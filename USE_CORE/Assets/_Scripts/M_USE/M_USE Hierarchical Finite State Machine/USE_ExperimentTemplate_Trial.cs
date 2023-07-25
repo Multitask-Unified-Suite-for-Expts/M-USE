@@ -176,7 +176,8 @@ namespace USE_ExperimentTemplate_Trial
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
-                if(SessionValues.SessionDef.EyeTrackerActive)
+
+                if (SessionValues.SessionDef.EyeTrackerActive)
                     SessionValues.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
 
                 if (SessionValues.SessionDef.SerialPortActive)
@@ -246,8 +247,8 @@ namespace USE_ExperimentTemplate_Trial
             {
                 GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 
-                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
-                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigName = "InTask_GazeCalibration";
+                GazeCalibrationTaskLevel.TaskName = "InTask_GazeCalibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
                 GameObject[] rootObjects = originalScene.GetRootGameObjects();
@@ -259,7 +260,7 @@ namespace USE_ExperimentTemplate_Trial
                 }
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
-                var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
+                //var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
                 var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
                 //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
@@ -268,7 +269,7 @@ namespace USE_ExperimentTemplate_Trial
                 GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
                 GazeCalibrationCanvas.gameObject.SetActive(true);
                 CalibrationGazeTrail.gameObject.SetActive(true);
-                CalibrationCube.gameObject.SetActive(true);
+               // CalibrationCube.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
 
                 GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);

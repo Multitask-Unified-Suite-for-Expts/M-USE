@@ -94,7 +94,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public LogWriter LogWriter;
 
         private ImportSettings_Level importSettings_Level;
-
+        [HideInInspector] public bool runSessionLevelCalibration;
 
 
         public override void DefineControlLevel()
@@ -274,6 +274,7 @@ namespace USE_ExperimentTemplate_Session
                     gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
                     GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
                     GazeCalibrationTaskLevel.gameObject.SetActive(false);
+                    runSessionLevelCalibration = true;
                 }
 
 
@@ -300,8 +301,8 @@ namespace USE_ExperimentTemplate_Session
             });
             //setupSession.AddLateUpdateMethod(() => AppendSerialData());
 
-            setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
-            setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
+            setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
+            setupSession.SpecifyTermination(() => iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && !runSessionLevelCalibration, selectTask);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -321,29 +322,27 @@ namespace USE_ExperimentTemplate_Session
 
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
 
-                GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
                 SessionValues.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTaskLevel.TrialLevel);
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
-                var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
+                GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
 
                 GazeCalibrationCanvas.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
-                CalibrationCube.gameObject.SetActive(true);
             });
             gazeCalibration.AddLateUpdateMethod(() =>
             {
                 if (SessionValues.TobiiEyeTrackerController != null)
                     SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
             });
-            gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
+            gazeCalibration.SpecifyTermination(() => !runSessionLevelCalibration, () => selectTask, () =>
             {
-                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+               /* GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";*/
+
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
-                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").Find("CalibrationCube").gameObject.SetActive(false);
 
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
@@ -379,6 +378,7 @@ namespace USE_ExperimentTemplate_Session
                     HumanVersionToggleButton.SetActive(false);
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
+
 
                 Starfield.SetActive(SessionValues.SessionDef.IsHuman);
 
@@ -604,6 +604,7 @@ namespace USE_ExperimentTemplate_Session
                     {
                         selectedConfigName = chosenGO;
                         taskAutomaticallySelected = false;
+                        SelectionHandler.ClearSelections();
                     }
                 }
                 AppendSerialData();
@@ -613,7 +614,11 @@ namespace USE_ExperimentTemplate_Session
             });
             selectTask.SpecifyTermination(() => selectedConfigName != null, loadTask, () => ResetSelectedTaskButtonSize());
 
-
+            selectTask.SpecifyTermination(() => runSessionLevelCalibration, gazeCalibration, () => 
+            {
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
+            });
+            //      REIMPLEMENT THIS IS THE TASK SELECTION TIME OUT!!!!!!!!!
             // Don't have automatic task selection if we encountered an error during setup
           /*  if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
             {

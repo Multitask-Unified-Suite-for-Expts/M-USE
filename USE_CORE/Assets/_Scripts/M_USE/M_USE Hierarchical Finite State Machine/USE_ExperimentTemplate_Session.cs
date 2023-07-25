@@ -300,27 +300,8 @@ namespace USE_ExperimentTemplate_Session
                         GazeCalibrationTaskLevel.gameObject.SetActive(false);
                     }));
                 }
-                
-                if (iTask < SessionValues.SessionDef.TaskMappings.Count)
-                {
-                    if (!SceneLoading)
-                    {
-                        SceneLoading = true;
-                        taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
-                        loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                        string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
-                        // Unload it after memory because this loads the assets into memory but destroys the objects
-                        loadScene.completed += (_) =>
-                        {
-                            SessionSettings.Save();
-                            OnTaskSceneLoaded(configFolderName, true);
-                            // SessionSettings.Restore();
-                            // SceneManager.UnloadSceneAsync(taskName);
-                            // SceneLoading = false;
-                            iTask++;
-                        };
-                    }
-                }
+
+
             });
 
             setupSession.SpecifyTermination(() => !SceneLoading && iTask >= SessionValues.SessionDef.TaskMappings.Count && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);

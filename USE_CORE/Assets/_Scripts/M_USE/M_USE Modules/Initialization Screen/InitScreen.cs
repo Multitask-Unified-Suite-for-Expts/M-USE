@@ -33,16 +33,11 @@ SOFTWARE.
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using USE_UI;
+
 
 public class InitScreen : MonoBehaviour
 {
-    public GameObject[] disableOnStart;
-    public GameObject[] enableOnStart;
-    public GameObject[] disableOnConfirm;
-    public GameObject[] enableOnConfirm;
-    [HideInInspector] 
-    public bool Confirmed;
+    [HideInInspector] public bool Confirmed;
 
     public event System.Action OnConfirm, OnLoadSettings;
 
@@ -64,18 +59,10 @@ public class InitScreen : MonoBehaviour
         folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
         dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
 
-        foreach (GameObject g in disableOnStart)
-            g.SetActive(false);
-        foreach (GameObject g in enableOnStart)
-            g.SetActive(true);
-
-
         if (SessionValues.WebBuild)
         {
             StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
-
             SetConfirmButtonPosition();
-
             confirmButtonGO.SetActive(true);
             webBuildChildrenGO.SetActive(true);
             buttonsParentGO.SetActive(false);
@@ -114,19 +101,11 @@ public class InitScreen : MonoBehaviour
 
         if (OnLoadSettings != null)
             OnLoadSettings();
-
-        foreach (GameObject g in disableOnConfirm)
-            g.SetActive(false);
-        foreach (GameObject g in enableOnConfirm)
-            g.SetActive(true);
-
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
-
         Confirmed = true;
-        if(OnConfirm != null)
+        if (OnConfirm != null)
             OnConfirm();
- 
         gameObject.SetActive(false);
         yield return 0;
     }

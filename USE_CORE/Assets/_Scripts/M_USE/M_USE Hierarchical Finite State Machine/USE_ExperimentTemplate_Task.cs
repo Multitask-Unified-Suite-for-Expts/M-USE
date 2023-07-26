@@ -643,28 +643,28 @@ namespace USE_ExperimentTemplate_Task
                     case "Audio":
                         if (!audioInited)
                         {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
+                            TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
                         break; 
                     
                     case "Halo":
-                        TrialLevel.HaloFBController.Init(FrameData, SessionValues.EventCodeManager);
+                        TrialLevel.HaloFBController.Init(FrameData);
                         break;
                     
                     case "Token":
                         if (!audioInited)
                         {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
+                            TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController, SessionValues.EventCodeManager);
+                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
                     
                     case "Slider":
                         if (!audioInited)
                         {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
+                            TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
                         TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);

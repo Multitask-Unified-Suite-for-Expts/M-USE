@@ -464,7 +464,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         }
     }
-    void LoadConfigUIVariables()
+    private void LoadConfigUIVariables()
     {
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");

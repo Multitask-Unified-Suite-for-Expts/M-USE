@@ -132,6 +132,7 @@ public class SetupSession_Level : ControlLevel
                 loadScene.completed += (_) =>
                 {
                     taskSceneLoaded = true;
+                    GameObject.Find(taskName + "_Camera").SetActive(false);
                 };
             }
         );
@@ -144,9 +145,11 @@ public class SetupSession_Level : ControlLevel
         VerifyTask.AddChildLevel(verifyTask_Level);
         VerifyTask.AddInitializationMethod(() =>
         {
+            //loads 
             var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
+            
             string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
 
             GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
@@ -314,27 +317,6 @@ public class SetupSession_Level : ControlLevel
         }
     }
     
-    
-    
-    // private void SetValuesForLoading_EventCodeConfig()
-    // {
-    //     // Add necessary fields to Load Session Event Codes from ImportSettings_Level
-    //     importSettings_Level.SettingsDetails.SettingParsingStyle = "JSON";
-    //     importSettings_Level.SettingsDetails.SettingType = typeof(Dictionary<string, EventCode>);
-    //     importSettings_Level.SettingsDetails.SearchString = "EventCode";
-    //
-    //     if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
-    //         importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
-    //     else  // Local or Default
-    //     {
-    //         string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-    //         if (!String.IsNullOrEmpty(eventCodeFileString))
-    //             importSettings_Level.SettingsDetails.FilePath = eventCodeFileString;
-    //         else
-    //             Debug.Log(
-    //                 "Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
-    //     }
-    // }
     
     
         private void SetupSessionDataControllers()

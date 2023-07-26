@@ -157,58 +157,7 @@ namespace USE_ExperimentTemplate_Session
 
             string selectedConfigFolderName = null;
             bool taskAutomaticallySelected = false;
-            //
-            // //LoadSessionSettings State---------------------------------------------------------------------------------------------------------------
-            // loadSessionSettings.AddChildLevel(importSettings_Level);
-            // loadSessionSettings.AddDefaultInitializationMethod(() =>
-            // {
-            //     // SetDataPaths();
-            //     // SetConfigPathsAndTypes();
-            //     // SetValuesForLoading_SessionConfig();
-            // });
-            // loadSessionSettings.AddUpdateMethod(() =>
-            // {
-            //     if (importSettings_Level.fileLoaded)
-            //         importSettings_Level.continueToLoadFile = true;
-            //
-            //     if (importSettings_Level.fileParsed)
-            //     {
-            //         Debug.Log("FILE PARSED! SEARCH STRING: " + importSettings_Level.SettingsDetails.SearchString);
-            //
-            //         if (importSettings_Level.SettingsDetails.SearchString == "SessionConfig")
-            //         {
-            //             SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
-            //             SetValuesForLoading_EventCodeConfig();
-            //             importSettings_Level.continueToNextSetting = true;
-            //         }
-            //         else if (importSettings_Level.SettingsDetails.SearchString == "EventCode")
-            //         {
-            //             SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
-            //             importSettings_Level.terminateImport = true;
-            //         }
-            //         else
-            //             Debug.Log($"The {importSettings_Level.SettingsDetails.SearchString} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
-            //     }
-            // });
-            // loadSessionSettings.SpecifyTermination(() => loadSessionSettings.ChildLevel.Terminated, createSessionDataFolder);
-            // loadSessionSettings.AddDefaultTerminationMethod(() =>
-            // {
-            //     SetupInputManagement(selectTask, loadTask);
-            //     SetupSessionDataControllers();
-            //     SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigFolderName);
-            //     SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
-            // });
-            //
-            // //CreateSessionDataFolder State---------------------------------------------------------------------------------------------------------------
-            // bool sessionDataFolderCreated = false;
-            // createSessionDataFolder.AddDefaultInitializationMethod(() =>
-            // {
-            //     if (SessionValues.SessionDef.StoreData)
-            //         StartCoroutine(CreateSessionDataFolder(result => sessionDataFolderCreated = true));
-            //     else
-            //         sessionDataFolderCreated = true; //set to true if not storing data so the state ends?
-            // });
-            // createSessionDataFolder.SpecifyTermination(() => sessionDataFolderCreated, setupSession);
+            
 
             bool waitForSerialPort = false;
 
@@ -226,22 +175,7 @@ namespace USE_ExperimentTemplate_Session
                 //     StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
 
             });
-            //
-            // if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
-            // {
-            //     SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", SessionValues.GazeTracker, inputActive, inputInactive);
-            //     SelectionHandler.MinDuration = 0.7f;
-            // }
-            // else
-            // {
-            //     SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", SessionValues.MouseTracker, inputActive, inputInactive);
-            //     SessionValues.MouseTracker.enabled = true;
-            //     SelectionHandler.MinDuration = 0.01f;
-            //     SelectionHandler.MaxDuration = 2f;
-            // }
-            //
-            // SessionData.AddDatum("SelectedTaskConfigName", () => selectedConfigFolderName);
-            // SessionData.AddDatum("TaskAutomaticallySelected", () => taskAutomaticallySelected);
+            
 
             int iTask = 0;
             SceneLoading = false;
@@ -262,35 +196,14 @@ namespace USE_ExperimentTemplate_Session
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
                     GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
-                    StartCoroutine(PopulateTaskLevel(GazeCalibrationTaskLevel, false, result =>
-                    {
-                        GazeCalibrationTaskLevel = result;
-                        gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                        GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
-                        GazeCalibrationTaskLevel.gameObject.SetActive(false);
-                    }));
+                    // StartCoroutine(PopulateTaskLevel(GazeCalibrationTaskLevel, false, result =>
+                    // {
+                    //     GazeCalibrationTaskLevel = result;
+                    //     gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                    //     GazeCalibrationTaskLevel.TrialLevel.TaskLevel = GazeCalibrationTaskLevel;
+                    //     GazeCalibrationTaskLevel.gameObject.SetActive(false);
+                    // }));
                 }
-                //
-                // if (iTask < SessionValues.SessionDef.TaskMappings.Count)
-                // {
-                //     if (!SceneLoading)
-                //     {
-                //         SceneLoading = true;
-                //         taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
-                //         loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                //         string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
-                //         // Unload it after memory because this loads the assets into memory but destroys the objects
-                //         loadScene.completed += (_) =>
-                //         {
-                //             SessionSettings.Save();
-                //             OnTaskSceneLoaded(configFolderName, true);
-                //             // SessionSettings.Restore();
-                //             // SceneManager.UnloadSceneAsync(taskName);
-                //             // SceneLoading = false;
-                //             iTask++;
-                //         };
-                //     }
-                // }
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
@@ -677,20 +590,20 @@ namespace USE_ExperimentTemplate_Session
                 string taskName = (string)SessionValues.SessionDef.TaskMappings[selectedConfigFolderName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 SceneLoading = true;
-                loadScene.completed += (_) =>
-                {
-                    OnTaskSceneLoaded(selectedConfigFolderName, false);
-                    //CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
-                };
+                loadScene.completed += (_) => SceneLoading = false;
+                // {
+                //     // OnTaskSceneLoaded(selectedConfigFolderName, false);
+                //     //CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
+                // };
             });
 
             loadTask.AddFixedUpdateMethod(() =>
             {
-                SessionValues.SelectionTracker.UpdateActiveSelections();
             });
 
             loadTask.AddLateUpdateMethod(() =>
             {
+                SessionValues.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
@@ -890,61 +803,6 @@ namespace USE_ExperimentTemplate_Session
             DisplayController.HandleDisplays(SessionInitScreen);
             SessionValues.DisplayController = DisplayController;
         }
-
-        // private void SetValuesForLoading_SessionConfig()
-        // {
-        //     // Add necessary fields to Load Session Def from ImportSettings_Level
-        //     importSettings_Level.SettingsDetails.SettingParsingStyle = "SingleType";
-        //     importSettings_Level.SettingsDetails.SettingType = typeof(SessionDef);
-        //     importSettings_Level.SettingsDetails.SearchString = "SessionConfig";
-        // }
-        // private void SetValuesForLoading_EventCodeConfig()
-        // {
-        //     // Add necessary fields to Load Session Event Codes from ImportSettings_Level
-        //     importSettings_Level.SettingsDetails.SettingParsingStyle = "JSON";
-        //     importSettings_Level.SettingsDetails.SettingType = typeof(Dictionary<string, EventCode>);
-        //     importSettings_Level.SettingsDetails.SearchString = "EventCode";
-        //
-        //     if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
-        //         importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
-        //     else  // Local or Default
-        //     {
-        //         string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-        //         if (!String.IsNullOrEmpty(eventCodeFileString))
-        //             importSettings_Level.SettingsDetails.FilePath = eventCodeFileString;
-        //         else
-        //             Debug.Log(
-        //                 "Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
-        //     }
-        // }
-
-
-        // private void SetConfigPathsAndTypes()
-        // {
-        //     if (SessionValues.WebBuild)
-        //     {
-        //         if (SessionValues.UsingDefaultConfigs)
-        //         {
-        //             SessionValues.ConfigAccessType = "Default";
-        //             SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-        //             importSettings_Level.SettingsDetails.FilePath = LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
-        //             WriteSessionConfigsToPersistantDataPath();
-        //         }
-        //         else //Using Server Configs:
-        //         {
-        //             SessionValues.ConfigAccessType = "Server";
-        //             SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-        //             importSettings_Level.SettingsDetails.FilePath = SessionValues.ConfigFolderPath;
-        //         }
-        //     }
-        //     else //Normal Build:
-        //     {
-        //         SessionValues.ConfigAccessType = "Local";
-        //         SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
-        //         importSettings_Level.SettingsDetails.FilePath = LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
-        //     }
-        // }
-
 
         private void CreateExperimenterDisplay()
         {
@@ -1302,112 +1160,112 @@ namespace USE_ExperimentTemplate_Session
             return path;
         }
         
-        void OnTaskSceneLoaded(string configFolderName, bool verifyOnly)
-        {
-            //We need to wait until the scene is loaded (async) to get
-            //the task type in order to call PrepareTaskLevel
-            string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
-            var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
-            
-            Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
-            MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyOnly });
-            
-            
-        }
-
-        public void GetTaskLevelType<T>(string configFolderName, bool verifyOnly) where T : ControlLevel_Task_Template
-        {
-            //Gets the task level type using reflection which cannot be done outside an invoked method
-            string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
-            ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
-            // return tl as ControlLevel_Task_Template; 
-            //it would be nice to return type T and 
-            tl.ConfigFolderName = configFolderName;
-
-            // tl.importSettings_Level = importSettings_Level;
-            // tl.verifyTask_Level = verifyTask_Level;
-            
-            StartCoroutine(PopulateTaskLevel(tl, verifyOnly, result =>
-            {
-                if (result != null)
-                {
-                    tl = result;
-                    if (verifyOnly)
-                    {
-                        SessionSettings.Restore();
-                        SceneManager.UnloadSceneAsync(taskName);
-                    }
-                    else
-                        CurrentTask = tl;
-
-                    SceneLoading = false;
-                }
-                else
-                {
-                    Debug.Log("Tasklevel result is null");
-                }
-            }));
-        }
-
-        IEnumerator PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, Action<ControlLevel_Task_Template> callback)
-        {
-            if (tl.TaskCam == null)
-                tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
-
-            tl.TaskCam.gameObject.SetActive(false);
-	        tl.BlockResults_AudioClip = BlockResults_AudioClip;
-
-            tl.BlockResultsPrefab = BlockResultsPrefab;
-            tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
-
-
-            if (SessionValues.UsingDefaultConfigs)
-            {
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigFolderName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
-
-                //Write Task Config Folder and its files to Persistant data path for Webbuild using default configs---------------------
-                if (!Directory.Exists(tl.TaskConfigPath))
-                {
-                    Directory.CreateDirectory(tl.TaskConfigPath);
-
-                    Dictionary<string, string> configDict = new Dictionary<string, string>
-                    {
-                        {"_TaskDef_singleType", "_TaskDef_singleType.txt"},
-                        {"_BlockDef_array", "_BlockDef_array.txt"},
-                        {"_TrialDef_array", "_TrialDef_array.txt"},
-                        {"_StimDef_array", "_StimDef_array.txt"},
-                        {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
-                        {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
-                        {"MazeDef_array", "MazeDef_array.txt"}
-                    };
-                    TextAsset configTextAsset;
-                    foreach (var entry in configDict)
-                    {
-                        configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
-                        if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
-                        if (configTextAsset != null)
-                            File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
-                    }
-                }
-            }
-            else
-                tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigFolderName);
-            
-            yield return StartCoroutine(tl.DefineTaskLevel(verifyOnly));
-            if (verifyOnly)
-            {
-                callback?.Invoke(tl);
-                yield break;
-            }
-
-            ActiveTaskLevels.Add(tl);
-            if (tl.TaskCanvasses != null)
-                foreach (Canvas canvas in tl.TaskCanvasses)
-                    canvas.gameObject.SetActive(true);
-            callback?.Invoke(tl);
-        }
+        // void OnTaskSceneLoaded(string configFolderName, bool verifyOnly)
+        // {
+        //     //We need to wait until the scene is loaded (async) to get
+        //     //the task type in order to call PrepareTaskLevel
+        //     string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
+        //     var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
+        //     
+        //     Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
+        //     MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
+        //     GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyOnly });
+        //     
+        //     
+        // }
+        //
+        // public void GetTaskLevelType<T>(string configFolderName, bool verifyOnly) where T : ControlLevel_Task_Template
+        // {
+        //     //Gets the task level type using reflection which cannot be done outside an invoked method
+        //     string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
+        //     ControlLevel_Task_Template tl = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+        //     // return tl as ControlLevel_Task_Template; 
+        //     //it would be nice to return type T and 
+        //     tl.ConfigFolderName = configFolderName;
+        //
+        //     // tl.importSettings_Level = importSettings_Level;
+        //     // tl.verifyTask_Level = verifyTask_Level;
+        //     
+        //     StartCoroutine(PopulateTaskLevel(tl, verifyOnly, result =>
+        //     {
+        //         if (result != null)
+        //         {
+        //             tl = result;
+        //             if (verifyOnly)
+        //             {
+        //                 SessionSettings.Restore();
+        //                 SceneManager.UnloadSceneAsync(taskName);
+        //             }
+        //             else
+        //                 CurrentTask = tl;
+        //
+        //             SceneLoading = false;
+        //         }
+        //         else
+        //         {
+        //             Debug.Log("Tasklevel result is null");
+        //         }
+        //     }));
+        // }
+        //
+        // IEnumerator PopulateTaskLevel(ControlLevel_Task_Template tl, bool verifyOnly, Action<ControlLevel_Task_Template> callback)
+        // {
+        //     if (tl.TaskCam == null)
+        //         tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
+        //
+        //     tl.TaskCam.gameObject.SetActive(false);
+	       //  tl.BlockResults_AudioClip = BlockResults_AudioClip;
+        //
+        //     tl.BlockResultsPrefab = BlockResultsPrefab;
+        //     tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
+        //
+        //
+        //     if (SessionValues.UsingDefaultConfigs)
+        //     {
+        //         tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigFolderName) + Path.DirectorySeparatorChar + tl.TaskName + "_DefaultConfigs";
+        //
+        //         //Write Task Config Folder and its files to Persistant data path for Webbuild using default configs---------------------
+        //         if (!Directory.Exists(tl.TaskConfigPath))
+        //         {
+        //             Directory.CreateDirectory(tl.TaskConfigPath);
+        //
+        //             Dictionary<string, string> configDict = new Dictionary<string, string>
+        //             {
+        //                 {"_TaskDef_singleType", "_TaskDef_singleType.txt"},
+        //                 {"_BlockDef_array", "_BlockDef_array.txt"},
+        //                 {"_TrialDef_array", "_TrialDef_array.txt"},
+        //                 {"_StimDef_array", "_StimDef_array.txt"},
+        //                 {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
+        //                 {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
+        //                 {"MazeDef_array", "MazeDef_array.txt"}
+        //             };
+        //             TextAsset configTextAsset;
+        //             foreach (var entry in configDict)
+        //             {
+        //                 configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+        //                 if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+        //                     configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
+        //                 if (configTextAsset != null)
+        //                     File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
+        //             }
+        //         }
+        //     }
+        //     else
+        //         tl.TaskConfigPath = GetConfigFolderPath(tl.ConfigFolderName);
+        //     
+        //     yield return StartCoroutine(tl.DefineTaskLevel(verifyOnly));
+        //     if (verifyOnly)
+        //     {
+        //         callback?.Invoke(tl);
+        //         yield break;
+        //     }
+        //
+        //     ActiveTaskLevels.Add(tl);
+        //     if (tl.TaskCanvasses != null)
+        //         foreach (Canvas canvas in tl.TaskCanvasses)
+        //             canvas.gameObject.SetActive(true);
+        //     callback?.Invoke(tl);
+        // }
 
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

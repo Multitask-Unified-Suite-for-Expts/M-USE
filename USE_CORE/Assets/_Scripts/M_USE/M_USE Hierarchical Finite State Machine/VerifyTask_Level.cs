@@ -110,26 +110,6 @@ public class VerifyTask_Level : ControlLevel
                 if (importSettings_Level.SettingsDetails.Count > 1)
                     importSettings_Level.SettingsDetails[1].FilePath = SetFilePath(importSettings_Level.SettingsDetails[1].SearchString);
                     
-                // MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.SettingsConverter))
-                //     .MakeGenericMethod(new Type[] { BlockDefType });
-                //
-                // var methodInfo = GetType().GetMethod(nameof(nameof(SettingsConverter)));
-                // if (currentFileName.ToLower().Contains("taskdef"))
-                //     SetValuesForLoading("BlockDef");
-                // else if (currentFileName.ToLower().Contains("blockdef"))
-                //     SetValuesForLoading("TrialDef");
-                // else if (currentFileName.ToLower().Contains("trialdef"))
-                //     SetValuesForLoading("StimDef");
-                // else if (currentFileName.ToLower().Contains("stimdef"))
-                //     SetValuesForLoading("EventCode");
-                // else if (currentFileName.ToLower().Contains("eventcode"))
-                //     SetValuesForLoading("ConfigUi");
-                // else if (currentFileName.ToLower().Contains("configui"))
-                //     Debug.Log("Parsed ConfigUI and no more to parse");
-                // else if (string.IsNullOrEmpty(currentFileName))
-                //     Debug.Log("Attempted to find settings file using search string " + importSettings_Level.currentSettingsDetails.SearchString + "but no corresponding file was found (this may not be a problem if it is not required)");
-                // else
-                //     Debug.LogError($"{currentFileName} has been parsed, but is not a TaskDef, BlockDef, TrialDef, StimDef, EventCode, or ConfigUI.");
 
                 importSettings_Level.importPaused = false;
             }

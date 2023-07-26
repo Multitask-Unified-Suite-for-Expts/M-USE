@@ -56,31 +56,35 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
-        folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
-        dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
+        //folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
+        //if (folderDropdown == null)
+        //    Debug.Log("FOLDER DROPDOWN NULL!");
+        //dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
+        //if (dropdown == null)
+        //    Debug.Log("DROPDOWN NULL!");
 
-        if (SessionValues.WebBuild)
-        {
-            StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
-            SetConfirmButtonPosition();
-            confirmButtonGO.SetActive(true);
-            webBuildChildrenGO.SetActive(true);
-            buttonsParentGO.SetActive(false);
-            initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-        }
-        else
-        {
-            webBuildChildrenGO.SetActive(false);
-            locateFileGO.SetActive(true); //comment out if want them to pick between default and local configs
-            //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
-            //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
-        }
+        //if (SessionValues.WebBuild)
+        //{
+        //    StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
+        //    SetConfirmButtonPosition();
+        //    confirmButtonGO.SetActive(true);
+        //    webBuildChildrenGO.SetActive(true);
+        //    buttonsParentGO.SetActive(false);
+        //    initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+        //}
+        //else
+        //{
+        //    webBuildChildrenGO.SetActive(false);
+        //    locateFileGO.SetActive(true); //comment out if want them to pick between default and local configs
+        //    //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
+        //    //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
+        //}
     }
 
-    private void Update()
-    {
-        SetConfirmButtonPosition();
-    }
+    //private void Update()
+    //{
+    //    SetConfirmButtonPosition();
+    //}
 
     public void Confirm()
     {

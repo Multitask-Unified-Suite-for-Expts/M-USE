@@ -93,6 +93,7 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public State selectTask, loadTask;
 
         private ImportSettings_Level importSettings_Level;
+        private InitScreen_Level initScreen_Level;
 
         private FlashPanelController FlashPanelController;
 
@@ -128,25 +129,20 @@ namespace USE_ExperimentTemplate_Session
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             // importSettings_Level.SessionLevel = this;
-
             // verifyTask_Level = gameObject.GetComponent<VerifyTask_Level>();
 
-            bool initScreenTerminated = false;
-
             //InitScreen State---------------------------------------------------------------------------------------------------------------
-            initScreen.AddDefaultInitializationMethod(() =>
+            initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
+            initScreen.AddChildLevel(initScreen_Level);
+            initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                SessionInitScreen.gameObject.SetActive(true);
-                SessionInitScreen.OnConfirm += ()=> initScreenTerminated = true;
-            });
-            
-            initScreen.SpecifyTermination(()=> initScreenTerminated, setupSession, () =>
-            {
-                SessionValues.SubjectID = SessionDetails.GetItemValue("SubjectID");
-                SessionValues.SessionID = SessionDetails.GetItemValue("SessionID");
+                Debug.Log("DONE WITH INIT SCREEN!!!!!!!");
 
                 if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
-                    InitCamGO.SetActive(false);
+                {
+                    InitCamGO.SetActive(false); //Init canvas doesnt even use InitCam........ (we using this for something else??)
+
+                }
                 else
                 {
                     CreateExperimenterDisplay();
@@ -836,7 +832,6 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
-                SessionInitScreen = GameObject.Find("InitializationScreen").GetComponent<InitScreen>();
                 InitCamGO = GameObject.Find("InitCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
@@ -887,6 +882,7 @@ namespace USE_ExperimentTemplate_Session
         private void SetDisplayController()
         {
             DisplayController = gameObject.AddComponent<DisplayController>();
+            SessionInitScreen = GameObject.Find("InitializationScreen_TWO_PANELS").GetComponent<InitScreen>();
             DisplayController.HandleDisplays(SessionInitScreen);
             SessionValues.DisplayController = DisplayController;
         }

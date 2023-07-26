@@ -8,9 +8,9 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
+    public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
-    private static readonly string RootDataFolder = "DATA"; //will move to server config
+    public static string RootDataFolder = "DATA"; //will move to server config
     private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
@@ -20,8 +20,8 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    private static readonly string RootConfigFolder = "CONFIGS"; //will move to server config
-    private static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
+    public static string RootConfigFolder = "CONFIGS"; //will move to server config
+    public static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     public static string SessionConfigFolderPath
     {
         get

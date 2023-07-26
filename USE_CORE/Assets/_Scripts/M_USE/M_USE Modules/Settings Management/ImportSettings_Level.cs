@@ -8,6 +8,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using UnityEngine;
 using USE_DisplayManagement;
+using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Session;
 using USE_States;
 
@@ -27,7 +28,7 @@ public class ImportSettings_Level : ControlLevel
     public object parsedResult = null;
 
     public bool fileParsed;
-    public bool fileLoaded;
+    public bool fileLoadingFinished;
     public bool importPaused;
 
 
@@ -46,42 +47,56 @@ public class ImportSettings_Level : ControlLevel
 
         loadFile.AddDefaultInitializationMethod(() =>
         {
-            fileLoaded = false;
+	        fileLoadingFinished = false;
             currentSettingsDetails = SettingsDetails[0];
+            Debug.Log("Attempting to load settings file  " + currentSettingsDetails.FilePath);
             if (string.IsNullOrEmpty(currentSettingsDetails.FilePath))
-                return;
-
-            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, currentSettingsDetails.SearchString, (contentString) =>
             {
-                if (!string.IsNullOrEmpty(contentString))
-                {
-                    currentSettingsDetails.FileContentString = contentString;
-                    fileLoaded = true;
-                }
-                else
-                    Debug.Log($"Failed to load {currentSettingsDetails.FileName}");
-            }));
-        });
-        loadFile.SpecifyTermination(() => fileLoaded, parseFile, () => fileLoaded = false);
-        // loadFile.SpecifyTermination(() => !importPaused && SettingsDetails.Count == 0, parseFile);
-        //     parseFile, () => { fileLoaded = false; continueToLoadFile = false; }) ;
-        loadFile.AddTimer(() => 10f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
-        
-        parseFile.AddDefaultInitializationMethod(() =>
-        {
-            if (!string.IsNullOrEmpty(currentSettingsDetails.FileContentString))
-            {
-                // currentSettingsDetails.SettingType = currentSettingsDetails.SettingType;
-                if (string.IsNullOrEmpty(currentSettingsDetails.SettingParsingStyle))
-                    currentSettingsDetails.SettingParsingStyle = DetermineParsingStyle(currentSettingsDetails.FilePath);
-                ConvertStringToSettings();
-                fileParsed = true;
-                importPaused = true;
+	            Debug.Log("No settings file found with search string " + currentSettingsDetails.SearchString);
+	            fileLoadingFinished = true;
             }
             else
             {
-                Debug.Log($"Failed to load {currentSettingsDetails.FileName}, because the file content is empty or not located in the correct path. Continuing onto loading the next setting.");
+	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath,
+		            currentSettingsDetails.SearchString, (contentString) =>
+		            {
+			            if (!string.IsNullOrEmpty(contentString))
+			            {
+				            currentSettingsDetails.FileContentString = contentString;
+				            Debug.Log("File " + currentSettingsDetails.FilePath + " successfully loaded.");
+				            fileLoadingFinished = true;
+			            }
+			            else
+			            {
+				            Debug.Log($"Failed to load {currentSettingsDetails.FileName}");
+				            fileLoadingFinished = true;
+			            }
+		            }));
             }
+        });
+        loadFile.SpecifyTermination(() => fileLoadingFinished, parseFile, () => fileLoadingFinished = false);
+        // loadFile.SpecifyTermination(() => !importPaused && SettingsDetails.Count == 0, parseFile);
+        //     parseFile, () => { fileLoaded = false; continueToLoadFile = false; }) ;
+        loadFile.AddTimer(() => 10f, parseFile ); //adjust timer value for a sensible amount of time for the server to retrieve file content 
+
+        parseFile.AddDefaultInitializationMethod(() =>
+        {
+	        if (!string.IsNullOrEmpty(currentSettingsDetails.FileContentString))
+	        {
+		        Debug.Log("Attempting to parse " + currentSettingsDetails.FilePath);
+		        // currentSettingsDetails.SettingType = currentSettingsDetails.SettingType;
+		        if (string.IsNullOrEmpty(currentSettingsDetails.SettingParsingStyle))
+			        currentSettingsDetails.SettingParsingStyle = DetermineParsingStyle(currentSettingsDetails.FilePath);
+		        ConvertStringToSettings();
+		        fileParsed = true;
+		        importPaused = true;
+	        }
+	        else
+	        {
+		        parsedResult = null;
+		        fileParsed = true;
+		        importPaused = true;
+	        }
         });
         parseFile.SpecifyTermination(()=> !importPaused && SettingsDetails.Count > 1, loadFile, ()=>
         {
@@ -103,9 +118,10 @@ public class ImportSettings_Level : ControlLevel
     {
         if (currentSettingsDetails.SettingParsingStyle == "Array")
         {
+            char delimiter = '\t';
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_Array));
             MethodInfo ConvertTextToSettings_SingleTypeArray_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
-            object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString });
+            object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, delimiter });
             parsedResult = result;
         }
         else if (currentSettingsDetails.SettingParsingStyle == "JSON")
@@ -127,12 +143,11 @@ public class ImportSettings_Level : ControlLevel
     }
     private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
     {
-        Debug.Log("FILE PATH: " + filePath);
-        Debug.Log(("SEARCH STRING: " + searchString));
         string fileContent;
 
         if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
         {
+	        Debug.Log(filePath);
             fileContent = File.ReadAllText(filePath); //Will need to check that this works during Web Build
             callback(fileContent);
         }
@@ -157,9 +172,8 @@ public class ImportSettings_Level : ControlLevel
     public T[] ConvertTextToSettings_Array<T>(string fileContentString, char delimiter = '\t')
     {
         string[] lines;
-
-        if (SessionValues.ConfigAccessType == "Server")
-        {
+        // if (SessionValues.ConfigAccessType == "Server")
+        // {
             string[] splitLines = fileContentString.Split('\n');
             List<string> stringList = new List<string>();
             foreach (var line in splitLines)
@@ -169,11 +183,11 @@ public class ImportSettings_Level : ControlLevel
                 stringList.Add(line);
             }
             lines = stringList.ToArray();
-        }
-        else
-        {
-            lines = new[] { "idk" };
-        }
+        // }
+        // else
+        // {
+        //     lines = new[] { "idk" };
+        // }
 
         T[] settingsArray = new T[lines.Length - 1];
 
@@ -215,11 +229,97 @@ public class ImportSettings_Level : ControlLevel
                     }
                     else if (fieldInfo != null)
                     {
-                        Type fieldType = fieldInfo.FieldType;
-
-                            fieldInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], fieldType));
-                        }
+	                    Type ft = fieldInfo.FieldType;
+	                    if (ft == typeof(string))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1], values[iVal]);
+	                    else if (ft == typeof(bool))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (bool) ConvertStringToType<bool>(values[iVal]));
+	                    else if (ft == typeof(int))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1], (int) ConvertStringToType<int>(values[iVal]));
+	                    else if (ft == typeof(float))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (float) ConvertStringToType<float>(values[iVal]));
+	                    else if (ft == typeof(bool?))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (bool?) ConvertStringToType<bool>(values[iVal]));
+	                    else if (ft == typeof(int?))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1], (int?) ConvertStringToType<int>(values[iVal]));
+	                    else if (ft == typeof(float?))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (float?) ConvertStringToType<float>(values[iVal]));
+	                    else if (ft == typeof(Vector2))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Vector2) ConvertStringToType<Vector2>(values[iVal]));
+	                    else if (ft == typeof(Vector3))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Vector3) ConvertStringToType<Vector3>(values[iVal]));
+	                    else if (ft == typeof(string[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (string[]) ConvertStringToType<string[]>(values[iVal]));
+	                    else if (ft == typeof(bool[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (bool[]) ConvertStringToType<bool[]>(values[iVal]));
+	                    else if (ft == typeof(int[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (int[]) ConvertStringToType<int[]>(values[iVal]));
+	                    else if (ft == typeof(float[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (float[]) ConvertStringToType<float[]>(values[iVal]));
+	                    else if (ft == typeof(bool?[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (bool?[]) ConvertStringToType<bool[]>(values[iVal]));
+	                    else if (ft == typeof(int?[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (int?[]) ConvertStringToType<int[]>(values[iVal]));
+	                    else if (ft == typeof(float?[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (float?[]) ConvertStringToType<float[]>(values[iVal]));
+	                    else if (ft == typeof(Vector2[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Vector2[]) ConvertStringToType<Vector2[]>(values[iVal]));
+	                    else if (ft == typeof(Vector3[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Vector3[]) ConvertStringToType<Vector3[]>(values[iVal]));
+	                    else if (ft == typeof(Reward[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Reward[]) ConvertStringToType<Reward[]>(values[iVal]));
+	                    else if (ft == typeof(string[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (string[][]) ConvertStringToType<string[][]>(values[iVal]));
+	                    else if (ft == typeof(bool[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (bool[][]) ConvertStringToType<bool[][]>(values[iVal]));
+	                    else if (ft == typeof(int[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (int[][]) ConvertStringToType<int[][]>(values[iVal]));
+	                    else if (ft == typeof(float[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (float[][]) ConvertStringToType<float[][]>(values[iVal]));
+	                    else if (ft == typeof(bool?[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (bool?[][]) ConvertStringToType<bool[][]>(values[iVal]));
+	                    else if (ft == typeof(int?[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (int?[][]) ConvertStringToType<int[][]>(values[iVal]));
+	                    else if (ft == typeof(float?[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (float?[][]) ConvertStringToType<float[][]>(values[iVal]));
+	                    else if (ft == typeof(Reward[][]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Reward[][]) ConvertStringToType<Reward[][]>(values[iVal]));
+	                    else if (ft == typeof(Color))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (Color) ConvertStringToType<Color>(values[iVal]));
+	                    else if (ft == typeof(MazeGame_Namespace.MazeDef[]))
+		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+			                    (MazeGame_Namespace.MazeDef[]) ConvertStringToType<MazeGame_Namespace.MazeDef[]>(
+				                    values[iVal]));
+	                    else
+		                    Debug.LogError("Attempted to convert value " + values[iVal] + " with header " + fieldName +
+		                                   " to type " + ft + " but there is no conversion specified for this type.");
                     }
+                }
                     catch (Exception e)
                     {
                         Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
@@ -232,11 +332,341 @@ public class ImportSettings_Level : ControlLevel
         return settingsArray;
 
     }
+    
+    
+		public static object ConvertStringToType<T>(string s)
+		{
+			if (typeof(T) == typeof(string))
+				return s;
+			else if (typeof(T) == typeof(Vector2))
+			{
+				try
+				{
+					return (Vector2)ConvertStringArray<Vector2>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Vector3))
+			{
+				try
+				{
+					return (Vector3)ConvertStringArray<Vector3>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Vector2[]))
+			{
+				try
+				{
+					return (Vector2[])ConvertStringArray<Vector2[]>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Vector3[]))
+			{
+				try
+				{
+					return (Vector3[])ConvertStringArray<Vector3[]>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Reward))
+			{
+				try
+				{
+					return (Reward)JsonConvert.DeserializeObject(s, typeof(Reward));
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Reward[]))
+			{
+				try
+				{
+					return (Reward[])JsonConvert.DeserializeObject(s, typeof(Reward[]));
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Reward[][]))
+			{
+				try
+				{
+					return (Reward[][])JsonConvert.DeserializeObject(s, typeof(Reward[][]));
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+            else if (typeof(T) == typeof(float[]))
+			{
+				try
+				{
+					return (float[])ConvertStringArray<float>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(int[]))
+			{
+				try
+				{
+					return (int[])ConvertStringArray<int>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(int[][]))
+			{
+
+				try
+				{// Remove the parentheses
+
+					return (int[][])ConvertStringJaggedArray<int>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(float[][]))
+			{
+
+				try
+				{// Remove the parentheses
+
+					return (float[][])ConvertStringJaggedArray<float>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(bool[][]))
+			{
+
+				try
+				{// Remove the parentheses
+
+					return (bool[][])ConvertStringJaggedArray<bool>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else if (typeof(T) == typeof(Color))
+			{
+				try
+				{
+					return (Color)ConvertStringJaggedArray<Color>(s);
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+
+			else if (typeof(T) != null)
+			{
+				try
+				{
+					//can add custom conversion instructions for particular typeStrings if needed
+					return Convert.ChangeType(s, typeof(T));
+				}
+				catch (Exception e)
+				{
+					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the conversion failed.");
+
+					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+				}
+			}
+			else
+			{
+				throw new ArgumentException("Tried to convert string \"" + s + "\" to type \""
+						+ typeof(T).Name + " but the type was not recognized.");
+			}
+		}
+		
+		
+		public static object ConvertStringArray<T>(string s)
+		{
+			if (typeof(T) == typeof(int))
+			{
+				string[] sArray = GetStringArray(s);
+				int[] finalArray = new int[sArray.Length];
+				for (int iVal = 0; iVal < sArray.Length; iVal++)
+					finalArray[iVal] = int.Parse(sArray[iVal]);
+				return finalArray;
+			}
+			else if (typeof(T) == typeof(float))
+			{
+				string[] sArray = GetStringArray(s);
+				float[] finalArray = new float[sArray.Length];
+				for (int iVal = 0; iVal < sArray.Length; iVal++)
+					finalArray[iVal] = float.Parse(sArray[iVal]);
+				return finalArray;
+			}
+			else if (typeof(T) == typeof(string))
+			{
+				return GetStringArray(s);
+			}
+			else if (typeof(T) == typeof(Vector2))
+			{
+				float[] floatArray = (float[])ConvertStringArray<float>(s);
+				return new Vector2(floatArray[0], floatArray[1]);
+			}
+			else if (typeof(T) == typeof(Vector3))
+			{
+				float[] floatArray = (float[])ConvertStringArray<float>(s);
+				return new Vector3(floatArray[0], floatArray[1], floatArray[2]);
+			}
+			else if (typeof(T) == typeof(Vector2[]))
+			{
+				string[][] sArray = GetStringArrayofArrays(s);
+				Vector2[] finalArray = new Vector2[sArray.Length];
+				for (int iVal = 0; iVal < sArray.Length; iVal++)
+				{
+					finalArray[iVal] = new Vector2(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]));
+				}
+				return finalArray;
+			}
+			else if (typeof(T) == typeof(Vector3[]))
+			{
+				string[][] sArray = GetStringArrayofArrays(s);
+				Vector3[] finalArray = new Vector3[sArray.Length];
+				for (int iVal = 0; iVal < sArray.Length; iVal++)
+				{
+					finalArray[iVal] = new Vector3(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]), float.Parse(sArray[iVal][2]));
+				}
+				return finalArray;
+			}
+			else
+			{
+				return GetStringArray(s);
+			}
+		}
+
+		public static object ConvertStringJaggedArray<T>(string s)
+		{
+			if (typeof(T) == typeof(int))
+			{
+				string[][] outerArray = GetStringArrayofArrays(s);
+				int[][] finalArray = new int[outerArray.Length][];
+				for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
+				{
+					finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => int.Parse(str));
+					//string[] innerArray = GetStringArray(outerArray[iOuter]);
+					//finalArray[iOuter] = new int[innerArray.Length];
+					//for (int iInner = 0; iInner < innerArray.Length; iInner++)
+						//finalArray[iOuter][iInner] = int.Parse(innerArray[iInner]);
+				}
+				return finalArray;
+			}
+			else if (typeof(T) == typeof(float))
+			{
+				string[][] outerArray = GetStringArrayofArrays(s);
+				float[][] finalArray = new float[outerArray.Length][];
+				for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
+				{
+					finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => float.Parse(str));
+					//string[] innerArray = GetStringArray(outerArray[iOuter]);
+					//finalArray[iOuter] = new float[innerArray.Length];
+					//for (int iInner = 0; iInner < innerArray.Length; iInner++)
+					//finalArray[iOuter][iInner] = float.Parse(innerArray[iInner]);
+				}
+				return finalArray;
+			}
+			else if (typeof(T) == typeof(string))
+			{
+				return GetStringArrayofArrays(s);
+			}
+			else if (typeof(T) == typeof(bool))
+			{
+				string[][] outerArray = GetStringArrayofArrays(s);
+				bool[][] finalArray = new bool[outerArray.Length][];
+				for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
+				{
+					finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => bool.Parse(str));
+				}
+				return finalArray;
+			}
+			else
+				return new object[0][];
+		}
+		public static string[] GetStringArray(string s)
+		{
+			return (string[])JsonConvert.DeserializeObject(s, typeof(string[]));
+		}
+		public static string[][] GetStringArrayofArrays(string s)
+		{
+			return (string[][])JsonConvert.DeserializeObject(s, typeof(string[][]));
+		}
+    
    // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
     public T ConvertTextToSettings_JSON<T>(string fileContentString)
     {
-        Debug.Log("FILE NAME: " + currentSettingsDetails.FileName);
-        Debug.Log("PARSING TYPE = " + currentSettingsDetails.SettingParsingStyle);
         
         T settingsInstance = Activator.CreateInstance<T>();
         try
@@ -267,13 +697,23 @@ public class ImportSettings_Level : ControlLevel
             string[] splitString = line.Split(delimiter);
             try
             {
-                string fieldName = splitString[1].Trim();
-                string fieldValue = splitString[2].Trim();
-                
+                string fieldName = "";
+                string fieldValue = "";
+                if (splitString.Length == 3)
+                {
+                    fieldName = splitString[1].Trim();
+                    fieldValue = splitString[2].Trim();
+                }
+                else if (splitString.Length == 2)
+                {
+                    fieldName = splitString[0].Trim();
+                    fieldValue = splitString[1].Trim();
+                }
+
                 if(SurroundedByQuotes(fieldValue))
                     fieldValue = fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
 
-                AssignFieldValue(fieldName, fieldValue, settingsInstance);
+                AssignFieldValue<T>(fieldName, fieldValue, settingsInstance);
             }
             
             catch (Exception e)
@@ -365,12 +805,30 @@ public class ImportSettings_Level : ControlLevel
                 var deserializedValue = JsonConvert.DeserializeObject<ScreenDetails>(fieldValue);
                 fieldInfo.SetValue(settingsInstance, deserializedValue);
             }
+            else if (fieldType.Equals(typeof(int?)))
+            {
+                fieldInfo.SetValue(settingsInstance, GetValueOrNull<float>(fieldValue));
+            }
+            else if (fieldType.Equals(typeof(float?)))
+            {
+                fieldInfo.SetValue(settingsInstance, GetValueOrNull<float>(fieldValue));
+            }
+            else if (fieldType.Equals((typeof(string))))
+                fieldInfo.SetValue(settingsInstance, fieldValue);
             else
             {
-                // Debug.Log("FIELD TYPE: " + fieldType);
+                Debug.Log("UNSPECIFIED SETTINGS FIELD TYPE: " + fieldType);
                 fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
             }
         }
+    }
+    
+    public  T? GetValueOrNull<T>(string valueAsString)
+        where T : struct 
+    {
+        if (string.IsNullOrEmpty(valueAsString))
+            return null;
+        return (T) Convert.ChangeType(valueAsString, typeof(T));
     }
 
     private bool StartsOrEndsWithBrackets(string s)
@@ -410,7 +868,6 @@ public class ImportSettings_Level : ControlLevel
     {
         string assumedParsingStyle = "";
 
-        Debug.Log("FILE NAME: " + filename);
 
         if (filename.ToLower().Contains("json"))
             assumedParsingStyle = "JSON";
@@ -421,7 +878,6 @@ public class ImportSettings_Level : ControlLevel
         else
             Debug.LogError("Attempting to parse FileName: " + filename + " , but this name does not contain a substring indicated settings parsing type.");
 
-        Debug.Log("ASSUMED PARSING STYLE: " + assumedParsingStyle);
 
         return assumedParsingStyle;
 

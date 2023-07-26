@@ -40,10 +40,10 @@ namespace USE_ExperimentTemplate_Task
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
         public GameObject StimCanvas_2D;
-        protected TrialDef[] AllTrialDefs;
+        public TrialDef[] AllTrialDefs;
         protected TrialDef[] CurrentBlockTrialDefs;
-        protected TaskDef TaskDef;
-        protected BlockDef[] BlockDefs;
+        public TaskDef TaskDef;
+        public BlockDef[] BlockDefs;
         public BlockDef CurrentBlockDef;
         public BlockDef currentBlockDef
         {
@@ -58,8 +58,8 @@ namespace USE_ExperimentTemplate_Task
         public List<GameObject> PreloadedStimGameObjects;
         public List<string> PrefabStimPaths;
         protected ConfigUI configUI;
-        protected ConfigVarStore ConfigUiVariables;
-        protected Dictionary<string, EventCode> CustomTaskEventCodes;
+        public ConfigVarStore ConfigUiVariables;
+        public Dictionary<string, EventCode> CustomTaskEventCodes;
 
         public Type TaskLevelType;
         public Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -201,39 +201,49 @@ namespace USE_ExperimentTemplate_Task
             verifyTask_Level.CurrentTask = this;
             VerifyTask.AddChildLevel(verifyTask_Level);
             VerifyTask.AddInitializationMethod(() => Debug.Log("STARTING VERIFY TASK STATE"));
-            VerifyTask.AddUpdateMethod(() =>
+            VerifyTask.AddInitializationMethod(() =>
             {
-                if (verifyTask_Level.fileParsed)
-                {
-                    Debug.Log("FILE PARSED!!!!!! " + verifyTask_Level.currentFileName.ToLower());
-                    switch (verifyTask_Level.currentFileName.ToLower())
-                    {
-                        case "taskdef":
-                            TaskDef = (TaskDef)verifyTask_Level.parsedResult;
-                            if (TaskDef.CustomSettings != null)
-                            {
-                                Debug.Log("would be handling custom settings!");
-                                //handle custom settings?
-                            }
-                            break;
-                        case "blockdef":
-                            BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
-                            break;
-                        case "trialdef":
-                            AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
-                            break;
-                        case "stimdef":
-                            StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
-                            AssignStimDefs(importedStimDefs);
-                            break;
-                        default:
-                            Debug.LogError("DEFAULT VERIFY TASK SWITCH STATEMENT!");
-                            break;
-                    }
-                }
+                verifyTask_Level.CurrentTask = this;
+                // var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
+                // Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
+                // MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
+                // string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+                //
+                // GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
             });
-            VerifyTask.SpecifyTermination(() => !verifyOnly && VerifyTask.ChildLevel.Terminated, SetupTask);
-            VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
+            // VerifyTask.AddUpdateMethod(() =>
+            // {
+            //     if (verifyTask_Level.fileParsed)
+            //     {
+            //         Debug.Log("FILE PARSED!!!!!! " + verifyTask_Level.currentFileName.ToLower());
+            //         switch (verifyTask_Level.currentFileName.ToLower())
+            //         {
+            //             case "taskdef":
+            //                 TaskDef = (TaskDef)verifyTask_Level.parsedResult;
+            //                 if (TaskDef.CustomSettings != null)
+            //                 {
+            //                     Debug.Log("would be handling custom settings!");
+            //                     //handle custom settings?
+            //                 }
+            //                 break;
+            //             case "blockdef":
+            //                 BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
+            //                 break;
+            //             case "trialdef":
+            //                 AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
+            //                 break;
+            //             case "stimdef":
+            //                 StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
+            //                 AssignStimDefs(importedStimDefs);
+            //                 break;
+            //             default:
+            //                 Debug.LogError("DEFAULT VERIFY TASK SWITCH STATEMENT!");
+            //                 break;
+            //         }
+            //     }
+            // });
+            VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, SetupTask);
+            // VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
 
 
             //SetupTask State-----------------------------------------------------------------------------------------------------
@@ -889,14 +899,14 @@ namespace USE_ExperimentTemplate_Task
                     Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName + " folder, no trials generated as a result.");
                 else
                 {
-                    if (!verifyOnly)
-                    {
+                    // if (!verifyOnly)
+                    // {
                         for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                         {
                             BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
                             BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
                         }
-                    }
+                    // }
                 }
             }
             else //trialDefs imported from settings files
@@ -920,8 +930,8 @@ namespace USE_ExperimentTemplate_Task
                     }
 
                     //add trialDef[] for each block;
-                    if (!verifyOnly)
-                    {
+                    // if (!verifyOnly)
+                    // {
                         for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                         {
                             if (BlockDefs[iBlock] == null)
@@ -929,20 +939,20 @@ namespace USE_ExperimentTemplate_Task
                             BlockDefs[iBlock].BlockCount = iBlock;
                             BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock, AllTrialDefs);
                         }
-                    }
+                    // }
                 }
                 else //there is a blockDef file, its information may need to be added to TrialDefs
                 {
                     //add trialDef[] for each block;
-                    if (!verifyOnly)
-                    {
+                    // if (!verifyOnly)
+                    // {
                         for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                         {
                             BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
                             BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
                             BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
                         }
-                    }
+                    // }
                 }
             }
             TrialAndBlockDefsHandled = true;
@@ -979,9 +989,9 @@ namespace USE_ExperimentTemplate_Task
             TaskStims.AllTaskStimGroups.Add("RuntimeStims", RuntimeStims);
 
             DefinePreloadedStims();
-            if(PrefabStims.stimDefs.Count > 0)
+            if(PrefabStims.stimDefs != null && PrefabStims.stimDefs.Count > 0)
                 DefinePrefabStims();
-            if(ExternalStims.stimDefs.Count > 0)
+            if(ExternalStims.stimDefs != null && ExternalStims.stimDefs.Count > 0)
                 DefineExternalStims();
 
             StimsHandled = true;

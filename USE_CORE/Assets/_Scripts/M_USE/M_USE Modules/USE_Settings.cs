@@ -733,16 +733,7 @@ namespace USE_Settings
 			else if (typeof(T) == typeof(Vector2))
 			{
 				try
-				{// Remove the parentheses
-				 //string[] sArray = GetStringArray(s);
-				 //if (s.StartsWith("(", StringComparison.Ordinal) && s.EndsWith(")", StringComparison.Ordinal))
-				 //{
-				 //	s = s.Substring(1, s.Length - 2);
-				 //}
-
-					//// split the items
-					//string[] sArray = s.Split(',');
-					//return new Vector2(float.Parse(sArray[0].Trim()), float.Parse(sArray[1].Trim()));
+				{
 					return (Vector2)ConvertStringArray<Vector2>(s);
 				}
 				catch (Exception e)
@@ -756,17 +747,7 @@ namespace USE_Settings
 			else if (typeof(T) == typeof(Vector3))
 			{
 				try
-				{// Remove the parentheses
-				 //if (s.StartsWith("(", StringComparison.Ordinal) && s.EndsWith(")", StringComparison.Ordinal))
-				 //{
-				 //	s = s.Substring(1, s.Length - 2);
-				 //}
-
-					//// split the items
-					//string[] sArray = s.Split(',');
-
-					//string[] sArray = GetStringArray(s);
-					//return new Vector3(float.Parse(sArray[0].Trim()), float.Parse(sArray[1].Trim()), float.Parse(sArray[2].Trim()));
+				{
 					return (Vector3)ConvertStringArray<Vector3>(s);
 				}
 				catch (Exception e)

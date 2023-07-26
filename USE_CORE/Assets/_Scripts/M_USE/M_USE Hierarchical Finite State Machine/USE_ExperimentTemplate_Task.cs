@@ -40,10 +40,10 @@ namespace USE_ExperimentTemplate_Task
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
         public GameObject StimCanvas_2D;
-        protected TrialDef[] AllTrialDefs;
+        public TrialDef[] AllTrialDefs;
         protected TrialDef[] CurrentBlockTrialDefs;
-        protected TaskDef TaskDef;
-        protected BlockDef[] BlockDefs;
+        public TaskDef TaskDef;
+        public BlockDef[] BlockDefs;
         public BlockDef CurrentBlockDef;
         public BlockDef currentBlockDef
         {
@@ -58,8 +58,8 @@ namespace USE_ExperimentTemplate_Task
         public List<GameObject> PreloadedStimGameObjects;
         public List<string> PrefabStimPaths;
         protected ConfigUI configUI;
-        protected ConfigVarStore ConfigUiVariables;
-        protected Dictionary<string, EventCode> CustomTaskEventCodes;
+        public ConfigVarStore ConfigUiVariables;
+        public Dictionary<string, EventCode> CustomTaskEventCodes;
 
         public Type TaskLevelType;
         public Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
@@ -979,9 +979,9 @@ namespace USE_ExperimentTemplate_Task
             TaskStims.AllTaskStimGroups.Add("RuntimeStims", RuntimeStims);
 
             DefinePreloadedStims();
-            if(PrefabStims.stimDefs.Count > 0)
+            if(PrefabStims.stimDefs != null && PrefabStims.stimDefs.Count > 0)
                 DefinePrefabStims();
-            if(ExternalStims.stimDefs.Count > 0)
+            if(ExternalStims.stimDefs != null && ExternalStims.stimDefs.Count > 0)
                 DefineExternalStims();
 
             StimsHandled = true;

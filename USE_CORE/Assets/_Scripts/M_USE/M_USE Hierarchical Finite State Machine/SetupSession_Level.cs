@@ -144,7 +144,6 @@ public class SetupSession_Level : ControlLevel
         VerifyTask.AddChildLevel(verifyTask_Level);
         VerifyTask.AddInitializationMethod(() =>
         {
-            Debug.Log("STARTING VERIFY TASK STATE");
             var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });

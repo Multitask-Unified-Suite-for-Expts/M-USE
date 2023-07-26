@@ -77,7 +77,7 @@ namespace USE_Def_Namespace
         public List<string[]> FeatureNames;
         public string neutralPatternedColorName;
         public float? ExternalStimScale;
-        public List<string[]> FeedbackControllers;
+        public List<string> FeedbackControllers;
         public int? TotalTokensNum;
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;

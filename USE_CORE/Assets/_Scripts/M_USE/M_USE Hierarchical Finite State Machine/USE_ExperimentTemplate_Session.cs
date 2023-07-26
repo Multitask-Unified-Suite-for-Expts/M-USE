@@ -37,7 +37,7 @@ namespace USE_ExperimentTemplate_Session
         public InitScreen SessionInitScreen;
 
         protected SummaryData SummaryData;
-        protected SessionData SessionData;
+        public SessionData SessionData;
 
         public string TaskSelectionSceneName;
 
@@ -51,7 +51,7 @@ namespace USE_ExperimentTemplate_Session
         public SessionDetails SessionDetails;
         public LocateFile LocateFile;
 
-        private SelectionTracker.SelectionHandler SelectionHandler;
+        public SelectionTracker.SelectionHandler SelectionHandler;
         private GameObject InputTrackers;
         public FrameData FrameData;
         private Camera SessionCam;
@@ -90,6 +90,8 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject InitCamGO;
         [HideInInspector] public LogWriter LogWriter;
 
+        [HideInInspector] public State selectTask, loadTask;
+
         private ImportSettings_Level importSettings_Level;
 
         private FlashPanelController FlashPanelController;
@@ -108,8 +110,8 @@ namespace USE_ExperimentTemplate_Session
             // State loadSessionSettings = new State("LoadSessionSettings");
             // State createSessionDataFolder = new State("CreateDataFolders");
             State setupSession = new State("SetupSession");
-            State selectTask = new State("SelectTask");
-            State loadTask = new State("LoadTask");
+            selectTask = new State("SelectTask");
+            loadTask = new State("LoadTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");

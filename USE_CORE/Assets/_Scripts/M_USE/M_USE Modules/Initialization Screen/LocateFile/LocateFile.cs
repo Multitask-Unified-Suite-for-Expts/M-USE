@@ -52,7 +52,7 @@ public class LocateFile : MonoBehaviour
 			g.transform.SetParent(containerFileItems, false);
 
 			FileItem fi = g.GetComponent<FileItem>();
-			fi.file = f;
+			fi.File = f;
 
 			mapFiles.Add(f.name, f);
 

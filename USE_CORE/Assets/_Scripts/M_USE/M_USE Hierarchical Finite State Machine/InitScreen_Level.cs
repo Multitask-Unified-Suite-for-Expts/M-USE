@@ -8,13 +8,13 @@ using UnityEngine.UI;
 using static Dropbox.Api.Common.PathRoot;
 using static Dropbox.Api.TeamLog.ExternalDriveBackupStatus;
 using static UnityEditor.PlayerSettings;
-//using UnityEngine.UIElements;
+
 
 public class InitScreen_Level : ControlLevel
 {
     private State SetupInitScreen;
-    private State InitialScreen;
-    private State Get_AllInfo;
+    private State StartScreen;
+    private State CollectInfo;
 
     private GameObject InitScreenGO;
     private GameObject InitScreenCanvasGO;
@@ -65,9 +65,9 @@ public class InitScreen_Level : ControlLevel
     public override void DefineControlLevel()
     {
         SetupInitScreen = new State("SetupInitScreen");
-        InitialScreen = new State("InitialScreen");
-        Get_AllInfo = new State("Get_AllInfo");
-        AddActiveStates(new List<State> { SetupInitScreen, InitialScreen, Get_AllInfo});
+        StartScreen = new State("StartScreen");
+        CollectInfo = new State("CollectInfo");
+        AddActiveStates(new List<State> { SetupInitScreen, StartScreen, CollectInfo});
 
         //not sure what to do with this right now:
         //SessionValues.LocateFile = GameObject.Find("LocateFile").GetComponent<LocateFile>();
@@ -81,19 +81,19 @@ public class InitScreen_Level : ControlLevel
             if (SessionValues.WebBuild)
                 GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
         });
-        SetupInitScreen.SpecifyTermination(() => true, InitialScreen);
+        SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
         //InitialScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        InitialScreen.AddInitializationMethod(() => InitialPanel_GO.SetActive(true));
-        InitialScreen.SpecifyTermination(() => ConfirmButtonPressed, Get_AllInfo, () =>
+        StartScreen.AddInitializationMethod(() => InitialPanel_GO.SetActive(true));
+        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
             ConfirmButtonPressed = false;
             InitialPanel_GO.SetActive(false);
         });
 
         //Get_ALLINFO State-----------------------------------------------------------------------------------------------------------------------------------
-        Get_AllInfo.AddInitializationMethod(() => AllInfoPanel_GO.SetActive(true));
-        Get_AllInfo.AddUpdateMethod(() =>
+        CollectInfo.AddInitializationMethod(() => AllInfoPanel_GO.SetActive(true));
+        CollectInfo.AddUpdateMethod(() =>
         {
             if (ErrorHandlingGO.activeInHierarchy)
             {
@@ -101,9 +101,10 @@ public class InitScreen_Level : ControlLevel
                     ErrorHandlingGO.SetActive(false);
             }
         });
-        Get_AllInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
+        CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
+
 
             SessionValues.SubjectID = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>().text;
             SessionValues.SessionID = GameObject.Find("SessionID_Text").GetComponent<TextMeshProUGUI>().text;
@@ -252,7 +253,7 @@ public class InitScreen_Level : ControlLevel
         InitScreenGO = GameObject.Find("InitScreen_GO");
         InitScreenCanvasGO = GameObject.Find("InitScreenCanvas");
 
-        InitialPanel_GO = InitScreenGO.transform.Find("Initial_InitScreen_Panel").gameObject;
+        InitialPanel_GO = InitScreenGO.transform.Find("StartPanel").gameObject;
 
         LocalConfigToggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfigToggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -271,12 +272,9 @@ public class InitScreen_Level : ControlLevel
         GreyOutPanels_Array = new GameObject[3];
         GreyOutPanels_Array[0] = GameObject.Find("GreyOutPanel_ServerURL");
         GreyOutPanels_Array[1] = GameObject.Find("GreyOutPanel_Data");
-        //GreyOutPanels_Array[1].SetActive(false);
         GreyOutPanels_Array[2] = GameObject.Find("GreyOutPanel_Config");
-        //GreyOutPanels_Array[2].SetActive(false);
 
-
-        AllInfoPanel_GO = InitScreenGO.transform.Find("ALL_INFO_PANEL").gameObject;
+        AllInfoPanel_GO = InitScreenGO.transform.Find("MainPanel").gameObject;
         ConfirmButtonGO = AllInfoPanel_GO.transform.Find("ButtonConfirm").transform.gameObject;
 
         ServerURL_GO = GameObject.Find("ServerURL_GO").transform.gameObject;
@@ -288,6 +286,27 @@ public class InitScreen_Level : ControlLevel
         LocalConfigGO = GameObject.Find("LocalConfig_GO").transform.gameObject;
         ServerConfigGO = GameObject.Find("ServerConfig_GO").transform.gameObject;
         ServerConfigGO.SetActive(false);
+
+
+        //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
+        FileSpec configFileSpec = new FileSpec();
+        configFileSpec.name = "Config Folder";
+        configFileSpec.isFolder = true;
+        TMP_InputField configInputField = LocalConfigGO.GetComponentInChildren<TMP_InputField>();
+        FileItem_TMP configFileItem = LocalConfigGO.AddComponent<FileItem_TMP>();
+        configFileItem.ManualStart(configFileSpec, configInputField);
+        //need to also set the browse button to FileItem_TMP.Locate()
+        LocalConfigGO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
+
+        FileSpec dataFileSpec = new FileSpec();
+        dataFileSpec.name = "Data Folder";
+        dataFileSpec.isFolder = true;
+        TMP_InputField dataInputField = LocalDataGO.GetComponentInChildren<TMP_InputField>();
+        FileItem_TMP dataFileItem = LocalDataGO.AddComponent<FileItem_TMP>();
+        dataFileItem.ManualStart(dataFileSpec, dataInputField);
+        //need to also set the browse button to FileItem_TMP.Locate()
+        LocalDataGO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
+
 
         AllInfoPanel_GO.SetActive(false);
     }
@@ -330,31 +349,13 @@ public class InitScreen_Level : ControlLevel
         ConfirmButtonPressed = true;
     }
 
-    //NEED TO MOVE THE SUBJECT ID AND SESSION ID ERROR HANDLING SOMEWHERE ELSE!!!!
-    public void HandleStartButtonPressed() 
-    {
-        string subjectValue = SubjectIDTextGO.GetComponent<TextMeshProUGUI>().text.Trim();
-        string sessionValue = SessionIDTextGO.GetComponent<TextMeshProUGUI>().text.Trim();
-
-        if (subjectValue.Length > 1 && sessionValue.Length > 1) //Short-term solution cuz for some reason when its empty its saying length is 1, even when trimmed!!!
-        {
-            Debug.Log($"Both SubjectID and SessionID have been filled out properly | SubjectID = {subjectValue} | SessionID = {sessionValue}");
-            Continue_AudioSource.Play();
-            ConfirmButtonPressed = true;
-
-            if (ErrorHandlingGO.activeInHierarchy)
-                ErrorHandlingGO.SetActive(false);
-        }
-        else
-        {
-            ErrorHandlingGO.SetActive(true);
-            ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = "Input a SubjectID and SessionID!";
-        }
-    }
-
     public void HandleConnectToServerButtonPressed()
     {
+        Debug.Log("CLICKED CONNECT BUTTON!");
+
         //Set Server Info:
+        //ServerManager.ServerURL = ServerURL_GO.GetComponentInChildren<>
+
         if (SessionValues.StoringDataOnServer || SessionValues.UsingServerConfigs)
             ServerManager.ServerURL = ServerSetup_GO.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>().text; //update later
         if (SessionValues.UsingServerConfigs)

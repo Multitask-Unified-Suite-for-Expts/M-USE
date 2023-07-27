@@ -18,6 +18,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
+using Tobii.Research.Unity.CodeExamples;
 using USE_Def_Namespace;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -41,7 +42,7 @@ namespace USE_ExperimentTemplate_Session
 
         public string TaskSelectionSceneName;
 
-        protected List<ControlLevel_Task_Template> ActiveTaskLevels;
+        public List<ControlLevel_Task_Template> ActiveTaskLevels;
         public ControlLevel_Task_Template CurrentTask;
         public ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
@@ -590,13 +591,38 @@ namespace USE_ExperimentTemplate_Session
                 string taskName = (string)SessionValues.SessionDef.TaskMappings[selectedConfigFolderName];
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 SceneLoading = true;
-                loadScene.completed += (_) => SceneLoading = false;
+                loadScene.completed += (_) =>
+                {
+                    Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
+                    Debug.Log("SELECTED TASK : " + taskName + " ... " + taskType);
+                    //var methodInfo = this.GetType().GetMethod("AddText", BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null);
+
+                    // MethodInfo SettingsConverter_methodTask = GetType()
+                    //     .GetMethod(nameof(this.SettingsConverterTask)).MakeGenericMethod(new Type[] {currentType});
+                    // var methodInfo = GetType().GetMethod(nameof(this.SetCurrentTask));
+                    // Debug.Log("method info " + methodInfo);
+                    MethodInfo SetCurrentTaskMethod = GetType().GetMethod(nameof(this.SetCurrentTask)).MakeGenericMethod(new Type[] { taskType });
+                    SetCurrentTaskMethod.Invoke(this, new object[] {taskName});
+                    // CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
+                    
+                    SceneLoading = false;
+                };
                 // {
                 //     // OnTaskSceneLoaded(selectedConfigFolderName, false);
                 //     //CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
                 // };
             });
 
+            loadTask.AddUpdateMethod(() =>
+            {
+                Debug.Log(("scene loading: " + SceneLoading));
+                Debug.Log("Current Task: " + CurrentTask);
+                if (CurrentTask != null)
+                    Debug.Log("TaskLevel Defined: " + CurrentTask.TaskLevelDefined);
+                if (!SceneLoading && CurrentTask != null)
+                    CurrentTask.DefineTaskLevel();
+            });
+            
             loadTask.AddFixedUpdateMethod(() =>
             {
             });
@@ -608,10 +634,13 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
 
-            loadTask.SpecifyTermination(() => !SceneLoading && CurrentTask != null && CurrentTask.TaskLevelDefined, runTask, () =>
+            loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, runTask, () =>
+            
             {
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
+                SessionCam.gameObject.SetActive(false);
+                CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
 
@@ -637,7 +666,6 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
-                SessionCam.gameObject.SetActive(false);
 
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");
 
@@ -1267,6 +1295,7 @@ namespace USE_ExperimentTemplate_Session
         //     callback?.Invoke(tl);
         // }
 
+        
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct ReparseDataBuffer
@@ -1312,7 +1341,14 @@ namespace USE_ExperimentTemplate_Session
             if (CameraMirrorTexture == null) return;
             GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
         }
+        
+        
+        public void SetCurrentTask<T>(string taskName) where T : ControlLevel_Task_Template
+        {
+            CurrentTask = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+        }
     }
 
+    
     
 }

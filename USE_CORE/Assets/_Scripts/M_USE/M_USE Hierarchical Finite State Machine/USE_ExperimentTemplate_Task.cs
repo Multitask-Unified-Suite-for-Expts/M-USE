@@ -113,8 +113,9 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        public IEnumerator DefineTaskLevel(bool verifyOnly)
+        public void DefineTaskLevel()
         {
+            Debug.Log("STARTED DEFINE TASK##################################################");
             TaskLevelDefined = false;
 
             importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
@@ -200,7 +201,6 @@ namespace USE_ExperimentTemplate_Task
             //VerifyTask State-----------------------------------------------------------------------------------------------------
             verifyTask_Level.CurrentTask = this;
             VerifyTask.AddChildLevel(verifyTask_Level);
-            VerifyTask.AddInitializationMethod(() => Debug.Log("STARTING VERIFY TASK STATE"));
             VerifyTask.AddInitializationMethod(() =>
             {
                 verifyTask_Level.CurrentTask = this;
@@ -268,12 +268,23 @@ namespace USE_ExperimentTemplate_Task
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
+                Debug.Log("############################");
+                Debug.Log("############################");
+                Debug.Log("############################");
+                Debug.Log("TrialLevel FB Controller : " + TrialLevel.TouchFBController);
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;
                 TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
+                
+                TrialLevel.TaskStims = TaskStims;
+                TrialLevel.PreloadedStims = PreloadedStims;
+                TrialLevel.PrefabStims = PrefabStims;
+                TrialLevel.ExternalStims = ExternalStims;
+                TrialLevel.RuntimeStims = RuntimeStims;
+                TrialLevel.ConfigUiVariables = ConfigUiVariables;
             });
 
             //Hotkey for WebGL build so we can end task and go to next block
@@ -555,6 +566,7 @@ namespace USE_ExperimentTemplate_Task
             fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            
 
            // TrialLevel.SelectionTracker = SelectionTracker;
                 
@@ -570,6 +582,11 @@ namespace USE_ExperimentTemplate_Task
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;
 
+            Debug.Log("############################");
+            Debug.Log("############################");
+            Debug.Log("############################");
+            Debug.Log("TrialLevel FB Controller : " + TrialLevel.TouchFBController);
+            
             if (SessionValues.SessionDef.EyeTrackerActive)
                 SessionValues.GazeTracker.Init(FrameData, 0);
             SessionValues.MouseTracker.Init(FrameData, 0);
@@ -631,20 +648,20 @@ namespace USE_ExperimentTemplate_Task
             }
 
             SessionValues.InputManager.SetActive(false);
-
-            TrialLevel.TaskStims = TaskStims;
-            TrialLevel.PreloadedStims = PreloadedStims;
-            TrialLevel.PrefabStims = PrefabStims;
-            TrialLevel.ExternalStims = ExternalStims;
-            TrialLevel.RuntimeStims = RuntimeStims;
-            TrialLevel.ConfigUiVariables = ConfigUiVariables;
+            //
+            // TrialLevel.TaskStims = TaskStims;
+            // TrialLevel.PreloadedStims = PreloadedStims;
+            // TrialLevel.PrefabStims = PrefabStims;
+            // TrialLevel.ExternalStims = ExternalStims;
+            // TrialLevel.RuntimeStims = RuntimeStims;
+            // TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
             TrialLevel.TaskLevel = this;
             TrialLevel.DefineTrialLevel();
 
             TaskLevelDefined = true;
 
-            yield return null;
+            // yield return null;
         }
 
         private void HandleContinueButtonClick()
@@ -718,84 +735,84 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void ReadSettingsFiles()
-        {
-            //user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
-            SpecifyTypes();
-            TaskStims = new TaskStims();
-
-            if (TaskDefType == null)
-                TaskDefType = typeof(TaskDef);
-            if (BlockDefType == null)
-                BlockDefType = typeof(BlockDef);
-            if (TrialDefType == null)
-                TrialDefType = typeof(TrialDef);
-            if (StimDefType == null)
-                StimDefType = typeof(StimDef);
-
-            MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
-            readTaskDef.Invoke(this, new object[] { TaskConfigPath });
-            MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
-                .MakeGenericMethod(new Type[] { BlockDefType });
-            readBlockDefs.Invoke(this, new object[] { TaskConfigPath });
-            MethodInfo readTrialDefs = GetType().GetMethod(nameof(this.ReadTrialDefs))
-                .MakeGenericMethod(new Type[] { TrialDefType });
-            readTrialDefs.Invoke(this, new object[] { TaskConfigPath });
-            MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
-                .MakeGenericMethod(new Type[] { StimDefType });
-            readStimDefs.Invoke(this, new object[] { TaskConfigPath });
-
-            LoadTaskEventCodeAndConfigUIFiles();
-        }
-
-        public void LoadTaskEventCodeAndConfigUIFiles()
-        {
-            if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
-            {
-                string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
-                StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
-                {
-                    if (result != null)
-                    {
-                        //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
-                        SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails_json", path, result[1]);
-                        ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails_json");
-                    }
-                    else
-                        Debug.Log($"Task ConfigUI Result is null or empty! ({TaskName} may not have one)");
-                }));
-
-                StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
-                {
-                    if (result != null)
-                    {
-                        //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
-                        SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig_json", path, result[1]);
-                        CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig_json");
-                    }
-                    else
-                        Debug.Log($"Task EventCode Result is null or empty! ({TaskName} may not have one)");
-                }));
-            }
-            else
-            {
-                string configUIVariableFile = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
-                if (!string.IsNullOrEmpty(configUIVariableFile))
-                {
-                    SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
-                    ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
-                }
-
-                string eventCodeFile = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
-                if (!string.IsNullOrEmpty(eventCodeFile))
-                {
-                    SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
-                    CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
-                }
-                else
-                    Debug.Log("NORMAL BUILD - TASK CONFIG UI RESULT IS NULL!");
-            }
-        }
+        // private void ReadSettingsFiles()
+        // {
+        //     //user specifies what custom types they have that inherit from TaskDef, BlockDef, and TrialDef;
+        //     SpecifyTypes();
+        //     TaskStims = new TaskStims();
+        //
+        //     if (TaskDefType == null)
+        //         TaskDefType = typeof(TaskDef);
+        //     if (BlockDefType == null)
+        //         BlockDefType = typeof(BlockDef);
+        //     if (TrialDefType == null)
+        //         TrialDefType = typeof(TrialDef);
+        //     if (StimDefType == null)
+        //         StimDefType = typeof(StimDef);
+        //
+        //     MethodInfo readTaskDef = GetType().GetMethod(nameof(this.ReadTaskDef)).MakeGenericMethod(new Type[] { TaskDefType });
+        //     readTaskDef.Invoke(this, new object[] { TaskConfigPath });
+        //     MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.ReadBlockDefs))
+        //         .MakeGenericMethod(new Type[] { BlockDefType });
+        //     readBlockDefs.Invoke(this, new object[] { TaskConfigPath });
+        //     MethodInfo readTrialDefs = GetType().GetMethod(nameof(this.ReadTrialDefs))
+        //         .MakeGenericMethod(new Type[] { TrialDefType });
+        //     readTrialDefs.Invoke(this, new object[] { TaskConfigPath });
+        //     MethodInfo readStimDefs = GetType().GetMethod(nameof(this.ReadStimDefs))
+        //         .MakeGenericMethod(new Type[] { StimDefType });
+        //     readStimDefs.Invoke(this, new object[] { TaskConfigPath });
+        //
+        //     LoadTaskEventCodeAndConfigUIFiles();
+        // }
+        //
+        // public void LoadTaskEventCodeAndConfigUIFiles()
+        // {
+        //     if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
+        //     {
+        //         string path = $"{ServerManager.SessionConfigFolderPath}/{TaskName}";
+        //         StartCoroutine(ServerManager.GetFileStringAsync(path, "ConfigUi", result =>
+        //         {
+        //             if (result != null)
+        //             {
+        //                 //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
+        //                 SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails_json", path, result[1]);
+        //                 ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails_json");
+        //             }
+        //             else
+        //                 Debug.Log($"Task ConfigUI Result is null or empty! ({TaskName} may not have one)");
+        //         }));
+        //
+        //         StartCoroutine(ServerManager.GetFileStringAsync(path, "EventCode", result =>
+        //         {
+        //             if (result != null)
+        //             {
+        //                 //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
+        //                 SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig_json", path, result[1]);
+        //                 CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig_json");
+        //             }
+        //             else
+        //                 Debug.Log($"Task EventCode Result is null or empty! ({TaskName} may not have one)");
+        //         }));
+        //     }
+        //     else
+        //     {
+        //         string configUIVariableFile = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*ConfigUiDetails*");
+        //         if (!string.IsNullOrEmpty(configUIVariableFile))
+        //         {
+        //             SessionSettings.ImportSettings_SingleTypeJSON<ConfigVarStore>(TaskName + "_ConfigUiDetails", configUIVariableFile);
+        //             ConfigUiVariables = (ConfigVarStore)SessionSettings.Get(TaskName + "_ConfigUiDetails");
+        //         }
+        //
+        //         string eventCodeFile = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*EventCodeConfig*");
+        //         if (!string.IsNullOrEmpty(eventCodeFile))
+        //         {
+        //             SessionSettings.ImportSettings_SingleTypeJSON<Dictionary<string, EventCode>>(TaskName + "_EventCodeConfig", eventCodeFile);
+        //             CustomTaskEventCodes = (Dictionary<string, EventCode>)SessionSettings.Get(TaskName + "_EventCodeConfig");
+        //         }
+        //         else
+        //             Debug.Log("NORMAL BUILD - TASK CONFIG UI RESULT IS NULL!");
+        //     }
+        // }
 
         public void HandleCustomSettings()
         {
@@ -975,6 +992,8 @@ namespace USE_ExperimentTemplate_Task
 
         public void FindStims()
         {
+            Debug.Log("EXTERNAL STIMS IN FindStims: " + ExternalStims);
+            
             MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
                 .MakeGenericMethod(new Type[] { StimDefType });
 
@@ -1042,26 +1061,28 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefineExternalStims()
         {
+            
+            
             // need to add check for files in stimfolderpath if there is no stimdef file (take all files)
-            string stimFolderPath = "";
-            string stimExtension = "";
-            float stimScale = 1;
+            // string stimFolderPath = "";
+            // string stimExtension = "";
+            // float stimScale = 1;
 
-            if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-            {
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimFolderPath"))
-                    stimFolderPath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimFolderPath");
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimExtension"))
-                    stimExtension = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimExtension");
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimScale"))
-                    stimScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
-            }
+            // if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
+            // {
+            //     if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimFolderPath"))
+            //         stimFolderPath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimFolderPath");
+            //     if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimExtension"))
+            //         stimExtension = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimExtension");
+            //     if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimScale"))
+            //         stimScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
+            // }
 
             foreach (StimDef sd in ExternalStims.stimDefs)
             {
-                sd.StimFolderPath = stimFolderPath;
-                sd.StimExtension = stimExtension;
-                sd.StimScale = stimScale;
+                sd.StimFolderPath = TaskDef.ExternalStimFolderPath;
+                sd.StimExtension = TaskDef.ExternalStimExtension;
+                sd.StimScale = TaskDef.ExternalStimScale;
 
                 //add StimExtesion to file path if it doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimExtension) && !sd.FileName.EndsWith(sd.StimExtension))

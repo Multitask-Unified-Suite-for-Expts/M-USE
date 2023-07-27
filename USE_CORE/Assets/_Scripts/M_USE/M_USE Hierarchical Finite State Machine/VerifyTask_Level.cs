@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using ConfigDynamicUI;
+using Tobii.Research.Unity.CodeExamples;
 using UnityEngine;
 using USE_Def_Namespace;
 using USE_ExperimentTemplate_Classes;
@@ -38,7 +39,7 @@ public class VerifyTask_Level : ControlLevel
                 new SettingsDetails("TrialDef", CurrentTask.TrialDefType),
                 new SettingsDetails("StimDef", CurrentTask.StimDefType),
                 new SettingsDetails("EventCode", typeof(Dictionary<string, EventCode>)),
-                new SettingsDetails("ConfigUI", typeof(ConfigVarStore)),
+                new SettingsDetails("ConfigUi", typeof(ConfigVarStore)),
             };
             // SetValuesForLoading("TaskDef");
             
@@ -114,7 +115,7 @@ public class VerifyTask_Level : ControlLevel
                 importSettings_Level.importPaused = false;
             }
         });
-        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs, () => Debug.Log("DONE WITH IMPORT SETTINGS STATE!"));
+        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs, () => Debug.Log("ImportSettings state terminated."));
 
         HandleTrialAndBlockDefs.AddInitializationMethod(() =>
         {
@@ -124,6 +125,8 @@ public class VerifyTask_Level : ControlLevel
 
         FindStims.AddInitializationMethod(() =>
         {
+            Debug.Log("External stims: " + CurrentTask.ExternalStims);
+            
             CurrentTask.TaskStims = new TaskStims();
             if (CurrentTask.PrefabStims == null)
                 CurrentTask.PrefabStims = new StimGroup("PrefabStims");
@@ -155,8 +158,6 @@ public class VerifyTask_Level : ControlLevel
         if (SessionValues.ConfigAccessType == "Default" || SessionValues.ConfigAccessType == "Local")
             pathToFile = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFile, $"*{searchString}*");
 
-        Debug.Log("Found file " + pathToFile);
-        
         return pathToFile;
     }
 

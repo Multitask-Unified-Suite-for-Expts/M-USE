@@ -68,7 +68,7 @@ public class ImportSettings_Level : ControlLevel
 			            }
 			            else
 			            {
-				            Debug.Log($"Failed to load {currentSettingsDetails.FileName}");
+				            Debug.Log($"Loaded file {currentSettingsDetails.FileName} but no data was found in it.");
 				            fileLoadingFinished = true;
 			            }
 		            }));
@@ -147,7 +147,6 @@ public class ImportSettings_Level : ControlLevel
 
         if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
         {
-	        Debug.Log(filePath);
             fileContent = File.ReadAllText(filePath); //Will need to check that this works during Web Build
             callback(fileContent);
         }

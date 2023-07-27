@@ -145,6 +145,8 @@ public class SetupSession_Level : ControlLevel
         VerifyTask.AddChildLevel(verifyTask_Level);
         VerifyTask.AddInitializationMethod(() =>
         {
+            //var methodInfo = this.GetType().GetMethod("AddText", BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null);
+
             //loads 
             var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
@@ -158,6 +160,7 @@ public class SetupSession_Level : ControlLevel
         VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
             () =>
             {
+                SessionLevel.ActiveTaskLevels.Add(taskLevel);
                 SceneManager.UnloadSceneAsync(taskName);
                 iTask++;
             });

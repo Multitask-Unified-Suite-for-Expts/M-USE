@@ -135,7 +135,7 @@ namespace USE_ExperimentTemplate_Trial
                 if (TaskLevel.TaskName != "GazeCalibration")
                 {
                     GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.DefineTaskLevel(false);
+                    GazeCalibrationTaskLevel.DefineTaskLevel();
                     GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);

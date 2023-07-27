@@ -295,8 +295,7 @@ public class InitScreen_Level : ControlLevel
         else if(!LocalDataToggle.isOn && !ServerDataToggle.isOn && !NoDataToggle.isOn) //make sure 1 of the data options is selected
         {
             ErrorHandlingGO.SetActive(true);
-            TextMeshProUGUI errorText = ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>();
-            errorText.text = "Select a Data Option!";
+            ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = "Select a Data Option!";
         }
         else
         {
@@ -318,7 +317,10 @@ public class InitScreen_Level : ControlLevel
             ConfirmButtonPressed = true;
 
             if (ErrorHandlingGO.activeInHierarchy)
+            {
+                ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = "Input both a SubjectID and SessionID!";
                 ErrorHandlingGO.SetActive(false);
+            }
         }
         else
             ErrorHandlingGO.SetActive(true);

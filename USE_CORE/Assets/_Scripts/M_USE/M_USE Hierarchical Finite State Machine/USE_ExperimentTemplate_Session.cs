@@ -107,6 +107,7 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.SessionLevel = this;
 
+
             State initScreen = new State("InitScreen");
             // State loadSessionSettings = new State("LoadSessionSettings");
             // State createSessionDataFolder = new State("CreateDataFolders");
@@ -882,7 +883,7 @@ namespace USE_ExperimentTemplate_Session
         private void SetDisplayController()
         {
             DisplayController = gameObject.AddComponent<DisplayController>();
-            SessionInitScreen = GameObject.Find("InitializationScreen_TWO_PANELS").GetComponent<InitScreen>();
+            SessionInitScreen = GameObject.Find("InitScreen_GO").GetComponent<InitScreen>();
             DisplayController.HandleDisplays(SessionInitScreen);
             SessionValues.DisplayController = DisplayController;
         }

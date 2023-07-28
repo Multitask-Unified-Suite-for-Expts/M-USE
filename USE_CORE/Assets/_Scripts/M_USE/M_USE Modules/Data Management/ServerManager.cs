@@ -35,6 +35,25 @@ public static class ServerManager //Used with the PHP scripts
     public static bool SessionDataFolderCreated; //used for logWriter
 
 
+    public static IEnumerator TestServerConnection(Action<bool> callback)
+    {
+        string url = $"{ServerURL}/testConnection.php";
+
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Server connection test successful!");
+            callback?.Invoke(true);
+        }
+        else
+        {
+            Debug.Log($"Server connection test failed. Error: {request.error}");
+            callback?.Invoke(false);
+        }
+    }
+
     public static IEnumerator CreateFolder(string folderPath)
     {
         string url = $"{ServerURL}/createFolder.php?path={folderPath}";

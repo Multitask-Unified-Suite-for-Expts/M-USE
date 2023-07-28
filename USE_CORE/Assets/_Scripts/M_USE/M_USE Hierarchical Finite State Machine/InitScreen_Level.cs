@@ -1,26 +1,19 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_States;
 using TMPro;
 using System.IO;
 using UnityEngine.UI;
-using static Dropbox.Api.Common.PathRoot;
-using static Dropbox.Api.TeamLog.ExternalDriveBackupStatus;
-using static UnityEditor.PlayerSettings;
-
+using System.Collections;
+using System.Security.Policy;
 
 public class InitScreen_Level : ControlLevel
 {
-    private State SetupInitScreen;
-    private State StartScreen;
-    private State CollectInfo;
-
     private GameObject InitScreenGO;
     private GameObject InitScreenCanvasGO;
 
-    public GameObject InitialPanel_GO;
-    public GameObject AllInfoPanel_GO;
+    public GameObject StartPanel_GO;
+    public GameObject MainPanel_GO;
 
     public GameObject ConfirmButtonGO;
 
@@ -36,6 +29,8 @@ public class InitScreen_Level : ControlLevel
 
     public GameObject LocalConfigGO;
     public GameObject ServerConfigGO;
+
+    public GameObject ConnectButton;
 
     private GameObject[] GreyOutPanels_Array;
 
@@ -59,7 +54,11 @@ public class InitScreen_Level : ControlLevel
     private Toggle ServerDataToggle;
     private Toggle NoDataToggle;
 
-    private string CurrentError = "";
+    private State SetupInitScreen;
+    private State StartScreen;
+    private State CollectInfo;
+
+    private FolderDropdown FolderDropdown;
 
 
     public override void DefineControlLevel()
@@ -68,9 +67,6 @@ public class InitScreen_Level : ControlLevel
         StartScreen = new State("StartScreen");
         CollectInfo = new State("CollectInfo");
         AddActiveStates(new List<State> { SetupInitScreen, StartScreen, CollectInfo});
-
-        //not sure what to do with this right now:
-        //SessionValues.LocateFile = GameObject.Find("LocateFile").GetComponent<LocateFile>();
 
         SetGameObjects();
 
@@ -84,15 +80,19 @@ public class InitScreen_Level : ControlLevel
         SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
         //InitialScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        StartScreen.AddInitializationMethod(() => InitialPanel_GO.SetActive(true));
+        StartScreen.AddInitializationMethod(() => StartPanel_GO.SetActive(true));
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
             ConfirmButtonPressed = false;
-            InitialPanel_GO.SetActive(false);
+            StartPanel_GO.SetActive(false);
         });
 
         //Get_ALLINFO State-----------------------------------------------------------------------------------------------------------------------------------
-        CollectInfo.AddInitializationMethod(() => AllInfoPanel_GO.SetActive(true));
+        CollectInfo.AddInitializationMethod(() =>
+        {
+            StartCoroutine(UsePlayerPrefsToActivateObjects());
+            MainPanel_GO.SetActive(true);
+        });
         CollectInfo.AddUpdateMethod(() =>
         {
             if (ErrorHandlingGO.activeInHierarchy)
@@ -103,30 +103,91 @@ public class InitScreen_Level : ControlLevel
         });
         CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
+            Debug.Log("DONE COLLECTING INFO NOW ABOUT TO SET EVERYTHING!");
             ConfirmButtonPressed = false;
 
+            SetSubjectIDAndSessionID();
 
-            SessionValues.SubjectID = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>().text;
-            SessionValues.SessionID = GameObject.Find("SessionID_Text").GetComponent<TextMeshProUGUI>().text;
+            //set the server config folder with what they selected in the server dropdown:
+            if (ServerConfigToggle.isOn)
+            {
+                string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
+                ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
+            }
+
+            if (ServerDataToggle.isOn)
+                ServerManager.RootDataFolder = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>().text;
+            
 
             SetConfigInfo();
 
             SetDataInfo();
 
-            AllInfoPanel_GO.SetActive(false);
+            MainPanel_GO.SetActive(false);
             InitScreenCanvasGO.SetActive(false); //turn off init canvas since last state.
         });
 
     }
 
+    private void SetSubjectIDAndSessionID()
+    {
+        string subjectID = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>().text;
+        subjectID = subjectID.Remove(subjectID.Length - 1, 1);
+        SessionValues.SubjectID = subjectID;
+
+        string sessionID = GameObject.Find("SessionID_Text").GetComponent<TextMeshProUGUI>().text;
+        sessionID = sessionID.Remove(sessionID.Length - 1, 1);
+        SessionValues.SessionID = sessionID;
+    }
+
+    private IEnumerator UsePlayerPrefsToActivateObjects()
+    {
+        yield return new WaitForEndOfFrame(); //Have to wait a frame so that the toggle's can load their IsOn value from PlayerPrefs during their Start() method of ToggleManager.cs
+
+        if(LocalConfigToggle.isOn)
+        {
+            LocalConfigGO.SetActive(true);
+            ServerConfigGO.SetActive(false);
+        }
+        else if(ServerConfigToggle.isOn)
+        {
+            ServerConfigGO.SetActive(true);
+            LocalConfigGO.SetActive(false);
+        }
+
+        if (LocalDataToggle.isOn)
+        {
+            LocalDataGO.SetActive(true);
+            ServerDataGO.SetActive(false);
+        }
+        else if(ServerDataToggle.isOn)
+        {
+            ServerDataGO.SetActive(true);
+            LocalDataGO.SetActive(false);
+        }
+
+
+        if (!ServerConfigToggle.isOn && !ServerDataToggle.isOn)
+            GreyOutPanels_Array[0].SetActive(true);
+
+        if(NoDataToggle.isOn)
+            GreyOutPanels_Array[1].SetActive(true);
+
+        if(DefaultConfigToggle.isOn)
+            GreyOutPanels_Array[2].SetActive(true);
+    }
+
+    //will eventually need to add more for the fields in the main section!
     private bool AllFieldsCompleted()
     {
-        string subjectValue = SubjectIDTextGO.GetComponent<TextMeshProUGUI>().text.Trim();
+        string subjectValue = SubjectIDTextGO.GetComponent<TextMeshProUGUI>().text;
+        subjectValue = subjectValue.Remove(subjectValue.Length - 1, 1);
         string sessionValue = SessionIDTextGO.GetComponent<TextMeshProUGUI>().text.Trim();
+        sessionValue = sessionValue.Remove(sessionValue.Length - 1, 1);
 
         if ((DefaultConfigToggle.isOn || LocalConfigToggle.isOn || ServerConfigToggle.isOn)
              && (LocalDataToggle.isOn || ServerDataToggle.isOn || NoDataToggle.isOn)
-             && subjectValue.Length > 1 && sessionValue.Length > 1)
+             && subjectValue.Length > 0 && sessionValue.Length > 0)
             return true;
         
         return false;
@@ -253,7 +314,7 @@ public class InitScreen_Level : ControlLevel
         InitScreenGO = GameObject.Find("InitScreen_GO");
         InitScreenCanvasGO = GameObject.Find("InitScreenCanvas");
 
-        InitialPanel_GO = InitScreenGO.transform.Find("StartPanel").gameObject;
+        StartPanel_GO = InitScreenGO.transform.Find("StartPanel").gameObject;
 
         LocalConfigToggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfigToggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -273,18 +334,25 @@ public class InitScreen_Level : ControlLevel
         GreyOutPanels_Array[0] = GameObject.Find("GreyOutPanel_ServerURL");
         GreyOutPanels_Array[1] = GameObject.Find("GreyOutPanel_Data");
         GreyOutPanels_Array[2] = GameObject.Find("GreyOutPanel_Config");
+        foreach (GameObject go in GreyOutPanels_Array)
+            go.SetActive(false);
 
-        AllInfoPanel_GO = InitScreenGO.transform.Find("MainPanel").gameObject;
-        ConfirmButtonGO = AllInfoPanel_GO.transform.Find("ButtonConfirm").transform.gameObject;
+        MainPanel_GO = InitScreenGO.transform.Find("MainPanel").gameObject;
+        ConfirmButtonGO = MainPanel_GO.transform.Find("ButtonConfirm").transform.gameObject;
 
-        ServerURL_GO = GameObject.Find("ServerURL_GO").transform.gameObject;
+        ServerURL_GO = GameObject.Find("ServerURL_GO");
 
-        LocalDataGO = GameObject.Find("LocalDataFolderPath_GO").transform.gameObject;
-        ServerDataGO = GameObject.Find("ServerDataFolderPath_GO").transform.gameObject;
+        ConnectButton = GameObject.Find("ConnectButton");
+
+        LocalDataGO = GameObject.Find("LocalData_GO");
+        ServerDataGO = GameObject.Find("ServerData_GO");
         ServerDataGO.SetActive(false);
 
-        LocalConfigGO = GameObject.Find("LocalConfig_GO").transform.gameObject;
-        ServerConfigGO = GameObject.Find("ServerConfig_GO").transform.gameObject;
+        FolderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
+
+
+        LocalConfigGO = GameObject.Find("LocalConfig_GO");
+        ServerConfigGO = GameObject.Find("ServerConfig_GO");
         ServerConfigGO.SetActive(false);
 
 
@@ -295,7 +363,6 @@ public class InitScreen_Level : ControlLevel
         TMP_InputField configInputField = LocalConfigGO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfigGO.AddComponent<FileItem_TMP>();
         configFileItem.ManualStart(configFileSpec, configInputField);
-        //need to also set the browse button to FileItem_TMP.Locate()
         LocalConfigGO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
         FileSpec dataFileSpec = new FileSpec();
@@ -304,36 +371,34 @@ public class InitScreen_Level : ControlLevel
         TMP_InputField dataInputField = LocalDataGO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalDataGO.AddComponent<FileItem_TMP>();
         dataFileItem.ManualStart(dataFileSpec, dataInputField);
-        //need to also set the browse button to FileItem_TMP.Locate()
         LocalDataGO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
 
 
-        AllInfoPanel_GO.SetActive(false);
+        MainPanel_GO.SetActive(false);
     }
 
     public void HandleConfirmButtonPress() //For the AllInfo Panel's Confirm Button
     {
+        //need to also add that if one of the 2 server toggle's is on, make sure already connected to server and they've selected a dropdown
+
         string subjectValue = SubjectIDTextGO.GetComponent<TextMeshProUGUI>().text.Trim();
         string sessionValue = SessionIDTextGO.GetComponent<TextMeshProUGUI>().text.Trim();
 
-        if(subjectValue.Length < 2 || sessionValue.Length < 2) // Short - term solution cuz for some reason when its empty its saying length is 1, even when trimmed!!!
+        if(subjectValue.Length < 1 || sessionValue.Length < 1) // Short - term solution cuz for some reason when its empty its saying length is 1, even when trimmed!!!
         {
             ErrorHandlingGO.SetActive(true);
             ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = "Input both a SubjectID and SessionID!";
-            CurrentError = "id";
         }
         else if (!LocalConfigToggle.isOn && !ServerConfigToggle.isOn && !DefaultConfigToggle.isOn) //make sure 1 of the config types is selected
         {
             ErrorHandlingGO.SetActive(true);
             TextMeshProUGUI errorText = ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>();
             errorText.text = "Select a Config Type!";
-            CurrentError = "config";
         }
         else if(!LocalDataToggle.isOn && !ServerDataToggle.isOn && !NoDataToggle.isOn) //make sure 1 of the data options is selected
         {
             ErrorHandlingGO.SetActive(true);
             ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = "Select a Data Option!";
-            CurrentError = "data";
         }
         else
         {
@@ -351,21 +416,23 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleConnectToServerButtonPressed()
     {
-        Debug.Log("CLICKED CONNECT BUTTON!");
+        if (ConnectButton.GetComponentInChildren<Text>().text == "Connected")
+            return;
 
-        //Set Server Info:
-        //ServerManager.ServerURL = ServerURL_GO.GetComponentInChildren<>
+        Continue_AudioSource.Play();
 
-        if (SessionValues.StoringDataOnServer || SessionValues.UsingServerConfigs)
-            ServerManager.ServerURL = ServerSetup_GO.transform.Find("Placeholder").GetComponent<TextMeshProUGUI>().text; //update later
-        if (SessionValues.UsingServerConfigs)
-            ServerManager.RootConfigFolder = ServerSetup_GO.transform.Find("NewText").GetComponent<TextMeshProUGUI>().text; //update later
-        if (SessionValues.StoringDataOnServer)
-            ServerManager.RootDataFolder = ServerSetup_GO.transform.Find("texty").GetComponent<TextMeshProUGUI>().text; //update later
+        //Set Server Info: //CURRENTLY NOT WORKING GETTING THE TEXT FROM INPUT FIELD!!! UN COMMENT BELOW WHEN FIXED!!
+        string url = GameObject.Find("ServerURL_Text").GetComponent<TextMeshProUGUI>().text;
+        ServerManager.ServerURL = url.Remove(url.Length - 1, 1);
 
-        //Load Server session config folders and populate dropdown
-        //XXXXXXXXXX
-
+        //If using server configs, go fetch the config folders and populate dropdown
+        if (ServerConfigToggle.isOn)
+            StartCoroutine(ServerManager.GetSessionConfigFolders(folders =>
+            {
+                FolderDropdown.SetFolders(folders);
+                ConnectButton.GetComponent<Image>().color = Color.green;
+                ConnectButton.GetComponentInChildren<Text>().text = "Connected";
+            }));
 
     }
 

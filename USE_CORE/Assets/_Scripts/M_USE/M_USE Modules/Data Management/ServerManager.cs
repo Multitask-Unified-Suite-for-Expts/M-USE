@@ -10,7 +10,7 @@ public static class ServerManager //Used with the PHP scripts
 {
     public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
-    public static string RootDataFolder = "DATA"; //will move to server config
+    public static string RootDataFolder = "DATA"; //They specify path on new init screen
     private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
@@ -20,7 +20,7 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static string RootConfigFolder = "CONFIGS"; //will move to server config
+    public static string RootConfigFolder = "CONFIGS"; //Marcus wants us to hardcode it. TELL THEM TO NAME FOLDER CONFIGS!
     public static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     public static string SessionConfigFolderPath
     {

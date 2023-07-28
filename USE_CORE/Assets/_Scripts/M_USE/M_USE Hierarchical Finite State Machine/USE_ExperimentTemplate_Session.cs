@@ -107,6 +107,9 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.SessionLevel = this;
 
+            //IDK WHERE TO PUT THIS CUZ LOCATE FILE ISN'T ON A GO ANYMORE, BUT SCRIPTS DO USE ITS FINDFILE METHOD
+            //SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
+
 
             State initScreen = new State("InitScreen");
             // State loadSessionSettings = new State("LoadSessionSettings");

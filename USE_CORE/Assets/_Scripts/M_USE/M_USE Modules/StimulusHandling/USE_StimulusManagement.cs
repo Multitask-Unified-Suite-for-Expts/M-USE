@@ -281,7 +281,6 @@ namespace USE_StimulusManagement
         {
 			SessionValues.Using2DStim = FileName.Contains("png");
 
-			bool loadFromServer = SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs;
 
 			if (SessionValues.UsingDefaultConfigs)
 			{
@@ -292,7 +291,7 @@ namespace USE_StimulusManagement
             {
                 if (!string.IsNullOrEmpty(FileName))
                 {
-					if (loadFromServer)
+					if (SessionValues.UsingServerConfigs)
 					{
 						yield return CoroutineHelper.StartCoroutine(LoadExternalStimFromServer(returnedStimGO =>
 						{

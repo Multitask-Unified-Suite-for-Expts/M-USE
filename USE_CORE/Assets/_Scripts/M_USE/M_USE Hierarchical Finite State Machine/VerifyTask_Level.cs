@@ -59,6 +59,7 @@ public class VerifyTask_Level : ControlLevel
                 currentFileName = importSettings_Level.currentSettingsDetails.FilePath;
                 // CurrentTask.
                 parsedResult = importSettings_Level.parsedResult;
+                Debug.Log(parsedResult);
                 Type currentType = importSettings_Level.currentSettingsDetails.SettingType;
 
                 if (parsedResult != null)
@@ -156,7 +157,10 @@ public class VerifyTask_Level : ControlLevel
         if (SessionValues.UsingDefaultConfigs)
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
         else if (SessionValues.UsingLocalConfigs)
-            pathToFolder = $"{SessionValues.ConfigFolderPath}{Path.DirectorySeparatorChar}{CurrentTask.TaskName}";
+        {
+            pathToFolder = $"{SessionValues.ConfigFolderPath}{CurrentTask.TaskName}";
+            //pathToFolder = $"{SessionValues.ConfigFolderPath}{Path.DirectorySeparatorChar}{CurrentTask.TaskName}";
+        }
         else if (SessionValues.UsingServerConfigs)
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}";
         
@@ -213,7 +217,9 @@ public class VerifyTask_Level : ControlLevel
 
     public void SettingsConverterTask<T>(object parsedSettings) where T: TaskDef
     {
+        Debug.Log(parsedSettings);
         CurrentTask.TaskDef = (T) parsedSettings;
+        Debug.Log(CurrentTask.TaskDef);
     }
     
     public void SettingsConverterBlock<T>(object parsedSettings) where T: BlockDef
@@ -226,6 +232,8 @@ public class VerifyTask_Level : ControlLevel
     }
     public void SettingsConverterStim<T>(object parsedSettings) where T: StimDef
     {
+        T[] tempStims = (T[])parsedSettings;
+        Debug.Log(tempStims[0].FileName);
         CurrentTask.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
 }

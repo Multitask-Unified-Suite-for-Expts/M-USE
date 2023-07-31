@@ -118,6 +118,8 @@ namespace USE_ExperimentTemplate_Trial
         
         public T GetTaskDef<T>() where T: TaskDef
         {
+            Debug.Log(TaskLevel);
+            Debug.Log(TaskLevel.TaskDef);
             return (T)TaskLevel.TaskDef;
         }
 

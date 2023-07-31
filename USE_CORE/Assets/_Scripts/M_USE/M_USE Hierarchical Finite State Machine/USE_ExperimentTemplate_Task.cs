@@ -167,6 +167,7 @@ namespace USE_ExperimentTemplate_Task
 
             TrialLevel.TrialDefType = TrialDefType; //may need to be moved down after new states
             TrialLevel.StimDefType = StimDefType;   //may need to be moved down after new states
+            TrialLevel.TaskLevel = this;
         
             Add_ControlLevel_InitializationMethod(() =>
             {

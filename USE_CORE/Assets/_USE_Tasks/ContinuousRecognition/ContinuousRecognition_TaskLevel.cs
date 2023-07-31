@@ -65,17 +65,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-            {
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
-                if (!SessionValues.UsingDefaultConfigs)
-                    contextFilePath += ".png";
-            }
-            else
-                contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
-
-            StartCoroutine(HandleSkybox(contextFilePath));
+            SetSkyBox(currentBlock.ContextName);
 
             trialLevel.ContextActive = true;
 

@@ -135,7 +135,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), currentTaskDef.ButtonPosition, currentTaskDef.ButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }

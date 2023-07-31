@@ -4,16 +4,16 @@ using USE_States;
 using USE_StimulusManagement;
 using FlexLearning_Namespace;
 using USE_ExperimentTemplate_Trial;
-using USE_UI;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
-using TMPro;
+
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 {
     public FlexLearning_TrialDef CurrentTrialDef => GetCurrentTrialDef<FlexLearning_TrialDef>();
     public FlexLearning_TaskLevel CurrentTaskLevel => GetTaskLevel<FlexLearning_TaskLevel>();
+    public FlexLearning_TaskDef currentTaskDef => GetTaskDef<FlexLearning_TaskDef>();
 
     public GameObject FL_CanvasGO;
 
@@ -36,12 +36,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     
 
     // Set in the Task Level
-    [HideInInspector] public string ContextExternalFilePath;
-    [HideInInspector] public Vector3 StartButtonPosition;
-    [HideInInspector] public float StartButtonScale;
-    [HideInInspector] public bool StimFacingCamera;
-    [HideInInspector] public string ShadowType;
-    [HideInInspector] public bool NeutralITI;
     [HideInInspector] public bool? TokensWithStimOn;
 
     
@@ -80,11 +74,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool TouchDurationError = false;
     private bool aborted = false;
 
-    [HideInInspector] public float TouchFeedbackDuration;
-
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
-
-    [HideInInspector] public bool MacMainDisplayBuild;
 
 
     public override void DefineControlLevel()
@@ -116,8 +106,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ContextName = CurrentTrialDef.ContextName;
 
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(ShadowType, "FlexLearning_DirectionalLight");
-            if (StimFacingCamera)
+            SetShadowType(currentTaskDef.ShadowType, "FlexLearning_DirectionalLight");
+            if (currentTaskDef.StimFacingCamera)
                 MakeStimFaceCamera();
             
             if (StartButton == null)
@@ -129,7 +119,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -150,11 +140,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*50, FL_CanvasGO);
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *50, FL_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
+            if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
@@ -318,11 +308,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
-            if (NeutralITI)
+            if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage")));
-                //RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

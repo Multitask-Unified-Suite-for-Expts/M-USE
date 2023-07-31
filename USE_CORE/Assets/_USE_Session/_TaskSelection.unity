@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -478,7 +478,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &604788857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -895,7 +895,6 @@ GameObject:
   - component: {fileID: 1375570699}
   - component: {fileID: 1375570698}
   - component: {fileID: 1375570700}
-  - component: {fileID: 1375570701}
   m_Layer: 0
   m_Name: ControlLevels
   m_TagString: Untagged
@@ -1019,7 +1018,7 @@ MonoBehaviour:
   importSettings_Level: {fileID: 0}
   fileParsed: 0
   currentFileName: 
-  TaskLevel: {fileID: 0}
+  CurrentTask: {fileID: 0}
 --- !u!114 &1375570699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1062,47 +1061,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: InitScreen_Level
-  initScreen: {fileID: 0}
-  Terminated: 0
-  isMainLevel: 0
-  CallDefineLevelAutomatically: 1
-  quitApplicationAtEnd: 0
-  DebugActive: 1
-  Paused: 1
-  StartPanel_GO: {fileID: 0}
-  MainPanel_GO: {fileID: 0}
-  ConfirmButtonGO: {fileID: 0}
-  ErrorHandlingGO: {fileID: 0}
-  SubjectIDTextGO: {fileID: 0}
-  SessionIDTextGO: {fileID: 0}
-  ServerDataTextGO: {fileID: 0}
-  LocalDataTextGO: {fileID: 0}
-  LocalConfigTextGO: {fileID: 0}
-  ServerURL_GO: {fileID: 0}
-  LocalDataGO: {fileID: 0}
-  ServerDataGO: {fileID: 0}
-  LocalConfigGO: {fileID: 0}
-  ServerConfigGO: {fileID: 0}
-  ConnectButton: {fileID: 0}
-  ConfigType_GO: {fileID: 0}
-  StoreData_GO: {fileID: 0}
-  StoreDataLocations_GO: {fileID: 0}
-  LocalFolderLocations_GO: {fileID: 0}
-  ServerSetup_GO: {fileID: 0}
-  ServerDropdown_GO: {fileID: 0}
---- !u!114 &1375570701
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1375570694}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3876a56ec7df541418359bab1f9403b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ControlLevelName: SetupTask_Level
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
@@ -1439,6 +1397,12 @@ MonoBehaviour:
   toggle: {fileID: 0}
   toggle_GO: {fileID: 1794402195}
   playerPrefKey: ServerConfigsToggleValue
+--- !u!1 &1812308324 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2374676794694860249, guid: 792e1de5c8846437a8604141b839538e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2033127974}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1895764640
 GameObject:
   m_ObjectHideFlags: 0
@@ -1841,6 +1805,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: HandleStartSessionButtonPress
       objectReference: {fileID: 0}
+    - target: {fileID: 2590195412010481339, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2590195412010481339, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1812308324}
     - target: {fileID: 2624996253987818505, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size

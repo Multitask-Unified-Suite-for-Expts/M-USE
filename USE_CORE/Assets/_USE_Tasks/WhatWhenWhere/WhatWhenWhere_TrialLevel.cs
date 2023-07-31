@@ -2,20 +2,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_States;
 using WhatWhenWhere_Namespace;
 using USE_StimulusManagement;
 using ConfigDynamicUI;
-using USE_Settings;
-using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
-using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
-using USE_UI;
-using USE_Utilities;
+
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -23,19 +18,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
-
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
+    public WhatWhenWhere_TaskDef currentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
+
     // game object variables
     private Texture2D texture;
     private static int numObjMax = 100;// need to change if stimulus exceeds this amount, not great
     
-    // Config Variables
-    public string ContextExternalFilePath;
-    [FormerlySerializedAs("ButtonPosition")] public Vector3 ButtonPosition;
-    [FormerlySerializedAs("ButtonScale")] public float ButtonScale;
-    public bool StimFacingCamera;
-    public string ShadowType;
-    public bool NeutralITI;
     //stim group
     private StimGroup searchStims, distractorStims;
     private List<int> touchedObjects = new List<int>();
@@ -136,8 +125,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private float? selectionDuration = null;
     private bool choiceMade = false;
 
-    [HideInInspector] public float TouchFeedbackDuration;
-
 
     public override void DefineControlLevel()
     {
@@ -185,7 +172,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -202,8 +189,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUiVariables();
             }
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(ShadowType, "WhatWhenWhere_DirectionalLight");
-            if (StimFacingCamera)
+            SetShadowType(currentTaskDef.ShadowType, "WhatWhenWhere_DirectionalLight");
+            if (currentTaskDef.StimFacingCamera)
                 MakeStimFaceCamera();
             
             if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
@@ -216,7 +203,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, FinalFeedback);
 
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale * 10, WWW_CanvasGO);
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -467,11 +454,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     DestroyChildren(GameObject.Find("MainCameraCopy"));
             }
             
-            if (NeutralITI)
+            if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png"));
-                //RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
+                string path = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
+                StartCoroutine(HandleSkybox(path + Path.DirectorySeparatorChar + ContextName + ".png"));
             }
 
             GenerateAccuracyLog();

@@ -83,10 +83,11 @@ namespace USE_Def_Namespace
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
         public Dictionary<string, string> CustomSettings;
-        public Vector3 ButtonPosition = Vector3.zero;
-        public float ButtonScale = 1.2f;
+        public Vector3 StartButtonPosition = Vector3.zero;
+        public float StartButtonScale = 1.2f;
+        public string ContextExternalFilePath;
     }
-    
+
     public class BlockDef
     {
         public int BlockCount;

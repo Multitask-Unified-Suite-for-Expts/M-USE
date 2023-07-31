@@ -48,14 +48,13 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
-        SetSettings();
         SetupBlockData();
 
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
             currentBlock.ContextName = currentBlock.ContextName.Trim();
-            SetSkyBox();
+            SetSkyBox(currentBlock.ContextName);
         });
 
         BlockFeedback.AddInitializationMethod(() =>
@@ -75,47 +74,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             BlockStringsAdded++;
         }
     }
-
-    private void SetSkyBox()
-    {
-        string contextFilePath;
-        if (SessionValues.WebBuild)
-        {
-            contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
-            if (!SessionValues.UsingDefaultConfigs)
-                contextFilePath += ".png";
-        }
-        else
-            contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
-
-        StartCoroutine(HandleSkybox(contextFilePath));
-    }
-
-    public void SetSettings()
-    {
-        trialLevel.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-        {
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
-        }
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            trialLevel.TouchFeedbackDuration = .3f;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            trialLevel.MacMainDisplayBuild = false;
-    }
-
 
     public void AddBlockValuesToTaskValues()
     {

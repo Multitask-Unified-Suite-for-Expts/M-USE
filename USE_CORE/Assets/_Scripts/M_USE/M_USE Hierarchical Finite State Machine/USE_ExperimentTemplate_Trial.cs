@@ -266,7 +266,7 @@ namespace USE_ExperimentTemplate_Trial
                 //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
                 GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
-                GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
+                GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = TaskLevel.TaskCam;
                 GazeCalibrationCanvas.gameObject.SetActive(true);
                 CalibrationGazeTrail.gameObject.SetActive(true);
                // CalibrationCube.gameObject.SetActive(true);

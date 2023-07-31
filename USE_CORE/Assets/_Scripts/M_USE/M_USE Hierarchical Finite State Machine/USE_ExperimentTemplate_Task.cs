@@ -573,12 +573,12 @@ namespace USE_ExperimentTemplate_Task
                 totalTokensNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
 
             //GOTTA BE A BETTER WAY TO DO THIS:
-            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
+            /*fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-
+*/
            // TrialLevel.SelectionTracker = SelectionTracker;
                 
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();

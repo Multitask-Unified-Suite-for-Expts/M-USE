@@ -79,7 +79,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public StringBuilder PreviousBlocksString;
     private int blocksAdded = 0;
     private MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
-
+    private MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
 
     public override void DefineControlLevel()
     {/*
@@ -98,27 +98,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
 
-        //Was in SetSettings() but removed most of that method so just put the last part here:
-        if (SessionValues.WebBuild)
-        {
-            if (SessionValues.UsingDefaultConfigs)
-            {
-                mgTL.MazeFilePath = "DefaultResources/Mazes";
-                mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
-            }
-            else //Using server configs:
-            {
-                mgTL.MazeFilePath = "Resources/Mazes";
-                mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
-            }
-        }
-        else
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
-                mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-                mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-        }
+        SetMazePaths();
 
         AssignBlockData();
         
@@ -132,17 +112,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-            {
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{mgBD.ContextName}";
-                if (!SessionValues.UsingDefaultConfigs)
-                    contextFilePath += ".png";
-            }
-            else
-                contextFilePath = mgTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, mgBD.ContextName, "LinearDark");
-
-            StartCoroutine(HandleSkybox(contextFilePath));
+            SetSkyBox(mgBD.ContextName);
 
             FindMaze();
             StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
@@ -154,6 +124,32 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             CalculateBlockSummaryString();
         });
     }
+
+    private void SetMazePaths()
+    {
+        if (SessionValues.UsingDefaultConfigs)
+        {
+            mgTL.MazeFilePath = "DefaultResources/Mazes";
+            mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
+        }
+        else if (SessionValues.UsingServerConfigs)
+        {
+            mgTL.MazeFilePath = "Resources/Mazes";
+            mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
+        }
+        else if (SessionValues.UsingLocalConfigs)
+        {
+            if (!string.IsNullOrEmpty(currentTaskDef.MazeKeyFilePath))
+                mazeKeyFilePath = currentTaskDef.MazeKeyFilePath;
+            else
+                Debug.Log("NO MAZE KEY FILE PATH SPECIFIED IN TASK DEF CONFIG!");
+            if (!string.IsNullOrEmpty(currentTaskDef.MazeFilePath))
+                mgTL.MazeFilePath = currentTaskDef.MazeFilePath;
+            else
+                Debug.Log("NO MAZE FILE PATH SPECIFIED IN TASK DEF CONFIG!");
+        }
+    }
+
 
     private void InitializeBlockArrays()
     {

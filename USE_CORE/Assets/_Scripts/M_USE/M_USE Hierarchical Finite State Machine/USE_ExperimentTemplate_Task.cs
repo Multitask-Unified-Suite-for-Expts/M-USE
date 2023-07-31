@@ -668,6 +668,21 @@ namespace USE_ExperimentTemplate_Task
             // yield return null;
         }
 
+
+        public void SetSkyBox(string contextName)
+        {
+            string contextFilePath = "";
+            if (SessionValues.UsingDefaultConfigs)
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{contextName}";
+            else if (SessionValues.UsingServerConfigs)
+                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{contextName}.png";
+            else if (SessionValues.UsingLocalConfigs)
+                contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
+
+            StartCoroutine(HandleSkybox(contextFilePath));
+        }
+
+
         private void HandleContinueButtonClick()
         {
             ContinueButtonClicked = true;

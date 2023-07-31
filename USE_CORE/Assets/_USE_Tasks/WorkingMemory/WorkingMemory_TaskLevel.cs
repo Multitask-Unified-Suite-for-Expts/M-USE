@@ -31,17 +31,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         {
             wmTL.ContextName = wmBD.ContextName;
 
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-            {
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wmBD.ContextName}";
-                if (!SessionValues.UsingDefaultConfigs)
-                    contextFilePath += ".png";
-            }
-            else
-                contextFilePath = wmTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wmBD.ContextName, "LinearDark");
-
-            StartCoroutine(HandleSkybox(contextFilePath));
+            SetSkyBox(wmBD.ContextName);
 
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
@@ -49,7 +39,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
         });
     }
-
 
     public override OrderedDictionary GetBlockResultsData()
     {

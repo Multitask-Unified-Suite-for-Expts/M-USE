@@ -8,6 +8,9 @@ namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
     {
+        public string MazeKeyFilePath;
+        public string MazeFilePath;
+
         public bool NeutralITI;
         public float TileSize;
         public string TileTexture;

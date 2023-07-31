@@ -130,40 +130,13 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
-            //if (TaskName != "GazeCalibration")
-            //{
-            //    ReadSettingsFiles();
-            //    while (!AllDefsImported)
-            //        yield return new WaitForEndOfFrame();
-            //    TaskDefImported = false;
-            //    BlockDefImported = false;
-            //    TrialDefImported = false;
 
-            //    HandleCustomSettings();
-
-            //    HandleTrialAndBlockDefs(verifyOnly);
-            //    while (!TrialAndBlockDefsHandled)
-            //        yield return new WaitForEndOfFrame();
-            //    TrialAndBlockDefsHandled = false;
-
-            //    FindStims();
-            //    while (!StimsHandled)
-            //        yield return new WaitForEndOfFrame();
-
-            //    StimsHandled = false;
-            //}
-
-            //if (verifyOnly)
-            //    yield break;
-
-
-            VerifyTask = new State("VerifyTask");
             SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
             BlockFeedback = new State("BlockFeedback");
             FinishTask = new State("FinishTask");
             RunBlock.AddChildLevel(TrialLevel);
-            AddActiveStates(new List<State> { VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask });
+            AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
 
             TrialLevel.TrialDefType = TrialDefType; //may need to be moved down after new states
             TrialLevel.StimDefType = StimDefType;   //may need to be moved down after new states
@@ -204,52 +177,18 @@ namespace USE_ExperimentTemplate_Task
             });
 
             //VerifyTask State-----------------------------------------------------------------------------------------------------
-            verifyTask_Level.CurrentTask = this;
-            VerifyTask.AddChildLevel(verifyTask_Level);
-            VerifyTask.AddInitializationMethod(() =>
-            {
-                verifyTask_Level.CurrentTask = this;
-                // var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
-                // Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
-                // MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
-                // string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
-                //
-                // GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
-            });
-            // VerifyTask.AddUpdateMethod(() =>
+            // verifyTask_Level.TaskLevel = this;
+            // VerifyTask.AddChildLevel(verifyTask_Level);
+            // VerifyTask.AddInitializationMethod(() =>
             // {
-            //     if (verifyTask_Level.fileParsed)
-            //     {
-            //         Debug.Log("FILE PARSED!!!!!! " + verifyTask_Level.currentFileName.ToLower());
-            //         switch (verifyTask_Level.currentFileName.ToLower())
-            //         {
-            //             case "taskdef":
-            //                 TaskDef = (TaskDef)verifyTask_Level.parsedResult;
-            //                 if (TaskDef.CustomSettings != null)
-            //                 {
-            //                     Debug.Log("would be handling custom settings!");
-            //                     //handle custom settings?
-            //                 }
-            //                 break;
-            //             case "blockdef":
-            //                 BlockDefs = (BlockDef[])verifyTask_Level.parsedResult;
-            //                 break;
-            //             case "trialdef":
-            //                 AllTrialDefs = (TrialDef[])verifyTask_Level.parsedResult;
-            //                 break;
-            //             case "stimdef":
-            //                 StimDef[] importedStimDefs = (StimDef[])verifyTask_Level.parsedResult;
-            //                 AssignStimDefs(importedStimDefs);
-            //                 break;
-            //             default:
-            //                 Debug.LogError("DEFAULT VERIFY TASK SWITCH STATEMENT!");
-            //                 break;
-            //         }
-            //     }
+            //     verifyTask_Level.TaskLevel = this;
             // });
-            VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, SetupTask);
+            //
+            // VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, SetupTask);
             // VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
 
+            SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
+            SetupTask.AddChildLevel(setupTaskLevel);
 
             //SetupTask State-----------------------------------------------------------------------------------------------------
             SetupTask.AddInitializationMethod(() =>
@@ -266,7 +205,7 @@ namespace USE_ExperimentTemplate_Task
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
             });
-            SetupTask.SpecifyTermination(() => true, RunBlock);
+            SetupTask.SpecifyTermination(() => setupTaskLevel.Terminated, RunBlock);
 
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
@@ -466,205 +405,6 @@ namespace USE_ExperimentTemplate_Task
 
 
 
-            //Setup data management
-            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName;
-
-            if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
-            {
-                StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
-            }
-
-            if (TaskName == "GazeCalibration")
-            {
-                //Setup data management
-                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
-                     // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "PreTask_GazeCalibration";
-                
-                else
-                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName + Path.DirectorySeparatorChar + "InTask_GazeCalibration";
-                
-                ConfigFolderName = "GazeCalibration";
-
-            }
-
-
-            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigFolderName}";
-
-            string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
-            BlockData = (BlockData)SessionValues.SessionDataControllers.InstantiateDataController<BlockData>("BlockData", ConfigFolderName, SessionValues.SessionDef.StoreData, subFolderPath);
-            BlockData.taskLevel = this;
-            BlockData.sessionLevel = SessionValues.SessionLevel;
-            BlockData.fileName = filePrefix + "__BlockData.txt";
-
-            subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
-            TrialData = (TrialData)SessionValues.SessionDataControllers.InstantiateDataController<TrialData>("TrialData", ConfigFolderName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-            TrialData.taskLevel = this;
-            TrialData.trialLevel = TrialLevel;
-            TrialData.sessionLevel = SessionValues.SessionLevel;
-
-            TrialLevel.TrialData = TrialData;
-            TrialData.fileName = filePrefix + "__TrialData.txt";
-
-            subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
-            FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", ConfigFolderName, SessionValues.SessionDef.StoreData, TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.taskLevel = this;
-            FrameData.trialLevel = TrialLevel;
-            FrameData.sessionLevel = SessionValues.SessionLevel;
-
-            TrialLevel.FrameData = FrameData;
-            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
-
-            if (SessionValues.SessionDef.EyeTrackerActive)
-            {
-                SessionValues.GazeData.taskLevel = this;
-                SessionValues.GazeData.trialLevel = TrialLevel;
-                SessionValues.GazeData.sessionLevel = SessionValues.SessionLevel;
-                SessionValues.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
-                SessionValues.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
-            }
-            //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
-            //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.taskLevel = this;
-            FrameData.trialLevel = TrialLevel;
-            TrialLevel.FrameData = FrameData;
-            FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
-
-            BlockData.InitDataController();
-            TrialData.InitDataController();
-            FrameData.InitDataController();
-
-            BlockData.ManuallyDefine();
-            FrameData.ManuallyDefine();
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.ManuallyDefine();
-
-            if (SessionValues.SessionDef.EventCodesActive)
-                FrameData.AddEventCodeColumns();
-            if (SessionValues.SessionDef.FlashPanelsActive)
-                FrameData.AddFlashPanelColumns();
-                FrameData.AddFlashPanelColumns();
-
-            //user-defined task control level 
-            DefineControlLevel();
-
-            BlockData.AddStateTimingData(this);
-            StartCoroutine(BlockData.CreateFile());
-            StartCoroutine(FrameData.CreateFile());
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                StartCoroutine(SessionValues.GazeData.CreateFile());
-
-
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), SessionValues.InputManager.transform);
-
-            List<string> fbControllersList = new List<string>();
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FeedbackControllers"))
-                fbControllersList = (List<string>)SessionSettings.Get(TaskName + "_TaskSettings", "FeedbackControllers");
-            int totalTokensNum = 5;
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TotalTokensNum"))
-                totalTokensNum = (int)SessionSettings.Get(TaskName + "_TaskSettings", "TotalTokensNum");
-
-            //GOTTA BE A BETTER WAY TO DO THIS:
-            fbControllers.GetComponent<AudioFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<HaloFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<TokenFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<SliderFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<TouchFBController>().SessionEventCodes = SessionValues.EventCodeManager.SessionEventCodes;
-            
-
-           // TrialLevel.SelectionTracker = SelectionTracker;
-                
-            TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
-            TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
-            TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
-            TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
-            TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
-            TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
-
-            TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
-
-            if (CustomTaskEventCodes != null)
-                TrialLevel.TaskEventCodes = CustomTaskEventCodes;
-
-            Debug.Log("############################");
-            Debug.Log("############################");
-            Debug.Log("############################");
-            Debug.Log("TrialLevel FB Controller : " + TrialLevel.TouchFBController);
-            
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeTracker.Init(FrameData, 0);
-            SessionValues.MouseTracker.Init(FrameData, 0);
-
-
-            if (SessionValues.WebBuild)
-            {
-                if (SessionValues.UsingDefaultConfigs)
-                    TrialLevel.LoadTexturesFromResources();
-                else
-                    TrialLevel.LoadTexturesFromServer();
-            }
-            else
-                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
-
-            //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(TrialData, FrameData); 
-
-
-            bool audioInited = false;
-            foreach (string fbController in fbControllersList)
-            {
-                switch (fbController)
-                {
-                    case "Audio":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
-                            audioInited = true;
-                        }
-                        break; 
-                    
-                    case "Halo":
-                        TrialLevel.HaloFBController.Init(FrameData, SessionValues.EventCodeManager);
-                        break;
-                    
-                    case "Token":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
-                            audioInited = true;
-                        }
-                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController, SessionValues.EventCodeManager);
-                        break;
-                    
-                    case "Slider":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
-                            audioInited = true;
-                        }
-                        TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-                        break;
-                    
-                    default:
-                        Debug.LogWarning(fbController + " is not a valid feedback controller.");
-                        break;
-                }
-            }
-
-            SessionValues.InputManager.SetActive(false);
-            //
-            // TrialLevel.TaskStims = TaskStims;
-            // TrialLevel.PreloadedStims = PreloadedStims;
-            // TrialLevel.PrefabStims = PrefabStims;
-            // TrialLevel.ExternalStims = ExternalStims;
-            // TrialLevel.RuntimeStims = RuntimeStims;
-            // TrialLevel.ConfigUiVariables = ConfigUiVariables;
-
-            TrialLevel.TaskLevel = this;
-            TrialLevel.DefineTrialLevel();
-
-            TaskLevelDefined = true;
 
             // yield return null;
         }
@@ -712,13 +452,6 @@ namespace USE_ExperimentTemplate_Task
                 Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
         }
 
-
-        public static IEnumerator HandleCreateExternalFolder(string configName)
-        {
-            yield return ServerManager.CreateFolder(configName);
-        }
-
-        
         public void ClearActiveTaskHandlers()
         {
             if (SessionValues.SelectionTracker.TaskHandlerNames.Count > 0)

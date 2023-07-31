@@ -169,7 +169,7 @@ public class SetupSession_Level : ControlLevel
     {
         //Gets the task level type using reflection which cannot be done outside an invoked method
         string taskName = (string) SessionValues.SessionDef.TaskMappings[configFolderName];
-        verifyTask_Level.CurrentTask = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+        verifyTask_Level.TaskLevel = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
     }
 
     private void SetDataPaths()

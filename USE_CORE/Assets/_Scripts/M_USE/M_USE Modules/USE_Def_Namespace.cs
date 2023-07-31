@@ -79,7 +79,7 @@ namespace USE_Def_Namespace
         public float? ExternalStimScale;
         public List<string> FeedbackControllers;
         public float TouchFeedbackDuration = 0.3f;
-        public int? TotalTokensNum;
+        public int TotalTokensNum = 5;
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
         public Dictionary<string, string> CustomSettings;

@@ -18,7 +18,7 @@ public class VerifyTask_Level : ControlLevel
     public bool fileParsed;
     public string currentFileName;
     public object parsedResult = null;
-    public ControlLevel_Task_Template CurrentTask;
+    public ControlLevel_Task_Template TaskLevel;
 
 
     public override void DefineControlLevel()
@@ -33,13 +33,13 @@ public class VerifyTask_Level : ControlLevel
         ImportSettings.AddChildLevel(importSettings_Level);
         ImportSettings.AddInitializationMethod(() =>
         {
-            CurrentTask.SpecifyTypes();
+            TaskLevel.SpecifyTypes();
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
-                new SettingsDetails("TaskDef", CurrentTask.TaskDefType),
-                new SettingsDetails("BlockDef", CurrentTask.BlockDefType),
-                new SettingsDetails("TrialDef", CurrentTask.TrialDefType),
-                new SettingsDetails("StimDef", CurrentTask.StimDefType),
+                new SettingsDetails("TaskDef", TaskLevel.TaskDefType),
+                new SettingsDetails("BlockDef", TaskLevel.BlockDefType),
+                new SettingsDetails("TrialDef", TaskLevel.TrialDefType),
+                new SettingsDetails("StimDef", TaskLevel.StimDefType),
                 new SettingsDetails("EventCode", typeof(Dictionary<string, EventCode>)),
                 new SettingsDetails("ConfigUi", typeof(ConfigVarStore)),
             };
@@ -64,45 +64,45 @@ public class VerifyTask_Level : ControlLevel
 
                 if (parsedResult != null)
                 {
-                    if (currentType.Equals(CurrentTask.TaskDefType))
+                    if (currentType.Equals(TaskLevel.TaskDefType))
                     {
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterTask)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});
-                        Debug.Log(CurrentTask.TaskName + " TaskDef imported.");
+                        Debug.Log(TaskLevel.TaskName + " TaskDef imported.");
                     }
-                    else if (currentType.Equals(CurrentTask.BlockDefType))
+                    else if (currentType.Equals(TaskLevel.BlockDefType))
                     {
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterBlock)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});
-                        Debug.Log(CurrentTask.TaskName + " " + CurrentTask.BlockDefs.Length + " BlockDefs imported.");
+                        Debug.Log(TaskLevel.TaskName + " " + TaskLevel.BlockDefs.Length + " BlockDefs imported.");
                     }
-                    else if (currentType.Equals(CurrentTask.TrialDefType))
+                    else if (currentType.Equals(TaskLevel.TrialDefType))
                     {
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterTrial)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});
-                        Debug.Log(CurrentTask.TaskName + " " + CurrentTask.AllTrialDefs.Length + " TrialDefs imported.");
+                        Debug.Log(TaskLevel.TaskName + " " + TaskLevel.AllTrialDefs.Length + " TrialDefs imported.");
                     }
-                    else if (currentType.Equals(CurrentTask.StimDefType))
+                    else if (currentType.Equals(TaskLevel.StimDefType))
                     {
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterStim)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});
-                        Debug.Log(CurrentTask.TaskName + " " + CurrentTask.ExternalStims.stimDefs.Count +
+                        Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ExternalStims.stimDefs.Count +
                                   " External StimDefs imported.");
                     }
                     else if (currentType.Equals(typeof(Dictionary<string, EventCode>)))
                     {
-                        CurrentTask.CustomTaskEventCodes = (Dictionary<string, EventCode>) parsedResult;
-                        Debug.Log(CurrentTask.TaskName + " " + CurrentTask.CustomTaskEventCodes.Count +
+                        TaskLevel.CustomTaskEventCodes = (Dictionary<string, EventCode>) parsedResult;
+                        Debug.Log(TaskLevel.TaskName + " " + TaskLevel.CustomTaskEventCodes.Count +
                                   " Event Codes imported.");
                     }
                     else if (currentType.Equals(typeof(ConfigVarStore)))
                     {
-                        CurrentTask.ConfigUiVariables = (ConfigVarStore) parsedResult;
-                        Debug.Log(CurrentTask.TaskName + " " + CurrentTask.ConfigUiVariables.getAllVariables().Count +
+                        TaskLevel.ConfigUiVariables = (ConfigVarStore) parsedResult;
+                        Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ConfigUiVariables.getAllVariables().Count +
                                   " Config UI Variables imported.");
                     }
                 }
@@ -122,24 +122,24 @@ public class VerifyTask_Level : ControlLevel
 
         HandleTrialAndBlockDefs.AddInitializationMethod(() =>
         {
-            CurrentTask.HandleTrialAndBlockDefs(true);
+            TaskLevel.HandleTrialAndBlockDefs(true);
         });
-        HandleTrialAndBlockDefs.SpecifyTermination(() => CurrentTask.TrialAndBlockDefsHandled, FindStims);
+        HandleTrialAndBlockDefs.SpecifyTermination(() => TaskLevel.TrialAndBlockDefsHandled, FindStims);
 
         FindStims.AddInitializationMethod(() =>
         {
-            Debug.Log("External stims: " + CurrentTask.ExternalStims);
+            Debug.Log("External stims: " + TaskLevel.ExternalStims);
             
-            CurrentTask.TaskStims = new TaskStims();
-            if (CurrentTask.PrefabStims == null)
-                CurrentTask.PrefabStims = new StimGroup("PrefabStims");
-            if (CurrentTask.PreloadedStims == null)
-                CurrentTask.PreloadedStims = new StimGroup("PreloadedStims");
-            if (CurrentTask.ExternalStims == null)
-                CurrentTask.ExternalStims = new StimGroup("ExternalStims");
-            CurrentTask.FindStims();
+            TaskLevel.TaskStims = new TaskStims();
+            if (TaskLevel.PrefabStims == null)
+                TaskLevel.PrefabStims = new StimGroup("PrefabStims");
+            if (TaskLevel.PreloadedStims == null)
+                TaskLevel.PreloadedStims = new StimGroup("PreloadedStims");
+            if (TaskLevel.ExternalStims == null)
+                TaskLevel.ExternalStims = new StimGroup("ExternalStims");
+            TaskLevel.FindStims();
         });
-        FindStims.SpecifyTermination(() => CurrentTask.StimsHandled, () => null);
+        FindStims.SpecifyTermination(() => TaskLevel.StimsHandled, () => null);
     }
 
     public void ContinueToNextSetting()
@@ -155,14 +155,14 @@ public class VerifyTask_Level : ControlLevel
         string pathToFolder = "";
 
         if (SessionValues.UsingDefaultConfigs)
-            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}_DefaultConfigs";
         else if (SessionValues.UsingLocalConfigs)
         {
-            pathToFolder = $"{SessionValues.ConfigFolderPath}{CurrentTask.TaskName}";
+            pathToFolder = $"{SessionValues.ConfigFolderPath}{TaskLevel.TaskName}";
             //pathToFolder = $"{SessionValues.ConfigFolderPath}{Path.DirectorySeparatorChar}{CurrentTask.TaskName}";
         }
         else if (SessionValues.UsingServerConfigs)
-            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}";
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}";
         
         
         if (SessionValues.UsingServerConfigs)
@@ -191,16 +191,16 @@ public class VerifyTask_Level : ControlLevel
         switch (searchString.ToLower())
         {
             case "taskdef":
-                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.TaskDefType;
+                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.TaskDefType;
                 break;
             case "blockdef":
-                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.BlockDefType;
+                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.BlockDefType;
                 break;
             case "trialdef":
-                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.TrialDefType;
+                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.TrialDefType;
                 break;
             case "stimdef":
-                importSettings_Level.SettingsDetails[0].SettingType = CurrentTask.StimDefType;
+                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.StimDefType;
                 break;
             case "eventcode":
                 importSettings_Level.SettingsDetails[0].SettingType = typeof(Dictionary<string, EventCode>); //this correct for event code?
@@ -218,22 +218,22 @@ public class VerifyTask_Level : ControlLevel
     public void SettingsConverterTask<T>(object parsedSettings) where T: TaskDef
     {
         Debug.Log(parsedSettings);
-        CurrentTask.TaskDef = (T) parsedSettings;
-        Debug.Log(CurrentTask.TaskDef);
+        TaskLevel.TaskDef = (T) parsedSettings;
+        Debug.Log(TaskLevel.TaskDef);
     }
     
     public void SettingsConverterBlock<T>(object parsedSettings) where T: BlockDef
     {
-        CurrentTask.BlockDefs = (T[]) parsedSettings;
+        TaskLevel.BlockDefs = (T[]) parsedSettings;
     }
     public void SettingsConverterTrial<T>(object parsedSettings) where T: TrialDef
     {
-        CurrentTask.AllTrialDefs = (T[]) parsedSettings;
+        TaskLevel.AllTrialDefs = (T[]) parsedSettings;
     }
     public void SettingsConverterStim<T>(object parsedSettings) where T: StimDef
     {
         T[] tempStims = (T[])parsedSettings;
         Debug.Log(tempStims[0].FileName);
-        CurrentTask.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
+        TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
 }

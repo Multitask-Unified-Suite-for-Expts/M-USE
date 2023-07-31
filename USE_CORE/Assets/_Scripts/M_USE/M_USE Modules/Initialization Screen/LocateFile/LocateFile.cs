@@ -30,49 +30,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using System;
 
 
 public class LocateFile : MonoBehaviour
 {
-	public List<FileSpec> files;
 	public Dictionary<string, FileSpec> mapFiles = new Dictionary<string, FileSpec>();
-
-	public FileItem prefabFileItem;
-	public Transform containerFileItems;
-
-	//void Start ()
-	//{
-	//	foreach(FileSpec f in files)
-	//	{
-	//		GameObject g = (GameObject) Instantiate(prefabFileItem.gameObject);
-	//		g.transform.SetParent(containerFileItems, false);
-
-	//		FileItem fi = g.GetComponent<FileItem>();
-	//		fi.File = f;
-
-	//		mapFiles.Add(f.name, f);
-
-	//		g.SetActive(true);
-	//	}
-	//}
 
 	public void AddToFilesDict(FileSpec file)
 	{
 		mapFiles.Add(file.name, file);
-	}
-	
+	}	
 	public string GetPath(string keyToFile)
 	{
 		if (mapFiles.ContainsKey(keyToFile))
 			return mapFiles[keyToFile].path;
+		else
+			Debug.LogError("DID NOT FIND A PATH FOR FILE KEY: " + keyToFile);
 		return null;
 	}
-
 	public string FindFilePathInExternalFolder(string keyToFolder, string stringPattern)
 	{
 		string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
@@ -83,11 +61,6 @@ public class LocateFile : MonoBehaviour
 		else
 			Debug.Log("More than one file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
 		return "";
-	}
-
-	internal static string FindFileInFolder(object taskConfigFolder, object p)
-	{
-		throw new NotImplementedException();
 	}
 }
 

@@ -67,10 +67,10 @@ public class FileItem_TMP : MonoBehaviour
     public void Locate()
     {
         #if (!UNITY_WEBGL)
-		if(!File.isFolder)
-			StandaloneFileBrowser.OpenFilePanelAsync("Open File", Text.text, "", false, (string[] paths) => { OnFileOpened(paths); });
-		else
-			StandaloneFileBrowser.OpenFolderPanelAsync("Open File", Text.text, false, (string[] paths) => { OnFileOpened(paths); });
+		    if(!File.isFolder)
+			    StandaloneFileBrowser.OpenFilePanelAsync("Open File", Text.text, "", false, (string[] paths) => { OnFileOpened(paths); });
+		    else
+			    StandaloneFileBrowser.OpenFolderPanelAsync("Open File", Text.text, false, (string[] paths) => { OnFileOpened(paths); });
         #endif
     }
 
@@ -92,77 +92,4 @@ public class FileItem_TMP : MonoBehaviour
         PlayerPrefs.SetString("filepath-" + File.name, path);
         File.path = path;
     }
-}
-
-
-public class FileItem : MonoBehaviour
-{
-	// [HideInInspector]
-	public FileSpec File;
-
-	public Text Label;
-	public InputField InputField_FilePath;
-
-
-	void Start()
-	{
-		if (File != null)
-		{
-			Label.text = File.name;
-			InputField_FilePath.text =  PlayerPrefs.GetString("filepath-" + File.name, "");
-			InputField_FilePath.text = InputField_FilePath.text.Replace("file://", "");
-			InputField_FilePath.text = InputField_FilePath.text.Replace("%20", " ");
-			File.path = InputField_FilePath.text;
-		}
-		InputField_FilePath.onEndEdit.AddListener((text)=>{
-			UpdatePath(text);
-		});
-	}
-
-	public void ManualStart(FileSpec file, InputField inputField)
-	{
-		File = file;
-		InputField_FilePath = inputField;
-
-        if (File != null)
-        {
-            InputField_FilePath.text = PlayerPrefs.GetString("filepath-" + File.name, "");
-            InputField_FilePath.text = InputField_FilePath.text.Replace("file://", "");
-            InputField_FilePath.text = InputField_FilePath.text.Replace("%20", " ");
-            File.path = InputField_FilePath.text;
-        }
-        InputField_FilePath.onEndEdit.AddListener((text) => {
-            UpdatePath(text);
-        });
-    }
-
-
-	public void locate()
-	{
-        #if (!UNITY_WEBGL)
-		    if(!File.isFolder)
-			    StandaloneFileBrowser.OpenFilePanelAsync("Open File", InputField_FilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
-		    else
-			    StandaloneFileBrowser.OpenFolderPanelAsync("Open File", InputField_FilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
-        #endif
-    }
-
-    void OnFileOpened(string[] paths)
-	{
-		if(paths.Length > 0 && paths[0] != "")
-		{
-			var path = paths[0];
-			path = path.Replace("file://", "");
-			path = path.Replace("%20", " ");
-			InputField_FilePath.text = path;
-			UpdatePath(path);
-		}
-	}
-
-	void UpdatePath(string path)
-	{
-		Debug.Log("updated path of file:" + File.name + " to:" + path);
-		PlayerPrefs.SetString("filepath-" + File.name, path);
-		File.path = path;
-	}
 }

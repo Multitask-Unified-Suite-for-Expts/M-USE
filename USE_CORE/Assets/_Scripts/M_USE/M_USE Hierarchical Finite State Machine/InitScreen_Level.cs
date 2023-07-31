@@ -11,7 +11,6 @@ public class InitScreen_Level : ControlLevel
 {
     private GameObject InitScreen_GO;
     private GameObject InitScreenCanvas_GO;
-
     private GameObject StartPanel_GO;
     private GameObject MainPanel_GO;
 
@@ -22,14 +21,8 @@ public class InitScreen_Level : ControlLevel
 
     private GameObject LocalData_GO;
     private GameObject ServerData_GO;
-
     private GameObject LocalConfig_GO;
     private GameObject ServerConfig_GO;
-
-    private GameObject ConnectToServerButton_GO;
-
-    private GameObject ErrorHandling_GO;
-    private GameObject[] GreyOutPanels_Array;
 
     private Toggle LocalConfig_Toggle;
     private Toggle ServerConfig_Toggle;
@@ -37,6 +30,11 @@ public class InitScreen_Level : ControlLevel
     private Toggle LocalData_Toggle;
     private Toggle ServerData_Toggle;
     private Toggle NoData_Toggle;
+
+    private GameObject ConnectToServerButton_GO;
+
+    private GameObject ErrorHandling_GO;
+    private GameObject[] GreyOutPanels_Array;
 
     private AudioSource AudioSource;
     private AudioClip ToggleChange_AudioClip;

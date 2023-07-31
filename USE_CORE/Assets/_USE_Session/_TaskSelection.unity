@@ -984,7 +984,7 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 0
+  CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
@@ -1010,7 +1010,7 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 0
+  CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
@@ -1034,7 +1034,7 @@ MonoBehaviour:
   initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
-  CallDefineLevelAutomatically: 0
+  CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Reflection;
 using ConfigDynamicUI;
+using Tobii.Research.Unity.CodeExamples;
 using UnityEngine;
 using USE_Def_Namespace;
 using USE_ExperimentTemplate_Classes;
@@ -38,11 +41,11 @@ public class VerifyTask_Level : ControlLevel
                 new SettingsDetails("TrialDef", CurrentTask.TrialDefType),
                 new SettingsDetails("StimDef", CurrentTask.StimDefType),
                 new SettingsDetails("EventCode", typeof(Dictionary<string, EventCode>)),
-                new SettingsDetails("ConfigUI", typeof(ConfigVarStore)),
+                new SettingsDetails("ConfigUi", typeof(ConfigVarStore)),
             };
             // SetValuesForLoading("TaskDef");
             
-            importSettings_Level.SettingsDetails[0].FilePath = SetFilePath("TaskDef");
+            importSettings_Level.SettingsDetails[0].FilePath = GetFilePath("TaskDef");
         });
 
         ImportSettings.AddUpdateMethod(() =>
@@ -108,33 +111,13 @@ public class VerifyTask_Level : ControlLevel
                 fileParsed = true;
 
                 if (importSettings_Level.SettingsDetails.Count > 1)
-                    importSettings_Level.SettingsDetails[1].FilePath = SetFilePath(importSettings_Level.SettingsDetails[1].SearchString);
+                    importSettings_Level.SettingsDetails[1].FilePath = GetFilePath(importSettings_Level.SettingsDetails[1].SearchString);
                     
-                // MethodInfo readBlockDefs = GetType().GetMethod(nameof(this.SettingsConverter))
-                //     .MakeGenericMethod(new Type[] { BlockDefType });
-                //
-                // var methodInfo = GetType().GetMethod(nameof(nameof(SettingsConverter)));
-                // if (currentFileName.ToLower().Contains("taskdef"))
-                //     SetValuesForLoading("BlockDef");
-                // else if (currentFileName.ToLower().Contains("blockdef"))
-                //     SetValuesForLoading("TrialDef");
-                // else if (currentFileName.ToLower().Contains("trialdef"))
-                //     SetValuesForLoading("StimDef");
-                // else if (currentFileName.ToLower().Contains("stimdef"))
-                //     SetValuesForLoading("EventCode");
-                // else if (currentFileName.ToLower().Contains("eventcode"))
-                //     SetValuesForLoading("ConfigUi");
-                // else if (currentFileName.ToLower().Contains("configui"))
-                //     Debug.Log("Parsed ConfigUI and no more to parse");
-                // else if (string.IsNullOrEmpty(currentFileName))
-                //     Debug.Log("Attempted to find settings file using search string " + importSettings_Level.currentSettingsDetails.SearchString + "but no corresponding file was found (this may not be a problem if it is not required)");
-                // else
-                //     Debug.LogError($"{currentFileName} has been parsed, but is not a TaskDef, BlockDef, TrialDef, StimDef, EventCode, or ConfigUI.");
 
                 importSettings_Level.importPaused = false;
             }
         });
-        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs, () => Debug.Log("DONE WITH IMPORT SETTINGS STATE!"));
+        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs, () => Debug.Log("ImportSettings state terminated."));
 
         HandleTrialAndBlockDefs.AddInitializationMethod(() =>
         {
@@ -144,6 +127,8 @@ public class VerifyTask_Level : ControlLevel
 
         FindStims.AddInitializationMethod(() =>
         {
+            Debug.Log("External stims: " + CurrentTask.ExternalStims);
+            
             CurrentTask.TaskStims = new TaskStims();
             if (CurrentTask.PrefabStims == null)
                 CurrentTask.PrefabStims = new StimGroup("PrefabStims");
@@ -161,29 +146,43 @@ public class VerifyTask_Level : ControlLevel
         importSettings_Level.importPaused = false;
     }
 
-    private string SetFilePath(string searchString)
+    private string GetFilePath(string searchString)
     {
         Debug.Log("Looking for file with search string " + searchString);
         
-        string pathToFile;
+        string pathToFile = "";
+        string pathToFolder = "";
 
-        if (SessionValues.WebBuild && SessionValues.UsingDefaultConfigs)
-            pathToFile = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
-        else
-            pathToFile = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}"; //test for windows!
-
-        if (SessionValues.ConfigAccessType == "Default" || SessionValues.ConfigAccessType == "Local")
-            pathToFile = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFile, $"*{searchString}*");
-
-        Debug.Log("Found file " + pathToFile);
+        if (SessionValues.UsingDefaultConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
+        else if (SessionValues.UsingLocalConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}{Path.DirectorySeparatorChar}{CurrentTask.TaskName}";
+        else if (SessionValues.UsingServerConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}";
         
+        
+        if (SessionValues.UsingServerConfigs)
+        {
+            StartCoroutine(ServerManager.GetFilePath(pathToFolder, searchString, result =>
+            {
+                if (!string.IsNullOrEmpty(result))
+                    pathToFile = result;
+                else
+                {
+                    Debug.Log("Server file path not found");
+                }
+            }));
+        }
+        else
+            pathToFile = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
+
         return pathToFile;
     }
 
     private void SetValuesForLoading(string searchString)
     {
         importSettings_Level.SettingsDetails[0].SearchString = searchString;
-        SetFilePath(importSettings_Level.SettingsDetails[0].SearchString);
+        GetFilePath(importSettings_Level.SettingsDetails[0].SearchString);
 
         switch (searchString.ToLower())
         {

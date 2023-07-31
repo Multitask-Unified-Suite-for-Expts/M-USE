@@ -78,11 +78,13 @@ namespace USE_Def_Namespace
         public string neutralPatternedColorName;
         public float? ExternalStimScale;
         public List<string> FeedbackControllers;
+        public float TouchFeedbackDuration = 0.3f;
         public int? TotalTokensNum;
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
         public Dictionary<string, string> CustomSettings;
-
+        public Vector3 ButtonPosition = Vector3.zero;
+        public float ButtonScale = 1.2f;
     }
     
     public class BlockDef

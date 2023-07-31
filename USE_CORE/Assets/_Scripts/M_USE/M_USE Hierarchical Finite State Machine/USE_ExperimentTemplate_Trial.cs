@@ -114,6 +114,12 @@ namespace USE_ExperimentTemplate_Trial
         {
             return (T)TaskLevel;
         }
+        
+        
+        public T GetTaskDef<T>() where T: TaskDef
+        {
+            return (T)TaskLevel.TaskDef;
+        }
 
         public Type TrialDefType, StimDefType;
 
@@ -135,7 +141,7 @@ namespace USE_ExperimentTemplate_Trial
                 if (TaskLevel.TaskName != "GazeCalibration")
                 {
                     GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.DefineTaskLevel(false);
+                    GazeCalibrationTaskLevel.DefineTaskLevel();
                     GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);

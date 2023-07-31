@@ -10,7 +10,7 @@ namespace ContinuousRecognition_Namespace
 {
     public class ContinuousRecognition_TaskDef : TaskDef
     {
-
+        public bool MakeStimPopOut;
     }
 
     public class ContinuousRecognition_BlockDef : BlockDef

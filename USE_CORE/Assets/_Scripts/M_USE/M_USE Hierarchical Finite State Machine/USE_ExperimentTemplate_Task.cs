@@ -602,7 +602,7 @@ namespace USE_ExperimentTemplate_Task
                 //TrialLevel.SyncBoxController.EventCodeManager = SessionValues.EventCodeManager;
 
           //  TrialLevel.EventCodeManager = EventCodeManager;
-            TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
+            //TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
 
             if (CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = CustomTaskEventCodes;

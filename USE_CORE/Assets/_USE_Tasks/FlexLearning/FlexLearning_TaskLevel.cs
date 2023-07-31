@@ -47,6 +47,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             ResetBlockVariables();
 
             string contextFilePath;
+
             if (SessionValues.WebBuild)
             {
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}";

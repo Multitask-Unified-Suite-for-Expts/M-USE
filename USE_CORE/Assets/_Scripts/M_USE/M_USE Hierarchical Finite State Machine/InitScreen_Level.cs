@@ -63,7 +63,7 @@ public class InitScreen_Level : ControlLevel
 
         SetGameObjects();
 
-        //SetupInitScreen State-----------------------------------------------------------------------------------------------------------------------------------
+        //Setup InitScreen State-----------------------------------------------------------------------------------------------------------------------------------
         SetupInitScreen.AddInitializationMethod(() =>
         {
             if (SessionValues.WebBuild)
@@ -71,7 +71,7 @@ public class InitScreen_Level : ControlLevel
         });
         SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
-        //InitialScreen State-----------------------------------------------------------------------------------------------------------------------------------
+        //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddInitializationMethod(() => StartPanel_GO.SetActive(true));
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
@@ -79,7 +79,7 @@ public class InitScreen_Level : ControlLevel
             StartPanel_GO.SetActive(false);
         });
 
-        //Get_ALLINFO State-----------------------------------------------------------------------------------------------------------------------------------
+        //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
         CollectInfo.AddInitializationMethod(() =>
         {
             StartCoroutine(UsePlayerPrefsToActivateObjects());

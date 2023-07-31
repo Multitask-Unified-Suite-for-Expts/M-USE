@@ -298,7 +298,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(currentTaskDef.ContextExternalFilePath, ContextName)));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, ContextName)));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

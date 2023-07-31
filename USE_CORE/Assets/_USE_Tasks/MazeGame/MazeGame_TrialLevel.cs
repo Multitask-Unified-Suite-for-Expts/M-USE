@@ -146,8 +146,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                tileTex = LoadPNG(GetContextNestedFilePath(currentTaskDef.ContextExternalFilePath, currentTaskDef.TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(currentTaskDef.ContextExternalFilePath, currentTaskDef.MazeBackgroundTextureName));
+                string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
+                tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTextureName));
             }
 
             if (MazeContainer == null)
@@ -419,7 +420,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 contextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(currentTaskDef.ContextExternalFilePath, "itiImage")));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);

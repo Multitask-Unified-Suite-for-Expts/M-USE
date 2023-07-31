@@ -116,10 +116,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
                 mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-            //else Debug.LogError("Maze key file path settings not defined in the TaskDef");
             if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
                 mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-            //else Debug.LogError("Maze File Path not defined in the TaskDef");
         }
 
         AssignBlockData();

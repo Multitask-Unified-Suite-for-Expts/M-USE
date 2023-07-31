@@ -70,4 +70,5 @@ public class FileSpec
 	public string name;
 	public bool isFolder = false;
 	public string path = "";
+
 }

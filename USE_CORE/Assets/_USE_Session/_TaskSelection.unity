@@ -927,6 +927,7 @@ MonoBehaviour:
   SessionInitScreen: {fileID: 0}
   SessionData: {fileID: 0}
   TaskSelectionSceneName: _TaskSelection
+  ActiveTaskLevels: []
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
   SessionDetails: {fileID: 0}
@@ -1067,23 +1068,6 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  InitialPanel_GO: {fileID: 0}
-  AllInfoPanel_GO: {fileID: 0}
-  ConfirmButtonGO: {fileID: 0}
-  ErrorHandlingGO: {fileID: 0}
-  SubjectIDTextGO: {fileID: 0}
-  SessionIDTextGO: {fileID: 0}
-  ServerURL_GO: {fileID: 0}
-  LocalDataGO: {fileID: 0}
-  ServerDataGO: {fileID: 0}
-  LocalConfigGO: {fileID: 0}
-  ServerConfigGO: {fileID: 0}
-  ConfigType_GO: {fileID: 0}
-  StoreData_GO: {fileID: 0}
-  StoreDataLocations_GO: {fileID: 0}
-  LocalFolderLocations_GO: {fileID: 0}
-  ServerSetup_GO: {fileID: 0}
-  ServerDropdown_GO: {fileID: 0}
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,
@@ -1413,6 +1397,12 @@ MonoBehaviour:
   toggle: {fileID: 0}
   toggle_GO: {fileID: 1794402195}
   playerPrefKey: ServerConfigsToggleValue
+--- !u!1 &1812308324 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2374676794694860249, guid: 792e1de5c8846437a8604141b839538e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2033127974}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1895764640
 GameObject:
   m_ObjectHideFlags: 0
@@ -1815,6 +1805,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: HandleStartSessionButtonPress
       objectReference: {fileID: 0}
+    - target: {fileID: 2590195412010481339, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2590195412010481339, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1812308324}
     - target: {fileID: 2624996253987818505, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size

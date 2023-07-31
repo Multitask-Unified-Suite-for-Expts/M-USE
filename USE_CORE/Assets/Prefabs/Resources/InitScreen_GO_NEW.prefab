@@ -2494,7 +2494,7 @@ GameObject:
   - component: {fileID: 3810861913846524161}
   - component: {fileID: 1755345704201290524}
   m_Layer: 18
-  m_Name: Button_Browse (1)
+  m_Name: LocalConfig_ButtonBrowse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10256,7 +10256,7 @@ GameObject:
   - component: {fileID: 6573617347125456825}
   - component: {fileID: 2590195412010481339}
   m_Layer: 18
-  m_Name: Button_Browse
+  m_Name: LocalData_ButtonBrowse
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

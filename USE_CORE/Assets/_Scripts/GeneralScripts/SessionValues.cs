@@ -195,109 +195,109 @@ public static class SessionValues
         return outputList.ToArray();
     }*/
 
-    private static void AssignFieldValue<T>(string fieldName, string fieldValue, T settingsInstance)
-    {
-        FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-
-        if (propertyInfo != null)
-        {
-            Type propertyType = propertyInfo.PropertyType;
-            propertyInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, propertyType));
-        }
-        else if (fieldInfo != null)
-        {
-            Type fieldType = fieldInfo.FieldType;
-            if (fieldType.Equals(typeof(OrderedDictionary)))
-            {
-                if (StartsOrEndsWithBrackets(fieldValue.Trim()))
-                {
-                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-                }
-                string[] sArray = fieldValue.Split(',');
-                OrderedDictionary pairs = new OrderedDictionary();
-                for (int sCount = 0; sCount < sArray.Length; sCount++)
-                {
-                    sArray[sCount] = sArray[sCount].Replace("\"", "");
-                    sArray[sCount] = sArray[sCount].Trim();
-                    string[] sArray2 = sArray[sCount].Split(':');
-                    pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
-                }
-                fieldInfo.SetValue(settingsInstance, pairs);
-            }
-            else if (fieldType.Equals(typeof(Dictionary<string, string>)))
-            {
-                if (StartsOrEndsWithBrackets(fieldValue))
-                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-                string[] sArray = fieldValue.Split(',');
-                Dictionary<string, string> pairs = new Dictionary<string, string>();
-                for (int sCount = 0; sCount < sArray.Length; sCount++)
-                {
-                    sArray[sCount] = sArray[sCount].Replace("\"", "");
-                    sArray[sCount] = sArray[sCount].Trim();
-                    string[] sArray2 = sArray[sCount].Split(':');
-                    pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
-                }
-                fieldInfo.SetValue(settingsInstance, pairs);
-            }
-            else if (fieldType.Equals(typeof(Vector3[])))
-            {
-                string[][] sArray = (string[][])JsonConvert.DeserializeObject(fieldValue, typeof(string[][]));
-                Vector3[] finalArray = new Vector3[sArray.Length];
-                for (int iVal = 0; iVal < sArray.Length; iVal++)
-                {
-                    finalArray[iVal] = new Vector3(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]), float.Parse(sArray[iVal][2]));
-                }
-                fieldInfo.SetValue(settingsInstance, finalArray);
-            }
-
-            else if (fieldType.Equals(typeof(List<int>)))
-            {
-                if (StartsOrEndsWithBrackets(fieldValue))
-                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-
-                string[] sArray = fieldValue.Split(',');
-                List<int> valuesList = new List<int>();
-
-                for (int sCount = 0; sCount < sArray.Length; sCount++)
-                {
-                    if (int.TryParse(sArray[sCount], out int parsedValue))
-                        valuesList.Add(parsedValue);
-                }
-                fieldInfo.SetValue(settingsInstance, valuesList);
-            }
-
-            else if (fieldType.Equals(typeof(List<string>)))
-            {
-                if (StartsOrEndsWithBrackets(fieldValue))
-                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-                string[] sArray = fieldValue.Split(',');
-                List<string> valuesList = new List<string>();
-                for (int sCount = 0; sCount < sArray.Length; sCount++)
-                {
-                    sArray[sCount] = sArray[sCount].Replace("\"", "");
-                    sArray[sCount] = sArray[sCount].Trim();
-                    valuesList.Add(sArray[sCount]);
-                }
-                fieldInfo.SetValue(settingsInstance, valuesList);
-            }
-
-            else if (fieldType.Equals(typeof(MonitorDetails)))
-            {
-                var deserializedValue = JsonConvert.DeserializeObject<MonitorDetails>(fieldValue);
-                fieldInfo.SetValue(settingsInstance, deserializedValue);
-            }
-            else if (fieldType.Equals(typeof(ScreenDetails)))
-            {
-                var deserializedValue = JsonConvert.DeserializeObject<ScreenDetails>(fieldValue);
-                fieldInfo.SetValue(settingsInstance, deserializedValue);
-            }
-            else
-            {
-                fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
-            }
-        }
-    }
+    // private static void AssignFieldValue<T>(string fieldName, string fieldValue, T settingsInstance)
+    // {
+    //     FieldInfo fieldInfo = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+    //     PropertyInfo propertyInfo = typeof(T).GetProperty(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+    //
+    //     if (propertyInfo != null)
+    //     {
+    //         Type propertyType = propertyInfo.PropertyType;
+    //         propertyInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, propertyType));
+    //     }
+    //     else if (fieldInfo != null)
+    //     {
+    //         Type fieldType = fieldInfo.FieldType;
+    //         if (fieldType.Equals(typeof(OrderedDictionary)))
+    //         {
+    //             if (StartsOrEndsWithBrackets(fieldValue.Trim()))
+    //             {
+    //                 fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+    //             }
+    //             string[] sArray = fieldValue.Split(',');
+    //             OrderedDictionary pairs = new OrderedDictionary();
+    //             for (int sCount = 0; sCount < sArray.Length; sCount++)
+    //             {
+    //                 sArray[sCount] = sArray[sCount].Replace("\"", "");
+    //                 sArray[sCount] = sArray[sCount].Trim();
+    //                 string[] sArray2 = sArray[sCount].Split(':');
+    //                 pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+    //             }
+    //             fieldInfo.SetValue(settingsInstance, pairs);
+    //         }
+    //         else if (fieldType.Equals(typeof(Dictionary<string, string>)))
+    //         {
+    //             if (StartsOrEndsWithBrackets(fieldValue))
+    //                 fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+    //             string[] sArray = fieldValue.Split(',');
+    //             Dictionary<string, string> pairs = new Dictionary<string, string>();
+    //             for (int sCount = 0; sCount < sArray.Length; sCount++)
+    //             {
+    //                 sArray[sCount] = sArray[sCount].Replace("\"", "");
+    //                 sArray[sCount] = sArray[sCount].Trim();
+    //                 string[] sArray2 = sArray[sCount].Split(':');
+    //                 pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+    //             }
+    //             fieldInfo.SetValue(settingsInstance, pairs);
+    //         }
+    //         else if (fieldType.Equals(typeof(Vector3[])))
+    //         {
+    //             string[][] sArray = (string[][])JsonConvert.DeserializeObject(fieldValue, typeof(string[][]));
+    //             Vector3[] finalArray = new Vector3[sArray.Length];
+    //             for (int iVal = 0; iVal < sArray.Length; iVal++)
+    //             {
+    //                 finalArray[iVal] = new Vector3(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]), float.Parse(sArray[iVal][2]));
+    //             }
+    //             fieldInfo.SetValue(settingsInstance, finalArray);
+    //         }
+    //
+    //         else if (fieldType.Equals(typeof(List<int>)))
+    //         {
+    //             if (StartsOrEndsWithBrackets(fieldValue))
+    //                 fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+    //
+    //             string[] sArray = fieldValue.Split(',');
+    //             List<int> valuesList = new List<int>();
+    //
+    //             for (int sCount = 0; sCount < sArray.Length; sCount++)
+    //             {
+    //                 if (int.TryParse(sArray[sCount], out int parsedValue))
+    //                     valuesList.Add(parsedValue);
+    //             }
+    //             fieldInfo.SetValue(settingsInstance, valuesList);
+    //         }
+    //
+    //         else if (fieldType.Equals(typeof(List<string>)))
+    //         {
+    //             if (StartsOrEndsWithBrackets(fieldValue))
+    //                 fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+    //             string[] sArray = fieldValue.Split(',');
+    //             List<string> valuesList = new List<string>();
+    //             for (int sCount = 0; sCount < sArray.Length; sCount++)
+    //             {
+    //                 sArray[sCount] = sArray[sCount].Replace("\"", "");
+    //                 sArray[sCount] = sArray[sCount].Trim();
+    //                 valuesList.Add(sArray[sCount]);
+    //             }
+    //             fieldInfo.SetValue(settingsInstance, valuesList);
+    //         }
+    //
+    //         else if (fieldType.Equals(typeof(MonitorDetails)))
+    //         {
+    //             var deserializedValue = JsonConvert.DeserializeObject<MonitorDetails>(fieldValue);
+    //             fieldInfo.SetValue(settingsInstance, deserializedValue);
+    //         }
+    //         else if (fieldType.Equals(typeof(ScreenDetails)))
+    //         {
+    //             var deserializedValue = JsonConvert.DeserializeObject<ScreenDetails>(fieldValue);
+    //             fieldInfo.SetValue(settingsInstance, deserializedValue);
+    //         }
+    //         else
+    //         {
+    //             fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
+    //         }
+    //     }
+    // }
 
     public static bool StartsOrEndsWithBrackets(string s)
     {

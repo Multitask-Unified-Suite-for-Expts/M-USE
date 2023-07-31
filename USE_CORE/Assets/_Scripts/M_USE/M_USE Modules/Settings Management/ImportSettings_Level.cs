@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +12,7 @@ using USE_DisplayManagement;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Session;
 using USE_States;
+using Debug = UnityEngine.Debug;
 
 public class ImportSettings_Level : ControlLevel
 {
@@ -116,7 +118,7 @@ public class ImportSettings_Level : ControlLevel
 
     private void ConvertStringToSettings()
     {
-        if (currentSettingsDetails.SettingParsingStyle == "Array")
+        if (currentSettingsDetails.SettingParsingStyle.ToLower() == "array")
         {
             char delimiter = '\t';
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_Array));
@@ -124,14 +126,14 @@ public class ImportSettings_Level : ControlLevel
             object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, delimiter });
             parsedResult = result;
         }
-        else if (currentSettingsDetails.SettingParsingStyle == "JSON")
+        else if (currentSettingsDetails.SettingParsingStyle.ToLower() == "json")
         {
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_JSON));
             MethodInfo ConvertTextToSettings_SingleTypeJSON_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString});
             parsedResult = result;
         }
-        else if (currentSettingsDetails.SettingParsingStyle == "SingleType")
+        else if (currentSettingsDetails.SettingParsingStyle.ToLower() == "singletype")
         {
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleType));
             MethodInfo ConvertTextToSettings_SingleTypeDelimited_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
@@ -202,8 +204,6 @@ public class ImportSettings_Level : ControlLevel
                                     + typeof(T) + ".");
             }
         }
-
-        FieldInfo[] fieldInfos = typeof(T).GetFields();
 
         for (int iLine = 1; iLine < lines.Length; iLine++)
         {
@@ -327,8 +327,11 @@ public class ImportSettings_Level : ControlLevel
                         throw new Exception(e.Message + "\t" + e.StackTrace);
                     }
                 }
-            }
+            settingsArray[iLine - 1] = settingsInstance;
+        }
 
+        Debug.Log("SUPPOSEDLY PARSED: " + settingsArray);
+        Debug.Log("ITEM 1: " + settingsArray[0]);
         return settingsArray;
 
     }

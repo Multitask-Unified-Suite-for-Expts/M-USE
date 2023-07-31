@@ -129,6 +129,34 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
     }
 
+
+    public static IEnumerator GetFilePath(string folderPath, string searchString, Action<string> callback)
+    {
+        string url = $"{ServerURL}/getFilePath.php?folderPath={folderPath}&searchString={searchString}";
+
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        var operation = request.SendWebRequest();
+
+        while (!operation.isDone)
+            yield return null;
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string result = request.downloadHandler.text;
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            if (result == "File not found")
+                callback?.Invoke(null);
+            else
+                callback?.Invoke(result);
+        }
+        else
+        {
+            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+            callback?.Invoke(null);
+        }
+    }
+
+
     public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string[]> callback)
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";

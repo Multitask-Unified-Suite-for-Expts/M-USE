@@ -33,16 +33,11 @@ SOFTWARE.
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using USE_UI;
+
 
 public class InitScreen : MonoBehaviour
 {
-    public GameObject[] disableOnStart;
-    public GameObject[] enableOnStart;
-    public GameObject[] disableOnConfirm;
-    public GameObject[] enableOnConfirm;
-    [HideInInspector] 
-    public bool Confirmed;
+    [HideInInspector] public bool Confirmed;
 
     public event System.Action OnConfirm, OnLoadSettings;
 
@@ -61,39 +56,35 @@ public class InitScreen : MonoBehaviour
 
     void Start()
     {
-        folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
-        dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
+        //folderDropdown = dropdownGO.GetComponent<FolderDropdown>();
+        //if (folderDropdown == null)
+        //    Debug.Log("FOLDER DROPDOWN NULL!");
+        //dropdown = dropdownGO.GetComponent<TMP_Dropdown>();
+        //if (dropdown == null)
+        //    Debug.Log("DROPDOWN NULL!");
 
-        foreach (GameObject g in disableOnStart)
-            g.SetActive(false);
-        foreach (GameObject g in enableOnStart)
-            g.SetActive(true);
-
-
-        if (SessionValues.WebBuild)
-        {
-            StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
-
-            SetConfirmButtonPosition();
-
-            confirmButtonGO.SetActive(true);
-            webBuildChildrenGO.SetActive(true);
-            buttonsParentGO.SetActive(false);
-            initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-        }
-        else
-        {
-            webBuildChildrenGO.SetActive(false);
-            locateFileGO.SetActive(true); //comment out if want them to pick between default and local configs
-            //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
-            //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
-        }
+        //if (SessionValues.WebBuild)
+        //{
+        //    StartCoroutine(ServerManager.GetSessionConfigFolders(folders => folderDropdown.SetFolders(folders)));
+        //    SetConfirmButtonPosition();
+        //    confirmButtonGO.SetActive(true);
+        //    webBuildChildrenGO.SetActive(true);
+        //    buttonsParentGO.SetActive(false);
+        //    initScreenCanvasGO.GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+        //}
+        //else
+        //{
+        //    webBuildChildrenGO.SetActive(false);
+        //    locateFileGO.SetActive(true); //comment out if want them to pick between default and local configs
+        //    //confirmButtonGO.SetActive(false); //uncomment if want them to pick between default and local configs
+        //    //buttonsParentGO.SetActive(true); //uncomment if want them to pick between default and local configs
+        //}
     }
 
-    private void Update()
-    {
-        SetConfirmButtonPosition();
-    }
+    //private void Update()
+    //{
+    //    SetConfirmButtonPosition();
+    //}
 
     public void Confirm()
     {
@@ -114,19 +105,11 @@ public class InitScreen : MonoBehaviour
 
         if (OnLoadSettings != null)
             OnLoadSettings();
-
-        foreach (GameObject g in disableOnConfirm)
-            g.SetActive(false);
-        foreach (GameObject g in enableOnConfirm)
-            g.SetActive(true);
-
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
-
         Confirmed = true;
-        if(OnConfirm != null)
+        if (OnConfirm != null)
             OnConfirm();
- 
         gameObject.SetActive(false);
         yield return 0;
     }

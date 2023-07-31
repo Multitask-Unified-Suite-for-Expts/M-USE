@@ -19,10 +19,19 @@ using USE_UI;
 
 public static class SessionValues
 {
-    public static bool WebBuild;
-    public static bool UsingDefaultConfigs;
+    public static bool WebBuild; //can eventually delete once implement new initscreen collecting responses;
     public static bool Using2DStim;
-    
+
+    //Info Collected from Init Screen Panels:
+    public static string SubjectID;
+    public static string SessionID;
+    public static bool UsingDefaultConfigs;
+    public static bool UsingLocalConfigs;
+    public static bool UsingServerConfigs;
+    public static bool StoringDataLocally;
+    public static bool StoringDataOnServer;
+
+
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
@@ -35,8 +44,8 @@ public static class SessionValues
     public static string SessionDataPath;
     public static string TaskSelectionDataPath;
     public static string FilePrefix;
-    public static string SubjectID;
-    public static string SessionID;
+
+
     public static SerialRecvData SerialRecvData;
     public static SerialSentData SerialSentData;
     public static GazeData GazeData;

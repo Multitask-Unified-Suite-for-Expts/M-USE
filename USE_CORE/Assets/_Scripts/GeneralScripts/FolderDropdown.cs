@@ -5,13 +5,13 @@ using TMPro;
 
 public class FolderDropdown : MonoBehaviour
 {
-    private TMP_Dropdown dropdown;
+    public TMP_Dropdown dropdown;
 
     private void Start()
     {
         dropdown = GetComponent<TMP_Dropdown>();
         if (dropdown == null)
-            Debug.Log("DROPDOWN IS NULL!");
+            Debug.LogError("The FolderDropdown's dropdown component is null!");
     }
 
     public void SetFolders(List<string> sessionConfigFolders)

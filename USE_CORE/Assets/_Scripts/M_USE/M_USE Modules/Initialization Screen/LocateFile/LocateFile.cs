@@ -36,6 +36,7 @@ using UnityEngine;
 using System.IO;
 using System;
 
+
 public class LocateFile : MonoBehaviour
 {
 	public List<FileSpec> files;
@@ -52,7 +53,7 @@ public class LocateFile : MonoBehaviour
 			g.transform.SetParent(containerFileItems, false);
 
 			FileItem fi = g.GetComponent<FileItem>();
-			fi.file = f;
+			fi.File = f;
 
 			mapFiles.Add(f.name, f);
 

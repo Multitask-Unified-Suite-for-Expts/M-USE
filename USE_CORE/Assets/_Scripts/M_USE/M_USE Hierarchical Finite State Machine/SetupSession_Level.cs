@@ -27,17 +27,16 @@ public class SetupSession_Level : ControlLevel
     public SessionData SessionData;
     public FrameData FrameData;
     public ControlLevel_Session_Template SessionLevel;
-
     private ControlLevel_Task_Template taskLevel;
+
+
     public override void DefineControlLevel()
     {
         ImportSessionSettings = new State("ImportSessionSettings");
         CreateDataFolder = new State("CreateDataFolder");
         LoadTaskScene = new State("LoadTaskScene");
         VerifyTask = new State("VerifyTask");
-        AddActiveStates(new List<State> {
-            ImportSessionSettings, CreateDataFolder, LoadTaskScene, VerifyTask
-        });
+        AddActiveStates(new List<State> { ImportSessionSettings, CreateDataFolder, LoadTaskScene, VerifyTask });
         
         // importSettings_Level.DefineControlLevel();
         importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
@@ -59,10 +58,9 @@ public class SetupSession_Level : ControlLevel
         });
         ImportSessionSettings.AddUpdateMethod(() =>
             {
-            
                 if (importSettings_Level.fileParsed)
                 {
-                    Debug.Log("FILE PARSED! SEARCH STRING: " + importSettings_Level.SettingsDetails[0].SearchString);
+                    Debug.Log(importSettings_Level.SettingsDetails[0].SearchString + " PARSED!");
             
                     if (importSettings_Level.SettingsDetails[0].SearchString == "SessionConfig") //just parsed sessionconfig
                     {
@@ -78,8 +76,7 @@ public class SetupSession_Level : ControlLevel
                             if (!String.IsNullOrEmpty(eventCodeFileString))
                                 importSettings_Level.SettingsDetails[1].FilePath = eventCodeFileString;
                             else
-                                Debug.Log(
-                                    "Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
+                                Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
                         }
                     }
                     else if (importSettings_Level.SettingsDetails[0].SearchString == "EventCode") //just parsed eventcodeconfig
@@ -211,20 +208,20 @@ public class SetupSession_Level : ControlLevel
         {
             if (SessionValues.UsingDefaultConfigs)
             {
-                SessionValues.ConfigAccessType = "Default";
-                SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+                //SessionValues.ConfigAccessType = "Default"; //SETTING IN INIT SCREEN LEVEL NOW!
+                //SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs"; //SETTING IN INIT SCREEN LEVEL NOW!
                 WriteSessionConfigsToPersistantDataPath();
             }
             else //Using Server Configs:
             {
-                SessionValues.ConfigAccessType = "Server";
+                //SessionValues.ConfigAccessType = "Server";
                 SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
             }
         }
         else //Normal Build:
         {
-            SessionValues.ConfigAccessType = "Local";
-            SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
+            //SessionValues.ConfigAccessType = "Local"; //SETTING IN INIT SCREEN LEVEL NOW!
+            //SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder"); //SETTING IN INIT SCREEN LEVEL NOW!
         }
     }
 

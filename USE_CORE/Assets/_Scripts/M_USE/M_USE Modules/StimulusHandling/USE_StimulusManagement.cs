@@ -337,9 +337,7 @@ namespace USE_StimulusManagement
                 }
 
 				callback?.Invoke(StimGameObject);
-
             }
-            //return StimGameObject;
         }
 
 

@@ -8,9 +8,9 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
+    public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
-    private static readonly string RootDataFolder = "DATA"; //will move to server config
+    public static string RootDataFolder = "DATA"; //They specify path on new init screen
     private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
@@ -20,8 +20,8 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    private static readonly string RootConfigFolder = "CONFIGS"; //will move to server config
-    private static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
+    public static string RootConfigFolder = "CONFIGS"; //Marcus wants us to hardcode it. TELL THEM TO NAME FOLDER CONFIGS!
+    public static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     public static string SessionConfigFolderPath
     {
         get
@@ -34,6 +34,25 @@ public static class ServerManager //Used with the PHP scripts
 
     public static bool SessionDataFolderCreated; //used for logWriter
 
+
+    public static IEnumerator TestServerConnection(Action<bool> callback)
+    {
+        string url = $"{ServerURL}/testConnection.php";
+
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Server connection test successful!");
+            callback?.Invoke(true);
+        }
+        else
+        {
+            Debug.Log($"Server connection test failed. Error: {request.error}");
+            callback?.Invoke(false);
+        }
+    }
 
     public static IEnumerator CreateFolder(string folderPath)
     {

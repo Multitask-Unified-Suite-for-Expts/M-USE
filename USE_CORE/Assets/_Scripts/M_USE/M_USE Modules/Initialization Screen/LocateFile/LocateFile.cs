@@ -45,20 +45,25 @@ public class LocateFile : MonoBehaviour
 	public FileItem prefabFileItem;
 	public Transform containerFileItems;
 
-	void Start ()
+	//void Start ()
+	//{
+	//	foreach(FileSpec f in files)
+	//	{
+	//		GameObject g = (GameObject) Instantiate(prefabFileItem.gameObject);
+	//		g.transform.SetParent(containerFileItems, false);
+
+	//		FileItem fi = g.GetComponent<FileItem>();
+	//		fi.File = f;
+
+	//		mapFiles.Add(f.name, f);
+
+	//		g.SetActive(true);
+	//	}
+	//}
+
+	public void AddToFilesDict(FileSpec file)
 	{
-		foreach(FileSpec f in files)
-		{
-			GameObject g = (GameObject) Instantiate(prefabFileItem.gameObject);
-			g.transform.SetParent(containerFileItems, false);
-
-			FileItem fi = g.GetComponent<FileItem>();
-			fi.File = f;
-
-			mapFiles.Add(f.name, f);
-
-			g.SetActive(true);
-		}
+		mapFiles.Add(file.name, file);
 	}
 	
 	public string GetPath(string keyToFile)

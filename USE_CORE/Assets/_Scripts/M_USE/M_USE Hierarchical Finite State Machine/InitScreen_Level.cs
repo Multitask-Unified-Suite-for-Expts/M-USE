@@ -113,23 +113,10 @@ public class InitScreen_Level : ControlLevel
         {
             ConfirmButtonPressed = false;
 
-            //Set SubjectID and SessionID:
             SessionValues.SubjectID = GetSubjectID();
             SessionValues.SessionID = GetSessionID();
 
-            //Set the server config folder with what they selected in the server dropdown:
-            if (ServerConfigToggle.isOn)
-            {
-                string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
-                ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
-            }
-
-            if (ServerDataToggle.isOn)
-                ServerManager.RootDataFolder = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>().text;
-            
-
             SetConfigInfo();
-
             SetDataInfo();
 
             MainPanel_GO.SetActive(false);
@@ -211,12 +198,14 @@ public class InitScreen_Level : ControlLevel
         if (LocalDataToggle.isOn)
         {
             SessionValues.StoringDataLocally = true;
-            //SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
-            SessionValues.SessionDataPath = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>().text;
+            SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
+            //SessionValues.SessionDataPath = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>().text;
         }
         else if (ServerDataToggle.isOn)
+        {
             SessionValues.StoringDataOnServer = true;
-        //the else is Not Storing Data, so dont need to set anything
+            ServerManager.RootDataFolder = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>().text;
+        }
     }
 
     private void SetConfigInfo()
@@ -231,13 +220,16 @@ public class InitScreen_Level : ControlLevel
         {
             SessionValues.UsingLocalConfigs = true;
             SessionValues.ConfigAccessType = "Local";
-            SessionValues.ConfigFolderPath = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>().text;
-            //SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
+            //SessionValues.ConfigFolderPath = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>().text;
+            SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
+            Debug.Log("CONFIG: " + SessionValues.ConfigFolderPath);
         }
         else if (ServerConfigToggle.isOn)
         {
             SessionValues.UsingServerConfigs = true;
             SessionValues.ConfigAccessType = "Server";
+            string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
+            ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
         }
         else //default config toggle is on
         {
@@ -384,11 +376,13 @@ public class InitScreen_Level : ControlLevel
         ServerConfigGO = GameObject.Find("ServerConfig_GO");
         ServerConfigGO.SetActive(false);
 
+        SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
         FileSpec configFileSpec = new FileSpec();
         configFileSpec.name = "Config Folder";
         configFileSpec.isFolder = true;
+        SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
         TMP_InputField configInputField = LocalConfigGO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfigGO.AddComponent<FileItem_TMP>();
         TextMeshProUGUI configText = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>();
@@ -398,6 +392,7 @@ public class InitScreen_Level : ControlLevel
         FileSpec dataFileSpec = new FileSpec();
         dataFileSpec.name = "Data Folder";
         dataFileSpec.isFolder = true;
+        SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
         TMP_InputField dataInputField = LocalDataGO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalDataGO.AddComponent<FileItem_TMP>();
         TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();

@@ -132,11 +132,7 @@ namespace USE_ExperimentTemplate_Session
 
             SetDisplayController();
 
-            if(SessionValues.UsingServerConfigs)
-            {
-
-            }
-
+            SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             // importSettings_Level.SessionLevel = this;

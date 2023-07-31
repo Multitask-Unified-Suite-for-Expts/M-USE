@@ -1,4 +1,4 @@
 List<string>	FeedbackControllers	["Audio", "Token"]
-Vector3	ButtonPosition	(0, 0, 0)
-float	ButtonScale	1.2
+Vector3	StartButtonPosition	(0, 0, 0)
+float	StartButtonScale	1.2
 float	TouchFeedbackDuration	0.3

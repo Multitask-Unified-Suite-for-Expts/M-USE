@@ -9,54 +9,39 @@ using System.Collections;
 
 public class InitScreen_Level : ControlLevel
 {
-    private GameObject InitScreenGO;
-    private GameObject InitScreenCanvasGO;
+    private GameObject InitScreen_GO;
+    private GameObject InitScreenCanvas_GO;
 
-    public GameObject StartPanel_GO;
-    public GameObject MainPanel_GO;
+    private GameObject StartPanel_GO;
+    private GameObject MainPanel_GO;
 
-    public GameObject ConfirmButtonGO;
+    private TextMeshProUGUI SubjectID_Text;
+    private TextMeshProUGUI SessionID_Text;
+    private TextMeshProUGUI ServerData_Text;
+    private TextMeshProUGUI LocalData_Text;
 
-    public GameObject ErrorHandlingGO;
+    private GameObject LocalData_GO;
+    private GameObject ServerData_GO;
 
-    public GameObject SubjectIDTextGO;
-    public GameObject SessionIDTextGO;
-    public GameObject ServerDataTextGO;
-    public GameObject LocalDataTextGO;
-    public GameObject LocalConfigTextGO;
+    private GameObject LocalConfig_GO;
+    private GameObject ServerConfig_GO;
 
-    public GameObject ServerURL_GO;
+    private GameObject ConnectToServerButton_GO;
 
-    public GameObject LocalDataGO;
-    public GameObject ServerDataGO;
-
-    public GameObject LocalConfigGO;
-    public GameObject ServerConfigGO;
-
-    public GameObject ConnectButton;
-
+    private GameObject ErrorHandling_GO;
     private GameObject[] GreyOutPanels_Array;
 
-    public GameObject ConfigType_GO;
-    public GameObject StoreData_GO;
-    public GameObject StoreDataLocations_GO;
-    public GameObject LocalFolderLocations_GO;
-    public GameObject ServerSetup_GO;
-    public GameObject ServerDropdown_GO;
+    private Toggle LocalConfig_Toggle;
+    private Toggle ServerConfig_Toggle;
+    private Toggle DefaultConfig_Toggle;
+    private Toggle LocalData_Toggle;
+    private Toggle ServerData_Toggle;
+    private Toggle NoData_Toggle;
 
     private AudioSource AudioSource;
-    private AudioClip Continue_AudioClip;
+    private AudioClip ToggleChange_AudioClip;
     private AudioClip Error_AudioClip;
-
-    private bool ConfirmButtonPressed;
-
-    private Toggle LocalConfigToggle;
-    private Toggle ServerConfigToggle;
-    private Toggle DefaultConfigToggle;
-
-    private Toggle LocalDataToggle;
-    private Toggle ServerDataToggle;
-    private Toggle NoDataToggle;
+    private AudioClip Confirm_AudioClip;
 
     private State SetupInitScreen;
     private State StartScreen;
@@ -64,6 +49,8 @@ public class InitScreen_Level : ControlLevel
 
     private FolderDropdown FolderDropdown;
 
+    private bool ValuesLoaded;
+    private bool ConfirmButtonPressed;
     private bool ConnectedToServer;
 
     private string ErrorType;
@@ -103,10 +90,10 @@ public class InitScreen_Level : ControlLevel
         });
         CollectInfo.AddUpdateMethod(() =>
         {
-            if (ErrorHandlingGO.activeInHierarchy)
+            if (ErrorHandling_GO.activeInHierarchy)
             {
                 if(ErrorHandled())
-                    ErrorHandlingGO.SetActive(false);
+                    ErrorHandling_GO.SetActive(false);
             }
         });
         CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
@@ -120,7 +107,7 @@ public class InitScreen_Level : ControlLevel
             SetDataInfo();
 
             MainPanel_GO.SetActive(false);
-            InitScreenCanvasGO.SetActive(false); //turn off init canvas since last state.
+            InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
         });
 
     }
@@ -129,37 +116,39 @@ public class InitScreen_Level : ControlLevel
     {
         yield return new WaitForEndOfFrame(); //Have to wait a frame so that the toggle's can load their IsOn value from PlayerPrefs during their Start() method of ToggleManager.cs
 
-        if(LocalConfigToggle.isOn)
+        if(LocalConfig_Toggle.isOn)
         {
-            LocalConfigGO.SetActive(true);
-            ServerConfigGO.SetActive(false);
+            LocalConfig_GO.SetActive(true);
+            ServerConfig_GO.SetActive(false);
         }
-        else if(ServerConfigToggle.isOn)
+        else if(ServerConfig_Toggle.isOn)
         {
-            ServerConfigGO.SetActive(true);
-            LocalConfigGO.SetActive(false);
-        }
-
-        if (LocalDataToggle.isOn)
-        {
-            LocalDataGO.SetActive(true);
-            ServerDataGO.SetActive(false);
-        }
-        else if(ServerDataToggle.isOn)
-        {
-            ServerDataGO.SetActive(true);
-            LocalDataGO.SetActive(false);
+            ServerConfig_GO.SetActive(true);
+            LocalConfig_GO.SetActive(false);
         }
 
+        if (LocalData_Toggle.isOn)
+        {
+            LocalData_GO.SetActive(true);
+            ServerData_GO.SetActive(false);
+        }
+        else if(ServerData_Toggle.isOn)
+        {
+            ServerData_GO.SetActive(true);
+            LocalData_GO.SetActive(false);
+        }
 
-        if (!ServerConfigToggle.isOn && !ServerDataToggle.isOn)
+
+        if (!ServerConfig_Toggle.isOn && !ServerData_Toggle.isOn)
             GreyOutPanels_Array[0].SetActive(true);
 
-        if(NoDataToggle.isOn)
+        if(NoData_Toggle.isOn)
             GreyOutPanels_Array[1].SetActive(true);
 
-        if(DefaultConfigToggle.isOn)
+        if(DefaultConfig_Toggle.isOn)
             GreyOutPanels_Array[2].SetActive(true);
+
+        ValuesLoaded = true;
     }
 
     private bool ErrorHandled()
@@ -171,19 +160,19 @@ public class InitScreen_Level : ControlLevel
                     return true;
                 break;
             case "EmptyConfigToggle":
-                if (DefaultConfigToggle.isOn || LocalConfigToggle.isOn || ServerConfigToggle.isOn)
+                if (DefaultConfig_Toggle.isOn || LocalConfig_Toggle.isOn || ServerConfig_Toggle.isOn)
                     return true;
                 break;
             case "EmptyDataToggle":
-                if (LocalDataToggle.isOn || ServerDataToggle.isOn || NoDataToggle.isOn)
+                if (LocalData_Toggle.isOn || ServerData_Toggle.isOn || NoData_Toggle.isOn)
                     return true;
                 break;
             case "NotConnectedToServer":
-                if((ServerConfigToggle.isOn || ServerDataToggle.isOn) && ConnectedToServer)
+                if((ServerConfig_Toggle.isOn || ServerData_Toggle.isOn) && ConnectedToServer)
                     return true;
                 break;
             case "EmptyDataFolder":
-                if (!NoDataToggle.isOn && GetDataValue().Length > 0)
+                if (!NoData_Toggle.isOn && GetDataValue().Length > 0)
                     return true;
                 break;
             default:
@@ -195,13 +184,13 @@ public class InitScreen_Level : ControlLevel
 
     private void SetDataInfo()
     {
-        if (LocalDataToggle.isOn)
+        if (LocalData_Toggle.isOn)
         {
             SessionValues.StoringDataLocally = true;
             SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
             //SessionValues.SessionDataPath = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>().text;
         }
-        else if (ServerDataToggle.isOn)
+        else if (ServerData_Toggle.isOn)
         {
             SessionValues.StoringDataOnServer = true;
             ServerManager.RootDataFolder = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>().text;
@@ -210,20 +199,19 @@ public class InitScreen_Level : ControlLevel
 
     private void SetConfigInfo()
     {
-        if(!LocalConfigToggle.isOn && !ServerConfigToggle.isOn && !DefaultConfigToggle.isOn)
+        if(!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn)
         {
             Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
             return;
         }
 
-        if (LocalConfigToggle.isOn)
+        if (LocalConfig_Toggle.isOn)
         {
             SessionValues.UsingLocalConfigs = true;
             SessionValues.ConfigAccessType = "Local";
-            //SessionValues.ConfigFolderPath = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>().text;
             SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
         }
-        else if (ServerConfigToggle.isOn)
+        else if (ServerConfig_Toggle.isOn)
         {
             SessionValues.UsingServerConfigs = true;
             SessionValues.ConfigAccessType = "Server";
@@ -238,116 +226,103 @@ public class InitScreen_Level : ControlLevel
         }
     }
 
-    public void HandleToggleChange()
+    private void HandleConfigToggle(GameObject selectedGO)
     {
-        PlayPositiveAudio();
+        if (selectedGO == LocalConfig_Toggle.gameObject && LocalConfig_Toggle.isOn)
+        {
+            DefaultConfig_Toggle.isOn = false;
+            ServerConfig_Toggle.isOn = false;
+            GreyOutPanels_Array[0].SetActive(!ServerData_Toggle.isOn);
+            LocalConfig_GO.SetActive(true);
+            ServerConfig_GO.SetActive(false);
+            GreyOutPanels_Array[2].SetActive(false);   
+        }
+        else if (selectedGO == ServerConfig_Toggle.gameObject && ServerData_Toggle.isOn)
+        {
+            DefaultConfig_Toggle.isOn = false;
+            LocalConfig_Toggle.isOn = false;
+            GreyOutPanels_Array[0].SetActive(false);
+            ServerConfig_GO.SetActive(true);
+            LocalConfig_GO.SetActive(false);
+            GreyOutPanels_Array[2].SetActive(false);
+            if (ConnectedToServer)
+                PopulateServerDropdown();
+        }
+        else if (selectedGO == DefaultConfig_Toggle.gameObject && DefaultConfig_Toggle.isOn)
+        {
+            LocalConfig_Toggle.isOn = false;
+            ServerConfig_Toggle.isOn = false;
+            GreyOutPanels_Array[0].SetActive(!ServerData_Toggle.isOn);
+            GreyOutPanels_Array[2].SetActive(true);   
+        }
+    }
+
+    private void HandleDataToggle(GameObject selectedGO)
+    {
+        if (selectedGO == LocalData_Toggle.gameObject && LocalData_Toggle.isOn)
+        {
+            ServerData_Toggle.isOn = false;
+            NoData_Toggle.isOn = false;
+            GreyOutPanels_Array[0].SetActive(!ServerConfig_Toggle.isOn);
+            LocalData_GO.SetActive(true);
+            ServerData_GO.SetActive(false);
+            GreyOutPanels_Array[1].SetActive(false);   
+        }
+        else if (selectedGO == ServerData_Toggle.gameObject && ServerData_Toggle.isOn)
+        {
+            LocalData_Toggle.isOn = false;
+            NoData_Toggle.isOn = false;
+            GreyOutPanels_Array[0].SetActive(false);
+            ServerData_GO.SetActive(true);
+            LocalData_GO.SetActive(false);
+            GreyOutPanels_Array[1].SetActive(false);
+            
+        }
+        else if (selectedGO == NoData_Toggle.gameObject && NoData_Toggle.isOn)
+        {
+            ServerData_Toggle.isOn = false;
+            LocalData_Toggle.isOn = false;
+            GreyOutPanels_Array[0].SetActive(!ServerConfig_Toggle.isOn);
+            GreyOutPanels_Array[1].SetActive(true);   
+        }
+    }
+
+    private void HandleToggleChange()
+    {
+        if(ValuesLoaded)
+            PlayToggleAudio();
+
         GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 
-        if(selectedGO.name.ToLower().Contains("config"))
-        {
-            if(selectedGO == LocalConfigToggle.gameObject)
-            {
-                if (LocalConfigToggle.isOn)
-                {
-                    DefaultConfigToggle.isOn = false;
-                    ServerConfigToggle.isOn = false;
-                    GreyOutPanels_Array[0].SetActive(!ServerDataToggle.isOn);
-                    LocalConfigGO.SetActive(true);
-                    ServerConfigGO.SetActive(false);
-                    GreyOutPanels_Array[2].SetActive(false);
-                }
-            }
-            else if (selectedGO == ServerConfigToggle.gameObject)
-            {
-                if(ServerConfigToggle.isOn)
-                {
-                    DefaultConfigToggle.isOn = false;
-                    LocalConfigToggle.isOn = false;
-                    GreyOutPanels_Array[0].SetActive(false);
-                    ServerConfigGO.SetActive(true);
-                    LocalConfigGO.SetActive(false);
-                    GreyOutPanels_Array[2].SetActive(false);
+        if (selectedGO.name.ToLower().Contains("config"))
+            HandleConfigToggle(selectedGO);
 
-                    //if already connected to server, go load the session configs and populate dropdown:
-                    if (ConnectedToServer)
-                        PopulateServerDropdown();
-                }
-            }
-            else if (selectedGO == DefaultConfigToggle.gameObject)
-            {
-                if(DefaultConfigToggle.isOn)
-                {
-                    LocalConfigToggle.isOn = false;
-                    ServerConfigToggle.isOn = false;
-                    GreyOutPanels_Array[0].SetActive(!ServerDataToggle.isOn);
-                    GreyOutPanels_Array[2].SetActive(true);                  
-                }
-            }
-        }
-
-        if(selectedGO.name.ToLower().Contains("data"))
-        {
-            if (selectedGO == LocalDataToggle.gameObject)
-            {
-                if(LocalDataToggle.isOn)
-                {
-                    ServerDataToggle.isOn = false;
-                    NoDataToggle.isOn = false;
-                    GreyOutPanels_Array[0].SetActive(!ServerConfigToggle.isOn);
-                    LocalDataGO.SetActive(true);
-                    ServerDataGO.SetActive(false);
-                    GreyOutPanels_Array[1].SetActive(false);
-                }
-            }
-            else if (selectedGO == ServerDataToggle.gameObject)
-            {
-                if(ServerDataToggle.isOn)
-                {
-                    LocalDataToggle.isOn = false;
-                    NoDataToggle.isOn = false;
-                    GreyOutPanels_Array[0].SetActive(false);
-                    ServerDataGO.SetActive(true);
-                    LocalDataGO.SetActive(false);
-                    GreyOutPanels_Array[1].SetActive(false);
-                }
-            }
-            else if (selectedGO == NoDataToggle.gameObject)
-            {
-                if(NoDataToggle.isOn)
-                {
-                    ServerDataToggle.isOn = false;
-                    LocalDataToggle.isOn = false;
-                    GreyOutPanels_Array[0].SetActive(!ServerConfigToggle.isOn);
-                    GreyOutPanels_Array[1].SetActive(true);
-                }
-            }
-        }
-
+        else if (selectedGO.name.ToLower().Contains("data"))
+            HandleDataToggle(selectedGO);
     }
 
     private void SetGameObjects()
     {
-        InitScreenGO = GameObject.Find("InitScreen_GO");
-        InitScreenCanvasGO = GameObject.Find("InitScreenCanvas");
+        InitScreen_GO = GameObject.Find("InitScreen_GO");
+        InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
-        StartPanel_GO = InitScreenGO.transform.Find("StartPanel").gameObject;
+        StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
 
-        LocalConfigToggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
-        ServerConfigToggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
-        DefaultConfigToggle = GameObject.Find("DefaultConfigs_Toggle").GetComponent<Toggle>();
+        LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
+        ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
+        DefaultConfig_Toggle = GameObject.Find("DefaultConfigs_Toggle").GetComponent<Toggle>();
 
-        LocalDataToggle = GameObject.Find("LocalData_Toggle").GetComponent<Toggle>();
-        ServerDataToggle = GameObject.Find("ServerData_Toggle").GetComponent<Toggle>();
-        NoDataToggle = GameObject.Find("NoData_Toggle").GetComponent<Toggle>();
+        LocalData_Toggle = GameObject.Find("LocalData_Toggle").GetComponent<Toggle>();
+        ServerData_Toggle = GameObject.Find("ServerData_Toggle").GetComponent<Toggle>();
+        NoData_Toggle = GameObject.Find("NoData_Toggle").GetComponent<Toggle>();
 
-        ErrorHandlingGO = GameObject.Find("ErrorHandling_Panel");
-        ErrorHandlingGO.SetActive(false);
+        ErrorHandling_GO = GameObject.Find("ErrorHandling_Panel");
+        ErrorHandling_GO.SetActive(false);
 
-        SubjectIDTextGO = GameObject.Find("SubjectID_Text");
-        SessionIDTextGO = GameObject.Find("SessionID_Text");
-        ServerDataTextGO = GameObject.Find("ServerData_Text");
-        LocalDataTextGO = GameObject.Find("LocalData_Text");
-        LocalConfigTextGO = GameObject.Find("LocalConfig_Text");
+        SubjectID_Text = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>();
+        SessionID_Text = GameObject.Find("SessionID_Text").GetComponent<TextMeshProUGUI>();
+        ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
+        LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
 
 
         GreyOutPanels_Array = new GameObject[3];
@@ -357,82 +332,77 @@ public class InitScreen_Level : ControlLevel
         foreach (GameObject go in GreyOutPanels_Array)
             go.SetActive(false);
 
-        MainPanel_GO = InitScreenGO.transform.Find("MainPanel").gameObject;
-        ConfirmButtonGO = MainPanel_GO.transform.Find("ButtonConfirm").transform.gameObject;
+        MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
 
-        ServerURL_GO = GameObject.Find("ServerURL_GO");
+        ConnectToServerButton_GO = GameObject.Find("ConnectButton");
 
-        ConnectButton = GameObject.Find("ConnectButton");
-
-        LocalDataGO = GameObject.Find("LocalData_GO");
-        ServerDataGO = GameObject.Find("ServerData_GO");
-        ServerDataGO.SetActive(false);
+        LocalData_GO = GameObject.Find("LocalData_GO");
+        ServerData_GO = GameObject.Find("ServerData_GO");
+        ServerData_GO.SetActive(false);
 
         FolderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
 
 
-        LocalConfigGO = GameObject.Find("LocalConfig_GO");
-        ServerConfigGO = GameObject.Find("ServerConfig_GO");
-        ServerConfigGO.SetActive(false);
-
-        SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
+        LocalConfig_GO = GameObject.Find("LocalConfig_GO");
+        ServerConfig_GO = GameObject.Find("ServerConfig_GO");
+        ServerConfig_GO.SetActive(false);
 
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
         FileSpec configFileSpec = new FileSpec();
         configFileSpec.name = "Config Folder";
         configFileSpec.isFolder = true;
         SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
-        TMP_InputField configInputField = LocalConfigGO.GetComponentInChildren<TMP_InputField>();
-        FileItem_TMP configFileItem = LocalConfigGO.AddComponent<FileItem_TMP>();
+        TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
+        FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
         TextMeshProUGUI configText = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>();
         configFileItem.ManualStart(configFileSpec, configInputField, configText);
-        LocalConfigGO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
+        LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
         FileSpec dataFileSpec = new FileSpec();
         dataFileSpec.name = "Data Folder";
         dataFileSpec.isFolder = true;
         SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
-        TMP_InputField dataInputField = LocalDataGO.GetComponentInChildren<TMP_InputField>();
-        FileItem_TMP dataFileItem = LocalDataGO.AddComponent<FileItem_TMP>();
+        TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
+        FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();
         TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
         dataFileItem.ManualStart(dataFileSpec, dataInputField, dataText);
-        LocalDataGO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
+        LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
 
 
         MainPanel_GO.SetActive(false);
-    }
-
-    public void HandleConfirmButtonPress() //For the AllInfo Panel's Confirm Button
-    {
-        if (GetSubjectID().Length < 1 || GetSessionID().Length < 1)
-            DisplayErrorMessage("Input a SubjectID and SessionID!", "EmptyID");
-        else if (!LocalConfigToggle.isOn && !ServerConfigToggle.isOn && !DefaultConfigToggle.isOn) //make sure 1 of the config types is selected
-            DisplayErrorMessage("Select a Config Type!", "EmptyConfigToggle");
-        else if (!LocalDataToggle.isOn && !ServerDataToggle.isOn && !NoDataToggle.isOn) //make sure 1 of the data options is selected
-            DisplayErrorMessage("Select a Data Option!", "EmptyDataToggle");
-        else if ((ServerConfigToggle.isOn || ServerDataToggle.isOn) && !ConnectedToServer) //if one of the 2 server toggle's is on, make sure already connected to server and they've selected a dropdown
-            DisplayErrorMessage("Connect to your server!", "NotConnectedToServer");
-        else if(!NoDataToggle.isOn && GetDataValue().Length < 1)
-            DisplayErrorMessage("Input a Data Folder Path!", "EmptyDataFolder");
-        else
-        {
-            Debug.Log("Properly Filled out all neccessary information!");
-            PlayPositiveAudio();
-            ConfirmButtonPressed = true;
-        }
     }
 
     private void DisplayErrorMessage(string message, string errorType)
     {
         PlayErrorAudio();
         ErrorType = errorType;
-        ErrorHandlingGO.SetActive(true);
-        ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = message;
+        ErrorHandling_GO.SetActive(true);
+        ErrorHandling_GO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = message;
+    }
+
+    public void HandleConfirmButtonPress() //For the AllInfo Panel's Confirm Button
+    {
+        if (GetSubjectID().Length < 1 || GetSessionID().Length < 1)
+            DisplayErrorMessage("Input a SubjectID and SessionID!", "EmptyID");
+        else if (!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn) //make sure 1 of the config types is selected
+            DisplayErrorMessage("Select a Config Type!", "EmptyConfigToggle");
+        else if (!LocalData_Toggle.isOn && !ServerData_Toggle.isOn && !NoData_Toggle.isOn) //make sure 1 of the data options is selected
+            DisplayErrorMessage("Select a Data Option!", "EmptyDataToggle");
+        else if ((ServerConfig_Toggle.isOn || ServerData_Toggle.isOn) && !ConnectedToServer) //if one of the 2 server toggle's is on, make sure already connected to server and they've selected a dropdown
+            DisplayErrorMessage("Connect to your server!", "NotConnectedToServer");
+        else if(!NoData_Toggle.isOn && GetDataValue().Length < 1)
+            DisplayErrorMessage("Input a Data Folder Path!", "EmptyDataFolder");
+        else
+        {
+            Debug.Log("Properly Filled out all neccessary information!");
+            PlayConfirmAudio();
+            ConfirmButtonPressed = true;
+        }
     }
 
     public void HandleStartSessionButtonPress()
     {
-        PlayPositiveAudio();
+        PlayConfirmAudio();
         ConfirmButtonPressed = true;
     }
 
@@ -441,7 +411,7 @@ public class InitScreen_Level : ControlLevel
         if(ConnectedToServer)
             return;
 
-        PlayPositiveAudio();
+        PlayConfirmAudio();
         string url = GameObject.Find("ServerURL_Text").GetComponent<TextMeshProUGUI>().text;
         ServerManager.ServerURL = url.Remove(url.Length - 1, 1);
         StartCoroutine(TestServerConnection());
@@ -454,14 +424,14 @@ public class InitScreen_Level : ControlLevel
             if (isConnected)
             {
                 ConnectedToServer = true;
-                ConnectButton.GetComponent<Image>().color = Color.green;
-                ConnectButton.GetComponentInChildren<Text>().text = "Connected";
+                ConnectToServerButton_GO.GetComponent<Image>().color = Color.green;
+                ConnectToServerButton_GO.GetComponentInChildren<Text>().text = "Connected";
             }
             else
                 Debug.LogError("UNABLE TO CONNECT TO SERVER!");
         });
 
-        if (ConnectedToServer && ServerConfigToggle.isOn)
+        if (ConnectedToServer && ServerConfig_Toggle.isOn)
             PopulateServerDropdown();
     }
 
@@ -472,38 +442,43 @@ public class InitScreen_Level : ControlLevel
 
     private string GetSubjectID()
     {
-        string subjectID = SubjectIDTextGO.GetComponent<TextMeshProUGUI>().text;
+        string subjectID = SubjectID_Text.GetComponent<TextMeshProUGUI>().text;
         return subjectID.Remove(subjectID.Length - 1, 1);
     }
     private string GetSessionID()
     {
-        string sessionID = SessionIDTextGO.GetComponent<TextMeshProUGUI>().text;
+        string sessionID = SessionID_Text.GetComponent<TextMeshProUGUI>().text;
         return sessionID.Remove(sessionID.Length - 1, 1);
     }
     private string GetDataValue()
     {
-        string datavalue = ServerDataGO.activeInHierarchy ? ServerDataTextGO.GetComponent<TextMeshProUGUI>().text : LocalDataTextGO.GetComponent<TextMeshProUGUI>().text;
+        string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<TextMeshProUGUI>().text : LocalData_Text.GetComponent<TextMeshProUGUI>().text;
         return datavalue.Remove(datavalue.Length - 1, 1);
     }
 
     private void SetupAudio()
     {
         AudioSource = gameObject.AddComponent<AudioSource>();
-        Continue_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
-        AudioSource.clip = Continue_AudioClip;
-
+        ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
+        Confirm_AudioClip = Resources.Load<AudioClip>("BlockResults");
     }
 
-    public void PlayPositiveAudio()
+    public void PlayToggleAudio()
     {
-        AudioSource.clip = Continue_AudioClip;
+        AudioSource.clip = ToggleChange_AudioClip;
         AudioSource.Play();
     }
 
     public void PlayErrorAudio()
     {
         AudioSource.clip = Error_AudioClip;
+        AudioSource.Play();
+    }
+
+    public void PlayConfirmAudio()
+    {
+        AudioSource.clip = Confirm_AudioClip;
         AudioSource.Play();
     }
 

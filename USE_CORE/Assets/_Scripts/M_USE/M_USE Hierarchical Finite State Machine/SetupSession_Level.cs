@@ -161,7 +161,7 @@ public class SetupSession_Level : ControlLevel
                 SceneManager.UnloadSceneAsync(taskName);
                 iTask++;
             });
-        VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, ()=> null);
+        VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, ()=> null, ()=> SceneManager.UnloadSceneAsync(taskName));
     }
 
 

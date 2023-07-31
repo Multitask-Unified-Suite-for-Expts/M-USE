@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Reflection;
 using ConfigDynamicUI;
 using Tobii.Research.Unity.CodeExamples;
@@ -43,7 +45,7 @@ public class VerifyTask_Level : ControlLevel
             };
             // SetValuesForLoading("TaskDef");
             
-            importSettings_Level.SettingsDetails[0].FilePath = SetFilePath("TaskDef");
+            importSettings_Level.SettingsDetails[0].FilePath = GetFilePath("TaskDef");
         });
 
         ImportSettings.AddUpdateMethod(() =>
@@ -109,7 +111,7 @@ public class VerifyTask_Level : ControlLevel
                 fileParsed = true;
 
                 if (importSettings_Level.SettingsDetails.Count > 1)
-                    importSettings_Level.SettingsDetails[1].FilePath = SetFilePath(importSettings_Level.SettingsDetails[1].SearchString);
+                    importSettings_Level.SettingsDetails[1].FilePath = GetFilePath(importSettings_Level.SettingsDetails[1].SearchString);
                     
 
                 importSettings_Level.importPaused = false;
@@ -144,19 +146,35 @@ public class VerifyTask_Level : ControlLevel
         importSettings_Level.importPaused = false;
     }
 
-    private string SetFilePath(string searchString)
+    private string GetFilePath(string searchString)
     {
         Debug.Log("Looking for file with search string " + searchString);
         
-        string pathToFile;
+        string pathToFile = "";
+        string pathToFolder = "";
 
-        if (SessionValues.WebBuild && SessionValues.UsingDefaultConfigs)
-            pathToFile = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
+        if (SessionValues.UsingDefaultConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}_DefaultConfigs";
+        else if (SessionValues.UsingLocalConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}{Path.DirectorySeparatorChar}{CurrentTask.TaskName}";
+        else if (SessionValues.UsingServerConfigs)
+            pathToFolder = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}";
+        
+        
+        if (SessionValues.UsingServerConfigs)
+        {
+            StartCoroutine(ServerManager.GetFilePath(pathToFolder, searchString, result =>
+            {
+                if (!string.IsNullOrEmpty(result))
+                    pathToFile = result;
+                else
+                {
+                    Debug.Log("Server file path not found");
+                }
+            }));
+        }
         else
-            pathToFile = $"{SessionValues.ConfigFolderPath}/{CurrentTask.TaskName}"; //test for windows!
-
-        if (SessionValues.ConfigAccessType == "Default" || SessionValues.ConfigAccessType == "Local")
-            pathToFile = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFile, $"*{searchString}*");
+            pathToFile = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
 
         return pathToFile;
     }
@@ -164,7 +182,7 @@ public class VerifyTask_Level : ControlLevel
     private void SetValuesForLoading(string searchString)
     {
         importSettings_Level.SettingsDetails[0].SearchString = searchString;
-        SetFilePath(importSettings_Level.SettingsDetails[0].SearchString);
+        GetFilePath(importSettings_Level.SettingsDetails[0].SearchString);
 
         switch (searchString.ToLower())
         {

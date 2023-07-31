@@ -114,6 +114,12 @@ namespace USE_ExperimentTemplate_Trial
         {
             return (T)TaskLevel;
         }
+        
+        
+        public T GetTaskDef<T>() where T: TaskDef
+        {
+            return (T)TaskLevel.TaskDef;
+        }
 
         public Type TrialDefType, StimDefType;
 

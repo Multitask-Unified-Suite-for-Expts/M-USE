@@ -53,9 +53,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public override void DefineControlLevel()
     {
-        trialLevel = (ContinuousRecognition_TrialLevel)TrialLevel;
-        
-        SetSettings();
+        trialLevel = (ContinuousRecognition_TrialLevel) TrialLevel;
 
         BlockAveragesString = "";
         CurrentBlockString = "";
@@ -134,35 +132,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         TotalRewards_Task.Add(trialLevel.NumRewards_Block);
     }
 
-    public void SetSettings()
-    {
-        trialLevel.MaterialFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MakeStimPopOut"))
-            trialLevel.MakeStimPopOut = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "MakeStimPopOut");
-        else
-            trialLevel.MakeStimPopOut = false;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            trialLevel.MacMainDisplayBuild = false;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-        else
-            trialLevel.ButtonPosition = new Vector3(0, 0, 0);
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else
-            trialLevel.ButtonScale = 120f;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            trialLevel.TouchFeedbackDuration = .3f;
-    }
 
 
     public override OrderedDictionary GetBlockResultsData()

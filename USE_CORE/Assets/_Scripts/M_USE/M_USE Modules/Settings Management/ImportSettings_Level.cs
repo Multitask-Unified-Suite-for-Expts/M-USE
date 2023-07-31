@@ -208,12 +208,13 @@ public class ImportSettings_Level : ControlLevel
         for (int iLine = 1; iLine < lines.Length; iLine++)
         {
             // Creates an instance for the entire line (ie. BlockDef)
-            settingsArray[iLine - 1] = Activator.CreateInstance<T>();
+            T settingsInstance = Activator.CreateInstance<T>();
         
             // Splits the separate fields for the single instance (ie. fields of BlockDef)
             string[] values = lines[iLine].Split(delimiter);
             for (int iVal = 0; iVal < fieldNames.Length; iVal++)
             {
+	            string fieldValue = values[iVal];
                 string fieldName = fieldNames[iVal].Trim();
                 try
                 {
@@ -224,104 +225,104 @@ public class ImportSettings_Level : ControlLevel
                     if (propertyInfo != null)
                     {
                         Type propertyType = propertyInfo.PropertyType;
-                        propertyInfo.SetValue(settingsArray[iLine - 1], Convert.ChangeType(values[iVal], propertyType));
+                        propertyInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, propertyType));
                     }
                     else if (fieldInfo != null)
                     {
-	                    Type ft = fieldInfo.FieldType;
-	                    if (ft == typeof(string))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1], values[iVal]);
-	                    else if (ft == typeof(bool))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (bool) ConvertStringToType<bool>(values[iVal]));
-	                    else if (ft == typeof(int))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1], (int) ConvertStringToType<int>(values[iVal]));
-	                    else if (ft == typeof(float))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (float) ConvertStringToType<float>(values[iVal]));
-	                    else if (ft == typeof(bool?))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (bool?) ConvertStringToType<bool>(values[iVal]));
-	                    else if (ft == typeof(int?))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1], (int?) ConvertStringToType<int>(values[iVal]));
-	                    else if (ft == typeof(float?))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (float?) ConvertStringToType<float>(values[iVal]));
-	                    else if (ft == typeof(Vector2))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Vector2) ConvertStringToType<Vector2>(values[iVal]));
-	                    else if (ft == typeof(Vector3))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Vector3) ConvertStringToType<Vector3>(values[iVal]));
-	                    else if (ft == typeof(string[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (string[]) ConvertStringToType<string[]>(values[iVal]));
-	                    else if (ft == typeof(bool[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (bool[]) ConvertStringToType<bool[]>(values[iVal]));
-	                    else if (ft == typeof(int[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (int[]) ConvertStringToType<int[]>(values[iVal]));
-	                    else if (ft == typeof(float[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (float[]) ConvertStringToType<float[]>(values[iVal]));
-	                    else if (ft == typeof(bool?[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (bool?[]) ConvertStringToType<bool[]>(values[iVal]));
-	                    else if (ft == typeof(int?[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (int?[]) ConvertStringToType<int[]>(values[iVal]));
-	                    else if (ft == typeof(float?[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (float?[]) ConvertStringToType<float[]>(values[iVal]));
-	                    else if (ft == typeof(Vector2[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Vector2[]) ConvertStringToType<Vector2[]>(values[iVal]));
-	                    else if (ft == typeof(Vector3[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Vector3[]) ConvertStringToType<Vector3[]>(values[iVal]));
-	                    else if (ft == typeof(Reward[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Reward[]) ConvertStringToType<Reward[]>(values[iVal]));
-	                    else if (ft == typeof(string[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (string[][]) ConvertStringToType<string[][]>(values[iVal]));
-	                    else if (ft == typeof(bool[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (bool[][]) ConvertStringToType<bool[][]>(values[iVal]));
-	                    else if (ft == typeof(int[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (int[][]) ConvertStringToType<int[][]>(values[iVal]));
-	                    else if (ft == typeof(float[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (float[][]) ConvertStringToType<float[][]>(values[iVal]));
-	                    else if (ft == typeof(bool?[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (bool?[][]) ConvertStringToType<bool[][]>(values[iVal]));
-	                    else if (ft == typeof(int?[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (int?[][]) ConvertStringToType<int[][]>(values[iVal]));
-	                    else if (ft == typeof(float?[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (float?[][]) ConvertStringToType<float[][]>(values[iVal]));
-	                    else if (ft == typeof(Reward[][]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Reward[][]) ConvertStringToType<Reward[][]>(values[iVal]));
-	                    else if (ft == typeof(Color))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
-			                    (Color) ConvertStringToType<Color>(values[iVal]));
-	                    else if (ft == typeof(MazeGame_Namespace.MazeDef[]))
-		                    fieldInfo.SetValue(settingsArray[iLine - 1],
+	                    Type fieldType = fieldInfo.FieldType;
+	                    if (fieldType == typeof(string))
+		                    fieldInfo.SetValue(settingsInstance, fieldValue);
+	                    else if (fieldType == typeof(bool))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (bool) ConvertStringToType<bool>(fieldValue));
+	                    else if (fieldType == typeof(int))
+		                    fieldInfo.SetValue(settingsInstance, (int) ConvertStringToType<int>(fieldValue));
+	                    else if (fieldType == typeof(float))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (float) ConvertStringToType<float>(fieldValue));
+	                    else if (fieldType == typeof(bool?))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (bool?) ConvertStringToType<bool>(fieldValue));
+	                    else if (fieldType == typeof(int?))
+		                    fieldInfo.SetValue(settingsInstance, (int?) ConvertStringToType<int>(fieldValue));
+	                    else if (fieldType == typeof(float?))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (float?) ConvertStringToType<float>(fieldValue));
+	                    else if (fieldType == typeof(Vector2))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Vector2) ConvertStringToType<Vector2>(fieldValue));
+	                    else if (fieldType == typeof(Vector3))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Vector3) ConvertStringToType<Vector3>(fieldValue));
+	                    else if (fieldType == typeof(string[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (string[]) ConvertStringToType<string[]>(fieldValue));
+	                    else if (fieldType == typeof(bool[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (bool[]) ConvertStringToType<bool[]>(fieldValue));
+	                    else if (fieldType == typeof(int[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (int[]) ConvertStringToType<int[]>(fieldValue));
+	                    else if (fieldType == typeof(float[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (float[]) ConvertStringToType<float[]>(fieldValue));
+	                    else if (fieldType == typeof(bool?[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (bool?[]) ConvertStringToType<bool[]>(fieldValue));
+	                    else if (fieldType == typeof(int?[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (int?[]) ConvertStringToType<int[]>(fieldValue));
+	                    else if (fieldType == typeof(float?[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (float?[]) ConvertStringToType<float[]>(fieldValue));
+	                    else if (fieldType == typeof(Vector2[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Vector2[]) ConvertStringToType<Vector2[]>(fieldValue));
+	                    else if (fieldType == typeof(Vector3[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Vector3[]) ConvertStringToType<Vector3[]>(fieldValue));
+	                    else if (fieldType == typeof(Reward[]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Reward[]) ConvertStringToType<Reward[]>(fieldValue));
+	                    else if (fieldType == typeof(string[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (string[][]) ConvertStringToType<string[][]>(fieldValue));
+	                    else if (fieldType == typeof(bool[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (bool[][]) ConvertStringToType<bool[][]>(fieldValue));
+	                    else if (fieldType == typeof(int[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (int[][]) ConvertStringToType<int[][]>(fieldValue));
+	                    else if (fieldType == typeof(float[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (float[][]) ConvertStringToType<float[][]>(fieldValue));
+	                    else if (fieldType == typeof(bool?[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (bool?[][]) ConvertStringToType<bool[][]>(fieldValue));
+	                    else if (fieldType == typeof(int?[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (int?[][]) ConvertStringToType<int[][]>(fieldValue));
+	                    else if (fieldType == typeof(float?[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (float?[][]) ConvertStringToType<float[][]>(fieldValue));
+	                    else if (fieldType == typeof(Reward[][]))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Reward[][]) ConvertStringToType<Reward[][]>(fieldValue));
+	                    else if (fieldType == typeof(Color))
+		                    fieldInfo.SetValue(settingsInstance,
+			                    (Color) ConvertStringToType<Color>(fieldValue));
+	                    else if (fieldType == typeof(MazeGame_Namespace.MazeDef[]))
+		                    fieldInfo.SetValue(settingsInstance,
 			                    (MazeGame_Namespace.MazeDef[]) ConvertStringToType<MazeGame_Namespace.MazeDef[]>(
-				                    values[iVal]));
+				                    fieldValue));
 	                    else
-		                    Debug.LogError("Attempted to convert value " + values[iVal] + " with header " + fieldName +
-		                                   " to type " + ft + " but there is no conversion specified for this type.");
+		                    Debug.LogError("Attempted to convert value " + fieldValue + " with header " + fieldName +
+		                                   " to type " + fieldType + " but there is no conversion specified for this type.");
                     }
                 }
                     catch (Exception e)
                     {
-                        Debug.Log(fieldNames[iVal] + ": " + values[iVal]);
+                        Debug.Log(fieldNames[iVal] + ": " + fieldValue);
                         // Debug.Log("Error adding TDF file \"" + settingsCategory + "\" to Settings \"" + settingsCategory + "\".");
                         throw new Exception(e.Message + "\t" + e.StackTrace);
                     }
@@ -738,38 +739,65 @@ public class ImportSettings_Level : ControlLevel
         {
             Type fieldType = fieldInfo.FieldType;
 
-            if (fieldType.Equals(typeof(OrderedDictionary)))
-            {
-                if (StartsOrEndsWithBrackets(fieldValue.Trim()))
-                {
-                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-                }
-                string[] sArray = fieldValue.Split(',');
-                OrderedDictionary pairs = new OrderedDictionary();
-                for (int sCount = 0; sCount < sArray.Length; sCount++)
-                {
-                    sArray[sCount] = sArray[sCount].Replace("\"", "");
-                    sArray[sCount] = sArray[sCount].Trim();
-                    string[] sArray2 = sArray[sCount].Split(':');
-                    pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
-                }
-                fieldInfo.SetValue(settingsInstance, pairs);
-            }
-            else if (fieldType.Equals(typeof(Dictionary<string, string>)))
-            {
-                if (StartsOrEndsWithBrackets(fieldValue))
-                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
-                string[] sArray = fieldValue.Split(',');
-                Dictionary<string, string> pairs = new Dictionary<string, string>();
-                for (int sCount = 0; sCount < sArray.Length; sCount++)
-                {
-                    sArray[sCount] = sArray[sCount].Replace("\"", "");
-                    sArray[sCount] = sArray[sCount].Trim();
-                    string[] sArray2 = sArray[sCount].Split(':');
-                    pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
-                }
-                fieldInfo.SetValue(settingsInstance, pairs);
-            }
+            if (fieldType == typeof(string))
+				fieldInfo.SetValue(settingsInstance, fieldValue);
+			else if (fieldType == typeof(bool))
+				fieldInfo.SetValue(settingsInstance, (bool)ConvertStringToType<bool>(fieldValue));
+			else if (fieldType == typeof(int))
+				fieldInfo.SetValue(settingsInstance, (int)ConvertStringToType<int>(fieldValue));
+			else if (fieldType == typeof(float))
+				fieldInfo.SetValue(settingsInstance, (float)ConvertStringToType<float>(fieldValue));
+			else if (fieldType == typeof(bool?))
+				fieldInfo.SetValue(settingsInstance, (bool?)ConvertStringToType<bool>(fieldValue));
+			else if (fieldType == typeof(int?))
+				fieldInfo.SetValue(settingsInstance, (int?)ConvertStringToType<int>(fieldValue));
+			else if (fieldType == typeof(float?))
+				fieldInfo.SetValue(settingsInstance, (float?)ConvertStringToType<float>(fieldValue));
+			else if (fieldType == typeof(Vector2))
+				fieldInfo.SetValue(settingsInstance, (Vector2)ConvertStringToType<Vector2>(fieldValue));
+			else if (fieldType == typeof(Vector3))
+				fieldInfo.SetValue(settingsInstance, (Vector3)ConvertStringToType<Vector3>(fieldValue));
+			else if (fieldType == typeof(string[]))
+				fieldInfo.SetValue(settingsInstance, (string[])ConvertStringToType<string[]>(fieldValue));
+			else if (fieldType == typeof(bool[]))
+				fieldInfo.SetValue(settingsInstance, (bool[])ConvertStringToType<bool[]>(fieldValue));
+			else if (fieldType == typeof(int[]))
+				fieldInfo.SetValue(settingsInstance, (int[])ConvertStringToType<int[]>(fieldValue));
+			else if (fieldType == typeof(float[]))
+				fieldInfo.SetValue(settingsInstance, (float[])ConvertStringToType<float[]>(fieldValue));
+			else if (fieldType == typeof(bool?[]))
+				fieldInfo.SetValue(settingsInstance, (bool?[])ConvertStringToType<bool[]>(fieldValue));
+			else if (fieldType == typeof(int?[]))
+				fieldInfo.SetValue(settingsInstance, (int?[])ConvertStringToType<int[]>(fieldValue));
+			else if (fieldType == typeof(float?[]))
+				fieldInfo.SetValue(settingsInstance, (float?[])ConvertStringToType<float[]>(fieldValue));
+			else if (fieldType == typeof(Vector2[]))
+				fieldInfo.SetValue(settingsInstance, (Vector2[])ConvertStringToType<Vector2[]>(fieldValue));
+			else if (fieldType == typeof(Vector3[]))
+				fieldInfo.SetValue(settingsInstance, (Vector3[])ConvertStringToType<Vector3[]>(fieldValue));
+			else if (fieldType == typeof(Reward[]))
+				fieldInfo.SetValue(settingsInstance, (Reward[])ConvertStringToType<Reward[]>(fieldValue));
+            else if (fieldType == typeof(string[][]))
+				fieldInfo.SetValue(settingsInstance, (string[][])ConvertStringToType<string[][]>(fieldValue));
+			else if (fieldType == typeof(bool[][]))
+				fieldInfo.SetValue(settingsInstance, (bool[][])ConvertStringToType<bool[][]>(fieldValue));
+			else if (fieldType == typeof(int[][]))
+				fieldInfo.SetValue(settingsInstance, (int[][])ConvertStringToType<int[][]>(fieldValue));
+			else if (fieldType == typeof(float[][]))
+				fieldInfo.SetValue(settingsInstance, (float[][])ConvertStringToType<float[][]>(fieldValue));
+			else if (fieldType == typeof(bool?[][]))
+				fieldInfo.SetValue(settingsInstance, (bool?[][])ConvertStringToType<bool[][]>(fieldValue));
+			else if (fieldType == typeof(int?[][]))
+				fieldInfo.SetValue(settingsInstance, (int?[][])ConvertStringToType<int[][]>(fieldValue));
+			else if (fieldType == typeof(float?[][]))
+				fieldInfo.SetValue(settingsInstance, (float?[][])ConvertStringToType<float[][]>(fieldValue));
+			else if (fieldType == typeof(Reward[][]))
+				fieldInfo.SetValue(settingsInstance, (Reward[][])ConvertStringToType<Reward[][]>(fieldValue));
+            else if (fieldType == typeof(Color))
+				fieldInfo.SetValue(settingsInstance, (Color)ConvertStringToType<Color>(fieldValue));
+			else if (fieldType == typeof(MazeGame_Namespace.MazeDef[]))
+				fieldInfo.SetValue(settingsInstance, (MazeGame_Namespace.MazeDef[])ConvertStringToType<MazeGame_Namespace.MazeDef[]>(fieldValue));
+			
             else if (fieldType.Equals(typeof(Vector3[])))
             {
                 string[][] sArray = (string[][])JsonConvert.DeserializeObject(fieldValue, typeof(string[][]));
@@ -804,20 +832,42 @@ public class ImportSettings_Level : ControlLevel
                 var deserializedValue = JsonConvert.DeserializeObject<ScreenDetails>(fieldValue);
                 fieldInfo.SetValue(settingsInstance, deserializedValue);
             }
-            else if (fieldType.Equals(typeof(int?)))
+            else if (fieldType.Equals(typeof(OrderedDictionary)))
             {
-                fieldInfo.SetValue(settingsInstance, GetValueOrNull<float>(fieldValue));
+	            if (StartsOrEndsWithBrackets(fieldValue.Trim()))
+	            {
+		            fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+	            }
+	            string[] sArray = fieldValue.Split(',');
+	            OrderedDictionary pairs = new OrderedDictionary();
+	            for (int sCount = 0; sCount < sArray.Length; sCount++)
+	            {
+		            sArray[sCount] = sArray[sCount].Replace("\"", "");
+		            sArray[sCount] = sArray[sCount].Trim();
+		            string[] sArray2 = sArray[sCount].Split(':');
+		            pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+	            }
+	            fieldInfo.SetValue(settingsInstance, pairs);
             }
-            else if (fieldType.Equals(typeof(float?)))
+            else if (fieldType.Equals(typeof(Dictionary<string, string>)))
             {
-                fieldInfo.SetValue(settingsInstance, GetValueOrNull<float>(fieldValue));
+	            if (StartsOrEndsWithBrackets(fieldValue))
+		            fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+	            string[] sArray = fieldValue.Split(',');
+	            Dictionary<string, string> pairs = new Dictionary<string, string>();
+	            for (int sCount = 0; sCount < sArray.Length; sCount++)
+	            {
+		            sArray[sCount] = sArray[sCount].Replace("\"", "");
+		            sArray[sCount] = sArray[sCount].Trim();
+		            string[] sArray2 = sArray[sCount].Split(':');
+		            pairs.Add(sArray2[0].Trim(), sArray2[1].Trim());
+	            }
+	            fieldInfo.SetValue(settingsInstance, pairs);
             }
-            else if (fieldType.Equals((typeof(string))))
-                fieldInfo.SetValue(settingsInstance, fieldValue);
             else
             {
-                Debug.Log("UNSPECIFIED SETTINGS FIELD TYPE: " + fieldType);
-                fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
+	            Debug.Log("UNSPECIFIED SETTINGS FIELD TYPE: " + fieldType);
+	            fieldInfo.SetValue(settingsInstance, Convert.ChangeType(fieldValue, fieldType));
             }
         }
     }

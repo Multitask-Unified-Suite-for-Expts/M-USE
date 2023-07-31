@@ -112,6 +112,10 @@ namespace USE_ExperimentTemplate_Task
             StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
         }
 
+        public T GetTaskDef<T>() where T: TaskDef
+        {
+            return (T)TaskDef;
+        }
 
         public void DefineTaskLevel()
         {

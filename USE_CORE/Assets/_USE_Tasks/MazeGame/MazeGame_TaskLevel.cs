@@ -97,7 +97,31 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         choiceDurationsList_InTask = new List<float?>();
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
-        SetSettings();
+
+        //Was in SetSettings() but removed most of that method so just put the last part here:
+        if (SessionValues.WebBuild)
+        {
+            if (SessionValues.UsingDefaultConfigs)
+            {
+                mgTL.MazeFilePath = "DefaultResources/Mazes";
+                mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
+            }
+            else //Using server configs:
+            {
+                mgTL.MazeFilePath = "Resources/Mazes";
+                mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
+            }
+        }
+        else
+        {
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
+                mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
+            //else Debug.LogError("Maze key file path settings not defined in the TaskDef");
+            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
+                mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
+            //else Debug.LogError("Maze File Path not defined in the TaskDef");
+        }
+
         AssignBlockData();
         
         BlockAveragesString = "";
@@ -331,117 +355,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     //    }
     //}
 
-    private void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            mgTL.ContextExternalFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else mgTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        if(SessionValues.WebBuild)
-        {
-            if (SessionValues.UsingDefaultConfigs)
-            {
-                mgTL.MazeFilePath = "DefaultResources/Mazes";
-                mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
-            }
-            else //Using server configs:
-            {
-                mgTL.MazeFilePath = "Resources/Mazes";
-                mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
-            }
-        }
-        else
-        {
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeKeyFilePath"))
-                mazeKeyFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeKeyFilePath");
-            //else Debug.LogError("Maze key file path settings not defined in the TaskDef");
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeFilePath"))
-                mgTL.MazeFilePath = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeFilePath");
-            //else Debug.LogError("Maze File Path not defined in the TaskDef");
-        }
-        
-
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            mgTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        //else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            mgTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        //else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            mgTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        else
-        {
-            mgTL.NeutralITI = false;
-            Debug.Log("Neutral ITI settings not defined in the TaskDef. Default Setting of false is used instead");
-        }
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileSize"))
-        {
-            mgTL.TileSize = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TileSize");
-        }
-        else
-        {
-            mgTL.TileSize = 0.5f; // default value in the case it isn't specified
-            Debug.Log("Tile Size settings not defined in the TaskDef. Default setting of " + mgTL.TileSize +
-                      " is used instead.");
-        }
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TileTexture"))
-            mgTL.TileTexture = (string)SessionSettings.Get(TaskName + "_TaskSettings", "TileTexture");
-        else
-        {
-            mgTL.TileTexture = "Tile"; // default value in the case it isn't specified
-            Debug.Log("Tile Texture settings not defined in the TaskDef. Default setting of " + mgTL.TileTexture +
-                      " is used instead.");
-        }
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NumBlinks"))
-            mgTL.NumBlinks = (int)SessionSettings.Get(TaskName + "_TaskSettings", "NumBlinks");
-        //else Debug.LogError("Num Blinks settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartColor"))
-            mgTL.startColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "StartColor");
-        //else Debug.LogError("Start Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "FinishColor"))
-            mgTL.finishColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "FinishColor");
-        //else Debug.LogError("Finish Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CorrectColor"))
-            mgTL.correctColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "CorrectColor");
-        //else Debug.LogError("Correct Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "LastCorrectColor"))
-            mgTL.lastCorrectColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "LastCorrectColor");
-        //else Debug.LogError("Last Correct Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor"))
-            mgTL.incorrectRuleAbidingColor =
-                (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleAbidingColor");
-        //else Debug.LogError("Incorrect Rule Abiding Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor"))
-            mgTL.incorrectRuleBreakingColor =
-                (float[])SessionSettings.Get(TaskName + "_TaskSettings", "IncorrectRuleBreakingColor");
-        //else Debug.LogError("Incorrect Rule Breaking Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "DefaultTileColor"))
-            mgTL.defaultTileColor = (float[])SessionSettings.Get(TaskName + "_TaskSettings", "DefaultTileColor");
-        //else Debug.LogError("Default Tile Color settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "UsingFixedRatioReward"))
-            mgTL.UsingFixedRatioReward = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "UsingFixedRatioReward");
-        else
-        {
-            mgTL.UsingFixedRatioReward = false;
-            Debug.Log("Using Fixed Ratio Reward settings not defined in the TaskDef, set as default of false");
-        }
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "MazeBackground"))
-            mgTL.MazeBackgroundTextureName = (string)SessionSettings.Get(TaskName + "_TaskSettings", "MazeBackgroundTexture");
-        else
-        {
-            mgTL.MazeBackgroundTextureName = "MazeBackground";
-            Debug.Log("Maze Background Texture settings not defined in the TaskDef, set as default of MazeBackground");
-        }
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            mgTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            mgTL.TouchFeedbackDuration = .3f;
-
-    }
 
     public override Type GetTaskCustomSettingsType(string typeName)
     {

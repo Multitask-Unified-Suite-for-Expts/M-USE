@@ -25,7 +25,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     {
         wmTL = (WorkingMemory_TrialLevel)TrialLevel;
 
-        SetSettings();
         AssignBlockData();
 
         RunBlock.AddInitializationMethod(() =>
@@ -49,39 +48,6 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
             SetBlockSummaryString();
         });
-    }
-
-    public void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            wmTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else wmTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            wmTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        //else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            wmTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        //else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-            wmTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        //else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-            wmTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        //else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            wmTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        //else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            wmTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            wmTL.TouchFeedbackDuration = .3f;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            wmTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            wmTL.MacMainDisplayBuild = false;
     }
 
 

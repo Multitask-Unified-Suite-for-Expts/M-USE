@@ -32,7 +32,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
 
-        SetSettings();
         DefineBlockData();
         
         BlockAveragesString = "";
@@ -148,33 +147,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumRewardGiven", ()=> wwwTL.numRewardGiven_InBlock);
     }
 
-    public void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else wwwTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        //else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            wwwTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        //else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-            wwwTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-            wwwTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        //else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            wwwTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        //else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            wwwTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            wwwTL.TouchFeedbackDuration = .3f;
-    }
     public void ClearStrings()
     {
         BlockAveragesString = "";

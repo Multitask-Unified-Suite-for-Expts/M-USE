@@ -7,11 +7,14 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using ContinuousRecognition_Namespace;
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
     public EffortControl_TrialDef currentTrial => GetCurrentTrialDef<EffortControl_TrialDef>();
     public EffortControl_TaskLevel currentTask => GetTaskLevel<EffortControl_TaskLevel>();
+    public EffortControl_TaskDef currentTaskDef => GetTaskDef<EffortControl_TaskDef>();
+
 
     //Prefabs to Instantiate:
     public GameObject StimNoMaterialPrefab;
@@ -20,13 +23,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     public GameObject RewardPrefab;
     public GameObject OutlinePrefab;
 
-    public Vector3 ButtonPosition;
-    public float ButtonScale;
     public Vector3 OriginalStartButtonPosition;
 
     public GameObject EC_CanvasGO;
-
-    [HideInInspector] public bool MacMainDisplayBuild;
 
     private GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
                BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
@@ -45,8 +44,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Vector3 LeftStimOriginalPosition;
     private Vector3 RightStimOriginalPosition;
 
-    //Set in task level:
-    [HideInInspector] public string ContextExternalFilePath;
 
     [System.NonSerialized] public int Response = -1;
     private int InflationsNeeded; //becomes left/right num clicks once they make selection. 
@@ -108,8 +105,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<GameObject> ObjectList;
 
-    [HideInInspector] public float TouchFeedbackDuration;
-
     [HideInInspector] public GameObject debugTextGO;
     [HideInInspector] public TextMeshProUGUI debugText;
 
@@ -142,7 +137,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -167,7 +162,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, ButtonScale * 50, EC_CanvasGO);
+            TouchFBController.EnableTouchFeedback(Handler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 50, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -610,21 +605,20 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        float tokenSize = MacMainDisplayBuild && !Application.isEditor ? 212 : 106;
-        float yOffset = MacMainDisplayBuild && !Application.isEditor ? 45 : 22;
+        float tokenSize = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 212 : 106;
+        float yOffset = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 45 : 22;
 
-#if (UNITY_WEBGL && !UNITY_EDITOR)
-
-        tokenSize = 116;
-        yOffset = 25;
-
-        if (Screen.fullScreen && Screen.width > 1920)
+        if(SessionValues.WebBuild && !Application.isEditor)
         {
-            tokenSize = Screen.width > 3000 ? 103 : 121;
-            yOffset = Screen.width > 3000 ? 98 : 120;
-        }
+            tokenSize = 116;
+            yOffset = 25;
 
-#endif
+            if (Screen.fullScreen && Screen.width > 1920)
+            {
+                tokenSize = Screen.width > 3000 ? 103 : 121;
+                yOffset = Screen.width > 3000 ? 98 : 120;
+            }
+        }
 
         TokenFBController.tokenSize = tokenSize;
         TokenFBController.tokenBoxYOffset = yOffset;
@@ -806,7 +800,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Image image = MiddleBarrier.AddComponent<Image>();
         image.rectTransform.anchoredPosition = Vector2.zero;
 
-        if (MacMainDisplayBuild)
+        if (SessionValues.SessionDef.MacMainDisplayBuild)
             image.transform.localScale = new Vector3(.06f, 15f, .001f);
         else
             image.transform.localScale = new Vector3(.06f, 11f, .001f);

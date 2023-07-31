@@ -66,7 +66,6 @@ public class InitScreen_Level : ControlLevel
         //SetupInitScreen State-----------------------------------------------------------------------------------------------------------------------------------
         SetupInitScreen.AddInitializationMethod(() =>
         {
-            SetupAudio();
             if (SessionValues.WebBuild)
                 GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
         });
@@ -305,11 +304,11 @@ public class InitScreen_Level : ControlLevel
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
+        MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
         DefaultConfig_Toggle = GameObject.Find("DefaultConfigs_Toggle").GetComponent<Toggle>();
-
         LocalData_Toggle = GameObject.Find("LocalData_Toggle").GetComponent<Toggle>();
         ServerData_Toggle = GameObject.Find("ServerData_Toggle").GetComponent<Toggle>();
         NoData_Toggle = GameObject.Find("NoData_Toggle").GetComponent<Toggle>();
@@ -322,15 +321,12 @@ public class InitScreen_Level : ControlLevel
         ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
         LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
 
-
         GreyOutPanels_Array = new GameObject[3];
         GreyOutPanels_Array[0] = GameObject.Find("GreyOutPanel_ServerURL");
         GreyOutPanels_Array[1] = GameObject.Find("GreyOutPanel_Data");
         GreyOutPanels_Array[2] = GameObject.Find("GreyOutPanel_Config");
         foreach (GameObject go in GreyOutPanels_Array)
             go.SetActive(false);
-
-        MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
 
         ConnectToServerButton_GO = GameObject.Find("ConnectButton");
 
@@ -339,7 +335,6 @@ public class InitScreen_Level : ControlLevel
         ServerData_GO.SetActive(false);
 
         FolderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
-
 
         LocalConfig_GO = GameObject.Find("LocalConfig_GO");
         ServerConfig_GO = GameObject.Find("ServerConfig_GO");
@@ -366,8 +361,12 @@ public class InitScreen_Level : ControlLevel
         dataFileItem.ManualStart(dataFileSpec, dataInputField, dataText);
         LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
 
-
         MainPanel_GO.SetActive(false);
+
+        AudioSource = gameObject.AddComponent<AudioSource>();
+        ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
+        Error_AudioClip = Resources.Load<AudioClip>("Error");
+        Confirm_AudioClip = Resources.Load<AudioClip>("BlockResults");
     }
 
     private void DisplayErrorMessage(string message, string errorType)
@@ -452,14 +451,6 @@ public class InitScreen_Level : ControlLevel
     {
         string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<TextMeshProUGUI>().text : LocalData_Text.GetComponent<TextMeshProUGUI>().text;
         return datavalue.Remove(datavalue.Length - 1, 1);
-    }
-
-    private void SetupAudio()
-    {
-        AudioSource = gameObject.AddComponent<AudioSource>();
-        ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
-        Error_AudioClip = Resources.Load<AudioClip>("Error");
-        Confirm_AudioClip = Resources.Load<AudioClip>("BlockResults");
     }
 
     public void PlayToggleAudio()

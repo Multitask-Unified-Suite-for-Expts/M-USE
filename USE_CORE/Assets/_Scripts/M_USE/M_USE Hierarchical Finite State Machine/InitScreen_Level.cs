@@ -235,7 +235,7 @@ public class InitScreen_Level : ControlLevel
             ServerConfig_GO.SetActive(false);
             GreyOutPanels_Array[2].SetActive(false);   
         }
-        else if (selectedGO == ServerConfig_Toggle.gameObject && ServerData_Toggle.isOn)
+        else if (selectedGO == ServerConfig_Toggle.gameObject && ServerConfig_Toggle.isOn)
         {
             DefaultConfig_Toggle.isOn = false;
             LocalConfig_Toggle.isOn = false;

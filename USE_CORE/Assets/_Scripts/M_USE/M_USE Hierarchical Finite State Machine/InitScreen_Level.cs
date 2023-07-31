@@ -82,7 +82,7 @@ public class InitScreen_Level : ControlLevel
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
         CollectInfo.AddInitializationMethod(() =>
         {
-            StartCoroutine(UsePlayerPrefsToActivateObjects());
+            StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
         });
         CollectInfo.AddUpdateMethod(() =>
@@ -109,7 +109,7 @@ public class InitScreen_Level : ControlLevel
 
     }
 
-    private IEnumerator UsePlayerPrefsToActivateObjects()
+    private IEnumerator ActivateObjectsAfterPlayerPrefsLoaded()
     {
         yield return new WaitForEndOfFrame(); //Have to wait a frame so that the toggle's can load their IsOn value from PlayerPrefs during their Start() method of ToggleManager.cs
 
@@ -405,10 +405,9 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleConnectToServerButtonPressed()
     {
-        if(ConnectedToServer)
+        if (ConnectedToServer)
             return;
 
-        PlayConfirmAudio();
         string url = GameObject.Find("ServerURL_Text").GetComponent<TextMeshProUGUI>().text;
         ServerManager.ServerURL = url.Remove(url.Length - 1, 1);
         StartCoroutine(TestServerConnection());
@@ -420,12 +419,17 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
+                PlayConfirmAudio();
                 ConnectedToServer = true;
                 ConnectToServerButton_GO.GetComponent<Image>().color = Color.green;
                 ConnectToServerButton_GO.GetComponentInChildren<Text>().text = "Connected";
             }
             else
-                Debug.LogError("UNABLE TO CONNECT TO SERVER!");
+            {
+                Debug.Log("UNABLE TO CONNECT TO SERVER!");
+                PlayErrorAudio();
+                ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
+            }
         });
 
         if (ConnectedToServer && ServerConfig_Toggle.isOn)

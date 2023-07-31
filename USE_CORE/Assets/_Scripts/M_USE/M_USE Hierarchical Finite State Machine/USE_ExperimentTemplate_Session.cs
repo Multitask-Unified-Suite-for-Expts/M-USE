@@ -131,6 +131,12 @@ namespace USE_ExperimentTemplate_Session
 
             SetDisplayController();
 
+            if(SessionValues.UsingServerConfigs)
+            {
+
+            }
+
+
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
             // importSettings_Level.SessionLevel = this;
             // verifyTask_Level = gameObject.GetComponent<VerifyTask_Level>();
@@ -963,22 +969,17 @@ namespace USE_ExperimentTemplate_Session
 
         private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder and copy config folder into it
         {
-            if (SessionValues.WebBuild)
+            if(SessionValues.UsingServerConfigs)
             {
-                if (!Application.isEditor)
+                if(!Application.isEditor)
                 {
-                    if (!SessionValues.UsingDefaultConfigs)
+                    StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                     {
-                        StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
-                        {
-                            StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored
-                        }));
-                    }
-                    else
-                        Debug.Log("Using default configs so not copying config folder to data folder");
+                        StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored
+                    }));
                 }
             }
-            else
+            else if(SessionValues.UsingLocalConfigs)
             {
                 string sourceFolderPath = SessionValues.ConfigFolderPath;
                 string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
@@ -1272,17 +1273,19 @@ namespace USE_ExperimentTemplate_Session
         {
             string path;
 
-            if(SessionValues.WebBuild)
+            if(SessionValues.UsingDefaultConfigs)
             {
-                if (SessionValues.UsingDefaultConfigs)
-                    path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-                else
-                    path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
+                path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+
+            }
+            else if (SessionValues.UsingServerConfigs)
+            {
+                path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
             }
             else
             {
                 if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-                    return SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configName;
+                    return SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configName;
                 else
                 {
                     List<string> configFolders =
@@ -1293,9 +1296,34 @@ namespace USE_ExperimentTemplate_Session
                         if (k.Equals(configName)) break;
                         ++index;
                     }
-                    path = SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configFolders[index];
+                    path = SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configFolders[index];
                 }
             }
+
+            //if(SessionValues.WebBuild)
+            //{
+            //    if (SessionValues.UsingDefaultConfigs)
+            //        path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+            //    else
+            //        path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
+            //}
+            //else
+            //{
+            //    if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
+            //        return SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configName;
+            //    else
+            //    {
+            //        List<string> configFolders =
+            //            (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
+            //        int index = 0;
+            //        foreach (string k in SessionValues.SessionDef.TaskMappings.Keys)
+            //        {
+            //            if (k.Equals(configName)) break;
+            //            ++index;
+            //        }
+            //        path = SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configFolders[index];
+            //    }
+            //}
             return path;
         }
         

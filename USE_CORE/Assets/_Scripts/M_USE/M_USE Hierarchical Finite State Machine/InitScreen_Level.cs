@@ -222,7 +222,6 @@ public class InitScreen_Level : ControlLevel
             SessionValues.ConfigAccessType = "Local";
             //SessionValues.ConfigFolderPath = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>().text;
             SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
-            Debug.Log("CONFIG: " + SessionValues.ConfigFolderPath);
         }
         else if (ServerConfigToggle.isOn)
         {

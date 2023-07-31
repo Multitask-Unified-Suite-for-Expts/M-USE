@@ -44,8 +44,9 @@ public class InitScreen_Level : ControlLevel
     public GameObject ServerSetup_GO;
     public GameObject ServerDropdown_GO;
 
-    private AudioSource Continue_AudioSource;
+    private AudioSource AudioSource;
     private AudioClip Continue_AudioClip;
+    private AudioClip Error_AudioClip;
 
     private bool ConfirmButtonPressed;
 
@@ -110,15 +111,13 @@ public class InitScreen_Level : ControlLevel
         });
         CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
-            Debug.Log("DONE COLLECTING INFO NOW ABOUT TO SET EVERYTHING!");
             ConfirmButtonPressed = false;
 
             //Set SubjectID and SessionID:
             SessionValues.SubjectID = GetSubjectID();
             SessionValues.SessionID = GetSessionID();
 
-
-            //set the server config folder with what they selected in the server dropdown:
+            //Set the server config folder with what they selected in the server dropdown:
             if (ServerConfigToggle.isOn)
             {
                 string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
@@ -212,7 +211,8 @@ public class InitScreen_Level : ControlLevel
         if (LocalDataToggle.isOn)
         {
             SessionValues.StoringDataLocally = true;
-            SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
+            //SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
+            SessionValues.SessionDataPath = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>().text;
         }
         else if (ServerDataToggle.isOn)
             SessionValues.StoringDataOnServer = true;
@@ -221,11 +221,18 @@ public class InitScreen_Level : ControlLevel
 
     private void SetConfigInfo()
     {
+        if(!LocalConfigToggle.isOn && !ServerConfigToggle.isOn && !DefaultConfigToggle.isOn)
+        {
+            Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
+            return;
+        }
+
         if (LocalConfigToggle.isOn)
         {
             SessionValues.UsingLocalConfigs = true;
             SessionValues.ConfigAccessType = "Local";
-            SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
+            SessionValues.ConfigFolderPath = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>().text;
+            //SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
         }
         else if (ServerConfigToggle.isOn)
         {
@@ -242,7 +249,7 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleToggleChange()
     {
-        Continue_AudioSource.Play();
+        PlayPositiveAudio();
         GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 
         if(selectedGO.name.ToLower().Contains("config"))
@@ -333,7 +340,6 @@ public class InitScreen_Level : ControlLevel
         InitScreenCanvasGO = GameObject.Find("InitScreenCanvas");
 
         StartPanel_GO = InitScreenGO.transform.Find("StartPanel").gameObject;
-        //StartPanel_GO.transform.localPosition = new Vector3(0, 750f, 0);
 
         LocalConfigToggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfigToggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -385,7 +391,8 @@ public class InitScreen_Level : ControlLevel
         configFileSpec.isFolder = true;
         TMP_InputField configInputField = LocalConfigGO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfigGO.AddComponent<FileItem_TMP>();
-        configFileItem.ManualStart(configFileSpec, configInputField);
+        TextMeshProUGUI configText = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>();
+        configFileItem.ManualStart(configFileSpec, configInputField, configText);
         LocalConfigGO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
         FileSpec dataFileSpec = new FileSpec();
@@ -393,7 +400,8 @@ public class InitScreen_Level : ControlLevel
         dataFileSpec.isFolder = true;
         TMP_InputField dataInputField = LocalDataGO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalDataGO.AddComponent<FileItem_TMP>();
-        dataFileItem.ManualStart(dataFileSpec, dataInputField);
+        TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
+        dataFileItem.ManualStart(dataFileSpec, dataInputField, dataText);
         LocalDataGO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
 
 
@@ -415,13 +423,14 @@ public class InitScreen_Level : ControlLevel
         else
         {
             Debug.Log("Properly Filled out all neccessary information!");
-            Continue_AudioSource.Play();
+            PlayPositiveAudio();
             ConfirmButtonPressed = true;
         }
     }
 
     private void DisplayErrorMessage(string message, string errorType)
     {
+        PlayErrorAudio();
         ErrorType = errorType;
         ErrorHandlingGO.SetActive(true);
         ErrorHandlingGO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = message;
@@ -429,15 +438,16 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleStartSessionButtonPress()
     {
-        Continue_AudioSource.Play();
+        PlayPositiveAudio();
         ConfirmButtonPressed = true;
     }
 
     public void HandleConnectToServerButtonPressed()
     {
-        if (ConnectButton.GetComponentInChildren<Text>().text == "Connected")
+        if(ConnectedToServer)
             return;
-        Continue_AudioSource.Play();
+
+        PlayPositiveAudio();
         string url = GameObject.Find("ServerURL_Text").GetComponent<TextMeshProUGUI>().text;
         ServerManager.ServerURL = url.Remove(url.Length - 1, 1);
         StartCoroutine(TestServerConnection());
@@ -447,7 +457,7 @@ public class InitScreen_Level : ControlLevel
     {
         yield return ServerManager.TestServerConnection((isConnected) =>
         {
-            if(isConnected)
+            if (isConnected)
             {
                 ConnectedToServer = true;
                 ConnectButton.GetComponent<Image>().color = Color.green;
@@ -484,9 +494,23 @@ public class InitScreen_Level : ControlLevel
 
     private void SetupAudio()
     {
-        Continue_AudioSource = gameObject.AddComponent<AudioSource>();
+        AudioSource = gameObject.AddComponent<AudioSource>();
         Continue_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
-        Continue_AudioSource.clip = Continue_AudioClip;
+        AudioSource.clip = Continue_AudioClip;
+
+        Error_AudioClip = Resources.Load<AudioClip>("Error");
+    }
+
+    public void PlayPositiveAudio()
+    {
+        AudioSource.clip = Continue_AudioClip;
+        AudioSource.Play();
+    }
+
+    public void PlayErrorAudio()
+    {
+        AudioSource.clip = Error_AudioClip;
+        AudioSource.Play();
     }
 
 

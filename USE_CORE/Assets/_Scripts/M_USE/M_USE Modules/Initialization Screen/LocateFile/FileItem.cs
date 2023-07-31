@@ -30,8 +30,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using System.Collections;
-using System.Collections.Generic;
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,19 +43,21 @@ public class FileItem_TMP : MonoBehaviour
 {
     public FileSpec File;
     public TMP_InputField InputField_FilePath;
+    public TextMeshProUGUI Text;
 
 
-    public void ManualStart(FileSpec file, TMP_InputField inputField)
+    public void ManualStart(FileSpec file, TMP_InputField inputField, TextMeshProUGUI text)  
     {
         File = file;
         InputField_FilePath = inputField;
+        Text = text;
 
         if (File != null)
         {
-            InputField_FilePath.text = PlayerPrefs.GetString("filepath-" + File.name, "");
-            InputField_FilePath.text = InputField_FilePath.text.Replace("file://", "");
-            InputField_FilePath.text = InputField_FilePath.text.Replace("%20", " ");
-            File.path = InputField_FilePath.text;
+            Text.text = PlayerPrefs.GetString("filepath-" + File.name, "");
+            Text.text = Text.text.Replace("file://", "");
+            Text.text = Text.text.Replace("%20", " ");
+            File.path = Text.text;
         }
         InputField_FilePath.onEndEdit.AddListener((text) => {
             UpdatePath(text);
@@ -66,10 +67,10 @@ public class FileItem_TMP : MonoBehaviour
     public void Locate()
     {
         #if (!UNITY_WEBGL)
-		if(!file.isFolder)
-			StandaloneFileBrowser.OpenFilePanelAsync("Open File", InputField_FilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
+		if(!File.isFolder)
+			StandaloneFileBrowser.OpenFilePanelAsync("Open File", Text.text, "", false, (string[] paths) => { OnFileOpened(paths); });
 		else
-			StandaloneFileBrowser.OpenFolderPanelAsync("Open File", InputField_FilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
+			StandaloneFileBrowser.OpenFolderPanelAsync("Open File", Text.text, false, (string[] paths) => { OnFileOpened(paths); });
         #endif
     }
 
@@ -80,7 +81,7 @@ public class FileItem_TMP : MonoBehaviour
             var path = paths[0];
             path = path.Replace("file://", "");
             path = path.Replace("%20", " ");
-            InputField_FilePath.text = path;
+            Text.text = path;
             UpdatePath(path);
         }
     }
@@ -92,6 +93,7 @@ public class FileItem_TMP : MonoBehaviour
         File.path = path;
     }
 }
+
 
 public class FileItem : MonoBehaviour
 {
@@ -137,12 +139,12 @@ public class FileItem : MonoBehaviour
 
 	public void locate()
 	{
-#if (!UNITY_WEBGL)
-		if(!file.isFolder)
-			StandaloneFileBrowser.OpenFilePanelAsync("Open File", InputField_FilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
-		else
-			StandaloneFileBrowser.OpenFolderPanelAsync("Open File", InputField_FilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
-#endif
+        #if (!UNITY_WEBGL)
+		    if(!File.isFolder)
+			    StandaloneFileBrowser.OpenFilePanelAsync("Open File", InputField_FilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
+		    else
+			    StandaloneFileBrowser.OpenFolderPanelAsync("Open File", InputField_FilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
+        #endif
     }
 
     void OnFileOpened(string[] paths)

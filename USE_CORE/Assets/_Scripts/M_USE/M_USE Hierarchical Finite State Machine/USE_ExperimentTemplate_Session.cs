@@ -143,10 +143,7 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("DONE WITH INIT SCREEN!!!!!!!");
 
                 if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
-                {
                     InitCamGO.SetActive(false); //Init canvas doesnt even use InitCam........ (we using this for something else??)
-
-                }
                 else
                 {
                     CreateExperimenterDisplay();

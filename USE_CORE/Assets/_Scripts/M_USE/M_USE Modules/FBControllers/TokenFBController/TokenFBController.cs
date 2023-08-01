@@ -120,7 +120,7 @@ public class TokenFBController : MonoBehaviour
         tokenBarFull = false;
 
     }
-    public bool isTokenBarFull()
+    public bool IsTokenBarFull()
     {
         return tokenBarFull;
     }

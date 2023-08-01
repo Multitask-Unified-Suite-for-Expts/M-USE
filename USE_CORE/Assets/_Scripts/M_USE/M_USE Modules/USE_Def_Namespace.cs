@@ -43,7 +43,7 @@ namespace USE_Def_Namespace
         
         public bool SonicationActive;
 
-        public float ShotgunRayCastCircleSize_DVA = 1.5f;
+        public float ShotgunRayCastCircleSize_DVA = 1.25f;
         public float ShotgunRaycastSpacing_DVA = 0.3f;
         public float ParticipantDistance_CM = 60f;
         public int RewardHotKeyNumPulses = 1;
@@ -77,10 +77,8 @@ namespace USE_Def_Namespace
         public float? ExternalStimScale;
         public List<string[]> FeedbackControllers;
         public int? TotalTokensNum;
-        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
         public Dictionary<string, string> CustomSettings;
-
     }
     
     public class BlockDef

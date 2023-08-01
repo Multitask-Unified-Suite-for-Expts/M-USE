@@ -288,7 +288,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
-            if (TokenFBController.isTokenBarFull())
+            if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;

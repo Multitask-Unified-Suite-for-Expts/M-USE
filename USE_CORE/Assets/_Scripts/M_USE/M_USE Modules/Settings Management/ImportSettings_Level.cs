@@ -59,10 +59,7 @@ public class ImportSettings_Level : ControlLevel
             }
             else
             {
-				Debug.Log("FILEPATH: " + currentSettingsDetails.FilePath);
-				Debug.Log("SEARCH STRING: " + currentSettingsDetails.SearchString);
-	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath,
-		            currentSettingsDetails.SearchString, (contentString) =>
+	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, currentSettingsDetails.SearchString, (contentString) =>
 		            {
 			            if (!string.IsNullOrEmpty(contentString))
 			            {
@@ -330,11 +327,7 @@ public class ImportSettings_Level : ControlLevel
                 }
             settingsArray[iLine - 1] = settingsInstance;
         }
-
-        Debug.Log("SUPPOSEDLY PARSED: " + settingsArray);
-        Debug.Log("ITEM 1: " + settingsArray[0]);
         return settingsArray;
-
     }
     
     

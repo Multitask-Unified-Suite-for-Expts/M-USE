@@ -130,6 +130,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
             SessionValues.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
+            SessionValues.FlashPanelController.FindPanels();
             if(SessionValues.WebBuild)
                 SessionValues.FlashPanelController.gameObject.SetActive(false);
 

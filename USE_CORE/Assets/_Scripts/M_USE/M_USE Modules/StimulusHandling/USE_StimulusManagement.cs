@@ -281,10 +281,9 @@ namespace USE_StimulusManagement
         {
 			SessionValues.Using2DStim = FileName.Contains("png");
 
-
 			if (SessionValues.UsingDefaultConfigs)
 			{
-                StimGameObject = LoadPrefabFromResources(PrefabPath);
+                StimGameObject = LoadPrefabFromResources();
 				callback?.Invoke(StimGameObject);
 			}
             else
@@ -301,7 +300,7 @@ namespace USE_StimulusManagement
 								Debug.Log("RETURNED STIM GAMEOBJECT IS NULL!!!!!!");
 						}));
 					}
-					else
+					else if(SessionValues.UsingLocalConfigs)
 					{
 						StimGameObject = LoadExternalStimFromFile();
 					}
@@ -317,7 +316,6 @@ namespace USE_StimulusManagement
                 {
                     Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 					callback?.Invoke(null);
-					//return null;
                 }
 
 
@@ -363,21 +361,11 @@ namespace USE_StimulusManagement
 			}
 		}
 		
-		
-		public GameObject LoadPrefabFromResources(string prefabPath = "")
+		//MAY NEED TO CHANGE THE PATH FOR WHEN NOT IN EDITOR!
+		public GameObject LoadPrefabFromResources()
 		{
-			if (prefabPath.Length > 2)
-				PrefabPath = prefabPath;
-
-			string path;
-			if (Application.isEditor)
-				path = "Assets/_USE_Session/Resources/" + PrefabPath + "/" + FileName;
-			else
-			{
-				string splitFileName = FileName.Split('.')[0];
-				path = PrefabPath + "/" + splitFileName;
-			}
-			StimGameObject = LoadModel(path, true);
+			string fullPath = "DefaultResources/Stimuli/" + FileName.Split('.')[0];
+			StimGameObject = LoadModel(fullPath);
 
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
@@ -425,17 +413,18 @@ namespace USE_StimulusManagement
 						if (CanvasGameObject != null)
 							StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
                     }
-					else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
-					{
-						string stimPath = WriteStimToPersistantDataPath(byteResult);
-						Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
-						StimGameObject = LoadModel(stimPath);
-						Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
+					//NOT USED BECAUSE TRILIB CANT LOAD FROM PERSISTENT DATA PATH:
+					//else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
+					//{
+					//	string stimPath = WriteStimToPersistantDataPath(byteResult);
+					//	Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
+					//	StimGameObject = LoadModel(stimPath);
+					//	Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
 
-						//Another trilib way to try:
-						//AssetLoader loader = new AssetLoader();
-						//GameObject loadedObject = loader.LoadFromMemory(byteResult, FileName);
-					}
+					//	//Another trilib way to try:
+					//	//AssetLoader loader = new AssetLoader();
+					//	//GameObject loadedObject = loader.LoadFromMemory(byteResult, FileName);
+					//}
 
 					PositionRotationScale();
 					if (!string.IsNullOrEmpty(StimName))
@@ -634,7 +623,7 @@ namespace USE_StimulusManagement
 
 
 
-		public GameObject LoadModel(string filePath, bool loadFromResources = false, bool visibiility = false)
+		public GameObject LoadModel(string filePath, bool visibiility = false)
 		{
 			using (var assetLoader = new AssetLoader())
 			{
@@ -644,15 +633,16 @@ namespace USE_StimulusManagement
 					assetLoaderOptions.AutoPlayAnimations = true;
 					assetLoaderOptions.AddAssetUnloader = true;
 
-					if(loadFromResources)
+					if(SessionValues.UsingDefaultConfigs)
 					{
-						string path = (PrefabPath + "/" + FileName).Split('.')[0];
-						StimGameObject = Object.Instantiate(Resources.Load(path) as GameObject);
-                    }
+						StimGameObject = Object.Instantiate(Resources.Load(filePath) as GameObject);
+						if (StimGameObject == null)
+							Debug.Log("STIM GO IS NULL!!!!!!!!!");
+					}
                     else
 						StimGameObject = assetLoader.LoadFromFile(filePath);
 				}
-				catch (System.Exception e)
+				catch (Exception e)
 				{
 					Debug.LogError(e.ToString());
 					return null;

@@ -145,9 +145,6 @@ public class SetupTask_Level : ControlLevel
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"),
                 SessionValues.InputManager.transform);
 
-            Debug.Log(TaskLevel);
-            Debug.Log(TaskLevel.TaskDef);
-            Debug.Log(TaskLevel.TaskDef.FeedbackControllers);
             
             List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
             int totalTokensNum = TaskLevel.TaskDef.TotalTokensNum;
@@ -181,11 +178,6 @@ public class SetupTask_Level : ControlLevel
 
             if (TaskLevel.CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = TaskLevel.CustomTaskEventCodes;
-
-            Debug.Log("############################");
-            Debug.Log("############################");
-            Debug.Log("############################");
-            Debug.Log("TrialLevel FB Controller : " + TrialLevel.TouchFBController);
 
             if (SessionValues.SessionDef.EyeTrackerActive)
                 SessionValues.GazeTracker.Init(FrameData, 0);

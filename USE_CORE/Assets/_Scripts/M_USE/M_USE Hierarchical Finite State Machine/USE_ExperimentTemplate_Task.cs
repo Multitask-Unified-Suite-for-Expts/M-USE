@@ -125,8 +125,8 @@ namespace USE_ExperimentTemplate_Task
             // importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
             // verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
             
-            if (SessionValues.UsingDefaultConfigs)
-                PrefabPath = "/DefaultResources/Stimuli";
+            //if (SessionValues.UsingDefaultConfigs)
+            //    PrefabPath = "/DefaultResources/Stimuli";
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
@@ -194,9 +194,8 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                if (SessionValues.SessionDef.IsHuman)
+                if (SessionValues.SessionDef.IsHuman) //NT: not sure we need this happening every block. 
                 {
-                    Debug.Log("TASK NAME : " + TaskName);
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
@@ -204,10 +203,6 @@ namespace USE_ExperimentTemplate_Task
                 }
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
-                Debug.Log("############################");
-                Debug.Log("############################");
-                Debug.Log("############################");
-                Debug.Log("TrialLevel FB Controller : " + TrialLevel.TouchFBController);
                 BlockCount++;
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
@@ -579,8 +574,6 @@ namespace USE_ExperimentTemplate_Task
                         string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
                         filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
 
-                        Debug.Log("FILE PATH: " + filePath);
-
                         if (!Directory.Exists(folderPath))
                             Directory.CreateDirectory(folderPath);
 
@@ -761,10 +754,8 @@ namespace USE_ExperimentTemplate_Task
             if (PreloadedStimGameObjects != null && PreloadedStimGameObjects.Count > 0)
             {
                 foreach (GameObject go in PreloadedStimGameObjects)
-                {
                     taskStimDefFromGameObject.Invoke(this, new object[] { go, PreloadedStims });
-                    // addTaskStimDefsToTaskStimGroup.Invoke(this, new object[] {TaskConfigPath});
-                }
+                
                 PreloadedStims.AddStims(PreloadedStimGameObjects);
             }
         }
@@ -774,16 +765,8 @@ namespace USE_ExperimentTemplate_Task
             MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
                 .MakeGenericMethod((new Type[] { StimDefType }));
 
-            float stimScale = 1;
-
-            if (SessionSettings.SettingClassExists(TaskName + "_TaskSettings"))
-            {
-                if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ExternalStimScale"))
-                    stimScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ExternalStimScale");
-            }
-
             foreach (StimDef sd in PrefabStims.stimDefs)
-                sd.StimScale = stimScale;
+                sd.StimScale = TaskDef.ExternalStimScale;
 
             if (PrefabStimPaths != null && PrefabStimPaths.Count > 0)
             {

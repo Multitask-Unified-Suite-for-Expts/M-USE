@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System;
 
 
@@ -28,11 +27,19 @@ public class FlashPanelController : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		panelImageL = GameObject.Find("FlashPanelL").GetComponent<Image>();
-		panelImageR = GameObject.Find("FlashPanelR").GetComponent<Image>();
+		FindPanels();
 		leftSequence = MakeSequence(leftSegmentLength);
 		rightSequence = MakeSequence(rightSegmentLength);
 	}
+
+	public void FindPanels()
+	{
+		if(panelImageL == null)
+		{
+			panelImageL = GameObject.Find("FlashPanelL").GetComponent<Image>();
+			panelImageR = GameObject.Find("FlashPanelR").GetComponent<Image>();
+		}
+    }
 
 	private void Update()
 	{
@@ -42,10 +49,10 @@ public class FlashPanelController : MonoBehaviour
 
 	public void TurnOffFlashPanels()
     {
-		panelImageL.gameObject.SetActive(false);
-		panelImageR.gameObject.SetActive(false);
-	    //GameObject.Find("FlashPanelL").SetActive(false);
-	    //GameObject.Find("FlashPanelR").SetActive(false);
+		if(panelImageL.gameObject != null)
+			panelImageL.gameObject.SetActive(false);
+		if(panelImageR.gameObject != null)
+			panelImageR.gameObject.SetActive(false);
     }
 
 	public void ReverseFlipBothSquares(){

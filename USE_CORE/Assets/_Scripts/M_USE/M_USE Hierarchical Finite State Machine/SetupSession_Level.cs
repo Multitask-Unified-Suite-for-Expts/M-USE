@@ -14,7 +14,6 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Task;
-using USE_StimulusManagement;
 
 
 public class SetupSession_Level : ControlLevel
@@ -283,6 +282,8 @@ public class SetupSession_Level : ControlLevel
 
     private void WriteSessionConfigsToPersistantDataPath()
     {
+        Debug.Log("WRITING SESSION CONFIGS TO PERS PATH!");
+
         if (Directory.Exists(SessionValues.ConfigFolderPath))
             Directory.Delete(SessionValues.ConfigFolderPath, true);
             

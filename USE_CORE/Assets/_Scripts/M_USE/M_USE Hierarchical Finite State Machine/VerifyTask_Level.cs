@@ -1,16 +1,16 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Reflection;
 using ConfigDynamicUI;
-using Tobii.Research.Unity.CodeExamples;
 using UnityEngine;
 using USE_Def_Namespace;
 using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Task;
 using USE_States;
 using USE_StimulusManagement;
+
 
 public class VerifyTask_Level : ControlLevel
 {
@@ -33,9 +33,9 @@ public class VerifyTask_Level : ControlLevel
         ImportSettings.AddChildLevel(importSettings_Level);
         ImportSettings.AddInitializationMethod(() =>
         {
-            //GOTTA FIND WHERE TO PUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
             if (SessionValues.UsingDefaultConfigs)
                 WriteTaskConfigsToPersistantDataPath(TaskLevel);
+
             TaskLevel.SpecifyTypes();
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
@@ -48,7 +48,10 @@ public class VerifyTask_Level : ControlLevel
             };
             // SetValuesForLoading("TaskDef");
 
-            importSettings_Level.SettingsDetails[0].FilePath = GetFilePath("TaskDef");
+            StartCoroutine(GetFilePath("TaskDef", result =>
+            {
+                importSettings_Level.SettingsDetails[0].FilePath = result;
+            }));
         });
 
         ImportSettings.AddUpdateMethod(() =>
@@ -118,8 +121,15 @@ public class VerifyTask_Level : ControlLevel
                 fileParsed = true;
 
                 if (importSettings_Level.SettingsDetails.Count > 1)
-                    importSettings_Level.SettingsDetails[1].FilePath =
-                        GetFilePath(importSettings_Level.SettingsDetails[1].SearchString);
+                {
+                    StartCoroutine(GetFilePath(importSettings_Level.SettingsDetails[1].SearchString, result =>
+                    {
+                        if (!string.IsNullOrEmpty(result))
+                            importSettings_Level.SettingsDetails[1].FilePath = result;
+                        else
+                            Debug.Log("GET FILE PATH RESULT IS NULL FOR SettingsDetails[1].SearchString !!!!!");
+                    }));
+                }
 
 
                 importSettings_Level.importPaused = false;
@@ -133,8 +143,6 @@ public class VerifyTask_Level : ControlLevel
 
         FindStims.AddInitializationMethod(() =>
         {
-            Debug.Log("External stims: " + TaskLevel.ExternalStims);
-
             TaskLevel.TaskStims = new TaskStims();
             if (TaskLevel.PrefabStims == null)
                 TaskLevel.PrefabStims = new StimGroup("PrefabStims");
@@ -156,10 +164,10 @@ public class VerifyTask_Level : ControlLevel
     //WHERE SHOULD WE CALL THIS METHOD?!?!?! 
     private void WriteTaskConfigsToPersistantDataPath(ControlLevel_Task_Template tl)
     {
+        Debug.Log("WRITING TASK CONFIGS TO PERSISTANT PATH! | " + tl.TaskName);
+
         if (!SessionValues.UsingDefaultConfigs)
             return;
-
-        Debug.Log("ABOUT TO WRITE TASK CONFIGS FOR: " + tl.TaskName);
 
         tl.TaskConfigPath = $"{SessionValues.ConfigFolderPath}/{tl.TaskName}_DefaultConfigs";
         Debug.Log("TASK CONFIG PATH: " + tl.TaskConfigPath);
@@ -185,10 +193,8 @@ public class VerifyTask_Level : ControlLevel
         {
             configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" +
                                                         tl.TaskName + entry.Key);
-            if (configTextAsset ==
-                null) //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                configTextAsset =
-                    Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
+            if (configTextAsset == null) //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
             if (configTextAsset != null)
                 File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value,
                     configTextAsset.bytes);
@@ -197,11 +203,10 @@ public class VerifyTask_Level : ControlLevel
 
 
 
-    private string GetFilePath(string searchString)
+    private IEnumerator GetFilePath(string searchString, Action<string> callback)
     {
         Debug.Log("Looking for file with search string " + searchString);
 
-        string pathToFile = "";
         string pathToFolder = "";
 
         if (SessionValues.UsingDefaultConfigs)
@@ -214,24 +219,22 @@ public class VerifyTask_Level : ControlLevel
 
         if (SessionValues.UsingServerConfigs)
         {
-            StartCoroutine(ServerManager.GetFilePath(pathToFolder, searchString, result =>
+            yield return StartCoroutine(ServerManager.GetFilePath(pathToFolder, searchString, result =>
             {
                 if (!string.IsNullOrEmpty(result))
-                    pathToFile = result;
+                    callback?.Invoke(result);
                 else
                     Debug.Log("Server GetFilePath() Result is null for: " + searchString);
             }));
         }
         else
-            pathToFile = SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*");
-
-        return pathToFile;
+            callback?.Invoke(SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*"));
     }
 
     private void SetValuesForLoading(string searchString)
     {
         importSettings_Level.SettingsDetails[0].SearchString = searchString;
-        GetFilePath(importSettings_Level.SettingsDetails[0].SearchString);
+        //StartCoroutine(GetFilePath(importSettings_Level.SettingsDetails[0].SearchString));
 
         switch (searchString.ToLower())
         {
@@ -264,9 +267,7 @@ public class VerifyTask_Level : ControlLevel
 
     public void SettingsConverterTask<T>(object parsedSettings) where T : TaskDef
     {
-        Debug.Log(parsedSettings);
         TaskLevel.TaskDef = (T) parsedSettings;
-        Debug.Log(TaskLevel.TaskDef.FeedbackControllers[0]);
     }
 
     public void SettingsConverterBlock<T>(object parsedSettings) where T : BlockDef

@@ -44,7 +44,10 @@ public class SetupSession_Level : ControlLevel
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
         {
             SetDataPaths();
-            SetConfigPathsAndTypes();
+
+            if (SessionValues.UsingDefaultConfigs)
+                WriteSessionConfigsToPersistantDataPath();
+
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
                 new SettingsDetails("SingleType", "SessionConfig", typeof(SessionDef)),
@@ -68,7 +71,7 @@ public class SetupSession_Level : ControlLevel
                         SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
                         
                         //determine file path of next config (event codes) based on content of sessiondef
-                        if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
+                        if (SessionValues.UsingServerConfigs) // Server
                             importSettings_Level.SettingsDetails[1].FilePath = SessionValues.ConfigFolderPath;
                         else  // Local or Default
                         {
@@ -176,8 +179,15 @@ public class SetupSession_Level : ControlLevel
     {
         SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
         ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
-        SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
-        SessionValues.TaskSelectionDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/TaskSelectionData" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData");
+
+        if (SessionValues.UsingServerConfigs)
+            SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
+        else if (SessionValues.UsingDefaultConfigs)
+            SessionValues.SessionDataPath = $"{SessionValues.LocateFile.GetPath("Data Folder")}/{SessionValues.FilePrefix}";
+        else if(SessionValues.UsingLocalConfigs)
+            SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
+
+        SessionValues.TaskSelectionDataPath = SessionValues.UsingLocalConfigs ? SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData" : $"{SessionValues.SessionDataPath}/TaskSelectionData";
     }
     
     
@@ -198,32 +208,8 @@ public class SetupSession_Level : ControlLevel
         }
 
         callbackBool?.Invoke(true);
-
-
     }
     
-    private void SetConfigPathsAndTypes()
-    {
-        if (SessionValues.WebBuild)
-        {
-            if (SessionValues.UsingDefaultConfigs)
-            {
-                //SessionValues.ConfigAccessType = "Default"; //SETTING IN INIT SCREEN LEVEL NOW!
-                //SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs"; //SETTING IN INIT SCREEN LEVEL NOW!
-                WriteSessionConfigsToPersistantDataPath();
-            }
-            else //Using Server Configs:
-            {
-                //SessionValues.ConfigAccessType = "Server";
-                SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-            }
-        }
-        else //Normal Build:
-        {
-            //SessionValues.ConfigAccessType = "Local"; //SETTING IN INIT SCREEN LEVEL NOW!
-            //SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder"); //SETTING IN INIT SCREEN LEVEL NOW!
-        }
-    }
 
 
     private void SetupInputManagement(State inputActive, State inputInactive)

@@ -13,7 +13,6 @@ using USE_UI;
 using USE_States;
 using USE_Settings;
 using USE_ExperimenterDisplay;
-using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
@@ -108,13 +107,8 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.SessionLevel = this;
 
-            //IDK WHERE TO PUT THIS CUZ LOCATE FILE ISN'T ON A GO ANYMORE, BUT SCRIPTS DO USE ITS FINDFILE METHOD
-            //SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
-
 
             State initScreen = new State("InitScreen");
-            // State loadSessionSettings = new State("LoadSessionSettings");
-            // State createSessionDataFolder = new State("CreateDataFolders");
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
@@ -135,16 +129,12 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
-            // importSettings_Level.SessionLevel = this;
-            // verifyTask_Level = gameObject.GetComponent<VerifyTask_Level>();
 
             //InitScreen State---------------------------------------------------------------------------------------------------------------
             initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                Debug.Log("DONE WITH INIT SCREEN!!!!!!!");
-
                 if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
                     InitCamGO.SetActive(false); //Init canvas doesnt even use InitCam........ (we using this for something else??)
                 else
@@ -161,21 +151,10 @@ namespace USE_ExperimentTemplate_Session
 
             bool waitForSerialPort = false;
 
-            // setupSession.AddChildLevel(set);
             //SetupSession State---------------------------------------------------------------------------------------------------------------
-
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
             setupSession.AddChildLevel(setupSessionLevel);
-            setupSessionLevel.SessionLevel = this;
-            
-            setupSession.AddDefaultInitializationMethod(() =>
-            {
-                //NEED TO MOVE THIS TO WHEREVER NORMAL BUILD CREATES THE TASKSELECTIONDATA FOLDER:
-                // if (SessionValues.WebBuild)
-                //     StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
-
-            });
-            
+            setupSessionLevel.SessionLevel = this;            
 
             int iTask = 0;
             SceneLoading = false;

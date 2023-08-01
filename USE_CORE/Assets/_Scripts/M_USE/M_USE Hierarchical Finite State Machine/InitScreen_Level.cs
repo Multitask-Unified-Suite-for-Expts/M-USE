@@ -33,6 +33,9 @@ public class InitScreen_Level : ControlLevel
 
     private GameObject ConnectToServerButton_GO;
 
+    private GameObject RedX_GO;
+    private GameObject GreenCheckMark_GO;
+
     private GameObject ErrorHandling_GO;
     private GameObject[] GreyOutPanels_Array;
 
@@ -50,6 +53,7 @@ public class InitScreen_Level : ControlLevel
     private bool ValuesLoaded;
     private bool ConfirmButtonPressed;
     private bool ConnectedToServer;
+    private bool FoldersSet;
 
     private string ErrorType;
 
@@ -214,6 +218,10 @@ public class InitScreen_Level : ControlLevel
             SessionValues.ConfigAccessType = "Server";
             string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
+
+            //THIS NEEDED??
+            SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
+
         }
         else //default config toggle is on
         {
@@ -242,7 +250,7 @@ public class InitScreen_Level : ControlLevel
             ServerConfig_GO.SetActive(true);
             LocalConfig_GO.SetActive(false);
             GreyOutPanels_Array[2].SetActive(false);
-            if (ConnectedToServer)
+            if (ConnectedToServer && !FoldersSet)
                 PopulateServerDropdown();
         }
         else if (selectedGO == DefaultConfig_Toggle.gameObject && DefaultConfig_Toggle.isOn)
@@ -286,8 +294,8 @@ public class InitScreen_Level : ControlLevel
 
     private void HandleToggleChange()
     {
-        if(ValuesLoaded)
-            PlayToggleAudio();
+        if (ValuesLoaded)
+            PlayAudio(ToggleChange_AudioClip);
 
         GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 
@@ -330,6 +338,11 @@ public class InitScreen_Level : ControlLevel
 
         ConnectToServerButton_GO = GameObject.Find("ConnectButton");
 
+        RedX_GO = GameObject.Find("RedX");
+        RedX_GO.SetActive(false);
+        GreenCheckMark_GO = GameObject.Find("GreenCheckMark");
+        GreenCheckMark_GO.SetActive(false);
+
         LocalData_GO = GameObject.Find("LocalData_GO");
         ServerData_GO = GameObject.Find("ServerData_GO");
         ServerData_GO.SetActive(false);
@@ -371,7 +384,7 @@ public class InitScreen_Level : ControlLevel
 
     private void DisplayErrorMessage(string message, string errorType)
     {
-        PlayErrorAudio();
+        PlayAudio(Error_AudioClip);
         ErrorType = errorType;
         ErrorHandling_GO.SetActive(true);
         ErrorHandling_GO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = message;
@@ -392,14 +405,14 @@ public class InitScreen_Level : ControlLevel
         else
         {
             Debug.Log("Properly Filled out all neccessary information!");
-            PlayConfirmAudio();
+            PlayAudio(Confirm_AudioClip);
             ConfirmButtonPressed = true;
         }
     }
 
     public void HandleStartSessionButtonPress()
     {
-        PlayConfirmAudio();
+        PlayAudio(Confirm_AudioClip);
         ConfirmButtonPressed = true;
     }
 
@@ -419,26 +432,38 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
-                PlayConfirmAudio();
+                PlayAudio(Confirm_AudioClip);
                 ConnectedToServer = true;
                 ConnectToServerButton_GO.GetComponent<Image>().color = Color.green;
                 ConnectToServerButton_GO.GetComponentInChildren<Text>().text = "Connected";
+                GreenCheckMark_GO.SetActive(true);
+                RedX_GO.SetActive(false);
+
+                if(ServerConfig_Toggle.isOn && !FoldersSet)
+                    PopulateServerDropdown();
             }
             else
             {
-                Debug.Log("UNABLE TO CONNECT TO SERVER!");
-                PlayErrorAudio();
+                Debug.LogError("UNABLE TO CONNECT TO SERVER!");
+                PlayAudio(Error_AudioClip);
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
+                RedX_GO.SetActive(true);
             }
         });
-
-        if (ConnectedToServer && ServerConfig_Toggle.isOn)
-            PopulateServerDropdown();
     }
 
     public void PopulateServerDropdown()
     {
-        StartCoroutine(ServerManager.GetSessionConfigFolders(folders => FolderDropdown.SetFolders(folders)));
+        StartCoroutine(ServerManager.GetSessionConfigFolders(folders =>
+        {
+            if (folders != null)
+            {
+                FolderDropdown.SetFolders(folders);
+                FoldersSet = true;
+            }
+            else
+                Debug.Log("TRIED TO GET FOLDERS FROM SERVER BUT THE RESULT IS NULL!");
+        }));
     }
 
     private string GetSubjectID()
@@ -457,22 +482,15 @@ public class InitScreen_Level : ControlLevel
         return datavalue.Remove(datavalue.Length - 1, 1);
     }
 
-    public void PlayToggleAudio()
+    public void PlayAudio(AudioClip clip)
     {
-        AudioSource.clip = ToggleChange_AudioClip;
-        AudioSource.Play();
-    }
-
-    public void PlayErrorAudio()
-    {
-        AudioSource.clip = Error_AudioClip;
-        AudioSource.Play();
-    }
-
-    public void PlayConfirmAudio()
-    {
-        AudioSource.clip = Confirm_AudioClip;
-        AudioSource.Play();
+        if (clip != null)
+        {
+            AudioSource.clip = clip;
+            AudioSource.Play();
+        }
+        else
+            Debug.Log("CANT PLAY AUDIO CLIP BECAUSE IT IS NULL!");
     }
 
 

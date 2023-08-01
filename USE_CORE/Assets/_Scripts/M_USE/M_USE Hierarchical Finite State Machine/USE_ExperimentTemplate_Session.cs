@@ -1103,10 +1103,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        // Debug.Log("sentdata: " + SerialSentData);
-                        // Debug.Log("sentdata.sc: " + SerialSentData.sc);
-                        // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount("sent"));
-                        // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
                         SessionValues.SerialSentData.AppendDataToBuffer();
                     }
                     catch (Exception e)
@@ -1119,10 +1115,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        // Debug.Log("recvdata: " + SerialRecvData);
-                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc);
-                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount("received"));
-                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("received"));
                         SessionValues.SerialRecvData.AppendDataToBuffer();
                     }
                     catch (Exception e)

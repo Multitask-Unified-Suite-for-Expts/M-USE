@@ -21,22 +21,15 @@ public class SetupTask_Level : ControlLevel
     private string TaskDataPath, ConfigFolderName, TaskName;
     public override void DefineControlLevel()
     {
-
-        TrialLevel = TaskLevel.TrialLevel;
-        BlockData = TaskLevel.BlockData;
-        FrameData = TaskLevel.FrameData;
-        TrialData = TaskLevel.TrialData;
-        TaskName = TaskLevel.TaskName;
-        
         State VerifyTask = new State("VerifyTask");
         State OtherSetup = new State("OtherSetup");
         AddActiveStates(new List<State> {VerifyTask, OtherSetup});
         
         verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
+        verifyTask_Level.TaskLevel = TaskLevel;
         VerifyTask.AddChildLevel(verifyTask_Level);
         VerifyTask.AddInitializationMethod(() =>
         {
-            verifyTask_Level.TaskLevel = TaskLevel;
         });
             
         VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup);
@@ -82,8 +75,10 @@ public class SetupTask_Level : ControlLevel
             TrialData = (TrialData) SessionValues.SessionDataControllers.InstantiateDataController<TrialData>(
                 "TrialData", ConfigFolderName, SessionValues.SessionDef.StoreData,
                 TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
+            
+            
+            TrialLevel = TaskLevel.TrialLevel;
             TrialData.taskLevel = TaskLevel;
-            TrialData.trialLevel = TrialLevel;
             TrialData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.TrialData = TrialData;
@@ -129,10 +124,16 @@ public class SetupTask_Level : ControlLevel
             if (SessionValues.SessionDef.FlashPanelsActive)
                 FrameData.AddFlashPanelColumns();
 
+            
+            TaskLevel.BlockData = BlockData;
+            TaskLevel.FrameData = FrameData;
+            TaskLevel.TrialData = TrialData;
+            TaskLevel.TaskName = TaskName;
+            TaskLevel.TrialLevel = TrialLevel;
             //user-defined task control level 
-            DefineControlLevel();
+            TaskLevel.DefineControlLevel();
 
-            BlockData.AddStateTimingData(this);
+            BlockData.AddStateTimingData(TaskLevel);
             StartCoroutine(BlockData.CreateFile());
             StartCoroutine(FrameData.CreateFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
@@ -142,7 +143,7 @@ public class SetupTask_Level : ControlLevel
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"),
                 SessionValues.InputManager.transform);
 
-            List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
+            List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllersList;
             int totalTokensNum = TaskLevel.TaskDef.TotalTokensNum;
 
 
@@ -246,18 +247,10 @@ public class SetupTask_Level : ControlLevel
             }
 
             SessionValues.InputManager.SetActive(false);
-            //
-            // TrialLevel.TaskStims = TaskStims;
-            // TrialLevel.PreloadedStims = PreloadedStims;
-            // TrialLevel.PrefabStims = PrefabStims;
-            // TrialLevel.ExternalStims = ExternalStims;
-            // TrialLevel.RuntimeStims = RuntimeStims;
-            // TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
             TrialLevel.TaskLevel = TaskLevel;
             TrialLevel.DefineTrialLevel();
 
-            TaskLevel.TaskLevelDefined = true;
         });
         
         OtherSetup.SpecifyTermination(() => true, () => null, () => { });

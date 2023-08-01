@@ -1,17 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Reflection;
-using Newtonsoft.Json;
 using SelectionTracking;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_Def_Namespace;
-using USE_DisplayManagement;
 using USE_ExperimenterDisplay;
-using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
 using USE_UI;
@@ -58,7 +49,6 @@ public static class SessionValues
 
     public static EventCodeManager EventCodeManager;
     
-    public static string ConfigAccessType;
     public static string ConfigFolderPath;
 
     public static SyncBoxController SyncBoxController;

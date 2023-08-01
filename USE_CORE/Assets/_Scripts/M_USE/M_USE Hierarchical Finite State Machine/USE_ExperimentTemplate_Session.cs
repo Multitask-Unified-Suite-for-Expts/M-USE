@@ -13,7 +13,6 @@ using USE_UI;
 using USE_States;
 using USE_Settings;
 using USE_ExperimenterDisplay;
-using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
@@ -108,13 +107,8 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.SessionLevel = this;
 
-            //IDK WHERE TO PUT THIS CUZ LOCATE FILE ISN'T ON A GO ANYMORE, BUT SCRIPTS DO USE ITS FINDFILE METHOD
-            //SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
-
 
             State initScreen = new State("InitScreen");
-            // State loadSessionSettings = new State("LoadSessionSettings");
-            // State createSessionDataFolder = new State("CreateDataFolders");
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
@@ -134,17 +128,18 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
+            SessionValues.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
+            if(SessionValues.WebBuild)
+                SessionValues.FlashPanelController.gameObject.SetActive(false);
+
+
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
-            // importSettings_Level.SessionLevel = this;
-            // verifyTask_Level = gameObject.GetComponent<VerifyTask_Level>();
 
             //InitScreen State---------------------------------------------------------------------------------------------------------------
             initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                Debug.Log("DONE WITH INIT SCREEN!!!!!!!");
-
                 if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
                     InitCamGO.SetActive(false); //Init canvas doesnt even use InitCam........ (we using this for something else??)
                 else
@@ -161,21 +156,10 @@ namespace USE_ExperimentTemplate_Session
 
             bool waitForSerialPort = false;
 
-            // setupSession.AddChildLevel(set);
             //SetupSession State---------------------------------------------------------------------------------------------------------------
-
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
             setupSession.AddChildLevel(setupSessionLevel);
-            setupSessionLevel.SessionLevel = this;
-            
-            setupSession.AddDefaultInitializationMethod(() =>
-            {
-                //NEED TO MOVE THIS TO WHEREVER NORMAL BUILD CREATES THE TASKSELECTIONDATA FOLDER:
-                // if (SessionValues.WebBuild)
-                //     StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath)); //Create SessionLevel Sub-Folder inside Data Folder
-
-            });
-            
+            setupSessionLevel.SessionLevel = this;            
 
             int iTask = 0;
             SceneLoading = false;
@@ -215,8 +199,6 @@ namespace USE_ExperimentTemplate_Session
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
                 CreateSessionSettingsFolder();
-
-                SessionValues.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)
                     SessionValues.FlashPanelController.TurnOffFlashPanels();
@@ -1116,10 +1098,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        // Debug.Log("sentdata: " + SerialSentData);
-                        // Debug.Log("sentdata.sc: " + SerialSentData.sc);
-                        // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferCount("sent"));
-                        // Debug.Log("sentdata.sc: " + SerialSentData.sc.BufferToString("sent"));
                         SessionValues.SerialSentData.AppendDataToBuffer();
                     }
                     catch (Exception e)
@@ -1132,10 +1110,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        // Debug.Log("recvdata: " + SerialRecvData);
-                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc);
-                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferCount("received"));
-                        // Debug.Log("recvdata.sc: " + SerialRecvData.sc.BufferToString("received"));
                         SessionValues.SerialRecvData.AppendDataToBuffer();
                     }
                     catch (Exception e)
@@ -1145,28 +1119,22 @@ namespace USE_ExperimentTemplate_Session
                 }
             }
         }
-        
-        string GetConfigFolderPath(string configName)
+
+        public string GetConfigFolderPath(string configName)
         {
             string path;
 
-            if(SessionValues.UsingDefaultConfigs)
-            {
+            if (SessionValues.UsingDefaultConfigs)
                 path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-
-            }
             else if (SessionValues.UsingServerConfigs)
-            {
                 path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
-            }
             else
             {
                 if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
                     return SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configName;
                 else
                 {
-                    List<string> configFolders =
-                        (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
+                    List<string> configFolders = (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
                     int index = 0;
                     foreach (string k in SessionValues.SessionDef.TaskMappings.Keys)
                     {
@@ -1176,34 +1144,9 @@ namespace USE_ExperimentTemplate_Session
                     path = SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configFolders[index];
                 }
             }
-
-            //if(SessionValues.WebBuild)
-            //{
-            //    if (SessionValues.UsingDefaultConfigs)
-            //        path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-            //    else
-            //        path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
-            //}
-            //else
-            //{
-            //    if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-            //        return SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configName;
-            //    else
-            //    {
-            //        List<string> configFolders =
-            //            (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
-            //        int index = 0;
-            //        foreach (string k in SessionValues.SessionDef.TaskMappings.Keys)
-            //        {
-            //            if (k.Equals(configName)) break;
-            //            ++index;
-            //        }
-            //        path = SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configFolders[index];
-            //    }
-            //}
             return path;
         }
-        
+
         // void OnTaskSceneLoaded(string configFolderName, bool verifyOnly)
         // {
         //     //We need to wait until the scene is loaded (async) to get
@@ -1258,7 +1201,7 @@ namespace USE_ExperimentTemplate_Session
         //         tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
         //
         //     tl.TaskCam.gameObject.SetActive(false);
-	       //  tl.BlockResults_AudioClip = BlockResults_AudioClip;
+        //  tl.BlockResults_AudioClip = BlockResults_AudioClip;
         //
         //     tl.BlockResultsPrefab = BlockResultsPrefab;
         //     tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
@@ -1311,7 +1254,7 @@ namespace USE_ExperimentTemplate_Session
         //     callback?.Invoke(tl);
         // }
 
-        
+
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct ReparseDataBuffer

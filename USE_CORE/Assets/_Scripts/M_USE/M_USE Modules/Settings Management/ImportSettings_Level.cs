@@ -59,6 +59,8 @@ public class ImportSettings_Level : ControlLevel
             }
             else
             {
+				Debug.Log("FILEPATH: " + currentSettingsDetails.FilePath);
+				Debug.Log("SEARCH STRING: " + currentSettingsDetails.SearchString);
 	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath,
 		            currentSettingsDetails.SearchString, (contentString) =>
 		            {
@@ -143,16 +145,17 @@ public class ImportSettings_Level : ControlLevel
         else
             Debug.LogError("Settings parsing style is " + settingParsingStyles[iSettings] + ", but this is not handled by script.");
     }
-    private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
+
+	private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
     {
         string fileContent;
 
-        if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
+        if (SessionValues.UsingLocalConfigs || SessionValues.UsingDefaultConfigs)
         {
-            fileContent = File.ReadAllText(filePath); //Will need to check that this works during Web Build
-            callback(fileContent);
+			fileContent = File.ReadAllText(filePath);
+			callback(fileContent);
         }
-        else if (SessionValues.ConfigAccessType == "Server")
+        else //Using Server Configs:
         {
             yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, searchString, result =>
             {
@@ -166,10 +169,8 @@ public class ImportSettings_Level : ControlLevel
                 }
             }));
         }
-        else
-            callback(null);
-
     }
+
     public T[] ConvertTextToSettings_Array<T>(string fileContentString, char delimiter = '\t')
     {
         string[] lines;
@@ -337,337 +338,337 @@ public class ImportSettings_Level : ControlLevel
     }
     
     
-		public static object ConvertStringToType<T>(string s)
+	public static object ConvertStringToType<T>(string s)
+	{
+		if (typeof(T) == typeof(string))
+			return s;
+		else if (typeof(T) == typeof(Vector2))
 		{
-			if (typeof(T) == typeof(string))
-				return s;
-			else if (typeof(T) == typeof(Vector2))
+			try
 			{
-				try
-				{
-					return (Vector2)ConvertStringArray<Vector2>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
+				return (Vector2)ConvertStringArray<Vector2>(s);
 			}
-			else if (typeof(T) == typeof(Vector3))
+			catch (Exception e)
 			{
-				try
-				{
-					return (Vector3)ConvertStringArray<Vector3>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
 
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(Vector2[]))
-			{
-				try
-				{
-					return (Vector2[])ConvertStringArray<Vector2[]>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(Vector3[]))
-			{
-				try
-				{
-					return (Vector3[])ConvertStringArray<Vector3[]>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(Reward))
-			{
-				try
-				{
-					return (Reward)JsonConvert.DeserializeObject(s, typeof(Reward));
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(Reward[]))
-			{
-				try
-				{
-					return (Reward[])JsonConvert.DeserializeObject(s, typeof(Reward[]));
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(Reward[][]))
-			{
-				try
-				{
-					return (Reward[][])JsonConvert.DeserializeObject(s, typeof(Reward[][]));
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-            else if (typeof(T) == typeof(float[]))
-			{
-				try
-				{
-					return (float[])ConvertStringArray<float>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(int[]))
-			{
-				try
-				{
-					return (int[])ConvertStringArray<int>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(int[][]))
-			{
-
-				try
-				{// Remove the parentheses
-
-					return (int[][])ConvertStringJaggedArray<int>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(float[][]))
-			{
-
-				try
-				{// Remove the parentheses
-
-					return (float[][])ConvertStringJaggedArray<float>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(bool[][]))
-			{
-
-				try
-				{// Remove the parentheses
-
-					return (bool[][])ConvertStringJaggedArray<bool>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else if (typeof(T) == typeof(Color))
-			{
-				try
-				{
-					return (Color)ConvertStringJaggedArray<Color>(s);
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-
-			else if (typeof(T) != null)
-			{
-				try
-				{
-					//can add custom conversion instructions for particular typeStrings if needed
-					return Convert.ChangeType(s, typeof(T));
-				}
-				catch (Exception e)
-				{
-					Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the conversion failed.");
-
-					throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-				}
-			}
-			else
-			{
-				throw new ArgumentException("Tried to convert string \"" + s + "\" to type \""
-						+ typeof(T).Name + " but the type was not recognized.");
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 			}
 		}
+		else if (typeof(T) == typeof(Vector3))
+		{
+			try
+			{
+				return (Vector3)ConvertStringArray<Vector3>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(Vector2[]))
+		{
+			try
+			{
+				return (Vector2[])ConvertStringArray<Vector2[]>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(Vector3[]))
+		{
+			try
+			{
+				return (Vector3[])ConvertStringArray<Vector3[]>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(Reward))
+		{
+			try
+			{
+				return (Reward)JsonConvert.DeserializeObject(s, typeof(Reward));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(Reward[]))
+		{
+			try
+			{
+				return (Reward[])JsonConvert.DeserializeObject(s, typeof(Reward[]));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(Reward[][]))
+		{
+			try
+			{
+				return (Reward[][])JsonConvert.DeserializeObject(s, typeof(Reward[][]));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+        else if (typeof(T) == typeof(float[]))
+		{
+			try
+			{
+				return (float[])ConvertStringArray<float>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(int[]))
+		{
+			try
+			{
+				return (int[])ConvertStringArray<int>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(int[][]))
+		{
+
+			try
+			{// Remove the parentheses
+
+				return (int[][])ConvertStringJaggedArray<int>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(float[][]))
+		{
+
+			try
+			{// Remove the parentheses
+
+				return (float[][])ConvertStringJaggedArray<float>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(bool[][]))
+		{
+
+			try
+			{// Remove the parentheses
+
+				return (bool[][])ConvertStringJaggedArray<bool>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(Color))
+		{
+			try
+			{
+				return (Color)ConvertStringJaggedArray<Color>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+
+		else if (typeof(T) != null)
+		{
+			try
+			{
+				//can add custom conversion instructions for particular typeStrings if needed
+				return Convert.ChangeType(s, typeof(T));
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
+
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else
+		{
+			throw new ArgumentException("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the type was not recognized.");
+		}
+	}
 		
 		
-		public static object ConvertStringArray<T>(string s)
+	public static object ConvertStringArray<T>(string s)
+	{
+		if (typeof(T) == typeof(int))
 		{
-			if (typeof(T) == typeof(int))
-			{
-				string[] sArray = GetStringArray(s);
-				int[] finalArray = new int[sArray.Length];
-				for (int iVal = 0; iVal < sArray.Length; iVal++)
-					finalArray[iVal] = int.Parse(sArray[iVal]);
-				return finalArray;
-			}
-			else if (typeof(T) == typeof(float))
-			{
-				string[] sArray = GetStringArray(s);
-				float[] finalArray = new float[sArray.Length];
-				for (int iVal = 0; iVal < sArray.Length; iVal++)
-					finalArray[iVal] = float.Parse(sArray[iVal]);
-				return finalArray;
-			}
-			else if (typeof(T) == typeof(string))
-			{
-				return GetStringArray(s);
-			}
-			else if (typeof(T) == typeof(Vector2))
-			{
-				float[] floatArray = (float[])ConvertStringArray<float>(s);
-				return new Vector2(floatArray[0], floatArray[1]);
-			}
-			else if (typeof(T) == typeof(Vector3))
-			{
-				float[] floatArray = (float[])ConvertStringArray<float>(s);
-				return new Vector3(floatArray[0], floatArray[1], floatArray[2]);
-			}
-			else if (typeof(T) == typeof(Vector2[]))
-			{
-				string[][] sArray = GetStringArrayofArrays(s);
-				Vector2[] finalArray = new Vector2[sArray.Length];
-				for (int iVal = 0; iVal < sArray.Length; iVal++)
-				{
-					finalArray[iVal] = new Vector2(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]));
-				}
-				return finalArray;
-			}
-			else if (typeof(T) == typeof(Vector3[]))
-			{
-				string[][] sArray = GetStringArrayofArrays(s);
-				Vector3[] finalArray = new Vector3[sArray.Length];
-				for (int iVal = 0; iVal < sArray.Length; iVal++)
-				{
-					finalArray[iVal] = new Vector3(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]), float.Parse(sArray[iVal][2]));
-				}
-				return finalArray;
-			}
-			else
-			{
-				return GetStringArray(s);
-			}
+			string[] sArray = GetStringArray(s);
+			int[] finalArray = new int[sArray.Length];
+			for (int iVal = 0; iVal < sArray.Length; iVal++)
+				finalArray[iVal] = int.Parse(sArray[iVal]);
+			return finalArray;
 		}
+		else if (typeof(T) == typeof(float))
+		{
+			string[] sArray = GetStringArray(s);
+			float[] finalArray = new float[sArray.Length];
+			for (int iVal = 0; iVal < sArray.Length; iVal++)
+				finalArray[iVal] = float.Parse(sArray[iVal]);
+			return finalArray;
+		}
+		else if (typeof(T) == typeof(string))
+		{
+			return GetStringArray(s);
+		}
+		else if (typeof(T) == typeof(Vector2))
+		{
+			float[] floatArray = (float[])ConvertStringArray<float>(s);
+			return new Vector2(floatArray[0], floatArray[1]);
+		}
+		else if (typeof(T) == typeof(Vector3))
+		{
+			float[] floatArray = (float[])ConvertStringArray<float>(s);
+			return new Vector3(floatArray[0], floatArray[1], floatArray[2]);
+		}
+		else if (typeof(T) == typeof(Vector2[]))
+		{
+			string[][] sArray = GetStringArrayofArrays(s);
+			Vector2[] finalArray = new Vector2[sArray.Length];
+			for (int iVal = 0; iVal < sArray.Length; iVal++)
+			{
+				finalArray[iVal] = new Vector2(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]));
+			}
+			return finalArray;
+		}
+		else if (typeof(T) == typeof(Vector3[]))
+		{
+			string[][] sArray = GetStringArrayofArrays(s);
+			Vector3[] finalArray = new Vector3[sArray.Length];
+			for (int iVal = 0; iVal < sArray.Length; iVal++)
+			{
+				finalArray[iVal] = new Vector3(float.Parse(sArray[iVal][0]), float.Parse(sArray[iVal][1]), float.Parse(sArray[iVal][2]));
+			}
+			return finalArray;
+		}
+		else
+		{
+			return GetStringArray(s);
+		}
+	}
 
-		public static object ConvertStringJaggedArray<T>(string s)
+	public static object ConvertStringJaggedArray<T>(string s)
+	{
+		if (typeof(T) == typeof(int))
 		{
-			if (typeof(T) == typeof(int))
+			string[][] outerArray = GetStringArrayofArrays(s);
+			int[][] finalArray = new int[outerArray.Length][];
+			for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
 			{
-				string[][] outerArray = GetStringArrayofArrays(s);
-				int[][] finalArray = new int[outerArray.Length][];
-				for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
-				{
-					finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => int.Parse(str));
-					//string[] innerArray = GetStringArray(outerArray[iOuter]);
-					//finalArray[iOuter] = new int[innerArray.Length];
-					//for (int iInner = 0; iInner < innerArray.Length; iInner++)
-						//finalArray[iOuter][iInner] = int.Parse(innerArray[iInner]);
-				}
-				return finalArray;
+				finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => int.Parse(str));
+				//string[] innerArray = GetStringArray(outerArray[iOuter]);
+				//finalArray[iOuter] = new int[innerArray.Length];
+				//for (int iInner = 0; iInner < innerArray.Length; iInner++)
+					//finalArray[iOuter][iInner] = int.Parse(innerArray[iInner]);
 			}
-			else if (typeof(T) == typeof(float))
-			{
-				string[][] outerArray = GetStringArrayofArrays(s);
-				float[][] finalArray = new float[outerArray.Length][];
-				for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
-				{
-					finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => float.Parse(str));
-					//string[] innerArray = GetStringArray(outerArray[iOuter]);
-					//finalArray[iOuter] = new float[innerArray.Length];
-					//for (int iInner = 0; iInner < innerArray.Length; iInner++)
-					//finalArray[iOuter][iInner] = float.Parse(innerArray[iInner]);
-				}
-				return finalArray;
-			}
-			else if (typeof(T) == typeof(string))
-			{
-				return GetStringArrayofArrays(s);
-			}
-			else if (typeof(T) == typeof(bool))
-			{
-				string[][] outerArray = GetStringArrayofArrays(s);
-				bool[][] finalArray = new bool[outerArray.Length][];
-				for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
-				{
-					finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => bool.Parse(str));
-				}
-				return finalArray;
-			}
-			else
-				return new object[0][];
+			return finalArray;
 		}
-		public static string[] GetStringArray(string s)
+		else if (typeof(T) == typeof(float))
 		{
-			return (string[])JsonConvert.DeserializeObject(s, typeof(string[]));
+			string[][] outerArray = GetStringArrayofArrays(s);
+			float[][] finalArray = new float[outerArray.Length][];
+			for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
+			{
+				finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => float.Parse(str));
+				//string[] innerArray = GetStringArray(outerArray[iOuter]);
+				//finalArray[iOuter] = new float[innerArray.Length];
+				//for (int iInner = 0; iInner < innerArray.Length; iInner++)
+				//finalArray[iOuter][iInner] = float.Parse(innerArray[iInner]);
+			}
+			return finalArray;
 		}
-		public static string[][] GetStringArrayofArrays(string s)
+		else if (typeof(T) == typeof(string))
 		{
-			return (string[][])JsonConvert.DeserializeObject(s, typeof(string[][]));
+			return GetStringArrayofArrays(s);
 		}
+		else if (typeof(T) == typeof(bool))
+		{
+			string[][] outerArray = GetStringArrayofArrays(s);
+			bool[][] finalArray = new bool[outerArray.Length][];
+			for (int iOuter = 0; iOuter < outerArray.Length; iOuter++)
+			{
+				finalArray[iOuter] = Array.ConvertAll(outerArray[iOuter], str => bool.Parse(str));
+			}
+			return finalArray;
+		}
+		else
+			return new object[0][];
+	}
+	public static string[] GetStringArray(string s)
+	{
+		return (string[])JsonConvert.DeserializeObject(s, typeof(string[]));
+	}
+	public static string[][] GetStringArrayofArrays(string s)
+	{
+		return (string[][])JsonConvert.DeserializeObject(s, typeof(string[][]));
+	}
     
-   // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
+    // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")
     public T ConvertTextToSettings_JSON<T>(string fileContentString)
     {
         
@@ -685,7 +686,8 @@ public class ImportSettings_Level : ControlLevel
         // T[] settingsArray = new T[] { settingsInstance };
         return settingsInstance;
     }
-  //  public static T ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
+
+    //  public static T ImportSettings_SingleTypeDelimited<T>(string settingsCategory, string settingsPath, string serverFileString = null, char delimiter = '\t')
     public T ConvertTextToSettings_SingleType<T>(string fileContentString, char delimiter = '\t')
     {
         string[] lines;
@@ -875,8 +877,7 @@ public class ImportSettings_Level : ControlLevel
         }
     }
     
-    public  T? GetValueOrNull<T>(string valueAsString)
-        where T : struct 
+    public  T? GetValueOrNull<T>(string valueAsString) where T : struct 
     {
         if (string.IsNullOrEmpty(valueAsString))
             return null;

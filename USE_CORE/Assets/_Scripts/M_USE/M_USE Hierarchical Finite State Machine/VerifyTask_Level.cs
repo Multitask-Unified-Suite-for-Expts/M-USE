@@ -57,7 +57,6 @@ public class VerifyTask_Level : ControlLevel
             if (importSettings_Level.fileParsed)
             {
                 currentFileName = importSettings_Level.currentSettingsDetails.FilePath;
-                // CurrentTask.
                 parsedResult = importSettings_Level.parsedResult;
                 Type currentType = importSettings_Level.currentSettingsDetails.SettingType;
 
@@ -156,10 +155,7 @@ public class VerifyTask_Level : ControlLevel
         if (SessionValues.UsingDefaultConfigs)
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}_DefaultConfigs";
         else if (SessionValues.UsingLocalConfigs)
-        {
             pathToFolder = $"{SessionValues.ConfigFolderPath}{TaskLevel.TaskName}";
-            //pathToFolder = $"{SessionValues.ConfigFolderPath}{Path.DirectorySeparatorChar}{CurrentTask.TaskName}";
-        }
         else if (SessionValues.UsingServerConfigs)
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}";
         
@@ -171,9 +167,7 @@ public class VerifyTask_Level : ControlLevel
                 if (!string.IsNullOrEmpty(result))
                     pathToFile = result;
                 else
-                {
-                    Debug.Log("Server file path not found");
-                }
+                    Debug.Log("Server GetFilePath() Result is null for: " + searchString);
             }));
         }
         else

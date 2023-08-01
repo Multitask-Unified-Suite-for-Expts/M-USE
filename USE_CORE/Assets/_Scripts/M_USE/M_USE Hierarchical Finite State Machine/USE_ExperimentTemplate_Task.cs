@@ -656,11 +656,9 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
+        //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
         public void HandleTrialAndBlockDefs(bool verifyOnly)
-        {
-            //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
-            
-            
+        {   
             if (AllTrialDefs == null || AllTrialDefs.Count() == 0) //no trialDefs have been imported from settings files
             {
                 if (BlockDefs == null)

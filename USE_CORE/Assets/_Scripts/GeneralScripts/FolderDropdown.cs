@@ -23,6 +23,7 @@ public class FolderDropdown : MonoBehaviour
             TMP_Dropdown.OptionData option = new TMP_Dropdown.OptionData(folder);
             options.Add(option);
         }
+        dropdown.ClearOptions();
         dropdown.AddOptions(options);
     }
 

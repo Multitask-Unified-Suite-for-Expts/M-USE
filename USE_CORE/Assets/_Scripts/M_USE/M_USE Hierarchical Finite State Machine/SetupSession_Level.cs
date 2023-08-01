@@ -37,20 +37,23 @@ public class SetupSession_Level : ControlLevel
         LoadTaskScene = new State("LoadTaskScene");
         VerifyTask = new State("VerifyTask");
         AddActiveStates(new List<State> { ImportSessionSettings, CreateDataFolder, LoadTaskScene, VerifyTask });
-        
+
         // importSettings_Level.DefineControlLevel();
         importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
         ImportSessionSettings.AddChildLevel(importSettings_Level);
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
         {
             SetDataPaths();
-            SetConfigPathsAndTypes();
+
+            if (SessionValues.UsingDefaultConfigs)
+                WriteSessionConfigsToPersistantDataPath();
+
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
                 new SettingsDetails("SingleType", "SessionConfig", typeof(SessionDef)),
                 new SettingsDetails("JSON", "EventCode", typeof(Dictionary<string, EventCode>))
             };
-            if (SessionValues.WebBuild && SessionValues.UsingDefaultConfigs)
+            if (SessionValues.UsingServerConfigs)
                 importSettings_Level.SettingsDetails[0].FilePath = SessionValues.ConfigFolderPath;
             else
                 importSettings_Level.SettingsDetails[0].FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
@@ -61,14 +64,14 @@ public class SetupSession_Level : ControlLevel
                 if (importSettings_Level.fileParsed)
                 {
                     Debug.Log(importSettings_Level.SettingsDetails[0].SearchString + " PARSED!");
-            
+
                     if (importSettings_Level.SettingsDetails[0].SearchString == "SessionConfig") //just parsed sessionconfig
                     {
                         //set sessiondef to the parsed content
                         SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
-                        
+
                         //determine file path of next config (event codes) based on content of sessiondef
-                        if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs) // Server
+                        if (SessionValues.UsingServerConfigs)
                             importSettings_Level.SettingsDetails[1].FilePath = SessionValues.ConfigFolderPath;
                         else  // Local or Default
                         {
@@ -82,24 +85,24 @@ public class SetupSession_Level : ControlLevel
                     else if (importSettings_Level.SettingsDetails[0].SearchString == "EventCode") //just parsed eventcodeconfig
                     {
                         //set event codes to parsed content
-                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>) importSettings_Level.parsedResult;
+                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;
                     }
                     else
                         Debug.LogError($"The {importSettings_Level.SettingsDetails[0].SearchString} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
-                    
+
                     importSettings_Level.importPaused = false;
                     settingsImported = true;
                     setupPaused = false;
                 }
             });
-        ImportSessionSettings.SpecifyTermination(() => ImportSessionSettings.ChildLevel.Terminated && !setupPaused, CreateDataFolder, 
+        ImportSessionSettings.SpecifyTermination(() => ImportSessionSettings.ChildLevel.Terminated && !setupPaused, CreateDataFolder,
             () =>
             {
                 settingsImported = false;
                 SetupInputManagement(SessionLevel.selectTask, SessionLevel.loadTask);
                 SetupSessionDataControllers();
             });
-        
+
         CreateDataFolder.AddDefaultInitializationMethod(() =>
         {
             dataFolderCreated = false;
@@ -114,12 +117,12 @@ public class SetupSession_Level : ControlLevel
             //NEED TO MOVE THIS TO WHEREVER NORMAL BUILD CREATES THE TASKSELECTIONDATA FOLDER:
         });
 
-        CreateDataFolder.SpecifyTermination(()=> dataFolderCreated && !setupPaused, LoadTaskScene);
+        CreateDataFolder.SpecifyTermination(() => dataFolderCreated && !setupPaused, LoadTaskScene);
 
         int iTask = 0;
         string taskName = "";
         AsyncOperation loadScene = null;
-        
+
         LoadTaskScene.AddInitializationMethod(() =>
             {
                 taskSceneLoaded = false;
@@ -133,10 +136,10 @@ public class SetupSession_Level : ControlLevel
                 };
             }
         );
-        
-        LoadTaskScene.SpecifyTermination(()=> taskSceneLoaded && !setupPaused, VerifyTask);
-        
-        
+
+        LoadTaskScene.SpecifyTermination(() => taskSceneLoaded && !setupPaused, VerifyTask);
+
+
         VerifyTask_Level verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
 
         VerifyTask.AddChildLevel(verifyTask_Level);
@@ -148,39 +151,52 @@ public class SetupSession_Level : ControlLevel
             var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
-            
+
             string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
 
             GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
         });
 
-        VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
+        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
             () =>
             {
                 SessionLevel.ActiveTaskLevels.Add(taskLevel);
                 SceneManager.UnloadSceneAsync(taskName);
                 iTask++;
             });
-        VerifyTask.SpecifyTermination(()=> verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, ()=> null, ()=> SceneManager.UnloadSceneAsync(taskName));
+        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, () => null, () => SceneManager.UnloadSceneAsync(taskName));
     }
 
 
     public void GetTaskLevelType<T>(string configFolderName, VerifyTask_Level verifyTask_Level) where T : ControlLevel_Task_Template
     {
         //Gets the task level type using reflection which cannot be done outside an invoked method
-        string taskName = (string) SessionValues.SessionDef.TaskMappings[configFolderName];
+        string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
         verifyTask_Level.TaskLevel = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+
+
+        //GOTTA FIND WHERE TO PUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
+        if(SessionValues.UsingDefaultConfigs)
+            WriteTaskConfigsToPersistantDataPath(verifyTask_Level.TaskLevel);
     }
+
 
     private void SetDataPaths()
     {
         SessionValues.FilePrefix = "Session_" + SessionValues.SessionID + "__Subject_" + SessionValues.SubjectID + "__" + DateTime.Now.ToString("MM_dd_yy__HH_mm_ss");
         ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
-        SessionValues.SessionDataPath = SessionValues.WebBuild ? ServerManager.SessionDataFolderPath : (SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix);
-        SessionValues.TaskSelectionDataPath = SessionValues.WebBuild ? $"{SessionValues.SessionDataPath}/TaskSelectionData" : (SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData");
+
+        if (SessionValues.UsingServerConfigs)
+            SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
+        else if (SessionValues.UsingDefaultConfigs)
+            SessionValues.SessionDataPath = $"{SessionValues.LocateFile.GetPath("Data Folder")}/{SessionValues.FilePrefix}";
+        else if (SessionValues.UsingLocalConfigs)
+            SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
+
+        SessionValues.TaskSelectionDataPath = SessionValues.UsingLocalConfigs ? SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData" : $"{SessionValues.SessionDataPath}/TaskSelectionData";
     }
-    
-    
+
+
     private IEnumerator CreateSessionDataFolder(Action<bool> callbackBool)
     {
         yield return StartCoroutine(SessionLevel.SessionData.CreateFile());
@@ -198,33 +214,7 @@ public class SetupSession_Level : ControlLevel
         }
 
         callbackBool?.Invoke(true);
-
-
     }
-    
-    private void SetConfigPathsAndTypes()
-    {
-        if (SessionValues.WebBuild)
-        {
-            if (SessionValues.UsingDefaultConfigs)
-            {
-                //SessionValues.ConfigAccessType = "Default"; //SETTING IN INIT SCREEN LEVEL NOW!
-                //SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs"; //SETTING IN INIT SCREEN LEVEL NOW!
-                WriteSessionConfigsToPersistantDataPath();
-            }
-            else //Using Server Configs:
-            {
-                //SessionValues.ConfigAccessType = "Server";
-                SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-            }
-        }
-        else //Normal Build:
-        {
-            //SessionValues.ConfigAccessType = "Local"; //SETTING IN INIT SCREEN LEVEL NOW!
-            //SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder"); //SETTING IN INIT SCREEN LEVEL NOW!
-        }
-    }
-
 
     private void SetupInputManagement(State inputActive, State inputInactive)
     {
@@ -293,33 +283,67 @@ public class SetupSession_Level : ControlLevel
         }
     }
 
+
     private void WriteSessionConfigsToPersistantDataPath()
     {
-        if (Directory.Exists(SessionValues.ConfigFolderPath ))
-            Directory.Delete(SessionValues.ConfigFolderPath , true);
-
-        if (!Directory.Exists(SessionValues.ConfigFolderPath ))
+        if (Directory.Exists(SessionValues.ConfigFolderPath))
+            Directory.Delete(SessionValues.ConfigFolderPath, true);
+            
+        Directory.CreateDirectory(SessionValues.ConfigFolderPath);
+        List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "EventCodeConfig_json", "DisplayConfig_json" };
+        foreach (string config in configsToWrite)
         {
-            Directory.CreateDirectory(SessionValues.ConfigFolderPath );
-            List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "EventCodeConfig_json", "DisplayConfig_json" };
-            foreach (string config in configsToWrite)
-            {
-                byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
-                string configName = config;
-                if (configName.ToLower().Contains("sessionconfig"))
-                    configName += ".txt";
-                else if (configName.ToLower().Contains("eventcode") || configName.ToLower().Contains("displayconfig"))
-                    configName += ".json";
-                File.WriteAllBytes(SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configName, textFileBytes);
-
-                Debug.Log("WROTE " + configName + " TO PERSISTANT PATH!");
-            }
+            byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
+            string configName = config;
+            if (configName.ToLower().Contains("sessionconfig"))
+                configName += ".txt";
+            else if (configName.ToLower().Contains("eventcode") || configName.ToLower().Contains("displayconfig"))
+                configName += ".json";
+            File.WriteAllBytes(SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configName, textFileBytes);
         }
     }
-    
-    
-    
-        private void SetupSessionDataControllers()
+
+    //WHERE SHOULD WE CALL THIS METHOD?!?!?! 
+    private void WriteTaskConfigsToPersistantDataPath(ControlLevel_Task_Template tl)
+    {
+        if (!SessionValues.UsingDefaultConfigs)
+            return;
+
+        Debug.Log("ABOUT TO WRITE TASK CONFIGS FOR: " + tl.TaskName);
+
+        tl.TaskConfigPath = $"{SessionValues.ConfigFolderPath}/{tl.TaskName}_DefaultConfigs";
+        Debug.Log("TASK CONFIG PATH: " + tl.TaskConfigPath);
+
+        if (Directory.Exists(tl.TaskConfigPath))
+            Directory.Delete(tl.TaskConfigPath, true);
+
+        Debug.Log("CREATING A DIRECTORY AT: " + tl.TaskConfigPath);
+        Directory.CreateDirectory(tl.TaskConfigPath);
+
+        Dictionary<string, string> configDict = new Dictionary<string, string>
+        {
+            {"_TaskDef_singleType", "_TaskDef_singleType.txt"},
+            {"_BlockDef_array", "_BlockDef_array.txt"},
+            {"_TrialDef_array", "_TrialDef_array.txt"},
+            {"_StimDef_array", "_StimDef_array.txt"},
+            {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
+            {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
+            {"MazeDef_array", "MazeDef_array.txt"}
+        };
+        TextAsset configTextAsset;
+        foreach (var entry in configDict)
+        {
+            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+            if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
+                configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
+            if (configTextAsset != null)
+                File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
+        }
+    }
+
+
+
+    private void SetupSessionDataControllers()
         {
             SessionLevel.SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
                 ("SessionData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
@@ -373,4 +397,3 @@ public class SetupSession_Level : ControlLevel
             SessionValues.MouseTracker.Init(SessionLevel.FrameData, 0);
         }
 }
-

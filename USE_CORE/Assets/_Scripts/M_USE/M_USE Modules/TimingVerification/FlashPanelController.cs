@@ -3,7 +3,9 @@ using UnityEngine.UI;
 using System.Collections;
 using System;
 
-public class FlashPanelController : MonoBehaviour {
+
+public class FlashPanelController : MonoBehaviour
+{
 	private Image panelImageL;
 	private Image panelImageR;
 
@@ -40,8 +42,10 @@ public class FlashPanelController : MonoBehaviour {
 
 	public void TurnOffFlashPanels()
     {
-	    GameObject.Find("FlashPanelL").SetActive(false);
-	    GameObject.Find("FlashPanelR").SetActive(false);
+		panelImageL.gameObject.SetActive(false);
+		panelImageR.gameObject.SetActive(false);
+	    //GameObject.Find("FlashPanelL").SetActive(false);
+	    //GameObject.Find("FlashPanelR").SetActive(false);
     }
 
 	public void ReverseFlipBothSquares(){

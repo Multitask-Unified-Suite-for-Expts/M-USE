@@ -1710,6 +1710,11 @@ PrefabInstance:
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 208512668776466679, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 785
+      objectReference: {fileID: 0}
     - target: {fileID: 1261186286192700968, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: m_Pivot.x
@@ -1910,6 +1915,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3286936735621854926, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -125
+      objectReference: {fileID: 0}
     - target: {fileID: 4165580877913185342, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: m_IsActive
@@ -1919,6 +1929,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: StartPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 4512664658299931372, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 785
       objectReference: {fileID: 0}
     - target: {fileID: 5384413144999050654, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}

@@ -567,8 +567,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            for (int i = 0; i < (calibPoint.CalibrationSamples.Count >= 10 ? 10 : calibPoint.CalibrationSamples.Count); i++)
+            //for (int i = 0; i < (calibPoint.CalibrationSamples.Count >= 10 ? 10 : calibPoint.CalibrationSamples.Count); i++)
+            Debug.Log("calibPoint.CalibrationSamples.Count" + calibPoint.CalibrationSamples.Count);
+            for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
             {
+                
                 CalibrationSample sample = calibPoint.CalibrationSamples[i];
                 // Record the positions of the Left and Right eye for each sample of the calibration point 
                 Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);

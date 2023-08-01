@@ -194,6 +194,14 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                if (SessionValues.SessionDef.IsHuman)
+                {
+                    Debug.Log("TASK NAME : " + TaskName);
+                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
+                    SessionValues.HumanStartPanel.SetTaskLevel(this);
+                    SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+                }
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
                 Debug.Log("############################");

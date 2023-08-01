@@ -175,9 +175,6 @@ public class SetupSession_Level : ControlLevel
         verifyTask_Level.TaskLevel = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
 
 
-        //GOTTA FIND WHERE TO PUT THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:
-        if(SessionValues.UsingDefaultConfigs)
-            WriteTaskConfigsToPersistantDataPath(verifyTask_Level.TaskLevel);
     }
 
 
@@ -302,45 +299,6 @@ public class SetupSession_Level : ControlLevel
             File.WriteAllBytes(SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configName, textFileBytes);
         }
     }
-
-    //WHERE SHOULD WE CALL THIS METHOD?!?!?! 
-    private void WriteTaskConfigsToPersistantDataPath(ControlLevel_Task_Template tl)
-    {
-        if (!SessionValues.UsingDefaultConfigs)
-            return;
-
-        Debug.Log("ABOUT TO WRITE TASK CONFIGS FOR: " + tl.TaskName);
-
-        tl.TaskConfigPath = $"{SessionValues.ConfigFolderPath}/{tl.TaskName}_DefaultConfigs";
-        Debug.Log("TASK CONFIG PATH: " + tl.TaskConfigPath);
-
-        if (Directory.Exists(tl.TaskConfigPath))
-            Directory.Delete(tl.TaskConfigPath, true);
-
-        Debug.Log("CREATING A DIRECTORY AT: " + tl.TaskConfigPath);
-        Directory.CreateDirectory(tl.TaskConfigPath);
-
-        Dictionary<string, string> configDict = new Dictionary<string, string>
-        {
-            {"_TaskDef_singleType", "_TaskDef_singleType.txt"},
-            {"_BlockDef_array", "_BlockDef_array.txt"},
-            {"_TrialDef_array", "_TrialDef_array.txt"},
-            {"_StimDef_array", "_StimDef_array.txt"},
-            {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
-            {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
-            {"MazeDef_array", "MazeDef_array.txt"}
-        };
-        TextAsset configTextAsset;
-        foreach (var entry in configDict)
-        {
-            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
-            if (configTextAsset == null)//try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
-            if (configTextAsset != null)
-                File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value, configTextAsset.bytes);
-        }
-    }
-
 
 
     private void SetupSessionDataControllers()

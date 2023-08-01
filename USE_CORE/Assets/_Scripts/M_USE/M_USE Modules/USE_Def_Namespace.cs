@@ -77,7 +77,7 @@ namespace USE_Def_Namespace
         public List<string[]> FeatureNames;
         public string neutralPatternedColorName;
         public float? ExternalStimScale;
-        public List<string> FeedbackControllers;
+        public List<string> FeedbackControllersList;
         public float TouchFeedbackDuration = 0.3f;
         public int TotalTokensNum = 5;
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;

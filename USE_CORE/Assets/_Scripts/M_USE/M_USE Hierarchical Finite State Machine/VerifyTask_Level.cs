@@ -226,7 +226,6 @@ public class VerifyTask_Level : ControlLevel
     public void SettingsConverterStim<T>(object parsedSettings) where T: StimDef
     {
         T[] tempStims = (T[])parsedSettings;
-        Debug.Log(tempStims[0].FileName);
         TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
 }

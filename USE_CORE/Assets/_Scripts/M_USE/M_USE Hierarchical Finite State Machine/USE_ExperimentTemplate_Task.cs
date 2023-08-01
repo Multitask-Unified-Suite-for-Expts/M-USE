@@ -122,8 +122,8 @@ namespace USE_ExperimentTemplate_Task
             Debug.Log("STARTED DEFINE TASK##################################################");
             TaskLevelDefined = false;
 
-            importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
-            verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
+            // importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
+            // verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
             
             if (SessionValues.UsingDefaultConfigs)
                 PrefabPath = "/DefaultResources/Stimuli";
@@ -188,12 +188,12 @@ namespace USE_ExperimentTemplate_Task
             // VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
 
             SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
+            setupTaskLevel.TaskLevel = this;
             SetupTask.AddChildLevel(setupTaskLevel);
 
             //SetupTask State-----------------------------------------------------------------------------------------------------
             SetupTask.AddInitializationMethod(() =>
             {
-                SetTaskSummaryString();
 
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
@@ -205,7 +205,8 @@ namespace USE_ExperimentTemplate_Task
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
             });
-            SetupTask.SpecifyTermination(() => setupTaskLevel.Terminated, RunBlock);
+            SetupTask.SpecifyTermination(() => setupTaskLevel.Terminated, RunBlock, ()=> 
+                SetTaskSummaryString());
 
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
@@ -402,11 +403,8 @@ namespace USE_ExperimentTemplate_Task
                         Destroy(child.gameObject);
                 }
             });
-
-
-
-
-            // yield return null;
+            
+            TaskLevelDefined = true;
         }
 
 
@@ -743,8 +741,6 @@ namespace USE_ExperimentTemplate_Task
 
         public void FindStims()
         {
-            Debug.Log("EXTERNAL STIMS IN FindStims: " + ExternalStims);
-            
             MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
                 .MakeGenericMethod(new Type[] { StimDefType });
 

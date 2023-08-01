@@ -575,33 +575,27 @@ namespace USE_ExperimentTemplate_Session
                 loadScene.completed += (_) =>
                 {
                     Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
-                    Debug.Log("SELECTED TASK : " + taskName + " ... " + taskType);
-                    //var methodInfo = this.GetType().GetMethod("AddText", BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null);
-
-                    // MethodInfo SettingsConverter_methodTask = GetType()
-                    //     .GetMethod(nameof(this.SettingsConverterTask)).MakeGenericMethod(new Type[] {currentType});
-                    // var methodInfo = GetType().GetMethod(nameof(this.SetCurrentTask));
-                    // Debug.Log("method info " + methodInfo);
+                    
                     MethodInfo SetCurrentTaskMethod = GetType().GetMethod(nameof(this.SetCurrentTask)).MakeGenericMethod(new Type[] { taskType });
                     SetCurrentTaskMethod.Invoke(this, new object[] {taskName});
-                    // CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
                     
                     SceneLoading = false;
                 };
-                // {
-                //     // OnTaskSceneLoaded(selectedConfigFolderName, false);
-                //     //CurrentTask = ActiveTaskLevels.Find((task) => task.ConfigFolderName == selectedConfigFolderName);
-                // };
             });
 
+            bool DefiningTask = false;
             loadTask.AddUpdateMethod(() =>
             {
                 Debug.Log(("scene loading: " + SceneLoading));
                 Debug.Log("Current Task: " + CurrentTask);
                 if (CurrentTask != null)
                     Debug.Log("TaskLevel Defined: " + CurrentTask.TaskLevelDefined);
-                if (!SceneLoading && CurrentTask != null)
+                if (!SceneLoading && CurrentTask != null && !DefiningTask)
+                {
+                    DefiningTask = true;
                     CurrentTask.DefineTaskLevel();
+                }
+
             });
             
             loadTask.AddFixedUpdateMethod(() =>
@@ -616,8 +610,9 @@ namespace USE_ExperimentTemplate_Session
             });
 
             loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, runTask, () =>
-            
+
             {
+                DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 SessionCam.gameObject.SetActive(false);

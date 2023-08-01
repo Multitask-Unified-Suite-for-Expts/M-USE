@@ -26,16 +26,25 @@ public class SetupTask_Level : ControlLevel
         AddActiveStates(new List<State> {VerifyTask, OtherSetup});
         
         verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
-        verifyTask_Level.TaskLevel = TaskLevel;
         VerifyTask.AddChildLevel(verifyTask_Level);
         VerifyTask.AddInitializationMethod(() =>
         {
+            verifyTask_Level.TaskLevel = TaskLevel;
         });
             
-        VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup);
+        VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup, () =>
+        {
+            Debug.Log("#####################################################: " + TaskLevel.TaskDef);
+        });
 
         OtherSetup.AddInitializationMethod(() =>
-        {
+        {  if (SessionValues.SessionDef.IsHuman)
+            {
+                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
+                SessionValues.HumanStartPanel.SetTaskLevel(TaskLevel);
+                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+            }
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName;
 
@@ -131,7 +140,6 @@ public class SetupTask_Level : ControlLevel
             TaskLevel.TaskName = TaskName;
             TaskLevel.TrialLevel = TrialLevel;
             //user-defined task control level 
-            TaskLevel.DefineControlLevel();
 
             BlockData.AddStateTimingData(TaskLevel);
             StartCoroutine(BlockData.CreateFile());
@@ -143,7 +151,11 @@ public class SetupTask_Level : ControlLevel
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"),
                 SessionValues.InputManager.transform);
 
-            List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllersList;
+            Debug.Log(TaskLevel);
+            Debug.Log(TaskLevel.TaskDef);
+            Debug.Log(TaskLevel.TaskDef.FeedbackControllers);
+            
+            List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
             int totalTokensNum = TaskLevel.TaskDef.TotalTokensNum;
 
 
@@ -248,8 +260,12 @@ public class SetupTask_Level : ControlLevel
 
             SessionValues.InputManager.SetActive(false);
 
+            TaskLevel.DefineControlLevel();
             TrialLevel.TaskLevel = TaskLevel;
+            TrialLevel.FrameData = FrameData;
+            TrialLevel.TrialData = TrialData;
             TrialLevel.DefineTrialLevel();
+            
 
         });
         

@@ -112,10 +112,11 @@ namespace USE_ExperimentTemplate_Session
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
+            State setupTask = new State("VerifyTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");
-            AddActiveStates(new List<State> { initScreen, setupSession, selectTask, loadTask, runTask, finishSession, gazeCalibration });
+            AddActiveStates(new List<State> { initScreen, setupSession, selectTask, loadTask, setupTask, runTask, finishSession, gazeCalibration });
 
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();
 
@@ -609,7 +610,7 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
 
-            loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, runTask, () =>
+            loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, setupTask, () =>
 
             {
                 DefiningTask = false;
@@ -639,6 +640,16 @@ namespace USE_ExperimentTemplate_Session
             //automatically finish tasks after running one - placeholder for proper selection
             //runTask.AddLateUpdateMethod
 
+            SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
+            setupTask.AddChildLevel(setupTaskLevel);
+            setupTask.AddInitializationMethod(() =>
+            {
+                setupTaskLevel.TaskLevel = CurrentTask;
+                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
+
+              
+            });
+            setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {

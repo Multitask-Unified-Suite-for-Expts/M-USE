@@ -1084,7 +1084,7 @@ MonoBehaviour:
   ControlLevelName: SetupTask_Level
   initScreen: {fileID: 0}
   Terminated: 0
-  isMainLevel: 1
+  isMainLevel: 0
   CallDefineLevelAutomatically: 1
   quitApplicationAtEnd: 0
   DebugActive: 0

@@ -15,7 +15,7 @@ public static class SessionValues
 
     //Info Collected from Init Screen Panels:
     public static string SubjectID;
-    public static string SessionID;
+    public static string SubjectAge;
     public static bool UsingDefaultConfigs;
     public static bool UsingLocalConfigs;
     public static bool UsingServerConfigs;

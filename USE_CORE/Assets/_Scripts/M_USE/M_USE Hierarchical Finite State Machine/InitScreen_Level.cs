@@ -15,7 +15,7 @@ public class InitScreen_Level : ControlLevel
     private GameObject MainPanel_GO;
 
     private TextMeshProUGUI SubjectID_Text;
-    private TextMeshProUGUI SessionID_Text;
+    private TextMeshProUGUI SubjectAge_Text;
     private TextMeshProUGUI ServerData_Text;
     private TextMeshProUGUI LocalData_Text;
 
@@ -116,7 +116,7 @@ public class InitScreen_Level : ControlLevel
             ConfirmButtonPressed = false;
 
             SessionValues.SubjectID = GetSubjectID();
-            SessionValues.SessionID = GetSessionID();
+            SessionValues.SubjectAge = GetSubjectAge();
 
             SetConfigInfo();
             SetDataInfo();
@@ -171,7 +171,7 @@ public class InitScreen_Level : ControlLevel
         switch(ErrorType)
         {
             case "EmptyID":
-                if (GetSubjectID().Length > 0 && GetSessionID().Length > 0)
+                if (GetSubjectID().Length > 0 && GetSubjectAge().Length > 0)
                     return true;
                 break;
             case "EmptyConfigToggle":
@@ -333,7 +333,7 @@ public class InitScreen_Level : ControlLevel
         ErrorHandling_GO.SetActive(false);
 
         SubjectID_Text = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>();
-        SessionID_Text = GameObject.Find("SessionID_Text").GetComponent<TextMeshProUGUI>();
+        SubjectAge_Text = GameObject.Find("SubjectAge_Text").GetComponent<TextMeshProUGUI>();
         ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
         LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
 
@@ -401,8 +401,8 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleConfirmButtonPress() //For the AllInfo Panel's Confirm Button
     {
-        if (GetSubjectID().Length < 1 || GetSessionID().Length < 1)
-            DisplayErrorMessage("Input a SubjectID and SessionID!", "EmptyID");
+        if (GetSubjectID().Length < 1 || GetSubjectAge().Length < 1)
+            DisplayErrorMessage("Input a SubjectID and SubjectAge!", "EmptyID");
         else if (!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn) //make sure 1 of the config types is selected
             DisplayErrorMessage("Select a Config Type!", "EmptyConfigToggle");
         else if (!LocalData_Toggle.isOn && !ServerData_Toggle.isOn && !NoData_Toggle.isOn) //make sure 1 of the data options is selected
@@ -480,10 +480,10 @@ public class InitScreen_Level : ControlLevel
         string subjectID = SubjectID_Text.GetComponent<TextMeshProUGUI>().text;
         return subjectID.Remove(subjectID.Length - 1, 1);
     }
-    private string GetSessionID()
+    private string GetSubjectAge()
     {
-        string sessionID = SessionID_Text.GetComponent<TextMeshProUGUI>().text;
-        return sessionID.Remove(sessionID.Length - 1, 1);
+        string SubjectAge = SubjectAge_Text.GetComponent<TextMeshProUGUI>().text;
+        return SubjectAge.Remove(SubjectAge.Length - 1, 1);
     }
     private string GetDataValue()
     {

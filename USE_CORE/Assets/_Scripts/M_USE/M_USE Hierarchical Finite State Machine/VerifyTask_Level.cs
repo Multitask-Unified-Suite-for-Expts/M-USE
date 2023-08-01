@@ -164,18 +164,14 @@ public class VerifyTask_Level : ControlLevel
     //WHERE SHOULD WE CALL THIS METHOD?!?!?! 
     private void WriteTaskConfigsToPersistantDataPath(ControlLevel_Task_Template tl)
     {
-        Debug.Log("WRITING TASK CONFIGS TO PERSISTANT PATH! | " + tl.TaskName);
-
         if (!SessionValues.UsingDefaultConfigs)
             return;
 
         tl.TaskConfigPath = $"{SessionValues.ConfigFolderPath}/{tl.TaskName}_DefaultConfigs";
-        Debug.Log("TASK CONFIG PATH: " + tl.TaskConfigPath);
 
         if (Directory.Exists(tl.TaskConfigPath))
             Directory.Delete(tl.TaskConfigPath, true);
 
-        Debug.Log("CREATING A DIRECTORY AT: " + tl.TaskConfigPath);
         Directory.CreateDirectory(tl.TaskConfigPath);
 
         Dictionary<string, string> configDict = new Dictionary<string, string>
@@ -191,8 +187,7 @@ public class VerifyTask_Level : ControlLevel
         TextAsset configTextAsset;
         foreach (var entry in configDict)
         {
-            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" +
-                                                        tl.TaskName + entry.Key);
+            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
             if (configTextAsset == null) //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
                 configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
             if (configTextAsset != null)

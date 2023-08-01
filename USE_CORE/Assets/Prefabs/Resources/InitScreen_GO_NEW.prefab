@@ -635,7 +635,7 @@ GameObject:
   - component: {fileID: 4756254679732405163}
   - component: {fileID: 1068207022079080198}
   m_Layer: 5
-  m_Name: SessionID_Label
+  m_Name: SubjectAge_Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -688,7 +688,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Session ID
+  m_text: Subject Age
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
   m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
@@ -3229,7 +3229,7 @@ GameObject:
   - component: {fileID: 7668117298375951418}
   - component: {fileID: 9093657403704921147}
   m_Layer: 5
-  m_Name: SessionID_Placeholder
+  m_Name: SubjectAge_Placeholder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3282,7 +3282,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: SessionID
+  m_text: Age
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
   m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
@@ -7245,7 +7245,7 @@ GameObject:
   - component: {fileID: 7592938824318975251}
   - component: {fileID: 5735573300961055237}
   m_Layer: 5
-  m_Name: SessionID_InputField
+  m_Name: SubjectAge_InputField
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7764,7 +7764,7 @@ GameObject:
   - component: {fileID: 5599051772933812660}
   - component: {fileID: 2975837398901507750}
   m_Layer: 5
-  m_Name: SessionID_Text
+  m_Name: SubjectAge_Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9038,7 +9038,7 @@ GameObject:
   - component: {fileID: 5793637661166940689}
   - component: {fileID: 1588722814188054827}
   m_Layer: 5
-  m_Name: SessionID_TextArea
+  m_Name: SubjectAge_TextArea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9089,7 +9089,7 @@ GameObject:
   m_Component:
   - component: {fileID: 344156709959017645}
   m_Layer: 5
-  m_Name: SessionID_GO
+  m_Name: SubjectAge_GO
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9113,7 +9113,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 425, y: 265}
+  m_AnchoredPosition: {x: 450, y: 265}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7802368946196118175

@@ -212,7 +212,7 @@ public class VerifyTask_Level : ControlLevel
     {
         Debug.Log(parsedSettings);
         TaskLevel.TaskDef = (T) parsedSettings;
-        Debug.Log(TaskLevel.TaskDef);
+        Debug.Log(TaskLevel.TaskDef.FeedbackControllers[0]);
     }
     
     public void SettingsConverterBlock<T>(object parsedSettings) where T: BlockDef

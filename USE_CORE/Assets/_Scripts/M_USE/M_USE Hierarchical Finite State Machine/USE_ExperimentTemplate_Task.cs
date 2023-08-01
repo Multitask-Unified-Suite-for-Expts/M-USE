@@ -131,12 +131,12 @@ namespace USE_ExperimentTemplate_Task
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
 
-            SetupTask = new State("SetupTask");
+            // SetupTask = new State("SetupTask");
             RunBlock = new State("RunBlock");
             BlockFeedback = new State("BlockFeedback");
             FinishTask = new State("FinishTask");
             RunBlock.AddChildLevel(TrialLevel);
-            AddActiveStates(new List<State> { SetupTask, RunBlock, BlockFeedback, FinishTask });
+            AddActiveStates(new List<State> { RunBlock, BlockFeedback, FinishTask });
 
             TrialLevel.TrialDefType = TrialDefType; //may need to be moved down after new states
             TrialLevel.StimDefType = StimDefType;   //may need to be moved down after new states
@@ -187,26 +187,9 @@ namespace USE_ExperimentTemplate_Task
             // VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, SetupTask);
             // VerifyTask.SpecifyTermination(() => verifyOnly && VerifyTask.ChildLevel.Terminated, () => null);
 
-            SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
-            setupTaskLevel.TaskLevel = this;
-            SetupTask.AddChildLevel(setupTaskLevel);
 
             //SetupTask State-----------------------------------------------------------------------------------------------------
-            SetupTask.AddInitializationMethod(() =>
-            {
-
-                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
-
-                if (SessionValues.SessionDef.IsHuman)
-                {
-                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                    SessionValues.HumanStartPanel.SetTaskLevel(this);
-                    SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-                }
-            });
-            SetupTask.SpecifyTermination(() => setupTaskLevel.Terminated, RunBlock, ()=> 
-                SetTaskSummaryString());
+            
 
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>

@@ -43,6 +43,7 @@ public class InitScreen_Level : ControlLevel
     private AudioClip ToggleChange_AudioClip;
     private AudioClip Error_AudioClip;
     private AudioClip Confirm_AudioClip;
+    private AudioClip Connected_AudioClip;
 
     private State SetupInitScreen;
     private State StartScreen;
@@ -76,7 +77,16 @@ public class InitScreen_Level : ControlLevel
         SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        StartScreen.AddInitializationMethod(() => StartPanel_GO.SetActive(true));
+        StartScreen.AddInitializationMethod(() =>
+        {
+            StartPanel_GO.SetActive(true);
+            StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+        });
+        StartScreen.AddUpdateMethod(() =>
+        {
+            if (StartPanel_GO.transform.localPosition != Vector3.zero)
+                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 700 * Time.deltaTime);
+        });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
             ConfirmButtonPressed = false;
@@ -88,9 +98,13 @@ public class InitScreen_Level : ControlLevel
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
+            MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
         });
         CollectInfo.AddUpdateMethod(() =>
         {
+            if (MainPanel_GO.transform.localPosition != Vector3.zero)
+                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 800 * Time.deltaTime);
+
             if (ErrorHandling_GO.activeInHierarchy)
             {
                 if(ErrorHandled())
@@ -189,7 +203,6 @@ public class InitScreen_Level : ControlLevel
         {
             SessionValues.StoringDataLocally = true;
             SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
-            //SessionValues.SessionDataPath = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>().text;
         }
         else if (ServerData_Toggle.isOn)
         {
@@ -209,24 +222,19 @@ public class InitScreen_Level : ControlLevel
         if (LocalConfig_Toggle.isOn)
         {
             SessionValues.UsingLocalConfigs = true;
-            SessionValues.ConfigAccessType = "Local";
             SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
         }
         else if (ServerConfig_Toggle.isOn)
         {
             SessionValues.UsingServerConfigs = true;
-            SessionValues.ConfigAccessType = "Server";
             string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
             ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
-
-            //THIS NEEDED??
             SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
 
         }
         else //default config toggle is on
         {
             SessionValues.UsingDefaultConfigs = true;
-            SessionValues.ConfigAccessType = "Default";
             SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
         }
     }
@@ -380,6 +388,7 @@ public class InitScreen_Level : ControlLevel
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Confirm_AudioClip = Resources.Load<AudioClip>("BlockResults");
+        Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
     }
 
     private void DisplayErrorMessage(string message, string errorType)
@@ -412,7 +421,7 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleStartSessionButtonPress()
     {
-        PlayAudio(Confirm_AudioClip);
+        PlayAudio(ToggleChange_AudioClip);
         ConfirmButtonPressed = true;
     }
 
@@ -432,7 +441,7 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
-                PlayAudio(Confirm_AudioClip);
+                PlayAudio(Connected_AudioClip);
                 ConnectedToServer = true;
                 ConnectToServerButton_GO.GetComponent<Image>().color = Color.green;
                 ConnectToServerButton_GO.GetComponentInChildren<Text>().text = "Connected";

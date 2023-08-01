@@ -59,6 +59,8 @@ public class ImportSettings_Level : ControlLevel
             }
             else
             {
+				Debug.Log("FILEPATH: " + currentSettingsDetails.FilePath);
+				Debug.Log("SEARCH STRING: " + currentSettingsDetails.SearchString);
 	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath,
 		            currentSettingsDetails.SearchString, (contentString) =>
 		            {
@@ -143,16 +145,17 @@ public class ImportSettings_Level : ControlLevel
         else
             Debug.LogError("Settings parsing style is " + settingParsingStyles[iSettings] + ", but this is not handled by script.");
     }
-    private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
+
+	private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
     {
         string fileContent;
 
-        if (SessionValues.ConfigAccessType == "Local" || SessionValues.ConfigAccessType == "Default")
+        if (SessionValues.UsingLocalConfigs || SessionValues.UsingDefaultConfigs)
         {
-            fileContent = File.ReadAllText(filePath); //Will need to check that this works during Web Build
-            callback(fileContent);
+			fileContent = File.ReadAllText(filePath);
+			callback(fileContent);
         }
-        else if (SessionValues.ConfigAccessType == "Server")
+        else //Using Server Configs:
         {
             yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, searchString, result =>
             {
@@ -166,10 +169,8 @@ public class ImportSettings_Level : ControlLevel
                 }
             }));
         }
-        else
-            callback(null);
-
     }
+
     public T[] ConvertTextToSettings_Array<T>(string fileContentString, char delimiter = '\t')
     {
         string[] lines;

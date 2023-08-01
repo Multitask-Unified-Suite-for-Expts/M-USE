@@ -1,7 +1,6 @@
 using System;
 using SelectionTracking;
 using UnityEngine;
-using UnityEngine.UI;
 using USE_Def_Namespace;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Data;
@@ -50,7 +49,6 @@ public static class SessionValues
 
     public static EventCodeManager EventCodeManager;
     
-    public static string ConfigAccessType;
     public static string ConfigFolderPath;
 
     public static SyncBoxController SyncBoxController;

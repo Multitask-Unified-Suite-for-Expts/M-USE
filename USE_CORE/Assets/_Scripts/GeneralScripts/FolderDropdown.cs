@@ -18,7 +18,6 @@ public class FolderDropdown : MonoBehaviour
     {
         List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 
-        Debug.Log("NUM FOLDERS: " + sessionConfigFolders.Count);
         foreach(string folder in sessionConfigFolders)
         {
             TMP_Dropdown.OptionData option = new TMP_Dropdown.OptionData(folder);

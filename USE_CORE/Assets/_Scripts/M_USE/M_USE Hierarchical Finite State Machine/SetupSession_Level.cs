@@ -53,7 +53,7 @@ public class SetupSession_Level : ControlLevel
                 new SettingsDetails("SingleType", "SessionConfig", typeof(SessionDef)),
                 new SettingsDetails("JSON", "EventCode", typeof(Dictionary<string, EventCode>))
             };
-            if (SessionValues.WebBuild && SessionValues.UsingDefaultConfigs)
+            if (SessionValues.UsingServerConfigs)
                 importSettings_Level.SettingsDetails[0].FilePath = SessionValues.ConfigFolderPath;
             else
                 importSettings_Level.SettingsDetails[0].FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
@@ -281,8 +281,8 @@ public class SetupSession_Level : ControlLevel
 
     private void WriteSessionConfigsToPersistantDataPath()
     {
-        if (Directory.Exists(SessionValues.ConfigFolderPath ))
-            Directory.Delete(SessionValues.ConfigFolderPath , true);
+        if (Directory.Exists(SessionValues.ConfigFolderPath))
+            Directory.Delete(SessionValues.ConfigFolderPath, true);
 
         if (!Directory.Exists(SessionValues.ConfigFolderPath ))
         {

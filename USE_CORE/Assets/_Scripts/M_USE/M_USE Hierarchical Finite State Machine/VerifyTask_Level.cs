@@ -92,8 +92,12 @@ public class VerifyTask_Level : ControlLevel
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterStim)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});
-                        Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ExternalStims.stimDefs.Count +
+                        if(SessionValues.UsingLocalConfigs)
+                            Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ExternalStims.stimDefs.Count +
                                   " External StimDefs imported.");
+                        else if (SessionValues.UsingDefaultConfigs)
+                            Debug.Log(TaskLevel.TaskName + " " + TaskLevel.PrefabStims.stimDefs.Count +
+                                      " Prefab StimDefs imported.");
                     }
                     else if (currentType.Equals(typeof(Dictionary<string, EventCode>)))
                     {

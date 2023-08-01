@@ -79,7 +79,7 @@ public class InputBroker
             {
                 return _gazePosition;
             }
-			return CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController.Instance);        
+			return CurrentGazePositionOnDisplayArea();        
 		}
         set
         {
@@ -330,13 +330,13 @@ public class InputBroker
         }
         return target;
     }
-	private static Vector2 CurrentGazePositionOnDisplayArea(TobiiEyeTrackerController tobiiEyeTrackerController) //REPLACE WITH TOBII
+	private static Vector2 CurrentGazePositionOnDisplayArea()
 	{
         
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
-        if (tobiiEyeTrackerController.iEyeTracker != null)
+        if (SessionValues.TobiiEyeTrackerController?.iEyeTracker != null)
         { // Get the most recent gaze data point
-            var gazeData = tobiiEyeTrackerController.EyeTracker?.LatestGazeData; // REFER TO TOBII EYETRACKER CONTROLLER
+            var gazeData = SessionValues.TobiiEyeTrackerController.EyeTracker?.LatestGazeData; // REFER TO TOBII EYETRACKER CONTROLLER
 
 			if (gazeData != null)
 			{

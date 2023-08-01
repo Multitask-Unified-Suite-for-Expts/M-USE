@@ -705,7 +705,8 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
                     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
 
-                    StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+                    if(SessionValues.SessionDef.EyeTrackerActive)
+                        StartCoroutine(SessionValues.GazeData.AppendDataToFile());
                 }
             });
 

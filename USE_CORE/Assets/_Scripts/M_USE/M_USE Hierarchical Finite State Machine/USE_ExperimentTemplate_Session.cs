@@ -161,9 +161,7 @@ namespace USE_ExperimentTemplate_Session
             setupSession.AddChildLevel(setupSessionLevel);
             setupSessionLevel.SessionLevel = this;            
 
-            int iTask = 0;
             SceneLoading = false;
-            string taskName = "";
             AsyncOperation loadScene = null;
             setupSession.AddUpdateMethod(() =>
             {
@@ -455,22 +453,21 @@ namespace USE_ExperimentTemplate_Session
                         }
                     }
 
-                    if (SessionValues.WebBuild)
+                    if (SessionValues.UsingServerConfigs)
                     {
-                        if (SessionValues.UsingDefaultConfigs)
-                            image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
-                        else
+                        StartCoroutine(ServerManager.LoadTextureFromServer($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
                         {
-                            StartCoroutine(ServerManager.LoadTextureFromServer($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
-                            {
-                                if (imageResult != null)
-                                    image.texture = imageResult;
-                                else
-                                    Debug.Log("NULL GETTING TASK ICON TEXTURE FROM SERVER!");
-                            }));
-                        }
+                            if (imageResult != null)
+                                image.texture = imageResult;
+                            else
+                                Debug.Log("NULL GETTING TASK ICON TEXTURE FROM SERVER!");
+                        }));
                     }
-                    else
+                    else if(SessionValues.UsingDefaultConfigs)
+                    {
+                        image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
+                    }
+                    else if(SessionValues.UsingLocalConfigs)
                         image.texture = LoadPNG(SessionValues.SessionDef.TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
 

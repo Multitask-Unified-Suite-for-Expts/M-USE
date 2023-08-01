@@ -162,8 +162,6 @@ public class VerifyTask_Level : ControlLevel
         
         if (SessionValues.UsingServerConfigs)
         {
-            Debug.Log("PATH TO FOLDER: " + pathToFolder);
-            Debug.Log("SEARCH STRING: " + searchString);
             StartCoroutine(ServerManager.GetFilePath(pathToFolder, searchString, result =>
             {
                 if (!string.IsNullOrEmpty(result))

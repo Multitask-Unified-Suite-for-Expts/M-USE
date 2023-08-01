@@ -1,7 +1,7 @@
 float	TouchFeedbackDuration	0.3
 List<string>	FeedbackControllers	["Audio", "Halo", "Slider"]
 Dictionary<string,string>	CustomSettings	{MazeDef_array.txt:SingleTypeArray}
-Vector3	StartButtonPosition	(0, 0, 0)
+Vector3	StartButtonPosition	[0, 0, 0]
 float	StartButtonScale	1.2
 float	TileSize	2
 int	NumBlinks	2

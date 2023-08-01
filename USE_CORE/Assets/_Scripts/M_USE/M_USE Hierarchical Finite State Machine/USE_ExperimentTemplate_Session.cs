@@ -128,6 +128,11 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
+            SessionValues.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
+            if(SessionValues.WebBuild)
+                SessionValues.FlashPanelController.gameObject.SetActive(false);
+
+
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
 
             //InitScreen State---------------------------------------------------------------------------------------------------------------
@@ -194,8 +199,6 @@ namespace USE_ExperimentTemplate_Session
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
                 CreateSessionSettingsFolder();
-
-                SessionValues.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)
                     SessionValues.FlashPanelController.TurnOffFlashPanels();
@@ -1129,28 +1132,22 @@ namespace USE_ExperimentTemplate_Session
                 }
             }
         }
-        
-        string GetConfigFolderPath(string configName)
+
+        public string GetConfigFolderPath(string configName)
         {
             string path;
 
-            if(SessionValues.UsingDefaultConfigs)
-            {
+            if (SessionValues.UsingDefaultConfigs)
                 path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-
-            }
             else if (SessionValues.UsingServerConfigs)
-            {
                 path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
-            }
             else
             {
                 if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
                     return SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configName;
                 else
                 {
-                    List<string> configFolders =
-                        (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
+                    List<string> configFolders = (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
                     int index = 0;
                     foreach (string k in SessionValues.SessionDef.TaskMappings.Keys)
                     {
@@ -1160,34 +1157,9 @@ namespace USE_ExperimentTemplate_Session
                     path = SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configFolders[index];
                 }
             }
-
-            //if(SessionValues.WebBuild)
-            //{
-            //    if (SessionValues.UsingDefaultConfigs)
-            //        path = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
-            //    else
-            //        path = $"{ServerManager.SessionConfigFolderPath}/{configName}";
-            //}
-            //else
-            //{
-            //    if (!SessionSettings.SettingExists("Session", "ConfigFolderNames"))
-            //        return SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configName;
-            //    else
-            //    {
-            //        List<string> configFolders =
-            //            (List<string>)SessionSettings.Get("Session", "ConfigFolderNames");
-            //        int index = 0;
-            //        foreach (string k in SessionValues.SessionDef.TaskMappings.Keys)
-            //        {
-            //            if (k.Equals(configName)) break;
-            //            ++index;
-            //        }
-            //        path = SessionValues.ConfigFolderPath  + Path.DirectorySeparatorChar + configFolders[index];
-            //    }
-            //}
             return path;
         }
-        
+
         // void OnTaskSceneLoaded(string configFolderName, bool verifyOnly)
         // {
         //     //We need to wait until the scene is loaded (async) to get
@@ -1242,7 +1214,7 @@ namespace USE_ExperimentTemplate_Session
         //         tl.TaskCam = GameObject.Find(tl.TaskName + "_Camera").GetComponent<Camera>();
         //
         //     tl.TaskCam.gameObject.SetActive(false);
-	       //  tl.BlockResults_AudioClip = BlockResults_AudioClip;
+        //  tl.BlockResults_AudioClip = BlockResults_AudioClip;
         //
         //     tl.BlockResultsPrefab = BlockResultsPrefab;
         //     tl.BlockResults_GridElementPrefab = BlockResults_GridElementPrefab;
@@ -1295,7 +1267,7 @@ namespace USE_ExperimentTemplate_Session
         //     callback?.Invoke(tl);
         // }
 
-        
+
 #if UNITY_STANDALONE_WIN
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct ReparseDataBuffer

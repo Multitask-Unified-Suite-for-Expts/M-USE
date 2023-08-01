@@ -103,7 +103,7 @@ public class InitScreen_Level : ControlLevel
         CollectInfo.AddUpdateMethod(() =>
         {
             if (MainPanel_GO.transform.localPosition != Vector3.zero)
-                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 800 * Time.deltaTime);
+                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
 
             if (ErrorHandling_GO.activeInHierarchy)
             {

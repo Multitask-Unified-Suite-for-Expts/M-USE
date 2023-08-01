@@ -38,13 +38,7 @@ public class SetupTask_Level : ControlLevel
         });
 
         OtherSetup.AddInitializationMethod(() =>
-        {  if (SessionValues.SessionDef.IsHuman)
-            {
-                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                SessionValues.HumanStartPanel.SetTaskLevel(TaskLevel);
-                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-            }
+        {  
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName;
 
@@ -137,7 +131,7 @@ public class SetupTask_Level : ControlLevel
             TaskLevel.BlockData = BlockData;
             TaskLevel.FrameData = FrameData;
             TaskLevel.TrialData = TrialData;
-            TaskLevel.TaskName = TaskName;
+            TaskName = TaskLevel.TaskName;
             TaskLevel.TrialLevel = TrialLevel;
             //user-defined task control level 
 
@@ -202,8 +196,7 @@ public class SetupTask_Level : ControlLevel
             else if(SessionValues.UsingDefaultConfigs)
                 TrialLevel.LoadTexturesFromResources();
             else if(SessionValues.UsingLocalConfigs)
-                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController. 
-
+                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController.
 
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);

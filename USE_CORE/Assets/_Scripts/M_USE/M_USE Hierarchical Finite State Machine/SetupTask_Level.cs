@@ -39,7 +39,7 @@ public class SetupTask_Level : ControlLevel
         OtherSetup.AddInitializationMethod(() =>
         {  
             //Setup data management
-            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName;
+            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;
 
             if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
             {

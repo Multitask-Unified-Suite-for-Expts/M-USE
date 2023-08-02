@@ -611,7 +611,10 @@ namespace USE_ExperimentTemplate_Session
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
-              
+                Debug.Log("SETTING TASK CONFIG PATH TO: " + (SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName));
+                CurrentTask.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
+
+
             });
             setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
             //RunTask State---------------------------------------------------------------------------------------------------------------

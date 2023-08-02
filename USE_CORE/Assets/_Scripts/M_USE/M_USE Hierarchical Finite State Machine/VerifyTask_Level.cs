@@ -134,6 +134,9 @@ public class VerifyTask_Level : ControlLevel
                 TaskLevel.PreloadedStims = new StimGroup("PreloadedStims");
             if (TaskLevel.ExternalStims == null)
                 TaskLevel.ExternalStims = new StimGroup("ExternalStims");
+            if (TaskLevel.RuntimeStims == null)
+                TaskLevel.RuntimeStims = new StimGroup("RuntimeStims");
+
             TaskLevel.FindStims();
         });
         FindStims.SpecifyTermination(() => TaskLevel.StimsHandled, () => null);

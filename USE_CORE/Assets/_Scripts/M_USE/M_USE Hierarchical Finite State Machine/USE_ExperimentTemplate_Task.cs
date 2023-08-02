@@ -617,20 +617,17 @@ namespace USE_ExperimentTemplate_Task
             MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
                 .MakeGenericMethod(new Type[] { StimDefType });
 
-            //PreloadedStims = GameObjects in scene prior to build
-            PreloadedStims = new StimGroup("PreloadedStims");
             TaskStims.AllTaskStimGroups.Add("PreloadedStims", PreloadedStims);
-            //Prefab stims are already created in ReadStimDefs
             TaskStims.AllTaskStimGroups.Add("PrefabStims", PrefabStims);
-            //ExternalStims is already created in ReadStimDefs (not ideal as hard to follow)
             TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
-            RuntimeStims = new StimGroup("RuntimeStims");
             TaskStims.AllTaskStimGroups.Add("RuntimeStims", RuntimeStims);
 
             DefinePreloadedStims();
-            if(PrefabStims.stimDefs != null && PrefabStims.stimDefs.Count > 0)
+
+            if (PrefabStims.stimDefs != null && PrefabStims.stimDefs.Count > 0)
                 DefinePrefabStims();
-            if(ExternalStims.stimDefs != null && ExternalStims.stimDefs.Count > 0)
+
+            if (ExternalStims.stimDefs != null && ExternalStims.stimDefs.Count > 0)
                 DefineExternalStims();
 
             StimsHandled = true;

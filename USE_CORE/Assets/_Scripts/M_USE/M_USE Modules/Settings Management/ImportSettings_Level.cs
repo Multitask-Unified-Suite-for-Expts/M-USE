@@ -929,46 +929,6 @@ public class ImportSettings_Level : ControlLevel
 
         return assumedParsingStyle;
 
-        //string verifiedParsingStyle = "";
-        //string[] lines = currentFileContentString.Split('\n');
-        //int tabCount = 0;
-        //for (int i = 0; i < lines.Length; i++)
-        //{
-        //    string line = lines[i].Trim();
-
-        //    if (line.Contains('\t'))
-        //    {
-        //        tabCount = line.Split('\t').Length; //check if all lines have same number of tabs 
-        //        for (int j = i + 1; j < lines.Length; j++)
-        //        {
-        //            string nextLine = lines[j].Trim();
-        //            if (!string.IsNullOrEmpty(nextLine) && nextLine.Split('\t').Length != tabCount)
-        //                verifiedParsingStyle = "SingleTypeJSON"; //Inconsistent number of tab-separated values
-        //        }
-        //    }
-        //    else
-        //        verifiedParsingStyle = "SingleTypeJSON";
-        //}
-
-        ////check for 2 tabs
-        //if (tabCount != 2 && verifiedParsingStyle != "SingleTypeJSON")
-        //    verifiedParsingStyle = "SingleTypeArray";
-
-        //if (verifiedParsingStyle != assumedParsingStyle)
-        //{
-        //    if (tabCount == 2)
-        //    {
-        //        verifiedParsingStyle = assumedParsingStyle;
-        //    }
-        //    else
-        //        verifiedParsingStyle = "SingleTypeJSON";
-        //}
-        //if (verifiedParsingStyle == "")
-        //    Debug.LogError("Attempting to verify parsing of " + SettingsDetails.FileName + " but the file is not parseable as one of the three settings types.");
-
-        //Debug.Log("VERIFIED PARSING STYLE!");
-
-        //return verifiedParsingStyle;
     }
 
 }

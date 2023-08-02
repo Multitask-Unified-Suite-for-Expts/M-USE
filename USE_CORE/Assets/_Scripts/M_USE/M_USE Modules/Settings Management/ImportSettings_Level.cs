@@ -137,18 +137,7 @@ public class ImportSettings_Level : ControlLevel
 
     private IEnumerator GetFilePath(string searchString, Action<string> callback)
     {
-        //string pathToFolder = "";
-
-        //if (SessionValues.UsingDefaultConfigs)
-        //    pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}_DefaultConfigs";
-        //else if (SessionValues.UsingLocalConfigs)
-        //    pathToFolder = $"{SessionValues.ConfigFolderPath}{TaskLevel.TaskName}";
-        //else if (SessionValues.UsingServerConfigs)
-        //    pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}";
-
         Debug.Log("ABOUT TO GET FILE PATH FOR SEARCH STRING: " + searchString + "  AT FOLDER PATH: " + currentSettingsDetails.FolderPath);
-
-		//WONT WORK FOR TASKS YET CUZ FOLDER PATH IS JUST UP TO THE SESSION FOLDER 
 
         if (SessionValues.UsingServerConfigs)
         {
@@ -200,6 +189,8 @@ public class ImportSettings_Level : ControlLevel
 
 	private IEnumerator GetFileContentString(string filePath, Action<string> callback)
     {
+		Debug.Log("GETTING FILE CONTENT STRING FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
+
         string fileContent;
 
         if (SessionValues.UsingLocalConfigs || SessionValues.UsingDefaultConfigs)
@@ -209,20 +200,17 @@ public class ImportSettings_Level : ControlLevel
         }
         else //Using Server Configs:
         {
-			Debug.Log("GETTING FILE CONTENT STRING FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
-
             yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, result =>
             {
                 if(result != null)
 				{
-					Debug.Log("RESULT 1: " + result[0]);
-					Debug.Log("RESULT 2: " + result[1]);
 					currentSettingsDetails.FileName = result[0];
                     callback(result[1]);
 				}
                 else
                 {
-                    Debug.Log("GET FILE STRING ASYNC RESULT IS NULL!");
+                    Debug.Log("GETTING FILE CONTENT STRING ASYNC IS NULL FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
+
                     callback(null);
                 }
             }));

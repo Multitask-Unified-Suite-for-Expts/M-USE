@@ -334,6 +334,9 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigFolderName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
+
+                SessionValues.LoadingCanvas_GO.SetActive(false); //Turn off loading circle now that about to set taskselection canvas active!
+
                 SessionCam.gameObject.SetActive(true);
 
 
@@ -611,10 +614,7 @@ namespace USE_ExperimentTemplate_Session
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
-                Debug.Log("SETTING TASK CONFIG PATH TO: " + (SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName));
                 CurrentTask.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
-
-
             });
             setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
             //RunTask State---------------------------------------------------------------------------------------------------------------

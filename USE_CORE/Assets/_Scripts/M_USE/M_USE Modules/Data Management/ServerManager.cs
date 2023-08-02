@@ -124,8 +124,6 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator AppendToFileAsync(string filePath, string rowData)
     {
-        //THIS WILL NEED TO BE EDITED NOW THAT WE CHANGED THE INPUT BEING THE FULL PATH!
-
         yield return GetFileStringAsync(filePath, originalFileContentsArray =>
         {
             if (originalFileContentsArray != null)
@@ -155,9 +153,6 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator GetFilePath(string folderPath, string searchString, Action<string> callback)
     {
-        Debug.Log("FOLDER PATH: " + folderPath);
-        Debug.Log("SEARCH STRING: " + searchString);
-
         string url = $"{ServerURL}/getFilePath.php?folderPath={folderPath}&searchString={searchString}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
@@ -185,8 +180,6 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator GetFileStringAsync(string path, Action<string[]> callback)
     {
-        Debug.Log("GETTING FILE AT: " + path);
-
         string url = $"{ServerURL}/getFile.php?path={path}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
@@ -215,29 +208,6 @@ public static class ServerManager //Used with the PHP scripts
         }
         callback?.Invoke(resultArray);
     }
-
-    public static IEnumerator GetFileBytesAsync(string path, string searchString, Action<byte[]> callback)
-    {
-        string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
-
-        using UnityWebRequest request = UnityWebRequest.Get(url);
-        var operation = request.SendWebRequest();
-
-        while (!operation.isDone)
-            yield return null;
-
-        byte[] result = null;
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            result = request.downloadHandler.data;
-            Debug.Log(result.Length == 0 ? ("File Not Found on Server: " + searchString) : ("Found File On Server: " + searchString));
-        }
-        else
-            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-
-        callback?.Invoke(result);
-    }
-
 
     public static IEnumerator CopyFolder(string sourcePath, string destinationPath)
     {

@@ -340,13 +340,17 @@ namespace USE_ExperimentTemplate_Task
                         StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
                         TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
                         StimGroup sg = taskSgs[0];
-                        while (sg.stimDefs.Count > 0)
+
+                        if(sg.stimDefs != null)
                         {
-                            sg.stimDefs[0].DestroyStimGameObject();
-                            sg.stimDefs.RemoveAt(0);
+                            while (sg.stimDefs.Count > 0)
+                            {
+                                sg.stimDefs[0].DestroyStimGameObject();
+                                sg.stimDefs.RemoveAt(0);
+                            }
+                            sg.DestroyStimGroup();
                         }
 
-                        sg.DestroyStimGroup();
                     }
                     TaskStims.AllTaskStims.DestroyStimGroup();
 
@@ -651,8 +655,12 @@ namespace USE_ExperimentTemplate_Task
             MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
                 .MakeGenericMethod((new Type[] { StimDefType }));
 
+            GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
             foreach (StimDef sd in PrefabStims.stimDefs)
+            {
                 sd.StimScale = TaskDef.ExternalStimScale;
+                sd.CanvasGameObject = taskCanvasGO; //adding task canvas in case default stim end up being 2D
+            }
 
             if (PrefabStimPaths != null && PrefabStimPaths.Count > 0)
             {
@@ -668,11 +676,14 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefineExternalStims()
         {
+            GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
+
             foreach (StimDef sd in ExternalStims.stimDefs)
             {
                 sd.StimFolderPath = TaskDef.ExternalStimFolderPath;
                 sd.StimExtension = TaskDef.ExternalStimExtension;
                 sd.StimScale = TaskDef.ExternalStimScale;
+                sd.CanvasGameObject = taskCanvasGO;
 
                 //add StimExtesion to file path if it doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimExtension) && !sd.FileName.EndsWith(sd.StimExtension))

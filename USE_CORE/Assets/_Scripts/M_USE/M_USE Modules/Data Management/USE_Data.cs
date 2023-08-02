@@ -634,7 +634,7 @@ namespace USE_Data
 					fileHeaders += data[i].Name;
 				}
 
-				if (SessionValues.WebBuild) //Create File With Headers
+				if (SessionValues.StoringDataOnServer) //Create File With Headers
 				{
 					if (!ServerManager.FolderCreated(folderPath))
 						yield return StartCoroutine(CreateServerFolder(folderPath));
@@ -662,7 +662,7 @@ namespace USE_Data
 			{
 				string content = String.Join("\n", dataBuffer.ToArray());
 
-                if (SessionValues.WebBuild)
+                if (SessionValues.StoringDataOnServer)
 					yield return StartCoroutine(AppendDataToServerFile(content));
 				else
 				{

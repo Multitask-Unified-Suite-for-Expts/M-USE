@@ -30,65 +30,66 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using System.Collections;
-using System.Collections.Generic;
+
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 #if (!UNITY_WEBGL)
 	using SFB;
 #endif
 
-public class FileItem : MonoBehaviour
+
+public class FileItem_TMP : MonoBehaviour
 {
-	// [HideInInspector]
-	public FileSpec file;
-
-	public Text label;
-	public InputField inputFilePath;
+    public FileSpec File;
+    public TMP_InputField InputField_FilePath;
+    public TextMeshProUGUI Text;
 
 
-	void Start()
-	{
-		if (file != null)
-		{
-			label.text = file.name;
-			inputFilePath.text =  PlayerPrefs.GetString("filepath-" + file.name, "");
-			inputFilePath.text = inputFilePath.text.Replace("file://", "");
-			inputFilePath.text = inputFilePath.text.Replace("%20", " ");
-			file.path = inputFilePath.text;
-		}
-		inputFilePath.onEndEdit.AddListener((text)=>{
-			UpdatePath(text);
-		});
-	}
+    public void ManualStart(FileSpec file, TMP_InputField inputField, TextMeshProUGUI text)  
+    {
+        File = file;
+        InputField_FilePath = inputField;
+        Text = text;
 
+        if (File != null)
+        {
+            Text.text = PlayerPrefs.GetString("filepath-" + File.name, "");
+            Text.text = Text.text.Replace("file://", "");
+            Text.text = Text.text.Replace("%20", " ");
+            File.path = Text.text;
+        }
+        InputField_FilePath.onEndEdit.AddListener((text) => {
+            UpdatePath(text);
+        });
+    }
 
-	public void locate()
-	{
-		#if (!UNITY_WEBGL)
-		if(!file.isFolder)
-			StandaloneFileBrowser.OpenFilePanelAsync("Open File", inputFilePath.text, "", false, (string[] paths) => { OnFileOpened(paths); });
-		else
-			StandaloneFileBrowser.OpenFolderPanelAsync("Open File", inputFilePath.text, false, (string[] paths) => { OnFileOpened(paths); });
-		#endif
-	}
+    public void Locate()
+    {
+        #if (!UNITY_WEBGL)
+		    if(!File.isFolder)
+			    StandaloneFileBrowser.OpenFilePanelAsync("Open File", Text.text, "", false, (string[] paths) => { OnFileOpened(paths); });
+		    else
+			    StandaloneFileBrowser.OpenFolderPanelAsync("Open File", Text.text, false, (string[] paths) => { OnFileOpened(paths); });
+        #endif
+    }
 
-	void OnFileOpened(string[] paths)
-	{
-		if(paths.Length > 0 && paths[0] != "")
-		{
-			var path = paths[0];
-			path = path.Replace("file://", "");
-			path = path.Replace("%20", " ");
-			inputFilePath.text = path;
-			UpdatePath(path);
-		}
-	}
+    void OnFileOpened(string[] paths)
+    {
+        if (paths.Length > 0 && paths[0] != "")
+        {
+            var path = paths[0];
+            path = path.Replace("file://", "");
+            path = path.Replace("%20", " ");
+            Text.text = path;
+            UpdatePath(path);
+        }
+    }
 
-	void UpdatePath(string path)
-	{
-		Debug.Log("updated path of file:" + file.name + " to:" + path);
-		PlayerPrefs.SetString("filepath-" + file.name, path);
-		file.path = path;
-	}
+    void UpdatePath(string path)
+    {
+        Debug.Log("updated path of file:" + File.name + " to:" + path);
+        PlayerPrefs.SetString("filepath-" + File.name, path);
+        File.path = path;
+    }
 }

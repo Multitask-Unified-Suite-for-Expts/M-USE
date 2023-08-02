@@ -26,12 +26,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     VisualSearch_TrialDef vsTD;
     //private VisualSearch_TrialDef vsTD => GetCurrentTrialDef<VisualSearch_TrialDef>();
     VisualSearch_TrialLevel vsTL;
+
+
     public override void DefineControlLevel()
     {
         
         vsTL = (VisualSearch_TrialLevel)TrialLevel;
         //vsTD = (VisualSearch_TrialDef)vsTL.GetCurrentTrialDef<VisualSearch_TrialDef>();
-        SetSettings();
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
@@ -44,15 +45,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         {
             vsTL.ContextName = vsBD.ContextName;
 
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{vsBD.ContextName}";
-            else
-                contextFilePath = vsTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, vsBD.ContextName, "LinearDark");
-
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+            SetSkyBox(vsBD.ContextName);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();
@@ -123,7 +116,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         if (vsTL.TrialCount_InTask != 0)
         {
             CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
                                                     $"\n<b># Trials:</b> {vsTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(vsTL.TrialCount_InTask)),2))*100}% aborted)" + 
                                                     $"\t<b># Blocks:</b> {BlockCount}" + 
                                                     $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
@@ -134,46 +127,11 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
             
     }
     
-    private void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            vsTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else vsTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            vsTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        else
-            vsTL.StartButtonPosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "StartButtonScale"))
-            vsTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        else
-            vsTL.StartButtonScale = 120f;
-        
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-            vsTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-            vsTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            vsTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            vsTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            vsTL.TouchFeedbackDuration = .3f;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            vsTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            vsTL.MacMainDisplayBuild = false;
-    }
 
     public void AssignBlockData()
     {

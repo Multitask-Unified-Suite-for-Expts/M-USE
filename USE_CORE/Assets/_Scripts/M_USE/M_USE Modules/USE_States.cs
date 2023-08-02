@@ -40,14 +40,15 @@ using USE_StimulusManagement;
 using System.IO;
 using UnityEditor;
 using UnityEngine.UI;
+using System.Collections;
 
 namespace USE_States
 {
-	// ############################################################################################################
-	// ############################################################################################################
-	// ############################################################################################################
+    // ############################################################################################################
+    // ############################################################################################################
+    // ############################################################################################################
 
-	/// <summary>Represents a single State of a ControlLevel, governing activity on each frame during this state.</summary>
+    /// <summary>Represents a single State of a ControlLevel, governing activity on each frame during this state.</summary>
 	public class State
 	{
 		//STATE AND CONTROLLEVEL REFERENCES
@@ -777,7 +778,7 @@ namespace USE_States
 		/// Adds the control level default termination method.
 		/// </summary>
 		/// <param name="method">Method.</param>
-		public void AddDefaultTerminationMethod(VoidDelegate method)
+		public void AddDefaultControlLevelTerminationMethod(VoidDelegate method)
 		{
 			controlLevelDefaultTermination += method;
 		}
@@ -1392,23 +1393,60 @@ namespace USE_States
             return tex;
         }
 
-        public static Material CreateSkybox(string filePath)
+        public IEnumerator HandleSkybox(string filePath)
         {
-			filePath = filePath.Trim();
+            Texture2D tex = null;
 
-			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+            yield return LoadTexture(filePath, result =>
+            {
+                if (result != null)
+					tex = result;
+                else
+                    Debug.Log("TEX RESULT IS NULL!");
+            });
 
-            Texture2D tex;
-
-            if (SessionValues.WebBuild) 
-				tex = Resources.Load<Texture2D>(filePath);
+			if (tex != null)
+			{
+				RenderSettings.skybox = CreateSkybox(tex);
+				SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+			}
 			else
-				tex = LoadPNG(filePath); // load the texture from a PNG -> Texture2D
+				Debug.Log("NOT SETTING SKYBOX BECAUSE TEX IS NULL!");
+        }
 
+        public static IEnumerator LoadTexture(string filePath, Action<Texture2D> callback)
+		{
+            filePath = filePath.Trim();
+			Texture2D tex = null;
+
+            if (SessionValues.WebBuild)
+			{
+				if(SessionValues.UsingDefaultConfigs)
+					tex = Resources.Load<Texture2D>(filePath);
+                else
+				{
+					yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
+                    {
+                        if (result != null)
+							tex = result;
+                        else
+                            Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
+                    }));
+                }
+			}
+			else
+				tex = LoadPNG(filePath);
+
+			callback?.Invoke(tex);
+        }
+
+        public static Material CreateSkybox(Texture2D tex)
+        {
 			if (tex == null)
 				Debug.Log("TEX IS NULL WHEN TRYING TO CREATE SKYBOX!");
 
-			//Set the textures of the skybox to that of the PNG
+			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+
 			materialSkybox.SetTexture("_FrontTex", tex);
             materialSkybox.SetTexture("_BackTex", tex);
             materialSkybox.SetTexture("_LeftTex", tex);

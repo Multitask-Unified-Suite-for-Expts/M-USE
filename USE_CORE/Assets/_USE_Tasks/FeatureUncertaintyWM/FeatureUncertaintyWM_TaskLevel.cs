@@ -30,8 +30,8 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             fuWMTL.ContextName = fuWMBD.ContextName;
-            RenderSettings.skybox = CreateSkybox(fuWMTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fuWMTL.ContextName));
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn"); fuWMTL.ResetBlockVariables();
+            StartCoroutine(HandleSkybox(fuWMTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fuWMTL.ContextName)));
+            fuWMTL.ResetBlockVariables();
             fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.NumTokenBar);
             fuWMTL.TokenFBController.SetTokenBarValue(fuWMBD.NumInitialTokens);
             SetBlockSummaryString();
@@ -93,7 +93,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         if (fuWMTL.TrialCount_InTask != 0)
         {
             CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
                                             $"\n<b># Trials:</b> {fuWMTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(NumAborted_InTask, (fuWMTL.TrialCount_InTask)), 2)) * 100}% aborted)" +
                                             $"\t<b># Blocks:</b> {BlockCount}" +
                                             $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
@@ -104,7 +104,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
 
     }

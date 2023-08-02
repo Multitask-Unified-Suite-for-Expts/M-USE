@@ -48,63 +48,32 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
-        SetSettings();
         SetupBlockData();
 
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{currentBlock.ContextName}";
-            else
-                contextFilePath = trialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, currentBlock.ContextName, "LinearDark");
-
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeImmediate("ContextOn");
+            currentBlock.ContextName = currentBlock.ContextName.Trim();
+            SetSkyBox(currentBlock.ContextName);
         });
 
         BlockFeedback.AddInitializationMethod(() =>
         {
             AddBlockValuesToTaskValues();
-
-            if(!SessionValues.WebBuild)
-            {
-                if (BlockStringsAdded > 0)
-                    CurrentBlockString += "\n";
-                PreviousBlocksString.Insert(0, CurrentBlockString);
-                BlockStringsAdded++;
-            }
+            HandleBlockStrings();
         });
     }
 
-    public void SetSettings()
+    private void HandleBlockStrings()
     {
-        trialLevel.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
+        if (!SessionValues.WebBuild)
         {
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-            trialLevel.OriginalStartButtonPosition = trialLevel.ButtonPosition;
+            if (BlockStringsAdded > 0)
+                CurrentBlockString += "\n";
+            PreviousBlocksString.Insert(0, CurrentBlockString);
+            BlockStringsAdded++;
         }
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else Debug.Log("[ERROR] Start Button Position settings not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            trialLevel.TouchFeedbackDuration = .3f;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            trialLevel.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            trialLevel.MacMainDisplayBuild = false;
     }
-
 
     public void AddBlockValuesToTaskValues()
     {
@@ -206,7 +175,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             decimal percentChoseSameReward = Math.Round(decimal.Divide(NumSameRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseSameEffort = Math.Round(decimal.Divide(NumSameEffortChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
                                             $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" + 
                                             $"\t<b># Blocks:</b> {BlockCount}" + 
                                             $"\t<b># Reward Pulses:</b> {RewardPulses_Task}" +
@@ -217,7 +186,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
             
     }

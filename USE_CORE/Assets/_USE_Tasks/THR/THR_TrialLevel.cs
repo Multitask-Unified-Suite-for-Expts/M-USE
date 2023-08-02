@@ -12,8 +12,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 {
     public THR_TrialDef currentTrial => GetCurrentTrialDef<THR_TrialDef>();
     public THR_TaskLevel currentTask => GetTaskLevel<THR_TaskLevel>();
+    public THR_TaskDef currentTaskDef => GetTaskDef<THR_TaskDef>();
 
-    [HideInInspector] public string MaterialFilePath;
 
     private USE_StartButton USE_Square;
     private GameObject SquareGO;
@@ -34,9 +34,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool GiveReleaseReward;
     private bool GiveReward;
     private bool TimeRanOut;
-
-    [HideInInspector] public Vector3 ButtonPosition;
-    [HideInInspector] public float ButtonScale;
 
     [HideInInspector] public List<int> TrialCompletionList;
     [HideInInspector] public int TrialsCompleted_Block;
@@ -87,10 +84,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private float RewardEarnedTime;
     private float RewardTimer;
-
-    [HideInInspector] public bool StartWithBlueSquare;
-
-    [HideInInspector] public float TouchFeedbackDuration;
 
 
     public override void DefineControlLevel()
@@ -159,7 +152,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
 
         });
-        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, StartWithBlueSquare ? BlueSquare : WhiteSquare);
+        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, currentTaskDef.StartWithBlueSquare ? BlueSquare : WhiteSquare);
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------

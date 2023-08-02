@@ -25,10 +25,10 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int BlockStringsAdded = 0;
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
+
     public override void DefineControlLevel()
     {   
         flTL = (FlexLearning_TrialLevel)TrialLevel;
-        SetSettings();
         
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
@@ -42,19 +42,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         {
             flTL.MinTrials = flBD.MinMaxTrials[0];
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
+            flTL.ContextName = flBD.ContextName;
             
             ResetBlockVariables();
-            flTL.ContextName = flBD.ContextName;
 
-            string contextFilePath;
-            if (SessionValues.WebBuild)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{flBD.ContextName}";
-            else
-                contextFilePath = flTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, flBD.ContextName, "LinearDark");
-
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+            SetSkyBox(flBD.ContextName);
             
             //Set the Initial Token Values for the Block
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);
@@ -75,41 +67,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         AssignBlockData();
     }
 
-    private void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            flTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else flTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            flTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        else
-            flTL.StartButtonPosition = new Vector3(0, 0, 0);
-        if (SessionSettings.SettingExists(TaskName +"_TaskSettings", "StartButtonScale"))
-            flTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        else
-            flTL.StartButtonScale = 120f;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-            flTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-            flTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            flTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            flTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            flTL.TouchFeedbackDuration = .3f;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            flTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            flTL.MacMainDisplayBuild = false;
-
-    }
     private void ResetBlockVariables()
     {
         flTL.SearchDurationsList.Clear();
@@ -174,7 +131,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         if (flTL.TrialCount_InTask != 0)
         {
             CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" + 
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
                                                         $"\n<b># Trials:</b> {flTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(flTL.TrialCount_InTask)),2))*100}% aborted)" + 
                                                         $"\t<b># Blocks:</b> {BlockCount}" + 
                                                         $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
@@ -185,7 +142,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         }
         else
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
     }
 

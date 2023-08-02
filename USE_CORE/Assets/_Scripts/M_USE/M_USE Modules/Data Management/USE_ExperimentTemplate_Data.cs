@@ -255,7 +255,8 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "SessionData";
             AddDatum("SubjectID", () => SessionValues.SubjectID);
-            AddDatum("SessionID", () => SessionValues.SessionID);
+            AddDatum("SubjectAge", () => SessionValues.SubjectAge);
+            AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddStateTimingData(sessionLevel);
         }
     }
@@ -291,7 +292,8 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "BlockData";
             AddDatum("SubjectID", () => SessionValues.SubjectID);
-            AddDatum("SessionID", () => SessionValues.SessionID);
+            AddDatum("SubjectAge", () => SessionValues.SubjectAge);
+            AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
         }
@@ -303,7 +305,8 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "TrialData";
             AddDatum("SubjectID", () => SessionValues.SubjectID); //session level instead of task level
-            AddDatum("SessionID", () => SessionValues.SessionID);
+            AddDatum("SubjectAge", () => SessionValues.SubjectAge);
+            AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddDatum("TaskName", () => taskLevel != null? taskLevel.TaskName:"NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString():"NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
@@ -318,7 +321,8 @@ namespace USE_ExperimentTemplate_Data
         {
             DataControllerName = "FrameData";
             AddDatum("SubjectID", () => SessionValues.SubjectID);
-            AddDatum("SessionID", () => SessionValues.SessionID);
+            AddDatum("SubjectAge", () => SessionValues.SubjectAge);
+            AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
@@ -328,6 +332,11 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("FrameStartUnity", () => Time.time);
         }
 
+        public void AddFlashPanelColumns()
+        {
+            AddDatum("FlashPanelLStatus", ()=> SessionValues.FlashPanelController.leftLuminanceFactor);
+            AddDatum("FlashPanelLStatus", ()=> SessionValues.FlashPanelController.rightLuminanceFactor);
+        }
         public void AddEventCodeColumns()
         {
             AddDatum("EventCodes", () => taskLevel != null ? string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")) : "NoTaskActive");
@@ -343,7 +352,8 @@ namespace USE_ExperimentTemplate_Data
             DataControllerName = "GazeData";
 
             AddDatum("SubjectID", () => SessionValues.SubjectID);
-            AddDatum("SessionID", () => SessionValues.SessionID);
+            AddDatum("SubjectAge", () => SessionValues.SubjectAge);
+            AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");

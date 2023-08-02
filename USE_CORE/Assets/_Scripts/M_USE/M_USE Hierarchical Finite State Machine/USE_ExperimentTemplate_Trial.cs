@@ -114,6 +114,12 @@ namespace USE_ExperimentTemplate_Trial
         {
             return (T)TaskLevel;
         }
+        
+        
+        public T GetTaskDef<T>() where T: TaskDef
+        {
+            return (T)TaskLevel.TaskDef;
+        }
 
         public Type TrialDefType, StimDefType;
 
@@ -135,7 +141,7 @@ namespace USE_ExperimentTemplate_Trial
                 if (TaskLevel.TaskName != "GazeCalibration")
                 {
                     GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.DefineTaskLevel(false);
+                    GazeCalibrationTaskLevel.DefineTaskLevel();
                     GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
@@ -176,8 +182,7 @@ namespace USE_ExperimentTemplate_Trial
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
-
-                if (SessionValues.SessionDef.EyeTrackerActive)
+                if(SessionValues.SessionDef.EyeTrackerActive)
                     SessionValues.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
 
                 if (SessionValues.SessionDef.SerialPortActive)
@@ -247,8 +252,8 @@ namespace USE_ExperimentTemplate_Trial
             {
                 GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 
-                GazeCalibrationTaskLevel.ConfigName = "InTask_GazeCalibration";
-                GazeCalibrationTaskLevel.TaskName = "InTask_GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
                 GameObject[] rootObjects = originalScene.GetRootGameObjects();
@@ -260,16 +265,16 @@ namespace USE_ExperimentTemplate_Trial
                 }
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
-                //var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
+                var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
                 var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
                 //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
                 GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
-                GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = TaskLevel.TaskCam;
+                GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
                 GazeCalibrationCanvas.gameObject.SetActive(true);
                 CalibrationGazeTrail.gameObject.SetActive(true);
-               // CalibrationCube.gameObject.SetActive(true);
+                CalibrationCube.gameObject.SetActive(true);
                 GazeCalibrationScripts.gameObject.SetActive(true);
 
                 GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);
@@ -356,21 +361,14 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(FrameData.AppendDataToBuffer());
             StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-            {
-                if (SessionValues.TobiiEyeTrackerController != null)
-                    SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-
-            }
             if (SessionValues.SessionDef.SerialPortActive)
             {
                 StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
                 StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
-
-
         }
-
+        
         public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)
@@ -398,12 +396,6 @@ namespace USE_ExperimentTemplate_Trial
             {
                 StartCoroutine(TrialData.AppendDataToBuffer());
                 StartCoroutine(TrialData.AppendDataToFile());
-            }
-
-            if (SessionValues.SessionDef.EyeTrackerActive)
-            {
-                SessionValues.TobiiEyeTrackerController.GazeDataSubscription.PumpGazeData();
-                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
         }
 
@@ -514,11 +506,6 @@ namespace USE_ExperimentTemplate_Trial
             TaskStims.AllTaskStimGroups.Remove(sgName);
         }
 
-        // MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
-        // 		.MakeGenericMethod((new Type[] {StimDefType}));
-        // 		taskStimDefFromPrefabPath.Invoke(this, new object[] {path, PreloadedStims});
-
-
         protected T GetGameObjectStimDefComponent<T>(GameObject go) where T : StimDef
         {
             // return (T) go.GetComponent<StimDef>();
@@ -612,6 +599,57 @@ namespace USE_ExperimentTemplate_Trial
             return contextPath;
         }
 
+
+        public void LoadTexturesFromServer()
+        {
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
+            {
+                if (result != null)
+                {
+                    HeldTooLongTexture = result;
+                    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+                }
+                else
+                    Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the HeldTooShort Texture from the server!");
+                    HeldTooShortTexture = result;
+                    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+                }
+                else
+                    Debug.Log("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/bg.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the BackdropStripesTexture from the server!");
+                    BackdropStripesTexture = result;
+                    TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+                }
+                else
+                    Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
+
+            }));
+
+            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
+            {
+                if (result != null)
+                {
+                    Debug.Log("Got the THR_BackDropTexture from the server!");
+                    THR_BackdropTexture = result;
+                }
+                else
+                    Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
+            }));
+        }
+
         public void LoadTexturesFromResources()
         {
             HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HorizontalStripes");
@@ -646,13 +684,6 @@ namespace USE_ExperimentTemplate_Trial
     {
 
     }
-
-
-    // public abstract class TrialDef
-    // {
-    //     public int BlockCount, TrialCountInBlock, TrialCountInTask;
-    //     public TrialStims TrialStims;
-    // }
 
     public class TrialLevel_Methods
     {

@@ -13,6 +13,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 {
     public VisualSearch_TrialDef CurrentTrialDef => GetCurrentTrialDef<VisualSearch_TrialDef>(); 
     public VisualSearch_TaskLevel CurrentTaskLevel => GetTaskLevel<VisualSearch_TaskLevel>();
+    public VisualSearch_TaskDef currentTaskDef => GetTaskDef<VisualSearch_TaskDef>();
 
     public GameObject VS_CanvasGO;
     public SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
@@ -29,12 +30,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private float tokenFbDuration;
     
     // Set in the Task Level
-    [HideInInspector] public string ContextExternalFilePath;
-    [HideInInspector] public Vector3 StartButtonPosition;
-    [HideInInspector] public float StartButtonScale;
-    [HideInInspector] public bool StimFacingCamera;
-    [HideInInspector] public string ShadowType;
-    [HideInInspector] public bool NeutralITI;
+    //[HideInInspector] public string ShadowType;
+    //[HideInInspector] public bool NeutralITI;
     [HideInInspector] public bool? TokensWithStimOn;
     
     // Stim Evaluation Variables
@@ -78,10 +75,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_StimDef chosenStimDef;
     public bool StimIsChosen;
 
-    [HideInInspector] public float TouchFeedbackDuration;
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
-
-    [HideInInspector] public bool MacMainDisplayBuild;
 
 
     public override void DefineControlLevel()
@@ -113,8 +107,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             //Set the context for the upcoming trial with the Start Button visible
 
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(ShadowType, "VisualSearch_DirectionalLight");
-            if (StimFacingCamera)
+            SetShadowType(currentTaskDef.ShadowType, "VisualSearch_DirectionalLight");
+            if (currentTaskDef.StimFacingCamera)
                 MakeStimFaceCamera();
 
             if (StartButton == null)
@@ -126,7 +120,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(VS_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(VS_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -146,11 +140,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", SessionValues.GazeTracker, InitTrial, SearchDisplay);
 
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, StartButtonScale*10, VS_CanvasGO);
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, VS_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
+            if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
             CurrentTaskLevel.SetBlockSummaryString();
@@ -313,10 +307,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddInitializationMethod(() =>
         {
-            if (NeutralITI)
+            if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath,"itiImage"));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Session
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
-            State setupTask = new State("VerifyTask");
+            State setupTask = new State("SetupTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");
@@ -610,8 +610,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
-
-              
+                    
             });
             setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
             //RunTask State---------------------------------------------------------------------------------------------------------------

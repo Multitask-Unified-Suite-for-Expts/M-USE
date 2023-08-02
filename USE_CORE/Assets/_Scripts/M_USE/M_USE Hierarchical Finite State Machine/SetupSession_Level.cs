@@ -278,7 +278,7 @@ public class SetupSession_Level : ControlLevel
             Directory.Delete(SessionValues.ConfigFolderPath, true);
             
         Directory.CreateDirectory(SessionValues.ConfigFolderPath);
-        List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "EventCodeConfig_json", "DisplayConfig_json" };
+        List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "SessionEventCodeConfig_json", "DisplayConfig_json" };
         foreach (string config in configsToWrite)
         {
             byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;

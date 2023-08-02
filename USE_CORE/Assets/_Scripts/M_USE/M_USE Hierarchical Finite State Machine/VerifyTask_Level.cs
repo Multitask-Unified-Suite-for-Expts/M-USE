@@ -235,7 +235,7 @@ public class VerifyTask_Level : ControlLevel
     {
         if (SessionValues.UsingDefaultConfigs)
             TaskLevel.PrefabStims = new StimGroup("PrefabStims", (T[]) parsedSettings);
-        else if (SessionValues.UsingLocalConfigs)
+        else if (SessionValues.UsingLocalConfigs || SessionValues.UsingServerConfigs)
             TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
 }

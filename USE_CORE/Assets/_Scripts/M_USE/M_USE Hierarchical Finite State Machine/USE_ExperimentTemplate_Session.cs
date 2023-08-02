@@ -142,9 +142,7 @@ namespace USE_ExperimentTemplate_Session
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
-                    InitCamGO.SetActive(false); //Init canvas doesnt even use InitCam........ (we using this for something else??)
-                else
+                if(!SessionValues.WebBuild)
                 {
                     CreateExperimenterDisplay();
                     CreateMirrorCam();

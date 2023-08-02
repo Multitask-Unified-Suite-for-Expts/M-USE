@@ -100,10 +100,7 @@ public static class SessionValues
 
     static SessionValues()
     {
-        Debug.Log("SESSION VALUES CONSTRUCTOR!");
-
         LoadPrefabs();
-
     }
 
     private static void LoadPrefabs()

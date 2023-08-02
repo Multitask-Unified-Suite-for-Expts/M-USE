@@ -621,10 +621,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         //NEED TO TEST THIS!!!!!
-        if(currentTrial.NumCoinsLeft > 8 || currentTrial.NumCoinsRight > 8)
-        {
-            tokenSize *= .75f;
-        }
+        //if(currentTrial.NumCoinsLeft > 8 || currentTrial.NumCoinsRight > 8)
+        //{
+        //    tokenSize *= .75f;
+        //}
 
         TokenFBController.tokenSize = tokenSize;
         TokenFBController.tokenBoxYOffset = yOffset;

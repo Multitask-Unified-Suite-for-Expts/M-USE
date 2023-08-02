@@ -125,7 +125,10 @@ public class VerifyTask_Level : ControlLevel
                     StartCoroutine(GetFilePath(importSettings_Level.SettingsDetails[1].SearchString, result =>
                     {
                         if (!string.IsNullOrEmpty(result))
+                        {
+                            Debug.Log("GET FILE PATH RESULT: " + result);
                             importSettings_Level.SettingsDetails[1].FilePath = result;
+                        }
                         else
                             Debug.Log("GET FILE PATH RESULT IS NULL FOR SettingsDetails[1].SearchString !!!!!");
                     }));
@@ -161,7 +164,6 @@ public class VerifyTask_Level : ControlLevel
     }
 
 
-    //WHERE SHOULD WE CALL THIS METHOD?!?!?! 
     private void WriteTaskConfigsToPersistantDataPath(ControlLevel_Task_Template tl)
     {
         if (!SessionValues.UsingDefaultConfigs)
@@ -200,8 +202,6 @@ public class VerifyTask_Level : ControlLevel
 
     private IEnumerator GetFilePath(string searchString, Action<string> callback)
     {
-        Debug.Log("Looking for file with search string " + searchString);
-
         string pathToFolder = "";
 
         if (SessionValues.UsingDefaultConfigs)
@@ -211,6 +211,7 @@ public class VerifyTask_Level : ControlLevel
         else if (SessionValues.UsingServerConfigs)
             pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}";
 
+        Debug.Log("ABOUT TO GET FILE PATH FOR SEARCH STRING: " + searchString + "  AT FOLDER PATH: " + pathToFolder);
 
         if (SessionValues.UsingServerConfigs)
         {

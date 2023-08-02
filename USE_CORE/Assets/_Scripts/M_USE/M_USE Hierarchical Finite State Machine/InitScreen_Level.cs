@@ -414,7 +414,7 @@ public class InitScreen_Level : ControlLevel
         else
         {
             Debug.Log("Properly Filled out all neccessary information!");
-            PlayAudio(Confirm_AudioClip);
+            PlayAudio(ToggleChange_AudioClip);
             ConfirmButtonPressed = true;
         }
     }

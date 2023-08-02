@@ -51,14 +51,14 @@ public class ImportSettings_Level : ControlLevel
         {
 	        fileLoadingFinished = false;
             currentSettingsDetails = SettingsDetails[0];
-            Debug.Log("Attempting to load settings file  " + currentSettingsDetails.FilePath);
             if (string.IsNullOrEmpty(currentSettingsDetails.FilePath))
             {
-	            Debug.Log("No settings file found with search string " + currentSettingsDetails.SearchString);
+	            Debug.Log("File Path is empty/null for search string: " + currentSettingsDetails.SearchString);
 	            fileLoadingFinished = true;
             }
             else
             {
+				Debug.Log("Attempting to load settings file at path: " + currentSettingsDetails.FilePath);
 	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, currentSettingsDetails.SearchString, (contentString) =>
 		            {
 			            if (!string.IsNullOrEmpty(contentString))
@@ -156,9 +156,11 @@ public class ImportSettings_Level : ControlLevel
         {
             yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, searchString, result =>
             {
-                currentSettingsDetails.FileName = result[0];
                 if(result != null)
+				{
+					currentSettingsDetails.FileName = result[0];
                     callback(result[1]);
+				}
                 else
                 {
                     Debug.Log("GET FILE STRING ASYNC RESULT IS NULL!");

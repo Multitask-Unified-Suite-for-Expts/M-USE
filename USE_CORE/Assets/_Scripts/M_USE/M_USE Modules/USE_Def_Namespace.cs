@@ -55,6 +55,8 @@ namespace USE_Def_Namespace
         public bool PlayBackgroundMusic;
 
         public bool GuidedTaskSelection;
+
+        public bool FlashPanelsActive;
         
 
         public int TaskButtonSize = 225;
@@ -76,14 +78,17 @@ namespace USE_Def_Namespace
         public List<string[]> FeatureNames;
         public string neutralPatternedColorName;
         public float? ExternalStimScale;
-        public List<string[]> FeedbackControllers;
-        public int? TotalTokensNum;
+        public List<string> FeedbackControllers;
+        public float TouchFeedbackDuration = 0.3f;
+        public int TotalTokensNum = 5;
         public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
         public string SelectionType;
         public Dictionary<string, string> CustomSettings;
-
+        public Vector3 StartButtonPosition = Vector3.zero;
+        public float StartButtonScale = 1.2f;
+        public string ContextExternalFilePath;
     }
-    
+
     public class BlockDef
     {
         public int BlockCount;

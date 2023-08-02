@@ -8,9 +8,9 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    private static readonly string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
+    public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
 
-    private static readonly string RootDataFolder = "DATA"; //will move to server config
+    public static string RootDataFolder = "DATA"; //They specify path on new init screen
     private static string SessionDataFolder;
     public static string SessionDataFolderPath
     {
@@ -20,8 +20,8 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    private static readonly string RootConfigFolder = "CONFIGS"; //will move to server config
-    private static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
+    public static string RootConfigFolder = "CONFIGS"; //Marcus wants us to hardcode it. TELL THEM TO NAME FOLDER CONFIGS!
+    public static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     public static string SessionConfigFolderPath
     {
         get
@@ -34,6 +34,47 @@ public static class ServerManager //Used with the PHP scripts
 
     public static bool SessionDataFolderCreated; //used for logWriter
 
+
+
+    public static IEnumerator TestServerConnection(Action<bool> callback)
+    {
+        bool validURL = TestURL();
+
+        if (validURL)
+        {
+            string url = $"{ServerURL}/testConnection.php";
+
+            using UnityWebRequest request = UnityWebRequest.Get(url);
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log("Server connection test successful!");
+                callback?.Invoke(true);
+            }
+            else
+            {
+                Debug.Log($"SERVER CONNECTION TEST FAILED! ERROR: {request.error}");
+                callback?.Invoke(false);
+            }
+        }
+        else
+            callback?.Invoke(false);
+    }
+
+    public static bool TestURL()
+    {
+        try
+        {
+            using UnityWebRequest request = UnityWebRequest.Get(ServerURL);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Debug.Log("SERVER URL TEST FAILED!  |  " + ex.Message);
+            return false;
+        }
+    }
 
     public static IEnumerator CreateFolder(string folderPath)
     {
@@ -83,14 +124,14 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
     {
-        yield return GetFileStringAsync(folderPath, fileName, originalFileContents =>
+        yield return GetFileStringAsync(folderPath, fileName, originalFileContentsArray =>
         {
-            if (originalFileContents != null)
+            if (originalFileContentsArray != null)
             {
                 string path = $"{folderPath}/{fileName}";
                 string url = $"{ServerURL}/updateFile.php?path={path}";
 
-                string updatedFileContents = originalFileContents + "\n" + rowData;
+                string updatedFileContents = originalFileContentsArray[1] + "\n" + rowData;
                 WWWForm formData = new WWWForm();
                 formData.AddField("data", updatedFileContents);
 
@@ -110,7 +151,35 @@ public static class ServerManager //Used with the PHP scripts
         Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
     }
 
-    public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string> callback)
+
+    public static IEnumerator GetFilePath(string folderPath, string searchString, Action<string> callback)
+    {
+        string url = $"{ServerURL}/getFilePath.php?folderPath={folderPath}&searchString={searchString}";
+
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        var operation = request.SendWebRequest();
+
+        while (!operation.isDone)
+            yield return null;
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            string result = request.downloadHandler.text;
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            if (result == "File not found")
+                callback?.Invoke(null);
+            else
+                callback?.Invoke(result);
+        }
+        else
+        {
+            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+            callback?.Invoke(null);
+        }
+    }
+
+
+    public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string[]> callback)
     {
         string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
 
@@ -120,19 +189,25 @@ public static class ServerManager //Used with the PHP scripts
         while (!operation.isDone)
             yield return null;
 
-        string result = "";
+        string[] resultArray;
         if (request.result == UnityWebRequest.Result.Success)
         {
-            result = request.downloadHandler.text;
+            string result = request.downloadHandler.text;
 
             Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
             if (result == "File not found")
-                result = null;
+                resultArray = null;
+            else
+            {
+                resultArray = result.Split(new[] { "\n##########\n" }, StringSplitOptions.None);
+            }
         }
         else
+        {
+            resultArray = null;
             Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
-
-        callback?.Invoke(result);
+        }
+        callback?.Invoke(resultArray);
     }
 
     public static IEnumerator GetFileBytesAsync(string path, string searchString, Action<byte[]> callback)

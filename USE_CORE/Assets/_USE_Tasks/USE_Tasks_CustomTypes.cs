@@ -180,6 +180,7 @@ static public class USE_Tasks_CustomTypes
                 StimDefType = typeof(JoystickWWW_StimDef)
             }
         }
+
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

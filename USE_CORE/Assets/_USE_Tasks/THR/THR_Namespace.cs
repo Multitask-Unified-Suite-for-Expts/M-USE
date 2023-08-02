@@ -8,17 +8,7 @@ namespace THR_Namespace
 {
     public class THR_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
+        public bool StartWithBlueSquare;
     }
 
     public class THR_BlockDef : BlockDef

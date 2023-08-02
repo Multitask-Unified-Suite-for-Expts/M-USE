@@ -20,14 +20,12 @@ namespace FlexLearning_Namespace
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
 
-        Vector3 ButtonPosition;
-        Vector3 ButtonScale;
+        public bool StimFacingCamera;
+        public string ShadowType;
+        public bool NeutralITI;
+
         Vector3 ButtonColor;
         string ButtonText;
-        string ContextExternalFilePath;
-        bool StimFacingCamera;
-        string ShadowType;
-        private bool NeutralITI;
     }
 
     public class FlexLearning_BlockDef : BlockDef

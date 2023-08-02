@@ -7,6 +7,9 @@ namespace WorkingMemory_Namespace
 {
     public class WorkingMemory_TaskDef : TaskDef
     {
+        public bool StimFacingCamera;
+        public string ShadowType;
+        public bool NeutralITI;
     }
 
     public class WorkingMemory_BlockDef : BlockDef

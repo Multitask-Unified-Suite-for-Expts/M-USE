@@ -114,6 +114,12 @@ namespace USE_ExperimentTemplate_Trial
         {
             return (T)TaskLevel;
         }
+        
+        
+        public T GetTaskDef<T>() where T: TaskDef
+        {
+            return (T)TaskLevel.TaskDef;
+        }
 
         public Type TrialDefType, StimDefType;
 
@@ -135,7 +141,7 @@ namespace USE_ExperimentTemplate_Trial
                 if (TaskLevel.TaskName != "GazeCalibration")
                 {
                     GazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.DefineTaskLevel(false);
+                    GazeCalibrationTaskLevel.DefineTaskLevel();
                     GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                     GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
@@ -246,7 +252,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 
-                GazeCalibrationTaskLevel.ConfigName = "GazeCalibration";
+                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
                 GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
 
                 UnityEngine.SceneManagement.Scene originalScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
@@ -500,11 +506,6 @@ namespace USE_ExperimentTemplate_Trial
             TaskStims.AllTaskStimGroups.Remove(sgName);
         }
 
-        // MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
-        // 		.MakeGenericMethod((new Type[] {StimDefType}));
-        // 		taskStimDefFromPrefabPath.Invoke(this, new object[] {path, PreloadedStims});
-
-
         protected T GetGameObjectStimDefComponent<T>(GameObject go) where T : StimDef
         {
             // return (T) go.GetComponent<StimDef>();
@@ -683,13 +684,6 @@ namespace USE_ExperimentTemplate_Trial
     {
 
     }
-
-
-    // public abstract class TrialDef
-    // {
-    //     public int BlockCount, TrialCountInBlock, TrialCountInTask;
-    //     public TrialStims TrialStims;
-    // }
 
     public class TrialLevel_Methods
     {

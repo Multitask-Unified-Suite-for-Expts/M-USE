@@ -16,7 +16,8 @@ using System.Collections;
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef currentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
-    public ContinuousRecognition_TaskLevel currentTask => GetTaskLevel<ContinuousRecognition_TaskLevel>();
+    public ContinuousRecognition_TaskLevel currentTaskLevel => GetTaskLevel<ContinuousRecognition_TaskLevel>();
+    public ContinuousRecognition_TaskDef currentTaskDef => GetTaskDef<ContinuousRecognition_TaskDef>();
 
     [HideInInspector] public GameObject StartButton;
 
@@ -45,7 +46,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup trialStims;
     [HideInInspector] public  List<int> ChosenStimIndices;
-    [HideInInspector] public string MaterialFilePath;
 
     [HideInInspector] public int NonStimTouches_Block;
     [HideInInspector] public int NumTrials_Block;
@@ -135,7 +135,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(CR_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -150,12 +150,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, ChooseStim);
+        
         if(!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, ButtonScale, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
                 AdjustTextPosForMac();
 
             NumFeedbackRows = 0;
@@ -165,10 +166,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             
             SetTrialSummaryString();
 
-            currentTask.CalculateBlockSummaryString();
+            currentTaskLevel.CalculateBlockSummaryString();
 
             if (TrialCount_InTask != 0)
-                currentTask.SetTaskSummaryString();
+                currentTaskLevel.SetTaskSummaryString();
 
             if (currentTrial.UseStarfield)
                 Starfield.SetActive(true);
@@ -210,7 +211,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             
-            if (MakeStimPopOut)
+            if (currentTaskDef.MakeStimPopOut)
                 PopStimOut();
         });
 
@@ -434,7 +435,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if (currentTrial.GotTrialCorrect)
                     NumCorrect_Block++;
 
-                currentTask.CalculateBlockSummaryString();
+                currentTaskLevel.CalculateBlockSummaryString();
             }
             else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
                 EndBlock = true;

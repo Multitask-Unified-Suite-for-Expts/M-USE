@@ -8,8 +8,22 @@ namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
     {
+        public string MazeKeyFilePath;
+        public string MazeFilePath;
 
-
+        public bool NeutralITI;
+        public float TileSize;
+        public string TileTexture;
+        public int NumBlinks;
+        public float[] StartColor;
+        public float[] FinishColor;
+        public float[] CorrectColor;
+        public float[] LastCorrectColor;
+        public float[] IncorrectRuleAbidingColor;
+        public float[] IncorrectRuleBreakingColor;
+        public float[] DefaultTileColor;
+        public bool UsingFixedRatioReward;
+        public string MazeBackgroundTextureName;
     }
 
     public class MazeGame_BlockDef : BlockDef

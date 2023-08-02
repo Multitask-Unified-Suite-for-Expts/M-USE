@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ConfigDynamicUI;
+using ContinuousRecognition_Namespace;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
@@ -76,24 +77,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Task Level Defined Color Variables
     [HideInInspector]
-    public float[] startColor;
-    public float[] finishColor;
-    public float[] correctColor;
-    public float[] lastCorrectColor;
-    public float[] incorrectRuleAbidingColor;
-    public float[] incorrectRuleBreakingColor;
-    public float[] defaultTileColor;
     public int NumBlinks;
     public Tile TilePrefab;
-    public float TileSize;
-    public string TileTexture;
-    public string MazeBackgroundTextureName;
-    public string ContextExternalFilePath;
     public string MazeFilePath;
-    public Vector3 StartButtonPosition;
-    public float StartButtonScale;
-    public bool NeutralITI;
-    public bool UsingFixedRatioReward;
 
     // Config UI Variables
     private bool configVariablesLoaded;
@@ -127,10 +113,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private float sliderValueChange;
     private float finishedFbDuration;
 
-    [HideInInspector] public float TouchFeedbackDuration;
-
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
+    public MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
+
 
     public override void DefineControlLevel()
     {
@@ -155,13 +141,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //THIS WILL EVENTUALLY NEED TO BE ADJUSTED IF START LOADING CONTEXTS/MAZES FROM SERVER!!
             if (SessionValues.WebBuild)
             {
-                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + MazeBackgroundTextureName);
+                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTextureName);
             }
             else
             {
-                tileTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, MazeBackgroundTextureName));
+                string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
+                tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTextureName));
             }
 
             if (MazeContainer == null)
@@ -184,7 +171,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(MG_CanvasGO.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(MG_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -202,14 +189,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         var SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ITI);
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(SelectionHandler, TouchFeedbackDuration, StartButtonScale, MG_CanvasGO);
+            TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale, MG_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
             if (!SessionValues.SessionDef.IsHuman)
             {
                 TouchFBController.DestroyTouchFeedback();
-                TouchFBController.SetPrefabSizes(StartButtonScale);
+                TouchFBController.SetPrefabSizes(currentTaskDef.StartButtonScale);
             }
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
@@ -245,7 +232,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.SessionDef.IsHuman)
             {
                 TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
-                tileScale = 26.25f * TileSize;
+                tileScale = 26.25f * currentTaskDef.TileSize;
                 TouchFBController.SetPrefabSizes(tileScale);
             }
             choiceStartTime = Time.unscaledTime;
@@ -361,7 +348,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
             choiceMade = false;
-            if (UsingFixedRatioReward)
+            if (currentTaskDef.UsingFixedRatioReward)
             {
                 if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
                 {
@@ -430,11 +417,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (finishedMaze)
                 SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOff");
             
-            if (NeutralITI)
+            if (currentTaskDef.NeutralITI)
             {
                 contextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage")));
-                //RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "itiImage"));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -467,8 +453,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         mazeDims = CurrentTaskLevel.currMaze.mDims;
         var mazeCenter = MazeBackground.transform.localPosition;
 
-        mazeLength = mazeDims.x * TileSize + (mazeDims.x - 1) * spaceBetweenTiles.value;
-        mazeHeight = mazeDims.y * TileSize + (mazeDims.y - 1) * spaceBetweenTiles.value;
+        mazeLength = mazeDims.x * currentTaskDef.TileSize + (mazeDims.x - 1) * spaceBetweenTiles.value;
+        mazeHeight = mazeDims.y * currentTaskDef.TileSize + (mazeDims.y - 1) * spaceBetweenTiles.value;
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * spaceBetweenTiles.value,
             mazeHeight + 2 * (spaceBetweenTiles.value), 0.1f);
@@ -483,12 +469,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // Configures Tile objects and Prefab within the maze container
             tile = Instantiate(TilePrefab, MazeContainer.transform);
             SetGameConfigs();
-            tile.transform.localScale = new Vector3(TileSize, TileSize, 0.15f);
+            tile.transform.localScale = new Vector3(currentTaskDef.TileSize, currentTaskDef.TileSize, 0.15f);
             tile.gameObject.SetActive(true);
             tile.gameObject.GetComponent<Tile>().enabled = true;
             tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
-            var displaceX = (2 * (x - 1) + 1) * (TileSize / 2) + spaceBetweenTiles.value * (x - 1);
-            var displaceY = (2 * (y - 1) + 1) * (TileSize / 2) + spaceBetweenTiles.value * (y - 1);
+            var displaceX = (2 * (x - 1) + 1) * (currentTaskDef.TileSize / 2) + spaceBetweenTiles.value * (x - 1);
+            var displaceY = (2 * (y - 1) + 1) * (currentTaskDef.TileSize / 2) + spaceBetweenTiles.value * (y - 1);
             var newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);
             tile.transform.position = newTilePosition;
             
@@ -779,27 +765,27 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tile.NUM_BLINKS = NumBlinks;
 
         // Default - White
-        tile.DEFAULT_TILE_COLOR = new Color(defaultTileColor[0], defaultTileColor[1], defaultTileColor[2], 1);
+        tile.DEFAULT_TILE_COLOR = new Color(currentTaskDef.DefaultTileColor[0], currentTaskDef.DefaultTileColor[1], currentTaskDef.DefaultTileColor[2], 1);
 
         // Start - Light yellow
-        tile.START_COLOR = new Color(startColor[0], startColor[1], startColor[2], 1);
+        tile.START_COLOR = new Color(currentTaskDef.StartColor[0], currentTaskDef.StartColor[1], currentTaskDef.StartColor[2], 1);
 
         // Finish - Light blue
-        tile.FINISH_COLOR = new Color(finishColor[0], finishColor[1], finishColor[2], 1);
+        tile.FINISH_COLOR = new Color(currentTaskDef.FinishColor[0], currentTaskDef.FinishColor[1], currentTaskDef.FinishColor[2], 1);
 
         // Correct - Light green
-        tile.CORRECT_COLOR = new Color(correctColor[0], correctColor[1], correctColor[2]);
+        tile.CORRECT_COLOR = new Color(currentTaskDef.CorrectColor[0], currentTaskDef.CorrectColor[1], currentTaskDef.CorrectColor[2]);
 
         // Prev correct - Darker green
-        tile.PREV_CORRECT_COLOR = new Color(lastCorrectColor[0], lastCorrectColor[1], lastCorrectColor[2]);
+        tile.PREV_CORRECT_COLOR = new Color(currentTaskDef.LastCorrectColor[0], currentTaskDef.LastCorrectColor[1], currentTaskDef.LastCorrectColor[2]);
 
         // Incorrect rule-abiding - Orange
-        tile.INCORRECT_RULEABIDING_COLOR = new Color(incorrectRuleAbidingColor[0], incorrectRuleAbidingColor[1],
-            incorrectRuleAbidingColor[2]);
+        tile.INCORRECT_RULEABIDING_COLOR = new Color(currentTaskDef.IncorrectRuleAbidingColor[0], currentTaskDef.IncorrectRuleAbidingColor[1],
+            currentTaskDef.IncorrectRuleAbidingColor[2]);
 
         // Incorrect rule-breaking - Black
-        tile.INCORRECT_RULEBREAKING_COLOR = new Color(incorrectRuleBreakingColor[0], incorrectRuleBreakingColor[1],
-            incorrectRuleBreakingColor[2]);
+        tile.INCORRECT_RULEBREAKING_COLOR = new Color(currentTaskDef.IncorrectRuleBreakingColor[0], currentTaskDef.IncorrectRuleBreakingColor[1],
+            currentTaskDef.IncorrectRuleBreakingColor[2]);
         
         // FEEDBACK LENGTH IN SECONDS
 

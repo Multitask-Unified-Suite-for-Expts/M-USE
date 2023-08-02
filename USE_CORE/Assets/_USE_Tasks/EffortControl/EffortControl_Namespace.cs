@@ -28,7 +28,7 @@ namespace EffortControl_Namespace
         {
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
 
-            for (int iTrial = 0; iTrial < NumTrials; iTrial++) // Set to NumTrials in the BlockDef
+            for (int iTrial = 0; iTrial < NumTrials; iTrial++) 
             {
                 EffortControl_TrialDef td = new EffortControl_TrialDef();
                 td.BlockName = BlockName;

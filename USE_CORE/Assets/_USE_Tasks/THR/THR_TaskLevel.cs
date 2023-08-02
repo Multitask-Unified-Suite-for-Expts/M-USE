@@ -43,10 +43,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
 
-        trialLevel.MaterialFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-
-        SetSettings();
-
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
@@ -72,42 +68,18 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         });
     }
 
-    public void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            trialLevel.MaterialFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartWithBlueSquare"))
-            trialLevel.StartWithBlueSquare = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StartWithBlueSquare");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonPosition"))
-            trialLevel.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonPosition");
-        else
-            trialLevel.ButtonPosition = new Vector3(0, 0, 0);
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ButtonScale"))
-            trialLevel.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "ButtonScale");
-        else
-            trialLevel.ButtonScale = 120f;
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            trialLevel.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            trialLevel.TouchFeedbackDuration = .3f;
-    }
-
     public override void SetTaskSummaryString()
     {
         if (trialLevel.TrialCount_InTask != 0)
         {
             CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>" +
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
                                             $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} | " +
                                             $"\t<b># Blocks:</b> {BlockCount} | " +
                                             $"\t<b># Rewards:</b> {TouchRewards_Task + ReleaseRewards_Task}");
         }
         else
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigName}</b>");
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
     }
 
     public void AddBlockValuesToTaskValues()

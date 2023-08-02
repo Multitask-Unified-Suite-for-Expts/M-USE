@@ -8,17 +8,10 @@ namespace VisualSearch_Namespace
 {
     public class VisualSearch_TaskDef : TaskDef
     {
-        //Already-existing fields (inherited from TaskDef)      
-        //public DateTime TaskStart_DateTime;
-        //public int TaskStart_Frame;
-        //public float TaskStart_UnityTime;
-        //public string TaskName;
-        //public string ExternalStimFolderPath;
-        //public string PrefabStimFolderPath;
-        //public string ExternalStimExtension;
-        //public List<string[]> FeatureNames;
-        //public string neutralPatternedColorName;
-        //public float? ExternalStimScale;
+        public bool StimFacingCamera;
+        public string ShadowType;
+        public bool NeutralITI;
+        public bool? TokensWithStimOn;
     }
 
     public class VisualSearch_BlockDef : BlockDef

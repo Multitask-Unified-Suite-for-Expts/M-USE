@@ -76,8 +76,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject ToggleAudioButton;
 
         //Load prefabs from resources:
-        [HideInInspector] public GameObject BlockResults_GridElementPrefab;
-        [HideInInspector] public GameObject BlockResultsPrefab;
         [HideInInspector] public GameObject HumanStartPanelPrefab;
         [HideInInspector] public GameObject StartButtonPrefabGO;
         [HideInInspector] public AudioClip BackgroundMusic_AudioClip;
@@ -104,6 +102,9 @@ namespace USE_ExperimentTemplate_Session
             #endif
 
             SessionValues.SessionLevel = this;
+
+            SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
+            SessionValues.LoadingCanvas_GO.SetActive(false);
 
 
             State initScreen = new State("InitScreen");

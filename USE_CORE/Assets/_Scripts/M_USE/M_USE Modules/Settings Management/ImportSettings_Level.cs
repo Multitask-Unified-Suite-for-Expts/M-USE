@@ -2,17 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 using UnityEngine;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Classes;
-using USE_ExperimentTemplate_Session;
 using USE_States;
 using Debug = UnityEngine.Debug;
+
 
 public class ImportSettings_Level : ControlLevel
 {

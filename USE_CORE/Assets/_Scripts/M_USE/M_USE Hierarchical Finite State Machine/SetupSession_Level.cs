@@ -49,7 +49,7 @@ public class SetupSession_Level : ControlLevel
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
                 new SettingsDetails(SessionValues.ConfigFolderPath, "SingleType", "SessionConfig", typeof(SessionDef)),
-                new SettingsDetails(SessionValues.ConfigFolderPath, "JSON", "EventCode", typeof(Dictionary<string, EventCode>))
+                new SettingsDetails(SessionValues.ConfigFolderPath, "JSON", "SessionEventCode", typeof(Dictionary<string, EventCode>))
             };
         });
         ImportSessionSettings.AddUpdateMethod(() =>
@@ -63,22 +63,22 @@ public class SetupSession_Level : ControlLevel
                     //set sessiondef to the parsed content
                     SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
 
-                    //determine file path of next config (event codes) based on content of sessiondef
-                    if (SessionValues.UsingServerConfigs)
-                        importSettings_Level.SettingsDetails[1].FilePath = SessionValues.ConfigFolderPath;
-                    else  // Local or Default
-                    {
-                        string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-                        if (!String.IsNullOrEmpty(eventCodeFileString))
-                            importSettings_Level.SettingsDetails[1].FilePath = eventCodeFileString;
-                        else
-                            Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
-                    }
+                    ////determine file path of next config (event codes) based on content of sessiondef
+                    //if (SessionValues.UsingServerConfigs)
+                    //    importSettings_Level.SettingsDetails[1].FilePath = SessionValues.ConfigFolderPath;
+                    //else  // Local or Default
+                    //{
+                    //    string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
+                    //    if (!String.IsNullOrEmpty(eventCodeFileString))
+                    //        importSettings_Level.SettingsDetails[1].FilePath = eventCodeFileString;
+                    //    else
+                    //        Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
+                    //}
                 }
-                else if (importSettings_Level.SettingsDetails[0].SearchString == "EventCode") //just parsed eventcodeconfig
+                else if (importSettings_Level.SettingsDetails[0].SearchString == "SessionEventCode") //just parsed eventcodeconfig
                 {
                     //set event codes to parsed content
-                    Debug.Log("EC PARSED RESULT = " + importSettings_Level.parsedResult);
+                    Debug.Log("SETTING SESSION EVENT CODES TO: " + (Dictionary<string, EventCode>)importSettings_Level.parsedResult);
                     SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;
                 }
                 else
@@ -146,9 +146,7 @@ public class SetupSession_Level : ControlLevel
 
             GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
 
-            //verifyTask_Level.taskConfigFolderPath = SessionValues.ConfigFolderPath + "/" + configFolderName;
             verifyTask_Level.TaskLevel.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + configFolderName;
-
         });
 
         VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,

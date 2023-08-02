@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Session
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
-            State setupTask = new State("SetupTask");
+            State setupTask = new State("VerifyTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");
@@ -610,7 +610,11 @@ namespace USE_ExperimentTemplate_Session
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
-                    
+
+                Debug.Log("SETTING TASK CONFIG PATH TO: " + (SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName));
+                CurrentTask.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
+
+
             });
             setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
             //RunTask State---------------------------------------------------------------------------------------------------------------

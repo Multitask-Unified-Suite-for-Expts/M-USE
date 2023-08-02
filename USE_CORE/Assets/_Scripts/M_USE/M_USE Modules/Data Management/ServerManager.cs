@@ -155,6 +155,9 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator GetFilePath(string folderPath, string searchString, Action<string> callback)
     {
+        Debug.Log("FOLDER PATH: " + folderPath);
+        Debug.Log("SEARCH STRING: " + searchString);
+
         string url = $"{ServerURL}/getFilePath.php?folderPath={folderPath}&searchString={searchString}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);

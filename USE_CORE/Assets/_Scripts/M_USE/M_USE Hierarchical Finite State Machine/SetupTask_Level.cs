@@ -34,7 +34,6 @@ public class SetupTask_Level : ControlLevel
             
         VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup, () =>
         {
-            Debug.Log("#####################################################: " + TaskLevel.TaskDef);
         });
 
         OtherSetup.AddInitializationMethod(() =>
@@ -107,8 +106,6 @@ public class SetupTask_Level : ControlLevel
                 SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
 
-            //SessionDataControllers.InstantiateFrameData(StoreData, ConfigName,
-            //  TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = TaskLevel;
             FrameData.trialLevel = TrialLevel;
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";

@@ -165,7 +165,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-
+        
         CurrentBlockString = "<b>Current Block:</b>" +
                 "\nCorrect: " + trialLevel.NumCorrect_Block +
                 "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +

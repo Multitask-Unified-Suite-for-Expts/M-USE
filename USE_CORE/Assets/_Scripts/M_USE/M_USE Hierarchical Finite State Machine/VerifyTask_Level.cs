@@ -54,6 +54,7 @@ public class VerifyTask_Level : ControlLevel
             }));
         });
 
+        bool gettingFilePath = false;
         ImportSettings.AddUpdateMethod(() =>
         {
             if (importSettings_Level.fileLoadingFinished)
@@ -116,12 +117,10 @@ public class VerifyTask_Level : ControlLevel
                     }
                 }
 
-
-
                 fileParsed = true;
-
-                if (importSettings_Level.SettingsDetails.Count > 1)
+                if (importSettings_Level.SettingsDetails.Count > 1 && !gettingFilePath)
                 {
+                    gettingFilePath = true;
                     StartCoroutine(GetFilePath(importSettings_Level.SettingsDetails[1].SearchString, result =>
                     {
                         if (!string.IsNullOrEmpty(result))
@@ -131,11 +130,13 @@ public class VerifyTask_Level : ControlLevel
                         }
                         else
                             Debug.Log("GET FILE PATH RESULT IS NULL FOR SettingsDetails[1].SearchString !!!!!");
+
+                        importSettings_Level.importPaused = false;
+                        gettingFilePath = false;
                     }));
                 }
-
-
-                importSettings_Level.importPaused = false;
+                else
+                    importSettings_Level.importPaused = false;
             }
         });
         ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs,

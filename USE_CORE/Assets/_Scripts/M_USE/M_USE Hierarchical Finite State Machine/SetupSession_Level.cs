@@ -48,51 +48,47 @@ public class SetupSession_Level : ControlLevel
 
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
-                new SettingsDetails("SingleType", "SessionConfig", typeof(SessionDef)),
-                new SettingsDetails("JSON", "EventCode", typeof(Dictionary<string, EventCode>))
+                new SettingsDetails(SessionValues.ConfigFolderPath, "SingleType", "SessionConfig", typeof(SessionDef)),
+                new SettingsDetails(SessionValues.ConfigFolderPath, "JSON", "EventCode", typeof(Dictionary<string, EventCode>))
             };
-            if (SessionValues.UsingServerConfigs)
-                importSettings_Level.SettingsDetails[0].FilePath = SessionValues.ConfigFolderPath;
-            else
-                importSettings_Level.SettingsDetails[0].FilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, $"*{"SessionConfig"}*");
-
         });
         ImportSessionSettings.AddUpdateMethod(() =>
+        {
+            if (importSettings_Level.fileParsed)
             {
-                if (importSettings_Level.fileParsed)
+                Debug.Log(importSettings_Level.SettingsDetails[0].SearchString + " PARSED!");
+
+                if (importSettings_Level.SettingsDetails[0].SearchString == "SessionConfig") //just parsed sessionconfig
                 {
-                    Debug.Log(importSettings_Level.SettingsDetails[0].SearchString + " PARSED!");
+                    //set sessiondef to the parsed content
+                    SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
 
-                    if (importSettings_Level.SettingsDetails[0].SearchString == "SessionConfig") //just parsed sessionconfig
+                    //determine file path of next config (event codes) based on content of sessiondef
+                    if (SessionValues.UsingServerConfigs)
+                        importSettings_Level.SettingsDetails[1].FilePath = SessionValues.ConfigFolderPath;
+                    else  // Local or Default
                     {
-                        //set sessiondef to the parsed content
-                        SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;
-
-                        //determine file path of next config (event codes) based on content of sessiondef
-                        if (SessionValues.UsingServerConfigs)
-                            importSettings_Level.SettingsDetails[1].FilePath = SessionValues.ConfigFolderPath;
-                        else  // Local or Default
-                        {
-                            string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
-                            if (!String.IsNullOrEmpty(eventCodeFileString))
-                                importSettings_Level.SettingsDetails[1].FilePath = eventCodeFileString;
-                            else
-                                Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
-                        }
+                        string eventCodeFileString = SessionValues.LocateFile.FindFilePathInExternalFolder(SessionValues.ConfigFolderPath, "*EventCode*");
+                        if (!String.IsNullOrEmpty(eventCodeFileString))
+                            importSettings_Level.SettingsDetails[1].FilePath = eventCodeFileString;
+                        else
+                            Debug.Log("Event Codes were not found in the config folder path. Not an issue if Event Codes are set INACTIVE.");
                     }
-                    else if (importSettings_Level.SettingsDetails[0].SearchString == "EventCode") //just parsed eventcodeconfig
-                    {
-                        //set event codes to parsed content
-                        SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;
-                    }
-                    else
-                        Debug.LogError($"The {importSettings_Level.SettingsDetails[0].SearchString} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
-
-                    importSettings_Level.importPaused = false;
-                    settingsImported = true;
-                    setupPaused = false;
                 }
-            });
+                else if (importSettings_Level.SettingsDetails[0].SearchString == "EventCode") //just parsed eventcodeconfig
+                {
+                    //set event codes to parsed content
+                    Debug.Log("EC PARSED RESULT = " + importSettings_Level.parsedResult);
+                    SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;
+                }
+                else
+                    Debug.LogError($"The {importSettings_Level.SettingsDetails[0].SearchString} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
+
+                importSettings_Level.importPaused = false;
+                settingsImported = true;
+                setupPaused = false;
+            }
+        });
         ImportSessionSettings.SpecifyTermination(() => ImportSessionSettings.ChildLevel.Terminated && !setupPaused, CreateDataFolder,
             () =>
             {
@@ -121,18 +117,17 @@ public class SetupSession_Level : ControlLevel
         AsyncOperation loadScene = null;
 
         LoadTaskScene.AddInitializationMethod(() =>
+        {
+            taskSceneLoaded = false;
+            taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
+            loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
+            string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+            loadScene.completed += (_) =>
             {
-                taskSceneLoaded = false;
-                taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
-                loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-                string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
-                loadScene.completed += (_) =>
-                {
-                    taskSceneLoaded = true;
-                    GameObject.Find(taskName + "_Camera").SetActive(false);
-                };
-            }
-        );
+                taskSceneLoaded = true;
+                GameObject.Find(taskName + "_Camera").SetActive(false);
+            };
+        });
 
         LoadTaskScene.SpecifyTermination(() => taskSceneLoaded && !setupPaused, VerifyTask);
 
@@ -150,6 +145,10 @@ public class SetupSession_Level : ControlLevel
             string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
 
             GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
+
+            //verifyTask_Level.taskConfigFolderPath = SessionValues.ConfigFolderPath + "/" + configFolderName;
+            verifyTask_Level.TaskLevel.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + configFolderName;
+
         });
 
         VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
@@ -217,7 +216,6 @@ public class SetupSession_Level : ControlLevel
         SessionValues.GazeTracker = SessionValues.InputTrackers.GetComponent<GazeTracker>();
 
         SessionValues.SelectionTracker = new SelectionTracker();
-
         if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
         {
             SessionLevel.SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", SessionValues.GazeTracker, inputActive, inputInactive);

@@ -490,9 +490,9 @@ namespace USE_ExperimentTemplate_Task
 
                     string customSettingsValue = customSettings[key].ToLower();
 
-                    if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
+                    if (SessionValues.UsingServerConfigs)
                     {
-                        StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
+                        StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath + key, result => //TASK CONFIG PATH (+ key) PROB IS NOT WHAT NEEDS TO BE HERE!!!
                         {
                             if (!string.IsNullOrEmpty(result[1]))
                             {

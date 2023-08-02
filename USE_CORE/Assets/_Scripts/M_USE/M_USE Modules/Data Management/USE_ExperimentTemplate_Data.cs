@@ -48,7 +48,7 @@ namespace USE_ExperimentTemplate_Data
                 string content = "";
                 foreach (DictionaryEntry entry in data)
                     content += $"{entry.Key}:\t{entry.Value}\n";
-                yield return CoroutineHelper.StartCoroutine(ServerManager.CreateFileAsync(filePath, ConfigName + ".txt", content));
+                yield return CoroutineHelper.StartCoroutine(ServerManager.CreateFileAsync(filePath, content));
             }
             else
             {

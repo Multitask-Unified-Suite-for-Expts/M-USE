@@ -413,7 +413,6 @@ public class InitScreen_Level : ControlLevel
             DisplayErrorMessage("Input a Data Folder Path!", "EmptyDataFolder");
         else
         {
-            Debug.Log("Properly Filled out all neccessary information!");
             PlayAudio(ToggleChange_AudioClip);
             ConfirmButtonPressed = true;
         }

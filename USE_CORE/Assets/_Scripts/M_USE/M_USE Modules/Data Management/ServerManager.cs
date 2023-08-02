@@ -112,24 +112,25 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static IEnumerator CreateFileAsync(string path, string fileName, string content)
+    public static IEnumerator CreateFileAsync(string filePath, string content)
     {
-        string url = $"{ServerURL}/createFile.php?path={path}";
+        string url = $"{ServerURL}/createFile.php?path={filePath}";
         using UnityWebRequest request = UnityWebRequest.Put(url, content);
         request.method = UnityWebRequest.kHttpVerbPUT;
         request.SetRequestHeader("Content-Type", "text/plain");
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFile Request: {request.downloadHandler.text} | File: {fileName}" : $"ERROR CREATING FILE: {fileName} | Error: {request.error}");
+        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFile Request: {request.downloadHandler.text} | FilePath: {filePath}" : $"ERROR CREATING FILE AT PATH: {filePath} | Error: {request.error}");
     }
 
-    public static IEnumerator AppendToFileAsync(string folderPath, string fileName, string rowData)
+    public static IEnumerator AppendToFileAsync(string filePath, string rowData)
     {
-        yield return GetFileStringAsync(folderPath, fileName, originalFileContentsArray =>
+        //THIS WILL NEED TO BE EDITED NOW THAT WE CHANGED THE INPUT BEING THE FULL PATH!
+
+        yield return GetFileStringAsync(filePath, originalFileContentsArray =>
         {
             if (originalFileContentsArray != null)
             {
-                string path = $"{folderPath}/{fileName}";
-                string url = $"{ServerURL}/updateFile.php?path={path}";
+                string url = $"{ServerURL}/updateFile.php?path={filePath}";
 
                 string updatedFileContents = originalFileContentsArray[1] + "\n" + rowData;
                 WWWForm formData = new WWWForm();
@@ -139,7 +140,7 @@ public static class ServerManager //Used with the PHP scripts
                 CoroutineHelper.StartCoroutine(appendCoroutine);
             }
             else
-                Debug.Log("ORIGINAL CONTENTS IS NULL FOR FILE: " + fileName);
+                Debug.Log("ORIGINAL CONTENTS IS NULL FOR FILE AT PATH: " + filePath);
         });
     }
 
@@ -179,9 +180,11 @@ public static class ServerManager //Used with the PHP scripts
     }
 
 
-    public static IEnumerator GetFileStringAsync(string path, string searchString, Action<string[]> callback)
+    public static IEnumerator GetFileStringAsync(string path, Action<string[]> callback)
     {
-        string url = $"{ServerURL}/getFile.php?path={path}&searchString={searchString}";
+        Debug.Log("GETTING FILE AT: " + path);
+
+        string url = $"{ServerURL}/getFile.php?path={path}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
         var operation = request.SendWebRequest();
@@ -194,7 +197,7 @@ public static class ServerManager //Used with the PHP scripts
         {
             string result = request.downloadHandler.text;
 
-            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server at path: " + path) : ("Found File On Server at path: " + path));
             if (result == "File not found")
                 resultArray = null;
             else
@@ -205,7 +208,7 @@ public static class ServerManager //Used with the PHP scripts
         else
         {
             resultArray = null;
-            Debug.Log($"ERROR FINDING FILE: {searchString} | ERROR: {request.error}");
+            Debug.Log($"ERROR FINDING FILE AT PATH: {path} | ERROR: {request.error}");
         }
         callback?.Invoke(resultArray);
     }

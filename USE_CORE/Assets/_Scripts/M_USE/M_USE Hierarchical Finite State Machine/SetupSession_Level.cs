@@ -37,7 +37,6 @@ public class SetupSession_Level : ControlLevel
         VerifyTask = new State("VerifyTask");
         AddActiveStates(new List<State> { ImportSessionSettings, CreateDataFolder, LoadTaskScene, VerifyTask });
 
-        // importSettings_Level.DefineControlLevel();
         importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
         ImportSessionSettings.AddChildLevel(importSettings_Level);
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
@@ -108,7 +107,6 @@ public class SetupSession_Level : ControlLevel
             if (SessionValues.SessionDef.StoreData)
                 StartCoroutine(CreateSessionDataFolder(result =>
                 {
-                    //StartCoroutine(CreateTaskSelectionDataFolder(result => dataFolderCreated = true));
                     dataFolderCreated = true;
                 }));
             else
@@ -144,8 +142,6 @@ public class SetupSession_Level : ControlLevel
         VerifyTask.AddChildLevel(verifyTask_Level);
         VerifyTask.AddInitializationMethod(() =>
         {
-            //var methodInfo = this.GetType().GetMethod("AddText", BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(string) }, null);
-
             //loads 
             var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
@@ -172,15 +168,12 @@ public class SetupSession_Level : ControlLevel
         //Gets the task level type using reflection which cannot be done outside an invoked method
         string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
         verifyTask_Level.TaskLevel = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
-
-
     }
 
 
     private void SetDataPaths()
     {
         SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}__SubjectID_{SessionValues.SubjectID}__SubjectAge_{SessionValues.SubjectAge}";
-        Debug.Log("FILE PREFIX: " + SessionValues.FilePrefix);
         ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
 
         if (SessionValues.UsingServerConfigs)

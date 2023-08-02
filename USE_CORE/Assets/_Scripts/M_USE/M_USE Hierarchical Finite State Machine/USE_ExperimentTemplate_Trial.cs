@@ -506,11 +506,6 @@ namespace USE_ExperimentTemplate_Trial
             TaskStims.AllTaskStimGroups.Remove(sgName);
         }
 
-        // MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
-        // 		.MakeGenericMethod((new Type[] {StimDefType}));
-        // 		taskStimDefFromPrefabPath.Invoke(this, new object[] {path, PreloadedStims});
-
-
         protected T GetGameObjectStimDefComponent<T>(GameObject go) where T : StimDef
         {
             // return (T) go.GetComponent<StimDef>();
@@ -689,13 +684,6 @@ namespace USE_ExperimentTemplate_Trial
     {
 
     }
-
-
-    // public abstract class TrialDef
-    // {
-    //     public int BlockCount, TrialCountInBlock, TrialCountInTask;
-    //     public TrialStims TrialStims;
-    // }
 
     public class TrialLevel_Methods
     {

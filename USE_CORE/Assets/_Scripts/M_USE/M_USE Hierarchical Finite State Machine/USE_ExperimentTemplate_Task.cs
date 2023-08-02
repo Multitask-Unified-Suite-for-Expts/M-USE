@@ -418,7 +418,7 @@ namespace USE_ExperimentTemplate_Task
             GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
             if (taskCanvas != null)
             {
-                BlockResultsGO = Instantiate(BlockResultsPrefab);
+                BlockResultsGO = Instantiate(SessionValues.BlockResultsPrefab);
                 BlockResultsGO.name = "BlockResults";
                 BlockResultsGO.transform.SetParent(taskCanvas.transform);
                 BlockResultsGO.transform.localScale = Vector3.one;
@@ -440,7 +440,7 @@ namespace USE_ExperimentTemplate_Task
                 {                        
                     blockResults_AudioSource.Play();
 
-                    GameObject gridItem = Instantiate(BlockResults_GridElementPrefab, gridParent);
+                    GameObject gridItem = Instantiate(SessionValues.BlockResults_GridElementPrefab, gridParent);
                     gridItem.name = "GridElement" + count;
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
                     itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";

@@ -614,7 +614,7 @@ namespace USE_ExperimentTemplate_Session
                 DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
-                SessionCam.gameObject.SetActive(false);
+                //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -651,6 +651,7 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
 
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");
 
@@ -786,8 +787,6 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
-                BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
-                BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
                 HumanStartPanelPrefab = Resources.Load<GameObject>("HumanStartPanel");
                 StartButtonPrefabGO = Resources.Load<GameObject>("StartButton");
                 BackgroundMusic_AudioClip = Resources.Load<AudioClip>("BackgroundMusic");

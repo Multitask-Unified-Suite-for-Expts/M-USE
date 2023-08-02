@@ -10,7 +10,7 @@ using USE_UI;
 
 public static class SessionValues
 {
-    public static bool WebBuild; //can eventually delete once implement new initscreen collecting responses;
+    public static bool WebBuild;
     public static bool Using2DStim;
 
     //Info Collected from Init Screen Panels:
@@ -22,6 +22,9 @@ public static class SessionValues
     public static bool StoringDataLocally;
     public static bool StoringDataOnServer;
 
+    //Prefabs passed from SessionLevel;
+    public static GameObject BlockResultsPrefab;
+    public static GameObject BlockResults_GridElementPrefab;
 
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;
@@ -95,6 +98,19 @@ public static class SessionValues
     //public int TaskButtonGridMaxPerRow = 4; //not currently used
     //public bool UseTaskButtonsGrid;
 
+    static SessionValues()
+    {
+        Debug.Log("SESSION VALUES CONSTRUCTOR!");
+
+        LoadPrefabs();
+
+    }
+
+    private static void LoadPrefabs()
+    {
+        BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
+        BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
+    }
 
     //public static IEnumerator GetFileContentString(string fileName, Action<string> callback)
     //{

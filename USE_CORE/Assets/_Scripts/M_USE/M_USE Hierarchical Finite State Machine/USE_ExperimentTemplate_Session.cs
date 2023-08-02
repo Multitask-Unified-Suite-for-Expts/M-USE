@@ -334,6 +334,9 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigFolderName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
+
+                SessionValues.LoadingCanvas_GO.SetActive(false); //Turn off loading circle now that about to set taskselection canvas active!
+
                 SessionCam.gameObject.SetActive(true);
 
 

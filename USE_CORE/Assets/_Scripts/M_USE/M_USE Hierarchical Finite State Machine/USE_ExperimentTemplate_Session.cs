@@ -104,6 +104,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevel = this;
 
             SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
+            SessionValues.LoadingController = GameObject.Find("Circle").GetComponent<LoadingController>();
             SessionValues.LoadingCanvas_GO.SetActive(false);
 
 

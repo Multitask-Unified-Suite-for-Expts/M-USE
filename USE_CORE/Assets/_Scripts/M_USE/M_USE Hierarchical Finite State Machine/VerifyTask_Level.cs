@@ -131,11 +131,12 @@ public class VerifyTask_Level : ControlLevel
                         }
                         else
                             Debug.Log("GET FILE PATH RESULT IS NULL FOR SettingsDetails[1].SearchString !!!!!");
+
+                        importSettings_Level.importPaused = false;
                     }));
                 }
-
-
-                importSettings_Level.importPaused = false;
+                else
+                    importSettings_Level.importPaused = false;
             }
         });
         ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs,

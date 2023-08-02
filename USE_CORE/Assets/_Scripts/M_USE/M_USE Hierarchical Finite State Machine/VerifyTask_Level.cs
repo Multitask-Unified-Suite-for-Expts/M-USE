@@ -153,8 +153,6 @@ public class VerifyTask_Level : ControlLevel
         if (!SessionValues.UsingDefaultConfigs)
             return;
 
-        //tl.TaskConfigPath = $"{SessionValues.ConfigFolderPath}/{tl.TaskName}_DefaultConfigs";
-
         if (Directory.Exists(TaskLevel.TaskConfigPath))
             Directory.Delete(TaskLevel.TaskConfigPath, true);
 
@@ -203,11 +201,11 @@ public class VerifyTask_Level : ControlLevel
                 break;
             case "eventcode":
                 importSettings_Level.SettingsDetails[0].SettingType =
-                    typeof(Dictionary<string, EventCode>); //this correct for event code?
+                    typeof(Dictionary<string, EventCode>);
                 break;
             case "configui":
                 importSettings_Level.SettingsDetails[0].SettingType =
-                    typeof(ConfigVarStore); //this correct for ConfigUI?
+                    typeof(ConfigVarStore);
                 break;
             default:
                 Debug.LogError("SET VALUES FOR LOADING DEFAULT SWITCH STATEMENT!");

@@ -437,7 +437,7 @@ namespace USE_ExperimentTemplate_Session
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 
-                    if (!SessionValues.WebBuild)
+                    if (!SessionValues.UsingServerConfigs)
                     {
                         if (!Directory.Exists(taskFolderPath))
                         {

@@ -76,8 +76,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject ToggleAudioButton;
 
         //Load prefabs from resources:
-        [HideInInspector] public GameObject BlockResults_GridElementPrefab;
-        [HideInInspector] public GameObject BlockResultsPrefab;
         [HideInInspector] public GameObject HumanStartPanelPrefab;
         [HideInInspector] public GameObject StartButtonPrefabGO;
         [HideInInspector] public AudioClip BackgroundMusic_AudioClip;
@@ -104,6 +102,10 @@ namespace USE_ExperimentTemplate_Session
             #endif
 
             SessionValues.SessionLevel = this;
+
+            SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
+            SessionValues.LoadingController = GameObject.Find("Circle").GetComponent<LoadingController>();
+            SessionValues.LoadingCanvas_GO.SetActive(false);
 
 
             State initScreen = new State("InitScreen");
@@ -140,9 +142,7 @@ namespace USE_ExperimentTemplate_Session
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                if(SessionValues.WebBuild) //immedietely load taskselection screen and set initCam inactive
-                    InitCamGO.SetActive(false); //Init canvas doesnt even use InitCam........ (we using this for something else??)
-                else
+                if(!SessionValues.WebBuild)
                 {
                     CreateExperimenterDisplay();
                     CreateMirrorCam();
@@ -579,7 +579,7 @@ namespace USE_ExperimentTemplate_Session
                 DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
-                SessionCam.gameObject.SetActive(false);
+                //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -616,6 +616,7 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionCam.gameObject.SetActive(false);
 
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");
 
@@ -747,8 +748,6 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
-                BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
-                BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
                 HumanStartPanelPrefab = Resources.Load<GameObject>("HumanStartPanel");
                 StartButtonPrefabGO = Resources.Load<GameObject>("StartButton");
                 BackgroundMusic_AudioClip = Resources.Load<AudioClip>("BackgroundMusic");

@@ -559,6 +559,7 @@ namespace USE_ExperimentTemplate_Session
                 if (!SceneLoading && CurrentTask != null && !DefiningTask)
                 {
                     DefiningTask = true;
+                    CurrentTask.ConfigFolderName = selectedConfigFolderName;
                     CurrentTask.DefineTaskLevel();
                 }
 

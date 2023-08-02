@@ -41,7 +41,7 @@ public class SetupTask_Level : ControlLevel
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName;
 
-            if (SessionValues.WebBuild && SessionValues.SessionDef.StoreData)
+            if (SessionValues.UsingServerConfigs && SessionValues.SessionDef.StoreData)
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
             }

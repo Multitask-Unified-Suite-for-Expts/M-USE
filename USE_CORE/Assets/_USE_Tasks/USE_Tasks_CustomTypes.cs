@@ -12,6 +12,7 @@ using THR_Namespace;
 using MazeReactionTest_Namespace;
 using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
+using JoystickWWW_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
 using TobiiGaze_Namespace;
@@ -166,6 +167,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(FeatureUncertaintyWM_BlockDef),
                 TrialDefType = typeof(FeatureUncertaintyWM_TrialDef),
                 StimDefType = typeof(FeatureUncertaintyWM_StimDef)
+            }
+        },
+        {
+            "JoystickWWW", new TaskTypes
+            {
+                TaskLevelType = typeof(JoystickWWW_TaskLevel),
+                TrialLevelType = typeof(JoystickWWW_TrialLevel),
+                TaskDefType = typeof(JoystickWWW_TaskDef),
+                BlockDefType = typeof(JoystickWWW_BlockDef),
+                TrialDefType = typeof(JoystickWWW_TrialDef),
+                StimDefType = typeof(JoystickWWW_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

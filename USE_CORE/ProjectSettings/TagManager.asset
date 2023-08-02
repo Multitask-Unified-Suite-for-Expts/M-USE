@@ -10,6 +10,7 @@ TagManager:
   - Center
   - PausePanel
   - Stimulus
+  - JoystickWWW_Camera
   layers:
   - Default
   - TransparentFX

@@ -53,6 +53,7 @@ public abstract class InputTracker : MonoBehaviour
     {
         ShotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
     }
+    
     public void Init(DataController frameData, int allowedDisplay)
     {
         AddFieldsToFrameData(frameData);

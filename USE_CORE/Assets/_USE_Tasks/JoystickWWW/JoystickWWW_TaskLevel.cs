@@ -1,4 +1,4 @@
-using WhatWhenWhere_Namespace;
+using JoystickWWW_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -8,9 +8,9 @@ using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
 
-public class JoystickWWW : ControlLevel_Task_Template
+public class JoystickWWW_TaskLevel : ControlLevel_Task_Template
 {
-    WhatWhenWhere_BlockDef wwwBD => GetCurrentBlockDef<WhatWhenWhere_BlockDef>();
+    JoystickWWW_BlockDef wwwBD => GetCurrentBlockDef<JoystickWWW_BlockDef>();
     JoystickWWW_TrialLevel wwwTL;
     public int[] NumTotal_InTask = new int[100]; // hard coding 100 to instantiate array, only an issue if more than 100 obj seq, not great
     public int[] NumErrors_InTask = new int[100];
@@ -47,13 +47,15 @@ public class JoystickWWW : ControlLevel_Task_Template
 
             string contextFilePath;
             if (SessionValues.WebBuild)
+            {
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{wwwBD.ContextName}";
+                if (!SessionValues.UsingDefaultConfigs)
+                    contextFilePath += ".png";
+            }
             else
                 contextFilePath = wwwTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, wwwBD.ContextName, "LinearDark");
 
-            RenderSettings.skybox = CreateSkybox(contextFilePath);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.SessionEventCodes["ContextOn"]);
+            StartCoroutine(HandleSkybox(contextFilePath));
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();
@@ -151,12 +153,14 @@ public class JoystickWWW : ControlLevel_Task_Template
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
             wwwTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
         else wwwTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            wwwTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
+            wwwTL.ButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
         else Debug.LogError("Start Button Position settings not defined in the TaskDef");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            wwwTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
+            wwwTL.ButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
         else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
+
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
             wwwTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
         if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
@@ -177,5 +181,4 @@ public class JoystickWWW : ControlLevel_Task_Template
         CurrentBlockString = "";
         BlockSummaryString.Clear();
     }
-
 }

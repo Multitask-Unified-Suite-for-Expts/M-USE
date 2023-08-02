@@ -194,6 +194,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             #endif
         });
 
+        Debug.LogError(SetupTrial);
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!variablesLoaded)

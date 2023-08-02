@@ -105,7 +105,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
-
+        
         SetupTrial.AddInitializationMethod(() =>
         {
             ResetTrialVariables();

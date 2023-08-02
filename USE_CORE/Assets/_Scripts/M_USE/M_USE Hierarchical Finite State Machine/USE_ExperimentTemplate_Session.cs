@@ -94,7 +94,7 @@ namespace USE_ExperimentTemplate_Session
         private InitScreen_Level initScreen_Level;
 
         private FlashPanelController FlashPanelController;
-        
+        public bool runSessionLevelCalibration;
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -104,6 +104,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevel = this;
 
             SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
+            SessionValues.LoadingController = GameObject.Find("Circle").GetComponent<LoadingController>();
             SessionValues.LoadingCanvas_GO.SetActive(false);
 
 
@@ -177,11 +178,12 @@ namespace USE_ExperimentTemplate_Session
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
                     GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    runSessionLevelCalibration = true;
                 }
             });
 
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !runSessionLevelCalibration, selectTask);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -247,8 +249,9 @@ namespace USE_ExperimentTemplate_Session
             });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
-                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                runSessionLevelCalibration = false;
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)

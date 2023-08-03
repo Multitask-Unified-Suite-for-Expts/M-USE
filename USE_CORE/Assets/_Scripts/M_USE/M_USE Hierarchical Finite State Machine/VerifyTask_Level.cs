@@ -51,6 +51,16 @@ public class VerifyTask_Level : ControlLevel
                 new SettingsDetails(TaskLevel.TaskConfigPath, "EventCode", typeof(Dictionary<string, EventCode>)),
                 new SettingsDetails(TaskLevel.TaskConfigPath, "ConfigUi", typeof(ConfigVarStore)),
             };
+
+            TaskLevel.customSettings = new List<CustomSettings>();
+            TaskLevel.DefineCustomSettings();
+            
+            foreach (CustomSettings customSettingsType in TaskLevel.customSettings)
+            {
+                importSettings_Level.SettingsDetails.Add(new SettingsDetails(TaskLevel.TaskConfigPath,
+                    customSettingsType.SearchString, customSettingsType.SettingsType));
+            }
+
         });
 
         ImportSettings.AddUpdateMethod(() =>
@@ -113,6 +123,22 @@ public class VerifyTask_Level : ControlLevel
                         Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ConfigUiVariables.getAllVariables().Count +
                                   " Config UI Variables imported.");
                     }
+                    else 
+                    {
+                        foreach (CustomSettings customSetting in TaskLevel.customSettings)
+                        {
+                            object[] parameters = new object[] {parsedResult};
+                            MethodInfo SettingsConverter_methodTask = GetType()
+                                .GetMethod(nameof(this.SettingsConverterCustom))
+                                .MakeGenericMethod(new Type[] { customSetting.SettingsType });
+                            customSetting.ParsedResult =  SettingsConverter_methodTask.Invoke(this, parameters);
+                            
+                            Debug.Log(TaskLevel.TaskName + " " + customSetting.SearchString + " file imported.");
+
+                        }
+                        
+                    }
+                    
                 }
 
                 fileParsed = true;
@@ -236,4 +262,10 @@ public class VerifyTask_Level : ControlLevel
         else if (SessionValues.UsingLocalConfigs || SessionValues.UsingServerConfigs)
             TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
+
+    public T SettingsConverterCustom<T>(object parsedSettings)
+    {
+        return (T)parsedSettings;
+    }
+
 }

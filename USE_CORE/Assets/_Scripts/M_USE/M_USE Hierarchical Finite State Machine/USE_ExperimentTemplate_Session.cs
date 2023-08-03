@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Session
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
-            State setupTask = new State("VerifyTask");
+            State setupTask = new State("SetupTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");

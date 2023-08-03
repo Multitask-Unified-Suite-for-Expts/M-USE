@@ -13,7 +13,7 @@ public class JoystickTracker : InputTracker
 
     private void Start()
     {
-        playerCamTransform = GameObject.Find("JoystickWWW_Camera")?.transform;
+        playerCamTransform = GameObject.Find("PlayerCam")?.transform;
         if (playerCamTransform == null)
         {
             playerCamTransform = GameObject.FindGameObjectWithTag("PlayerCam")?.transform;

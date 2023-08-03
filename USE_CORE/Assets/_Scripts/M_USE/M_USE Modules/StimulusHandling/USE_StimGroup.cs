@@ -163,6 +163,7 @@ namespace USE_StimulusManagement
 
 		public void AddStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
 		{
+			Debug.LogError(stimSubsetIndices);
 			foreach (int index in stimSubsetIndices)
 			{
 				sgOrig.stimDefs[index].AddToStimGroup(this);

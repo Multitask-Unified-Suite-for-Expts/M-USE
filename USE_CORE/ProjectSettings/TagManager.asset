@@ -11,6 +11,7 @@ TagManager:
   - PausePanel
   - Stimulus
   - JoystickWWW_Camera
+  - PlayerCam
   layers:
   - Default
   - TransparentFX

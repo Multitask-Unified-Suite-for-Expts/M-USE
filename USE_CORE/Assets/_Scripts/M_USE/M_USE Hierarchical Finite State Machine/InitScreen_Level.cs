@@ -85,7 +85,7 @@ public class InitScreen_Level : ControlLevel
         StartScreen.AddUpdateMethod(() =>
         {
             if (StartPanel_GO.transform.localPosition != Vector3.zero)
-                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 700 * Time.deltaTime);
+                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
         });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
@@ -107,7 +107,7 @@ public class InitScreen_Level : ControlLevel
 
             if (ErrorHandling_GO.activeInHierarchy)
             {
-                if(ErrorHandled())
+                if (ErrorHandled())
                     ErrorHandling_GO.SetActive(false);
             }
         });
@@ -215,12 +215,6 @@ public class InitScreen_Level : ControlLevel
 
     private void SetConfigInfo()
     {
-        if(!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn)
-        {
-            Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
-            return;
-        }
-
         if (LocalConfig_Toggle.isOn)
         {
             SessionValues.UsingLocalConfigs = true;
@@ -229,16 +223,16 @@ public class InitScreen_Level : ControlLevel
         else if (ServerConfig_Toggle.isOn)
         {
             SessionValues.UsingServerConfigs = true;
-            string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
-            ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
+            ServerManager.SetSessionConfigFolderName(FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text);
             SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-
         }
-        else //default config toggle is on
+        else if (DefaultConfig_Toggle.isOn)
         {
             SessionValues.UsingDefaultConfigs = true;
             SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
         }
+        else
+            Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
     }
 
     private void HandleConfigToggle(GameObject selectedGO)

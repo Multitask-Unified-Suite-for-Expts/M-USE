@@ -1095,9 +1095,9 @@ namespace USE_ExperimentTemplate_Task
             ParsedResult = parsedResult;
         }
 
-        public void AssignCustomSetting<T>(object parsedResult)
+        public T AssignCustomSetting<T>()
         {
-            ParsedResult = (T)parsedResult;
+            return (T)ParsedResult;
         }
         
     }

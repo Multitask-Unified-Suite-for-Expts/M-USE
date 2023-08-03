@@ -10,6 +10,7 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Task;
 using USE_States;
 using USE_StimulusManagement;
+using Object = System.Object;
 
 
 public class VerifyTask_Level : ControlLevel
@@ -125,15 +126,29 @@ public class VerifyTask_Level : ControlLevel
                     }
                     else 
                     {
-                        foreach (CustomSettings customSetting in TaskLevel.customSettings)
+                        for(int iCustom = 0; iCustom < TaskLevel.customSettings.Count; iCustom++)
                         {
+                            CustomSettings cs = TaskLevel.customSettings[iCustom];
                             object[] parameters = new object[] {parsedResult};
-                            MethodInfo SettingsConverter_methodTask = GetType()
-                                .GetMethod(nameof(this.SettingsConverterCustom))
-                                .MakeGenericMethod(new Type[] { customSetting.SettingsType });
-                            customSetting.ParsedResult =  SettingsConverter_methodTask.Invoke(this, parameters);
-                            
-                            Debug.Log(TaskLevel.TaskName + " " + customSetting.SearchString + " file imported.");
+
+                            if (cs.SettingsParsingStyle.ToLower() == "array")
+                            {
+                                MethodInfo SettingsConverter_methodCustom = GetType()
+                                    .GetMethod(nameof(this.SettingsConverterCustomArray))
+                                    .MakeGenericMethod(new Type[] {currentType});
+                                cs.ParsedResult = SettingsConverter_methodCustom.Invoke(this, parameters);
+                                Debug.Log(cs.ParsedResult);
+                            }
+                            else
+                            {
+                                MethodInfo SettingsConverter_methodCustom = GetType()
+                                    .GetMethod(nameof(this.SettingsConverterCustom))
+                                    .MakeGenericMethod(new Type[] {currentType});
+                                cs.ParsedResult = SettingsConverter_methodCustom.Invoke(this, parameters);
+                            }
+
+                            Debug.Log(TaskLevel.TaskName + " " + cs.SearchString + " file imported.");
+                            Debug.Log(((MazeGame_Namespace.MazeDef[])cs.ParsedResult)[0].mDims);
 
                         }
                         
@@ -265,7 +280,16 @@ public class VerifyTask_Level : ControlLevel
 
     public T SettingsConverterCustom<T>(object parsedSettings)
     {
-        return (T)parsedSettings;
+       return (T)parsedSettings;
     }
+    public T[] SettingsConverterCustomArray<T>(object parsedSettings)
+    {
+        return (T[])parsedSettings;
+    }
+    
+    // public void SettingsConverterCustomArray<T>(T[] parsedSettings, CustomSettings customSetting)
+    // {
+    //     customSetting.ParsedResult = parsedSettings;
+    // }
 
 }

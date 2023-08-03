@@ -43,9 +43,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddInitializationMethod(() =>
         {
+            vsBD.ContextName = vsBD.ContextName.Trim();
             vsTL.ContextName = vsBD.ContextName;
 
-            SetSkyBox(vsBD.ContextName);
+            SetSkyBox(vsBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();

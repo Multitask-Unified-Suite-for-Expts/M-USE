@@ -680,14 +680,13 @@ namespace USE_Data
 
 		private IEnumerator CreateServerFileWithHeaders()
 		{
-			string path = $"{folderPath}/{fileName}";
-            yield return ServerManager.CreateFileAsync(path, fileName, fileHeaders);
+            yield return ServerManager.CreateFileAsync(folderPath + "/" + fileName, fileHeaders);
             fileCreated = true;   
         }
 
         private IEnumerator AppendDataToServerFile(string fileContent)
 		{
-            yield return ServerManager.AppendToFileAsync(folderPath, fileName, fileContent);	
+            yield return ServerManager.AppendToFileAsync(folderPath + "/" + fileName, fileContent);	
 		}
 
 

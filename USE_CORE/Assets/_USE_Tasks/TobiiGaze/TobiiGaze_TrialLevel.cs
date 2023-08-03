@@ -10,6 +10,8 @@ using Tobii.Research.Unity;
 public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
 {
     public TobiiGaze_TrialDef CurrentTrialDef => GetCurrentTrialDef<TobiiGaze_TrialDef>();
+    public TobiiGaze_TaskLevel CurrentTaskLevel => GetTaskLevel<TobiiGaze_TaskLevel>();
+
     private Calibration calibration;
     private ScreenBasedSaveData screenBasedSaveData;
     private EyeTracker eyeTracker;
@@ -29,8 +31,7 @@ public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddInitializationMethod(() =>
         {
-            StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey")));
-            //RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"));
+            CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"), Camera.main.gameObject.GetComponent<Skybox>());
             
             // auto set save data true every trial, can turn off before calibration starts
             screenBasedSaveData.SaveData = true;

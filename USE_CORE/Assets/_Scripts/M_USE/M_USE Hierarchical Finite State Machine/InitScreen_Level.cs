@@ -123,6 +123,8 @@ public class InitScreen_Level : ControlLevel
 
             MainPanel_GO.SetActive(false);
             InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
+
+            SessionValues.LoadingCanvas_GO.SetActive(true); //Turn on the loading Canvas/Circle so that it immedietely shows that its loading
         });
 
     }
@@ -413,7 +415,6 @@ public class InitScreen_Level : ControlLevel
             DisplayErrorMessage("Input a Data Folder Path!", "EmptyDataFolder");
         else
         {
-            Debug.Log("Properly Filled out all neccessary information!");
             PlayAudio(ToggleChange_AudioClip);
             ConfirmButtonPressed = true;
         }

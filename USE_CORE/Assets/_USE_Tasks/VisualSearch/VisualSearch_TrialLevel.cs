@@ -310,7 +310,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage"), Camera.main.gameObject.GetComponent<Skybox>());
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

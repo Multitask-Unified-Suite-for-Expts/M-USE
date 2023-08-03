@@ -7,6 +7,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
@@ -311,7 +312,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage"), Camera.main.gameObject.GetComponent<Skybox>()));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

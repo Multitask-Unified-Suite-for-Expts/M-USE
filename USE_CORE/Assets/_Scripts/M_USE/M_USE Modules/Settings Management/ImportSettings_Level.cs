@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Classes;
+using USE_ExperimentTemplate_Task;
 using USE_States;
 using Debug = UnityEngine.Debug;
 
@@ -34,9 +35,10 @@ public class ImportSettings_Level : ControlLevel
 
     public override void DefineControlLevel()
     {
+		State getFilePath = new State("GetFilePath");
         State loadFile = new State("LoadFile");
         State parseFile = new State("ParseFile");
-        AddActiveStates(new List<State> { loadFile, parseFile });
+        AddActiveStates(new List<State> { getFilePath, loadFile, parseFile });
 
         SettingsDetails = new List<SettingsDetails>();
         
@@ -45,10 +47,30 @@ public class ImportSettings_Level : ControlLevel
             outputSettings = new List<object>();
         });
 
+		bool filePathSet = false;
+
+		getFilePath.AddInitializationMethod(() =>
+		{
+			filePathSet = false;
+
+            currentSettingsDetails = SettingsDetails[0];
+
+			StartCoroutine(GetFilePath(currentSettingsDetails.SearchString, result =>
+			{
+				if(!string.IsNullOrEmpty(result))
+				{
+					Debug.Log("GET FILE PATH RESULT: " + result);
+					currentSettingsDetails.FilePath = result;
+				}
+				filePathSet = true;
+			}));
+
+		});
+		getFilePath.SpecifyTermination(() => filePathSet, loadFile);
+
         loadFile.AddDefaultInitializationMethod(() =>
         {
 	        fileLoadingFinished = false;
-            currentSettingsDetails = SettingsDetails[0];
             if (string.IsNullOrEmpty(currentSettingsDetails.FilePath))
             {
 	            Debug.Log("File Path is empty/null for search string: " + currentSettingsDetails.SearchString);
@@ -57,7 +79,7 @@ public class ImportSettings_Level : ControlLevel
             else
             {
 				Debug.Log("Attempting to load settings file at path: " + currentSettingsDetails.FilePath);
-	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, currentSettingsDetails.SearchString, (contentString) =>
+	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, (contentString) =>
 		            {
 			            if (!string.IsNullOrEmpty(contentString))
 			            {
@@ -97,7 +119,7 @@ public class ImportSettings_Level : ControlLevel
 		        importPaused = true;
 	        }
         });
-        parseFile.SpecifyTermination(()=> !importPaused && SettingsDetails.Count > 1, loadFile, ()=>
+        parseFile.SpecifyTermination(()=> !importPaused && SettingsDetails.Count > 1, getFilePath, ()=>
         {
             importPaused = false;
             fileParsed = false;
@@ -113,6 +135,27 @@ public class ImportSettings_Level : ControlLevel
         });
     }
 
+    private IEnumerator GetFilePath(string searchString, Action<string> callback)
+    {
+        Debug.Log("ABOUT TO GET FILE PATH FOR SEARCH STRING: " + searchString + "  AT FOLDER PATH: " + currentSettingsDetails.FolderPath);
+
+        if (SessionValues.UsingServerConfigs)
+        {
+            yield return StartCoroutine(ServerManager.GetFilePath(currentSettingsDetails.FolderPath, searchString, result =>
+            {
+                if (!string.IsNullOrEmpty(result))
+                    callback?.Invoke(result);
+                else
+				{
+                    Debug.Log("Server GetFilePath() Result is null for: " + searchString);
+					callback?.Invoke(null);
+				}
+            }));
+        }
+        else
+            callback?.Invoke(SessionValues.LocateFile.FindFilePathInExternalFolder(currentSettingsDetails.FolderPath, $"*{searchString}*"));
+    }
+
     private void ConvertStringToSettings()
     {
         if (currentSettingsDetails.SettingParsingStyle.ToLower() == "array")
@@ -121,6 +164,7 @@ public class ImportSettings_Level : ControlLevel
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_Array));
             MethodInfo ConvertTextToSettings_SingleTypeArray_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, delimiter });
+			Debug.Log("SETTING PARSED RESULT TO: " + result);
             parsedResult = result;
         }
         else if (currentSettingsDetails.SettingParsingStyle.ToLower() == "json")
@@ -128,6 +172,7 @@ public class ImportSettings_Level : ControlLevel
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_JSON));
             MethodInfo ConvertTextToSettings_SingleTypeJSON_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString});
+            Debug.Log("SETTING PARSED RESULT TO: " + result);
             parsedResult = result;
         }
         else if (currentSettingsDetails.SettingParsingStyle.ToLower() == "singletype")
@@ -135,14 +180,17 @@ public class ImportSettings_Level : ControlLevel
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleType));
             MethodInfo ConvertTextToSettings_SingleTypeDelimited_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeDelimited_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, '\t' });
+            Debug.Log("SETTING PARSED RESULT TO: " + result);
             parsedResult = result;
         }
         else
             Debug.LogError("Settings parsing style is " + settingParsingStyles[iSettings] + ", but this is not handled by script.");
     }
 
-	private IEnumerator GetFileContentString(string filePath, string searchString, Action<string> callback)
+	private IEnumerator GetFileContentString(string filePath, Action<string> callback)
     {
+		Debug.Log("GETTING FILE CONTENT STRING FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
+
         string fileContent;
 
         if (SessionValues.UsingLocalConfigs || SessionValues.UsingDefaultConfigs)
@@ -152,7 +200,7 @@ public class ImportSettings_Level : ControlLevel
         }
         else //Using Server Configs:
         {
-            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, searchString, result =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileStringAsync(filePath, result =>
             {
                 if(result != null)
 				{
@@ -161,7 +209,8 @@ public class ImportSettings_Level : ControlLevel
 				}
                 else
                 {
-                    Debug.Log("GET FILE STRING ASYNC RESULT IS NULL!");
+                    Debug.Log("GETTING FILE CONTENT STRING ASYNC IS NULL FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
+
                     callback(null);
                 }
             }));
@@ -936,19 +985,22 @@ public class SettingsDetails
     public string SettingParsingStyle;
     public string FilePath;
     public string FileName;
+	public string FolderPath;
     public string SearchString;
     public string FileContentString;
     public Type SettingType;
 
-    public SettingsDetails(string settingParsingStyle, string searchString, Type settingType)
+    public SettingsDetails(string folderPath, string settingParsingStyle, string searchString, Type settingType)
     {
+		FolderPath = folderPath;
         SettingParsingStyle = settingParsingStyle;
         SearchString = searchString;
         SettingType = settingType;
     }
 
-    public SettingsDetails(string searchString, Type settingType)
+    public SettingsDetails(string folderPath, string searchString, Type settingType)
     {
+		FolderPath = folderPath;
         SearchString = searchString;
         SettingType = settingType;
     }

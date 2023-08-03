@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657874, g: 0.49641275, b: 0.5748172, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 26745623}
   - component: {fileID: 26745622}
   - component: {fileID: 26745621}
+  - component: {fileID: 26745624}
   m_Layer: 0
   m_Name: FeatureUncertaintyWM_Camera
   m_TagString: MainCamera
@@ -206,6 +207,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!45 &26745624
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 26745620}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}
 --- !u!1 &273835035
 GameObject:
   m_ObjectHideFlags: 0
@@ -246,18 +256,12 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
-  SerialSentData: {fileID: 0}
-  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  StoreData: 0
   ForceBlockEnd: 0
-  SerialPortActive: 0
-  EyetrackerActive: 0
   TaskDataPath: 
-  FilePrefix: 
   TrialSummaryString: 
   TaskLevel: {fileID: 0}
   PreloadedStims:
@@ -273,7 +277,6 @@ MonoBehaviour:
     stimGroupName: 
     IsActive: 0
   TrialStims: []
-  ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
   TouchFBController: {fileID: 0}
@@ -281,27 +284,14 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  MouseTracker: {fileID: 0}
-  GazeTracker: {fileID: 0}
-  TobiiEyeTrackerController: {fileID: 0}
-  SelectionType: 
-  EyeTrackerActive: 0
-  SerialPortController: {fileID: 0}
-  EventCodeManager: {fileID: 0}
-  DisplayController: {fileID: 0}
+  runCalibration: 0
   InitialTokenAmount: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ParticipantDistance_CM: 0
-  ShotgunRaycastCircleSize_DVA: 0
-  UseDefaultConfigs: 0
-  IsHuman: 0
-  HumanStartPanel: {fileID: 0}
-  TaskSelectionCanvasGO: {fileID: 0}
+  PauseIconGO: {fileID: 0}
+  TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
-  USE_StartButton: {fileID: 0}
   USE_FBSquare: {fileID: 0}
   runningAcc: 
   MinTrials: 0
@@ -437,38 +427,17 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  ShotgunRaycastCircleSize_DVA: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ParticipantDistance_CM: 0
   PrefabPath: 
-  ConfigName: 
+  ConfigFolderName: 
   TaskName: FeatureUncertaintyWM
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 273835036}
-  SerialSentData: {fileID: 0}
-  SerialRecvData: {fileID: 0}
-  EyeTrackerActive: 0
-  GazeTracker: {fileID: 0}
-  MouseTracker: {fileID: 0}
-  TobiiEyeTrackerController: {fileID: 0}
-  StoreData: 0
-  SerialPortActive: 0
-  SyncBoxActive: 0
-  EventCodesActive: 0
-  RewardPulsesActive: 0
-  SonicationActive: 0
-  UseDefaultConfigs: 0
-  ContextExternalFilePath: 
-  SessionDataPath: 
+  BlockData: {fileID: 0}
+  FrameData: {fileID: 0}
+  TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
-  SubjectID: 
-  SessionID: 
-  FilePrefix: 
-  EyetrackerType: 
-  SelectionType: 
-  LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
   StimCanvas_2D: {fileID: 0}
@@ -486,16 +455,16 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
-  ExperimenterDisplayController: {fileID: 0}
-  SessionInfoPanel: {fileID: 0}
-  DisplayController: {fileID: 0}
-  SerialPortController: {fileID: 0}
-  EventCodeManager: {fileID: 0}
-  Controllers: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
-  TaskSelectionCanvasGO: {fileID: 0}
-  IsHuman: 0
-  HumanStartPanel: {fileID: 0}
+  TaskLevelDefined: 0
+  TrialAndBlockDefsHandled: 0
+  StimsHandled: 0
+  BlockResultsPrefab: {fileID: 0}
+  BlockResults_GridElementPrefab: {fileID: 0}
+  BlockResults_AudioClip: {fileID: 0}
+  BlockResultsGO: {fileID: 0}
+  importSettings_Level: {fileID: 0}
+  verifyTask_Level: {fileID: 0}
   NumCorrect_InTask: 0
   SearchDurations_InTask: []
   NumErrors_InTask: 0

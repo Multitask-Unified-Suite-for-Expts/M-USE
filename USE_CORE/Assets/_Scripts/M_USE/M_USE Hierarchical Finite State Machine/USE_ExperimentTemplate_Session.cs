@@ -142,7 +142,9 @@ namespace USE_ExperimentTemplate_Session
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                if(!SessionValues.WebBuild)
+                if (SessionValues.WebBuild)
+                    InitCamGO.SetActive(false);
+                else
                 {
                     CreateExperimenterDisplay();
                     CreateMirrorCam();
@@ -336,6 +338,9 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigFolderName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
+
+                SessionValues.LoadingCanvas_GO.SetActive(false); //Turn off loading circle now that about to set taskselection canvas active!
+
                 SessionCam.gameObject.SetActive(true);
 
 
@@ -439,7 +444,7 @@ namespace USE_ExperimentTemplate_Session
 
                     string taskFolderPath = GetConfigFolderPath(configName);
 
-                    if (!SessionValues.WebBuild)
+                    if (!SessionValues.UsingServerConfigs)
                     {
                         if (!Directory.Exists(taskFolderPath))
                         {
@@ -526,6 +531,8 @@ namespace USE_ExperimentTemplate_Session
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddInitializationMethod(() =>
             {
+                SessionValues.LoadingCanvas_GO.SetActive(true);
+
                 TaskButtonsContainer.SetActive(false);
 
                 GameObject taskButton = taskButtonGOs[selectedConfigFolderName];
@@ -613,12 +620,14 @@ namespace USE_ExperimentTemplate_Session
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
 
-              
+                CurrentTask.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
             });
             setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
+
                 SessionCam.gameObject.SetActive(false);
 
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");

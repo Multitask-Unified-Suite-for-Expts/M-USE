@@ -112,7 +112,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            SetSkyBox(mgBD.ContextName);
+            SetSkyBox(mgBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             FindMaze();
             StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
@@ -436,7 +436,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             }
             else //Using server configs:
             {
-                yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath, mgTL.mazeDefName, result =>
+                yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath + "/" + mgTL.mazeDefName, result =>
                 {
                     //SettingsDetails.FileName = result[0]; //implement later
 

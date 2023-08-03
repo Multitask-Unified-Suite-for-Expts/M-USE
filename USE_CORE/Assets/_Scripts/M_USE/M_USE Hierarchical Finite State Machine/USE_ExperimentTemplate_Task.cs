@@ -137,6 +137,7 @@ namespace USE_ExperimentTemplate_Task
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TaskCam.gameObject.SetActive(true);
+
                 if (TaskCanvasses != null)
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(true);
@@ -340,13 +341,17 @@ namespace USE_ExperimentTemplate_Task
                         StimGroup[] taskSgs = new StimGroup[TaskStims.AllTaskStimGroups.Count];
                         TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
                         StimGroup sg = taskSgs[0];
-                        while (sg.stimDefs.Count > 0)
+
+                        if(sg.stimDefs != null)
                         {
-                            sg.stimDefs[0].DestroyStimGameObject();
-                            sg.stimDefs.RemoveAt(0);
+                            while (sg.stimDefs.Count > 0)
+                            {
+                                sg.stimDefs[0].DestroyStimGameObject();
+                                sg.stimDefs.RemoveAt(0);
+                            }
+                            sg.DestroyStimGroup();
                         }
 
-                        sg.DestroyStimGroup();
                     }
                     TaskStims.AllTaskStims.DestroyStimGroup();
 
@@ -371,7 +376,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        public void SetSkyBox(string contextName)
+        public void SetSkyBox(string contextName, Skybox skybox)
         {
             string contextFilePath = "";
             if (SessionValues.UsingDefaultConfigs)
@@ -381,7 +386,7 @@ namespace USE_ExperimentTemplate_Task
             else if (SessionValues.UsingLocalConfigs)
                 contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
-            StartCoroutine(HandleSkybox(contextFilePath));
+            StartCoroutine(HandleSkybox(contextFilePath, skybox));
         }
 
 
@@ -490,9 +495,9 @@ namespace USE_ExperimentTemplate_Task
 
                     string customSettingsValue = customSettings[key].ToLower();
 
-                    if (SessionValues.WebBuild && !SessionValues.UsingDefaultConfigs)
+                    if (SessionValues.UsingServerConfigs)
                     {
-                        StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath, key, result =>
+                        StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath + key, result => //TASK CONFIG PATH (+ key) PROB IS NOT WHAT NEEDS TO BE HERE!!!
                         {
                             if (!string.IsNullOrEmpty(result[1]))
                             {
@@ -617,20 +622,17 @@ namespace USE_ExperimentTemplate_Task
             MethodInfo addTaskStimDefsToTaskStimGroup = GetType().GetMethod(nameof(this.AddTaskStimDefsToTaskStimGroup))
                 .MakeGenericMethod(new Type[] { StimDefType });
 
-            //PreloadedStims = GameObjects in scene prior to build
-            PreloadedStims = new StimGroup("PreloadedStims");
             TaskStims.AllTaskStimGroups.Add("PreloadedStims", PreloadedStims);
-            //Prefab stims are already created in ReadStimDefs
             TaskStims.AllTaskStimGroups.Add("PrefabStims", PrefabStims);
-            //ExternalStims is already created in ReadStimDefs (not ideal as hard to follow)
             TaskStims.AllTaskStimGroups.Add("ExternalStims", ExternalStims);
-            RuntimeStims = new StimGroup("RuntimeStims");
             TaskStims.AllTaskStimGroups.Add("RuntimeStims", RuntimeStims);
 
             DefinePreloadedStims();
-            if(PrefabStims.stimDefs != null && PrefabStims.stimDefs.Count > 0)
+
+            if (PrefabStims.stimDefs != null && PrefabStims.stimDefs.Count > 0)
                 DefinePrefabStims();
-            if(ExternalStims.stimDefs != null && ExternalStims.stimDefs.Count > 0)
+
+            if (ExternalStims.stimDefs != null && ExternalStims.stimDefs.Count > 0)
                 DefineExternalStims();
 
             StimsHandled = true;
@@ -654,8 +656,12 @@ namespace USE_ExperimentTemplate_Task
             MethodInfo taskStimDefFromPrefabPath = GetType().GetMethod(nameof(TaskStimDefFromPrefabPath))
                 .MakeGenericMethod((new Type[] { StimDefType }));
 
+            GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
             foreach (StimDef sd in PrefabStims.stimDefs)
+            {
                 sd.StimScale = TaskDef.ExternalStimScale;
+                sd.CanvasGameObject = taskCanvasGO; //adding task canvas in case default stim end up being 2D
+            }
 
             if (PrefabStimPaths != null && PrefabStimPaths.Count > 0)
             {
@@ -671,11 +677,14 @@ namespace USE_ExperimentTemplate_Task
 
         protected virtual void DefineExternalStims()
         {
+            GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
+
             foreach (StimDef sd in ExternalStims.stimDefs)
             {
                 sd.StimFolderPath = TaskDef.ExternalStimFolderPath;
                 sd.StimExtension = TaskDef.ExternalStimExtension;
                 sd.StimScale = TaskDef.ExternalStimScale;
+                sd.CanvasGameObject = taskCanvasGO;
 
                 //add StimExtesion to file path if it doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimExtension) && !sd.FileName.EndsWith(sd.StimExtension))

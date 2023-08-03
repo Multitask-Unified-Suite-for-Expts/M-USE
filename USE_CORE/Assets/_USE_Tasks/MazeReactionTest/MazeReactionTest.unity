@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 562810794}
   - component: {fileID: 562810792}
   - component: {fileID: 562810793}
+  - component: {fileID: 562810795}
   m_Layer: 0
   m_Name: MazeReactionTest_Camera
   m_TagString: MainCamera
@@ -166,7 +167,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 55
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -199,13 +200,22 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 562810791}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -60}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -16.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!45 &562810795
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 562810791}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}
 --- !u!1 &633810149
 GameObject:
   m_ObjectHideFlags: 0
@@ -559,7 +569,7 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   PrefabPath: 
-  ConfigName: 
+  ConfigFolderName: 
   TaskName: MazeReactionTest
   TaskProjectFolder: 
   BlockCount: 0
@@ -588,10 +598,14 @@ MonoBehaviour:
   PrefabStimPaths: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
+  TrialAndBlockDefsHandled: 0
+  StimsHandled: 0
   BlockResultsPrefab: {fileID: 0}
   BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
+  importSettings_Level: {fileID: 0}
+  verifyTask_Level: {fileID: 0}
   MazeNumSquares: 
   MazeNumTurns: 
   MazeDims: []
@@ -671,7 +685,7 @@ MonoBehaviour:
   m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 1920, y: 1080}
+  m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3

@@ -137,6 +137,7 @@ namespace USE_ExperimentTemplate_Task
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TaskCam.gameObject.SetActive(true);
+
                 if (TaskCanvasses != null)
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(true);
@@ -375,7 +376,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        public void SetSkyBox(string contextName)
+        public void SetSkyBox(string contextName, Skybox skybox)
         {
             string contextFilePath = "";
             if (SessionValues.UsingDefaultConfigs)
@@ -385,7 +386,7 @@ namespace USE_ExperimentTemplate_Task
             else if (SessionValues.UsingLocalConfigs)
                 contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
-            StartCoroutine(HandleSkybox(contextFilePath));
+            StartCoroutine(HandleSkybox(contextFilePath, skybox));
         }
 
 

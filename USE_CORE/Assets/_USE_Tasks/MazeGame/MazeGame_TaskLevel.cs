@@ -112,7 +112,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            SetSkyBox(mgBD.ContextName);
+            SetSkyBox(mgBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             FindMaze();
             StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays

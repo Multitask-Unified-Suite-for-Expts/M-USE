@@ -391,10 +391,7 @@ MonoBehaviour:
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
-  MaterialFilePath: 
   THR_CanvasGO: {fileID: 186084661}
-  ButtonPosition: {x: 0, y: 0, z: 0}
-  ButtonScale: 0
   TrialCompletionList: 
   TrialsCompleted_Block: 0
   TrialsCorrect_Block: 0
@@ -415,8 +412,6 @@ MonoBehaviour:
   NumReleasedLate_Block: 0
   NumTouchesMovedOutside_Block: 0
   PerfThresholdMet: 0
-  StartWithBlueSquare: 0
-  TouchFeedbackDuration: 0
 --- !u!114 &900455551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,7 +433,7 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   PrefabPath: 
-  ConfigName: 
+  ConfigFolderName: 
   TaskName: THR
   TaskProjectFolder: 
   BlockCount: 0
@@ -467,10 +462,14 @@ MonoBehaviour:
   PrefabStimPaths: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
+  TrialAndBlockDefsHandled: 0
+  StimsHandled: 0
   BlockResultsPrefab: {fileID: 0}
   BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
+  importSettings_Level: {fileID: 0}
+  verifyTask_Level: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0
@@ -509,6 +508,7 @@ GameObject:
   - component: {fileID: 1081779817}
   - component: {fileID: 1081779816}
   - component: {fileID: 1081779815}
+  - component: {fileID: 1081779818}
   m_Layer: 0
   m_Name: THR_Camera
   m_TagString: MainCamera
@@ -533,7 +533,7 @@ Camera:
   m_GameObject: {fileID: 1081779814}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 2
+  m_ClearFlags: 1
   m_BackGroundColor: {r: 0.10980392, g: 0.1254902, b: 0.14901961, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -549,7 +549,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 58.4
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -581,3 +581,12 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!45 &1081779818
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1081779814}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}

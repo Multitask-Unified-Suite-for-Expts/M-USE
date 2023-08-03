@@ -44,7 +44,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             wwwTL.ContextName = wwwBD.ContextName;
 
-            SetSkyBox(wwwBD.ContextName);
+            SetSkyBox(wwwBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();

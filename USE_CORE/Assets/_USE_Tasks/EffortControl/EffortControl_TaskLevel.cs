@@ -54,7 +54,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         {
             trialLevel.ResetBlockVariables();
             currentBlock.ContextName = currentBlock.ContextName.Trim();
-            SetSkyBox(currentBlock.ContextName);
+            SetSkyBox(currentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
         });
 
         BlockFeedback.AddInitializationMethod(() =>

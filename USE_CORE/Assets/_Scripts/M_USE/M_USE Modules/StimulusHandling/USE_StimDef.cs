@@ -393,38 +393,23 @@ namespace USE_StimulusManagement
             return stimPath;
         }
 
-        public IEnumerator LoadExternalStimFromServer(Action<GameObject> callback)
+        public IEnumerator LoadExternalStimFromServer(Action<GameObject> callback) //ONLY WORKS FOR 2D Stim
 		{
-			string stimServerPath = $"Resources/Stimuli/";
+			string filePath = $"Resources/Stimuli/{FileName}"; //may need to document this or make it configurable or something
 
-			//Fetch the .fbx file from the server as a byte array:
-            yield return CoroutineHelper.StartCoroutine(ServerManager.GetFileBytesAsync(stimServerPath, FileName, byteResult =>
+			yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
 			{
-				if(byteResult != null)
+				if (textureResult != null)
 				{
-					if(SessionValues.Using2DStim) //If 2D: use the byte array 
+					if (SessionValues.Using2DStim)
 					{
 						StimGameObject = new GameObject();
 						StimGameObject.SetActive(false);
 						RawImage image = StimGameObject.AddComponent<RawImage>();
-                        Texture2D tex = new Texture2D(2, 2);
-                        tex.LoadImage(byteResult);
-						image.texture = tex;
+						image.texture = textureResult;
 						if (CanvasGameObject != null)
 							StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
-                    }
-					//NOT USED BECAUSE TRILIB CANT LOAD FROM PERSISTENT DATA PATH:
-					//else //Using 3D stim from server, so write file to persistant data path and pass the path into LoadModel
-					//{
-					//	string stimPath = WriteStimToPersistantDataPath(byteResult);
-					//	Debug.Log("ABOUT TO LOAD MODEL FROM PERSISTANT DATA PATH!");
-					//	StimGameObject = LoadModel(stimPath);
-					//	Debug.Log("AFTER LOADING MODEL FROM PERSISTANT DATA PATH! (doubt it makes it here)");
-
-					//	//Another trilib way to try:
-					//	//AssetLoader loader = new AssetLoader();
-					//	//GameObject loadedObject = loader.LoadFromMemory(byteResult, FileName);
-					//}
+					}
 
 					PositionRotationScale();
 					if (!string.IsNullOrEmpty(StimName))
@@ -433,10 +418,7 @@ namespace USE_StimulusManagement
 					callback?.Invoke(StimGameObject);
 				}
 				else
-				{
-					Debug.Log("STIM BYTE RESULT IS NULL!!!!!!!!!!!!!!!!!!!!!!!!!");
-					callback?.Invoke(null);
-				}
+					Debug.Log("LOAD TEXTURE RESULT IS NULL!");
 			}));
 		}
 
@@ -499,8 +481,8 @@ namespace USE_StimulusManagement
 					StimGameObject = new GameObject();//give it name
 					RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
 					stimGOImage.texture = LoadPNG(FileName);
-					if (this.CanvasGameObject != null)
-						StimGameObject.GetComponent<RectTransform>().SetParent(this.CanvasGameObject.GetComponent<RectTransform>());
+					if (CanvasGameObject != null)
+						StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
 					PositionRotationScale();
 					break;
 				default:
@@ -523,6 +505,9 @@ namespace USE_StimulusManagement
 				tex = new Texture2D(2, 2);
 				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 			}
+			else
+				Debug.LogError("FILE DOES NOT EXIST!");
+
 			PositionRotationScale();
 			ToggleVisibility(visibility);
 			return tex;

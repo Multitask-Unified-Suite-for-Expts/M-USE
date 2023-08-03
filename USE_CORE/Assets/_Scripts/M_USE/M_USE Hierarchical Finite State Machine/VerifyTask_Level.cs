@@ -30,31 +30,29 @@ public class VerifyTask_Level : ControlLevel
         AddActiveStates(new List<State> {ImportSettings, HandleTrialAndBlockDefs, FindStims});
 
         importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
+        //importSettings_Level.TaskLevel = TaskLevel;
         ImportSettings.AddChildLevel(importSettings_Level);
         ImportSettings.AddInitializationMethod(() =>
         {
             if (SessionValues.UsingDefaultConfigs)
-                WriteTaskConfigsToPersistantDataPath(TaskLevel);
+                TaskLevel.TaskConfigPath += "_DefaultConfigs";
+
+            if (SessionValues.UsingDefaultConfigs)
+                WriteTaskConfigsToPersistantDataPath();
 
             TaskLevel.SpecifyTypes();
+
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
-                new SettingsDetails("TaskDef", TaskLevel.TaskDefType),
-                new SettingsDetails("BlockDef", TaskLevel.BlockDefType),
-                new SettingsDetails("TrialDef", TaskLevel.TrialDefType),
-                new SettingsDetails("StimDef", TaskLevel.StimDefType),
-                new SettingsDetails("EventCode", typeof(Dictionary<string, EventCode>)),
-                new SettingsDetails("ConfigUi", typeof(ConfigVarStore)),
+                new SettingsDetails(TaskLevel.TaskConfigPath, "TaskDef", TaskLevel.TaskDefType),
+                new SettingsDetails(TaskLevel.TaskConfigPath, "BlockDef", TaskLevel.BlockDefType),
+                new SettingsDetails(TaskLevel.TaskConfigPath, "TrialDef", TaskLevel.TrialDefType),
+                new SettingsDetails(TaskLevel.TaskConfigPath, "StimDef", TaskLevel.StimDefType),
+                new SettingsDetails(TaskLevel.TaskConfigPath, "EventCode", typeof(Dictionary<string, EventCode>)),
+                new SettingsDetails(TaskLevel.TaskConfigPath, "ConfigUi", typeof(ConfigVarStore)),
             };
-            // SetValuesForLoading("TaskDef");
-
-            StartCoroutine(GetFilePath("TaskDef", result =>
-            {
-                importSettings_Level.SettingsDetails[0].FilePath = result;
-            }));
         });
 
-        bool gettingFilePath = false;
         ImportSettings.AddUpdateMethod(() =>
         {
             if (importSettings_Level.fileLoadingFinished)
@@ -118,25 +116,7 @@ public class VerifyTask_Level : ControlLevel
                 }
 
                 fileParsed = true;
-                if (importSettings_Level.SettingsDetails.Count > 1 && !gettingFilePath)
-                {
-                    gettingFilePath = true;
-                    StartCoroutine(GetFilePath(importSettings_Level.SettingsDetails[1].SearchString, result =>
-                    {
-                        if (!string.IsNullOrEmpty(result))
-                        {
-                            Debug.Log("GET FILE PATH RESULT: " + result);
-                            importSettings_Level.SettingsDetails[1].FilePath = result;
-                        }
-                        else
-                            Debug.Log("GET FILE PATH RESULT IS NULL FOR SettingsDetails[1].SearchString !!!!!");
-
-                        importSettings_Level.importPaused = false;
-                        gettingFilePath = false;
-                    }));
-                }
-                else
-                    importSettings_Level.importPaused = false;
+                importSettings_Level.importPaused = false;
             }
         });
         ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs,
@@ -154,6 +134,9 @@ public class VerifyTask_Level : ControlLevel
                 TaskLevel.PreloadedStims = new StimGroup("PreloadedStims");
             if (TaskLevel.ExternalStims == null)
                 TaskLevel.ExternalStims = new StimGroup("ExternalStims");
+            if (TaskLevel.RuntimeStims == null)
+                TaskLevel.RuntimeStims = new StimGroup("RuntimeStims");
+
             TaskLevel.FindStims();
         });
         FindStims.SpecifyTermination(() => TaskLevel.StimsHandled, () => null);
@@ -165,17 +148,15 @@ public class VerifyTask_Level : ControlLevel
     }
 
 
-    private void WriteTaskConfigsToPersistantDataPath(ControlLevel_Task_Template tl)
+    private void WriteTaskConfigsToPersistantDataPath()
     {
         if (!SessionValues.UsingDefaultConfigs)
             return;
 
-        tl.TaskConfigPath = $"{SessionValues.ConfigFolderPath}/{tl.TaskName}_DefaultConfigs";
+        if (Directory.Exists(TaskLevel.TaskConfigPath))
+            Directory.Delete(TaskLevel.TaskConfigPath, true);
 
-        if (Directory.Exists(tl.TaskConfigPath))
-            Directory.Delete(tl.TaskConfigPath, true);
-
-        Directory.CreateDirectory(tl.TaskConfigPath);
+        Directory.CreateDirectory(TaskLevel.TaskConfigPath);
 
         Dictionary<string, string> configDict = new Dictionary<string, string>
         {
@@ -190,48 +171,19 @@ public class VerifyTask_Level : ControlLevel
         TextAsset configTextAsset;
         foreach (var entry in configDict)
         {
-            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + tl.TaskName + entry.Key);
+            configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskLevel.TaskName + "_DefaultConfigs/" + TaskLevel.TaskName + entry.Key);
             if (configTextAsset == null) //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
-                configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + tl.TaskName + "_DefaultConfigs/" + entry.Key);
+                configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskLevel.TaskName + "_DefaultConfigs/" + entry.Key);
             if (configTextAsset != null)
-                File.WriteAllBytes(tl.TaskConfigPath + Path.DirectorySeparatorChar + tl.TaskName + entry.Value,
+                File.WriteAllBytes(TaskLevel.TaskConfigPath + Path.DirectorySeparatorChar + TaskLevel.TaskName + entry.Value,
                     configTextAsset.bytes);
         }
     }
 
 
-
-    private IEnumerator GetFilePath(string searchString, Action<string> callback)
-    {
-        string pathToFolder = "";
-
-        if (SessionValues.UsingDefaultConfigs)
-            pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}_DefaultConfigs";
-        else if (SessionValues.UsingLocalConfigs)
-            pathToFolder = $"{SessionValues.ConfigFolderPath}{TaskLevel.TaskName}";
-        else if (SessionValues.UsingServerConfigs)
-            pathToFolder = $"{SessionValues.ConfigFolderPath}/{TaskLevel.TaskName}";
-
-        Debug.Log("ABOUT TO GET FILE PATH FOR SEARCH STRING: " + searchString + "  AT FOLDER PATH: " + pathToFolder);
-
-        if (SessionValues.UsingServerConfigs)
-        {
-            yield return StartCoroutine(ServerManager.GetFilePath(pathToFolder, searchString, result =>
-            {
-                if (!string.IsNullOrEmpty(result))
-                    callback?.Invoke(result);
-                else
-                    Debug.Log("Server GetFilePath() Result is null for: " + searchString);
-            }));
-        }
-        else
-            callback?.Invoke(SessionValues.LocateFile.FindFilePathInExternalFolder(pathToFolder, $"*{searchString}*"));
-    }
-
     private void SetValuesForLoading(string searchString)
     {
         importSettings_Level.SettingsDetails[0].SearchString = searchString;
-        //StartCoroutine(GetFilePath(importSettings_Level.SettingsDetails[0].SearchString));
 
         switch (searchString.ToLower())
         {
@@ -249,11 +201,11 @@ public class VerifyTask_Level : ControlLevel
                 break;
             case "eventcode":
                 importSettings_Level.SettingsDetails[0].SettingType =
-                    typeof(Dictionary<string, EventCode>); //this correct for event code?
+                    typeof(Dictionary<string, EventCode>);
                 break;
             case "configui":
                 importSettings_Level.SettingsDetails[0].SettingType =
-                    typeof(ConfigVarStore); //this correct for ConfigUI?
+                    typeof(ConfigVarStore);
                 break;
             default:
                 Debug.LogError("SET VALUES FOR LOADING DEFAULT SWITCH STATEMENT!");
@@ -281,7 +233,7 @@ public class VerifyTask_Level : ControlLevel
     {
         if (SessionValues.UsingDefaultConfigs)
             TaskLevel.PrefabStims = new StimGroup("PrefabStims", (T[]) parsedSettings);
-        else if (SessionValues.UsingLocalConfigs)
+        else if (SessionValues.UsingLocalConfigs || SessionValues.UsingServerConfigs)
             TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
 }

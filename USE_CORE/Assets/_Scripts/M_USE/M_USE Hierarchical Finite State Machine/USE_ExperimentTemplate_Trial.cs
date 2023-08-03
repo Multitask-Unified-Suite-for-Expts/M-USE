@@ -198,7 +198,9 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.TaskSelectionCanvasGO.SetActive(false);
+                SessionValues.LoadingCanvas_GO.SetActive(false);
+
+                //SessionValues.TaskSelectionCanvasGO.SetActive(false);
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;

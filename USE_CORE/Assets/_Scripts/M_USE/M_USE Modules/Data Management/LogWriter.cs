@@ -140,7 +140,7 @@ public class LogWriter : MonoBehaviour
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
-            yield return ServerManager.CreateFileAsync(ServerLogFilePath, "Player.log", content);
+            yield return ServerManager.CreateFileAsync(ServerLogFilePath, content);
         }
         else
         {
@@ -156,7 +156,7 @@ public class LogWriter : MonoBehaviour
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
-            yield return ServerManager.AppendToFileAsync(ServerLogFolderPath, "Player.log", content);
+            yield return ServerManager.AppendToFileAsync(ServerLogFilePath, content);
         }
         else
         {

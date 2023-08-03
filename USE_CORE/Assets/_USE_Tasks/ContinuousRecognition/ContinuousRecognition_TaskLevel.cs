@@ -65,7 +65,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            SetSkyBox(currentBlock.ContextName);
+            SetSkyBox(currentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             trialLevel.ContextActive = true;
 

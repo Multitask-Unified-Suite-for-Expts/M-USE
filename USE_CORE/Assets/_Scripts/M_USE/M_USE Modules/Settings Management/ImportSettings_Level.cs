@@ -59,7 +59,6 @@ public class ImportSettings_Level : ControlLevel
 			{
 				if(!string.IsNullOrEmpty(result))
 				{
-					Debug.Log("GET FILE PATH RESULT: " + result);
 					currentSettingsDetails.FilePath = result;
 				}
 				filePathSet = true;
@@ -84,7 +83,7 @@ public class ImportSettings_Level : ControlLevel
 			            if (!string.IsNullOrEmpty(contentString))
 			            {
 				            currentSettingsDetails.FileContentString = contentString;
-				            Debug.Log("File " + currentSettingsDetails.FilePath + " successfully loaded.");
+				            Debug.Log("Successfully loaded file at path: " + currentSettingsDetails.FilePath);
 				            fileLoadingFinished = true;
 			            }
 			            else
@@ -137,8 +136,6 @@ public class ImportSettings_Level : ControlLevel
 
     private IEnumerator GetFilePath(string searchString, Action<string> callback)
     {
-        Debug.Log("ABOUT TO GET FILE PATH FOR SEARCH STRING: " + searchString + "  AT FOLDER PATH: " + currentSettingsDetails.FolderPath);
-
         if (SessionValues.UsingServerConfigs)
         {
             yield return StartCoroutine(ServerManager.GetFilePath(currentSettingsDetails.FolderPath, searchString, result =>
@@ -164,7 +161,6 @@ public class ImportSettings_Level : ControlLevel
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_Array));
             MethodInfo ConvertTextToSettings_SingleTypeArray_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeArray_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, delimiter });
-			Debug.Log("SETTING PARSED RESULT TO: " + result);
             parsedResult = result;
         }
         else if (currentSettingsDetails.SettingParsingStyle.ToLower() == "json")
@@ -172,7 +168,6 @@ public class ImportSettings_Level : ControlLevel
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_JSON));
             MethodInfo ConvertTextToSettings_SingleTypeJSON_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeJSON_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString});
-            Debug.Log("SETTING PARSED RESULT TO: " + result);
             parsedResult = result;
         }
         else if (currentSettingsDetails.SettingParsingStyle.ToLower() == "singletype")
@@ -180,7 +175,6 @@ public class ImportSettings_Level : ControlLevel
             MethodInfo methodInfo = GetType().GetMethod(nameof(ConvertTextToSettings_SingleType));
             MethodInfo ConvertTextToSettings_SingleTypeDelimited_meth = methodInfo.MakeGenericMethod(new Type[] { currentSettingsDetails.SettingType });
             object result = ConvertTextToSettings_SingleTypeDelimited_meth.Invoke(this, new object[] { currentSettingsDetails.FileContentString, '\t' });
-            Debug.Log("SETTING PARSED RESULT TO: " + result);
             parsedResult = result;
         }
         else
@@ -189,8 +183,6 @@ public class ImportSettings_Level : ControlLevel
 
 	private IEnumerator GetFileContentString(string filePath, Action<string> callback)
     {
-		Debug.Log("GETTING FILE CONTENT STRING FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
-
         string fileContent;
 
         if (SessionValues.UsingLocalConfigs || SessionValues.UsingDefaultConfigs)
@@ -210,7 +202,6 @@ public class ImportSettings_Level : ControlLevel
                 else
                 {
                     Debug.Log("GETTING FILE CONTENT STRING ASYNC IS NULL FOR: " + currentSettingsDetails.SearchString + " | " + "FILE PATH: " + filePath);
-
                     callback(null);
                 }
             }));

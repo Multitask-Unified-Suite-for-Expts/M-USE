@@ -103,7 +103,7 @@ public class InitScreen_Level : ControlLevel
         CollectInfo.AddUpdateMethod(() =>
         {
             if (MainPanel_GO.transform.localPosition != Vector3.zero)
-                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
+                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 1000 * Time.deltaTime);
 
             if (ErrorHandling_GO.activeInHierarchy)
             {
@@ -209,7 +209,7 @@ public class InitScreen_Level : ControlLevel
         else if (ServerData_Toggle.isOn)
         {
             SessionValues.StoringDataOnServer = true;
-            ServerManager.RootDataFolder = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>().text;
+            ServerManager.RootDataFolder = GetDataValue();
         }
     }
 

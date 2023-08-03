@@ -42,7 +42,6 @@ public class InitScreen_Level : ControlLevel
     private AudioSource AudioSource;
     private AudioClip ToggleChange_AudioClip;
     private AudioClip Error_AudioClip;
-    private AudioClip Confirm_AudioClip;
     private AudioClip Connected_AudioClip;
 
     private State SetupInitScreen;
@@ -80,7 +79,6 @@ public class InitScreen_Level : ControlLevel
         StartScreen.AddInitializationMethod(() =>
         {
             StartPanel_GO.SetActive(true);
-            StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
         });
         StartScreen.AddUpdateMethod(() =>
         {
@@ -98,7 +96,6 @@ public class InitScreen_Level : ControlLevel
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
-            MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
         });
         CollectInfo.AddUpdateMethod(() =>
         {
@@ -316,7 +313,10 @@ public class InitScreen_Level : ControlLevel
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
+        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
+        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -383,7 +383,6 @@ public class InitScreen_Level : ControlLevel
         AudioSource = gameObject.AddComponent<AudioSource>();
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
-        Confirm_AudioClip = Resources.Load<AudioClip>("BlockResults");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
     }
 

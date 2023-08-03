@@ -1393,7 +1393,7 @@ namespace USE_States
             return tex;
         }
 
-        public IEnumerator HandleSkybox(string filePath)
+        public IEnumerator HandleSkybox(string filePath, Skybox skybox)
         {
             Texture2D tex = null;
 
@@ -1408,6 +1408,8 @@ namespace USE_States
 			if (tex != null)
 			{
 				RenderSettings.skybox = CreateSkybox(tex);
+				if (skybox != null)
+					skybox.enabled = false; //turn off the task's skybox component now that the blocks background has been set. 
 				SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 			}
 			else

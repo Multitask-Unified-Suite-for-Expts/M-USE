@@ -43,9 +43,10 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddInitializationMethod(() =>
         {
+            vsBD.ContextName = vsBD.ContextName.Trim();
             vsTL.ContextName = vsBD.ContextName;
 
-            SetSkyBox(vsBD.ContextName);
+            SetSkyBox(vsBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();
@@ -98,7 +99,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("Accuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        BlockSummaryString.AppendLine("\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + string.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
@@ -107,9 +108,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                                       "\nNum Reward Given: " + vsTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);
-        BlockSummaryString.AppendLine(CurrentBlockString);
-        /*if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     public override void SetTaskSummaryString()
@@ -146,7 +144,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     }
     public void ClearStrings()
     {
-        CurrentBlockString = "";
         BlockSummaryString.Clear();
     }
     public void ResetTaskVariables()

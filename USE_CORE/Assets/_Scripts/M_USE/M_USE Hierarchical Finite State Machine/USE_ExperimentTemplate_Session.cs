@@ -94,7 +94,7 @@ namespace USE_ExperimentTemplate_Session
         private InitScreen_Level initScreen_Level;
 
         private FlashPanelController FlashPanelController;
-        
+        public bool runSessionLevelCalibration;
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Session
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
-            State setupTask = new State("VerifyTask");
+            State setupTask = new State("SetupTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");
@@ -142,7 +142,9 @@ namespace USE_ExperimentTemplate_Session
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                if(!SessionValues.WebBuild)
+                if (SessionValues.WebBuild)
+                    InitCamGO.SetActive(false);
+                else
                 {
                     CreateExperimenterDisplay();
                     CreateMirrorCam();
@@ -178,11 +180,12 @@ namespace USE_ExperimentTemplate_Session
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
                     GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    runSessionLevelCalibration = true;
                 }
             });
 
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !runSessionLevelCalibration, selectTask);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -248,8 +251,9 @@ namespace USE_ExperimentTemplate_Session
             });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
-                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                runSessionLevelCalibration = false;
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
@@ -527,6 +531,8 @@ namespace USE_ExperimentTemplate_Session
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddInitializationMethod(() =>
             {
+                SessionValues.LoadingCanvas_GO.SetActive(true);
+
                 TaskButtonsContainer.SetActive(false);
 
                 GameObject taskButton = taskButtonGOs[selectedConfigFolderName];
@@ -620,6 +626,8 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
+
                 SessionCam.gameObject.SetActive(false);
 
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");

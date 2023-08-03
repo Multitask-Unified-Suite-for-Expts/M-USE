@@ -322,7 +322,7 @@ public class SetupSession_Level : ControlLevel
             SessionValues.GazeData.sessionLevel = SessionLevel;
             SessionValues.GazeData.InitDataController();
             SessionValues.GazeData.ManuallyDefine();
-            SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
+          //  SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
             SessionValues.GazeTracker.Init(SessionLevel.FrameData, 0);
 
         }

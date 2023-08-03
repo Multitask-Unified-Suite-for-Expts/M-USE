@@ -458,7 +458,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 string path = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
-                StartCoroutine(HandleSkybox(path + Path.DirectorySeparatorChar + ContextName + ".png"));
+                CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + ContextName + ".png", Camera.main.gameObject.GetComponent<Skybox>());
             }
 
             GenerateAccuracyLog();

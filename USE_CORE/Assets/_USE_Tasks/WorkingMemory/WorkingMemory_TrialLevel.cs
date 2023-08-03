@@ -279,7 +279,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
-            if (TokenFBController.isTokenBarFull())
+            if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
@@ -298,7 +298,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, ContextName)));
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, ContextName), Camera.main.gameObject.GetComponent<Skybox>());
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });

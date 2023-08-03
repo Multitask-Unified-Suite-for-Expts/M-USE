@@ -46,7 +46,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             
             ResetBlockVariables();
 
-            SetSkyBox(flBD.ContextName);
+            SetSkyBox(flBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
             
             //Set the Initial Token Values for the Block
             flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);

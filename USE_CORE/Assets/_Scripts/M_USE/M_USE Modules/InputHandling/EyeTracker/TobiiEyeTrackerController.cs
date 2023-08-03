@@ -20,7 +20,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
     public TobiiGazeSample mostRecentGazeSample;
     public TobiiGazeDataSubscription GazeDataSubscription;
-    public USE_ExperimentTemplate_Data.GazeData GazeData;
+    //public USE_ExperimentTemplate_Data.GazeData GazeData;
    
     // Start is called before the first frame update
     private void Awake()
@@ -28,7 +28,6 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         Instance = this;
         base.Awake();
         mostRecentGazeSample = new TobiiGazeSample();
-
     }
 
     // Update is called once per frame
@@ -65,7 +64,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
 
             Debug.Log("is iEYE TRACKER NULL: " + (iEyeTracker == null ? "Yes" : "No"));
             iEyeTracker.GazeDataReceived += GazeDataSubscription.EnqueueEyeData;
-            GazeDataSubscription.TobiiEyeTrackerController = this;
+            //SessionValues.TobiiEyeTrackerController = this;
             //    EyeTracker.SubscribeToGazeData = true;
 
         }

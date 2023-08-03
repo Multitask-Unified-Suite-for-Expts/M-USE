@@ -228,6 +228,7 @@ GameObject:
   - component: {fileID: 258609756}
   - component: {fileID: 258609758}
   - component: {fileID: 258609757}
+  - component: {fileID: 258609759}
   m_Layer: 0
   m_Name: MazeGame_Camera
   m_TagString: MainCamera
@@ -300,6 +301,15 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!45 &258609759
+Skybox:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 258609755}
+  m_Enabled: 1
+  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}
 --- !u!1 &584128556
 GameObject:
   m_ObjectHideFlags: 0
@@ -538,18 +548,12 @@ MonoBehaviour:
   Paused: 1
   TrialData: {fileID: 0}
   FrameData: {fileID: 0}
-  SerialSentData: {fileID: 0}
-  SerialRecvData: {fileID: 0}
   BlockCount: 0
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
-  StoreData: 0
   ForceBlockEnd: 0
-  SerialPortActive: 0
-  EyetrackerActive: 0
   TaskDataPath: 
-  FilePrefix: 
   TrialSummaryString: 
   TaskLevel: {fileID: 0}
   PreloadedStims:
@@ -565,7 +569,6 @@ MonoBehaviour:
     stimGroupName: 
     IsActive: 0
   TrialStims: []
-  ExperimenterDisplayController: {fileID: 0}
   SessionInfoPanel: {fileID: 0}
   TrialCompleteTime: 0
   TouchFBController: {fileID: 0}
@@ -573,25 +576,15 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  MouseTracker: {fileID: 0}
-  GazeTracker: {fileID: 0}
-  SelectionType: 
-  SerialPortController: {fileID: 0}
-  EventCodeManager: {fileID: 0}
-  DisplayController: {fileID: 0}
+  runCalibration: 0
   InitialTokenAmount: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ParticipantDistance_CM: 0
-  ShotgunRaycastCircleSize_DVA: 0
-  UseDefaultConfigs: 0
-  IsHuman: 0
-  HumanStartPanel: {fileID: 0}
+  PauseIconGO: {fileID: 0}
+  TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
   MG_CanvasGO: {fileID: 859525660}
-  USE_StartButton: {fileID: 0}
   runningPercentError: []
   MinTrials: 0
   mazeDefName: 
@@ -604,27 +597,13 @@ MonoBehaviour:
   viewPath: 0
   tileFbDuration: 0
   startTile: {fileID: 0}
+  mazeDuration: 0
   choiceDurationsList: []
   contextName: 
-  startColor: []
-  finishColor: []
-  correctColor: []
-  lastCorrectColor: []
-  incorrectRuleAbidingColor: []
-  incorrectRuleBreakingColor: []
-  defaultTileColor: []
   NumBlinks: 0
   TilePrefab: {fileID: 925009272087881901, guid: 5796f049ef3372046b3edd4795fcdc39,
     type: 3}
-  TileSize: 0
-  TileTexture: 
-  MazeBackgroundTextureName: 
-  ContextExternalFilePath: 
   MazeFilePath: 
-  StartButtonPosition: {x: 0, y: 0, z: 0}
-  StartButtonScale: 0
-  NeutralITI: 0
-  UsingFixedRatioReward: 0
   spaceBetweenTiles:
     name: 
     hidden: 0
@@ -731,7 +710,6 @@ MonoBehaviour:
     precision: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
-  TouchFeedbackDuration: 0
 --- !u!114 &1860654111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -752,36 +730,20 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  ShotgunRaycastCircleSize_DVA: 0
-  ShotgunRaycastSpacing_DVA: 0
-  ParticipantDistance_CM: 0
   PrefabPath: 
-  ConfigName: 
+  ConfigFolderName: 
   TaskName: MazeGame
   TaskProjectFolder: 
   BlockCount: 0
   TrialLevel: {fileID: 1860654110}
-  SerialSentData: {fileID: 0}
-  SerialRecvData: {fileID: 0}
-  StoreData: 0
-  SerialPortActive: 0
-  SyncBoxActive: 0
-  EventCodesActive: 0
-  RewardPulsesActive: 0
-  SonicationActive: 0
-  UseDefaultConfigs: 0
-  ContextExternalFilePath: 
-  SessionDataPath: 
+  BlockData: {fileID: 0}
+  FrameData: {fileID: 0}
+  TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
-  SubjectID: 
-  SessionID: 
-  FilePrefix: 
-  EyetrackerType: 
-  SelectionType: 
-  LocateFile: {fileID: 0}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
+  StimCanvas_2D: {fileID: 0}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -796,14 +758,16 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
-  ExperimenterDisplayController: {fileID: 0}
-  SessionInfoPanel: {fileID: 0}
-  DisplayController: {fileID: 0}
-  SerialPortController: {fileID: 0}
-  EventCodeManager: {fileID: 0}
   DrawRenderTexture: {fileID: 0}
-  IsHuman: 0
-  HumanStartPanel: {fileID: 0}
+  TaskLevelDefined: 0
+  TrialAndBlockDefsHandled: 0
+  StimsHandled: 0
+  BlockResultsPrefab: {fileID: 0}
+  BlockResults_GridElementPrefab: {fileID: 0}
+  BlockResults_AudioClip: {fileID: 0}
+  BlockResultsGO: {fileID: 0}
+  importSettings_Level: {fileID: 0}
+  verifyTask_Level: {fileID: 0}
   MazeNumSquares: 
   MazeNumTurns: 
   MazeDims: []

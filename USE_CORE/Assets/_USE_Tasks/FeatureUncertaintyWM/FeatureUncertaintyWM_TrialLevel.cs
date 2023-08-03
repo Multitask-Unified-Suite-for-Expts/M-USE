@@ -367,7 +367,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
-            if (TokenFBController.isTokenBarFull())
+            if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
@@ -387,8 +387,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName)));
-                //RenderSettings.skybox = CreateSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), Camera.main.gameObject.GetComponent<Skybox>()));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
 

@@ -7,7 +7,9 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
+#if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+#endif  
 
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
@@ -128,10 +130,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
 
-            #if (!UNITY_WEBGL)
+#if (!UNITY_WEBGL)
                 if (!playerViewLoaded)
                     CreateTextOnExperimenterDisplay();
-            #endif
+#endif
 
             SetTrialSummaryString();
             MaxTrials = CurrentTrialDef.MaxTrials;

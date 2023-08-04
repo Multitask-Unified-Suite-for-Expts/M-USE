@@ -833,22 +833,24 @@ namespace USE_ExperimentTemplate_Session
 
         private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder and copy config folder into it
         {
-            if(SessionValues.UsingServerConfigs)
+            if (SessionValues.UsingServerConfigs)
             {
-                if(!Application.isEditor)
+                if (!Application.isEditor)
                 {
                     StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
                     {
-                        StartCoroutine(CopySessionConfigFolderToDataFolder()); //Copy Session Config folder to Data folder so that the settings are stored
+                        StartCoroutine(CopySessionConfigFolderToDataFolder());
                     }));
                 }
             }
-            else if(SessionValues.UsingLocalConfigs)
+            else if (SessionValues.UsingLocalConfigs)
             {
                 string sourceFolderPath = SessionValues.ConfigFolderPath;
                 string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
                 CopyLocalFolder(sourceFolderPath, destinationFolderPath);
             }
+            else if (SessionValues.UsingDefaultConfigs)
+                Debug.Log("Using Default Configs, so not copying the session config folder to the data folder.");
         }
 
         public void CopyLocalFolder(string sourceFolderPath, string destinationFolderPath)

@@ -42,7 +42,6 @@ public class InitScreen_Level : ControlLevel
     private AudioSource AudioSource;
     private AudioClip ToggleChange_AudioClip;
     private AudioClip Error_AudioClip;
-    private AudioClip Confirm_AudioClip;
     private AudioClip Connected_AudioClip;
 
     private State SetupInitScreen;
@@ -80,12 +79,11 @@ public class InitScreen_Level : ControlLevel
         StartScreen.AddInitializationMethod(() =>
         {
             StartPanel_GO.SetActive(true);
-            StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
         });
         StartScreen.AddUpdateMethod(() =>
         {
             if (StartPanel_GO.transform.localPosition != Vector3.zero)
-                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 700 * Time.deltaTime);
+                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
         });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
@@ -98,16 +96,15 @@ public class InitScreen_Level : ControlLevel
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
-            MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
         });
         CollectInfo.AddUpdateMethod(() =>
         {
             if (MainPanel_GO.transform.localPosition != Vector3.zero)
-                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
+                MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 1000 * Time.deltaTime);
 
             if (ErrorHandling_GO.activeInHierarchy)
             {
-                if(ErrorHandled())
+                if (ErrorHandled())
                     ErrorHandling_GO.SetActive(false);
             }
         });
@@ -209,18 +206,12 @@ public class InitScreen_Level : ControlLevel
         else if (ServerData_Toggle.isOn)
         {
             SessionValues.StoringDataOnServer = true;
-            ServerManager.RootDataFolder = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>().text;
+            ServerManager.RootDataFolder = GetDataValue();
         }
     }
 
     private void SetConfigInfo()
     {
-        if(!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn)
-        {
-            Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
-            return;
-        }
-
         if (LocalConfig_Toggle.isOn)
         {
             SessionValues.UsingLocalConfigs = true;
@@ -229,16 +220,16 @@ public class InitScreen_Level : ControlLevel
         else if (ServerConfig_Toggle.isOn)
         {
             SessionValues.UsingServerConfigs = true;
-            string sessionConfigFolder = FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text;
-            ServerManager.SetSessionConfigFolderName(sessionConfigFolder);
+            ServerManager.SetSessionConfigFolderName(FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text);
             SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-
         }
-        else //default config toggle is on
+        else if (DefaultConfig_Toggle.isOn)
         {
             SessionValues.UsingDefaultConfigs = true;
             SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
         }
+        else
+            Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
     }
 
     private void HandleConfigToggle(GameObject selectedGO)
@@ -322,7 +313,10 @@ public class InitScreen_Level : ControlLevel
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
+        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
+        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -389,7 +383,6 @@ public class InitScreen_Level : ControlLevel
         AudioSource = gameObject.AddComponent<AudioSource>();
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
-        Confirm_AudioClip = Resources.Load<AudioClip>("BlockResults");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
     }
 

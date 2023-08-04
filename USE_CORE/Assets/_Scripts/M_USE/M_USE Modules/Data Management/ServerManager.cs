@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 
-
 public static class ServerManager //Used with the PHP scripts
 {
     public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig

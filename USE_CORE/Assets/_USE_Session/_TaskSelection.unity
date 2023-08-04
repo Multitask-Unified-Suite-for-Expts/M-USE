@@ -227,6 +227,21 @@ PrefabInstance:
       propertyPath: m_Color.a
       value: 0.8039216
       objectReference: {fileID: 0}
+    - target: {fileID: 3846432246081571865, guid: b44f3da8034064e10b6cd2dcf577b1f1,
+        type: 3}
+      propertyPath: m_Color.b
+      value: 0.6320754
+      objectReference: {fileID: 0}
+    - target: {fileID: 3846432246081571865, guid: b44f3da8034064e10b6cd2dcf577b1f1,
+        type: 3}
+      propertyPath: m_Color.g
+      value: 0.6278586
+      objectReference: {fileID: 0}
+    - target: {fileID: 3846432246081571865, guid: b44f3da8034064e10b6cd2dcf577b1f1,
+        type: 3}
+      propertyPath: m_Color.r
+      value: 0.617168
+      objectReference: {fileID: 0}
     - target: {fileID: 6944886660273333703, guid: b44f3da8034064e10b6cd2dcf577b1f1,
         type: 3}
       propertyPath: LoadingCanvas_GO
@@ -1031,6 +1046,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1280058611}
   m_CullTransparentMesh: 1
+--- !u!114 &1285477282 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2033127974}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1375570694
 GameObject:
   m_ObjectHideFlags: 0
@@ -1351,6 +1378,25 @@ Skybox:
   m_GameObject: {fileID: 1396040246}
   m_Enabled: 1
   m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}
+--- !u!1 &1448812256 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6548508546174282677, guid: 792e1de5c8846437a8604141b839538e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2033127974}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1448812258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448812256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68cef892bf2434845b423efa649ebb84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputField: {fileID: 1285477282}
 --- !u!1 &1530207056
 GameObject:
   m_ObjectHideFlags: 0
@@ -2066,6 +2112,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -125
       objectReference: {fileID: 0}
+    - target: {fileID: 4069249004808432687, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 36
+      objectReference: {fileID: 0}
     - target: {fileID: 4165580877913185342, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: m_IsActive
@@ -2134,6 +2185,41 @@ PrefabInstance:
     - target: {fileID: 5974222194002777434, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1448812258}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OpenKeyboard
+      objectReference: {fileID: 0}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: KeyboardManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6172819942582250829, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 6600834944638117012, guid: 792e1de5c8846437a8604141b839538e,
@@ -2280,6 +2366,31 @@ PrefabInstance:
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7979117076066553898, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 7979117076066553898, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 85
+      objectReference: {fileID: 0}
+    - target: {fileID: 7979117076066553898, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7979117076066553898, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7979117076066553898, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8709060249709736296, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}

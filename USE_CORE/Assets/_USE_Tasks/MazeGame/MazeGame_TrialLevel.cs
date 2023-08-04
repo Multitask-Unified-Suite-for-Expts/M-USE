@@ -180,7 +180,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigVariables();
 
             // Load Maze at the start of every trial to keep the mNextStep consistent
-            StartCoroutine(CurrentTaskLevel.LoadTextMaze());
+            //StartCoroutine(CurrentTaskLevel.LoadTextMaze());
             CurrentTaskLevel.SetTaskSummaryString();
             CurrentTaskLevel.CalculateBlockSummaryString();
             
@@ -894,6 +894,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         //    CurrentTaskLevel.ClearStrings();
         //    CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
+
+        // Reset the maze so that the correct next step is the start
+        CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mStart;
     }
 
     public override void ResetTrialVariables()

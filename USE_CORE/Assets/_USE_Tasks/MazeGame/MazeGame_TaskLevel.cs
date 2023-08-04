@@ -26,6 +26,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string[] MazeStart;
     [HideInInspector] public string[] MazeFinish;
     [HideInInspector] public string[] MazeName;
+    [HideInInspector] public string[] MazeString;
     [HideInInspector] public Maze currMaze;
     private string mazeKeyFilePath;
     private MazeGame_TrialLevel mgTL;
@@ -120,7 +121,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             InitializeMazeSearchingArrays();
 
             FindMaze();
-            StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
+            LoadTextMaze();
+            //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
@@ -367,49 +369,50 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         mgTL.mazeDefName = MazeName[mIndex];
     }
 
-    public IEnumerator LoadTextMaze()
+    public void LoadTextMaze()
     {
-        string mazeFilePath = "";
-        string jsonString = "";
-
-        if(SessionValues.WebBuild)
-        {
-            if(SessionValues.UsingDefaultConfigs) //will need to check if this works for non editor!!
-            {
-                TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
-                if (textAsset != null)
-                    jsonString = textAsset.text;
-
-                currMaze = new Maze(jsonString);
-            }
-            else //Using server configs:
-            {
-                yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath + "/" + mgTL.mazeDefName, result =>
-                {
-                    //SettingsDetails.FileName = result[0]; //implement later
-
-                    if (!string.IsNullOrEmpty(result[1]))
-                    {
-                        jsonString = result[1];
-                        currMaze = new Maze(jsonString);
-                    }
-                    else
-                        Debug.Log("MAZE RESULT IS NULL!!!!!");
-                }));
-            }
-        }
-        else
-        {
-            string[] filePaths = Directory.GetFiles(mgTL.MazeFilePath, $"*{mgTL.mazeDefName}*", SearchOption.AllDirectories);
-
-            if (filePaths.Length >= 1)
-                mazeFilePath = filePaths[0];
-            else
-                Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
-
-            jsonString = File.ReadAllLines(mazeFilePath)[0];
-            currMaze = new Maze(jsonString);
-        }
+        // string mazeFilePath = "";
+        // string jsonString = "";
+        //
+        // if(SessionValues.WebBuild)
+        // {
+        //     if(SessionValues.UsingDefaultConfigs) //will need to check if this works for non editor!!
+        //     {
+        //         TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
+        //         if (textAsset != null)
+        //             jsonString = textAsset.text;
+        //
+        //         currMaze = new Maze(jsonString);
+        //     }
+        //     else //Using server configs:
+        //     {
+        //         yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath + "/" + mgTL.mazeDefName, result =>
+        //         {
+        //             //SettingsDetails.FileName = result[0]; //implement later
+        //
+        //             if (!string.IsNullOrEmpty(result[1]))
+        //             {
+        //                 jsonString = result[1];
+        //                 currMaze = new Maze(jsonString);
+        //             }
+        //             else
+        //                 Debug.Log("MAZE RESULT IS NULL!!!!!");
+        //         }));
+        //     }
+        // }
+        // else
+        // {
+        //     string[] filePaths = Directory.GetFiles(mgTL.MazeFilePath, $"*{mgTL.mazeDefName}*", SearchOption.AllDirectories);
+        //
+        //     if (filePaths.Length >= 1)
+        //         mazeFilePath = filePaths[0];
+        //     else
+        //         Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
+        //
+        //     jsonString = File.ReadAllLines(mazeFilePath)[0];
+        //     currMaze = new Maze(jsonString);
+        // }
+        currMaze = new Maze(MazeString[mIndex]);
         mgTL.InitializeTrialArrays();
         InitializeBlockArrays();
     }
@@ -432,6 +435,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         MazeStart = new string[MazeDefs.Length];
         MazeFinish = new string[MazeDefs.Length];
         MazeName = new string[MazeDefs.Length];
+        MazeString = new string[MazeDefs.Length];
         for (var iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
         {
             MazeDims[iMaze] = MazeDefs[iMaze].mDims;
@@ -440,6 +444,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeStart[iMaze] = MazeDefs[iMaze].mStart;
             MazeFinish[iMaze] = MazeDefs[iMaze].mFinish;
             MazeName[iMaze] = MazeDefs[iMaze].mName;
+            MazeString[iMaze] = MazeDefs[iMaze].mString;
         }
     }
 }

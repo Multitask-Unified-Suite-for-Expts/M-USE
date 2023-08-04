@@ -32,6 +32,6 @@ namespace EyeTrackerData_Namespace
         public float rightPupilDiameter;
         public float leftPupilDiameter;
 
-        public float systemTimeStamp;
+        public long systemTimeStamp;
     }
 }

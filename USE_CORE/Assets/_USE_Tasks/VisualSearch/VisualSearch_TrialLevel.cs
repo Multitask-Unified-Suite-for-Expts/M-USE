@@ -289,7 +289,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
         TokenFeedback.AddTimer(()=>tokenFbDuration, () => ITI, ()=>
         {
-            if (TokenFBController.isTokenBarFull())
+            if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
@@ -458,7 +458,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         }
     }
-    void LoadConfigUIVariables()
+    private void LoadConfigUIVariables()
     {
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
@@ -476,7 +476,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                                                                                                               ////configured token fb duration
         configUIVariablesLoaded = true;
     }
-    void SetTrialSummaryString()
+    private void SetTrialSummaryString()
     {
         TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +

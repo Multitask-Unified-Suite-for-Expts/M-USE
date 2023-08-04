@@ -19,7 +19,7 @@ public class Tile : MonoBehaviour
     public Coords mCoord;
     public float sliderValueChange;
     private MazeGame_TrialLevel mgTL = null;
-    private MazeReactionTest_TrialLevel mrtTL = null;
+    //private MazeReactionTest_TrialLevel mrtTL = null;
 
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
     public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
@@ -56,14 +56,15 @@ public class Tile : MonoBehaviour
     {
         gameObject.GetComponent<Renderer>().material.color = baseColor;
 
-        if (GameObject.Find("MazeGame_Scripts") != null)
-        {
+      //  if (GameObject.Find("MazeGame_Scripts") != null)
+       // {
             mgTL = GameObject.Find("MazeGame_Scripts").GetComponent<MazeGame_TrialLevel>();
-        }
+        //}
+        /*
         else
         {
             mrtTL = GameObject.Find("MazeReactionTest_Scripts").GetComponent<MazeReactionTest_TrialLevel>();
-        }
+        }*/
     }
 
 
@@ -71,6 +72,8 @@ public class Tile : MonoBehaviour
     {
         if (!isFlashing)
         {
+            correctnessCode = mgTL.ManageTileTouch(this);
+/*
             if (mgTL != null)
             {
                 correctnessCode = mgTL.ManageTileTouch(this);
@@ -78,7 +81,7 @@ public class Tile : MonoBehaviour
             else
             {
                 correctnessCode = mrtTL.ManageTileTouch(this);
-            }
+            }*/
             ColorFeedback(correctnessCode);
         }
     }
@@ -133,10 +136,10 @@ public class Tile : MonoBehaviour
     public void NextCorrectFlashingFeedback()
     {
         // ... code to set flashingTile, originalColor, and flashColor ...
-        if (mrtTL.pathProgressGO.Count == 0) // haven't selected the start yet
-            flashingTile = mrtTL.startTile;
+        if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
+            flashingTile = mgTL.startTile;
         else
-            flashingTile = GameObject.Find(mrtTL.CurrentTaskLevel.currMaze.mNextStep);
+            flashingTile = GameObject.Find(mgTL.CurrentTaskLevel.currMaze.mNextStep);
 
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
@@ -149,6 +152,7 @@ public class Tile : MonoBehaviour
         if (isFlashing)
         {
             fbColor = PREV_CORRECT_COLOR;
+            
             float elapsed = Time.unscaledTime - flashStartTime;
             float interval = TILE_BLINKING_DURATION / (2 * NUM_BLINKS);
         
@@ -158,7 +162,7 @@ public class Tile : MonoBehaviour
                     flashingTile.GetComponent<Renderer>().material.color = fbColor;
                 else
                     flashingTile.GetComponent<Renderer>().material.color = originalTileColor;
-            
+
                 numFlashes++;
             }
         
@@ -173,11 +177,12 @@ public class Tile : MonoBehaviour
         {
 
             float elapsed = Time.unscaledTime - fbStartTime;
-            float interval = mgTL != null ? mgTL.tileFbDuration : mrtTL.tileFbDuration;
+            float interval = mgTL.tileFbDuration;
         
             if (elapsed >=  interval)
             {
-                if ((mgTL != null ? !mgTL.viewPath : !mrtTL.viewPath) || correctnessCode != 1)
+               // if ((mgTL != null ? !mgTL.viewPath : !mrtTL.viewPath) || correctnessCode != 1)
+                if (!mgTL.viewPath || correctnessCode != 1)
                 {
                     gameObject.GetComponent<Renderer>().material.color = originalTileColor;
                 }

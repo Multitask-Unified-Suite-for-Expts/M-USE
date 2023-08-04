@@ -10,6 +10,7 @@ using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Task;
 using USE_States;
 using USE_StimulusManagement;
+using Object = System.Object;
 
 
 public class VerifyTask_Level : ControlLevel
@@ -51,6 +52,16 @@ public class VerifyTask_Level : ControlLevel
                 new SettingsDetails(TaskLevel.TaskConfigPath, "EventCode", typeof(Dictionary<string, EventCode>)),
                 new SettingsDetails(TaskLevel.TaskConfigPath, "ConfigUi", typeof(ConfigVarStore)),
             };
+
+            TaskLevel.customSettings = new List<CustomSettings>();
+            TaskLevel.DefineCustomSettings();
+            
+            foreach (CustomSettings customSettingsType in TaskLevel.customSettings)
+            {
+                importSettings_Level.SettingsDetails.Add(new SettingsDetails(TaskLevel.TaskConfigPath,
+                    customSettingsType.SearchString, customSettingsType.SettingsType));
+            }
+
         });
 
         ImportSettings.AddUpdateMethod(() =>
@@ -113,6 +124,36 @@ public class VerifyTask_Level : ControlLevel
                         Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ConfigUiVariables.getAllVariables().Count +
                                   " Config UI Variables imported.");
                     }
+                    else 
+                    {
+                        for(int iCustom = 0; iCustom < TaskLevel.customSettings.Count; iCustom++)
+                        {
+                            CustomSettings cs = TaskLevel.customSettings[iCustom];
+                            object[] parameters = new object[] {parsedResult};
+
+                            if (cs.SettingsParsingStyle.ToLower() == "array")
+                            {
+                                MethodInfo SettingsConverter_methodCustom = GetType()
+                                    .GetMethod(nameof(this.SettingsConverterCustomArray))
+                                    .MakeGenericMethod(new Type[] {currentType});
+                                cs.ParsedResult = SettingsConverter_methodCustom.Invoke(this, parameters);
+                                Debug.Log(cs.ParsedResult);
+                            }
+                            else
+                            {
+                                MethodInfo SettingsConverter_methodCustom = GetType()
+                                    .GetMethod(nameof(this.SettingsConverterCustom))
+                                    .MakeGenericMethod(new Type[] {currentType});
+                                cs.ParsedResult = SettingsConverter_methodCustom.Invoke(this, parameters);
+                            }
+
+                            Debug.Log(TaskLevel.TaskName + " " + cs.SearchString + " file imported.");
+                            Debug.Log(((MazeGame_Namespace.MazeDef[])cs.ParsedResult)[0].mDims);
+
+                        }
+                        
+                    }
+                    
                 }
 
                 fileParsed = true;
@@ -236,4 +277,19 @@ public class VerifyTask_Level : ControlLevel
         else if (SessionValues.UsingLocalConfigs || SessionValues.UsingServerConfigs)
             TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
+
+    public T SettingsConverterCustom<T>(object parsedSettings)
+    {
+       return (T)parsedSettings;
+    }
+    public T[] SettingsConverterCustomArray<T>(object parsedSettings)
+    {
+        return (T[])parsedSettings;
+    }
+    
+    // public void SettingsConverterCustomArray<T>(T[] parsedSettings, CustomSettings customSetting)
+    // {
+    //     customSetting.ParsedResult = parsedSettings;
+    // }
+
 }

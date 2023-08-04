@@ -235,6 +235,7 @@ public class ImportSettings_Level : ControlLevel
         foreach (string fieldName in fieldNames)
         {
             string tempFieldName = fieldName.Trim();
+            
             if (typeof(T).GetProperty(tempFieldName) == null && typeof(T).GetField(tempFieldName) == null)
             {
                 throw new Exception("Settings file contains the header \""

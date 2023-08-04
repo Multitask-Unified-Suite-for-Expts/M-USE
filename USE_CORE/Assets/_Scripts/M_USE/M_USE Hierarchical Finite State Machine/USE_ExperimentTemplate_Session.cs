@@ -94,7 +94,7 @@ namespace USE_ExperimentTemplate_Session
         private InitScreen_Level initScreen_Level;
 
         private FlashPanelController FlashPanelController;
-        
+        public bool runSessionLevelCalibration;
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -112,7 +112,7 @@ namespace USE_ExperimentTemplate_Session
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
-            State setupTask = new State("VerifyTask");
+            State setupTask = new State("SetupTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State gazeCalibration = new State("GazeCalibration");
@@ -180,11 +180,12 @@ namespace USE_ExperimentTemplate_Session
                     GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
                     GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
                     GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    runSessionLevelCalibration = true;
                 }
             });
 
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && SessionValues.SessionDef.EyeTrackerActive, gazeCalibration);
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !SessionValues.SessionDef.EyeTrackerActive, selectTask);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !runSessionLevelCalibration, selectTask);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -250,8 +251,9 @@ namespace USE_ExperimentTemplate_Session
             });
             gazeCalibration.SpecifyTermination(() => !GazeCalibrationTaskLevel.TrialLevel.runCalibration, () => selectTask, () =>
             {
-                GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                // GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                runSessionLevelCalibration = false;
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                 GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts").gameObject.SetActive(false);
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
@@ -525,6 +527,30 @@ namespace USE_ExperimentTemplate_Session
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
             
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
+            
+            //      REIMPLEMENT THIS IS THE TASK SELECTION TIME OUT!!!!!!!!!
+            // Don't have automatic task selection if we encountered an error during setup
+            /*  if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
+              {*/
+                  //selectTask.AddTimer(SessionValues.SessionDef.TaskSelectionTimeout, loadTask, () =>
+                  selectTask.AddTimer(() => SessionValues.SessionDef != null? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
+                  {
+                      foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
+                      {
+                          //Find the next task in the list that is still interactable
+                          string configName = (string)task.Key;
+  
+                          // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                          if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
+                              continue;
+  
+                          taskAutomaticallySelected = true;
+                          selectedConfigFolderName = configName;
+                          break;
+                      }
+                  });
+  /*            }
+  */            
 
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddInitializationMethod(() =>

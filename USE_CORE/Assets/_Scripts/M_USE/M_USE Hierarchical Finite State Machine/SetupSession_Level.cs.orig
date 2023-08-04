@@ -261,6 +261,10 @@ public class SetupSession_Level : ControlLevel
             Directory.Delete(SessionValues.ConfigFolderPath, true);
             
         Directory.CreateDirectory(SessionValues.ConfigFolderPath);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7efe5f98636b187cc464468da6838a436a386df5
         List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "SessionEventCodeConfig_json", "DisplayConfig_json" };
         foreach (string config in configsToWrite)
         {
@@ -322,7 +326,7 @@ public class SetupSession_Level : ControlLevel
             SessionValues.GazeData.sessionLevel = SessionLevel;
             SessionValues.GazeData.InitDataController();
             SessionValues.GazeData.ManuallyDefine();
-          //  SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
+            SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
             SessionValues.GazeTracker.Init(SessionLevel.FrameData, 0);
 
         }

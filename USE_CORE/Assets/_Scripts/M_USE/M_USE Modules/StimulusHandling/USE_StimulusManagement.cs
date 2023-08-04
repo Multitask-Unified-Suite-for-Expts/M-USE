@@ -532,7 +532,9 @@ namespace USE_StimulusManagement
 
 			if (StimGameObject != null)
 			{
-				DestroyRecursive(StimGameObject);
+				//DestroyRecursive(StimGameObject);
+				GameObject.Destroy(StimGameObject);
+				Resources.UnloadUnusedAssets();
 			}
 
 			StimGameObject = null;
@@ -545,6 +547,11 @@ namespace USE_StimulusManagement
                 Object.Destroy(go);
                 return;
             }
+
+			if(go.GetComponent<Tile>()  != null)
+			{
+				return;
+			}
 
             // Destroy MeshFilters and their associated Meshes
             MeshFilter[] meshFilters = go.GetComponentsInChildren<MeshFilter>();

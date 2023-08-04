@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 
 
 public class InputFieldManager : MonoBehaviour
@@ -12,11 +11,30 @@ public class InputFieldManager : MonoBehaviour
     private void Start() //Load saved values
     {
         inputField = inputField_GO.GetComponent<TMP_InputField>();
-        inputField.text = PlayerPrefs.GetString(playerPrefKey, "");        
+        string storedValue = PlayerPrefs.GetString(playerPrefKey, "");
+        if (string.IsNullOrEmpty(storedValue))
+            storedValue = GetDefaultValue();
+        inputField.text = storedValue;      
     }
 
     public void SaveInputValue() //Save current value when user changes it
     {
         PlayerPrefs.SetString(playerPrefKey, inputField.text);
     }
+
+    private string GetDefaultValue()
+    {
+        if (inputField_GO.name.ToLower().Contains("subjectid"))
+            return "Player";
+        else if (inputField_GO.name.ToLower().Contains("subjectage"))
+            return "50";
+        else if (inputField_GO.name.ToLower().Contains("serverurl"))
+            return "http://m-use.psy.vanderbilt.edu:8080";
+        else if (inputField_GO.name.ToLower().Contains("serverdata"))
+            return "DATA";
+        else
+            return "DefaultValue";
+        
+    }
+
 }

@@ -19,11 +19,11 @@ public class AudioFBController : MonoBehaviour
 
     private string playingClipName = null;
 
-    public EventCodeManager EventCodeManager;
-    public Dictionary<string, EventCode> SessionEventCodes;
+    /*public EventCodeManager EventCodeManager;
+    public Dictionary<string, EventCode> SessionEventCodes;*/
 
 
-    public void Init(DataController frameData, EventCodeManager ec)
+    public void Init(DataController frameData)
     {
         frameData.AddDatum("PlayingAudioClipName", () => playingClipName);
 
@@ -33,7 +33,6 @@ public class AudioFBController : MonoBehaviour
         foreach (AudioFB audioFB in DefaultAudioFeedbacks)
             clips.Add(audioFB.name, audioFB.clip);
 
-        EventCodeManager = ec;
     }
 
     public void UpdateAudioSource() //When new task starts, old audio is deactivated. need to find the new one
@@ -70,7 +69,7 @@ public class AudioFBController : MonoBehaviour
                 audioSource.Stop();
             audioSource.PlayOneShot(clip);
             if (SessionValues.SessionDef.EventCodesActive)
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
         }
         else
             Debug.LogWarning("Trying to play clip " + clipName + " but it has not been added");

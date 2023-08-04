@@ -1,11 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
 using UnityEngine.UI;
-using UnityEngine.UI.Extensions;
 
-public class PlayerViewPanel //: MonoBehaviour
+public class PlayerViewPanel:MonoBehaviour
 {
     private GameObject circle;
     // public Transform parent;
@@ -15,10 +11,8 @@ public class PlayerViewPanel //: MonoBehaviour
     private float distanceToScreen;
     private Vector3 textLocation;
 
-    // Start is called before the first frame update
     void Start()
     {
-        // parent = transform;
     }
     public GameObject CreateLine(string name, Vector3 start, Vector3 end, Color color, Transform transform)
     {
@@ -92,6 +86,29 @@ public class PlayerViewPanel //: MonoBehaviour
         return textObject;
     }
 
+    public void GenerateParticle(Vector3 position, Canvas RenderCanvas)
+    {
+        // Create a new GameObject
+        GameObject particle = new GameObject("Particle");
+        // Add a ParticleSystem component
+        particle.AddComponent<ParticleSystem>();
+
+        // Make the particle a child of the RenderCanvas
+        particle.transform.SetParent(RenderCanvas.transform);
+        particle.transform.position = position;
+
+        // Get the ParticleSystem component
+        ParticleSystem particleSystem = particle.GetComponent<ParticleSystem>();
+
+        // Configure the particle system here if needed
+        var main = particleSystem.main;
+        main.startLifetime = 5f; // This particle will live for 5 seconds before being destroyed.
+
+        var trails = particleSystem.trails;
+        trails.enabled = true; // Enable trails for this particle.
+    }
+
+
     /*
     public GameObject drawHalo(Vector2  haloLocation, Vector2 size)
     {
@@ -108,19 +125,5 @@ public class PlayerViewPanel //: MonoBehaviour
         return halo;
     }
     */
-    Vector2 GetMidpoint(Vector2[] points)
-    {
-        float sumX = 0f;
-        float sumY = 0f;
-        int count = points.Length;
-
-        foreach (Vector2 point in points)
-        {
-            sumX += point.x;
-            sumY += point.y;
-        }
-
-        return new Vector2(sumX / count, sumY / count);
-    }
 
 }

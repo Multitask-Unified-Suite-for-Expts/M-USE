@@ -148,7 +148,7 @@ public class SetupTask_Level : ControlLevel
 
 
             //GOTTA BE A BETTER WAY TO DO THIS:
-            fbControllers.GetComponent<AudioFBController>().SessionEventCodes =
+            /*fbControllers.GetComponent<AudioFBController>().SessionEventCodes =
                 SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<HaloFBController>().SessionEventCodes =
                 SessionValues.EventCodeManager.SessionEventCodes;
@@ -158,6 +158,7 @@ public class SetupTask_Level : ControlLevel
                 SessionValues.EventCodeManager.SessionEventCodes;
             fbControllers.GetComponent<TouchFBController>().SessionEventCodes =
                 SessionValues.EventCodeManager.SessionEventCodes;
+                */
 
             fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(totalTokensNum);
 
@@ -171,7 +172,7 @@ public class SetupTask_Level : ControlLevel
             TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
             TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
 
-            TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
+          //  TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
 
             if (TaskLevel.CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = TaskLevel.CustomTaskEventCodes;
@@ -199,31 +200,30 @@ public class SetupTask_Level : ControlLevel
                     case "Audio":
                         if (!audioInited)
                         {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
+                            TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
 
                         break;
 
                     case "Halo":
-                        TrialLevel.HaloFBController.Init(FrameData, SessionValues.EventCodeManager);
+                        TrialLevel.HaloFBController.Init(FrameData);
                         break;
 
                     case "Token":
                         if (!audioInited)
                         {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
+                            TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
 
-                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController,
-                            SessionValues.EventCodeManager);
+                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
 
                     case "Slider":
                         if (!audioInited)
                         {
-                            TrialLevel.AudioFBController.Init(FrameData, SessionValues.EventCodeManager);
+                            TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
 

@@ -28,7 +28,7 @@ RectTransform:
   m_GameObject: {fileID: 648919338838905791}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 1}
   m_Children:
   - {fileID: 9153309848572649277}
   m_Father: {fileID: 7053871020013470584}
@@ -91,7 +91,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FillCircle_GO: {fileID: 2158197537283666423}
   FillCircle_Image: {fileID: 0}
-  Loading: 0
 --- !u!1 &2005828973968722000
 GameObject:
   m_ObjectHideFlags: 0

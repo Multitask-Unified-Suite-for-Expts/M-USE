@@ -62,13 +62,13 @@ namespace USE_ExperimenterDisplay
             }
 
         }
-
-        private void MoveToLayer(Transform root, int layer)
-        {
-            root.gameObject.layer = layer;
-            foreach (Transform child in root)
-                MoveToLayer(child, layer);
-        }
+        //NOT USED I COMMENTED OUT -sd
+        // private void MoveToLayer(Transform root, int layer)
+        // {
+        //     root.gameObject.layer = layer;
+        //     foreach (Transform child in root)
+        //         MoveToLayer(child, layer);
+        // }
     }
 
     public class ExperimenterDisplayPanel : MonoBehaviour

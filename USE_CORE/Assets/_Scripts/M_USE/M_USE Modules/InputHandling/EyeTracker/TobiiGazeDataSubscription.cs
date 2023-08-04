@@ -13,8 +13,8 @@ namespace Tobii.Research.Unity.CodeExamples
     {
         public IEyeTracker _eyeTracker;
         private Queue<GazeDataEventArgs> _queue = new Queue<GazeDataEventArgs>();
-        public USE_ExperimentTemplate_Data.GazeData GazeData;
-        public TobiiEyeTrackerController TobiiEyeTrackerController;
+        /*public USE_ExperimentTemplate_Data.GazeData GazeData;
+        public TobiiEyeTrackerController TobiiEyeTrackerController;*/
 
         void Awake()
         {/*
@@ -78,7 +78,7 @@ namespace Tobii.Research.Unity.CodeExamples
             }
         }
 
-        private void PumpGazeData()
+        public void PumpGazeData()
         {
             var next = GetNextGazeData();
             while (next != null)
@@ -114,12 +114,9 @@ namespace Tobii.Research.Unity.CodeExamples
 
             mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
-            TobiiEyeTrackerController.mostRecentGazeSample = mostRecentGazeSample;
-            
-            if (TobiiEyeTrackerController.GazeData != null)
-            {
-                TobiiEyeTrackerController.GazeData.AppendDataToBuffer();
-            }
+            SessionValues.TobiiEyeTrackerController.mostRecentGazeSample = mostRecentGazeSample;
+
+            StartCoroutine(SessionValues.GazeData.AppendDataToBuffer());
         }
     }
 }

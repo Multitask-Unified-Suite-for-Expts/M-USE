@@ -16,6 +16,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Collections;
 using USE_Def_Namespace;
 using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using TMPro;
 
 namespace USE_ExperimentTemplate_Task
@@ -69,14 +70,16 @@ namespace USE_ExperimentTemplate_Task
         protected TaskLevelTemplate_Methods TaskLevel_Methods;
 
         protected int? MinTrials, MaxTrials;
-
         [HideInInspector] public RenderTexture DrawRenderTexture;
         [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
         [HideInInspector] public bool TaskLevelDefined;
 
+        [HideInInspector] public List<CustomSettings> customSettings;
+        
         private bool TaskDefImported;
         private bool BlockDefImported;
         private bool TrialDefImported;
+        
 
         private bool AllDefsImported
         {
@@ -453,95 +456,100 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        public void HandleCustomSettings()
+        // public void HandleCustomSettings()
+        // {
+        //     Dictionary<string, string> customSettings = new Dictionary<string, string>();
+        //     string settingsFilePath;
+        //
+        //     if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CustomSettings"))
+        //         customSettings = (Dictionary<string, string>)SessionSettings.Get(TaskName + "_TaskSettings", "CustomSettings");
+        //     else
+        //         customSettings = null;
+        //
+        //     if (customSettings != null)
+        //     {
+        //         foreach (string key in customSettings.Keys)
+        //         {
+        //             string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
+        //             string settingsFileName = key.Split('.')[0];
+        //
+        //             //Write to persistant data path for default configs:
+        //             if (SessionValues.UsingDefaultConfigs)
+        //             {
+        //                 string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
+        //                 filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
+        //
+        //                 if (!Directory.Exists(folderPath))
+        //                     Directory.CreateDirectory(folderPath);
+        //
+        //                 if (!File.Exists(filePath))
+        //                 {
+        //                     Debug.Log("LOADING FROM: " + "DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
+        //                     var db = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
+        //                     if (db == null)
+        //                         Debug.Log("DB IS NULL!!!!!!!!!!!!");
+        //                     byte[] data = db.bytes;
+        //                     File.WriteAllBytes(filePath, data);
+        //                 }
+        //                 else
+        //                     settingsFilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
+        //
+        //             }
+        //
+        //             string customSettingsValue = customSettings[key].ToLower();
+        //
+        //             if (SessionValues.UsingServerConfigs)
+        //             {
+        //                 StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath + key, result => //TASK CONFIG PATH (+ key) PROB IS NOT WHAT NEEDS TO BE HERE!!!
+        //                 {
+        //                     if (!string.IsNullOrEmpty(result[1]))
+        //                     {
+        //                         //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
+        //
+        //                         ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result[1]);
+        //                     }
+        //                     else
+        //                         Debug.Log("CUSTOM SETTINGS RESULT IS NULL!!!!!");
+        //                 }));
+        //             }
+        //             else
+        //                 ImportCustomSetting(customSettingsValue, filePath, settingsFileName);
+        //         }
+        //     }
+        // }
+        //
+        // private void ImportCustomSetting(string customSettingsValue, string filePath, string settingsFileName, string serverFileString = null)
+        // {
+        //     Type settingsType = GetTaskCustomSettingsType(settingsFileName);
+        //     Debug.Log("SETTINGS TYPE: " + settingsType);
+        //     switch (customSettingsValue)
+        //     {
+        //         case ("singletypearray"):
+        //             MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
+        //             readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
+        //             break;
+        //         case ("singletypejson"):
+        //             MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
+        //             readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
+        //             break;
+        //         case ("multipletype"):
+        //             MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
+        //             readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
+        //             break;
+        //         default:
+        //             Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
+        //             break;
+        //     }
+        //
+        //     ProcessCustomSettingsFiles();
+        // }
+
+        public virtual List<CustomSettings> DefineCustomSettings()
         {
-            Dictionary<string, string> customSettings = new Dictionary<string, string>();
-            string settingsFilePath;
-
-            if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CustomSettings"))
-                customSettings = (Dictionary<string, string>)SessionSettings.Get(TaskName + "_TaskSettings", "CustomSettings");
-            else
-                customSettings = null;
-
-            if (customSettings != null)
-            {
-                foreach (string key in customSettings.Keys)
-                {
-                    string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
-                    string settingsFileName = key.Split('.')[0];
-
-                    //Write to persistant data path for default configs:
-                    if (SessionValues.UsingDefaultConfigs)
-                    {
-                        string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
-                        filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
-
-                        if (!Directory.Exists(folderPath))
-                            Directory.CreateDirectory(folderPath);
-
-                        if (!File.Exists(filePath))
-                        {
-                            Debug.Log("LOADING FROM: " + "DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
-                            var db = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
-                            if (db == null)
-                                Debug.Log("DB IS NULL!!!!!!!!!!!!");
-                            byte[] data = db.bytes;
-                            File.WriteAllBytes(filePath, data);
-                        }
-                        else
-                            settingsFilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
-
-                    }
-
-                    string customSettingsValue = customSettings[key].ToLower();
-
-                    if (SessionValues.UsingServerConfigs)
-                    {
-                        StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath + key, result => //TASK CONFIG PATH (+ key) PROB IS NOT WHAT NEEDS TO BE HERE!!!
-                        {
-                            if (!string.IsNullOrEmpty(result[1]))
-                            {
-                                //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
-
-                                ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result[1]);
-                            }
-                            else
-                                Debug.Log("CUSTOM SETTINGS RESULT IS NULL!!!!!");
-                        }));
-                    }
-                    else
-                        ImportCustomSetting(customSettingsValue, filePath, settingsFileName);
-                }
-            }
+            return null;
         }
-
-        private void ImportCustomSetting(string customSettingsValue, string filePath, string settingsFileName, string serverFileString = null)
-        {
-            Type settingsType = GetTaskCustomSettingsType(settingsFileName);
-
-            switch (customSettingsValue)
-            {
-                case ("singletypearray"):
-                    MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
-                    readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-                    break;
-                case ("singletypejson"):
-                    MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
-                    readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-                    break;
-                case ("multipletype"):
-                    MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
-                    readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-                    break;
-                default:
-                    Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
-                    break;
-            }
-
-            ProcessCustomSettingsFiles();
-        }
-
-
+        
+        
         //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
         public void HandleTrialAndBlockDefs(bool verifyOnly)
         {   
@@ -742,17 +750,17 @@ namespace USE_ExperimentTemplate_Task
 
 
 
-        public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
+        public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettings
         {
             SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
         }
 
-        public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
+        public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettings
         {
             SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
         }
 
-        public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettingsType
+        public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettings
         {
             SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
         }
@@ -1070,8 +1078,27 @@ namespace USE_ExperimentTemplate_Task
         }
     }
 
-    public class CustomSettingsType
+    public class CustomSettings
     {
+        public string SearchString;
+        public Type SettingsType;
+        public string SettingsParsingStyle;
+        public object ParsedResult;
+        public Action<object> UpdateAction;
+        
+        //public CustomSettings(string searchString, Type settingsType, string settingsParsingStyle, Action<object> updateAction)
+        public CustomSettings(string searchString, Type settingsType, string settingsParsingStyle, object parsedResult)
+        {
+            SearchString = searchString;
+            SettingsType = settingsType;
+            SettingsParsingStyle = settingsParsingStyle;
+            ParsedResult = parsedResult;
+        }
 
+        public T AssignCustomSetting<T>()
+        {
+            return (T)ParsedResult;
+        }
+        
     }
 }

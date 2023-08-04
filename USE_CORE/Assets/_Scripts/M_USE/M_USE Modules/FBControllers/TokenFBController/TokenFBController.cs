@@ -49,12 +49,13 @@ public class TokenFBController : MonoBehaviour
     // Audio
     AudioFBController audioFBController;
     //Event Codes
+    /*
     public EventCodeManager EventCodeManager;
-    public Dictionary<string, EventCode> SessionEventCodes;
+    public Dictionary<string, EventCode> SessionEventCodes;*/
 
 
 
-    public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController, EventCodeManager ec)
+    public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
@@ -71,7 +72,6 @@ public class TokenFBController : MonoBehaviour
         SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
         SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
 
-        EventCodeManager = ec;
     }
 
 
@@ -120,7 +120,7 @@ public class TokenFBController : MonoBehaviour
         tokenBarFull = false;
 
     }
-    public bool isTokenBarFull()
+    public bool IsTokenBarFull()
     {
         return tokenBarFull;
     }
@@ -225,7 +225,7 @@ public class TokenFBController : MonoBehaviour
                         tokenBarFull = true;
                         audioFBController.Play("TripleCollected");
                         if (SessionValues.SessionDef.EventCodesActive)
-                            EventCodeManager.SendCodeImmediate(SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
+                            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
                         animationEndTime += flashingTime;
                     }
                     break;
@@ -234,8 +234,8 @@ public class TokenFBController : MonoBehaviour
                     animationPhase = AnimationPhase.None;
                     if (SessionValues.SessionDef.EventCodesActive)
                     {
-                        EventCodeManager.SendCodeImmediate(SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
-                        EventCodeManager.SendCodeNextFrame(SessionEventCodes["TokenFbController_TbReset"]);
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
+                        SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
                     }
                     break;
             }

@@ -16,6 +16,9 @@ using Random = UnityEngine.Random;
 
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
+    // Config Loading Variables
+    public MazeDef[] MazeDefs;
+
     // Maze Loading Variables
     [HideInInspector] public int[] MazeNumSquares;
     [HideInInspector] public int[] MazeNumTurns;
@@ -23,11 +26,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string[] MazeStart;
     [HideInInspector] public string[] MazeFinish;
     [HideInInspector] public string[] MazeName;
+    [HideInInspector] public string[] MazeString;
     [HideInInspector] public Maze currMaze;
-    private MazeDef[] MazeDefs;
     private string mazeKeyFilePath;
     private MazeGame_TrialLevel mgTL;
     private int mIndex;
+    
     
     // Block Data Tracking Variables
     [HideInInspector]
@@ -98,7 +102,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
 
-        SetMazePaths();
+        //SetMazePaths();
 
         AssignBlockData();
         
@@ -112,10 +116,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
+            MazeDefs = customSettings[0].AssignCustomSetting<MazeDef[]>();
             SetSkyBox(mgBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            InitializeMazeSearchingArrays();
 
             FindMaze();
-            StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
+            LoadTextMaze();
+            //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             mgTL.contextName = mgBD.ContextName;
             mgTL.MinTrials = mgBD.MinMaxTrials[0];
@@ -125,30 +132,32 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
     }
 
-    private void SetMazePaths()
-    {
-        if (SessionValues.UsingDefaultConfigs)
-        {
-            mgTL.MazeFilePath = "DefaultResources/Mazes";
-            mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
-        }
-        else if (SessionValues.UsingServerConfigs)
-        {
-            mgTL.MazeFilePath = "Resources/Mazes";
-            mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
-        }
-        else if (SessionValues.UsingLocalConfigs)
-        {
-            if (!string.IsNullOrEmpty(currentTaskDef.MazeKeyFilePath))
-                mazeKeyFilePath = currentTaskDef.MazeKeyFilePath;
-            else
-                Debug.Log("NO MAZE KEY FILE PATH SPECIFIED IN TASK DEF CONFIG!");
-            if (!string.IsNullOrEmpty(currentTaskDef.MazeFilePath))
-                mgTL.MazeFilePath = currentTaskDef.MazeFilePath;
-            else
-                Debug.Log("NO MAZE FILE PATH SPECIFIED IN TASK DEF CONFIG!");
-        }
-    }
+    // private void SetMazePaths()
+    // {
+    //     if (SessionValues.UsingDefaultConfigs)
+    //     {
+    //         mgTL.MazeFilePath = "DefaultResources/Mazes";
+    //         mazeKeyFilePath = "DefaultSessionConfigs/MazeGame_DefaultConfigs/MazeDef.txt";
+    //     }
+    //     else if (SessionValues.UsingServerConfigs)
+    //     {
+    //         mgTL.MazeFilePath = "Resources/Mazes";
+    //         mazeKeyFilePath = $"{ServerManager.SessionConfigFolderPath}/{TaskName}/MazeDef.txt";
+    //     }
+    //     else if (SessionValues.UsingLocalConfigs)
+    //     {
+    //         mazeKeyFilePath = TaskConfigPath + Path.DirectorySeparatorChar + "MazeDef";
+    //         Debug.Log("TASK CONFIG PATH" + mazeKeyFilePath);
+    //         // if (!string.IsNullOrEmpty(currentTaskDef.MazeKeyFilePath))
+    //         //     mazeKeyFilePath = currentTaskDef.MazeKeyFilePath;
+    //         // else
+    //         //     Debug.Log("NO MAZE KEY FILE PATH SPECIFIED IN TASK DEF CONFIG!");
+    //         // if (!string.IsNullOrEmpty(currentTaskDef.MazeFilePath))
+    //         //     mgTL.MazeFilePath = currentTaskDef.MazeFilePath;
+    //         // else
+    //         //     Debug.Log("NO MAZE FILE PATH SPECIFIED IN TASK DEF CONFIG!");
+    //     }
+    // }
 
 
     private void InitializeBlockArrays()
@@ -181,27 +190,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("MinTrials", () => mgBD.MaxTrials);
        // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
     }
-    // public void AddBlockValuesToTaskValues()
-    // {
-    //     numRewardPulses_InTask.Add(numRewardPulses_InBlock);
-    //     totalErrors_InTask.Add(totalErrors_InBlock);
-    //     correctTouches_InTask.Add(correctTouches_InBlock);
-    //     retouchCorrect_InTask.Add(retouchCorrect_InBlock);
-    //     perseverativeErrors_InTask.Add(perseverativeErrors_InBlock);
-    //     backtrackErrors_InTask.Add(backtrackErrors_InBlock);
-    //     ruleAbidingErrors_InTask.Add(ruleAbidingErrors_InBlock);
-    //     ruleBreakingErrors_InTask.Add(ruleBreakingErrors_InBlock);
-    //     numAbortedTrials_InTask.Add(numAbortedTrials_InBlock);
-    //     numSliderBarFull_InTask.Add(numSliderBarFull_InBlock);
-    //     mazeDurationsList_InTask.Add(string.Join(",",mazeDurationsList_InBlock));
-    //     List<float> allDurations = mazeDurationsList_InTask
-    //         .SelectMany(str => str.Split(','))
-    //         .Select(str => float.Parse(str))
-    //         .ToList();
-    //     Debug.Log("MAZE DURATIONS IN TASK: " + string.Join(",", allDurations));
-    // }
-
-
     public override OrderedDictionary GetBlockResultsData()
     {
         OrderedDictionary data = new OrderedDictionary
@@ -312,78 +300,40 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         BlockSummaryString.Clear();
     }
-
-    //private void CalculateBlockAverages()
-    //{
-    //    if (totalErrors_InTask.Count >= 1)
-    //        AvgTotalErrors = (float)totalErrors_InTask.AsQueryable().Average();
-        
-    //    if (correctTouches_InTask.Count >= 1)
-    //        AvgCorrectTouches = (float)correctTouches_InTask.AsQueryable().Average();
-
-    //    if (retouchCorrect_InTask.Count >= 1)
-    //        AvgRetouchCorrect = (float)retouchCorrect_InTask.AsQueryable().Average();
-
-    //    if (perseverativeErrors_InTask.Count >= 1)
-    //        AvgPerseverativeErrors = (float)perseverativeErrors_InTask.AsQueryable().Average();
-
-    //    if (backtrackErrors_InTask.Count >= 1)
-    //        AvgBacktrackErrors = (float)backtrackErrors_InTask.AsQueryable().Average();
-        
-    //    if (ruleAbidingErrors_InTask.Count >= 1)
-    //        AvgRuleAbidingErrors = (float)ruleAbidingErrors_InTask.AsQueryable().Average();
-        
-    //    if (ruleBreakingErrors_InTask.Count >= 1)
-    //        AvgRuleBreakingErrors = (float)ruleBreakingErrors_InTask.AsQueryable().Average();
-
-    //    if (numRewardPulses_InTask.Count >= 1)
-    //        AvgReward = (float)numRewardPulses_InTask.AsQueryable().Average();
-
-    //    if (mazeDurationsList_InTask.Count >= 1)
-    //    {
-    //        List<float> allDurations = mazeDurationsList_InTask
-    //            .SelectMany(str => str.Split(','))
-    //            .Select(str => float.Parse(str))
-    //            .ToList();
-    //        AvgMazeDuration = allDurations.Average();
-    //    }
-    //}
-
-
-    public override Type GetTaskCustomSettingsType(string typeName)
-    {
-        if (typeName.ToLower().Contains("mazedef"))
-            return typeof(MazeDef);
-        else
-        {
-            Debug.LogError("TYPE ERROR INSIDE MAZEGAMES GETTASKCUSTOMSETTINGS OVERRIDE METHOD!");
-            return null;
-        }
-    }
-
-    public override void ProcessCustomSettingsFiles()
-    {
-        MazeDefs = (MazeDef[])SessionSettings.Get("MazeDef_array");
-
-        if (MazeDefs == null)
-            Debug.LogError("MAZE DEFS ARE NULL!");
-
-        MazeDims = new Vector2[MazeDefs.Length];
-        MazeNumSquares = new int[MazeDefs.Length];
-        MazeNumTurns = new int[MazeDefs.Length];
-        MazeStart = new string[MazeDefs.Length];
-        MazeFinish = new string[MazeDefs.Length];
-        MazeName = new string[MazeDefs.Length];
-        for (var iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
-        {
-            MazeDims[iMaze] = MazeDefs[iMaze].mDims;
-            MazeNumSquares[iMaze] = MazeDefs[iMaze].mNumSquares;
-            MazeNumTurns[iMaze] = MazeDefs[iMaze].mNumTurns;
-            MazeStart[iMaze] = MazeDefs[iMaze].mStart;
-            MazeFinish[iMaze] = MazeDefs[iMaze].mFinish;
-            MazeName[iMaze] = MazeDefs[iMaze].mName;
-        }
-    }
+    // public override Type GetTaskCustomSettingsType(string typeName)
+    // {
+    //     if (typeName.ToLower().Contains("mazedef"))
+    //         return typeof(MazeDef);
+    //     else
+    //     {
+    //         Debug.LogError("TYPE ERROR INSIDE MAZEGAMES GETTASKCUSTOMSETTINGS OVERRIDE METHOD!");
+    //         return null;
+    //     }
+    // }
+    //
+    // public override void ProcessCustomSettingsFiles()
+    // {
+    //     MazeDefs = (MazeDef[])SessionSettings.Get("MazeDef_array");
+    //     Debug.Log("GETTING IN HERE!!!");
+    //     if (MazeDefs == null)
+    //         Debug.LogError("MAZE DEFS ARE NULL!");
+    //
+    //     MazeDims = new Vector2[MazeDefs.Length];
+    //     MazeNumSquares = new int[MazeDefs.Length];
+    //     MazeNumTurns = new int[MazeDefs.Length];
+    //     MazeStart = new string[MazeDefs.Length];
+    //     MazeFinish = new string[MazeDefs.Length];
+    //     MazeName = new string[MazeDefs.Length];
+    //     for (var iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
+    //     {
+    //         MazeDims[iMaze] = MazeDefs[iMaze].mDims;
+    //         MazeNumSquares[iMaze] = MazeDefs[iMaze].mNumSquares;
+    //         MazeNumTurns[iMaze] = MazeDefs[iMaze].mNumTurns;
+    //         MazeStart[iMaze] = MazeDefs[iMaze].mStart;
+    //         MazeFinish[iMaze] = MazeDefs[iMaze].mFinish;
+    //         MazeName[iMaze] = MazeDefs[iMaze].mName;
+    //     }
+    // }
 
     private void FindMaze()
     {
@@ -419,50 +369,80 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         mgTL.mazeDefName = MazeName[mIndex];
     }
 
-    public IEnumerator LoadTextMaze()
+    public void LoadTextMaze()
     {
-        string mazeFilePath = "";
-        string jsonString = "";
-
-        if(SessionValues.WebBuild)
-        {
-            if(SessionValues.UsingDefaultConfigs) //will need to check if this works for non editor!!
-            {
-                TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
-                if (textAsset != null)
-                    jsonString = textAsset.text;
-
-                currMaze = new Maze(jsonString);
-            }
-            else //Using server configs:
-            {
-                yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath + "/" + mgTL.mazeDefName, result =>
-                {
-                    //SettingsDetails.FileName = result[0]; //implement later
-
-                    if (!string.IsNullOrEmpty(result[1]))
-                    {
-                        jsonString = result[1];
-                        currMaze = new Maze(jsonString);
-                    }
-                    else
-                        Debug.Log("MAZE RESULT IS NULL!!!!!");
-                }));
-            }
-        }
-        else
-        {
-            string[] filePaths = Directory.GetFiles(mgTL.MazeFilePath, $"*{mgTL.mazeDefName}*", SearchOption.AllDirectories);
-
-            if (filePaths.Length >= 1)
-                mazeFilePath = filePaths[0];
-            else
-                Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
-
-            jsonString = File.ReadAllLines(mazeFilePath)[0];
-            currMaze = new Maze(jsonString);
-        }
+        // string mazeFilePath = "";
+        // string jsonString = "";
+        //
+        // if(SessionValues.WebBuild)
+        // {
+        //     if(SessionValues.UsingDefaultConfigs) //will need to check if this works for non editor!!
+        //     {
+        //         TextAsset textAsset = Resources.Load<TextAsset>(mgTL.MazeFilePath + "/" + mgTL.mazeDefName);
+        //         if (textAsset != null)
+        //             jsonString = textAsset.text;
+        //
+        //         currMaze = new Maze(jsonString);
+        //     }
+        //     else //Using server configs:
+        //     {
+        //         yield return StartCoroutine(ServerManager.GetFileStringAsync(mgTL.MazeFilePath + "/" + mgTL.mazeDefName, result =>
+        //         {
+        //             //SettingsDetails.FileName = result[0]; //implement later
+        //
+        //             if (!string.IsNullOrEmpty(result[1]))
+        //             {
+        //                 jsonString = result[1];
+        //                 currMaze = new Maze(jsonString);
+        //             }
+        //             else
+        //                 Debug.Log("MAZE RESULT IS NULL!!!!!");
+        //         }));
+        //     }
+        // }
+        // else
+        // {
+        //     string[] filePaths = Directory.GetFiles(mgTL.MazeFilePath, $"*{mgTL.mazeDefName}*", SearchOption.AllDirectories);
+        //
+        //     if (filePaths.Length >= 1)
+        //         mazeFilePath = filePaths[0];
+        //     else
+        //         Debug.LogError($"Maze not found within the given file path ({mazeFilePath}) or in any nested folders");
+        //
+        //     jsonString = File.ReadAllLines(mazeFilePath)[0];
+        //     currMaze = new Maze(jsonString);
+        // }
+        currMaze = new Maze(MazeString[mIndex]);
         mgTL.InitializeTrialArrays();
         InitializeBlockArrays();
+    }
+
+
+    public override List<CustomSettings> DefineCustomSettings()
+    {
+       // customSettings.Add(new CustomSettings("MazeDef", typeof(MazeDef), "array", parsed => MazeDefs = (MazeDef[])parsed));
+        customSettings.Add(new CustomSettings("MazeDef", typeof(MazeDef), "array", MazeDefs));
+        return customSettings;
+    }
+
+    private void InitializeMazeSearchingArrays()
+    {
+        MazeDims = new Vector2[MazeDefs.Length];
+        MazeNumSquares = new int[MazeDefs.Length];
+        MazeNumTurns = new int[MazeDefs.Length];
+        MazeStart = new string[MazeDefs.Length];
+        MazeFinish = new string[MazeDefs.Length];
+        MazeName = new string[MazeDefs.Length];
+        MazeString = new string[MazeDefs.Length];
+        for (var iMaze = 0; iMaze < MazeDefs.Length; iMaze++)
+        {
+            MazeDims[iMaze] = MazeDefs[iMaze].mDims;
+            MazeNumSquares[iMaze] = MazeDefs[iMaze].mNumSquares;
+            MazeNumTurns[iMaze] = MazeDefs[iMaze].mNumTurns;
+            MazeStart[iMaze] = MazeDefs[iMaze].mStart;
+            MazeFinish[iMaze] = MazeDefs[iMaze].mFinish;
+            MazeName[iMaze] = MazeDefs[iMaze].mName;
+            MazeString[iMaze] = MazeDefs[iMaze].mString;
+        }
     }
 }

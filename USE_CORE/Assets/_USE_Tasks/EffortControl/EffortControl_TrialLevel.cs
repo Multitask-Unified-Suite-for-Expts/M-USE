@@ -122,9 +122,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen && Screen.width != 1920 ? -2.5f : -2.18f);
 
-            if (TokenFBController != null)
-                SetTokenVariables();
-
             if (AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
 
@@ -155,6 +152,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             LoadConfigUIVariables();
             if (TrialCount_InTask != 0)
                 currentTask.SetTaskSummaryString();
+
+            if (TokenFBController != null)
+                SetTokenVariables();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -620,12 +620,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         }
 
-        //NEED TO TEST THIS!!!!!
-        //if(currentTrial.NumCoinsLeft > 8 || currentTrial.NumCoinsRight > 8)
-        //{
-        //    tokenSize *= .75f;
-        //}
-
         TokenFBController.tokenSize = tokenSize;
         TokenFBController.tokenBoxYOffset = yOffset;
 
@@ -851,11 +845,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
     {
-        float width = Reward.GetComponent<Renderer>().bounds.size.x - .035f; //Get Reward width! (-.35f cuz need to be closer together)
-        pos -= new Vector3(((NumRewards - 1) * (width / 2)), 0, 0);
+        int numCoins = Mathf.Max(currentTrial.NumCoinsLeft, currentTrial.NumCoinsRight);
+        float scaler = 1f; //100% for 9 or less
+        if(numCoins > 9)
+        {
+            int num = numCoins;
+            while (num > 9)
+            {
+                scaler -= .0555f;
+                num--;
+            }
+        }
+
+        float width = (Reward.GetComponent<Renderer>().bounds.size.x - .035f) * scaler; //Get Reward width! (-.35f cuz need to be closer together)
+        pos -= new Vector3((NumRewards - 1) * (width / 2), 0, 0);
         for (int i = 0; i < NumRewards; i++)
         {
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
+            RewardClone.transform.localScale *= scaler;
             RewardClone.transform.Translate(new Vector3(i * width, 0.028f, 0), Space.World);
             RewardClone.name = "Reward" + SideChoice + (i + 1);
             AddRigidBody(RewardClone);

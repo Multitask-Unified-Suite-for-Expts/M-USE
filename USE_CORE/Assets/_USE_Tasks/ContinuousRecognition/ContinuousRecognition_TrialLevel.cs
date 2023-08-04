@@ -1134,7 +1134,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleTokenUpdate()
     {
-        if(TokenFBController.isTokenBarFull())
+        if(TokenFBController.IsTokenBarFull())
         {
             NumTbCompletions_Block++;
             NumRewards_Block += currentTrial.NumRewardPulses;

@@ -24,6 +24,10 @@ namespace MazeGame_Namespace
         public float[] DefaultTileColor;
         public bool UsingFixedRatioReward;
         public string MazeBackgroundTextureName;
+        public float SpaceBetweenTiles;
+        public bool GuidedMazeSelection;
+        
+        
     }
 
     public class MazeGame_BlockDef : BlockDef

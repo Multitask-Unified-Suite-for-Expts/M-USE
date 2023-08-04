@@ -427,8 +427,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     private void InitializeMazeSearchingArrays()
     {
-        Debug.Log("IS MAZEDEFS NULL?? " + (MazeDefs == null? "YES":"NO"));
-        Debug.Log("MAZEDEFS LENGTH: " + MazeDefs.Length);
         MazeDims = new Vector2[MazeDefs.Length];
         MazeNumSquares = new int[MazeDefs.Length];
         MazeNumTurns = new int[MazeDefs.Length];

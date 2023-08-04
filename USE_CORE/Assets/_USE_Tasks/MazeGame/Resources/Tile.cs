@@ -152,6 +152,7 @@ public class Tile : MonoBehaviour
         if (isFlashing)
         {
             fbColor = PREV_CORRECT_COLOR;
+            
             float elapsed = Time.unscaledTime - flashStartTime;
             float interval = TILE_BLINKING_DURATION / (2 * NUM_BLINKS);
         
@@ -161,7 +162,7 @@ public class Tile : MonoBehaviour
                     flashingTile.GetComponent<Renderer>().material.color = fbColor;
                 else
                     flashingTile.GetComponent<Renderer>().material.color = originalTileColor;
-            
+
                 numFlashes++;
             }
         

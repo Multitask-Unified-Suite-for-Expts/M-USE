@@ -532,7 +532,9 @@ namespace USE_StimulusManagement
 
 			if (StimGameObject != null)
 			{
-				DestroyRecursive(StimGameObject);
+				//DestroyRecursive(StimGameObject);
+				GameObject.Destroy(StimGameObject);
+				Resources.UnloadUnusedAssets();
 			}
 
 			StimGameObject = null;

@@ -248,6 +248,7 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
                 WriteDataFiles();
+                Resources.UnloadUnusedAssets();
             });
             
             GazeCalibration.AddInitializationMethod(() =>

@@ -9,7 +9,6 @@ using EffortControl_Namespace;
 using MazeGame_Namespace;
 using FlexLearning_Namespace;
 using THR_Namespace;
-using MazeReactionTest_Namespace;
 using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
 //using FinderGame_Namespace;
@@ -121,17 +120,6 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(THR_BlockDef),
                 TrialDefType = typeof(THR_TrialDef),
                 StimDefType = typeof(THR_StimDef)
-            }
-        }
-        ,{
-            "MazeReactionTest", new TaskTypes
-            {
-                TaskLevelType = typeof(MazeReactionTest_TaskLevel),
-                TrialLevelType = typeof(MazeReactionTest_TrialLevel),
-                TaskDefType = typeof(MazeReactionTest_TaskDef),
-                BlockDefType = typeof(MazeReactionTest_BlockDef),
-                TrialDefType = typeof(MazeReactionTest_TrialDef),
-                StimDefType = typeof(MazeReactionTest_StimDef)
             }
         }
         ,{

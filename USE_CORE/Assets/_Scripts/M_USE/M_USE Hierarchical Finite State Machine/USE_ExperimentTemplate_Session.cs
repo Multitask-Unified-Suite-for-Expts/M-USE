@@ -533,7 +533,7 @@ namespace USE_ExperimentTemplate_Session
             /*  if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
               {*/
                   //selectTask.AddTimer(SessionValues.SessionDef.TaskSelectionTimeout, loadTask, () =>
-                  selectTask.AddTimer(20f, loadTask, () =>
+                  selectTask.AddTimer(() => SessionValues.SessionDef != null? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
                   {
                       foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                       {

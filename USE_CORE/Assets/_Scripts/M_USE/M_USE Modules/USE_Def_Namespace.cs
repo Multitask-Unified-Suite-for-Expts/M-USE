@@ -23,7 +23,7 @@ namespace USE_Def_Namespace
         public string TaskIconsFolderPath;
         public Vector3[] TaskIconLocations;
         
-        public float TaskSelectionTimeout;
+        public float TaskSelectionTimeout = 0f;
         public bool MacMainDisplayBuild;
         public bool IsHuman;
         public bool StoreData;

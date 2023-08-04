@@ -162,7 +162,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(Handler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 50, EC_CanvasGO);
+            TouchFBController.EnableTouchFeedback(Handler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, EC_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {

@@ -19,6 +19,7 @@ using SelectionTracking;
 using TMPro;
 using Tobii.Research.Unity.CodeExamples;
 using USE_Def_Namespace;
+using System.Runtime.InteropServices;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
@@ -729,6 +730,8 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
 
                 FrameData.gameObject.SetActive(true);
+
+                CurrentTask = null;
             });
 
             //FinishSession State---------------------------------------------------------------------------------------------------------------

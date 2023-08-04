@@ -212,6 +212,9 @@ public class SetupSession_Level : ControlLevel
             SessionLevel.SelectionHandler.MaxDuration = 2f;
         }
 
+        SessionValues.MouseTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
+        SessionValues.GazeTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
+
         if (SessionValues.SessionDef.EyeTrackerActive)
         {
             if (GameObject.Find("TobiiEyeTrackerController") == null)

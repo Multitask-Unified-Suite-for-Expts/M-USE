@@ -1,16 +1,18 @@
 using UnityEngine;
 using TMPro;
-
+using UnityEngine.UI;
 
 public class InputFieldManager : MonoBehaviour
 {
-    [HideInInspector] public TMP_InputField inputField;
+    //[HideInInspector] public TMP_InputField inputField;
+    [HideInInspector] public InputField inputField;
     public GameObject inputField_GO;
     public string playerPrefKey;
 
     private void Start() //Load saved values
     {
-        inputField = inputField_GO.GetComponent<TMP_InputField>();
+        inputField = inputField_GO.GetComponent<InputField>();
+        //inputField = inputField_GO.GetComponent<TMP_InputField>();
         string storedValue = PlayerPrefs.GetString(playerPrefKey, "");
 
         //this is just to get ipad off and running cuz got stuck on "defaultValue" and couldnt change it. Can delete this later

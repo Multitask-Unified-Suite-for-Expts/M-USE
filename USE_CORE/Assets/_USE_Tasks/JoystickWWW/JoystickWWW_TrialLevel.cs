@@ -468,13 +468,6 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
                 if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                     DestroyChildren(GameObject.Find("MainCameraCopy"));
             }
-            
-            if (NeutralITI)
-            {
-                ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png"));
-                //RenderSettings.skybox = CreateSkybox(ContextExternalFilePath + Path.DirectorySeparatorChar + ContextName + ".png");
-            }
 
             GenerateAccuracyLog();
         });

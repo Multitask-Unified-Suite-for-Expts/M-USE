@@ -14,14 +14,10 @@ public class InitScreen_Level : ControlLevel
     private GameObject StartPanel_GO;
     private GameObject MainPanel_GO;
 
-    private Text SubjectID_Text;
-    private Text SubjectAge_Text;
-    private Text ServerData_Text;
-    private Text LocalData_Text;
-    //private TextMeshProUGUI SubjectID_Text;
-    //private TextMeshProUGUI SubjectAge_Text;
-    //private TextMeshProUGUI ServerData_Text;
-    //private TextMeshProUGUI LocalData_Text;
+    private TextMeshProUGUI SubjectID_Text;
+    private TextMeshProUGUI SubjectAge_Text;
+    private TextMeshProUGUI ServerData_Text;
+    private TextMeshProUGUI LocalData_Text;
 
     private GameObject LocalData_GO;
     private GameObject ServerData_GO;
@@ -62,6 +58,7 @@ public class InitScreen_Level : ControlLevel
     private string ErrorType;
 
 
+
     public override void DefineControlLevel()
     {
         SetupInitScreen = new State("SetupInitScreen");
@@ -70,6 +67,7 @@ public class InitScreen_Level : ControlLevel
         AddActiveStates(new List<State> { SetupInitScreen, StartScreen, CollectInfo});
 
         SetGameObjects();
+
 
         //Setup InitScreen State-----------------------------------------------------------------------------------------------------------------------------------
         SetupInitScreen.AddInitializationMethod(() =>
@@ -332,15 +330,10 @@ public class InitScreen_Level : ControlLevel
         ErrorHandling_GO = GameObject.Find("ErrorHandling_Panel");
         ErrorHandling_GO.SetActive(false);
 
-
-        SubjectID_Text = GameObject.Find("SubjectID_Text").GetComponent<Text>();
-        SubjectAge_Text = GameObject.Find("SubjectAge_Text").GetComponent<Text>();
-        ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<Text>();
-        LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<Text>();
-        //SubjectID_Text = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>();
-        //SubjectAge_Text = GameObject.Find("SubjectAge_Text").GetComponent<TextMeshProUGUI>();
-        //ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
-        //LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
+        SubjectID_Text = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>();
+        SubjectAge_Text = GameObject.Find("SubjectAge_Text").GetComponent<TextMeshProUGUI>();
+        ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
+        LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
 
         GreyOutPanels_Array = new GameObject[3];
         GreyOutPanels_Array[0] = GameObject.Find("GreyOutPanel_ServerURL");
@@ -371,11 +364,9 @@ public class InitScreen_Level : ControlLevel
         configFileSpec.name = "Config Folder";
         configFileSpec.isFolder = true;
         SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
-        InputField configInputField = LocalConfig_GO.GetComponentInChildren<InputField>();
-        //TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
+        TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
-        //TextMeshProUGUI configText = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>();
-        Text configText = GameObject.Find("LocalConfig_Text").GetComponent<Text>();
+        TextMeshProUGUI configText = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>();
         configFileItem.ManualStart(configFileSpec, configInputField, configText);
         LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
@@ -383,11 +374,9 @@ public class InitScreen_Level : ControlLevel
         dataFileSpec.name = "Data Folder";
         dataFileSpec.isFolder = true;
         SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
-        InputField dataInputField = LocalData_GO.GetComponentInChildren<InputField>();
-        //TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
+        TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();
-        //TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
-        Text dataText = GameObject.Find("LocalData_Text").GetComponent<Text>();
+        TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
         dataFileItem.ManualStart(dataFileSpec, dataInputField, dataText);
         LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
 
@@ -437,10 +426,8 @@ public class InitScreen_Level : ControlLevel
         if (ConnectedToServer)
             return;
 
-        string url = GameObject.Find("ServerURL_Text").GetComponent<Text>().text;
-        //string url = GameObject.Find("ServerURL_Text").GetComponent<TextMeshProUGUI>().text;
-        //ServerManager.ServerURL = url.Remove(url.Length - 1, 1);
-        ServerManager.ServerURL = url;
+        string url = GameObject.Find("ServerURL_Text").GetComponent<TextMeshProUGUI>().text;
+        ServerManager.ServerURL = url.Remove(url.Length - 1, 1);
         StartCoroutine(TestServerConnection());
     }
 
@@ -486,20 +473,17 @@ public class InitScreen_Level : ControlLevel
 
     private string GetSubjectID()
     {
-        string subjectID = SubjectID_Text.GetComponent<Text>().text;
-        //string subjectID = SubjectID_Text.GetComponent<TextMeshProUGUI>().text;
+        string subjectID = SubjectID_Text.GetComponent<TextMeshProUGUI>().text;
         return subjectID.Remove(subjectID.Length - 1, 1);
     }
     private string GetSubjectAge()
     {
-        string SubjectAge = SubjectAge_Text.GetComponent<Text>().text;
-        //string SubjectAge = SubjectAge_Text.GetComponent<TextMeshProUGUI>().text;
+        string SubjectAge = SubjectAge_Text.GetComponent<TextMeshProUGUI>().text;
         return SubjectAge.Remove(SubjectAge.Length - 1, 1);
     }
     private string GetDataValue()
     {
-        string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<Text>().text : LocalData_Text.GetComponent<Text>().text;
-        //string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<TextMeshProUGUI>().text : LocalData_Text.GetComponent<TextMeshProUGUI>().text;
+        string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<TextMeshProUGUI>().text : LocalData_Text.GetComponent<TextMeshProUGUI>().text;
         return datavalue.Remove(datavalue.Length - 1, 1);
     }
 

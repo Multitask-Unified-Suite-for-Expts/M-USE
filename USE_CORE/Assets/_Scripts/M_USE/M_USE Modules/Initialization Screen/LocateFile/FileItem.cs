@@ -42,12 +42,11 @@ using UnityEngine.UI;
 public class FileItem_TMP : MonoBehaviour
 {
     public FileSpec File;
-    //public TMP_InputField InputField_FilePath;
-    public InputField InputField_FilePath;
-    public Text Text;
+    public TMP_InputField InputField_FilePath;
+    public TextMeshProUGUI Text;
 
 
-    public void ManualStart(FileSpec file, InputField inputField, Text text)  
+    public void ManualStart(FileSpec file, TMP_InputField inputField, TextMeshProUGUI text)  
     {
         File = file;
         InputField_FilePath = inputField;

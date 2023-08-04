@@ -24,16 +24,16 @@ public class VerifyTask_Level : ControlLevel
 
     public override void DefineControlLevel()
     {
-        State ImportSettings = new State("ImportSettings");
+        State ImportTaskSettings = new State("ImportTaskSettings");
         State HandleTrialAndBlockDefs = new State("HandleTrialAndBlockDefs");
         State FindStims = new State("FindStims");
 
-        AddActiveStates(new List<State> {ImportSettings, HandleTrialAndBlockDefs, FindStims});
+        AddActiveStates(new List<State> {ImportTaskSettings, HandleTrialAndBlockDefs, FindStims});
 
         importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
         //importSettings_Level.TaskLevel = TaskLevel;
-        ImportSettings.AddChildLevel(importSettings_Level);
-        ImportSettings.AddInitializationMethod(() =>
+        ImportTaskSettings.AddChildLevel(importSettings_Level);
+        ImportTaskSettings.AddInitializationMethod(() =>
         {
             if (SessionValues.UsingDefaultConfigs)
                 TaskLevel.TaskConfigPath += "_DefaultConfigs";
@@ -64,7 +64,7 @@ public class VerifyTask_Level : ControlLevel
 
         });
 
-        ImportSettings.AddUpdateMethod(() =>
+        ImportTaskSettings.AddUpdateMethod(() =>
         {
             if (importSettings_Level.fileLoadingFinished)
             {
@@ -160,7 +160,7 @@ public class VerifyTask_Level : ControlLevel
                 importSettings_Level.importPaused = false;
             }
         });
-        ImportSettings.SpecifyTermination(() => ImportSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs,
+        ImportTaskSettings.SpecifyTermination(() => ImportTaskSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs,
             () => Debug.Log("ImportSettings state terminated."));
 
         HandleTrialAndBlockDefs.AddInitializationMethod(() => { TaskLevel.HandleTrialAndBlockDefs(true); });

@@ -872,10 +872,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = ("Touches: " + TrialTouches +
+        TrialSummaryString = "Touches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +
-                            "\nEffort Chosen: " + EffortChoice);
+                            "\nEffort Chosen: " + EffortChoice;
     }
 
     void ClearTrialSummaryString()

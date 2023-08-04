@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class KeyboardManager : MonoBehaviour
 {
     public TMP_InputField inputField;
-
+    
     public void OpenKeyboard()
     {
         Debug.Log("OPENING KEYBOARD!");

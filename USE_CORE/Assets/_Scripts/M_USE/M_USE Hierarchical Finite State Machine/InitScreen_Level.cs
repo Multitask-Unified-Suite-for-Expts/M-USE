@@ -24,6 +24,10 @@ public class InitScreen_Level : ControlLevel
     private GameObject LocalConfig_GO;
     private GameObject ServerConfig_GO;
 
+    private GameObject Settings_GO;
+    private GameObject SettingsButton_GO;
+    private GameObject SettingsPanel_GO;
+
     private Toggle LocalConfig_Toggle;
     private Toggle ServerConfig_Toggle;
     private Toggle DefaultConfig_Toggle;
@@ -98,6 +102,8 @@ public class InitScreen_Level : ControlLevel
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
+
+            Settings_GO.SetActive(true);
         });
         CollectInfo.AddUpdateMethod(() =>
         {
@@ -359,6 +365,16 @@ public class InitScreen_Level : ControlLevel
         ServerConfig_GO = GameObject.Find("ServerConfig_GO");
         ServerConfig_GO.SetActive(false);
 
+        Settings_GO = GameObject.Find("InitScreen_Settings");
+        SettingsPanel_GO = GameObject.Find("SettingsPanel");
+        SettingsButton_GO = GameObject.Find("SettingsButton");
+        if (SettingsButton_GO == null)
+            Debug.Log("NULL!");
+        SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
+        SettingsPanel_GO.SetActive(false);
+        Settings_GO.SetActive(false);
+
+
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
         FileSpec configFileSpec = new FileSpec();
         configFileSpec.name = "Config Folder";
@@ -386,6 +402,12 @@ public class InitScreen_Level : ControlLevel
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
+    }
+
+    private void HandleSettingButtonClicked()
+    {
+        Debug.Log("CLICKED THE SETTINGS BUTTON!");
+        SettingsPanel_GO.SetActive(!SettingsPanel_GO.activeInHierarchy);
     }
 
     private void DisplayErrorMessage(string message, string errorType)

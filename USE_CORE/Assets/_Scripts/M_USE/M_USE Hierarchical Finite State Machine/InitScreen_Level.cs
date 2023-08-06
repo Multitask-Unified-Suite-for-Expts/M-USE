@@ -61,6 +61,9 @@ public class InitScreen_Level : ControlLevel
 
     private string ErrorType;
 
+    private KeyboardController KeyboardController;
+    private Toggle KeyboardToggle;
+
 
 
     public override void DefineControlLevel()
@@ -132,6 +135,13 @@ public class InitScreen_Level : ControlLevel
             SessionValues.LoadingCanvas_GO.SetActive(true); //Turn on the loading Canvas/Circle so that it immedietely shows that its loading
         });
 
+    }
+
+    public void OnKeyboardTogglePressed()
+    {
+        Debug.Log("PRESSED TOGGLE!");
+
+        KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
     private IEnumerator ActivateObjectsAfterPlayerPrefsLoaded()
@@ -317,6 +327,7 @@ public class InitScreen_Level : ControlLevel
 
     private void SetGameObjects()
     {
+
         InitScreen_GO = GameObject.Find("InitScreen_GO");
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
@@ -325,6 +336,9 @@ public class InitScreen_Level : ControlLevel
 
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
         MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+
+        KeyboardController = GameObject.Find("Keyboard_Canvas").GetComponent<KeyboardController>();
+        KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();

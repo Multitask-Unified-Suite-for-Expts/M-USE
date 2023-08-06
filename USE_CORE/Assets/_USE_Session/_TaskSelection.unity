@@ -342,6 +342,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3038709928689074587, guid: 20399882fccb34f6ba613251d347fd2c,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3126635544977583657, guid: 20399882fccb34f6ba613251d347fd2c,
         type: 3}
       propertyPath: m_CellSize.x
@@ -2206,6 +2211,16 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1727960503381736144, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1727960503381736144, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: playerPrefKey
+      value: KeyboardToggleValue
+      objectReference: {fileID: 0}
     - target: {fileID: 2130985214387144491, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: m_text
@@ -2355,6 +2370,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 785
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: m_IsOn
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1375570700}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnKeyboardTogglePressed
       objectReference: {fileID: 0}
     - target: {fileID: 5234245802362393662, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}

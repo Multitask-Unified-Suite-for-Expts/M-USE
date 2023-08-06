@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
 
 public class KeyboardController : MonoBehaviour
 {
@@ -11,12 +12,10 @@ public class KeyboardController : MonoBehaviour
     public GameObject KeyboardCanvas_GO;
     public GameObject GridItemPrefab;
     public GameObject GridParent_GO;
-
-
     private List<string> CharacterList;
+    public bool UsingKeyboard;
 
-    private bool UsingKeyboard;
-
+    public TMP_InputField CurrentInputField;
 
 
     private void Start()
@@ -28,7 +27,52 @@ public class KeyboardController : MonoBehaviour
         }
         else
             Debug.LogError("KEYBOARD IS NULL!");
+    }
 
+    private void Update()
+    {
+        if (UsingKeyboard)
+        {
+            GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
+            if(selectedGO != null)
+            {
+                if (selectedGO.GetComponent<TMP_InputField>() != null)
+                {
+                    CurrentInputField = selectedGO.GetComponent<TMP_InputField>();
+                    //CurrentInputField = fjfj;
+                    Keyboard_GO.SetActive(true);
+                }
+
+            }
+            
+        }
+    }
+
+    public void OnKeyboardButtonPressed()
+    {
+        if (CurrentInputField == null)
+        {
+            Debug.LogError("NO CURRENT INPUT FIELD!");
+            return;
+        }
+
+        string currentText = CurrentInputField.text;
+
+        string selected = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
+        if(selected != null)
+        {
+            Debug.Log("SELECTED: " + selected);
+
+            if (selected.ToLower() == "back")
+            {
+                Debug.Log("CLICKED THE BACK BUTTON!");
+                CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
+            }
+            else
+                CurrentInputField.text += selected;
+        }
+        else
+            Debug.Log("SELECTED GO DOES NOT HAVE A TEXT COMPONENT");
     }
 
     private void SetCharacterList()
@@ -50,13 +94,10 @@ public class KeyboardController : MonoBehaviour
             gridItem.transform.GetComponentInChildren<TextMeshProUGUI>().text = current;
             if (CharacterList[i].ToLower() == "back")
                 gridItem.GetComponent<Image>().color = new Color32(255, 136, 0, 183);
+
+            gridItem.AddComponent<Button>().onClick.AddListener(OnKeyboardButtonPressed);
             
         }
-    }
-
-    public void OnCharacterSelected()
-    {
-
     }
 
 

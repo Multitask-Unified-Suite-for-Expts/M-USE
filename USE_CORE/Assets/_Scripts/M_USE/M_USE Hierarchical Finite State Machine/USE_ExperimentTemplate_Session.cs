@@ -34,8 +34,6 @@ namespace USE_ExperimentTemplate_Session
 
         [HideInInspector] public bool TasksFinished;
         
-        public InitScreen SessionInitScreen;
-
         protected SummaryData SummaryData;
         public SessionData SessionData;
 
@@ -808,8 +806,7 @@ namespace USE_ExperimentTemplate_Session
         private void SetDisplayController()
         {
             DisplayController = gameObject.AddComponent<DisplayController>();
-            SessionInitScreen = GameObject.Find("InitScreen_GO").GetComponent<InitScreen>();
-            DisplayController.HandleDisplays(SessionInitScreen);
+            DisplayController.HandleDisplays();
             SessionValues.DisplayController = DisplayController;
         }
 

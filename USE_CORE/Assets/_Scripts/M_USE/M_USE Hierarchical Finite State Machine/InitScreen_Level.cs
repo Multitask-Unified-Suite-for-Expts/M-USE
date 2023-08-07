@@ -139,6 +139,7 @@ public class InitScreen_Level : ControlLevel
 
     public void OnKeyboardTogglePressed()
     {
+        PlayAudio(ToggleChange_AudioClip);
         KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 

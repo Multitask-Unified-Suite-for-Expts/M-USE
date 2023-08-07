@@ -203,13 +203,7 @@ namespace USE_Data
 		void Start()
 		{
 			if (!DefineManually)
-			{
-				var initScreen = FindObjectOfType<InitScreen>();
-				if (initScreen != null)
-					initScreen.OnConfirm += OnStart;
-				else
-					OnStart();
-			}
+				OnStart();
 		}
 
 		public void ManuallyDefine(int cap = 100)

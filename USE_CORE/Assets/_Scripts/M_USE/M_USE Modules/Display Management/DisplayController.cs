@@ -7,7 +7,6 @@ using USE_Settings;
 
 public class DisplayController : MonoBehaviour
 {
-    [HideInInspector] public InitScreen InitScreen;
     [HideInInspector] public Canvas InitScreenCanvas;
     [HideInInspector] public bool SingleDisplayBuild;
     [HideInInspector] public bool SwitchDisplays;
@@ -16,10 +15,9 @@ public class DisplayController : MonoBehaviour
     public Dictionary<string, bool> DisplayDict;
 
 
-    public void HandleDisplays(InitScreen initScreen) //Called by Start method of InitScreen
+    public void HandleDisplays()
     {
-        InitScreen = initScreen;
-        InitScreenCanvas = initScreen.GetComponentInParent<Canvas>();
+        InitScreenCanvas = GameObject.Find("InitScreenCanvas").GetComponent<Canvas>();
 
         if(!SessionValues.WebBuild)
         {
@@ -90,12 +88,12 @@ public class DisplayController : MonoBehaviour
             InitScreenCanvas.targetDisplay = 0;
         
 
-        if(MacBuild)
-        {
-            InitScreen.transform.localScale *= 1.75f;
-            GameObject confirmButton = InitScreen.transform.Find("ButtonConfirm").gameObject;
-            confirmButton.transform.position = new Vector3(confirmButton.transform.position.x, confirmButton.transform.position.y + 1000f, confirmButton.transform.position.z);
-        }
+        //if(MacBuild)
+        //{
+        //    InitScreen.transform.localScale *= 1.75f;
+        //    GameObject confirmButton = InitScreen.transform.Find("ButtonConfirm").gameObject;
+        //    confirmButton.transform.position = new Vector3(confirmButton.transform.position.x, confirmButton.transform.position.y + 1000f, confirmButton.transform.position.z);
+        //}
     }
 
     public string FindFileInFolder(string keyToFolder, string stringPattern)

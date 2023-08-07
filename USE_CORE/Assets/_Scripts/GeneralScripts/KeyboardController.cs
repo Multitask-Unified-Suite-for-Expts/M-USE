@@ -43,13 +43,28 @@ public class KeyboardController : MonoBehaviour
                 TMP_InputField selectedInputField = selectedGO.GetComponent<TMP_InputField>();
                 if (selectedInputField != null)
                 {
-                    CurrentInputField = selectedInputField;
-                    Keyboard_GO.SetActive(true);
+                    if (CurrentInputField == null || CurrentInputField != selectedInputField)
+                    {
+                        CurrentInputField = selectedInputField;
+                        Keyboard_GO.SetActive(true);
+                        SetKeyboardPosition(selectedInputField.transform.position);
+                    }
                 }
-
+                else
+                {
+                    CurrentInputField = null;
+                    Keyboard_GO.SetActive(false);
+                }
             }
-            
         }
+    }
+
+    private void SetKeyboardPosition(Vector3 inputFieldPos)
+    {
+        if(inputFieldPos.y >= 600)
+            Keyboard_GO.transform.localPosition = new Vector3(0, -275f, 0);
+        else
+            Keyboard_GO.transform.localPosition = new Vector3(0, 275f, 0);
     }
 
     public void OnKeyboardButtonPressed()

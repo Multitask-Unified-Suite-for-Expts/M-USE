@@ -44,9 +44,9 @@ public class InitScreen_Level : ControlLevel
     private GameObject[] GreyOutPanels_Array;
 
     private AudioSource AudioSource;
-    private AudioClip ToggleChange_AudioClip;
-    private AudioClip Error_AudioClip;
-    private AudioClip Connected_AudioClip;
+    [HideInInspector] public AudioClip ToggleChange_AudioClip;
+    [HideInInspector] public AudioClip Error_AudioClip;
+    [HideInInspector] public AudioClip Connected_AudioClip;
 
     private State SetupInitScreen;
     private State StartScreen;
@@ -139,7 +139,6 @@ public class InitScreen_Level : ControlLevel
 
     public void OnKeyboardTogglePressed()
     {
-        PlayAudio(ToggleChange_AudioClip);
         KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
@@ -330,14 +329,14 @@ public class InitScreen_Level : ControlLevel
         InitScreen_GO = GameObject.Find("InitScreen_GO");
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
+        KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
+        KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
+
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
         StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
 
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
         MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
-
-        KeyboardController = GameObject.Find("Keyboard_Canvas").GetComponent<KeyboardController>();
-        KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -381,8 +380,6 @@ public class InitScreen_Level : ControlLevel
         Settings_GO = GameObject.Find("InitScreen_Settings");
         SettingsPanel_GO = GameObject.Find("SettingsPanel");
         SettingsButton_GO = GameObject.Find("SettingsButton");
-        if (SettingsButton_GO == null)
-            Debug.Log("NULL!");
         SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
         SettingsPanel_GO.SetActive(false);
         Settings_GO.SetActive(false);

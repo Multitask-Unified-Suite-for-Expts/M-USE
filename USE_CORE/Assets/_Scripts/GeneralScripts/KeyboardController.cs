@@ -8,20 +8,26 @@ using UnityEngine.EventSystems;
 public class KeyboardController : MonoBehaviour
 {
     public GameObject Keyboard_GO;
-    public GameObject KeyboardCanvas_GO;
     public GameObject GridItemPrefab;
     public GameObject GridParent_GO;
+
     private List<string> CharacterList;
     private List<GameObject> gridItems;
-    public bool UsingKeyboard;
     private bool Caps;
     private EventSystem eventSystem;
     private TMP_InputField CurrentInputField;
 
+    [HideInInspector] public bool UsingKeyboard;
+
+    InitScreen_Level InitScreen_Level;
 
 
     private void Start()
     {
+        InitScreen_Level = GameObject.Find("ControlLevels").GetComponent<InitScreen_Level>();
+        if (InitScreen_Level == null)
+            Debug.Log("INIT LEVEL IS NULL!");
+
         eventSystem = EventSystem.current;
 
         if (Keyboard_GO != null)
@@ -43,75 +49,87 @@ public class KeyboardController : MonoBehaviour
                 TMP_InputField selectedInputField = selectedGO.GetComponent<TMP_InputField>();
                 if (selectedInputField != null)
                 {
-                    if (CurrentInputField == null || CurrentInputField != selectedInputField)
+                    if (!Keyboard_GO.activeInHierarchy)
+                        Keyboard_GO.SetActive(true);
+
+                    if(CurrentInputField == null || selectedInputField != CurrentInputField)
                     {
                         CurrentInputField = selectedInputField;
-                        Keyboard_GO.SetActive(true);
-                        SetKeyboardPosition(selectedInputField.transform.position);
+                        SetKeyboardPosition(selectedInputField.gameObject.name);
                     }
-                }
-                else
-                {
-                    CurrentInputField = null;
-                    Keyboard_GO.SetActive(false);
                 }
             }
         }
     }
 
-    private void SetKeyboardPosition(Vector3 inputFieldPos)
+    private void SetKeyboardPosition(string selectedGO_Name)
     {
-        if(inputFieldPos.y >= 600)
-            Keyboard_GO.transform.localPosition = new Vector3(0, -275f, 0);
+        if(selectedGO_Name == "SubjectID_InputField" || selectedGO_Name == "SubjectAge_InputField")
+            Keyboard_GO.transform.localPosition = new Vector3(0, -235f, 0);
         else
-            Keyboard_GO.transform.localPosition = new Vector3(0, 275f, 0);
+            Keyboard_GO.transform.localPosition = new Vector3(0, 235f, 0);
     }
 
-    public void OnKeyboardButtonPressed()
+    public void OnNonGridButtonPress()
     {
-        if (CurrentInputField == null)
+        if(CurrentInputField == null)
         {
-            Debug.LogError("NO CURRENT INPUT FIELD!");
+            Debug.LogError("CURRENT INPUT FIELD IS NULL!");
             return;
         }
 
-        string currentText = CurrentInputField.text;
+        InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
 
-        string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
-        if(selected != null)
+        GameObject clickedGO = eventSystem.currentSelectedGameObject;
+
+        if (clickedGO.name == "HideButton")
         {
-            if (selected.ToLower() == "back")
-                CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
-            else
-                CurrentInputField.text += selected;
+            Keyboard_GO.SetActive(false);
         }
-        else
-            Debug.Log("SELECTED GO DOES NOT HAVE A TEXT COMPONENT");
+        else if (clickedGO.name == "BackButton")
+        {
+            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
+            string currentText = CurrentInputField.text;
+            CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
+        }
+        else if (clickedGO.name == "ClearButton")
+        {
+            CurrentInputField.text = "";
+        }
+        else if (clickedGO.name == "CapsButton")
+        {
+            Caps = !Caps;
+            foreach (GameObject go in gridItems)
+            {
+                TextMeshProUGUI textComponent = go.transform.GetComponentInChildren<TextMeshProUGUI>();
+                if (textComponent.text.ToLower() == "back")
+                    continue;
+                textComponent.text = Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
+            }
+        }
+        else if(clickedGO.name == "SpaceButton")
+        {
+            CurrentInputField.text += " ";
+        }
     }
 
-    public void OnHideButtonPressed()
+    public void OnKeyboardGridButtonPressed()
     {
-        Keyboard_GO.SetActive(false);
+        if (CurrentInputField != null)
+        {
+            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
+            string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
+            if(selected != null)
+                CurrentInputField.text += selected;
+        }
     }
 
     private void SetCharacterList()
     {
         CharacterList = new List<string>()
         {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "Back", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "Z", "X", "C", "V", "B", "N", "M", ".", "/"
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/"
         };
-    }
-
-    public void OnCapsButtonPressed()
-    {
-        Caps = !Caps;
-        foreach(GameObject go in gridItems)
-        {
-            TextMeshProUGUI textComponent = go.transform.GetComponentInChildren<TextMeshProUGUI>();
-            if (textComponent.text.ToLower() == "back")
-                continue;
-            textComponent.text = Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
-        }
     }
 
     public void GenerateGridItems()
@@ -120,20 +138,15 @@ public class KeyboardController : MonoBehaviour
 
         for (int i = 0; i < CharacterList.Count; i++)
         {
-            string current = CharacterList[i].ToString();
-            if (current != "Back")
-                current = current.ToLower();
+            string current = CharacterList[i].ToString().ToLower();
             GameObject gridItem = Instantiate(GridItemPrefab);
             gridItem.name = "Item_" + current;
             gridItem.transform.SetParent(GridParent_GO.transform);
+            gridItem.transform.localPosition = Vector3.zero;
+            gridItem.transform.localScale = Vector3.one;
             gridItem.transform.GetComponentInChildren<TextMeshProUGUI>().text = current;
-            if (CharacterList[i].ToLower() == "back")
-                gridItem.GetComponent<Image>().color = new Color32(255, 136, 0, 183);
-
-            gridItem.AddComponent<Button>().onClick.AddListener(OnKeyboardButtonPressed);
-
+            gridItem.AddComponent<Button>().onClick.AddListener(OnKeyboardGridButtonPressed);
             gridItems.Add(gridItem);
-            
         }
     }
 

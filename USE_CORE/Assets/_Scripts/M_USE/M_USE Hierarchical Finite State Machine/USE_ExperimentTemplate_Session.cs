@@ -525,9 +525,9 @@ namespace USE_ExperimentTemplate_Session
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
+            selectTask.SpecifyTermination(() => TasksFinished, finishSession);
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
             
-            selectTask.SpecifyTermination(() => TasksFinished, finishSession);
 
             selectTask.AddTimer(
                 () => SessionValues.SessionDef != null ? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask,
@@ -723,6 +723,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(true);
 
                 CurrentTask = null;
+                selectedConfigFolderName = null;
             });
 
             //FinishSession State---------------------------------------------------------------------------------------------------------------

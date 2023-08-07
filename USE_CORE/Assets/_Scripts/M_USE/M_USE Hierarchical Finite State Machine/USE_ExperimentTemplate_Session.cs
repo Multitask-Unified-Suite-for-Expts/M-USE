@@ -270,7 +270,6 @@ namespace USE_ExperimentTemplate_Session
 
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
-            selectedConfigFolderName = null;
 
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>

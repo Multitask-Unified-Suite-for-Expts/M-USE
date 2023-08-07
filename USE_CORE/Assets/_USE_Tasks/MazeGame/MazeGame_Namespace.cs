@@ -26,6 +26,8 @@ namespace MazeGame_Namespace
         public string MazeBackgroundTextureName;
         public float SpaceBetweenTiles;
         public bool GuidedMazeSelection;
+
+        public Vector3 MazePosition;
         
         
     }
@@ -51,6 +53,7 @@ namespace MazeGame_Namespace
         public string BlockEndType;
         public float BlockEndThreshold;
         public bool ErrorPenalty;
+        
         
         public override void GenerateTrialDefsFromBlockDef()
         {

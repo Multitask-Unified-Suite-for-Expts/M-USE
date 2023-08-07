@@ -153,7 +153,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 MazeContainer = new GameObject("MazeContainer");
 
             if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, new Vector3(0, 0.42f, 0), new Vector3(5, 5, 5));
+                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
             
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
@@ -187,15 +187,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         var SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ITI);
         if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale, MG_CanvasGO);
+            TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale*10, MG_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
-            if (!SessionValues.SessionDef.IsHuman)
-            {
-                TouchFBController.DestroyTouchFeedback();
-                TouchFBController.SetPrefabSizes(currentTaskDef.StartButtonScale);
-            }
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
@@ -231,12 +226,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         ChooseTile.AddInitializationMethod(() =>
         {
-            if (!SessionValues.SessionDef.IsHuman)
-            {
-                TouchFBController.DestroyTouchFeedback(); // destroys prefab of previous sizing
-                tileScale = 26.25f * currentTaskDef.TileSize;
-                TouchFBController.SetPrefabSizes(tileScale);
-            }
+            //TouchFBController.SetPrefabSizes(tileScale);
+
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)

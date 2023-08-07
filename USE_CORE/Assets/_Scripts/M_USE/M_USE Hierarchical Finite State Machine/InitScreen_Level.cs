@@ -139,8 +139,6 @@ public class InitScreen_Level : ControlLevel
 
     public void OnKeyboardTogglePressed()
     {
-        Debug.Log("PRESSED TOGGLE!");
-
         KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
@@ -420,7 +418,6 @@ public class InitScreen_Level : ControlLevel
 
     private void HandleSettingButtonClicked()
     {
-        Debug.Log("CLICKED THE SETTINGS BUTTON!");
         SettingsPanel_GO.SetActive(!SettingsPanel_GO.activeInHierarchy);
     }
 

@@ -1,25 +1,29 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Linq;
+using UnityEngine.EventSystems;
+
 
 public class KeyboardController : MonoBehaviour
 {
     public GameObject Keyboard_GO;
-    //public GameObject HideButton_GO;
     public GameObject KeyboardCanvas_GO;
     public GameObject GridItemPrefab;
     public GameObject GridParent_GO;
     private List<string> CharacterList;
+    private List<GameObject> gridItems;
     public bool UsingKeyboard;
+    private bool Caps;
+    private EventSystem eventSystem;
+    private TMP_InputField CurrentInputField;
 
-    public TMP_InputField CurrentInputField;
 
 
     private void Start()
     {
+        eventSystem = EventSystem.current;
+
         if (Keyboard_GO != null)
         {
             SetCharacterList();
@@ -33,13 +37,13 @@ public class KeyboardController : MonoBehaviour
     {
         if (UsingKeyboard)
         {
-            GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
+            GameObject selectedGO = eventSystem.currentSelectedGameObject;
             if(selectedGO != null)
             {
-                if (selectedGO.GetComponent<TMP_InputField>() != null)
+                TMP_InputField selectedInputField = selectedGO.GetComponent<TMP_InputField>();
+                if (selectedInputField != null)
                 {
-                    CurrentInputField = selectedGO.GetComponent<TMP_InputField>();
-                    //CurrentInputField = fjfj;
+                    CurrentInputField = selectedInputField;
                     Keyboard_GO.SetActive(true);
                 }
 
@@ -58,21 +62,21 @@ public class KeyboardController : MonoBehaviour
 
         string currentText = CurrentInputField.text;
 
-        string selected = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
+        string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
         if(selected != null)
         {
-            Debug.Log("SELECTED: " + selected);
-
             if (selected.ToLower() == "back")
-            {
-                Debug.Log("CLICKED THE BACK BUTTON!");
                 CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
-            }
             else
                 CurrentInputField.text += selected;
         }
         else
             Debug.Log("SELECTED GO DOES NOT HAVE A TEXT COMPONENT");
+    }
+
+    public void OnHideButtonPressed()
+    {
+        Keyboard_GO.SetActive(false);
     }
 
     private void SetCharacterList()
@@ -83,11 +87,27 @@ public class KeyboardController : MonoBehaviour
         };
     }
 
+    public void OnCapsButtonPressed()
+    {
+        Caps = !Caps;
+        foreach(GameObject go in gridItems)
+        {
+            TextMeshProUGUI textComponent = go.transform.GetComponentInChildren<TextMeshProUGUI>();
+            if (textComponent.text.ToLower() == "back")
+                continue;
+            textComponent.text = Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
+        }
+    }
+
     public void GenerateGridItems()
     {
+        gridItems = new List<GameObject>();
+
         for (int i = 0; i < CharacterList.Count; i++)
         {
             string current = CharacterList[i].ToString();
+            if (current != "Back")
+                current = current.ToLower();
             GameObject gridItem = Instantiate(GridItemPrefab);
             gridItem.name = "Item_" + current;
             gridItem.transform.SetParent(GridParent_GO.transform);
@@ -96,15 +116,10 @@ public class KeyboardController : MonoBehaviour
                 gridItem.GetComponent<Image>().color = new Color32(255, 136, 0, 183);
 
             gridItem.AddComponent<Button>().onClick.AddListener(OnKeyboardButtonPressed);
+
+            gridItems.Add(gridItem);
             
         }
-    }
-
-
-    public void TurnKeyboardOn()
-    {
-        if (UsingKeyboard)
-            Keyboard_GO.SetActive(true);
     }
 
 

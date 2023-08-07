@@ -528,32 +528,26 @@ namespace USE_ExperimentTemplate_Session
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
             
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
-            
-            //      REIMPLEMENT THIS IS THE TASK SELECTION TIME OUT!!!!!!!!!
-            // Don't have automatic task selection if we encountered an error during setup
-            /*  if (SessionValues.SessionDef.TaskSelectionTimeout >= 0 && !LogPanel.HasError())
-              {*/
-                  //selectTask.AddTimer(SessionValues.SessionDef.TaskSelectionTimeout, loadTask, () =>
-                  selectTask.AddTimer(() => SessionValues.SessionDef != null? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
-                  {
-                      foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
-                      {
-                          //Find the next task in the list that is still interactable
-                          string configName = (string)task.Key;
-  
-                          // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                          if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
-                              continue;
-  
-                          taskAutomaticallySelected = true;
-                          selectedConfigFolderName = configName;
-                          break;
-                      }
-                  });
-  /*            }
-  */            
 
-            //LoadTask State---------------------------------------------------------------------------------------------------------------
+            selectTask.AddTimer(
+                () => SessionValues.SessionDef != null ? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask,
+                () =>
+                {
+                    foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
+                    {
+                        //Find the next task in the list that is still interactable
+                        string configName = (string)task.Key;
+
+                        // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                        if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
+                            continue;
+
+                        taskAutomaticallySelected = true;
+                        selectedConfigFolderName = configName;
+                        break;
+                    }
+                });
+                  //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddInitializationMethod(() =>
             {
                 SessionValues.LoadingCanvas_GO.SetActive(true);
@@ -595,10 +589,6 @@ namespace USE_ExperimentTemplate_Session
                     CurrentTask.DefineTaskLevel();
                 }
 
-            });
-            
-            loadTask.AddFixedUpdateMethod(() =>
-            {
             });
 
             loadTask.AddLateUpdateMethod(() =>
@@ -711,6 +701,7 @@ namespace USE_ExperimentTemplate_Session
                 }
 
                 taskCount++;
+                Debug.Log("TASK COUNT: " + taskCount);
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {

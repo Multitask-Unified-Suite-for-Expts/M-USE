@@ -25,9 +25,6 @@ public class KeyboardController : MonoBehaviour
     private void Start()
     {
         InitScreen_Level = GameObject.Find("ControlLevels").GetComponent<InitScreen_Level>();
-        if (InitScreen_Level == null)
-            Debug.Log("INIT LEVEL IS NULL!");
-
         eventSystem = EventSystem.current;
 
         if (Keyboard_GO != null)

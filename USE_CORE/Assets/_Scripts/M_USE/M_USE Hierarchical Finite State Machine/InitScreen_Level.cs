@@ -331,7 +331,6 @@ public class InitScreen_Level : ControlLevel
 
         KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
         KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
-        //KeyboardToggle.onValueChanged.AddListener(OnKeyboardTogglePressed());
 
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
         StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
@@ -424,12 +423,6 @@ public class InitScreen_Level : ControlLevel
 
     public void HandleSettingButtonClicked()
     {
-        Debug.Log("ACTIVE? " + SettingsPanel_GO.activeInHierarchy);
-
-        //if (SettingsPanel_GO.activeInHierarchy)
-        //    SettingsPanel_GO.SetActive(false);
-        //else
-        //SettingsPanel_GO.SetActive(true);
         SettingsPanel_GO.SetActive(!SettingsPanel_GO.activeInHierarchy);
     }
 

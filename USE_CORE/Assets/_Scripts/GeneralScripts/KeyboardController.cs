@@ -38,7 +38,7 @@ public class KeyboardController : MonoBehaviour
 
     private void Update()
     {
-        if (UsingKeyboard)
+        if(Keyboard_GO.activeInHierarchy && UsingKeyboard)
         {
             GameObject selectedGO = eventSystem.currentSelectedGameObject;
             if(selectedGO != null)

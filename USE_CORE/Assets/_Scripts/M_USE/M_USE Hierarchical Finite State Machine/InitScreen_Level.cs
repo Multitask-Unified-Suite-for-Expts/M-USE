@@ -338,6 +338,13 @@ public class InitScreen_Level : ControlLevel
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
         MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
 
+        //Block out local toggle options if on web build
+        if(!SessionValues.WebBuild)
+        {
+            GameObject.Find("LocalConfigsToggle_GREYPANEL").SetActive(false);
+            GameObject.Find("LocalDataToggle_GREYPANEL").SetActive(false);
+        }   
+
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
         DefaultConfig_Toggle = GameObject.Find("DefaultConfigs_Toggle").GetComponent<Toggle>();
@@ -480,7 +487,7 @@ public class InitScreen_Level : ControlLevel
             }
             else
             {
-                Debug.LogError("UNABLE TO CONNECT TO SERVER!");
+                Debug.Log("UNABLE TO CONNECT TO SERVER!");
                 PlayAudio(Error_AudioClip);
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
                 RedX_GO.SetActive(true);

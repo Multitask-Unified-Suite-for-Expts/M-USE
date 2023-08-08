@@ -139,6 +139,7 @@ public class InitScreen_Level : ControlLevel
 
     public void OnKeyboardTogglePressed()
     {
+        PlayAudio(ToggleChange_AudioClip);
         KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
@@ -199,6 +200,8 @@ public class InitScreen_Level : ControlLevel
                 break;
             case "NotConnectedToServer":
                 if((ServerConfig_Toggle.isOn || ServerData_Toggle.isOn) && ConnectedToServer)
+                    return true;
+                if (!ServerConfig_Toggle.isOn && !ServerData_Toggle.isOn) //if they changed options from server, then can remove the "connect to server!" error message. 
                     return true;
                 break;
             case "EmptyDataFolder":
@@ -325,18 +328,18 @@ public class InitScreen_Level : ControlLevel
 
     private void SetGameObjects()
     {
-
         InitScreen_GO = GameObject.Find("InitScreen_GO");
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
         KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
         KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
+        //KeyboardToggle.onValueChanged.AddListener(OnKeyboardTogglePressed());
 
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
-        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
 
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
-        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
 
         //Block out local toggle options if on web build
         if(!SessionValues.WebBuild)
@@ -421,8 +424,14 @@ public class InitScreen_Level : ControlLevel
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
     }
 
-    private void HandleSettingButtonClicked()
+    public void HandleSettingButtonClicked()
     {
+        Debug.Log("ACTIVE? " + SettingsPanel_GO.activeInHierarchy);
+
+        //if (SettingsPanel_GO.activeInHierarchy)
+        //    SettingsPanel_GO.SetActive(false);
+        //else
+        //SettingsPanel_GO.SetActive(true);
         SettingsPanel_GO.SetActive(!SettingsPanel_GO.activeInHierarchy);
     }
 

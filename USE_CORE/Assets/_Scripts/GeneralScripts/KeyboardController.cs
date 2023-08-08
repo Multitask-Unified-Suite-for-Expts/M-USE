@@ -38,7 +38,7 @@ public class KeyboardController : MonoBehaviour
 
     private void Update()
     {
-        if(Keyboard_GO.activeInHierarchy && UsingKeyboard)
+        if(UsingKeyboard)
         {
             GameObject selectedGO = eventSystem.currentSelectedGameObject;
             if(selectedGO != null)
@@ -52,19 +52,14 @@ public class KeyboardController : MonoBehaviour
                     if(CurrentInputField == null || selectedInputField != CurrentInputField)
                     {
                         CurrentInputField = selectedInputField;
-                        SetKeyboardPosition(selectedInputField.gameObject.name);
+                        if(selectedInputField.gameObject.name == "SubjectID_InputField" || selectedInputField.gameObject.name == "SubjectAge_InputField")
+                            Keyboard_GO.transform.localPosition = new Vector3(0, -235f, 0);
+                        else
+                            Keyboard_GO.transform.localPosition = new Vector3(0, 235f, 0);
                     }
                 }
             }
         }
-    }
-
-    private void SetKeyboardPosition(string selectedGO_Name)
-    {
-        if(selectedGO_Name == "SubjectID_InputField" || selectedGO_Name == "SubjectAge_InputField")
-            Keyboard_GO.transform.localPosition = new Vector3(0, -235f, 0);
-        else
-            Keyboard_GO.transform.localPosition = new Vector3(0, 235f, 0);
     }
 
     public void OnNonGridButtonPress()

@@ -16,6 +16,6 @@ float[]	IncorrectRuleBreakingColor	[0,0,0]
 float[]	DefaultTileColor	[1, 1, 1]
 bool	NeutralITI	false
 bool	UsingFixedRatioReward	true
-string	MazeBackgroundTextureName	"MazeBackgroundImage"
+string	MazeBackgroundImage	"MazeBackgroundImage"
 Vector3	MazePosition	[0, 0.5, 0]
 bool	GuidedMazeSelection	true

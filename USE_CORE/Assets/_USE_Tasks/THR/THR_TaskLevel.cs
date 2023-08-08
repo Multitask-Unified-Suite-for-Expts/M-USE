@@ -151,7 +151,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
-
     void SetupBlockData()
     {
         BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.TrialsCompleted_Block);

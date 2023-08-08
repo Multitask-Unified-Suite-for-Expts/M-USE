@@ -597,8 +597,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void RecordChoices()
     {
-        Debug.Log("RECORDING CHOICES!");
-
         if(SideChoice == "Left")
         {
             NumChosenLeft_Block++;

@@ -1,8 +1,6 @@
-float	StartButtonScale	1
+float	StartButtonScale	1.2
 string	TileTexture	"Tile"
 Dictionary<string,string>	CustomSettings	{MazeDef.txt:SingleTypeArray}
-float	TouchFeedbackDuration	0.3
-Vector3	StartButtonPosition	[0, 0, 0]
 float	TileSize	2
 float	SpaceBetweenTiles	0.7
 List<string>	FeedbackControllers	["Audio", "Halo", "Slider"]
@@ -14,7 +12,6 @@ float[]	LastCorrectColor	[0.2, 0.7, 0.5]
 float[]	IncorrectRuleAbidingColor	[1, 0.5, 0.25]
 float[]	IncorrectRuleBreakingColor	[0,0,0]
 float[]	DefaultTileColor	[1, 1, 1]
-bool	NeutralITI	false
 bool	UsingFixedRatioReward	true
 string	MazeBackgroundImage	"MazeBackgroundImage"
 Vector3	MazePosition	[0, 0.5, 0]

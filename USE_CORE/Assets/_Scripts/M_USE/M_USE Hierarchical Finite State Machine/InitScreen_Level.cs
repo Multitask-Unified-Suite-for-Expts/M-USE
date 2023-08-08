@@ -75,7 +75,6 @@ public class InitScreen_Level : ControlLevel
 
         SetGameObjects();
 
-
         //Setup InitScreen State-----------------------------------------------------------------------------------------------------------------------------------
         SetupInitScreen.AddInitializationMethod(() =>
         {
@@ -105,7 +104,6 @@ public class InitScreen_Level : ControlLevel
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
-
             Settings_GO.SetActive(true);
         });
         CollectInfo.AddUpdateMethod(() =>

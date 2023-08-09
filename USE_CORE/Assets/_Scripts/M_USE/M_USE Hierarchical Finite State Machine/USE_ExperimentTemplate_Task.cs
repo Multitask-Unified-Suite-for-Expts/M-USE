@@ -270,7 +270,7 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-                if (SessionValues.SessionDef.StoreData)
+                if (SessionValues.StoreData)
                     StartCoroutine(FrameData.AppendDataToBuffer());
 
                 if (SessionValues.SessionDef.EventCodesActive)
@@ -286,7 +286,7 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionValues.SessionDef.IsHuman && BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
-                if (SessionValues.SessionDef.StoreData)
+                if (SessionValues.StoreData)
                 {
                     StartCoroutine(BlockData.AppendDataToBuffer());
                     StartCoroutine(BlockData.AppendDataToFile());
@@ -299,7 +299,7 @@ namespace USE_ExperimentTemplate_Task
                 if (TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 
-                if (TrialLevel.ForceBlockEnd && SessionValues.SessionDef.StoreData) //If they used end task hotkey, still write the block data!
+                if (TrialLevel.ForceBlockEnd && SessionValues.StoreData) //If they used end task hotkey, still write the block data!
                 {
                     StartCoroutine(BlockData.AppendDataToBuffer());
                     StartCoroutine(BlockData.AppendDataToFile());

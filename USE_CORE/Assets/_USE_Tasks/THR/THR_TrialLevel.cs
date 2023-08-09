@@ -111,7 +111,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SquareGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, false, "SquareGO");
             }
 
-            if(StartButton == null && SessionValues.SessionDef.IsHuman)
+            if (StartButton == null && SessionValues.SessionDef.IsHuman)
                 StartButton = SessionValues.HumanStartPanel.StartButtonGO;
 
             USE_Square.SetPlayIconColor(SessionValues.SessionDef.IsHuman ? new Color32(255, 199, 87, 255) : new Color32(38, 188, 250, 255));
@@ -127,8 +127,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
-            BackdropGO.SetActive(!SessionValues.SessionDef.IsHuman);
-
             if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
                 SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
             else

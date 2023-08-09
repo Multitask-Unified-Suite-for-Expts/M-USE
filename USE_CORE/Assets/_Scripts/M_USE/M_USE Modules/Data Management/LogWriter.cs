@@ -86,7 +86,7 @@ public class LogWriter : MonoBehaviour
         if (!StoreDataIsSet) //Wait for StoreData to be set
             return;
 
-        if (!SessionValues.SessionDef.StoreData) //if storedata is set, but its False, return:
+        if (!SessionValues.StoreData) //if storedata is set, but its False, return:
         {
             LogMessages.Clear();
             return;
@@ -168,7 +168,7 @@ public class LogWriter : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        if (!SessionValues.SessionDef.StoreData)
+        if (!SessionValues.StoreData)
             return;
 
         if (!LogFolderCreated)

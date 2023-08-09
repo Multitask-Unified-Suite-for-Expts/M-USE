@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using USE_Def_Namespace;
-using USE_ExperimentTemplate_Task;
 using USE_StimulusManagement;
+
 
 namespace MazeGame_Namespace
 {
@@ -23,9 +23,11 @@ namespace MazeGame_Namespace
         public float[] IncorrectRuleBreakingColor;
         public float[] DefaultTileColor;
         public bool UsingFixedRatioReward;
-        public string MazeBackgroundTextureName;
+        public string MazeBackgroundImage;
         public float SpaceBetweenTiles;
         public bool GuidedMazeSelection;
+
+        public Vector3 MazePosition;
         
         
     }
@@ -51,6 +53,7 @@ namespace MazeGame_Namespace
         public string BlockEndType;
         public float BlockEndThreshold;
         public bool ErrorPenalty;
+        
         
         public override void GenerateTrialDefsFromBlockDef()
         {

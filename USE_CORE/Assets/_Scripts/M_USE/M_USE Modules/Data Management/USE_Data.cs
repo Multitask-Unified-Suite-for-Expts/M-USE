@@ -203,13 +203,7 @@ namespace USE_Data
 		void Start()
 		{
 			if (!DefineManually)
-			{
-				var initScreen = FindObjectOfType<InitScreen>();
-				if (initScreen != null)
-					initScreen.OnConfirm += OnStart;
-				else
-					OnStart();
-			}
+				OnStart();
 		}
 
 		public void ManuallyDefine(int cap = 100)
@@ -644,7 +638,9 @@ namespace USE_Data
 				}
 				else
 				{
+					Debug.Log("BEFORE!");
 					Directory.CreateDirectory(folderPath);
+					Debug.Log("AFTER!");
 					using StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName);
 					dataStream.Write(fileHeaders);
 

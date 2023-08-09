@@ -13,7 +13,6 @@ namespace USE_Def_Namespace
         // public DateTime SessionStart_DateTime;
         // public int SessionStart_Frame;
         // public float SessionStart_UnityTime;
-        // public string SessionID;
 
         public OrderedDictionary TaskMappings;
         public List<string> TaskNames;
@@ -26,7 +25,6 @@ namespace USE_Def_Namespace
         public float TaskSelectionTimeout = 0f;
         public bool MacMainDisplayBuild;
         public bool IsHuman;
-        public bool StoreData;
         public bool EventCodesActive;
         public bool SyncBoxActive;
         public bool SerialPortActive;

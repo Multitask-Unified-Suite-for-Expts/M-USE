@@ -21,6 +21,13 @@ public static class SessionValues
     public static bool UsingServerConfigs;
     public static bool StoringDataLocally;
     public static bool StoringDataOnServer;
+    public static bool StoreData
+    {
+        get
+        {
+            return StoringDataLocally || StoringDataOnServer;
+        }
+    }
 
     public static LoadingController LoadingController;
 

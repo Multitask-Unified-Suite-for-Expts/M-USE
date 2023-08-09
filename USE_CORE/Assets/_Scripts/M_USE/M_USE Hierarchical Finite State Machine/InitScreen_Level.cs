@@ -24,6 +24,10 @@ public class InitScreen_Level : ControlLevel
     private GameObject LocalConfig_GO;
     private GameObject ServerConfig_GO;
 
+    private GameObject Settings_GO;
+    private GameObject SettingsButton_GO;
+    private GameObject SettingsPanel_GO;
+
     private Toggle LocalConfig_Toggle;
     private Toggle ServerConfig_Toggle;
     private Toggle DefaultConfig_Toggle;
@@ -40,9 +44,9 @@ public class InitScreen_Level : ControlLevel
     private GameObject[] GreyOutPanels_Array;
 
     private AudioSource AudioSource;
-    private AudioClip ToggleChange_AudioClip;
-    private AudioClip Error_AudioClip;
-    private AudioClip Connected_AudioClip;
+    [HideInInspector] public AudioClip ToggleChange_AudioClip;
+    [HideInInspector] public AudioClip Error_AudioClip;
+    [HideInInspector] public AudioClip Connected_AudioClip;
 
     private State SetupInitScreen;
     private State StartScreen;
@@ -56,6 +60,10 @@ public class InitScreen_Level : ControlLevel
     private bool FoldersSet;
 
     private string ErrorType;
+
+    private KeyboardController KeyboardController;
+    private Toggle KeyboardToggle;
+
 
 
     public override void DefineControlLevel()
@@ -96,6 +104,7 @@ public class InitScreen_Level : ControlLevel
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
+            Settings_GO.SetActive(true);
         });
         CollectInfo.AddUpdateMethod(() =>
         {
@@ -124,6 +133,12 @@ public class InitScreen_Level : ControlLevel
             SessionValues.LoadingCanvas_GO.SetActive(true); //Turn on the loading Canvas/Circle so that it immedietely shows that its loading
         });
 
+    }
+
+    public void OnKeyboardTogglePressed()
+    {
+        PlayAudio(ToggleChange_AudioClip);
+        KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
     private IEnumerator ActivateObjectsAfterPlayerPrefsLoaded()
@@ -183,6 +198,8 @@ public class InitScreen_Level : ControlLevel
                 break;
             case "NotConnectedToServer":
                 if((ServerConfig_Toggle.isOn || ServerData_Toggle.isOn) && ConnectedToServer)
+                    return true;
+                if (!ServerConfig_Toggle.isOn && !ServerData_Toggle.isOn) //if they changed options from server, then can remove the "connect to server!" error message. 
                     return true;
                 break;
             case "EmptyDataFolder":
@@ -312,11 +329,21 @@ public class InitScreen_Level : ControlLevel
         InitScreen_GO = GameObject.Find("InitScreen_GO");
         InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
 
+        KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
+        KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
+
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
-        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
 
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
-        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0);
+        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
+
+        //Block out local toggle options if on web build
+        if(!SessionValues.WebBuild)
+        {
+            GameObject.Find("LocalConfigsToggle_GREYPANEL").SetActive(false);
+            GameObject.Find("LocalDataToggle_GREYPANEL").SetActive(false);
+        }   
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -357,6 +384,14 @@ public class InitScreen_Level : ControlLevel
         ServerConfig_GO = GameObject.Find("ServerConfig_GO");
         ServerConfig_GO.SetActive(false);
 
+        Settings_GO = GameObject.Find("InitScreen_Settings");
+        SettingsPanel_GO = GameObject.Find("SettingsPanel");
+        SettingsButton_GO = GameObject.Find("SettingsButton");
+        SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
+        SettingsPanel_GO.SetActive(false);
+        Settings_GO.SetActive(false);
+
+
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
         FileSpec configFileSpec = new FileSpec();
         configFileSpec.name = "Config Folder";
@@ -384,6 +419,11 @@ public class InitScreen_Level : ControlLevel
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
+    }
+
+    public void HandleSettingButtonClicked()
+    {
+        SettingsPanel_GO.SetActive(!SettingsPanel_GO.activeInHierarchy);
     }
 
     private void DisplayErrorMessage(string message, string errorType)
@@ -447,7 +487,7 @@ public class InitScreen_Level : ControlLevel
             }
             else
             {
-                Debug.LogError("UNABLE TO CONNECT TO SERVER!");
+                Debug.Log("UNABLE TO CONNECT TO SERVER!");
                 PlayAudio(Error_AudioClip);
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
                 RedX_GO.SetActive(true);

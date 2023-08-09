@@ -639,8 +639,6 @@ namespace USE_States
 		private VoidDelegate controlLevelDefaultTermination;
 		private List<ControlLevelTerminationSpecification> controlLevelTerminationSpecifications;
 
-		public InitScreen initScreen;
-
 		private StimGroup ControlLevelAllStims;
 		private Dictionary<string, StimGroup> ControlLevelAllStimGroups;
 
@@ -729,28 +727,12 @@ namespace USE_States
 			StartTimeAbsolute = -1;
 			EndFrame = -1;
 			Duration = -1;
-			//Paused = false;
 			controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
 
-            //should be called after Init screen confirm button press
-            //var initScreen = FindObjectOfType<InitScreen>();
+            LoadSettings();
+            if (CallDefineLevelAutomatically)
+                DefineControlLevel();
 
-            if (initScreen != null)
-			{
-				initScreen.OnLoadSettings += LoadSettings;
-				initScreen.OnConfirm += () => {
-					Debug.Log("initScreen confirmed fired for ControlLevel " + ControlLevelName + ", CallDefineLevelAutomatically" + CallDefineLevelAutomatically);
-					if (CallDefineLevelAutomatically)
-						DefineControlLevel();
-				};
-			}
-			else
-			{
-				// initScreen.OnLoadConfigs += LoadConfigs;
-				LoadSettings();
-				if (CallDefineLevelAutomatically)
-					DefineControlLevel();
-			}
             Paused = false;
 		}
 		public void InitializeControlLevel(State state)

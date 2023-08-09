@@ -5,8 +5,8 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using USE_Settings;
 using USE_ExperimentTemplate_Task;
+
 
 public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 {
@@ -58,7 +58,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = new OrderedDictionary
         {
             ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1,
-            ["Trials Correct"] = wwwTL.numCorrect_InBlock.Sum(),
+            ["Stim Chosen Correctly"] = wwwTL.numCorrect_InBlock.Sum(),
             ["Errors"] = wwwTL.numErrors_InBlock.Sum()
         };
         return data;

@@ -253,7 +253,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: EffortControl_TrialLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -298,6 +297,7 @@ MonoBehaviour:
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
+  SliderGO: {fileID: 0}
   StimNoMaterialPrefab: {fileID: 3971733981247237095, guid: 48399b3e51fb047ff80a4c57704fcf7f,
     type: 3}
   StimLeftPrefab: {fileID: 7975343082115934864, guid: 807cad8d28a2e48ecb294f7b4351c79d,
@@ -414,7 +414,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: EffortControl_TaskLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0

@@ -23,7 +23,7 @@ namespace MazeGame_Namespace
         public float[] IncorrectRuleBreakingColor;
         public float[] DefaultTileColor;
         public bool UsingFixedRatioReward;
-        public string MazeBackgroundTextureName;
+        public string MazeBackgroundTexture;
         public float SpaceBetweenTiles;
         public bool GuidedMazeSelection;
 

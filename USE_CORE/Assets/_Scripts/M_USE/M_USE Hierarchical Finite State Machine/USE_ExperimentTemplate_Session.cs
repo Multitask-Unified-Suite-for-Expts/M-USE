@@ -349,11 +349,7 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
-                if (taskCount >= SessionValues.SessionDef.TaskMappings.Count)
-                {
-                    TasksFinished = true;
-                    return;
-                }
+                
 
                 if (TaskButtonsContainer != null)
                 {
@@ -524,7 +520,7 @@ namespace USE_ExperimentTemplate_Session
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
             });
-            selectTask.SpecifyTermination(() => TasksFinished, finishSession);
+           // selectTask.SpecifyTermination(() => TasksFinished, finishSession);
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
             
 
@@ -671,7 +667,7 @@ namespace USE_ExperimentTemplate_Session
                 AppendSerialData();
             });
 
-            runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
+            runTask.AddUniversalTerminationMethod( () =>
             {
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
@@ -683,9 +679,9 @@ namespace USE_ExperimentTemplate_Session
 
                 if(CurrentTask.TaskName != "GazeCalibration")
                     SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
-                SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 
                 ActiveTaskLevels.Remove(CurrentTask);
+                SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -693,14 +689,21 @@ namespace USE_ExperimentTemplate_Session
                 if (SessionValues.ExperimenterDisplayController != null)
                     SessionValues.ExperimenterDisplayController.ResetTask(null, null);
 
+                CurrentTask = null;
+                selectedConfigFolderName = null;
+                taskCount++;
+
+            });
+
+            runTask.SpecifyTermination(() => CurrentTask.Terminated && taskCount == (SessionValues.SessionDef.TaskMappings.Count-1), finishSession);
+            runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
+            {
                 if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                 {
                     TobiiEyeTrackerController.Instance.isCalibrating = false;
                     TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
                 }
 
-                taskCount++;
-                Debug.Log("TASK COUNT: " + taskCount);
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
@@ -720,9 +723,6 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
 
                 FrameData.gameObject.SetActive(true);
-
-                CurrentTask = null;
-                selectedConfigFolderName = null;
             });
 
             //FinishSession State---------------------------------------------------------------------------------------------------------------

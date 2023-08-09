@@ -140,13 +140,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.WebBuild)
             {
                 tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTextureName);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
             }
             else
             {
                 string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
                 tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTextureName));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
             }
 
             if (MazeContainer == null)
@@ -282,6 +282,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
+            runningPercentError.Add(-1);
         }); 
        
         SelectionFeedback.AddInitializationMethod(() =>

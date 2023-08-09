@@ -1505,6 +1505,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &1534418205 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1727960503381736144, guid: 792e1de5c8846437a8604141b839538e,
+    type: 3}
+  m_PrefabInstance: {fileID: 2033127974}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd10b86f2b9ad4ad2bfb35e410fb72c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1551787081
 GameObject:
   m_ObjectHideFlags: 0
@@ -2105,7 +2117,7 @@ PrefabInstance:
     - target: {fileID: 1727960503381736144, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1727960503381736144, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
@@ -2380,7 +2392,7 @@ PrefabInstance:
     - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
@@ -2389,8 +2401,28 @@ PrefabInstance:
       objectReference: {fileID: 1375570700}
     - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 1534418205}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnKeyboardTogglePressed
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: SaveInputValue
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: ToggleManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 4680557800224663792, guid: 792e1de5c8846437a8604141b839538e,
+        type: 3}
+      propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 4749798871209422403, guid: 792e1de5c8846437a8604141b839538e,
         type: 3}

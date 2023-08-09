@@ -32,9 +32,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private Color Red;
     private Color32 OffWhiteOutlineColor = new Color32(250, 249, 246, 0);
 
+    private Vector3 MaxScale = new Vector3(66.5f, 0, 65.5f); //CONTROLS THE SIZE OF THE OUTLINES!
+
     private Vector3 LeftScaleUpAmount;
     private Vector3 RightScaleUpAmount;
-    private Vector3 MaxScale;
     private Vector3 TrialStimInitLocalScale;
     private Vector3 LeftContainerOriginalPosition;
     private Vector3 RightContainerOriginalPosition;
@@ -202,7 +203,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             RewardContainerLeft.transform.localPosition = new Vector3(-.99f, 1.5825f, 0);
             RewardContainerRight.transform.localPosition = new Vector3(.99f, 1.5825f, 0);
 
-            MaxScale = new Vector3(65.5f, 0, 65.5f);
             LeftScaleUpAmount = MaxScale / currentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / currentTrial.NumClicksRight;
 
@@ -319,9 +319,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         List<GameObject> correctObjects = new List<GameObject>();
         InflateBalloon.AddInitializationMethod(() =>
         {
-            //Debug.Log("STIM LOCAL Y = " + TrialStim.transform.localScale.y);
+            Debug.Log("STIM LOCAL Y = " + TrialStim.transform.localScale.y);
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? currentTrial.NumClicksLeft : currentTrial.NumClicksRight);
-            //Debug.Log("SCALE PER INFLATION Y = " + ScalePerInflation_Y);
+            Debug.Log("SCALE PER INFLATION Y = " + ScalePerInflation_Y);
             IncrementAmounts = new Vector3();
             Flashing = false;
             InflateAudioPlayed = false;
@@ -740,7 +740,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
         StimLeft.name = "StimLeft";
         StimLeft.transform.localScale *= 1.2f;
-        StimLeft.transform.localPosition = new Vector3(StimLeft.transform.localPosition.x, -.0785f, StimLeft.transform.localPosition.z);
+        StimLeft.transform.localPosition = new Vector3(StimLeft.transform.localPosition.x, -.075f, StimLeft.transform.localPosition.z);
         Red = StimLeft.GetComponent<Renderer>().material.color;
         StimLeft.GetComponent<Renderer>().material.color = Red;
         TrialStimInitLocalScale = StimLeft.transform.localScale;
@@ -750,7 +750,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StimRight = Instantiate(StimRightPrefab, StimRightPrefab.transform.position, StimRightPrefab.transform.rotation);
         StimRight.name = "StimRight";
         StimRight.transform.localScale *= 1.2f;
-        StimRight.transform.localPosition = new Vector3(StimRight.transform.localPosition.x, -.0785f, StimRight.transform.localPosition.z);
+        StimRight.transform.localPosition = new Vector3(StimRight.transform.localPosition.x, -.075f, StimRight.transform.localPosition.z);
         StimRight.GetComponent<Renderer>().material.color = Red;
         AddRigidBody(StimRight);
         ObjectList.Add(StimRight);
@@ -850,12 +850,27 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ObjectList.Add(MaxOutline_Right);
     }
 
+    private Color32 GetOutlineColor(int i)
+    {
+        if(i <= 5)
+            return new Color32(255, 204, 204, 255);
+        else if(i > 5 && i <= 10)
+            return new Color32(255, 153, 153, 255);
+        else if (i > 10 && i <= 15)
+            return new Color32(255, 102, 102, 255);
+        else if (i > 15 && i <= 20)
+            return new Color32(255, 51, 51, 255);
+        else //greater than 20
+            return new Color32(255, 0, 0, 255);
+    }
+
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
     {
-
         for (int i = 1; i <= numBalloons; i ++)
         {
             GameObject outline = Instantiate(BalloonOutline, pos, BalloonOutline.transform.rotation);
+            //Color32 outlineColor = GetOutlineColor(i);
+            //outline.GetComponent<MeshRenderer>().material.color = outlineColor;
             outline.transform.parent = container.transform;
             outline.name = "Outline_" + (container.name.ToLower().Contains("left") ? "Left_" : "Right_") + i;
             outline.transform.localScale += i * ScaleUpAmount;

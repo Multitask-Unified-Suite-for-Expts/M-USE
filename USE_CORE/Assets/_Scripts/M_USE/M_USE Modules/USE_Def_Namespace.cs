@@ -13,7 +13,6 @@ namespace USE_Def_Namespace
         // public DateTime SessionStart_DateTime;
         // public int SessionStart_Frame;
         // public float SessionStart_UnityTime;
-        // public string SessionID;
 
         public OrderedDictionary TaskMappings;
         public List<string> TaskNames;
@@ -26,7 +25,6 @@ namespace USE_Def_Namespace
         public float TaskSelectionTimeout = 0f;
         public bool MacMainDisplayBuild;
         public bool IsHuman;
-        public bool StoreData;
         public bool EventCodesActive;
         public bool SyncBoxActive;
         public bool SerialPortActive;
@@ -43,7 +41,7 @@ namespace USE_Def_Namespace
         
         public bool SonicationActive;
 
-        public float ShotgunRayCastCircleSize_DVA = 1.5f;
+        public float ShotgunRayCastCircleSize_DVA = 1.25f;
         public float ShotgunRaycastSpacing_DVA = 0.3f;
         public float ParticipantDistance_CM = 60f;
         public int RewardHotKeyNumPulses = 1;

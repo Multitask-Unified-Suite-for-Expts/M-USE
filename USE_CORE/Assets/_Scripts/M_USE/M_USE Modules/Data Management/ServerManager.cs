@@ -42,7 +42,6 @@ public static class ServerManager //Used with the PHP scripts
         if (validURL)
         {
             string url = $"{ServerURL}/testConnection.php";
-
             using UnityWebRequest request = UnityWebRequest.Get(url);
             yield return request.SendWebRequest();
 

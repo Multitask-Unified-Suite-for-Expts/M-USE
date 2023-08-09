@@ -41,7 +41,7 @@ public class SetupTask_Level : ControlLevel
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;
 
-            if (SessionValues.UsingServerConfigs && SessionValues.SessionDef.StoreData)
+            if (SessionValues.UsingServerConfigs && SessionValues.StoringDataOnServer) //MAY NEED TO CHECK THIS LOGIC
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
             }
@@ -68,14 +68,14 @@ public class SetupTask_Level : ControlLevel
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
             BlockData = (BlockData) SessionValues.SessionDataControllers.InstantiateDataController<BlockData>(
-                "BlockData", ConfigFolderName, SessionValues.SessionDef.StoreData, subFolderPath);
+                "BlockData", ConfigFolderName, SessionValues.StoreData, subFolderPath);
             BlockData.taskLevel = TaskLevel;
             BlockData.sessionLevel = SessionValues.SessionLevel;
             BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
             TrialData = (TrialData) SessionValues.SessionDataControllers.InstantiateDataController<TrialData>(
-                "TrialData", ConfigFolderName, SessionValues.SessionDef.StoreData,
+                "TrialData", ConfigFolderName, SessionValues.StoreData,
                 TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
             
             
@@ -88,7 +88,7 @@ public class SetupTask_Level : ControlLevel
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
             FrameData = (FrameData) SessionValues.SessionDataControllers.InstantiateDataController<FrameData>(
-                "FrameData", ConfigFolderName, SessionValues.SessionDef.StoreData,
+                "FrameData", ConfigFolderName, SessionValues.StoreData,
                 TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = TaskLevel;
             FrameData.trialLevel = TrialLevel;

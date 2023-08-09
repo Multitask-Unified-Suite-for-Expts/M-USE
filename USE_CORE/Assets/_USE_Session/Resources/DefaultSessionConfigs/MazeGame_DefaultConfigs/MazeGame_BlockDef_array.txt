@@ -1,4 +1,4 @@
 BlockName	BlockCount	MinMaxTrials	ViewPath	NumPulses	PulseSize	ContextName	MazeName	RewardRatio	BlockEndType	BlockEndThreshold	ErrorPenalty
-Block1a	1	[1,1]	TRUE	3	250	007_033_072_001_3	M6X6_T5_L10_A1_F5_0000000	5	CurrentTrialPerformance	0.5	TRUE
-Block2a	2	[1,1]	TRUE	3	250	007_033_072_001_4	M6X6_T3_L9_D1_E6_0000000	5	CurrentTrialPerformance	0.5	FALSE
-Block3a	3	[1,1]	FALSE	3	250	007_033_072_001_3	M6X6_T10_L21_E6_D1_0000000	5	CurrentTrialPerformance	0.5	FALSE
+ Block1a	1	[2,20]	True	3	250	007_033_003_002_4	M6X6_T1_L6_D1_A3_00000000	5	CurrentTrialPerformance	0.5	FALSE
+ Block2a	2	[2,20]	True	3	250	007_033_008_001_3	M6X6_T0_L6_A2_F2_00000000	5	CurrentTrialPerformance	0.5	FALSE
+ Block3a	3	[2,20]	True	3	250	007_033_003_002_1	M6X6_T1_L6_E1_A2_00000001	5	CurrentTrialPerformance	0.5	FALSE

@@ -85,7 +85,7 @@ public class SetupSession_Level : ControlLevel
         CreateDataFolder.AddDefaultInitializationMethod(() =>
         {
             dataFolderCreated = false;
-            if (SessionValues.SessionDef.StoreData)
+            if (SessionValues.StoreData && (SessionValues.StoringDataLocally || SessionValues.StoringDataOnServer))
                 StartCoroutine(CreateSessionDataFolder(result =>
                 {
                     dataFolderCreated = true;
@@ -212,6 +212,9 @@ public class SetupSession_Level : ControlLevel
             SessionLevel.SelectionHandler.MaxDuration = 2f;
         }
 
+        SessionValues.MouseTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
+        SessionValues.GazeTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
+
         if (SessionValues.SessionDef.EyeTrackerActive)
         {
             if (GameObject.Find("TobiiEyeTrackerController") == null)
@@ -278,7 +281,7 @@ public class SetupSession_Level : ControlLevel
     private void SetupSessionDataControllers()
     {
         SessionLevel.SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
-            ("SessionData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
+            ("SessionData", SessionValues.StoreData, SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
         SessionLevel.SessionData.fileName = SessionValues.FilePrefix + "__SessionData.txt";
         SessionLevel.SessionData.sessionLevel = SessionLevel;
         SessionLevel.SessionData.InitDataController();
@@ -287,7 +290,7 @@ public class SetupSession_Level : ControlLevel
         if (SessionValues.SessionDef.SerialPortActive)
         {
             SessionValues.SerialSentData = (SerialSentData)SessionValues.SessionDataControllers.InstantiateDataController<SerialSentData>
-                ("SerialSentData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
+                ("SerialSentData", SessionValues.StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialSentData"
                                                 + Path.DirectorySeparatorChar + "0001_TaskSelection");
             SessionValues.SerialSentData.fileName = SessionValues.FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
             SessionValues.SerialSentData.sessionLevel = SessionLevel;
@@ -295,7 +298,7 @@ public class SetupSession_Level : ControlLevel
             SessionValues.SerialSentData.ManuallyDefine();
 
             SessionValues.SerialRecvData = (SerialRecvData)SessionValues.SessionDataControllers.InstantiateDataController<SerialRecvData>
-                ("SerialRecvData", SessionValues.SessionDef.StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
+                ("SerialRecvData", SessionValues.StoreData, SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SerialRecvData"
                                                                         + Path.DirectorySeparatorChar + "0001_TaskSelection");
             SessionValues.SerialRecvData.fileName = SessionValues.FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
             SessionValues.SerialRecvData.sessionLevel = SessionLevel;
@@ -303,7 +306,7 @@ public class SetupSession_Level : ControlLevel
             SessionValues.SerialRecvData.ManuallyDefine();
         }
 
-        SessionLevel.FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "FrameData");
+        SessionLevel.FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", SessionValues.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "FrameData");
         SessionLevel.FrameData.fileName = "TaskSelection__FrameData.txt";
         SessionLevel.FrameData.sessionLevel = SessionLevel;
         SessionLevel.FrameData.InitDataController();
@@ -316,7 +319,7 @@ public class SetupSession_Level : ControlLevel
 
         if (SessionValues.SessionDef.EyeTrackerActive)
         {
-            SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", SessionValues.SessionDef.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData");
+            SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", SessionValues.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData");
 
             SessionValues.GazeData.fileName = "TaskSelection__GazeData.txt";
             SessionValues.GazeData.sessionLevel = SessionLevel;

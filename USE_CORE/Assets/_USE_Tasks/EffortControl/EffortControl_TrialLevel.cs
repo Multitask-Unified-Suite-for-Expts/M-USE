@@ -165,6 +165,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            //Set handler active in case they ran out of time mid inflation and it was never set back to active
+            if (Handler != null)
+                Handler.HandlerActive = true;
+
             TokenFBController.enabled = false;
             ResetRelativeStartTime(); 
             DisableAllGameobjects();
@@ -319,9 +323,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         List<GameObject> correctObjects = new List<GameObject>();
         InflateBalloon.AddInitializationMethod(() =>
         {
-            Debug.Log("STIM LOCAL Y = " + TrialStim.transform.localScale.y);
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight);
-            Debug.Log("SCALE PER INFLATION Y = " + ScalePerInflation_Y);
             IncrementAmounts = new Vector3();
             Flashing = false;
             InflateAudioPlayed = false;
@@ -339,8 +341,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
-
-            successfulSelections = 0;
             startTime = 0;
             holdTime = 0;
             successfulSelections = 0;
@@ -361,12 +361,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (ScaleTimer >= (InflateClipDuration / scalingInterval.value)) //When timer hits for next inflation
                 {
                     if (TrialStim.transform.localScale != NextScale)
+                    {
                         ScaleToNextInterval();
-                    else
+                    }
+                    else //Reached the scale 
                     {
                         Inflate = false;
                         Handler.HandlerActive = true;
-                        if (NumInflations >= InflationsNeeded)
+                        if (NumInflations >= InflationsNeeded) //Done enough inflations
                         {
                             Response = 1;
                             AvgClickTime = clickTimings.Average();
@@ -393,14 +395,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     {
                         successfulSelections++;
 
+                        Debug.Log("SUCCESSFUL SEL: " + successfulSelections + " | NUM INFLATIONS: " + NumInflations);
+
                         if (outlineClicksRemaining > 1 && !Inflate)
                         {
                             if (outlineClicksRemaining > 1) //Dont play on the last one because full inflate will play 
                                 AudioFBController.Play("SHORT_INFLATION");
                             outlineClicksRemaining--;
                         }
-
-                        else if (successfulSelections > NumInflations && !Inflate && outlineClicksRemaining == 1)
+                        else if (outlineClicksRemaining == 1 && !Inflate)
                         {
                             if (NumInflations < InflationsNeeded)
                             {
@@ -420,6 +423,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
                             }
                         }
+                        else
+                            Debug.Log("EXTRA CLICK!");
                     }
                 }
 
@@ -440,6 +445,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
+
             TotalTouches_Block += TrialTouches;
             CurrentTaskLevel.Touches_Task += TrialTouches;
 
@@ -488,8 +494,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
-          //  else
-               // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+            //  else
+            // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);

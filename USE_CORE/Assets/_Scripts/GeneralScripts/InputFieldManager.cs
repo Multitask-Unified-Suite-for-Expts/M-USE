@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 
 public class InputFieldManager : MonoBehaviour
 {
@@ -12,10 +11,6 @@ public class InputFieldManager : MonoBehaviour
     {
         inputField = inputField_GO.GetComponent<TMP_InputField>();
         string storedValue = PlayerPrefs.GetString(playerPrefKey, "");
-
-        //this is just to get ipad off and running cuz got stuck on "defaultValue" and couldnt change it. Can delete this later
-        if (inputField_GO.name.ToLower().Contains("serverurl") && storedValue.ToLower().Contains("default"))
-            storedValue = "http://m-use.psy.vanderbilt.edu:8080";
 
         if (string.IsNullOrEmpty(storedValue))
             storedValue = GetDefaultValue();

@@ -350,8 +350,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     {
                         SessionValues.SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize);
                         //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                        CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                        //CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                        CurrentTaskLevel.numRewardPulses_InBlock += 1;
+                        CurrentTaskLevel.numRewardPulses_InTask += 1;
                     }
                 }
             }
@@ -372,6 +372,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                    // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
             }
             else if (CheckTileFlash() || currentTaskDef.GuidedMazeSelection)

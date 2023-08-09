@@ -869,12 +869,11 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
-        public bool CheckBlockEnd(string blockEndType, IEnumerable<float> runningTrialPerformance, float performanceThreshold = 1,
+        public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {
             // Takes in accuracy info from the current trial to determine whether to end the block
-            List<float> rTrialPerformance = (List<float>)runningTrialPerformance;
-            Debug.Log("MIN TRIALS: " + minTrials + " MAX TRIALS: " + maxTrials);
+            List<float?> rTrialPerformance = (List<float?>)runningTrialPerformance;
             if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
                 return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
 
@@ -885,7 +884,7 @@ namespace USE_ExperimentTemplate_Task
                 case "CurrentTrialPerformance":
                     Debug.Log("####CHECKING BLOCK END, rTrialPerformance.Count: " + rTrialPerformance.Count + ", (rTrialPerformance[rTrialPerformance.Count - 1]: " + (rTrialPerformance[rTrialPerformance.Count - 1]));
 
-                    if (rTrialPerformance[rTrialPerformance.Count - 1] != -1 && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;

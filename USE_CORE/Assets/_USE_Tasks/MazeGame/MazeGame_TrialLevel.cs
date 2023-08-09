@@ -19,7 +19,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     // Block Ending Variable
-    public List<float> runningPercentError = new List<float>();
+    public List<float?> runningPercentError = new List<float?>();
     private float percentError;
     public int MinTrials;
 
@@ -282,7 +282,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
-            runningPercentError.Add(-1);
+            runningPercentError.Add(null);
         }); 
        
         SelectionFeedback.AddInitializationMethod(() =>

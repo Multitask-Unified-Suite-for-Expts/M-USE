@@ -21,6 +21,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WWW_CanvasGO;
     public GameObject Player;
+    public GameObject ArenaPrefab;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public JoystickWWW_TrialDef CurrentTrialDef => GetCurrentTrialDef<JoystickWWW_TrialDef>();
@@ -34,7 +35,6 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
     public string ContextExternalFilePath;
     [FormerlySerializedAs("ButtonPosition")] public Vector3 ButtonPosition;
     [FormerlySerializedAs("ButtonScale")] public float ButtonScale;
-    public bool StimFacingCamera;
     public string ShadowType;
     public bool NeutralITI;
     //stim group
@@ -97,14 +97,8 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
    // private List<int> trialPerformance = new List<int>();
     private int timeoutCondition = 3;
     private float totalFbDuration;
-
     
-    // vector3 variables
-    private Vector3 trialStimInitLocalScale, fbInitLocalScale, sliderInitPosition, touchPosition;
-
     // misc variables
-    private Ray mouseRay;
-    private Camera cam;
     private bool variablesLoaded;
     private int correctIndex;
     public int NumSliderBarFilled = 0;
@@ -136,8 +130,6 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
     private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
     private float? selectionDuration = null;
     private bool choiceMade = false;
-
-    [HideInInspector] public float TouchFeedbackDuration;
 
 
     public override void DefineControlLevel()
@@ -177,6 +169,10 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(12);
             HaloFBController.SetHaloIntensity(5);
+            
+            GameObject instantiatedArena = Instantiate(ArenaPrefab);
+            GameObject instantiatedPlayer = Instantiate(Player);
+
             if (StartButton == null)
             {
                 if (SessionValues.SessionDef.IsHuman)
@@ -194,8 +190,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
                 playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
             #endif
         });
-
-        Debug.LogError(SetupTrial);
+        
         SetupTrial.AddInitializationMethod(() =>
         {
             if (!variablesLoaded)
@@ -204,21 +199,18 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUiVariables();
             }
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(ShadowType, "WhatWhenWhere_DirectionalLight");
-            if (StimFacingCamera)
-                MakeStimFaceCamera();
-            
+            SetShadowType(ShadowType, "JoystickWWW_DirectionalLight");
+
             if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
                 sbDelay = timeoutDuration.value;
             else
                 sbDelay = startButtonDelay.value;
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
-
+        
+        SessionValues.JoystickTracker.playerCamTransform = CurrentTaskLevel.TaskCam.transform;
+        SessionValues.JoystickTracker.isActive = true;
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "JoystickHandler", SessionValues.JoystickTracker, InitTrial, FinalFeedback);
-
-        if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(ShotgunHandler, TouchFeedbackDuration, ButtonScale * 10, WWW_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -472,6 +464,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
             GenerateAccuracyLog();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        AddDefaultControlLevelTerminationMethod(() => SessionValues.JoystickTracker.isActive = false);
         //------------------------------------------------------------------------ADDING VALUES TO DATA FILE--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
         DefineTrialData();
@@ -665,7 +658,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
         searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimsIndices);
         distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimsIndices);
        // searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback")); MAKING QUADDLES TWITCH BETWEEN STATES
-     //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
+       //   distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("SelectionFeedback"));
 
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);

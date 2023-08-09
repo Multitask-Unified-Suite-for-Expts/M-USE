@@ -102,6 +102,7 @@ public class VerifyTask_Level : ControlLevel
                     }
                     else if (currentType.Equals(TaskLevel.StimDefType))
                     {
+                        Debug.Log(importSettings_Level.currentSettingsDetails.FileContentString);
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterStim)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});

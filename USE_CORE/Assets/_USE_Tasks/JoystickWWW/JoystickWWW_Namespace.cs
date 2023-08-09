@@ -97,7 +97,6 @@ namespace JoystickWWW_Namespace
 
     public class JoystickWWW_TaskDef : TaskDef
     {
-        // string ContextExternalFilePath;
         Vector3 ButtonPosition;
         Vector3 ButtonScale;
         Vector3 FBSquarePosition;
@@ -105,7 +104,6 @@ namespace JoystickWWW_Namespace
         Vector3 ButtonColor;
         string ButtonText;
         string ContextExternalFilePath;
-        bool StimFacingCamera;
         string ShadowType;
         bool NeutralITI;
     }

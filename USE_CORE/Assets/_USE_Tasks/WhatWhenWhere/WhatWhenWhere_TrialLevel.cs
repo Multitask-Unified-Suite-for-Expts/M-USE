@@ -759,17 +759,3 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

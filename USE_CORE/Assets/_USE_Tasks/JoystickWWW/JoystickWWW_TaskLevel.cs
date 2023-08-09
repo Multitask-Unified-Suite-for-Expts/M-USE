@@ -28,6 +28,17 @@ public class JoystickWWW_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     private int blocksAdded = 0;
+    
+    public override void SpecifyTypes()
+    {
+        TaskLevelType = typeof(JoystickWWW_TaskLevel);
+        TrialLevelType = typeof(JoystickWWW_TrialLevel);
+        TaskDefType = typeof(JoystickWWW_TaskDef);
+        BlockDefType = typeof(JoystickWWW_BlockDef);
+        TrialDefType = typeof(JoystickWWW_TrialDef);
+        StimDefType = typeof(JoystickWWW_StimDef);
+    }
+    
     public override void DefineControlLevel()
     {
         wwwTL = (JoystickWWW_TrialLevel)TrialLevel;

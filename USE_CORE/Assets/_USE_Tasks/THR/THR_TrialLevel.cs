@@ -125,7 +125,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InitTrial);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
                 SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
@@ -154,7 +154,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //WHITE SQUARE state ------------------------------------------------------------------------------------------------------------------------
-        WhiteSquare.AddInitializationMethod(() =>
+        WhiteSquare.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes();
             if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
@@ -209,7 +209,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         WhiteSquare.SpecifyTermination(() => ((Time.time - WhiteStartTime) > currentTrial.WhiteSquareDuration) && WhiteTimeoutTime == 0, BlueSquare);
 
         //BLUE SQUARE state -------------------------------------------------------------------------------------------------------------------------
-        BlueSquare.AddInitializationMethod(() =>
+        BlueSquare.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes();
             if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
@@ -327,7 +327,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, WhiteSquare); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
-        Feedback.AddInitializationMethod((VoidDelegate)(() =>
+        Feedback.AddSpecificInitializationMethod((VoidDelegate)(() =>
         {
             RewardTimer = Time.time - RewardEarnedTime; //start the timer at the difference between rewardtimeEarned and right now.
             AudioPlayed = false;
@@ -369,7 +369,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SessionValues.SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
         Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, ITI); //if didn't get right, so no pulses. 
 
-        Reward.AddInitializationMethod(() =>
+        Reward.AddSpecificInitializationMethod(() =>
         {
             if (GiveReleaseReward && SessionValues.SyncBoxController != null)
             {

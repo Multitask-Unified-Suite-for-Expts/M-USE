@@ -27,7 +27,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         SetSettings();
         AssignBlockData();
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             fuWMTL.ContextName = fuWMBD.ContextName;
             StartCoroutine(HandleSkybox(fuWMTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fuWMTL.ContextName), TaskCam.gameObject.GetComponent<Skybox>()));

@@ -48,7 +48,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         SetupBlockData();
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
 
@@ -56,7 +56,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());
 
-        BlockFeedback.AddInitializationMethod(() =>
+        BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {

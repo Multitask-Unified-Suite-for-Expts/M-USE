@@ -147,7 +147,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             LoadConfigUIVariables();
             if (TrialCount_InTask != 0)
@@ -163,7 +163,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             //Set handler active in case they ran out of time mid inflation and it was never set back to active
             if (Handler != null)
@@ -196,7 +196,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
-        ChooseBalloon.AddInitializationMethod(() =>
+        ChooseBalloon.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
 
@@ -261,7 +261,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Center Selection state -------------------------------------------------------------------------------------------------------
-        CenterSelection.AddInitializationMethod(() =>
+        CenterSelection.AddSpecificInitializationMethod(() =>
         {
             ChooseDuration = ChooseBalloon.TimingInfo.Duration;
 
@@ -321,7 +321,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         float startTime = 0;
         float holdTime = 0;
         List<GameObject> correctObjects = new List<GameObject>();
-        InflateBalloon.AddInitializationMethod(() =>
+        InflateBalloon.AddSpecificInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight);
             IncrementAmounts = new Vector3();
@@ -476,7 +476,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Feedback state -------------------------------------------------------------------------------------------------------
-        Feedback.AddInitializationMethod(() =>
+        Feedback.AddSpecificInitializationMethod(() =>
         {
             if (Response == 1)
             {

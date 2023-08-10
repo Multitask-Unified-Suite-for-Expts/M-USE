@@ -114,7 +114,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         blocksAdded = 0;
         //LoadMazeDef();
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             MazeDefs = customSettings[0].AssignCustomSetting<MazeDef[]>();
             SetSkyBox(mgBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());

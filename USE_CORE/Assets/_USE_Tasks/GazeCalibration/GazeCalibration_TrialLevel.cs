@@ -119,7 +119,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
         });
 
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (!SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
@@ -196,7 +196,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         //----------------------------------------------------- BLINK THE CALIBRATION POINT -----------------------------------------------------
         
-        Blink.AddInitializationMethod(() =>
+        Blink.AddSpecificInitializationMethod(() =>
         {
             // Initialize the Calibration Point at Max Scale
             InitializeCalibPoint();
@@ -227,7 +227,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         //----------------------------------------------------- SHRINK THE CALIBRATION POINT -----------------------------------------------------
         
-        Shrink.AddInitializationMethod(() =>
+        Shrink.AddSpecificInitializationMethod(() =>
         {
             elapsedShrinkDuration = 0;
             InfoString.Append("<b>\n\nInfo</b>"
@@ -253,7 +253,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         //----------------------------------------------------- CHECK CALIBRATION READINESS -----------------------------------------------------
         
-        Check.AddInitializationMethod(() =>
+        Check.AddSpecificInitializationMethod(() =>
         {
             keyboardOverride = false;
             InfoString.Append("<b>\n\nInfo</b>"
@@ -272,7 +272,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         //-------------------------------------------------------- CALIBRATE GAZE POINT --------------------------------------------------------
        
-        Calibrate.AddInitializationMethod(() =>
+        Calibrate.AddSpecificInitializationMethod(() =>
         {
             keyboardOverride = false;
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
@@ -312,7 +312,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         //---------------------------------------------------- CONFIRM CALIBRATION RESULTS ----------------------------------------------------
 
-        Confirm.AddInitializationMethod(() =>
+        Confirm.AddSpecificInitializationMethod(() =>
         {
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.white;
             if (!SpoofGazeWithMouse)
@@ -414,7 +414,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             // Leave calibration mode once the user has confirmed all points
             // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.

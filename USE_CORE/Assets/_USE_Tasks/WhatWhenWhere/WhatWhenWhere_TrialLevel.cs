@@ -181,7 +181,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             #endif
         });
 
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (!variablesLoaded)
             {
@@ -205,7 +205,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WWW_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
@@ -240,7 +240,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
-        ChooseStimulus.AddInitializationMethod(() =>
+        ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
             AssignCorrectStim();
 
@@ -328,7 +328,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
             touchedObjects.Add(selectedSD.StimIndex);
@@ -397,7 +397,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
             }
         });
-        FinalFeedback.AddInitializationMethod(() =>
+        FinalFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
 
@@ -434,7 +434,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Define iti state
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);

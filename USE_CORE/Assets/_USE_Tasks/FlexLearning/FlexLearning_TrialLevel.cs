@@ -102,7 +102,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloIntensity(5);
         });
         
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             TokenFBController.ResetTokenBarFull();
             //Set the context for the upcoming trial
@@ -145,7 +145,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
@@ -175,7 +175,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-        SearchDisplay.AddInitializationMethod(() =>
+        SearchDisplay.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
@@ -248,7 +248,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
@@ -271,7 +271,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
        
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
-        TokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddSpecificInitializationMethod(() =>
         {
 #if (!UNITY_WEBGL)
                 DestroyTextOnExperimenterDisplay();
@@ -309,7 +309,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {

@@ -90,7 +90,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "WorkingMemory_DirectionalLight");
@@ -123,7 +123,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale*10, WM_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.WebBuild)
                 TokenFBController.AdjustTokenBarSizing(110);
@@ -170,7 +170,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
-        SearchDisplay.AddInitializationMethod(() =>
+        SearchDisplay.AddSpecificInitializationMethod(() =>
         {
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
@@ -234,7 +234,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurations_InBlock.Add(SearchDuration);
@@ -255,7 +255,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
 
         // The state that will handle the token feedback and wait for any animations
-        TokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {
@@ -293,7 +293,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {

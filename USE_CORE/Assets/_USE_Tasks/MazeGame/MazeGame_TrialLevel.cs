@@ -158,7 +158,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
         });
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (StartButton == null)
             {
@@ -189,7 +189,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale*10, MG_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
@@ -224,7 +224,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-        ChooseTile.AddInitializationMethod(() =>
+        ChooseTile.AddSpecificInitializationMethod(() =>
         {
             //TouchFBController.SetPrefabSizes(tileScale);
 
@@ -285,7 +285,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             runningPercentError.Add(null);
         }); 
        
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
@@ -390,7 +390,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             ReturnToLast = false;
             ErroneousReturnToLast = false;
         });
-        TileFlashFeedback.AddInitializationMethod(() =>
+        TileFlashFeedback.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
@@ -406,7 +406,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
         });
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             DisableSceneElements();
             if (!SessionValues.WebBuild)

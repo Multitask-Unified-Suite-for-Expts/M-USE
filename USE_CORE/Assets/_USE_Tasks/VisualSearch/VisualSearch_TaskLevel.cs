@@ -41,7 +41,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             ResetTaskVariables();
         });
         
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             vsBD.ContextName = vsBD.ContextName.Trim();
             vsTL.ContextName = vsBD.ContextName;
@@ -55,7 +55,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
             SetBlockSummaryString();
         });
-        BlockFeedback.AddInitializationMethod(() =>
+        BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {

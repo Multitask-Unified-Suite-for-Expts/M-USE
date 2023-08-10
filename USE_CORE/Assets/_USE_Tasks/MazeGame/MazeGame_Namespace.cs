@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using USE_Def_Namespace;
+using USE_ExperimentTemplate_Task;
 using USE_StimulusManagement;
-
 
 namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
     {
-        public string MazeKeyFilePath;
-        public string MazeFilePath;
+        // public string MazeKeyFilePath;
+        // public string MazeFilePath;
 
         public bool NeutralITI;
+        public Vector3 MazePosition;
+
         public float TileSize;
         public string TileTexture;
         public int NumBlinks;
@@ -23,11 +25,10 @@ namespace MazeGame_Namespace
         public float[] IncorrectRuleBreakingColor;
         public float[] DefaultTileColor;
         public bool UsingFixedRatioReward;
-        public string MazeBackgroundImage;
+        public string MazeBackgroundTexture;
         public float SpaceBetweenTiles;
         public bool GuidedMazeSelection;
 
-        public Vector3 MazePosition;
         
         
     }

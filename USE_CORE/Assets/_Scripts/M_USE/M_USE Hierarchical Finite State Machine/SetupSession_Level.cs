@@ -155,7 +155,7 @@ public class SetupSession_Level : ControlLevel
 
     private void SetDataPaths()
     {
-        SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}__SubjectID_{SessionValues.SubjectID}";
+        SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}_{SessionValues.SubjectID}";
         ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
 
         if (SessionValues.UsingServerConfigs)

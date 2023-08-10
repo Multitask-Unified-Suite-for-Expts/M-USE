@@ -19,7 +19,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     // Block Ending Variable
-    public List<float> runningPercentError = new List<float>();
+    public List<float?> runningPercentError = new List<float?>();
     private float percentError;
     public int MinTrials;
 
@@ -140,13 +140,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.WebBuild)
             {
                 tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundImage);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
             }
             else
             {
                 string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
                 tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundImage));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
             }
 
             if (MazeContainer == null)
@@ -282,6 +282,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
+            runningPercentError.Add(null);
         }); 
        
         SelectionFeedback.AddInitializationMethod(() =>
@@ -349,8 +350,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     {
                         SessionValues.SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize);
                         //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                        CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                        //CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                        CurrentTaskLevel.numRewardPulses_InBlock += 1;
+                        CurrentTaskLevel.numRewardPulses_InTask += 1;
                     }
                 }
             }
@@ -371,6 +372,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                    // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
             }
             else if (CheckTileFlash() || currentTaskDef.GuidedMazeSelection)

@@ -23,17 +23,12 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
-        //[HideInInspector] public USE_ExperimentTemplate_Data.GazeData GazeData;
-       // [HideInInspector] public SerialSentData SerialSentData;
-       // [HideInInspector] public SerialRecvData SerialRecvData;
+
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
-        //[HideInInspector] public SessionDataControllers SessionDataControllers;
 
         [HideInInspector] public bool ForceBlockEnd;
-        //[HideInInspector] public bool StoreData, ForceBlockEnd, SerialPortActive;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
-        //[HideInInspector] public string FilePrefix;
         protected State LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
         protected State StateAfterDelay = null;
@@ -47,11 +42,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public List<StimGroup> TrialStims;
 
         [HideInInspector] public ConfigVarStore ConfigUiVariables;
-      //  [HideInInspector] public ExperimenterDisplayController ExperimenterDisplayController;
         [HideInInspector] public SessionInfoPanel SessionInfoPanel;
         [HideInInspector] public float TrialCompleteTime;
-
-       // [HideInInspector] public SelectionTracker SelectionTracker;
 
         // Feedback Controllers
         [HideInInspector] public TouchFBController TouchFBController;
@@ -60,51 +52,24 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public TokenFBController TokenFBController;
         [HideInInspector] public SliderFBController SliderFBController;
         
-        // Input Trackers
-        //[HideInInspector] public MouseTracker MouseTracker;
-        //[HideInInspector] public GazeTracker GazeTracker;
-        //[HideInInspector] public TobiiEyeTrackerController TobiiEyeTrackerController;
-
-        //[HideInInspector] public string SelectionType;
-        //[HideInInspector] public bool EyeTrackerActive;
         [HideInInspector] public bool runCalibration;
         private ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
-        //[HideInInspector] public SerialPortThreaded SerialPortController;
-        //[HideInInspector] public SyncBoxController SyncBoxController;
-        //[HideInInspector] public EventCodeManager EventCodeManager;
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
-        //[HideInInspector] public Dictionary<string, EventCode> SessionEventCodes;
-
-      //  [HideInInspector] public DisplayController DisplayController;
-
 
         [HideInInspector] public int InitialTokenAmount;
 
         [HideInInspector] public Dictionary<string, int> AbortCodeDict;
-
-        /*[HideInInspector] public float ShotgunRaycastSpacing_DVA;
-        [HideInInspector] public float ParticipantDistance_CM;
-        [HideInInspector] public float ShotgunRaycastCircleSize_DVA;*/
-
-        //[HideInInspector] public bool IsHuman;
-        //[HideInInspector] public HumanStartPanel HumanStartPanel;
-        //[HideInInspector] public USE_StartButton USE_StartButton;
-        //[HideInInspector] public GameObject TaskSelectionCanvasGO;
 
         [HideInInspector] public UI_Debugger UI_Debugger;
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
 
-
-
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
             BackdropStripesTexture, THR_BackdropTexture;
-        //[HideInInspector] public bool Grating;
-        
-        //protected TrialDef CurrentTrialDef;
+
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
             return (T)TrialDefs[TrialCount_InBlock];

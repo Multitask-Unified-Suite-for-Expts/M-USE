@@ -698,7 +698,6 @@ namespace USE_ExperimentTemplate_Session
                 }
 
                 taskCount++;
-                Debug.Log("TASK COUNT: " + taskCount);
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {

@@ -81,6 +81,7 @@ public class SetupTask_Level : ControlLevel
             
             TrialLevel = TaskLevel.TrialLevel;
             TrialData.taskLevel = TaskLevel;
+            TrialData.trialLevel = TrialLevel;
             TrialData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.TrialData = TrialData;
@@ -94,7 +95,7 @@ public class SetupTask_Level : ControlLevel
             FrameData.trialLevel = TrialLevel;
             FrameData.sessionLevel = SessionValues.SessionLevel;
 
-            FrameData = FrameData;
+           // TrialLevel.FrameData = FrameData;
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             if (SessionValues.SessionDef.EyeTrackerActive)
@@ -115,6 +116,7 @@ public class SetupTask_Level : ControlLevel
             FrameData.InitDataController();
 
             BlockData.ManuallyDefine();
+            TrialData.ManuallyDefine();
             FrameData.ManuallyDefine();
             if (SessionValues.SessionDef.EyeTrackerActive)
                 SessionValues.GazeData.ManuallyDefine();

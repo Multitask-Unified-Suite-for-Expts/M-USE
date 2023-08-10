@@ -16,12 +16,11 @@ using USE_ExperimentTemplate_Trial;
 using System.Collections;
 using USE_Def_Namespace;
 using System.Collections.Specialized;
-using System.Runtime.CompilerServices;
 using TMPro;
+
 
 namespace USE_ExperimentTemplate_Task
 {
-
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
         public string PrefabPath;
@@ -75,19 +74,6 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool TaskLevelDefined;
 
         [HideInInspector] public List<CustomSettings> customSettings;
-        
-        private bool TaskDefImported;
-        private bool BlockDefImported;
-        private bool TrialDefImported;
-        
-
-        private bool AllDefsImported
-        {
-            get
-            {
-                return (TaskDefImported && BlockDefImported && TrialDefImported);
-            }
-        }
 
         public bool TrialAndBlockDefsHandled;
         public bool StimsHandled;
@@ -133,8 +119,8 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { RunBlock, BlockFeedback, FinishTask });
 
-            TrialLevel.TrialDefType = TrialDefType; //may need to be moved down after new states
-            TrialLevel.StimDefType = StimDefType;   //may need to be moved down after new states
+            TrialLevel.TrialDefType = TrialDefType;
+            TrialLevel.StimDefType = StimDefType;
             TrialLevel.TaskLevel = this;
         
             Add_ControlLevel_InitializationMethod(() =>
@@ -869,19 +855,22 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
-        public bool CheckBlockEnd(string blockEndType, IEnumerable<float> runningTrialPerformance, float performanceThreshold = 1,
+        public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {
             // Takes in accuracy info from the current trial to determine whether to end the block
-            List<float> rTrialPerformance = (List<float>)runningTrialPerformance;
-
+            List<float?> rTrialPerformance = (List<float?>)runningTrialPerformance;
             if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
                 return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
+
+            // Add -1 to the running trial performance to indicate an aborted/incomplete trial
 
             switch (blockEndType)
             {
                 case "CurrentTrialPerformance":
-                    if (rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    Debug.Log("####CHECKING BLOCK END, rTrialPerformance.Count: " + rTrialPerformance.Count + ", (rTrialPerformance[rTrialPerformance.Count - 1]: " + (rTrialPerformance[rTrialPerformance.Count - 1]));
+
+                    if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;

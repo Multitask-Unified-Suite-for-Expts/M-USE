@@ -4,9 +4,9 @@ string	ContextExternalFilePath	"DefaultResources/Contexts"
 string	TaskIconsFolderPath	"DefaultResources/TaskIcons"
 float	TaskSelectionTimeout	2000
 bool	GuidedTaskSelection	false
-bool	IsHuman	true
+bool	IsHuman	false
 bool	StoreData	true
 bool	EventCodesActive	false
 bool	SyncBoxActive	false
-float	BlockResultsDuration	8
+float	BlockResultsDuration	0
 bool	PlayBackgroundMusic	true

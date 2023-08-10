@@ -7,8 +7,8 @@ using USE_States;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
 
-public class SetupTask_Level : ControlLevel
 
+public class SetupTask_Level : ControlLevel
 {
     public ImportSettings_Level importSettings_Level;
     public VerifyTask_Level verifyTask_Level;
@@ -19,6 +19,7 @@ public class SetupTask_Level : ControlLevel
     private FrameData FrameData;
     private TrialData TrialData;
     private string TaskDataPath, ConfigFolderName, TaskName;
+
     public override void DefineControlLevel()
     {
         State VerifyTask = new State("VerifyTask");

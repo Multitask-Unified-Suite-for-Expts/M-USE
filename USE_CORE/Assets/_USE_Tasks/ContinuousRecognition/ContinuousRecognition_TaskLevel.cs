@@ -36,7 +36,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
 
-    ContinuousRecognition_BlockDef currentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
+    ContinuousRecognition_BlockDef CurrentBlock => GetCurrentBlockDef<ContinuousRecognition_BlockDef>();
     ContinuousRecognition_TrialLevel trialLevel;
 
     public int blocksAdded;
@@ -65,12 +65,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            SetSkyBox(currentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(CurrentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
 
             trialLevel.ContextActive = true;
 
-            trialLevel.TokenFBController.SetTotalTokensNum(currentBlock.NumTokenBar);
-            trialLevel.TokenFBController.SetTokenBarValue(currentBlock.InitialTokenAmount);
+            trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.NumTokenBar);
+            trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.InitialTokenAmount);
             trialLevel.ResetBlockVariables();
 
             CalculateBlockSummaryString();
@@ -151,7 +151,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     void SetupBlockData()
     {
-        BlockData.AddDatum("BlockName", () => currentBlock.BlockName);
+        BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
         BlockData.AddDatum("NonStimTouches", () => trialLevel.NonStimTouches_Block);
         BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
         BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
@@ -159,7 +159,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
         BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
-        BlockData.AddDatum("MaxNumTrials", () => currentBlock.MaxNumTrials);
+        BlockData.AddDatum("MaxNumTrials", () => CurrentBlock.MaxNumTrials);
     }
 
     public void CalculateBlockSummaryString()
@@ -180,7 +180,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if (trialLevel.AbortCode == 0)
             BlockSummaryString.AppendLine(CurrentBlockString.ToString());
 
-
         if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
         {
             BlockAveragesString = "-------------------------------------------------" +
@@ -199,11 +198,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
-        {
             BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
-        }
-
-        
     }
 
     void ClearStrings()

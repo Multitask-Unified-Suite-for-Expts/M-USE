@@ -33,7 +33,7 @@ public class KeyboardController : MonoBehaviour
             GenerateGridItems();
         }
         else
-            Debug.LogError("KEYBOARD IS NULL!");
+            Debug.LogError("KEYBOARD GO IS NULL!");
     }
 
     private void Update()
@@ -59,6 +59,17 @@ public class KeyboardController : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public void OnKeyboardGridButtonPressed()
+    {
+        if (CurrentInputField != null)
+        {
+            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
+            string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
+            if(selected != null)
+                CurrentInputField.text += selected;
         }
     }
 
@@ -102,17 +113,6 @@ public class KeyboardController : MonoBehaviour
         else if(clickedGO.name == "SpaceButton")
         {
             CurrentInputField.text += " ";
-        }
-    }
-
-    public void OnKeyboardGridButtonPressed()
-    {
-        if (CurrentInputField != null)
-        {
-            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
-            string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
-            if(selected != null)
-                CurrentInputField.text += selected;
         }
     }
 

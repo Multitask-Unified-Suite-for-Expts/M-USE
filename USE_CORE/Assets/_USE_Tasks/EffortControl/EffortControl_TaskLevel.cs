@@ -27,7 +27,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
-    EffortControl_BlockDef currentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
+    EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
 
     public override void SpecifyTypes()
@@ -52,8 +52,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-            currentBlock.ContextName = currentBlock.ContextName.Trim();
-            SetSkyBox(currentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
+            SetSkyBox(CurrentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
         });
 
         BlockFeedback.AddInitializationMethod(() =>

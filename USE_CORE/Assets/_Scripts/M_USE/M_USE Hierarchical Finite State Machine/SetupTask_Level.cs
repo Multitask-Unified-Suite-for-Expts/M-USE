@@ -132,11 +132,6 @@ public class SetupTask_Level : ControlLevel
             TaskLevel.TrialLevel = TrialLevel;
             //user-defined task control level 
 
-            BlockData.AddStateTimingData(TaskLevel);
-            StartCoroutine(BlockData.CreateFile());
-            StartCoroutine(FrameData.CreateFile());
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                StartCoroutine(SessionValues.GazeData.CreateFile());
 
 
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"),
@@ -244,6 +239,11 @@ public class SetupTask_Level : ControlLevel
             TrialLevel.TrialData = TrialData;
             TrialLevel.DefineTrialLevel();
             
+            BlockData.AddStateTimingData(TaskLevel);
+            StartCoroutine(BlockData.CreateFile());
+            StartCoroutine(FrameData.CreateFile());
+            if (SessionValues.SessionDef.EyeTrackerActive)
+                StartCoroutine(SessionValues.GazeData.CreateFile());
 
         });
         

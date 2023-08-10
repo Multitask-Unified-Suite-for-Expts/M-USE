@@ -142,7 +142,7 @@ namespace USE_States
 		}
 
 		//UPDATE, INITIALIZATION, AND DEFAULT TERMINATION METHODS
-		public void AddInitializationMethod(VoidDelegate method, string name, float? initDelay = null)
+		public void AddSpecificInitializationMethod(VoidDelegate method, string name, float? initDelay = null)
 		{
 			StateInitialization init = new StateInitialization(method, name, initDelay);
 			StateInitializations.Add(init);
@@ -151,10 +151,10 @@ namespace USE_States
 				StateDefaultInitialization = init;
 			}
 		}
-		public void AddInitializationMethod(VoidDelegate method, float? initDelay = null)
+		public void AddSpecificInitializationMethod(VoidDelegate method, float? initDelay = null)
 		{
 			string name = StateName + "Initialization_" + StateInitializations.Count;
-			AddInitializationMethod(method, name, initDelay);
+			AddSpecificInitializationMethod(method, name, initDelay);
 		}
 		public void AddDefaultInitializationMethod(VoidDelegate method, string name, float? initDelay = null)
 		{
@@ -899,7 +899,7 @@ namespace USE_States
 			{
 				if (CheckForAvailableState(s))
 				{
-					s.AddInitializationMethod(method);
+					s.AddSpecificInitializationMethod(method);
 				}
 				else
 				{

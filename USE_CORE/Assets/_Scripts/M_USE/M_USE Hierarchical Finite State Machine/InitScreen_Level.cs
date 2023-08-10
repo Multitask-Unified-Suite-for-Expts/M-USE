@@ -76,7 +76,7 @@ public class InitScreen_Level : ControlLevel
         SetGameObjects();
 
         //Setup InitScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        SetupInitScreen.AddInitializationMethod(() =>
+        SetupInitScreen.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.WebBuild)
                 GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
@@ -84,7 +84,7 @@ public class InitScreen_Level : ControlLevel
         SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        StartScreen.AddInitializationMethod(() =>
+        StartScreen.AddSpecificInitializationMethod(() =>
         {
             StartPanel_GO.SetActive(true);
         });
@@ -100,7 +100,7 @@ public class InitScreen_Level : ControlLevel
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
-        CollectInfo.AddInitializationMethod(() =>
+        CollectInfo.AddSpecificInitializationMethod(() =>
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);

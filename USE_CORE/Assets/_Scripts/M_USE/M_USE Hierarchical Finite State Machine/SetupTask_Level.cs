@@ -27,7 +27,7 @@ public class SetupTask_Level : ControlLevel
         
         verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
         VerifyTask.AddChildLevel(verifyTask_Level);
-        VerifyTask.AddInitializationMethod(() =>
+        VerifyTask.AddSpecificInitializationMethod(() =>
         {
             verifyTask_Level.TaskLevel = TaskLevel;
         });
@@ -36,7 +36,7 @@ public class SetupTask_Level : ControlLevel
         {
         });
 
-        OtherSetup.AddInitializationMethod(() =>
+        OtherSetup.AddSpecificInitializationMethod(() =>
         {  
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;

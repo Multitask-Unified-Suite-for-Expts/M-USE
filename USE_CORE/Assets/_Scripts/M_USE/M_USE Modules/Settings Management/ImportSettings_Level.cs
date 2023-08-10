@@ -49,7 +49,7 @@ public class ImportSettings_Level : ControlLevel
 
 		bool filePathSet = false;
 
-		getFilePath.AddInitializationMethod(() =>
+		getFilePath.AddSpecificInitializationMethod(() =>
 		{
 			filePathSet = false;
 

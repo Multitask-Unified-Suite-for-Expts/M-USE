@@ -31,7 +31,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         {
             wmTL.ContextName = wmBD.ContextName;
 
-            SetSkyBox(wmBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(wmBD.ContextName);
 
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);

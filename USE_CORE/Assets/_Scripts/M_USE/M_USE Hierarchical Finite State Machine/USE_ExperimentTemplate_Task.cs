@@ -156,18 +156,20 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 SessionValues.InputManager.SetActive(true);
-            });
 
-            //RunBlock State-----------------------------------------------------------------------------------------------------
-            RunBlock.AddUniversalInitializationMethod(() =>
-            {
-                if (SessionValues.SessionDef.IsHuman) //NT: not sure we need this happening every block. 
+                if (SessionValues.SessionDef.IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+                    Debug.Log("CREATED HUMAN START PANEL!");
                 }
+            });
+
+            //RunBlock State-----------------------------------------------------------------------------------------------------
+            RunBlock.AddUniversalInitializationMethod(() =>
+            {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
                 BlockCount++;
@@ -185,7 +187,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
             });
 
-            //Hotkey for WebGL build so we can end task and go to next block
+            //Hotkeys for WebGL build so we can end task and go to next block
             if (SessionValues.WebBuild)
             {
                 RunBlock.AddUpdateMethod(() =>
@@ -365,7 +367,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        public void SetSkyBox(string contextName, Skybox skybox)
+        public void SetSkyBox(string contextName)
         {
             string contextFilePath = "";
             if (SessionValues.UsingDefaultConfigs)
@@ -375,7 +377,7 @@ namespace USE_ExperimentTemplate_Task
             else if (SessionValues.UsingLocalConfigs)
                 contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
-            StartCoroutine(HandleSkybox(contextFilePath, skybox));
+            StartCoroutine(HandleSkybox(contextFilePath));
         }
 
 

@@ -165,8 +165,6 @@ namespace USE_ExperimentTemplate_Trial
             {
                 SessionValues.LoadingCanvas_GO.SetActive(false);
 
-                //SessionValues.TaskSelectionCanvasGO.SetActive(false);
-
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
                 else

@@ -205,6 +205,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddInitializationMethod(() =>
         {
+            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
             if (TrialCount_InTask != 0)
@@ -457,7 +459,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 string path = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
-                CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + ContextName + ".png", Camera.main.gameObject.GetComponent<Skybox>());
+                CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + ContextName + ".png");
             }
 
             GenerateAccuracyLog();

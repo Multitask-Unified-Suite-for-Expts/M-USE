@@ -387,7 +387,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), Camera.main.gameObject.GetComponent<Skybox>()));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName)));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
 

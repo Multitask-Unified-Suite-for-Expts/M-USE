@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
-using USE_Settings;
 using USE_ExperimentTemplate_Task;
 using System.Linq;
-using System.Collections;
+
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 {
@@ -65,7 +64,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddInitializationMethod(() =>
         {
-            SetSkyBox(CurrentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(CurrentBlock.ContextName);
 
             trialLevel.ContextActive = true;
 

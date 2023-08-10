@@ -30,7 +30,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public override void DefineControlLevel()
     {
-        
         vsTL = (VisualSearch_TrialLevel)TrialLevel;
         //vsTD = (VisualSearch_TrialDef)vsTL.GetCurrentTrialDef<VisualSearch_TrialDef>();
         CurrentBlockString = "";
@@ -46,7 +45,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsBD.ContextName = vsBD.ContextName.Trim();
             vsTL.ContextName = vsBD.ContextName;
 
-            SetSkyBox(vsBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(vsBD.ContextName);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();

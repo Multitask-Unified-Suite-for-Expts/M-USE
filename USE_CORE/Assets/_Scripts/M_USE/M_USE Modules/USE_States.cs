@@ -700,16 +700,6 @@ namespace USE_States
 
 		}
 
-		public virtual OrderedDictionary GetTaskSummaryData()
-		{
-			return new OrderedDictionary();
-		}
-
-		public virtual OrderedDictionary GetBlockResultsData()
-		{
-			return new OrderedDictionary();
-		}
-
 		public void InitializeControlLevel()
 		{
 			if (string.IsNullOrEmpty(ControlLevelName))

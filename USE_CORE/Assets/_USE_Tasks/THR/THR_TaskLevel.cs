@@ -1,10 +1,8 @@
-using System;
 using System.Text;
 using THR_Namespace;
-using USE_Settings;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
-using UnityEngine;
+
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
@@ -13,7 +11,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     public int BlockStringsAdded = 0;
 
-    THR_BlockDef currentBlock => GetCurrentBlockDef<THR_BlockDef>();
+    THR_BlockDef CurrentBlock => GetCurrentBlockDef<THR_BlockDef>();
     THR_TrialLevel trialLevel;
 
     public int TrialsCompleted_Task = 0;
@@ -135,7 +133,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = ("<b>Block " + "(" + currentBlock.BlockName + "):" + "</b>" +
+        CurrentBlockString = ("<b>Block " + "(" + CurrentBlock.BlockName + "):" + "</b>" +
                         "\nTrialsCorrect: " + trialLevel.TrialsCorrect_Block + " (out of " + trialLevel.TrialsCompleted_Block + ")" +
                         "\nReleasedEarly: " + trialLevel.NumReleasedEarly_Block +
                         "\nReleasedLate: " + trialLevel.NumReleasedLate_Block +
@@ -161,7 +159,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ItiTouches_Block", () => trialLevel.NumItiTouches_Block);
         BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards_Block);
         BlockData.AddDatum("NumReleaseRewards", () => trialLevel.NumReleaseRewards_Block);
-        BlockData.AddDatum("DifficultyLevel", () => currentBlock.BlockName);
+        BlockData.AddDatum("DifficultyLevel", () => CurrentBlock.BlockName);
         BlockData.AddDatum("NumReleasedEarly", () => trialLevel.NumReleasedEarly_Block);
         BlockData.AddDatum("NumReleasedLate", () => trialLevel.NumReleasedLate_Block);
         BlockData.AddDatum("NumTouchesMovedOutside", () => trialLevel.NumTouchesMovedOutside_Block);

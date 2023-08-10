@@ -95,18 +95,7 @@
 			"isRange": true,
 			"name": "Start Button Delay",
 			"hidden": false
-		},
-		"gratingSquareDuration": {
-			"value": 1,
-			"min": 0.1,
-			"max": 20.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Grating Square Duration",
-			"hidden": false
 		}
-
-
 
 	},
 

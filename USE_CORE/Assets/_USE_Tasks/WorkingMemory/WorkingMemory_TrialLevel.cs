@@ -32,7 +32,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
         displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
     private float tokenFbDuration;
     
@@ -420,7 +420,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         displayPostSampleDistractorsDuration = ConfigUiVariables.get<ConfigNumber>("displayPostSampleDistractorsDuration");
         preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");

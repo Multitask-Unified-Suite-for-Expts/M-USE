@@ -326,8 +326,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         });
         BlueSquare.SpecifyTermination(() => (Time.time - BlueStartTime > currentTrial.BlueSquareDuration) && !InputBroker.GetMouseButton(0) && !BlueSquareReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, WhiteSquare); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         BlueSquare.SpecifyTermination(() => (BlueSquareReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
+
         //FEEDBACK state ----------------------------------------------------------------------------------------------------------------------------
-        Feedback.AddInitializationMethod((VoidDelegate)(() =>
+        Feedback.AddInitializationMethod(() =>
         {
             RewardTimer = Time.time - RewardEarnedTime; //start the timer at the difference between rewardtimeEarned and right now.
             AudioPlayed = false;
@@ -336,7 +337,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if(GiveTouchReward || GiveReleaseReward)
             {
                 AudioFBController.Play("Positive");
-
                 if (GiveReleaseReward)
                     USE_Square.ActivateCoverCircle(LightBlueColor);
             }
@@ -354,7 +354,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 }
             }
             AudioPlayed = true;
-        }));
+        });
         Feedback.AddUpdateMethod(() =>
         {
             if((GiveTouchReward || GiveReleaseReward) && SessionValues.SyncBoxController != null)

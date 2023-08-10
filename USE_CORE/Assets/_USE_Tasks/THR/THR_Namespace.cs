@@ -13,12 +13,7 @@ namespace THR_Namespace
 
     public class THR_BlockDef : BlockDef
     {
-        //Already-existing fields (inherited from BlockDef)
-        //public int BlockCount;
-        //public TrialDef[] TrialDefs;
-
         public string BlockName;
-        //public string ContextName;
         public int[] MinMaxNumTrials;
         public bool ShowNegFb;
         public int PulseSize;
@@ -49,8 +44,6 @@ namespace THR_Namespace
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
         public float TimeoutDuration;
-        public float GreyOnReleaseDuration;
-        public float GratingSquareDuration;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -61,7 +54,6 @@ namespace THR_Namespace
             {
                 THR_TrialDef trial = new THR_TrialDef();
 
-                //trial.ContextName = ContextName;
                 trial.BlockName = BlockName;
                 trial.MinNumTrials = MinMaxNumTrials[0];
                 trial.MaxNumTrials = MinMaxNumTrials[1];
@@ -94,8 +86,6 @@ namespace THR_Namespace
                 trial.RandomSquarePosition = RandomSquarePosition;
                 trial.TimeToAutoEndTrialSec = TimeToAutoEndTrialSec;
                 trial.TimeoutDuration = TimeoutDuration;
-                trial.GreyOnReleaseDuration = GreyOnReleaseDuration;
-                trial.GratingSquareDuration = GratingSquareDuration;
 
                 TrialDefs.Add(trial);
             }
@@ -105,11 +95,6 @@ namespace THR_Namespace
 
     public class THR_TrialDef : TrialDef
     {
-        //Already-existing fields (inherited from TrialDef)
-        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
-        //public TrialStims TrialStims;
-
-        //public string ContextName;
         public string BlockName;
         public int MinNumTrials;
         public int MaxNumTrials;
@@ -142,42 +127,12 @@ namespace THR_Namespace
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
         public float TimeoutDuration;
-        public float GratingSquareDuration;
-        public float GreyOnReleaseDuration;
     }
 
 
     public class THR_StimDef : StimDef
     {
-        //Already-existing fields (inherited from Stim  Def)
-        //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
-        //public string StimName;
-        //public string StimPath;
-        //public string PrefabPath;
-        //public string ExternalFilePath;
-        //public string StimFolderPath;
-        //public string StimExtension;
-        //public int StimCode; //optional, for analysis purposes
-        //public string StimID;
-        //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
-        //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector2 StimScreenLocation; //screen position calculated during trial
-        //public float? StimScale;
-        //public bool StimLocationSet;
-        //public bool StimRotationSet;
-        //public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-        //public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        //public TokenReward[] TokenRewards;
-        //public int[] BaseTokenGain;
-        //public int[] BaseTokenLoss;
-        //public int TimesUsedInBlock;
-        //public bool isRelevant;
-        //public bool TriggersSonication;
-        //public State SetActiveOnInitialization;
-        //public State SetInactiveOnTermination;
-    
+        
     }
 }
 

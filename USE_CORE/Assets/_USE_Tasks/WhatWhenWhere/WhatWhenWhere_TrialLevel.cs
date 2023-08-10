@@ -72,7 +72,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber chooseStimOnsetDelay; 
     public ConfigNumber startButtonDelay;
     public ConfigNumber timeoutDuration;
-    public ConfigNumber gratingSquareDuration;
 
 
     //data logging variables
@@ -176,9 +175,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
-            #endif
         });
 
         SetupTrial.AddInitializationMethod(() =>
@@ -244,10 +242,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             AssignCorrectStim();
 
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                     CreateTextOnExperimenterDisplay();
-            #endif
+            }
 
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
@@ -639,7 +638,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         flashingFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");

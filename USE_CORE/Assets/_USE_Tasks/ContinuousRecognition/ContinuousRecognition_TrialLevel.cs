@@ -144,7 +144,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, ChooseStim);
         
         if(!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*10, CR_CanvasGO);
+            TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*15, CR_CanvasGO);
 
         InitTrial.AddInitializationMethod(() =>
         {
@@ -226,7 +226,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
-
         ChooseStim.AddUpdateMethod(() =>
         {
             if (TimeRemaining > 0)
@@ -368,6 +367,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
             SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
         });
+
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddInitializationMethod(() =>
         {
@@ -379,25 +379,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 StartCoroutine(GenerateBlockFeedback());
 
                 if (SessionValues.SessionDef.IsHuman)
-                {
-                    float Y_Offset = GetOffsetY();
-
-                    if (CompletedAllTrials)
-                    {
-                        //YouWinTextGO.transform.localPosition = new Vector3(YouWinTextGO.transform.localPosition.x, YouWinTextGO.transform.localPosition.y - Y_Offset, YouWinTextGO.transform.localPosition.z);
-                        //YouWinTextGO.GetComponent<TextMeshProUGUI>().text = $"WINNER! \n New HighScore: {Score} xp";
-                        //YouWinTextGO.SetActive(true);
-                        AudioFBController.Play("CR_BlockCompleted");
-                    }
-                    else
-                    {
-                        //YouLoseTextGO.transform.localPosition = new Vector3(YouLoseTextGO.transform.localPosition.x, YouLoseTextGO.transform.localPosition.y - Y_Offset, YouLoseTextGO.transform.localPosition.z);
-                        //YouLoseTextGO.GetComponent<TextMeshProUGUI>().text = $"Game Over \n HighScore: {Score} xp";
-                        //YouLoseTextGO.SetActive(true);
-                        AudioFBController.Play("CR_BlockFailed");
-                        //AudioFBController.Play("CR_SouthParkFail");
-                    }
-                }
+                    AudioFBController.Play(CompletedAllTrials ? "CR_BlockCompleted" : "CR_BlockFailed");
             }
         });
         DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
@@ -858,7 +840,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumPNC_Trial = 0;
 
         StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
-
 
         if (TrialCount_InBlock == 0)
         {

@@ -230,7 +230,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
-            gazeCalibration.AddInitializationMethod(() =>
+            gazeCalibration.AddSpecificInitializationMethod(() =>
             {
                 FrameData.gameObject.SetActive(false);
 
@@ -545,7 +545,7 @@ namespace USE_ExperimentTemplate_Session
                     }
                 });
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
-            loadTask.AddInitializationMethod(() =>
+            loadTask.AddSpecificInitializationMethod(() =>
             {
                 SessionValues.LoadingCanvas_GO.SetActive(true);
 
@@ -627,7 +627,7 @@ namespace USE_ExperimentTemplate_Session
 
             SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
             setupTask.AddChildLevel(setupTaskLevel);
-            setupTask.AddInitializationMethod(() =>
+            setupTask.AddSpecificInitializationMethod(() =>
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
@@ -723,7 +723,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             //FinishSession State---------------------------------------------------------------------------------------------------------------
-            finishSession.AddInitializationMethod(() =>
+            finishSession.AddSpecificInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("FinishSessionStarts");
             });

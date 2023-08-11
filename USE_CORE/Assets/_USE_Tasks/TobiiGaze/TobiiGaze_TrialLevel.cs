@@ -29,7 +29,7 @@ public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
             screenBasedSaveData = GameObject.Find("[SaveData]").GetComponent<ScreenBasedSaveData>();
             eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
         });
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"));
             

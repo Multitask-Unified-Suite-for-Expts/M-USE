@@ -62,7 +62,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         blocksAdded = 0;
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             SetSkyBox(CurrentBlock.ContextName);
 
@@ -76,7 +76,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());
 
-        BlockFeedback.AddInitializationMethod(() =>
+        BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild && trialLevel.AbortCode == 0)
             {

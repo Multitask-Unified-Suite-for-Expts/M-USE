@@ -49,14 +49,14 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         
         SetupBlockData();
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
         });
 
-        BlockFeedback.AddInitializationMethod(() =>
+        BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             AddBlockValuesToTaskValues();
             HandleBlockStrings();

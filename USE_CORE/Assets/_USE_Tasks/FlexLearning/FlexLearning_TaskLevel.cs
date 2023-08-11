@@ -38,7 +38,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             ResetTaskVariables();
         });
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             flTL.MinTrials = flBD.MinMaxTrials[0];
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
@@ -54,7 +54,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
             
         });
-        BlockFeedback.AddInitializationMethod(() =>
+        BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {

@@ -448,93 +448,16 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        // public void HandleCustomSettings()
-        // {
-        //     Dictionary<string, string> customSettings = new Dictionary<string, string>();
-        //     string settingsFilePath;
-        //
-        //     if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CustomSettings"))
-        //         customSettings = (Dictionary<string, string>)SessionSettings.Get(TaskName + "_TaskSettings", "CustomSettings");
-        //     else
-        //         customSettings = null;
-        //
-        //     if (customSettings != null)
-        //     {
-        //         foreach (string key in customSettings.Keys)
-        //         {
-        //             string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
-        //             string settingsFileName = key.Split('.')[0];
-        //
-        //             //Write to persistant data path for default configs:
-        //             if (SessionValues.UsingDefaultConfigs)
-        //             {
-        //                 string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
-        //                 filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
-        //
-        //                 if (!Directory.Exists(folderPath))
-        //                     Directory.CreateDirectory(folderPath);
-        //
-        //                 if (!File.Exists(filePath))
-        //                 {
-        //                     Debug.Log("LOADING FROM: " + "DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
-        //                     var db = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
-        //                     if (db == null)
-        //                         Debug.Log("DB IS NULL!!!!!!!!!!!!");
-        //                     byte[] data = db.bytes;
-        //                     File.WriteAllBytes(filePath, data);
-        //                 }
-        //                 else
-        //                     settingsFilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
-        //
-        //             }
-        //
-        //             string customSettingsValue = customSettings[key].ToLower();
-        //
-        //             if (SessionValues.UsingServerConfigs)
-        //             {
-        //                 StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath + key, result => //TASK CONFIG PATH (+ key) PROB IS NOT WHAT NEEDS TO BE HERE!!!
-        //                 {
-        //                     if (!string.IsNullOrEmpty(result[1]))
-        //                     {
-        //                         //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
-        //
-        //                         ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result[1]);
-        //                     }
-        //                     else
-        //                         Debug.Log("CUSTOM SETTINGS RESULT IS NULL!!!!!");
-        //                 }));
-        //             }
-        //             else
-        //                 ImportCustomSetting(customSettingsValue, filePath, settingsFileName);
-        //         }
-        //     }
-        // }
-        //
-        // private void ImportCustomSetting(string customSettingsValue, string filePath, string settingsFileName, string serverFileString = null)
-        // {
-        //     Type settingsType = GetTaskCustomSettingsType(settingsFileName);
-        //     Debug.Log("SETTINGS TYPE: " + settingsType);
-        //     switch (customSettingsValue)
-        //     {
-        //         case ("singletypearray"):
-        //             MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
-        //             readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-        //             break;
-        //         case ("singletypejson"):
-        //             MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
-        //             readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-        //             break;
-        //         case ("multipletype"):
-        //             MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
-        //             readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-        //             break;
-        //         default:
-        //             Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
-        //             break;
-        //     }
-        //
-        //     ProcessCustomSettingsFiles();
-        // }
+        
+        public virtual OrderedDictionary GetTaskSummaryData()
+        {
+            return new OrderedDictionary();
+        }
+
+        public virtual OrderedDictionary GetBlockResultsData()
+        {
+            return new OrderedDictionary();
+        }
 
         public virtual List<CustomSettings> DefineCustomSettings()
         {
@@ -861,19 +784,22 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
-        public bool CheckBlockEnd(string blockEndType, IEnumerable<float> runningTrialPerformance, float performanceThreshold = 1,
+        public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {
             // Takes in accuracy info from the current trial to determine whether to end the block
-            List<float> rTrialPerformance = (List<float>)runningTrialPerformance;
-
+            List<float?> rTrialPerformance = (List<float?>)runningTrialPerformance;
             if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
                 return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
+
+            // Add -1 to the running trial performance to indicate an aborted/incomplete trial
 
             switch (blockEndType)
             {
                 case "CurrentTrialPerformance":
-                    if (rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    Debug.Log("####CHECKING BLOCK END, rTrialPerformance.Count: " + rTrialPerformance.Count + ", (rTrialPerformance[rTrialPerformance.Count - 1]: " + (rTrialPerformance[rTrialPerformance.Count - 1]));
+
+                    if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;

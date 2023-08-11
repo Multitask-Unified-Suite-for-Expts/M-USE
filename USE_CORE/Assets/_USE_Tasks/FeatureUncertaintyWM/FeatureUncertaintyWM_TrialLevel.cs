@@ -165,7 +165,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             }
         );
 
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
             SetShadowType(ShadowType, "FeatureUncertaintyWM_DirectionalLight");
@@ -192,7 +192,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, taskCanvas);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -242,7 +242,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
-        SearchDisplay.AddInitializationMethod(() =>
+        SearchDisplay.AddSpecificInitializationMethod(() =>
         {
             CreateTextOnExperimenterDisplay();
             multiCompStims.ToggleVisibility(true);
@@ -313,7 +313,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurations_InBlock.Add(SearchDuration);
@@ -346,7 +346,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
 
         // The state that will handle the token feedback and wait for any animations
-        TokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddSpecificInitializationMethod(() =>
         {
             if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
@@ -382,7 +382,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (NeutralITI)
             {

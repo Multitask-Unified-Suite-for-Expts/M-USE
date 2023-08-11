@@ -186,7 +186,7 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
             });
 
-            FinishTrial.AddInitializationMethod(() =>
+            FinishTrial.AddSpecificInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
             });
@@ -214,7 +214,7 @@ namespace USE_ExperimentTemplate_Trial
                 Resources.UnloadUnusedAssets();
             });
             
-            GazeCalibration.AddInitializationMethod(() =>
+            GazeCalibration.AddSpecificInitializationMethod(() =>
             {
                 GazeCalibrationTaskLevel.TaskCam = TaskLevel.TaskCam;
 

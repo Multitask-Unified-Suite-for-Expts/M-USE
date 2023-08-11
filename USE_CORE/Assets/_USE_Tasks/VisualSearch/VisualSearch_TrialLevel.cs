@@ -100,7 +100,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloIntensity(5);
         });
 
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
@@ -142,7 +142,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, VS_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
@@ -175,7 +175,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-        SearchDisplay.AddInitializationMethod(() =>
+        SearchDisplay.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
@@ -248,7 +248,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
 
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
@@ -267,7 +267,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.Destroy());
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
-        TokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {
@@ -307,7 +307,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {

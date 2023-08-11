@@ -137,7 +137,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
-        SetupTrial.AddInitializationMethod(() => CR_CanvasGO.SetActive(true));
+        SetupTrial.AddSpecificInitializationMethod(() => CR_CanvasGO.SetActive(true));
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
@@ -146,7 +146,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if(!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*15, CR_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
@@ -213,7 +213,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        ChooseStim.AddInitializationMethod(() =>
+        ChooseStim.AddSpecificInitializationMethod(() =>
         {
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
@@ -311,7 +311,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
-        TouchFeedback.AddInitializationMethod(() =>
+        TouchFeedback.AddSpecificInitializationMethod(() =>
         {
             if (!StimIsChosen)
                 return;
@@ -327,7 +327,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
 
         //TOKEN UPDATE state ---------------------------------------------------------------------------------------------------------
-        TokenUpdate.AddInitializationMethod(() =>
+        TokenUpdate.AddSpecificInitializationMethod(() =>
         {
             TokenUpdateStartTime = Time.time;
             HaloFBController.Destroy();
@@ -371,7 +371,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
-        DisplayResults.AddInitializationMethod(() =>
+        DisplayResults.AddSpecificInitializationMethod(() =>
         {
             if (CurrentTrial.GotTrialCorrect)
                 score += (TrialCount_InBlock + 1) * 100;
@@ -397,7 +397,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (AbortCode == 0) //Normal
             {

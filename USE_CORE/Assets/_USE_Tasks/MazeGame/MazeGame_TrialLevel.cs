@@ -19,7 +19,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     // Block Ending Variable
-    public List<float> runningPercentError = new List<float>();
+    public List<float?> runningPercentError = new List<float?>();
     private float percentError;
     public int MinTrials;
 
@@ -140,13 +140,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.WebBuild)
             {
                 tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundImage);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
             }
             else
             {
                 string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
                 tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundImage));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
             }
 
             if (MazeContainer == null)
@@ -158,7 +158,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
         });
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (StartButton == null)
             {
@@ -189,7 +189,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale*10, MG_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
@@ -226,7 +226,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-        ChooseTile.AddInitializationMethod(() =>
+        ChooseTile.AddSpecificInitializationMethod(() =>
         {
             //TouchFBController.SetPrefabSizes(tileScale);
 
@@ -284,9 +284,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
+            runningPercentError.Add(null);
         }); 
        
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["TileFbOn"]);
@@ -351,8 +352,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     {
                         SessionValues.SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize);
                         //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                        CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                        //CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
+                        CurrentTaskLevel.numRewardPulses_InBlock += 1;
+                        CurrentTaskLevel.numRewardPulses_InTask += 1;
                     }
                 }
             }
@@ -373,6 +374,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                    // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.numRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.numRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
             }
             else if (CheckTileFlash() || currentTaskDef.GuidedMazeSelection)
@@ -390,7 +392,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             ReturnToLast = false;
             ErroneousReturnToLast = false;
         });
-        TileFlashFeedback.AddInitializationMethod(() =>
+        TileFlashFeedback.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
@@ -406,7 +408,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
         });
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             DisableSceneElements();
             if (!SessionValues.WebBuild)

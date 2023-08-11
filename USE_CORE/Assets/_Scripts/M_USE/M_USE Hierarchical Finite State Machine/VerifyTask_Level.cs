@@ -33,7 +33,7 @@ public class VerifyTask_Level : ControlLevel
         importSettings_Level = GameObject.Find("ControlLevels").GetComponent<ImportSettings_Level>();
         //importSettings_Level.TaskLevel = TaskLevel;
         ImportTaskSettings.AddChildLevel(importSettings_Level);
-        ImportTaskSettings.AddInitializationMethod(() =>
+        ImportTaskSettings.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.UsingDefaultConfigs)
                 TaskLevel.TaskConfigPath += "_DefaultConfigs";
@@ -163,10 +163,10 @@ public class VerifyTask_Level : ControlLevel
         ImportTaskSettings.SpecifyTermination(() => ImportTaskSettings.ChildLevel.Terminated, HandleTrialAndBlockDefs,
             () => Debug.Log("ImportSettings state terminated."));
 
-        HandleTrialAndBlockDefs.AddInitializationMethod(() => { TaskLevel.HandleTrialAndBlockDefs(true); });
+        HandleTrialAndBlockDefs.AddSpecificInitializationMethod(() => { TaskLevel.HandleTrialAndBlockDefs(true); });
         HandleTrialAndBlockDefs.SpecifyTermination(() => TaskLevel.TrialAndBlockDefsHandled, FindStims);
 
-        FindStims.AddInitializationMethod(() =>
+        FindStims.AddSpecificInitializationMethod(() =>
         {
             TaskLevel.TaskStims = new TaskStims();
             if (TaskLevel.PrefabStims == null)

@@ -27,7 +27,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
         AssignBlockData();
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             wmTL.ContextName = wmBD.ContextName;
 

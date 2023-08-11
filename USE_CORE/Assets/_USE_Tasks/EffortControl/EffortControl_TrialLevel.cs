@@ -390,6 +390,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.Touches_Task++;
                 SetTrialSummaryString();
                 CurrentTaskLevel.CalculateBlockSummaryString();
+                CurrentTaskLevel.SetTaskSummaryString();
 
                 holdTime = Time.time - startTime;
 

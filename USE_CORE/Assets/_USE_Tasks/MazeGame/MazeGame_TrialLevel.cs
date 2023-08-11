@@ -343,6 +343,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetTaskSummaryString();
             choiceMade = false;
             if (currentTaskDef.UsingFixedRatioReward)
             {

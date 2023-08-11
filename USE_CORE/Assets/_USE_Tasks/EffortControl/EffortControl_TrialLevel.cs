@@ -397,8 +397,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     {
                         successfulSelections++;
 
-                        Debug.Log("SUCCESSFUL SEL: " + successfulSelections + " | NUM INFLATIONS: " + NumInflations);
-
                         if (outlineClicksRemaining > 1 && !Inflate)
                         {
                             if (outlineClicksRemaining > 1) //Dont play on the last one because full inflate will play 
@@ -416,7 +414,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 Handler.HandlerActive = false;
                                 NumInflations++;
 
-                                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");
                                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
 
                                 CalculateInflation(); //Sets Inflate to TRUE at end of func
@@ -425,8 +423,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
                             }
                         }
-                        else
-                            Debug.Log("EXTRA CLICK!");
                     }
                 }
 
@@ -462,10 +458,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             
             if (Response == 1)
             {
-                if(SessionValues.SessionDef.IsHuman)
-                    AudioFBController.Play("EC_HarshPop"); //better for humans
-                else
-                    AudioFBController.Play("EC_NicePop"); //better for monkeys
+                AudioFBController.Play(SessionValues.SessionDef.IsHuman ? "EC_HarshPop" : "EC_NicePop");
             }
             else
             {
@@ -496,8 +489,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Completions_Block++;
                 AddTokenInflateAudioPlayed = true;
             }
-            //  else
-            // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);

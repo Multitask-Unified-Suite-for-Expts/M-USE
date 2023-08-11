@@ -199,7 +199,7 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialStims);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
 
-            FinishTrial.AddUniversalTerminationMethod(() =>
+            FinishTrial.AddUniversalLateTerminationMethod(() =>
             {
                 TrialCompleteTime = FinishTrial.TimingInfo.StartTimeAbsolute + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute);
 

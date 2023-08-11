@@ -78,6 +78,7 @@ namespace USE_States
 		///  termination (other terminations can be specified with <see cref="T:State_Namespace.StateTerminationSpecification"/>s).</summary>
 		public VoidDelegate StateDefaultTermination;
 		private VoidDelegate StateUniversalTermination;
+		private VoidDelegate StateUniversalLateTermination;
 		/// <summary>The State that will follow this one, only given a value after StateTerminationCheck returns true.</summary>
 		public State Successor;
 
@@ -209,6 +210,10 @@ namespace USE_States
 		public void AddUniversalTerminationMethod(VoidDelegate method)
 		{
 			StateUniversalTermination += method;
+		}
+		public void AddUniversalLateTerminationMethod(VoidDelegate method)
+		{
+			StateUniversalLateTermination += method;
 		}
 
 
@@ -561,6 +566,11 @@ namespace USE_States
 					Debug.Log("Control Level " + ParentLevel.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", no successor.");
 				}
 			}
+			
+			//if there is a universal termination, run it
+			if (StateUniversalTermination != null)
+				StateUniversalTermination();
+			
 			//if TerminationSpecification includes a termination method, run it
 			if (termSpec.Termination != null)
 			{
@@ -572,8 +582,8 @@ namespace USE_States
 				StateDefaultTermination();
 			}
 			//if there is a universal termination, run it
-			if (StateUniversalTermination != null)
-				StateUniversalTermination();
+			if (StateUniversalLateTermination != null)
+				StateUniversalLateTermination();
 
 			//setup Successor State
 			if (termSpec.SuccessorState != null)

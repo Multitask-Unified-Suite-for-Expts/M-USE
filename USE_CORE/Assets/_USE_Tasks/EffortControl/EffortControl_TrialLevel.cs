@@ -386,7 +386,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(InputBroker.GetMouseButtonUp(0))
             {
                 TrialTouches++;
+                TotalTouches_Block++;
+                CurrentTaskLevel.Touches_Task++;
                 SetTrialSummaryString();
+                CurrentTaskLevel.CalculateBlockSummaryString();
 
                 holdTime = Time.time - startTime;
 
@@ -447,9 +450,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
-
-            TotalTouches_Block += TrialTouches;
-            CurrentTaskLevel.Touches_Task += TrialTouches;
 
             if (SideChoice == "Left")
                 MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;

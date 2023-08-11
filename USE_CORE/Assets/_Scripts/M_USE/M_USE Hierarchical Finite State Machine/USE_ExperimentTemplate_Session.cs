@@ -602,7 +602,7 @@ namespace USE_ExperimentTemplate_Session
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 //SessionCam.gameObject.SetActive(false);
-                //Debug.LogError(GameObject.Find(CurrentTask.TaskName + "_Camera"));
+                Debug.Log(GameObject.Find(CurrentTask.TaskName));
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();

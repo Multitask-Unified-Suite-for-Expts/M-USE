@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6358285946212745555}
   - component: {fileID: -4421433783915754283}
   - component: {fileID: 6020225256618707032}
+  - component: {fileID: 1258264958698717416}
   m_Layer: 0
   m_Name: InputTrackers
   m_TagString: Untagged
@@ -74,3 +75,25 @@ MonoBehaviour:
   SimpleRaycastTarget: {fileID: 0}
   ShotgunRaycast: {fileID: 0}
   ShotgunThreshold: 0
+--- !u!114 &1258264958698717416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1916987163475544777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91fa173b56794b3fa8a20851fce2fb41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TargetedGameObject: {fileID: 0}
+  ShotgunGoAboveThreshold: []
+  ShotgunModalTarget: {fileID: 0}
+  SimpleRaycastTarget: {fileID: 0}
+  ShotgunRaycast: {fileID: 0}
+  ShotgunThreshold: 0
+  movementSpeed: 15
+  rotationSpeed: 180
+  playerCamTransform: {fileID: 0}
+  isActive: 0

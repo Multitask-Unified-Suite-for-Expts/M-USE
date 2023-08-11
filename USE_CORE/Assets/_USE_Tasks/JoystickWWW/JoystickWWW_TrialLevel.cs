@@ -19,9 +19,7 @@ using USE_Utilities;
 
 public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
 {
-    public GameObject WWW_CanvasGO;
-    public GameObject Player;
-    public GameObject ArenaPrefab;
+    public GameObject JoystickWWW_CanvasGO;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public JoystickWWW_TrialDef CurrentTrialDef => GetCurrentTrialDef<JoystickWWW_TrialDef>();
@@ -169,9 +167,9 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(12);
             HaloFBController.SetHaloIntensity(5);
-            
-            GameObject instantiatedArena = Instantiate(ArenaPrefab);
-            GameObject instantiatedPlayer = Instantiate(Player);
+
+            GameObject instantiatedArena = Resources.Load<GameObject>("ArenaPrefab");
+            GameObject instantiatedPlayer = Resources.Load<GameObject>("Player");
 
             if (StartButton == null)
             {
@@ -182,7 +180,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
+                    StartButton = SessionValues.USE_StartButton.CreateStartButton(JoystickWWW_CanvasGO.GetComponent<Canvas>(), ButtonPosition, ButtonScale);
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -208,6 +206,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
         
+        SessionValues.JoystickTracker.Player = Resources.Load<GameObject>("Player");
         SessionValues.JoystickTracker.playerCamTransform = CurrentTaskLevel.TaskCam.transform;
         SessionValues.JoystickTracker.isActive = true;
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "JoystickHandler", SessionValues.JoystickTracker, InitTrial, FinalFeedback);

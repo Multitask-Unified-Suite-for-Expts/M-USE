@@ -197,6 +197,9 @@ public class SetupSession_Level : ControlLevel
             SessionValues.InputManager.transform);
         SessionValues.MouseTracker = SessionValues.InputTrackers.GetComponent<MouseTracker>();
         SessionValues.GazeTracker = SessionValues.InputTrackers.GetComponent<GazeTracker>();
+        SessionValues.JoystickTracker = SessionValues.InputTrackers.GetComponent<JoystickTracker>();
+        //add here rigid body to joystick tracker/input tracker
+        //maybe? add here player object to joystick tracker as you did in hierarchy
 
         SessionValues.SelectionTracker = new SelectionTracker();
         if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))

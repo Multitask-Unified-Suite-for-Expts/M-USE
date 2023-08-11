@@ -11,6 +11,7 @@ public class JoystickTracker : InputTracker
     public Transform playerCamTransform;
     private Vector3 moveDirection;
     public bool isActive;
+    public GameObject Player;
 
     private void Start()
     {
@@ -68,7 +69,7 @@ public class JoystickTracker : InputTracker
     {
         if (isActive)
         {
-            GetComponent<Rigidbody>().MovePosition(transform.position + moveDirection * movementSpeed * Time.fixedDeltaTime);
+            Player.GetComponent<Rigidbody>().MovePosition(transform.position + moveDirection * movementSpeed * Time.fixedDeltaTime);
 
         }
     }

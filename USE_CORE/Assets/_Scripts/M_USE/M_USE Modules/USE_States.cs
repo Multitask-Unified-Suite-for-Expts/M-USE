@@ -78,6 +78,7 @@ namespace USE_States
 		///  termination (other terminations can be specified with <see cref="T:State_Namespace.StateTerminationSpecification"/>s).</summary>
 		public VoidDelegate StateDefaultTermination;
 		private VoidDelegate StateUniversalTermination;
+		private VoidDelegate StateUniversalLateTermination;
 		/// <summary>The State that will follow this one, only given a value after StateTerminationCheck returns true.</summary>
 		public State Successor;
 
@@ -209,6 +210,10 @@ namespace USE_States
 		public void AddUniversalTerminationMethod(VoidDelegate method)
 		{
 			StateUniversalTermination += method;
+		}
+		public void AddUniversalLateTerminationMethod(VoidDelegate method)
+		{
+			StateUniversalLateTermination += method;
 		}
 
 
@@ -561,6 +566,11 @@ namespace USE_States
 					Debug.Log("Control Level " + ParentLevel.ControlLevelName + ": State " + StateName + " termination on Frame " + Time.frameCount + ", no successor.");
 				}
 			}
+			
+			//if there is a universal termination, run it
+			if (StateUniversalTermination != null)
+				StateUniversalTermination();
+			
 			//if TerminationSpecification includes a termination method, run it
 			if (termSpec.Termination != null)
 			{
@@ -572,8 +582,8 @@ namespace USE_States
 				StateDefaultTermination();
 			}
 			//if there is a universal termination, run it
-			if (StateUniversalTermination != null)
-				StateUniversalTermination();
+			if (StateUniversalLateTermination != null)
+				StateUniversalLateTermination();
 
 			//setup Successor State
 			if (termSpec.SuccessorState != null)
@@ -883,60 +893,6 @@ namespace USE_States
 				return ActiveStates[iS];
 		}
 
-		//Populate State method groups
-		public void AddStateInitializationMethod(VoidDelegate method, State state = null)
-		{
-			List<State> stateList = new List<State>();
-			if (state == null)
-			{
-				stateList = AvailableStates;
-			}
-			else
-			{
-				stateList.Add(state);
-			}
-			foreach (State s in stateList)
-			{
-				if (CheckForAvailableState(s))
-				{
-					s.AddSpecificInitializationMethod(method);
-				}
-				else
-				{
-					Debug.LogError("Attempted to add Initialization method to state named " + state.StateName
-								   + " via ControlLevel " + ControlLevelName + ", but this ControlLevel does" +
-								   " not contain this state. Perhaps you need to add it using the ControlLevel.AddActiveStates method.");
-				}
-			}
-		}
-		public void AddStateInitializationMethod(VoidDelegate method, IEnumerable<State> states)
-		{
-			foreach (State s in states)
-			{
-				AddStateInitializationMethod(method, s);
-			}
-		}
-		public void AddStateInitializationMethod(VoidDelegate method, string stateName)
-		{
-			if (ActiveStateNames.Contains(stateName))
-			{
-				AddStateInitializationMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
-			}
-			else
-			{
-				Debug.LogError("Attempted Initialization method to state named " + stateName +
-							   "via ControlLevel " + ControlLevelName + ", but this ControlLevel" +
-							   "does not contain a state with this name. Perhaps you need to add it uing the ControlLevel.AddActiveStates method.");
-			}
-		}
-		public void AddStateInitializationMethod(VoidDelegate method, IEnumerable<string> stateNames)
-		{
-			foreach (string s in stateNames)
-			{
-				AddStateInitializationMethod(method, s);
-			}
-		}
-		
 		public bool CheckForActiveState(State state)
 		{
 			return ActiveStates.Contains(state) ? true : false;

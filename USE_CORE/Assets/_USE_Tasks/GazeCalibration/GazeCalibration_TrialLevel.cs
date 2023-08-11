@@ -249,7 +249,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Blink);
         
-        Shrink.AddUniversalTerminationMethod(() => { InfoString.Clear(); });
+        Shrink.AddUniversalLateTerminationMethod(() => { InfoString.Clear(); });
 
         //----------------------------------------------------- CHECK CALIBRATION READINESS -----------------------------------------------------
         
@@ -393,7 +393,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        Confirm.AddUniversalTerminationMethod(() =>
+        Confirm.AddUniversalLateTerminationMethod(() =>
         {
             // Set the calibration point to inactive at the end of confirming
             CalibCircle.CircleGO.SetActive(false);

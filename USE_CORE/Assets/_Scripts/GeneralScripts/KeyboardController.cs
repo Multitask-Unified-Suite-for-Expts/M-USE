@@ -29,6 +29,7 @@ public class KeyboardController : MonoBehaviour
 
         if (Keyboard_GO != null)
         {
+
             SetCharacterList();
             GenerateGridItems();
         }
@@ -53,9 +54,9 @@ public class KeyboardController : MonoBehaviour
                     {
                         CurrentInputField = selectedInputField;
                         if(selectedInputField.gameObject.name == "SubjectID_InputField" || selectedInputField.gameObject.name == "SubjectAge_InputField")
-                            Keyboard_GO.transform.localPosition = new Vector3(0, -235f, 0);
+                            Keyboard_GO.transform.localPosition = new Vector3(0, -300f, 0);
                         else
-                            Keyboard_GO.transform.localPosition = new Vector3(0, 235f, 0);
+                            Keyboard_GO.transform.localPosition = new Vector3(0, 300f, 0);
                     }
                 }
             }

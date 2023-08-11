@@ -163,7 +163,6 @@ namespace USE_ExperimentTemplate_Task
                     SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-                    Debug.Log("CREATED HUMAN START PANEL!");
                 }
             });
 
@@ -239,19 +238,24 @@ namespace USE_ExperimentTemplate_Task
 
 
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
+            float blockFeedbackDuration = 0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
-            {                
-                if(SessionValues.SessionDef.IsHuman)
+            {
+                blockFeedbackDuration = SessionValues.SessionDef.BlockResultsDuration;
+                if (SessionValues.SessionDef.IsHuman)
                 {
                     OrderedDictionary taskBlockResults = GetBlockResultsData();
-                    if(taskBlockResults != null && taskBlockResults.Count > 0)
+                    if (taskBlockResults != null && taskBlockResults.Count > 0)
                         DisplayBlockResults(taskBlockResults);
                 }
+                else
+                    blockFeedbackDuration = 0;
+
                 SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= SessionValues.SessionDef.BlockResultsDuration))
+                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;

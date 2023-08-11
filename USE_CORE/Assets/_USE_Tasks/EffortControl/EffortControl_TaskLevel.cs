@@ -58,7 +58,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
-            AddBlockValuesToTaskValues();
+            //AddBlockValuesToTaskValues();
             HandleBlockStrings();
         });
     }
@@ -74,7 +74,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    public void AddBlockValuesToTaskValues()
+/*    public void AddBlockValuesToTaskValues()
     {
         RewardPulses_Task += trialLevel.RewardPulses_Block;
         Completions_Task += trialLevel.Completions_Block;
@@ -89,7 +89,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         NumSameRewardChosen_Task += trialLevel.NumSameRewardChosen_Block;
         NumAborted_Task += trialLevel.NumAborted_Block;
 
-    }
+    }*/
 
     public override OrderedDictionary GetBlockResultsData()
     {

@@ -29,7 +29,6 @@ public class KeyboardController : MonoBehaviour
 
         if (Keyboard_GO != null)
         {
-
             SetCharacterList();
             GenerateGridItems();
         }

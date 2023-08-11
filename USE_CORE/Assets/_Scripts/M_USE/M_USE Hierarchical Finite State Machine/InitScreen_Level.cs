@@ -167,7 +167,6 @@ public class InitScreen_Level : ControlLevel
             LocalData_GO.SetActive(false);
         }
 
-
         if (!ServerConfig_Toggle.isOn && !ServerData_Toggle.isOn)
             GreyOutPanels_Array[0].SetActive(true);
 
@@ -331,11 +330,6 @@ public class InitScreen_Level : ControlLevel
 
         KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
         KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
-
-        if (KeyboardToggle.isOn)
-            Debug.Log("KEYBOARD IS ON!");
-        else
-            Debug.Log("NOT ON!");
 
         StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
         StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen

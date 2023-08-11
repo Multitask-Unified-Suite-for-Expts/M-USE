@@ -165,6 +165,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
             //Set handler active in case they ran out of time mid inflation and it was never set back to active
             if (Handler != null)
                 Handler.HandlerActive = true;

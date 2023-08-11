@@ -883,60 +883,6 @@ namespace USE_States
 				return ActiveStates[iS];
 		}
 
-		//Populate State method groups
-		public void AddStateInitializationMethod(VoidDelegate method, State state = null)
-		{
-			List<State> stateList = new List<State>();
-			if (state == null)
-			{
-				stateList = AvailableStates;
-			}
-			else
-			{
-				stateList.Add(state);
-			}
-			foreach (State s in stateList)
-			{
-				if (CheckForAvailableState(s))
-				{
-					s.AddSpecificInitializationMethod(method);
-				}
-				else
-				{
-					Debug.LogError("Attempted to add Initialization method to state named " + state.StateName
-								   + " via ControlLevel " + ControlLevelName + ", but this ControlLevel does" +
-								   " not contain this state. Perhaps you need to add it using the ControlLevel.AddActiveStates method.");
-				}
-			}
-		}
-		public void AddStateInitializationMethod(VoidDelegate method, IEnumerable<State> states)
-		{
-			foreach (State s in states)
-			{
-				AddStateInitializationMethod(method, s);
-			}
-		}
-		public void AddStateInitializationMethod(VoidDelegate method, string stateName)
-		{
-			if (ActiveStateNames.Contains(stateName))
-			{
-				AddStateInitializationMethod(method, ActiveStates[ActiveStateNames.IndexOf(stateName)]);
-			}
-			else
-			{
-				Debug.LogError("Attempted Initialization method to state named " + stateName +
-							   "via ControlLevel " + ControlLevelName + ", but this ControlLevel" +
-							   "does not contain a state with this name. Perhaps you need to add it uing the ControlLevel.AddActiveStates method.");
-			}
-		}
-		public void AddStateInitializationMethod(VoidDelegate method, IEnumerable<string> stateNames)
-		{
-			foreach (string s in stateNames)
-			{
-				AddStateInitializationMethod(method, s);
-			}
-		}
-		
 		public bool CheckForActiveState(State state)
 		{
 			return ActiveStates.Contains(state) ? true : false;

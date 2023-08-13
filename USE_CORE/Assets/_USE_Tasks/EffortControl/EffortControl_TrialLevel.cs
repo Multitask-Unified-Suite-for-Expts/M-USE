@@ -386,7 +386,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(InputBroker.GetMouseButtonUp(0))
             {
                 TrialTouches++;
+                TotalTouches_Block++;
+                CurrentTaskLevel.Touches_Task++;
                 SetTrialSummaryString();
+                CurrentTaskLevel.CalculateBlockSummaryString();
+                CurrentTaskLevel.SetTaskSummaryString();
 
                 holdTime = Time.time - startTime;
 
@@ -448,9 +452,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
 
-            TotalTouches_Block += TrialTouches;
-            CurrentTaskLevel.Touches_Task += TrialTouches;
-
             if (SideChoice == "Left")
                 MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;
             else
@@ -470,6 +471,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 NumAborted_Block++;
+                CurrentTaskLevel.NumAborted_Task++;
+
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
                 SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
@@ -494,6 +497,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 Completions_Block++;
+                CurrentTaskLevel.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
             }
             //  else
@@ -554,6 +558,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
             NumAborted_Block++;
+            CurrentTaskLevel.NumAborted_Task++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
@@ -612,29 +617,49 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(SideChoice == "Left")
         {
             NumChosenLeft_Block++;
+            CurrentTaskLevel.NumChosenLeft_Task++;
             EffortChoice = CompareValues(CurrentTrial.NumClicksLeft, CurrentTrial.NumClicksRight);
             RewardChoice = CompareValues(CurrentTrial.NumCoinsLeft, CurrentTrial.NumCoinsRight);
         }
         else
         {
             NumChosenRight_Block++;
+            CurrentTaskLevel.NumChosenRight_Task++;
             EffortChoice = CompareValues(CurrentTrial.NumClicksRight, CurrentTrial.NumClicksLeft);
             RewardChoice = CompareValues(CurrentTrial.NumCoinsRight, CurrentTrial.NumCoinsLeft);
         }
 
         if (EffortChoice == "Higher")
+        {
             NumHigherEffortChosen_Block++;
+            CurrentTaskLevel.NumHigherEffortChosen_Task++;
+        }
         else if (EffortChoice == "Lower")
+        {
             NumLowerEffortChosen_Block++;
+            CurrentTaskLevel.NumLowerEffortChosen_Task++;
+        }
         else
+        {
             NumSameEffortChosen_Block++;
+            CurrentTaskLevel.NumSameEffortChosen_Task++;
+        }
 
         if (RewardChoice == "Higher")
+        {
             NumHigherRewardChosen_Block++;
+            CurrentTaskLevel.NumHigherRewardChosen_Task++;
+        }
         else if (RewardChoice == "Lower")
+        {
             NumLowerRewardChosen_Block++;
+            CurrentTaskLevel.NumLowerRewardChosen_Task++;
+        }
         else
+        {
             NumSameRewardChosen_Block++;
+            CurrentTaskLevel.NumSameRewardChosen_Task++;
+        }
     }
 
     public string CompareValues(int chosenValue, int otherValue)

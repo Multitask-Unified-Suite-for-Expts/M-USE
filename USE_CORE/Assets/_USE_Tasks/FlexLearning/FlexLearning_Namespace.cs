@@ -23,9 +23,6 @@ namespace FlexLearning_Namespace
         public bool StimFacingCamera;
         public string ShadowType;
         public bool NeutralITI;
-
-        Vector3 ButtonColor;
-        string ButtonText;
     }
 
     public class FlexLearning_BlockDef : BlockDef
@@ -46,7 +43,7 @@ namespace FlexLearning_Namespace
         public float BlockEndThreshold;
         public int BlockEndWindow;
         public int NumTokenBar;
-        public int NumPulses;
+        //public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
         public bool? TokensWithStimOn = null;
@@ -173,7 +170,6 @@ namespace FlexLearning_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
         public bool IsTarget;
-        public int TokenUpdate;
 
     }
 }

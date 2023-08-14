@@ -178,7 +178,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigVariables();
 
             // Load Maze at the start of every trial to keep the mNextStep consistent
-            //StartCoroutine(CurrentTaskLevel.LoadTextMaze());
             CurrentTaskLevel.SetTaskSummaryString();
             CurrentTaskLevel.CalculateBlockSummaryString();
             

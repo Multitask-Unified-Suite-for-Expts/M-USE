@@ -691,7 +691,7 @@ namespace USE_States
 		/// <summary>
 		/// Whether this Control Level is the Main Level of the experiment.
 		/// </summary>
-		public bool isMainLevel;
+		public bool isHighestLevel;
 		public bool CallDefineLevelAutomatically = true;
 		public bool quitApplicationAtEnd = false;
 
@@ -925,7 +925,7 @@ namespace USE_States
             Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
 			InitializeControlLevel();
-			if (isMainLevel)
+			if (isHighestLevel)
 			{
 				if (!mainLevelSpecified)
 				{
@@ -937,23 +937,23 @@ namespace USE_States
 				}
 			}
 		}
-		void FixedUpdate()
+		void Update()
 		{
-			if (isMainLevel & !Paused)
-			{
-				RunControlLevelFixedUpdate();
-			}
-		}
-		public virtual void Update()
-		{
-			if (isMainLevel & !Paused)
+			if (isHighestLevel & !Paused)
 			{
 				RunControlLevelUpdate();
 			}
 		}
+		void FixedUpdate()
+		{
+			if (isHighestLevel & !Paused)
+			{
+				RunControlLevelFixedUpdate();
+			}
+		}
 		void LateUpdate()
 		{
-			if (isMainLevel & !Paused)
+			if (isHighestLevel & !Paused)
 			{
 				RunControlLevelLateUpdate();
 			}
@@ -964,17 +964,6 @@ namespace USE_States
 			CurrentState = state;
 		}
 
-		public void RunControlLevelFixedUpdate()
-		{
-			if (!Paused)
-			{
-				CheckInitialization();
-				if (CurrentState != null)
-				{
-					CurrentState.RunStateFixedUpdate();
-				}
-			}
-		}
 
 		public void RunControlLevelUpdate()
 		{
@@ -984,6 +973,18 @@ namespace USE_States
 				if (CurrentState != null)
 				{
 					CurrentState.RunStateUpdate();
+				}
+			}
+		}
+		
+		public void RunControlLevelFixedUpdate()
+		{
+			if (!Paused)
+			{
+				// CheckInitialization();
+				if (CurrentState != null)
+				{
+					CurrentState.RunStateFixedUpdate();
 				}
 			}
 		}
@@ -1063,7 +1064,7 @@ namespace USE_States
 			initialized = false;
 			EndFrame = Time.frameCount;
 			Duration = Time.time - StartTimeAbsolute;
-			if (isMainLevel)
+			if (isHighestLevel)
 			{
 				if (quitApplicationAtEnd)
 				{

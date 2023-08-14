@@ -147,7 +147,7 @@ static class TaskCreation
         
 
         TaskLevel.ControlLevelName = taskName + "_TaskLevel";
-        TaskLevel.isMainLevel = false;
+        TaskLevel.isHighestLevel = false;
         TaskLevel.CallDefineLevelAutomatically = false;
         TaskLevel.quitApplicationAtEnd = false;
         TaskLevel.DebugActive = true;
@@ -155,7 +155,7 @@ static class TaskCreation
         TaskLevel.TrialLevel = TrialLevel;
         
         TrialLevel.ControlLevelName = taskName + "_TrialLevel";
-        TrialLevel.isMainLevel = false;
+        TrialLevel.isHighestLevel = false;
         TrialLevel.CallDefineLevelAutomatically = false;
         TrialLevel.quitApplicationAtEnd = false;
         TrialLevel.DebugActive = true;

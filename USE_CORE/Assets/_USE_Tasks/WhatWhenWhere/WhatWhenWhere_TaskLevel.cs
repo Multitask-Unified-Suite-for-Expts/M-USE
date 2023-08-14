@@ -125,7 +125,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     }
 
     private void DefineBlockData()
+
     {
+        BlockData.AddDatum("MaxTrials", () => wwwTL.CurrentTrialDef.MaxTrials);
         BlockData.AddDatum("LearningSpeed", () => LearningSpeed);
         BlockData.AddDatum("BlockAccuracyLog", ()=> wwwTL.accuracyLog_InBlock);
         BlockData.AddDatum("AvgSearchDuration", ()=> wwwTL.searchDurations_InBlock.Average());

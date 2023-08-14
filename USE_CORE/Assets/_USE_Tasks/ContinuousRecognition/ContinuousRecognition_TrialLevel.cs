@@ -199,7 +199,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
 
-            if(CurrentTrial.ShakeStim || (SessionValues.WebBuild && SessionValues.SessionDef.IsHuman))
+            if(CurrentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
@@ -358,7 +358,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             HandleTokenUpdate();
             DeactivatePlayerViewText();
 
-            if (CurrentTrial.ShakeStim || (SessionValues.WebBuild && SessionValues.SessionDef.IsHuman))
+            if (CurrentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
 
             if (SessionValues.SessionDef.IsHuman)

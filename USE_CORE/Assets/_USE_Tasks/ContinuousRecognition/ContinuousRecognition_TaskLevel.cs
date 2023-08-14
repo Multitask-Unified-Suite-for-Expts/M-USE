@@ -31,6 +31,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public float AvgNonStimTouches_Task = 0;
 
     [HideInInspector] public double StanDev;
+
     [HideInInspector] public string BlockAveragesString;
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;

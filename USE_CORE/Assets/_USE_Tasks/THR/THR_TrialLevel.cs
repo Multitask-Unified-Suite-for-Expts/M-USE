@@ -396,22 +396,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ITI.AddDefaultTerminationMethod(() =>
         {
             SquareGO.SetActive(false);
-
-            if (GiveReleaseReward || GiveTouchReward)
-                TrialsCorrect_Block++;
-
-            if (GiveTouchReward || GiveReleaseReward)
-                TrialCompletionList.Insert(0, 1);
-            else
-                TrialCompletionList.Insert(0, 0);
-
-            TrialsCompleted_Block++;
-            AddTrialTouchNumsToBlock();
-
+            UpdateData();
             currentTask.CalculateBlockSummaryString();
-
             CheckIfBlockShouldEnd();
-
             ConfigValuesChangedInPrevTrial = ConfigValuesChanged();
         });
 
@@ -421,7 +408,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
-    private void AddTrialTouchNumsToBlock()
+    private void UpdateData()
     {
         BlueSquareTouches_Block += BlueSquareTouches_Trial;
         WhiteSquareTouches_Block += WhiteSquareTouches_Trial;
@@ -430,6 +417,30 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         NumTouchRewards_Block += TouchRewards_Trial;
         NumReleaseRewards_Block += ReleaseRewards_Trial;
         NumTouchesMovedOutside_Block += NumTouchesMovedOutside_Trial;
+
+        currentTask.BlueSquareTouches_Task += BlueSquareTouches_Block;
+        currentTask.WhiteSquareTouches_Task += WhiteSquareTouches_Block;
+        currentTask.BackdropTouches_Task += BackdropTouches_Block;
+        currentTask.ItiTouches_Task += NumItiTouches_Block;
+        currentTask.TouchRewards_Task += NumTouchRewards_Block;
+        currentTask.ReleaseRewards_Task += NumReleaseRewards_Block;
+        currentTask.ReleasedEarly_Task += NumReleasedEarly_Block;
+        currentTask.ReleasedLate_Task += NumReleasedLate_Block;
+        currentTask.TouchesMovedOutside_Task += NumTouchesMovedOutside_Block;
+
+        if (GiveReleaseReward || GiveTouchReward)
+        {
+            TrialsCorrect_Block++;
+            currentTask.TrialsCorrect_Task++;
+        }
+
+        if (GiveTouchReward || GiveReleaseReward)
+            TrialCompletionList.Insert(0, 1);
+        else
+            TrialCompletionList.Insert(0, 0);
+
+        TrialsCompleted_Block++;
+        currentTask.TrialsCompleted_Task++;
     }
 
     public void ResetBlockVariables()

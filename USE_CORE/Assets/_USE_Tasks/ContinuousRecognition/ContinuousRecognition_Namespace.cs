@@ -23,20 +23,14 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_Locations;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int InitialTokenAmount, NumTokenBar, TrialCount, NumRewardPulses, PulseSize, RewardMag;
+        public int InitialTokenAmount, NumTokenBar, NumRewardPulses, PulseSize, RewardMag;
         public string BlockName, ContextName, ShadowType;
         public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
+        public Vector3[] BlockStimLocations; //Empty unless they specify (and set ManuallySpecifyLocation to true)
 
-        public List<int> PC_Stim;
-        public List<int> PNC_Stim;
-        public List<int> New_Stim;
-        public List<int> Unseen_Stim;
-        public List<int> TrialStimIndices;
+
         public int MaxNumTrials;
         public int MaxNumStim;
-        public Vector3[] BlockStimLocations; //Value comes from Block Config if you specify. 
-        public Vector3[] StimLocations; //Value calculated below. Used if you don't specify locations.
-        public Vector3[] BlockFeedbackLocations;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -47,42 +41,26 @@ namespace ContinuousRecognition_Namespace
             else
                 MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
 
-            PC_Stim = new List<int>();
-            PNC_Stim = new List<int>();
-            New_Stim = new List<int>();
-            Unseen_Stim = new List<int>();
-            TrialStimIndices = new List<int>();
 
             //Calculate STIM Locations:
-            StimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
-
-            int index = 0;
-            for (int i = 0; i < Y_Locations.Length; i++)
-            {
-                float y = Y_Locations[i];
-                for (int j = 0; j < X_Locations.Length; j++)
-                {
-                    float x = X_Locations[j];
-                    StimLocations[index] = new Vector3(x, y, 0);
-                    index++;
-                }
-            }
             if(!ManuallySpecifyLocation)
-                BlockStimLocations = StimLocations;
-
-            //Calculate FEEDBACK Locations:
-            BlockFeedbackLocations = new Vector3[X_FbLocations.Length * Y_FbLocations.Length];
-            index = 0;
-            for (int i = 0; i < Y_FbLocations.Length; i++)
             {
-                float y = Y_FbLocations[i];
-                for (int j = 0; j < X_FbLocations.Length; j++)
+                BlockStimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
+
+                int stimIndex = 0;
+                for (int i = 0; i < Y_Locations.Length; i++)
                 {
-                    float x = X_FbLocations[j];
-                    BlockFeedbackLocations[index] = new Vector3(x, y, 0);
-                    index++;
+                    float y = Y_Locations[i];
+                    for (int j = 0; j < X_Locations.Length; j++)
+                    {
+                        float x = X_Locations[j];
+                        BlockStimLocations[stimIndex] = new Vector3(x, y, 0);
+                        stimIndex++;
+                    }
                 }
+
             }
+
 
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
 
@@ -110,13 +88,9 @@ namespace ContinuousRecognition_Namespace
                     }
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
-                trial.TrialFeedbackLocations = BlockFeedbackLocations;
+                trial.X_FbLocations = X_FbLocations;
+                trial.Y_FbLocations = Y_FbLocations;
                 trial.TrialStimLocations = trialStimLocations;
-                trial.TrialStimIndices = TrialStimIndices;
-                trial.PC_Stim = PC_Stim;
-                trial.PNC_Stim = PNC_Stim;
-                trial.Unseen_Stim = Unseen_Stim;
-                trial.New_Stim = New_Stim;
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
@@ -177,12 +151,8 @@ namespace ContinuousRecognition_Namespace
             if (Num_PNC == 0) Num_PNC = 1;
 
             float PC_TargetPerc = stimPercentages[0];
-            int temp = 2;
             while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
             {
-                float currentPerc = Num_PC / (Num_PC + Num_New + Num_PNC);
-                float percDiff = currentPerc - PC_TargetPerc;
-
                 float PC_AddPerc = (Num_PC + 1) / (Num_PC + 1 + Num_New + Num_PNC);
                 float PC_AddDiff = PC_AddPerc - PC_TargetPerc;
 
@@ -193,12 +163,26 @@ namespace ContinuousRecognition_Namespace
                     Num_PC++;
                 else
                 {
-                    if (temp % 2 == 0)
-                        Num_New++;
-                    else
+                    if (Num_PNC < Num_New)
                         Num_PNC++;
+                    else
+                        Num_New++;
                 }
             }
+
+            while(Num_PC + Num_New + Num_PNC > totalTrialStim)
+            {
+                if (Num_New > 1)
+                    Num_New--;
+                else
+                {
+                    if (Num_PC > Num_PNC || Num_PC == Num_PNC)
+                        Num_PC--;
+                    else
+                        Num_PNC--;
+                }
+            }
+
             return Num_New;
         }
 
@@ -220,37 +204,25 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_TrialDef : TrialDef
     {
-        public bool ShakeStim;
-        public bool UseStarfield;
-        public bool FindAllStim;
-        public bool StimFacingCamera;
-
-        public Vector3[] TrialStimLocations;
-        public Vector3[] TrialFeedbackLocations;
-
+        //FROM BLOCK CONFIG & PASSED:
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
+        public float[] X_FbLocations;
+        public float[] Y_FbLocations;
+        public int InitialTokenAmount, NumTokenBar, NumRewardPulses, PulseSize, RewardMag;
+        public string ContextName, ShadowType;
+        public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield;
 
-        public List<int> PC_Stim;
-        public List<int> PNC_Stim;
-        public List<int> Unseen_Stim;
-        public List<int> New_Stim;
-        public List<int> TrialStimIndices;
+
+        public Vector3[] TrialStimLocations;
 
         public int WrongStimIndex;
         public int NumTrialStims;
         public int MaxNumTrials;
         public int MaxNumStim;
 
-        public int NumTokenBar;
-        public int NumRewardPulses;
-        public int RewardMag;
-        public int PulseSize;
-
         public bool GotTrialCorrect;
-        public string ShadowType;
-        public string ContextName;
 
         //Data:
         public float TimeChosen;

@@ -21,6 +21,7 @@ namespace THR_Namespace
         public float PerfThresholdEndTrials;
         public float WhiteSquareDuration;
         public float BlueSquareDuration;
+        public float TimeoutDuration;
         public float FbDuration;
         public float ItiDuration;
         public float MinTouchDuration;
@@ -43,7 +44,6 @@ namespace THR_Namespace
         public bool RandomSquareSize;
         public bool RandomSquarePosition;
         public int TimeToAutoEndTrialSec;
-        public float TimeoutDuration;
 
 
         public override void GenerateTrialDefsFromBlockDef()

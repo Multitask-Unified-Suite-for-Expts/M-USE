@@ -82,7 +82,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     private int blocksAdded = 0;
-    private MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
+    public MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     private MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
 
     public override void DefineControlLevel()
@@ -160,8 +160,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumAbortedTrials", ()=> numAbortedTrials_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",mazeDurationsList_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", choiceDurationsList_InBlock));
-        BlockData.AddDatum("MaxTrials", () => mgBD.MinMaxTrials[0]);
-        BlockData.AddDatum("MinTrials", () => mgBD.MaxTrials);
+        BlockData.AddDatum("MinTrials", () => mgBD.MinMaxTrials[0]);
+        BlockData.AddDatum("MaxTrials", () => mgTL.CurrentTrialDef.MaxTrials);
        // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
     }
     public override OrderedDictionary GetBlockResultsData()
@@ -181,7 +181,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trial Count In Task"] = mgTL.TrialCount_InTask,
+            ["Trial Count In Task"] = mgTL.TrialCount_InTask + 1,
             ["Num Reward Pulses"] = numRewardPulses_InTask,
             ["Total Errors"] = totalErrors_InTask,
             ["Correct Touches"] = correctTouches_InTask,

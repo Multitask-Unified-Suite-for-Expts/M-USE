@@ -140,13 +140,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.WebBuild)
             {
                 tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundImage);
+                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
             }
             else
             {
                 string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
                 tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundImage));
+                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
             }
 
             if (MazeContainer == null)
@@ -178,7 +178,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigVariables();
 
             // Load Maze at the start of every trial to keep the mNextStep consistent
-            //StartCoroutine(CurrentTaskLevel.LoadTextMaze());
             CurrentTaskLevel.SetTaskSummaryString();
             CurrentTaskLevel.CalculateBlockSummaryString();
             
@@ -343,6 +342,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetTaskSummaryString();
             choiceMade = false;
             if (currentTaskDef.UsingFixedRatioReward)
             {
@@ -808,6 +808,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineTrialData()
     {
+        TrialData.AddDatum("BlockName", ()=> CurrentTaskLevel.mgBD.BlockName);
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH

@@ -201,9 +201,6 @@ namespace USE_ExperimentTemplate_Trial
             {
                 TrialCompleteTime = FinishTrial.TimingInfo.StartTimeAbsolute + (Time.time - FinishTrial.TimingInfo.StartTimeAbsolute);
 
-                FinishTrialCleanup();
-                ClearActiveTrialHandlers();
-
                 int nStimGroups = TrialStims.Count;
                 for (int iG = 0; iG < nStimGroups; iG++)
                 {
@@ -211,6 +208,10 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
                 WriteDataFiles();
+                
+                FinishTrialCleanup();
+                ClearActiveTrialHandlers();
+                TouchFBController.ClearErrorDict();
                 Resources.UnloadUnusedAssets();
             });
             

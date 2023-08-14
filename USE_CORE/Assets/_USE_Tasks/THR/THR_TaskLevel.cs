@@ -96,6 +96,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
+            ["Trial Count In Task"] = trialLevel.TrialCount_InTask + 1,
             ["Trials Completed"] = TrialsCompleted_Task,
             ["Trials Correct"] = TrialsCorrect_Task,
             ["Blue Square Touches"] = BlueSquareTouches_Task,

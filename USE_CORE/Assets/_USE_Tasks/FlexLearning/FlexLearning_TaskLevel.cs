@@ -41,6 +41,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             flTL.MinTrials = flBD.MinMaxTrials[0];
+            flTL.MaxTrials = flTL.CurrentTrialDef.MaxTrials;
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             flTL.ContextName = flBD.ContextName;
             
@@ -96,7 +97,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = new OrderedDictionary();
-
+        data["Trial Count In Task"] = flTL.TrialCount_InTask + 1;
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
@@ -153,6 +154,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumRewardGiven", ()=> flTL.NumRewardPulses_InBlock);
         BlockData.AddDatum("NumTokenBarFilled", ()=> flTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("TotalTokensCollected", ()=> flTL.TotalTokensCollected_InBlock);
+        BlockData.AddDatum("MinTrials", () => flTL.MinTrials);
+        BlockData.AddDatum("MaxTrials", () => flTL.CurrentTrialDef.MaxTrials);
     }
     public void ClearStrings()
     {

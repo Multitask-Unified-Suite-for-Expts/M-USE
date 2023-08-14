@@ -7,9 +7,9 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
-#if (!UNITY_WEBGL)
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-#endif  
+// #if (!UNITY_WEBGL)
+// using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+// #endif  
 
 
 public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
@@ -74,7 +74,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
-    private bool TouchDurationError = false;
     private bool aborted = false;
 
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
@@ -136,7 +135,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 #endif
 
             SetTrialSummaryString();
-            MaxTrials = CurrentTrialDef.MaxTrials;
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -206,10 +204,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            if (TouchFBController.ErrorCount > PreSearch_TouchFbErrorCount)
-                TouchDurationError = true;
-            else
-                TouchDurationError = false;
 
             CorrectSelection = selectedSD.IsTarget;
             if (CorrectSelection)
@@ -232,6 +226,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (selectedGO != null)
             {
                 SelectedStimIndex = selectedSD.StimIndex;
+                Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
                 SelectedStimLocation = selectedSD.StimLocation;
             }
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
@@ -287,8 +282,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
@@ -321,8 +316,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
-        AssignTrialData();
-        AssignFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
 
 
@@ -409,14 +404,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        TouchDurationError = false;
         aborted = false;
         SessionValues.MouseTracker.ResetClicks();
     }
-    private void AssignTrialData()
+    private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
-        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
@@ -425,7 +420,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
-    private void AssignFrameData()
+    private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
@@ -480,7 +475,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" +
                              "\nCorrect Selection: " + CorrectSelection +
-                             "\nTouch Duration Error: " + TouchDurationError +
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 

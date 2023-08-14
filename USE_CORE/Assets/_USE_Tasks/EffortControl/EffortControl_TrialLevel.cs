@@ -74,6 +74,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     //Trial specific Data variables:
     [HideInInspector] public float AvgClickTime;
     [HideInInspector] public float ChooseDuration;
+    [HideInInspector] public float InflationDuration;
     //Block specific Data variables:
     [HideInInspector] public int RewardPulses_Block;
     [HideInInspector] public int TotalTouches_Block;
@@ -87,6 +88,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumLowerRewardChosen_Block;
     [HideInInspector] public int NumSameRewardChosen_Block;
     [HideInInspector] public int NumAborted_Block;
+    [HideInInspector] public List<float?> InflationDurations_Block = new List<float?>();
+    
 
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
@@ -329,6 +332,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             IncrementAmounts = new Vector3();
             Flashing = false;
             InflateAudioPlayed = false;
+            InflationDuration = 0;
             ScaleTimer = 0;
             SessionValues.MouseTracker.ResetClicks();
             clickTimings = new List<float>();
@@ -351,6 +355,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
+            InflationDuration += Time.deltaTime;
             if (Inflate)
             {
                 if (!InflateAudioPlayed)
@@ -386,7 +391,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(InputBroker.GetMouseButtonUp(0))
             {
                 TrialTouches++;
+                TotalTouches_Block++;
+                CurrentTaskLevel.Touches_Task++;
                 SetTrialSummaryString();
+                CurrentTaskLevel.CalculateBlockSummaryString();
+                CurrentTaskLevel.SetTaskSummaryString();
 
                 holdTime = Time.time - startTime;
 
@@ -414,7 +423,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 Handler.HandlerActive = false;
                                 NumInflations++;
 
-                                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");
+                                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
 
                                 CalculateInflation(); //Sets Inflate to TRUE at end of func
@@ -443,10 +452,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = Feedback;
             DelayDuration = popToFeedbackDelay.value;
-
-            TotalTouches_Block += TrialTouches;
-            CurrentTaskLevel.Touches_Task += TrialTouches;
-
+            
             if (SideChoice == "Left")
                 MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;
             else
@@ -458,11 +464,22 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             
             if (Response == 1)
             {
-                AudioFBController.Play(SessionValues.SessionDef.IsHuman ? "EC_HarshPop" : "EC_NicePop");
+                InflationDurations_Block.Add(InflationDuration);
+                CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
+                
+                if(SessionValues.SessionDef.IsHuman)
+                    AudioFBController.Play("EC_HarshPop"); //better for humans
+                else
+                    AudioFBController.Play("EC_NicePop"); //better for monkeys
             }
             else
             {
+                InflationDurations_Block.Add(null);
+                CurrentTaskLevel.InflationDurations_Task.Add(null);
+
                 NumAborted_Block++;
+                CurrentTaskLevel.NumAborted_Task++;
+
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
                 SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
@@ -487,8 +504,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 Completions_Block++;
+                CurrentTaskLevel.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
             }
+            //  else
+            // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
@@ -511,6 +531,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumInflations = 0;
         Response = -1;
         ChooseDuration = 0;
+        InflationDuration = 0;
         InflationsNeeded = 0;
         AvgClickTime = 0;
         SideChoice = "";
@@ -545,6 +566,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
         {
             NumAborted_Block++;
+            CurrentTaskLevel.NumAborted_Task++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.BlockSummaryString.AppendLine("");
         }
@@ -575,6 +597,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TotalTouches_Block = 0;
         RewardPulses_Block = 0;
         NumAborted_Block = 0;
+        InflationDurations_Block.Clear();
     }
 
     void ScaleToNextInterval()
@@ -603,29 +626,49 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if(SideChoice == "Left")
         {
             NumChosenLeft_Block++;
+            CurrentTaskLevel.NumChosenLeft_Task++;
             EffortChoice = CompareValues(CurrentTrial.NumClicksLeft, CurrentTrial.NumClicksRight);
             RewardChoice = CompareValues(CurrentTrial.NumCoinsLeft, CurrentTrial.NumCoinsRight);
         }
         else
         {
             NumChosenRight_Block++;
+            CurrentTaskLevel.NumChosenRight_Task++;
             EffortChoice = CompareValues(CurrentTrial.NumClicksRight, CurrentTrial.NumClicksLeft);
             RewardChoice = CompareValues(CurrentTrial.NumCoinsRight, CurrentTrial.NumCoinsLeft);
         }
 
         if (EffortChoice == "Higher")
+        {
             NumHigherEffortChosen_Block++;
+            CurrentTaskLevel.NumHigherEffortChosen_Task++;
+        }
         else if (EffortChoice == "Lower")
+        {
             NumLowerEffortChosen_Block++;
+            CurrentTaskLevel.NumLowerEffortChosen_Task++;
+        }
         else
+        {
             NumSameEffortChosen_Block++;
+            CurrentTaskLevel.NumSameEffortChosen_Task++;
+        }
 
         if (RewardChoice == "Higher")
+        {
             NumHigherRewardChosen_Block++;
+            CurrentTaskLevel.NumHigherRewardChosen_Task++;
+        }
         else if (RewardChoice == "Lower")
+        {
             NumLowerRewardChosen_Block++;
+            CurrentTaskLevel.NumLowerRewardChosen_Task++;
+        }
         else
+        {
             NumSameRewardChosen_Block++;
+            CurrentTaskLevel.NumSameRewardChosen_Task++;
+        }
     }
 
     public string CompareValues(int chosenValue, int otherValue)
@@ -935,6 +978,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void DefineTrialData()
     {
+        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("ClicksNeeded", () => InflationsNeeded);
         TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
         TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);
@@ -944,6 +988,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ChosenEffort", () => EffortChoice);
         TrialData.AddDatum("ChosenReward", () => RewardChoice);
         TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
+        TrialData.AddDatum("TimeTakenToInflateBaloon", () => InflationDuration);
         TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
         TrialData.AddDatum("ClicksPerOutline", () => CurrentTrial.ClicksPerOutline);
         TrialData.AddDatum("TrialTouches", () => TrialTouches);

@@ -559,7 +559,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void DefineTrialData() //All ".AddDatum" commands for Trial Data
     {
-        TrialData.AddDatum("TrialID", () => CurrentTrialDef.BlockName);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);

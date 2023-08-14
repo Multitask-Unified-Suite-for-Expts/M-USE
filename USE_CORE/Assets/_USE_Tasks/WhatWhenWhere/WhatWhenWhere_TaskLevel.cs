@@ -68,7 +68,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trial Count In Task"] = wwwTL.TrialCount_InTask,
+            ["Trial Count In Task"] = wwwTL.TrialCount_InTask + 1,
             ["Num Reward Pulses"] = NumRewardPulses_InTask,
             ["Slider Bar Full"] = NumSliderBarFilled_InTask,
             ["Aborted Trials In Task"] = AbortedTrials_InTask

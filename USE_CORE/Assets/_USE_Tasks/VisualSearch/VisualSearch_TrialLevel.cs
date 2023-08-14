@@ -66,7 +66,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
-    private bool TouchDurationError = false;
     private bool aborted = false;
     private float? selectionDuration = null;
     private bool choiceMade = false;
@@ -207,11 +206,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            if (TouchFBController.ErrorCount > PreSearch_TouchFbErrorCount)
-                TouchDurationError = true;
-            else
-                TouchDurationError = false;
-
             CorrectSelection = selectedSD.IsTarget;
 
             if (CorrectSelection)
@@ -284,8 +278,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
         });
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
@@ -418,7 +412,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        TouchDurationError = false;
         aborted = false;
         choiceMade = false;
         if (SessionValues.MouseTracker != null)
@@ -483,7 +476,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" +
                              "\nCorrect Selection: " + CorrectSelection +
-                             "\nTouch Duration Error: " + TouchDurationError +
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 

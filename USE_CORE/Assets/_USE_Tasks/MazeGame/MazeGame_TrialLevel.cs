@@ -499,7 +499,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (chessCoordName == CurrentTaskLevel.currMaze.mFinish)
             {
                 tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
-                tile.GetComponent<Tile>().sliderValueChange = (float)1.2*tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
+                tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
             else
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);

@@ -298,7 +298,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 Ray ray = Camera.main.ScreenPointToRay(InputBroker.mousePosition);
                 if (!Physics.Raycast(ray, out RaycastHit hit))
+                {
                     NonStimTouches_Block++;
+                    CurrentTaskLevel.NonStimTouches_Task++;
+                }
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
@@ -402,8 +405,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (AbortCode == 0) //Normal
             {
                 NumTrials_Block++;
+                CurrentTaskLevel.TrialsCompleted_Task++;
+
                 if (CurrentTrial.GotTrialCorrect)
+                {
                     NumCorrect_Block++;
+                    CurrentTaskLevel.TrialsCorrect_Task++;
+                }
 
                 CurrentTaskLevel.CalculateBlockSummaryString();
             }
@@ -1108,7 +1116,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if(TokenFBController.IsTokenBarFull())
         {
             NumTbCompletions_Block++;
+            CurrentTaskLevel.TokenBarCompletions_Task++;
+
             NumRewards_Block += CurrentTrial.NumRewardPulses;
+            CurrentTaskLevel.TotalRewards_Task += CurrentTrial.NumRewardPulses;
+
             TokenFBController.ResetTokenBarFull();
 
             if (SessionValues.SyncBoxController != null)

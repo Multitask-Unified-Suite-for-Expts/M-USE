@@ -982,6 +982,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void DefineTrialData()
     {
+        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("ClicksNeeded", () => InflationsNeeded);
         TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
         TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);

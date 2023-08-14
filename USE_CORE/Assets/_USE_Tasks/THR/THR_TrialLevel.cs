@@ -415,8 +415,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             ConfigValuesChangedInPrevTrial = ConfigValuesChanged();
         });
 
-        LogTrialData();
-        LogFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
 
 
@@ -571,8 +571,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ReleaseRewards_Trial = 0;
     }
 
-    private void LogTrialData()
+    private void DefineTrialData()
     {
+        
+        TrialData.AddDatum("TrialID", () => currentTrial.TrialID);
         TrialData.AddDatum("SquareSize", () => currentTrial.SquareSize);
         TrialData.AddDatum("SquarePosX", () => currentTrial.PositionX);
         TrialData.AddDatum("SquarePosY", () => currentTrial.PositionY);
@@ -591,7 +593,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("HeldDuration", () => HeldDuration);
     }
 
-    private void LogFrameData()
+    private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("SquareGO", () => SquareGO.activeInHierarchy);

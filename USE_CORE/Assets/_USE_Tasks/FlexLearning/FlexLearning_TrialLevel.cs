@@ -135,7 +135,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 #endif
 
             SetTrialSummaryString();
-            MaxTrials = CurrentTrialDef.MaxTrials;
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -317,8 +316,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
-        AssignTrialData();
-        AssignFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
 
 
@@ -408,10 +407,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         aborted = false;
         SessionValues.MouseTracker.ResetClicks();
     }
-    private void AssignTrialData()
+    private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
-        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
@@ -420,7 +420,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
-    private void AssignFrameData()
+    private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);

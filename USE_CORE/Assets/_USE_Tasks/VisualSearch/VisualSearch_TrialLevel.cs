@@ -312,8 +312,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
-        AssignTrialData();
-        AssignFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
     public void MakeStimFaceCamera()
     {
@@ -417,9 +417,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         if (SessionValues.MouseTracker != null)
             SessionValues.MouseTracker.ResetClicks();
     }
-    private void AssignTrialData()
+    private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
+        TrialData.AddDatum("TrialID", ()=> CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelecteStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
@@ -429,7 +430,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
-    private void AssignFrameData()
+    private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);

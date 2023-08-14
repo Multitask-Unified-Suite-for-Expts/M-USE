@@ -108,6 +108,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
+            ["Trial Count In Task"] = trialLevel.TrialCount_InTask + 1,
             ["Completions"] = Completions_Task,
             ["Reward Pulses"] = RewardPulses_Task,
             ["Touches"] = Touches_Task,

@@ -26,5 +26,7 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         gcTL.MinCircleScale = 0.15f;
         gcTL.ShrinkDuration = 1.5f;
     }
+    
+    
 
 }

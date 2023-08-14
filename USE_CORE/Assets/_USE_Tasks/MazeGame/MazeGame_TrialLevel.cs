@@ -809,6 +809,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineTrialData()
     {
+        TrialData.AddDatum("BlockName", ()=> CurrentTaskLevel.mgBD.BlockName);
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH

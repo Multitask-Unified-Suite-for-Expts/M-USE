@@ -44,7 +44,7 @@ namespace USE_ExperimentTemplate_Task
         protected TrialDef[] CurrentBlockTrialDefs;
         public TaskDef TaskDef;
         public BlockDef[] BlockDefs;
-        public BlockDef CurrentBlockDef;
+        private BlockDef CurrentBlockDef;
         public BlockDef currentBlockDef
         {
             get

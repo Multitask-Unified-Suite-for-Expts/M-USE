@@ -140,6 +140,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
+            ["Trial Count In Task"] = trialLevel.TrialCount_InTask+ 1,
             ["Trials Completed"] = TrialsCompleted_Task.Sum(),
             ["Trials Correct"] = TrialsCorrect_Task.Sum(),
             ["TokenBar Completions"] = TokenBarCompletions_Task.Sum(),

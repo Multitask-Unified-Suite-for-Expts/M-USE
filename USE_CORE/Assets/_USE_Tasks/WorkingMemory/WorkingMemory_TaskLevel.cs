@@ -39,6 +39,20 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             SetBlockSummaryString();
         });
     }
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = wmTL.TrialCount_InTask + 1,
+            ["Num Reward Pulses"] = NumRewardPulses_InTask,
+            ["Token Bar Full"] = NumTokenBarFull_InTask,
+            ["Aborted Trials In Task"] = NumAborted_InTask
+        };
+        if (SearchDurations_InTask.Count > 0)
+            data["Average Search Duration"] = SearchDurations_InTask.Average();
+        
+        return data;
+    }
 
     public override OrderedDictionary GetBlockResultsData()
     {

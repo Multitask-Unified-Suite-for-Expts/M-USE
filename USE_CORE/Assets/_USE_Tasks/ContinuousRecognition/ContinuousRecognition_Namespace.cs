@@ -26,7 +26,7 @@ namespace ContinuousRecognition_Namespace
         public int InitialTokenAmount, NumTokenBar, NumRewardPulses, PulseSize, RewardMag;
         public string BlockName, ContextName, ShadowType;
         public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
-        public Vector3[] BlockStimLocations; //Empty unless they specify (and set ManuallySpecifyLocation to true)
+        public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
 
 
         public int MaxNumTrials;
@@ -41,12 +41,10 @@ namespace ContinuousRecognition_Namespace
             else
                 MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
 
-
             //Calculate STIM Locations:
             if(!ManuallySpecifyLocation)
             {
                 BlockStimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
-
                 int stimIndex = 0;
                 for (int i = 0; i < Y_Locations.Length; i++)
                 {
@@ -58,9 +56,7 @@ namespace ContinuousRecognition_Namespace
                         stimIndex++;
                     }
                 }
-
             }
-
 
             TrialDefs = new List<ContinuousRecognition_TrialDef>().ConvertAll(x=>(TrialDef)x);
 
@@ -69,7 +65,6 @@ namespace ContinuousRecognition_Namespace
             for (int trialIndex = 0; trialIndex < MaxNumTrials; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
-                trial.BlockStimIndices = BlockStimIndices;
 
                 Vector3[] trialStimLocations;
                 if (FindAllStim && trialIndex > MaxNumStim - 2)
@@ -88,6 +83,7 @@ namespace ContinuousRecognition_Namespace
                     }
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
+                trial.BlockStimIndices = BlockStimIndices;
                 trial.X_FbLocations = X_FbLocations;
                 trial.Y_FbLocations = Y_FbLocations;
                 trial.TrialStimLocations = trialStimLocations;
@@ -214,24 +210,11 @@ namespace ContinuousRecognition_Namespace
         public string ContextName, ShadowType;
         public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield;
 
-
+        //Not in block config BUT STILL PASSED DOWN:
         public Vector3[] TrialStimLocations;
-
-        public int WrongStimIndex;
         public int NumTrialStims;
         public int MaxNumTrials;
         public int MaxNumStim;
-
-        public bool GotTrialCorrect;
-
-        //Data:
-        public float TimeChosen;
-        public float TimeToChoice;
-
-        public string Locations_String;
-        public string PC_String;
-        public string New_String;
-        public string PNC_String;
 
         public string PC_Percentage_String;
     }

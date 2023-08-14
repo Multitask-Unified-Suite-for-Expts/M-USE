@@ -109,6 +109,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public string PC_String;
     public string New_String;
     public string PNC_String;
+    public string PC_Percentage_String;
+
 
 
     public override void DefineControlLevel()
@@ -171,6 +173,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (TrialCount_InBlock == 0)
                 CalculateBlockFeedbackLocations();
+
+            CalculatePercentagePC();
 
             if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
                 AdjustTextPosForMac();
@@ -1216,6 +1220,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     }
 
+    private string CalculatePercentagePC()
+    {
+        return (GetStimPercentages()[0] * 100).ToString() + "%";
+    }
+
+    private float[] GetStimPercentages()
+    {
+        var ratio = CurrentTrial.InitialStimRatio;
+        float sum = 0;
+        float[] stimPercentages = new float[ratio.Length];
+
+        foreach (var num in ratio)
+            sum += num;
+        for (int i = 0; i < ratio.Length; i++)
+            stimPercentages[i] = ratio[i] / sum;
+
+        return stimPercentages;
+    }
+
     private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
@@ -1228,7 +1251,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("StimLocations", () => Locations_String);
         TrialData.AddDatum("ChoseCorrectly", () => GotTrialCorrect);
         TrialData.AddDatum("CurrentTrialStims", () => TrialStimIndices);
-        TrialData.AddDatum("PC_Percentage", () => CurrentTrial.PC_Percentage_String);
+        TrialData.AddDatum("PC_Percentage", () => PC_Percentage_String);
     }
 
     private void DefineFrameData()

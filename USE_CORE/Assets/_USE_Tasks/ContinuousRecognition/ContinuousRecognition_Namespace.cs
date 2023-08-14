@@ -28,7 +28,7 @@ namespace ContinuousRecognition_Namespace
         public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
 
-
+        //Calculated below (DONT SET IN CONFIG!!!):
         public int MaxNumTrials;
         public int MaxNumStim;
 
@@ -97,7 +97,6 @@ namespace ContinuousRecognition_Namespace
                 trial.RewardMag = RewardMag;
                 trial.PulseSize = PulseSize;
                 trial.NumTokenBar = NumTokenBar;
-                trial.PC_Percentage_String = CalcPercentagePC();
                 trial.FindAllStim = FindAllStim;
                 trial.StimFacingCamera = StimFacingCamera;
                 trial.ShadowType = ShadowType;
@@ -109,12 +108,6 @@ namespace ContinuousRecognition_Namespace
             }
         }
 
-        string CalcPercentagePC()
-        {
-            float[] all = GetStimPercentages();
-            float multiplied = all[0] * 100;
-            return multiplied.ToString() + "%";
-        }
 
         int CalculateMaxNumTrials(int maxNumStim)
         {
@@ -215,8 +208,6 @@ namespace ContinuousRecognition_Namespace
         public int NumTrialStims;
         public int MaxNumTrials;
         public int MaxNumStim;
-
-        public string PC_Percentage_String;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

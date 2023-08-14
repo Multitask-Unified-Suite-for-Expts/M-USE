@@ -22,7 +22,6 @@ namespace THR_Namespace
         public float WhiteSquareDuration;
         public float BlueSquareDuration;
         public float TimeoutDuration;
-        public float FbDuration;
         public float ItiDuration;
         public float MinTouchDuration;
         public float MaxTouchDuration;
@@ -54,7 +53,7 @@ namespace THR_Namespace
             {
                 THR_TrialDef trial = new THR_TrialDef();
 
-                trial.BlockName = BlockName;
+                trial.TrialName = BlockName;
                 trial.MinNumTrials = MinMaxNumTrials[0];
                 trial.MaxNumTrials = MinMaxNumTrials[1];
                 trial.ShowNegFb = ShowNegFb;
@@ -63,7 +62,6 @@ namespace THR_Namespace
                 trial.PerfThresholdEndTrials = PerfThresholdEndTrials;
                 trial.WhiteSquareDuration = WhiteSquareDuration;
                 trial.BlueSquareDuration = BlueSquareDuration;
-                trial.FbDuration = FbDuration;
                 trial.ItiDuration = ItiDuration;
                 trial.MinTouchDuration = MinTouchDuration;
                 trial.MaxTouchDuration = MaxTouchDuration;
@@ -95,7 +93,7 @@ namespace THR_Namespace
 
     public class THR_TrialDef : TrialDef
     {
-        public string BlockName;
+        public string TrialName;
         public int MinNumTrials;
         public int MaxNumTrials;
         public bool ShowNegFb;
@@ -104,7 +102,6 @@ namespace THR_Namespace
         public float PerfThresholdEndTrials;
         public float WhiteSquareDuration;
         public float BlueSquareDuration;
-        public float FbDuration;
         public float ItiDuration;
         public float MinTouchDuration;
         public float MaxTouchDuration;

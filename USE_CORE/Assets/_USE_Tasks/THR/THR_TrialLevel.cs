@@ -593,7 +593,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("MaxTouchDuration", () => currentTrial.MaxTouchDuration);
         TrialData.AddDatum("RewardTouch", () => currentTrial.RewardTouch);
         TrialData.AddDatum("RewardRelease", () => currentTrial.RewardRelease);
-        TrialData.AddDatum("DifficultyLevel", () => currentTrial.BlockName);
+        TrialData.AddDatum("DifficultyLevel", () => currentTrial.TrialID);
         TrialData.AddDatum("BlueSquareTouches_Trial", () => BlueSquareTouches_Trial);
         TrialData.AddDatum("WhiteSquareTouches_Trial", () => WhiteSquareTouches_Trial);
         TrialData.AddDatum("BackdropTouches_Trial", () => BackdropTouches_Trial);

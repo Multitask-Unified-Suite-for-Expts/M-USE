@@ -49,10 +49,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-
             CalculateBlockSummaryString();
         });
-        RunBlock.AddDefaultTerminationMethod(() => AddBlockValuesToTaskValues());
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
@@ -80,20 +78,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
     }
 
-    public void AddBlockValuesToTaskValues()
-    {
-        TrialsCompleted_Task += trialLevel.TrialsCompleted_Block;
-        TrialsCorrect_Task += trialLevel.TrialsCorrect_Block;
-        BlueSquareTouches_Task += trialLevel.BlueSquareTouches_Block;
-        WhiteSquareTouches_Task += trialLevel.WhiteSquareTouches_Block;
-        BackdropTouches_Task += trialLevel.BackdropTouches_Block;
-        ItiTouches_Task += trialLevel.NumItiTouches_Block;
-        TouchRewards_Task += trialLevel.NumTouchRewards_Block;
-        ReleaseRewards_Task += trialLevel.NumReleaseRewards_Block;
-        ReleasedEarly_Task += trialLevel.NumReleasedEarly_Block;
-        ReleasedLate_Task += trialLevel.NumReleasedLate_Block;
-        TouchesMovedOutside_Task += trialLevel.NumTouchesMovedOutside_Block;
-    }
 
     public override OrderedDictionary GetBlockResultsData()
     {
@@ -101,8 +85,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         {
             ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
             ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
-            //["Start Button Touches"] = trialLevel.BlueSquareTouches_Block,
-            //["White Circle Touches"] = trialLevel.WhiteSquareTouches_Block,
             ["Touches Released Early"] = trialLevel.NumReleasedEarly_Block,
             ["Touches Released Late"] = trialLevel.NumReleasedLate_Block,
             ["Touches Moved Outside"] = trialLevel.NumTouchesMovedOutside_Block

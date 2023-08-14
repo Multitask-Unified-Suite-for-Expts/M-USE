@@ -406,8 +406,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     {
                         successfulSelections++;
 
-                        Debug.Log("SUCCESSFUL SEL: " + successfulSelections + " | NUM INFLATIONS: " + NumInflations);
-
                         if (outlineClicksRemaining > 1 && !Inflate)
                         {
                             if (outlineClicksRemaining > 1) //Dont play on the last one because full inflate will play 
@@ -434,8 +432,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
                             }
                         }
-                        else
-                            Debug.Log("EXTRA CLICK!");
                     }
                 }
 

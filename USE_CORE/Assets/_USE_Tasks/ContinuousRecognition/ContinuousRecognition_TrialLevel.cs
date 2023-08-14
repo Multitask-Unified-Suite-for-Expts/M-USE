@@ -197,7 +197,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
 
             if (CurrentTrial.StimFacingCamera)
-                MakeStimsFaceCamera(trialStims);  
+                MakeStimsFaceCamera(trialStims);
 
             if(CurrentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
@@ -503,6 +503,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             AddRigidBody(stim.StimGameObject);
             stim.StimGameObject.AddComponent<ShakeStim>();
+            if (SessionValues.Using2DStim)
+                stim.StimGameObject.GetComponent<ShakeStim>().Radius = .004f;
         }
     }
 
@@ -1272,23 +1274,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (New_Num == 0) New_Num = 1;
         if (PNC_Num == 0) PNC_Num = 1;
 
-        int PC_Available = CurrentTrial.PC_Stim.Count;
-        int New_Available = CurrentTrial.Unseen_Stim.Count;
-        int PNC_Available = CurrentTrial.PNC_Stim.Count;
+        int[] available = new int[3] { CurrentTrial.PC_Stim.Count, CurrentTrial.Unseen_Stim.Count, CurrentTrial.PNC_Stim.Count };
 
         //Ensure a crazy stim ratio doesn't calculate more stim than available in that category.
-        while (PC_Num > PC_Available) PC_Num--;
-        while (New_Num > New_Available) New_Num--;
-        while (PNC_Num > PNC_Available) PNC_Num--;
+        while (PC_Num > available[0]) PC_Num--;
+        while (New_Num > available[1]) New_Num--;
+        while (PNC_Num > available[2]) PNC_Num--;
 
         float PC_TargetPerc = stimPercentages[0];
-        int temp = 2;
         while((PC_Num + New_Num + PNC_Num) < CurrentTrial.NumTrialStims)
         {
-            //calculate PC Percentage difference.
-            float currentPerc = PC_Num / (PC_Num + New_Num + PNC_Num);
-            float percDiff = currentPerc - PC_TargetPerc;
-
             //determine whether 1)Adding to PC, or 2)Adding to New/PNC makes the PercDiff smaller.
             float PC_AddPerc = (PC_Num + 1) / (PC_Num + 1 + New_Num + PNC_Num);
             float PC_AddDiff = PC_AddPerc - PC_TargetPerc;
@@ -1297,17 +1292,30 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             float NonPC_AddDiff = NonPC_AddPerc - PC_TargetPerc;
 
             if(PC_AddDiff < NonPC_AddDiff)
-            {
                 PC_Num++;
-            }
             else
             {
-                if (temp % 2 == 0)
-                    New_Num++;
-                else
+                if (PNC_Num < New_Num)
                     PNC_Num++;
+                else
+                    New_Num++;
             }
         }
+
+        while(PC_Num + New_Num + PNC_Num > CurrentTrial.NumTrialStims)
+        {
+            Debug.Log("GOTTA REMOVE!");
+
+            if (New_Num > 1)
+                New_Num--;
+            else if (New_Num <= 1 && PC_Num > 1)
+                PC_Num--;
+            else if (New_Num <= 1 && PNC_Num > 1)
+                PNC_Num--;
+            else
+                Debug.LogError("CR GetStimNumbers() WHILE LOOP ERROR!");
+        }
+
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 

@@ -33,7 +33,6 @@ namespace FlexLearning_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public int[] MinMaxTrials;
-        public string TrialID;
         public string BlockName;
         public string ContextName;
         public int NumInitialTokens;
@@ -56,7 +55,6 @@ namespace FlexLearning_Namespace
             for (int iTrial = 0; iTrial < maxNum; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
-                td.TrialID = TrialID;
                 td.BlockName = BlockName;
                 td.TrialStimIndices = TrialStimIndices;
                 td.TrialStimLocations = TrialStimLocations;
@@ -120,7 +118,6 @@ namespace FlexLearning_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public string BlockName;
-        public string TrialID;
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
         public bool RandomizedLocations;

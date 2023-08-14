@@ -308,8 +308,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
-        AssignFrameData();
-        AssignTrialData();
+        DefineFrameData();
+        DefineTrialData();
     }
 
     public void MakeStimFaceCamera()
@@ -444,9 +444,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         selectedGO = null;
         selectedSD = null;
     }
-    private void AssignTrialData()
+    private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
+
+        TrialData.AddDatum("TrialID", ()=> CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
@@ -454,7 +456,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven);
     }
-    private void AssignFrameData()
+    private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);

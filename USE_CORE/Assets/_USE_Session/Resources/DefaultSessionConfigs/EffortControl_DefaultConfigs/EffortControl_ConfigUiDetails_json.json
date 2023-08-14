@@ -44,7 +44,8 @@
       "precision": 1,
       "isRange": 1,
       "hidden": 0
-    }, "sbToBalloonDelay": {
+    },
+    "sbToBalloonDelay": {
       "name": "Start Button To Balloon Delay",
       "value": 0.005,
       "min": 0.005,

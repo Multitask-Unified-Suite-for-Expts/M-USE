@@ -53,7 +53,7 @@ namespace ContinuousRecognition_Namespace
             Unseen_Stim = new List<int>();
             TrialStimIndices = new List<int>();
 
-            //Calculate BlockStimLocations:
+            //Calculate STIM Locations:
             StimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
 
             int index = 0;
@@ -70,7 +70,7 @@ namespace ContinuousRecognition_Namespace
             if(!ManuallySpecifyLocation)
                 BlockStimLocations = StimLocations;
 
-            //Calculate FeedbackLocations;
+            //Calculate FEEDBACK Locations:
             BlockFeedbackLocations = new Vector3[X_FbLocations.Length * Y_FbLocations.Length];
             index = 0;
             for (int i = 0; i < Y_FbLocations.Length; i++)

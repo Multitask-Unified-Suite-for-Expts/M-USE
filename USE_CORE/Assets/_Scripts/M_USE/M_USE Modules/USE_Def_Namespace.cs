@@ -110,6 +110,7 @@ namespace USE_Def_Namespace
     public abstract class TrialDef
     {
         public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        public string TrialID;
         public TrialStims TrialStims;
     }
 

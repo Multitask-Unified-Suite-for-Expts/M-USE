@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 using EffortControl_Namespace;
 
@@ -23,6 +25,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumLowerEffortChosen_Task = 0;
     [HideInInspector] public int NumSameEffortChosen_Task = 0;
     [HideInInspector] public int NumAborted_Task = 0;
+    [HideInInspector] public List<float?> InflationDurations_Task = new List<float?>();
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
@@ -106,9 +109,23 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetTaskSummaryData()
     {
+        float avgInflationDuration_Task;
+        
+        if (InflationDurations_Task.Any(item => item.HasValue))
+        {
+            avgInflationDuration_Task = (float)InflationDurations_Task
+                .Where(item => item.HasValue)
+                .Average(item => item.Value);
+        }
+        else
+        {
+            avgInflationDuration_Task = 0f;
+        }
+
         OrderedDictionary data = new OrderedDictionary
         {
             ["Trial Count In Task"] = trialLevel.TrialCount_InTask + 1,
+            
             ["Completions"] = Completions_Task,
             ["Reward Pulses"] = RewardPulses_Task,
             ["Touches"] = Touches_Task,
@@ -119,7 +136,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             ["Chose Same Reward"] = NumSameRewardChosen_Task,
             ["Chose Higher Effort"] = NumHigherEffortChosen_Task,
             ["Chose Lower Effort"] = NumLowerEffortChosen_Task,
-            ["Chose Same Effort"] = NumSameEffortChosen_Task
+            ["Chose Same Effort"] = NumSameEffortChosen_Task,
+            ["Avg Inflation Duration"] = avgInflationDuration_Task
         };
 
         return data;
@@ -128,7 +146,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockString = ("Touches: " + trialLevel.TotalTouches_Block +
+        CurrentBlockString = ("\nTouches: " + trialLevel.TotalTouches_Block +
                         "\nReward Pulses: " + trialLevel.RewardPulses_Block +
                         "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
                         "\nChose Right: " + trialLevel.NumChosenRight_Block +
@@ -137,8 +155,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChose Same Reward: " + trialLevel.NumSameRewardChosen_Block +
                         "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
                         "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
-                        "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block +
-                        "\n");
+                        "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block);
         BlockSummaryString.AppendLine(CurrentBlockString).ToString();
         /*if (PreviousBlocksString.Length > 0)
             BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
@@ -146,6 +163,19 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     void SetupBlockData()
     {
+        float avgInflationDuration_Block;
+        if (trialLevel.InflationDurations_Block.Any(item => item.HasValue))
+        {
+            avgInflationDuration_Block = (float)trialLevel.InflationDurations_Block
+                .Where(item => item.HasValue)
+                .Average(item => item.Value);
+        }
+        else
+        {
+            avgInflationDuration_Block = 0f;
+        }
+
+        
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.Completions_Block);
         BlockData.AddDatum("ChoseLeft", () => trialLevel.NumChosenLeft_Block);
         BlockData.AddDatum("ChoseRight", () => trialLevel.NumChosenRight_Block);
@@ -155,6 +185,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
         BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
         BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
+        BlockData.AddDatum("AvgInflationDuration", () =>avgInflationDuration_Block);
+        
     }
 
     public void ClearStrings()
@@ -164,10 +196,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     }
     public override void SetTaskSummaryString()
     {
+        CurrentTaskSummaryString.Clear();
+
         if (trialLevel.TrialCount_InTask != 0)
         {
-            CurrentTaskSummaryString.Clear();
-
             decimal percentAbortedTrials = (Math.Round(decimal.Divide(NumAborted_Task, (trialLevel.TrialCount_InTask)), 2)) * 100;
             decimal percentChoseLeft = Math.Round(decimal.Divide(NumChosenLeft_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseHigherReward = Math.Round(decimal.Divide(NumHigherRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;

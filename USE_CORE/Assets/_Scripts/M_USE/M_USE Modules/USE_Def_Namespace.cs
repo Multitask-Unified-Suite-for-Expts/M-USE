@@ -277,6 +277,21 @@ namespace USE_Def_Namespace
         /// </summary>
         public float StartButtonScale = 1.2f;
 
+        /// <summary>
+        /// Indicates whether the stimulus is facing the camera.
+        /// </summary>
+        public bool StimFacingCamera;
+
+        /// <summary>
+        /// Specifies the type of shadow being used or its configuration.
+        /// </summary>
+        public string ShadowType;
+
+        /// <summary>
+        /// Indicates whether the Inter-Trial Interval (ITI) is set to a neutral state or mode.
+        /// </summary>
+        public bool NeutralITI;
+
     }
 
     public class BlockDef
@@ -400,6 +415,40 @@ namespace USE_Def_Namespace
         /// </summary>
         public TrialStims TrialStims;
 
+        /// <summary>
+        /// Indicates the type of block end condition.
+        /// </summary>
+        public string BlockEndType;
+
+        /// <summary>
+        /// Threshold value used to determine block end condition.
+        /// </summary>
+        public float BlockEndThreshold;
+
+        /// <summary>
+        /// Window value used in conjunction with the block end condition.
+        /// </summary>
+        public int BlockEndWindow;
+
+        /// <summary>
+        /// Represents the name of the block.
+        /// </summary>
+        public string BlockName;
+
+        /// <summary>
+        /// Represents the name of the context.
+        /// </summary>
+        public string ContextName;
+        
+        /// <summary>
+        /// Number of pulses.
+        /// </summary>
+        public int NumPulses;
+
+        /// <summary>
+        /// Size of each pulse.
+        /// </summary>
+        public int PulseSize;
     }
 
     

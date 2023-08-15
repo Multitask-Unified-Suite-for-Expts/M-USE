@@ -30,12 +30,17 @@ namespace USE_ExperimentTemplate_Task
         public string TaskProjectFolder;
         [HideInInspector] public int BlockCount;
         protected int NumBlocksInTask;
+        public int NumAbortedTrials_InTask;
+        public int NumRewardPulses_InTask;
+        public int MinTrials_InBlock;
+        public int MaxTrials_InBlock;
+        
         public ControlLevel_Trial_Template TrialLevel;
         public BlockData BlockData;
         public FrameData FrameData;
         public TrialData TrialData;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
-        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
+        [HideInInspector] public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
@@ -132,7 +137,7 @@ namespace USE_ExperimentTemplate_Task
                         canvas.gameObject.SetActive(true);
 
                 BlockCount = -1;
-                BlockSummaryString = new StringBuilder();
+                CurrentBlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
 
@@ -301,11 +306,11 @@ namespace USE_ExperimentTemplate_Task
                     SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
-                if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
+                if (TrialLevel.TrialSummaryString != null && CurrentBlockSummaryString != null)
                 {
                     TrialLevel.TrialSummaryString = "";
-                    BlockSummaryString.Clear();
-                    BlockSummaryString.AppendLine("");
+                    CurrentBlockSummaryString.Clear();
+                    CurrentBlockSummaryString.AppendLine("");
                 }
 
                 ClearActiveTaskHandlers();
@@ -353,6 +358,8 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 TaskCam.gameObject.SetActive(false);
+                NumRewardPulses_InTask = 0;
+                NumAbortedTrials_InTask = 0;
 
                 if (TaskCanvasses != null)
                     foreach (Canvas canvas in TaskCanvasses)

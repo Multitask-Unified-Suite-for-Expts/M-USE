@@ -101,7 +101,7 @@ public class SetupSession_Level : ControlLevel
         string taskName = "";
         AsyncOperation loadScene = null;
 
-        LoadTaskScene.AddInitializationMethod(() =>
+        LoadTaskScene.AddSpecificInitializationMethod(() =>
         {
             taskSceneLoaded = false;
             taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
@@ -120,7 +120,7 @@ public class SetupSession_Level : ControlLevel
         VerifyTask_Level verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
 
         VerifyTask.AddChildLevel(verifyTask_Level);
-        VerifyTask.AddInitializationMethod(() =>
+        VerifyTask.AddSpecificInitializationMethod(() =>
         {
             //loads 
             var methodInfo = GetType().GetMethod(nameof(this.GetTaskLevelType));
@@ -155,7 +155,7 @@ public class SetupSession_Level : ControlLevel
 
     private void SetDataPaths()
     {
-        SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}__SubjectID_{SessionValues.SubjectID}";
+        SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}_{SessionValues.SubjectID}";
         ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
 
         if (SessionValues.UsingServerConfigs)

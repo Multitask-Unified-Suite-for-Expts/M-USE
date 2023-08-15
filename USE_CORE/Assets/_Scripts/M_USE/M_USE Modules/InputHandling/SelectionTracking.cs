@@ -243,6 +243,9 @@ namespace SelectionTracking
             public bool HandlerActive;
             public GameObject playerObject;
 
+            //Just added but not implemented
+            public List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
+
 
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 

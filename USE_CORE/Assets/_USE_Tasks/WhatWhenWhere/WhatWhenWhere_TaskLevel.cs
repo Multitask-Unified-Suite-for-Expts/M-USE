@@ -38,13 +38,13 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             LearningSpeed = -1;
 
             wwwTL.ContextName = wwwBD.ContextName;
 
-            SetSkyBox(wwwBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(wwwBD.ContextName);
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();
@@ -68,7 +68,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trial Count In Task"] = wwwTL.TrialCount_InTask,
+            ["Trial Count In Task"] = wwwTL.TrialCount_InTask + 1,
             ["Num Reward Pulses"] = NumRewardPulses_InTask,
             ["Slider Bar Full"] = NumSliderBarFilled_InTask,
             ["Aborted Trials In Task"] = AbortedTrials_InTask

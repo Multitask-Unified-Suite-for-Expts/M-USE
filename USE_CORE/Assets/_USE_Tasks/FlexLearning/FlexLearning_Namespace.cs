@@ -23,9 +23,6 @@ namespace FlexLearning_Namespace
         public bool StimFacingCamera;
         public string ShadowType;
         public bool NeutralITI;
-
-        Vector3 ButtonColor;
-        string ButtonText;
     }
 
     public class FlexLearning_BlockDef : BlockDef
@@ -36,7 +33,6 @@ namespace FlexLearning_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public int[] MinMaxTrials;
-        public string TrialID;
         public string BlockName;
         public string ContextName;
         public int NumInitialTokens;
@@ -46,7 +42,7 @@ namespace FlexLearning_Namespace
         public float BlockEndThreshold;
         public int BlockEndWindow;
         public int NumTokenBar;
-        public int NumPulses;
+        //public int NumPulses;
         public int PulseSize;
         public bool RandomizedLocations;
         public bool? TokensWithStimOn = null;
@@ -59,7 +55,6 @@ namespace FlexLearning_Namespace
             for (int iTrial = 0; iTrial < maxNum; iTrial++)
             {
                 FlexLearning_TrialDef td = new FlexLearning_TrialDef();
-                td.TrialID = TrialID;
                 td.BlockName = BlockName;
                 td.TrialStimIndices = TrialStimIndices;
                 td.TrialStimLocations = TrialStimLocations;
@@ -123,7 +118,6 @@ namespace FlexLearning_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public string BlockName;
-        public string TrialID;
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
         public bool RandomizedLocations;
@@ -173,7 +167,6 @@ namespace FlexLearning_Namespace
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;
         public bool IsTarget;
-        public int TokenUpdate;
 
     }
 }

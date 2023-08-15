@@ -84,15 +84,6 @@
 			"isRange": true,
 			"name": "Search Display Delay",
 			"hidden": false
-		},
-		"gratingSquareDuration": {
-			"value": 0.3,
-			"min": 0.1,
-			"max": 20.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Grating Square Duration",
-			"hidden": false
 		}
 
 	},

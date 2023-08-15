@@ -13,7 +13,6 @@ namespace EffortControl_Namespace
     {
         public string BlockName;
         public string ContextName;
-        public string TrialId;
         public int NumTrials;
         public int NumClicksLeft;
         public int NumClicksRight;
@@ -33,7 +32,6 @@ namespace EffortControl_Namespace
                 EffortControl_TrialDef td = new EffortControl_TrialDef();
                 td.BlockName = BlockName;
                 td.ContextName = ContextName;
-                td.TrialId = TrialId;
                 td.NumClicksLeft = NumClicksLeft;
                 td.NumClicksRight = NumClicksRight;
                 td.NumCoinsLeft = NumCoinsLeft;
@@ -51,7 +49,6 @@ namespace EffortControl_Namespace
 
     public class EffortControl_TrialDef : TrialDef
     {
-        public string TrialId;
         public string BlockName;
         public string ContextName;
         public int NumClicksLeft;

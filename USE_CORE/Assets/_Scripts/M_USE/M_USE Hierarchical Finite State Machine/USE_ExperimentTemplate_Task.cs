@@ -16,12 +16,11 @@ using USE_ExperimentTemplate_Trial;
 using System.Collections;
 using USE_Def_Namespace;
 using System.Collections.Specialized;
-using System.Runtime.CompilerServices;
 using TMPro;
+
 
 namespace USE_ExperimentTemplate_Task
 {
-
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
         public string PrefabPath;
@@ -45,7 +44,7 @@ namespace USE_ExperimentTemplate_Task
         protected TrialDef[] CurrentBlockTrialDefs;
         public TaskDef TaskDef;
         public BlockDef[] BlockDefs;
-        public BlockDef CurrentBlockDef;
+        private BlockDef CurrentBlockDef;
         public BlockDef currentBlockDef
         {
             get
@@ -75,19 +74,6 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool TaskLevelDefined;
 
         [HideInInspector] public List<CustomSettings> customSettings;
-        
-        private bool TaskDefImported;
-        private bool BlockDefImported;
-        private bool TrialDefImported;
-        
-
-        private bool AllDefsImported
-        {
-            get
-            {
-                return (TaskDefImported && BlockDefImported && TrialDefImported);
-            }
-        }
 
         public bool TrialAndBlockDefsHandled;
         public bool StimsHandled;
@@ -133,8 +119,8 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddChildLevel(TrialLevel);
             AddActiveStates(new List<State> { RunBlock, BlockFeedback, FinishTask });
 
-            TrialLevel.TrialDefType = TrialDefType; //may need to be moved down after new states
-            TrialLevel.StimDefType = StimDefType;   //may need to be moved down after new states
+            TrialLevel.TrialDefType = TrialDefType;
+            TrialLevel.StimDefType = StimDefType;
             TrialLevel.TaskLevel = this;
         
             Add_ControlLevel_InitializationMethod(() =>
@@ -170,18 +156,19 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 SessionValues.InputManager.SetActive(true);
-            });
 
-            //RunBlock State-----------------------------------------------------------------------------------------------------
-            RunBlock.AddUniversalInitializationMethod(() =>
-            {
-                if (SessionValues.SessionDef.IsHuman) //NT: not sure we need this happening every block. 
+                if (SessionValues.SessionDef.IsHuman)
                 {
                     Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
                     SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
+            });
+
+            //RunBlock State-----------------------------------------------------------------------------------------------------
+            RunBlock.AddUniversalInitializationMethod(() =>
+            {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
 
                 BlockCount++;
@@ -199,7 +186,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
             });
 
-            //Hotkey for WebGL build so we can end task and go to next block
+            //Hotkeys for WebGL build so we can end task and go to next block
             if (SessionValues.WebBuild)
             {
                 RunBlock.AddUpdateMethod(() =>
@@ -251,19 +238,24 @@ namespace USE_ExperimentTemplate_Task
 
 
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
+            float blockFeedbackDuration = 0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
-            {                
-                if(SessionValues.SessionDef.IsHuman)
+            {
+                blockFeedbackDuration = SessionValues.SessionDef.BlockResultsDuration;
+                if (SessionValues.SessionDef.IsHuman)
                 {
                     OrderedDictionary taskBlockResults = GetBlockResultsData();
-                    if(taskBlockResults != null && taskBlockResults.Count > 0)
+                    if (taskBlockResults != null && taskBlockResults.Count > 0)
                         DisplayBlockResults(taskBlockResults);
                 }
+                else
+                    blockFeedbackDuration = 0;
+
                 SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= SessionValues.SessionDef.BlockResultsDuration))
+                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;
@@ -379,7 +371,7 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        public void SetSkyBox(string contextName, Skybox skybox)
+        public void SetSkyBox(string contextName)
         {
             string contextFilePath = "";
             if (SessionValues.UsingDefaultConfigs)
@@ -389,7 +381,7 @@ namespace USE_ExperimentTemplate_Task
             else if (SessionValues.UsingLocalConfigs)
                 contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
-            StartCoroutine(HandleSkybox(contextFilePath, skybox));
+            StartCoroutine(HandleSkybox(contextFilePath));
         }
 
 
@@ -456,93 +448,16 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        // public void HandleCustomSettings()
-        // {
-        //     Dictionary<string, string> customSettings = new Dictionary<string, string>();
-        //     string settingsFilePath;
-        //
-        //     if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "CustomSettings"))
-        //         customSettings = (Dictionary<string, string>)SessionSettings.Get(TaskName + "_TaskSettings", "CustomSettings");
-        //     else
-        //         customSettings = null;
-        //
-        //     if (customSettings != null)
-        //     {
-        //         foreach (string key in customSettings.Keys)
-        //         {
-        //             string filePath = TaskConfigPath + Path.DirectorySeparatorChar + key; //initially set for not default configs, then changed below for UseDefaultConfigs
-        //             string settingsFileName = key.Split('.')[0];
-        //
-        //             //Write to persistant data path for default configs:
-        //             if (SessionValues.UsingDefaultConfigs)
-        //             {
-        //                 string folderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs" + Path.DirectorySeparatorChar + TaskName + "_DefaultConfigs";
-        //                 filePath = folderPath + Path.DirectorySeparatorChar + settingsFileName;
-        //
-        //                 if (!Directory.Exists(folderPath))
-        //                     Directory.CreateDirectory(folderPath);
-        //
-        //                 if (!File.Exists(filePath))
-        //                 {
-        //                     Debug.Log("LOADING FROM: " + "DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
-        //                     var db = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskName + "_DefaultConfigs/" + settingsFileName);
-        //                     if (db == null)
-        //                         Debug.Log("DB IS NULL!!!!!!!!!!!!");
-        //                     byte[] data = db.bytes;
-        //                     File.WriteAllBytes(filePath, data);
-        //                 }
-        //                 else
-        //                     settingsFilePath = SessionValues.LocateFile.FindFilePathInExternalFolder(TaskConfigPath, "*" + TaskName + "*" + settingsFileName + "*");
-        //
-        //             }
-        //
-        //             string customSettingsValue = customSettings[key].ToLower();
-        //
-        //             if (SessionValues.UsingServerConfigs)
-        //             {
-        //                 StartCoroutine(ServerManager.GetFileStringAsync(TaskConfigPath + key, result => //TASK CONFIG PATH (+ key) PROB IS NOT WHAT NEEDS TO BE HERE!!!
-        //                 {
-        //                     if (!string.IsNullOrEmpty(result[1]))
-        //                     {
-        //                         //importSettings_Level.SettingsDetails.FileName = result[0]; //implement later?
-        //
-        //                         ImportCustomSetting(customSettingsValue, TaskConfigPath, settingsFileName, result[1]);
-        //                     }
-        //                     else
-        //                         Debug.Log("CUSTOM SETTINGS RESULT IS NULL!!!!!");
-        //                 }));
-        //             }
-        //             else
-        //                 ImportCustomSetting(customSettingsValue, filePath, settingsFileName);
-        //         }
-        //     }
-        // }
-        //
-        // private void ImportCustomSetting(string customSettingsValue, string filePath, string settingsFileName, string serverFileString = null)
-        // {
-        //     Type settingsType = GetTaskCustomSettingsType(settingsFileName);
-        //     Debug.Log("SETTINGS TYPE: " + settingsType);
-        //     switch (customSettingsValue)
-        //     {
-        //         case ("singletypearray"):
-        //             MethodInfo readCustomSingleTypeArray = GetType().GetMethod(nameof(this.ReadCustomSingleTypeArray)).MakeGenericMethod(new Type[] { settingsType });
-        //             readCustomSingleTypeArray.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-        //             break;
-        //         case ("singletypejson"):
-        //             MethodInfo readCustomSingleTypeJson = GetType().GetMethod(nameof(this.ReadCustomSingleTypeJson)).MakeGenericMethod(new Type[] { settingsType });
-        //             readCustomSingleTypeJson.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-        //             break;
-        //         case ("multipletype"):
-        //             MethodInfo readCustomMultipleTypes = GetType().GetMethod(nameof(this.ReadCustomMultipleTypes)).MakeGenericMethod(new Type[] { settingsType });
-        //             readCustomMultipleTypes.Invoke(this, new object[] { filePath, settingsFileName, serverFileString });
-        //             break;
-        //         default:
-        //             Debug.LogError("DEFAULT CUSTOM SETTINGS SWITCH STATEMENT");
-        //             break;
-        //     }
-        //
-        //     ProcessCustomSettingsFiles();
-        // }
+        
+        public virtual OrderedDictionary GetTaskSummaryData()
+        {
+            return new OrderedDictionary();
+        }
+
+        public virtual OrderedDictionary GetBlockResultsData()
+        {
+            return new OrderedDictionary();
+        }
 
         public virtual List<CustomSettings> DefineCustomSettings()
         {
@@ -869,19 +784,22 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
-        public bool CheckBlockEnd(string blockEndType, IEnumerable<float> runningTrialPerformance, float performanceThreshold = 1,
+        public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {
             // Takes in accuracy info from the current trial to determine whether to end the block
-            List<float> rTrialPerformance = (List<float>)runningTrialPerformance;
-
+            List<float?> rTrialPerformance = (List<float?>)runningTrialPerformance;
             if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
                 return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
+
+            // Add -1 to the running trial performance to indicate an aborted/incomplete trial
 
             switch (blockEndType)
             {
                 case "CurrentTrialPerformance":
-                    if (rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    Debug.Log("####CHECKING BLOCK END, rTrialPerformance.Count: " + rTrialPerformance.Count + ", (rTrialPerformance[rTrialPerformance.Count - 1]: " + (rTrialPerformance[rTrialPerformance.Count - 1]));
+
+                    if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;

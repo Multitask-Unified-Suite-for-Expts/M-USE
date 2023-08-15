@@ -1,0 +1,6 @@
+List<TrialDef>
+System.Collections.Generic.List`1[[USE_Def_Namespace.TrialDef, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null]]
+
+Random
+System.Random
+

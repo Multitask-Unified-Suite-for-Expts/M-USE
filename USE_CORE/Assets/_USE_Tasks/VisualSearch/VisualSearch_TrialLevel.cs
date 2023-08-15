@@ -26,7 +26,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private bool configUIVariablesLoaded;
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, itiDuration, fbDuration, maxObjectTouchDuration, 
-        selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, searchDisplayDelay, gratingSquareDuration;
+        selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, searchDisplayDelay;
     private float tokenFbDuration;
     
     // Set in the Task Level
@@ -66,7 +66,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
-    private bool TouchDurationError = false;
     private bool aborted = false;
     private float? selectionDuration = null;
     private bool choiceMade = false;
@@ -99,8 +98,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
-        
-        SetupTrial.AddInitializationMethod(() =>
+
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             ResetTrialVariables();
             TokenFBController.ResetTokenBarFull();
@@ -142,8 +141,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, VS_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
             if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
@@ -173,7 +174,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
         
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
-        SearchDisplay.AddInitializationMethod(() =>
+        SearchDisplay.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
@@ -205,11 +206,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            if (TouchFBController.ErrorCount > PreSearch_TouchFbErrorCount)
-                TouchDurationError = true;
-            else
-                TouchDurationError = false;
-
             CorrectSelection = selectedSD.IsTarget;
 
             if (CorrectSelection)
@@ -246,7 +242,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
 
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurationsList.Add(SearchDuration);
@@ -265,7 +261,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.Destroy());
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
-        TokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {
@@ -282,8 +278,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
         });
         //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
@@ -305,19 +301,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
         });
         // ITI STATE ---------------------------------------------------------------------------------------------------
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage"), Camera.main.gameObject.GetComponent<Skybox>());
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage"));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
-        AssignTrialData();
-        AssignFrameData();
+        DefineTrialData();
+        DefineFrameData();
     }
     public void MakeStimFaceCamera()
     {
@@ -416,15 +412,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        TouchDurationError = false;
         aborted = false;
         choiceMade = false;
         if (SessionValues.MouseTracker != null)
             SessionValues.MouseTracker.ResetClicks();
     }
-    private void AssignTrialData()
+    private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
+        TrialData.AddDatum("TrialID", ()=> CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelecteStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
@@ -434,7 +430,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
         TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
-    private void AssignFrameData()
+    private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
@@ -467,7 +463,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
@@ -482,7 +477,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n" +
                              "\nCorrect Selection: " + CorrectSelection +
-                             "\nTouch Duration Error: " + TouchDurationError +
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 

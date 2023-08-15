@@ -29,9 +29,9 @@ public class TobiiGaze_TrialLevel : ControlLevel_Trial_Template
             screenBasedSaveData = GameObject.Find("[SaveData]").GetComponent<ScreenBasedSaveData>();
             eyeTracker = GameObject.Find("[EyeTracker]").GetComponent<EyeTracker>();
         });
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"), Camera.main.gameObject.GetComponent<Skybox>());
+            CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(ContextExternalFilePath, "DarkGrey"));
             
             // auto set save data true every trial, can turn off before calibration starts
             screenBasedSaveData.SaveData = true;

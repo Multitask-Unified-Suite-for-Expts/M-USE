@@ -72,7 +72,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber chooseStimOnsetDelay; 
     public ConfigNumber startButtonDelay;
     public ConfigNumber timeoutDuration;
-    public ConfigNumber gratingSquareDuration;
 
 
     //data logging variables
@@ -176,13 +175,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
                 playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
-            #endif
         });
 
-        Debug.LogError(SetupTrial);
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (!variablesLoaded)
             {
@@ -206,8 +203,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WWW_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
             if (TrialCount_InTask != 0)
@@ -241,14 +240,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
-        ChooseStimulus.AddInitializationMethod(() =>
+        ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
             AssignCorrectStim();
 
-            #if (!UNITY_WEBGL)
+            if(!SessionValues.WebBuild)
+            {
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                     CreateTextOnExperimenterDisplay();
-            #endif
+            }
 
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
@@ -329,7 +329,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
             touchedObjects.Add(selectedSD.StimIndex);
@@ -398,7 +398,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
             }
         });
-        FinalFeedback.AddInitializationMethod(() =>
+        FinalFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
 
@@ -435,7 +435,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Define iti state
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);
@@ -459,7 +459,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 string path = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
-                CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + ContextName + ".png", Camera.main.gameObject.GetComponent<Skybox>());
+                CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + ContextName + ".png");
             }
 
             GenerateAccuracyLog();
@@ -559,7 +559,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void DefineTrialData() //All ".AddDatum" commands for Trial Data
     {
-        TrialData.AddDatum("TrialID", () => CurrentTrialDef.BlockName);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);
@@ -640,7 +640,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         flashingFbDuration = ConfigUiVariables.get<ConfigNumber>("finalFbDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         chooseStimOnsetDelay = ConfigUiVariables.get<ConfigNumber>("chooseStimOnsetDelay");
@@ -759,3 +758,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

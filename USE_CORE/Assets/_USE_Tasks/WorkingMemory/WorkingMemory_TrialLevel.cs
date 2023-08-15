@@ -32,7 +32,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
         displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
     private float tokenFbDuration;
     
@@ -90,7 +90,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(5f);
             HaloFBController.SetHaloIntensity(5);
         });
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "WorkingMemory_DirectionalLight");
@@ -123,8 +123,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.SessionDef.IsHuman)
             TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale*10, WM_CanvasGO);
 
-        InitTrial.AddInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
             if (SessionValues.WebBuild)
                 TokenFBController.AdjustTokenBarSizing(110);
 
@@ -170,7 +172,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
-        SearchDisplay.AddInitializationMethod(() =>
+        SearchDisplay.AddSpecificInitializationMethod(() =>
         {
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
@@ -234,7 +236,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurations_InBlock.Add(SearchDuration);
@@ -255,7 +257,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
 
         // The state that will handle the token feedback and wait for any animations
-        TokenFeedback.AddInitializationMethod(() =>
+        TokenFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {
@@ -293,12 +295,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "itiImage";
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, ContextName), Camera.main.gameObject.GetComponent<Skybox>());
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, ContextName));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
@@ -306,8 +308,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
-        AssignFrameData();
-        AssignTrialData();
+        DefineFrameData();
+        DefineTrialData();
     }
 
     public void MakeStimFaceCamera()
@@ -420,7 +422,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         displayPostSampleDistractorsDuration = ConfigUiVariables.get<ConfigNumber>("displayPostSampleDistractorsDuration");
         preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        gratingSquareDuration = ConfigUiVariables.get<ConfigNumber>("gratingSquareDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
@@ -443,9 +444,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         selectedGO = null;
         selectedSD = null;
     }
-    private void AssignTrialData()
+    private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
+
+        TrialData.AddDatum("TrialID", ()=> CurrentTrialDef.TrialID);
         TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
@@ -453,7 +456,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven);
     }
-    private void AssignFrameData()
+    private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);

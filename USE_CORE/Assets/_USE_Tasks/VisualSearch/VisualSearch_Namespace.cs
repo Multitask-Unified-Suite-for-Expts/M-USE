@@ -84,7 +84,6 @@ namespace VisualSearch_Namespace
         //public TrialStims TrialStims;
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public string TrialID;
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
         public bool? TokensWithStimOn;

@@ -27,17 +27,31 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
         AssignBlockData();
 
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             wmTL.ContextName = wmBD.ContextName;
 
-            SetSkyBox(wmBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(wmBD.ContextName);
 
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
             SetBlockSummaryString();
         });
+    }
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trial Count In Task"] = wmTL.TrialCount_InTask + 1,
+            ["Num Reward Pulses"] = NumRewardPulses_InTask,
+            ["Token Bar Full"] = NumTokenBarFull_InTask,
+            ["Aborted Trials In Task"] = NumAborted_InTask
+        };
+        if (SearchDurations_InTask.Count > 0)
+            data["Average Search Duration"] = SearchDurations_InTask.Average();
+        
+        return data;
     }
 
     public override OrderedDictionary GetBlockResultsData()

@@ -58,7 +58,7 @@ public class MouseTracker : InputTracker
                     float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
             CurrentInputScreenPosition = null;
 
-        if (CurrentInputScreenPosition != null)
+        if (CurrentInputScreenPosition != null && Camera.main != null)
         {
             //Find Current Shotgun Target:
             Dictionary<GameObject, float> proportions = ShotgunRaycast.RaycastShotgunProportions(CurrentInputScreenPosition.Value, Camera.main);

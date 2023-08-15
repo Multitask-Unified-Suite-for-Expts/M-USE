@@ -30,7 +30,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public override void DefineControlLevel()
     {
-        
         vsTL = (VisualSearch_TrialLevel)TrialLevel;
         //vsTD = (VisualSearch_TrialDef)vsTL.GetCurrentTrialDef<VisualSearch_TrialDef>();
         CurrentBlockString = "";
@@ -41,12 +40,12 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             ResetTaskVariables();
         });
         
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             vsBD.ContextName = vsBD.ContextName.Trim();
             vsTL.ContextName = vsBD.ContextName;
 
-            SetSkyBox(vsBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(vsBD.ContextName);
 
             vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();
@@ -55,7 +54,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
             SetBlockSummaryString();
         });
-        BlockFeedback.AddInitializationMethod(() =>
+        BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
             {
@@ -85,6 +84,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
+            ["Trial Count In Task"] = vsTL.TrialCount_InTask + 1,
             ["Reward Pulses"] = NumRewardPulses_InTask,
             ["Token Bar Full"] = NumTokenBarFull_InTask,
             ["Total Tokens Collected"] = TotalTokensCollected_InTask

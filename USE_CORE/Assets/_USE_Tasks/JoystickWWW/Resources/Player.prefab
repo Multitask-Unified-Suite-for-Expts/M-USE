@@ -86,6 +86,7 @@ MonoBehaviour:
   rotationSpeed: 180
   playerCamTransform: {fileID: 0}
   isActive: 0
+  Player: {fileID: 8665248776927794520}
 --- !u!1 &8665248776980723241
 GameObject:
   m_ObjectHideFlags: 0

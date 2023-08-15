@@ -230,7 +230,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
-            gazeCalibration.AddInitializationMethod(() =>
+            gazeCalibration.AddSpecificInitializationMethod(() =>
             {
                 FrameData.gameObject.SetActive(false);
 
@@ -545,8 +545,9 @@ namespace USE_ExperimentTemplate_Session
                     }
                 });
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
-            loadTask.AddInitializationMethod(() =>
+            loadTask.AddSpecificInitializationMethod(() =>
             {
+                SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
                 SessionValues.LoadingCanvas_GO.SetActive(true);
 
                 TaskButtonsContainer.SetActive(false);
@@ -628,7 +629,7 @@ namespace USE_ExperimentTemplate_Session
 
             SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
             setupTask.AddChildLevel(setupTaskLevel);
-            setupTask.AddInitializationMethod(() =>
+            setupTask.AddSpecificInitializationMethod(() =>
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
@@ -699,7 +700,6 @@ namespace USE_ExperimentTemplate_Session
                 }
 
                 taskCount++;
-                Debug.Log("TASK COUNT: " + taskCount);
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
@@ -725,7 +725,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             //FinishSession State---------------------------------------------------------------------------------------------------------------
-            finishSession.AddInitializationMethod(() =>
+            finishSession.AddSpecificInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("FinishSessionStarts");
             });
@@ -881,8 +881,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.TryGetComponent(out HoverEffect hoverComponent))
                     hoverComponent.SetToInitialSize();
-                else
-                    Debug.Log("HoverEffect component not found on selected TaskButton, so not resetting its size.");
             }
             else
                 Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");

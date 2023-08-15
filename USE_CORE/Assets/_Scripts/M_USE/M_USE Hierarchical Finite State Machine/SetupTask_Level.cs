@@ -7,8 +7,8 @@ using USE_States;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Trial;
 
-public class SetupTask_Level : ControlLevel
 
+public class SetupTask_Level : ControlLevel
 {
     public ImportSettings_Level importSettings_Level;
     public VerifyTask_Level verifyTask_Level;
@@ -19,6 +19,7 @@ public class SetupTask_Level : ControlLevel
     private FrameData FrameData;
     private TrialData TrialData;
     private string TaskDataPath, ConfigFolderName, TaskName;
+
     public override void DefineControlLevel()
     {
         State VerifyTask = new State("VerifyTask");
@@ -27,7 +28,7 @@ public class SetupTask_Level : ControlLevel
         
         verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
         VerifyTask.AddChildLevel(verifyTask_Level);
-        VerifyTask.AddInitializationMethod(() =>
+        VerifyTask.AddSpecificInitializationMethod(() =>
         {
             verifyTask_Level.TaskLevel = TaskLevel;
         });
@@ -36,7 +37,7 @@ public class SetupTask_Level : ControlLevel
         {
         });
 
-        OtherSetup.AddInitializationMethod(() =>
+        OtherSetup.AddSpecificInitializationMethod(() =>
         {  
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;
@@ -81,6 +82,7 @@ public class SetupTask_Level : ControlLevel
             
             TrialLevel = TaskLevel.TrialLevel;
             TrialData.taskLevel = TaskLevel;
+            TrialData.trialLevel = TrialLevel;
             TrialData.sessionLevel = SessionValues.SessionLevel;
 
             TrialLevel.TrialData = TrialData;
@@ -94,7 +96,7 @@ public class SetupTask_Level : ControlLevel
             FrameData.trialLevel = TrialLevel;
             FrameData.sessionLevel = SessionValues.SessionLevel;
 
-            FrameData = FrameData;
+           // TrialLevel.FrameData = FrameData;
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             if (SessionValues.SessionDef.EyeTrackerActive)
@@ -115,6 +117,7 @@ public class SetupTask_Level : ControlLevel
             FrameData.InitDataController();
 
             BlockData.ManuallyDefine();
+            TrialData.ManuallyDefine();
             FrameData.ManuallyDefine();
             if (SessionValues.SessionDef.EyeTrackerActive)
                 SessionValues.GazeData.ManuallyDefine();
@@ -132,11 +135,6 @@ public class SetupTask_Level : ControlLevel
             TaskLevel.TrialLevel = TrialLevel;
             //user-defined task control level 
 
-            BlockData.AddStateTimingData(TaskLevel);
-            StartCoroutine(BlockData.CreateFile());
-            StartCoroutine(FrameData.CreateFile());
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                StartCoroutine(SessionValues.GazeData.CreateFile());
 
 
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"),
@@ -244,6 +242,11 @@ public class SetupTask_Level : ControlLevel
             TrialLevel.TrialData = TrialData;
             TrialLevel.DefineTrialLevel();
             
+            BlockData.AddStateTimingData(TaskLevel);
+            StartCoroutine(BlockData.CreateFile());
+            StartCoroutine(FrameData.CreateFile());
+            if (SessionValues.SessionDef.EyeTrackerActive)
+                StartCoroutine(SessionValues.GazeData.CreateFile());
 
         });
         

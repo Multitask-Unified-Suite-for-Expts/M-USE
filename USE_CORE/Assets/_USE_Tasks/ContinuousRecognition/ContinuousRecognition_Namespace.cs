@@ -30,16 +30,16 @@ namespace ContinuousRecognition_Namespace
 
         //Calculated below (DONT SET IN CONFIG!!!):
         public int MaxNumTrials;
-        public int MaxNumStim;
 
 
         public override void GenerateTrialDefsFromBlockDef()
         {
-            MaxNumStim = NumObjectsMinMax[1];
+            int maxNumStim = NumObjectsMinMax[1];
             if (FindAllStim)
-                MaxNumTrials = CalculateMaxNumTrials(MaxNumStim);
+                MaxNumTrials = CalculateMaxNumTrials(maxNumStim);
             else
                 MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+
 
             //Calculate STIM Locations:
             if(!ManuallySpecifyLocation)
@@ -67,10 +67,10 @@ namespace ContinuousRecognition_Namespace
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
 
                 Vector3[] trialStimLocations;
-                if (FindAllStim && trialIndex > MaxNumStim - 2)
+                if (FindAllStim && trialIndex > maxNumStim - 2)
                 {
-                    trialStimLocations = new Vector3[MaxNumStim];
-                    numTrialStims = MaxNumStim;
+                    trialStimLocations = new Vector3[maxNumStim];
+                    numTrialStims = maxNumStim;
                 }
                 else trialStimLocations = new Vector3[NumObjectsMinMax[0] + trialIndex];
 
@@ -91,7 +91,6 @@ namespace ContinuousRecognition_Namespace
                 trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
                 trial.MaxNumTrials = MaxNumTrials;
-                trial.MaxNumStim = MaxNumStim;
                 trial.ContextName = ContextName;
                 trial.NumRewardPulses = NumRewardPulses;
                 trial.RewardMag = RewardMag;
@@ -207,7 +206,6 @@ namespace ContinuousRecognition_Namespace
         public Vector3[] TrialStimLocations;
         public int NumTrialStims;
         public int MaxNumTrials;
-        public int MaxNumStim;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

@@ -102,11 +102,10 @@ public class KeyboardController : MonoBehaviour
         else if (clickedGO.name == "CapsButton")
         {
             Caps = !Caps;
+            clickedGO.GetComponentInChildren<TextMeshProUGUI>().text = Caps ? "CAPS" : "Caps";
             foreach (GameObject go in gridItems)
             {
                 TextMeshProUGUI textComponent = go.transform.GetComponentInChildren<TextMeshProUGUI>();
-                if (textComponent.text.ToLower() == "back")
-                    continue;
                 textComponent.text = Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
             }
         }
@@ -120,7 +119,7 @@ public class KeyboardController : MonoBehaviour
     {
         CharacterList = new List<string>()
         {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/"
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "=", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", ";", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "+", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/", "!"
         };
     }
 

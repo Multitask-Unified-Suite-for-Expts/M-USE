@@ -228,7 +228,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
-            
+
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
         });
@@ -884,7 +884,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TrialStims.Add(trialStims);
 
         }
-        else if((TrialCount_InBlock > 0 && TrialCount_InBlock <= (CurrentTrial.MaxNumStim-2)) || TrialCount_InBlock > 0 && !CurrentTrial.FindAllStim)
+        else if((TrialCount_InBlock > 0 && TrialCount_InBlock <= (CurrentTrial.NumObjectsMinMax[1] - 2)) || TrialCount_InBlock > 0 && !CurrentTrial.FindAllStim)
         {
             TrialStimIndices.Clear();
 

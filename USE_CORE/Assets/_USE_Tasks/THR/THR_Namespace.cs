@@ -8,7 +8,7 @@ namespace THR_Namespace
 {
     public class THR_TaskDef : TaskDef
     {
-        public bool StartWithBlueSquare;
+        public bool StartWithSelectObjectState;
     }
 
     public class THR_BlockDef : BlockDef
@@ -19,17 +19,17 @@ namespace THR_Namespace
         public int PulseSize;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;
-        public float WhiteSquareDuration;
-        public float BlueSquareDuration;
+        public float AvoidObjectDuration;
+        public float SelectObjectDuration;
         public float TimeoutDuration;
         public float ItiDuration;
         public float MinTouchDuration;
         public float MaxTouchDuration;
         public float TouchToRewardDelay;
         public float ReleaseToRewardDelay;
-        public float SquareSize;
-        public float SquareSizeMin;
-        public float SquareSizeMax;
+        public float ObjectSize;
+        public float ObjectSizeMin;
+        public float ObjectSizeMax;
         public int PositionX;
         public int PositionX_Min;
         public int PositionX_Max;
@@ -40,8 +40,8 @@ namespace THR_Namespace
         public int NumTouchPulses;
         public bool RewardRelease;
         public int NumReleasePulses;
-        public bool RandomSquareSize;
-        public bool RandomSquarePosition;
+        public bool RandomObjectSize;
+        public bool RandomObjectPosition;
         public int TimeToAutoEndTrialSec;
 
 
@@ -60,16 +60,16 @@ namespace THR_Namespace
                 trial.PulseSize = PulseSize;
                 trial.PerfWindowEndTrials = PerfWindowEndTrials;
                 trial.PerfThresholdEndTrials = PerfThresholdEndTrials;
-                trial.WhiteSquareDuration = WhiteSquareDuration;
-                trial.BlueSquareDuration = BlueSquareDuration;
+                trial.AvoidObjectDuration = AvoidObjectDuration;
+                trial.SelectObjectDuration = SelectObjectDuration;
                 trial.ItiDuration = ItiDuration;
                 trial.MinTouchDuration = MinTouchDuration;
                 trial.MaxTouchDuration = MaxTouchDuration;
                 trial.TouchToRewardDelay = TouchToRewardDelay;
                 trial.ReleaseToRewardDelay = ReleaseToRewardDelay;
-                trial.SquareSize = SquareSize;
-                trial.SquareSizeMin = SquareSizeMin;
-                trial.SquareSizeMax = SquareSizeMax;
+                trial.ObjectSize = ObjectSize;
+                trial.ObjectSizeMin = ObjectSizeMin;
+                trial.ObjectSizeMax = ObjectSizeMax;
                 trial.PositionX = PositionX;
                 trial.PositionX_Min = PositionX_Min;
                 trial.PositionX_Max = PositionX_Max;
@@ -80,8 +80,8 @@ namespace THR_Namespace
                 trial.NumTouchPulses = NumTouchPulses;
                 trial.RewardRelease = RewardRelease;
                 trial.NumReleasePulses = NumReleasePulses;
-                trial.RandomSquareSize = RandomSquareSize;
-                trial.RandomSquarePosition = RandomSquarePosition;
+                trial.RandomObjectSize = RandomObjectSize;
+                trial.RandomObjectPosition = RandomObjectPosition;
                 trial.TimeToAutoEndTrialSec = TimeToAutoEndTrialSec;
                 trial.TimeoutDuration = TimeoutDuration;
 
@@ -100,16 +100,16 @@ namespace THR_Namespace
         public int PulseSize;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;
-        public float WhiteSquareDuration;
-        public float BlueSquareDuration;
+        public float AvoidObjectDuration;
+        public float SelectObjectDuration;
         public float ItiDuration;
         public float MinTouchDuration;
         public float MaxTouchDuration;
         public float TouchToRewardDelay;
         public float ReleaseToRewardDelay;
-        public float SquareSize;
-        public float SquareSizeMin;
-        public float SquareSizeMax;
+        public float ObjectSize;
+        public float ObjectSizeMin;
+        public float ObjectSizeMax;
         public int PositionX;
         public int PositionX_Min;
         public int PositionX_Max;
@@ -120,8 +120,8 @@ namespace THR_Namespace
         public int NumTouchPulses;
         public bool RewardRelease;
         public int NumReleasePulses;
-        public bool RandomSquareSize;
-        public bool RandomSquarePosition;
+        public bool RandomObjectSize;
+        public bool RandomObjectPosition;
         public int TimeToAutoEndTrialSec;
         public float TimeoutDuration;
     }

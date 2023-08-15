@@ -375,13 +375,11 @@ public class InitScreen_Level : ControlLevel
 
         LocalData_GO = GameObject.Find("LocalData_GO");
         ServerData_GO = GameObject.Find("ServerData_GO");
-        //ServerData_GO.SetActive(false);
 
         FolderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
 
         LocalConfig_GO = GameObject.Find("LocalConfig_GO");
         ServerConfig_GO = GameObject.Find("ServerConfig_GO");
-        //ServerConfig_GO.SetActive(false);
 
         Settings_GO = GameObject.Find("InitScreen_Settings");
         SettingsPanel_GO = GameObject.Find("SettingsPanel");

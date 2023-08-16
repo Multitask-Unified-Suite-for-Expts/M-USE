@@ -8,7 +8,6 @@ using USE_StimulusManagement;
 using ConfigDynamicUI;
 using System.Linq;
 using System.IO;
-using UnityEditor.Scripting;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
 

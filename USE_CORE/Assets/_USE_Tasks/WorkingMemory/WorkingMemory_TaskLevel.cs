@@ -15,7 +15,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     public int NumCorrect_InTask = 0;
     public List<float> SearchDurations_InTask = new List<float>();
     public int NumErrors_InTask = 0;
-    public int NumRewardPulses_InTask = 0;
+   // public int NumRewardPulses_InTask = 0;
     public int NumTokenBarFull_InTask = 0;
     public int TotalTokensCollected_InTask = 0;
     public float Accuracy_InTask = 0;

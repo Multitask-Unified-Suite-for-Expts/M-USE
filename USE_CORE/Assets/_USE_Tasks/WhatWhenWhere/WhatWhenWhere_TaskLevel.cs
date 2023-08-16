@@ -56,10 +56,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1
-            //DON'T DELETE, UPDATE !!!
-            // ["Stim Chosen Correctly"] = wwwTL.numCorrect_InBlock.Sum(),
-            // ["Errors"] = wwwTL.numErrors_InBlock.Sum()
+            ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1,
+            ["Stim Chosen Correctly"] = NumCorrectSelections_InBlock,
+            ["Errors"] = NumErrors_InBlock
         };
         return data;
     }
@@ -112,23 +111,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     }
 
     private void DefineBlockData()
-
     {
-        float avgSearchDuration;
-        if (SearchDurations_InBlock.Any(item => item.HasValue))
-        {
-            avgSearchDuration = (float)SearchDurations_InBlock
-                .Where(item => item.HasValue)
-                .Average(item => item.Value);
-        }
-        else
-        {
-            avgSearchDuration = 0f;
-        }
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
         BlockData.AddDatum("LearningSpeed", () => LearningSpeed);
-        BlockData.AddDatum("AvgSearchDuration", ()=> SearchDurations_InBlock.Average());
+        BlockData.AddDatum("AvgSearchDuration", ()=> CalculateAverageSearchDuration(SearchDurations_InBlock));
         BlockData.AddDatum("NumDistractorSlotError", ()=> DistractorSlotErrorCount_InBlock);
         BlockData.AddDatum("NumSearchSlotError", ()=> SlotErrorCount_InBlock);
         BlockData.AddDatum("NumRepetitionError", ()=> RepetitionErrorCount_InBlock);

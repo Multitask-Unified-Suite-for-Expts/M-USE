@@ -120,7 +120,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
 
         CurrentBlockString = "<b>Current Block:</b>" +
                 "\nCorrect: " + trialLevel.NumCorrect_Block +
@@ -134,11 +134,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         //Add CurrentBlockString if block wasn't aborted:
         if (trialLevel.AbortCode == 0)
-            BlockSummaryString.AppendLine(CurrentBlockString.ToString());
+            CurrentBlockSummaryString.AppendLine(CurrentBlockString.ToString());
 
         //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
+            CurrentBlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
     }
 
 }

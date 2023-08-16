@@ -149,7 +149,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CenteringSpeed = 1.5f;
         });
 
-        //SETUP TRIAL state -----------------------------------------------------------------------------------------------------
+        //SETUP TRIAL state ---------------------------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             LoadConfigUIVariables();
@@ -161,7 +161,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        //INIT Trial state -------------------------------------------------------------------------------------------------------
+        //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
 
@@ -191,19 +191,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
-
-            Debug.Log("END OF EC INIT TRIAL INITIALIZATION METHOD");
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-
-            Debug.Log("END OF INIT TRIAL TERMINATION METHOD");
         });
 
-        //Choose Balloon state -------------------------------------------------------------------------------------------------------
+        //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
         ChooseBalloon.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes(); //reset input in case they holding down
@@ -230,8 +226,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-
-            Debug.Log("END OF CHOOSE BALLOON INIT METHOD");
         });
         ChooseBalloon.AddUpdateMethod(() =>
         {
@@ -267,11 +261,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
             RecordChoices();
-
-            Debug.Log("END OF CHOOSE BALLOON TERMINATION METHOD");
         });
 
-        //Center Selection state -------------------------------------------------------------------------------------------------------
+        //Center Selection state -----------------------------------------------------------------------------------------------------------------------------------------
         CenterSelection.AddSpecificInitializationMethod(() =>
         {
             ChooseDuration = ChooseBalloon.TimingInfo.Duration;
@@ -298,8 +290,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 DestroyChildren(BalloonContainerLeft);
                 StimLeft.SetActive(false);
             }
-
-            Debug.Log("END OF CENTER SELECTION INIT METHOD");
         });
         CenterSelection.AddUpdateMethod(() =>
         {
@@ -326,11 +316,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.SetTotalTokensNum(SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
-
-            Debug.Log("END OF CENTER SELECTION TERM METHOD");
         });
 
-        //Inflate Balloon state -------------------------------------------------------------------------------------------------------
+        //Inflate Balloon state -----------------------------------------------------------------------------------------------------------------------------------------
         int outlineClicksRemaining = 1;
         int successfulSelections = 0;
         float startTime = 0;
@@ -367,8 +355,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler != null)
                 Handler.HandlerActive = true;
-
-            Debug.Log("END OF INFLATE BALLOON INIT METHOD");
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
@@ -498,11 +484,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             }
             TrialStim.SetActive(false);
-
-            Debug.Log("END OF INFLATE BALLOON TERM METHOD");
         });
 
-        //Feedback state -------------------------------------------------------------------------------------------------------
+        //Feedback state ------------------------------------------------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
             if (Response == 1)
@@ -522,8 +506,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
             }
-
-            Debug.Log("END OF FEEDBACK INIT METHOD");
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
@@ -531,18 +513,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
-
-            Debug.Log("END OF FEEDBACK TERM METHOD");
         });
 
-        //ITI state -------------------------------------------------------------------------------------------------------
+        //ITI state ------------------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(itiDuration.value, FinishTrial);
         
         DefineTrialData();
         DefineFrameData();
     }
 
-    //HELPER FUNCTIONS -------------------------------------------------------------------------------------------------------
+    //HELPER FUNCTIONS ---------------------------------------------------------------------------------------------------------------------------------------------------
     public override void ResetTrialVariables()
     {
         NumInflations = 0;
@@ -899,12 +879,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //transparent balloon with size of biggest outline, allows easy detection of clicks within the entire balloon
         MaxOutline_Left = Instantiate(StimNoMaterialPrefab, StimLeft.transform.position, StimLeftPrefab.transform.rotation);
         MaxOutline_Left.name = "MaxOutline_Left";
-        MaxOutline_Left.transform.localScale = new Vector3(70f, .1f, 70f);
+        MaxOutline_Left.transform.localScale = new Vector3(77f, .1f, 77f);
         MaxOutline_Left.transform.SetParent(BalloonContainerLeft.transform);
 
         MaxOutline_Right = Instantiate(StimNoMaterialPrefab, StimRight.transform.position, StimRightPrefab.transform.rotation);
         MaxOutline_Right.name = "MaxOutline_Right";
-        MaxOutline_Right.transform.localScale = new Vector3(70f, .1f, 70f);
+        MaxOutline_Right.transform.localScale = new Vector3(77f, .1f, 77f);
         MaxOutline_Right.transform.SetParent(BalloonContainerRight.transform);
 
         ObjectList.Add(MaxOutline_Left);

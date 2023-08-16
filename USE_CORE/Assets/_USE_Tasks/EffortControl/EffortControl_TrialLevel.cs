@@ -163,8 +163,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
-        if (!SessionValues.SessionDef.IsHuman)
-            TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
@@ -363,6 +362,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             successfulSelections = 0;
 
             correctObjects = new List<GameObject>() {TrialStim, MaxOutline_Left, MaxOutline_Right };
+
+            Inflate = false;
+
+            if (Handler != null)
+                Handler.HandlerActive = true;
 
             Debug.Log("END OF INFLATE BALLOON INIT METHOD");
         });

@@ -54,9 +54,11 @@ public class MouseTracker : InputTracker
     {
         CurrentInputScreenPosition = InputBroker.mousePosition;
 
-        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height ||
-                    float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
+            || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        {
             CurrentInputScreenPosition = null;
+        }
 
         if (CurrentInputScreenPosition != null && Camera.main != null)
         {
@@ -73,7 +75,8 @@ public class MouseTracker : InputTracker
             ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
 
             //Find Current Target and return it if found:
-            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);        }
+            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
+        }
     }
 
 }

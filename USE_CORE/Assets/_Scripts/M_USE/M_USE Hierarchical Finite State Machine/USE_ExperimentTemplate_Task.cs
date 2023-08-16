@@ -145,6 +145,9 @@ namespace USE_ExperimentTemplate_Task
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
 
+                NumRewardPulses_InTask = 0;
+                NumAbortedTrials_InTask = 0;
+
                 if (!SessionValues.WebBuild)
                 {
                     if (configUI == null)
@@ -365,8 +368,7 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 TaskCam.gameObject.SetActive(false);
-                NumRewardPulses_InTask = 0;
-                NumAbortedTrials_InTask = 0;
+                
                 NumAbortedTrials_InBlock = 0;
                 NumRewardPulses_InBlock = 0;
 

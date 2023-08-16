@@ -324,6 +324,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         float startTime = 0;
         float holdTime = 0;
         List<GameObject> correctObjects = new List<GameObject>();
+
         InflateBalloon.AddSpecificInitializationMethod(() =>
         {
             ScalePerInflation_Y = (MaxInflation_Y - TrialStim.transform.localScale.y) / (SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight);
@@ -891,27 +892,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ObjectList.Add(MaxOutline_Right);
     }
 
-    private Color32 GetOutlineColor(int i)
-    {
-        if(i <= 5)
-            return new Color32(255, 204, 204, 255);
-        else if(i > 5 && i <= 10)
-            return new Color32(255, 153, 153, 255);
-        else if (i > 10 && i <= 15)
-            return new Color32(255, 102, 102, 255);
-        else if (i > 15 && i <= 20)
-            return new Color32(255, 51, 51, 255);
-        else //greater than 20
-            return new Color32(255, 0, 0, 255);
-    }
-
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
     {
         for (int i = 1; i <= numBalloons; i ++)
         {
             GameObject outline = Instantiate(BalloonOutline, pos, BalloonOutline.transform.rotation);
-            //Color32 outlineColor = GetOutlineColor(i);
-            //outline.GetComponent<MeshRenderer>().material.color = outlineColor;
             outline.transform.parent = container.transform;
             outline.name = "Outline_" + (container.name.ToLower().Contains("left") ? "Left_" : "Right_") + i;
             outline.transform.localScale += i * ScaleUpAmount;

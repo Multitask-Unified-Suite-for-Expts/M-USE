@@ -51,14 +51,9 @@ public class ImportSettings_Level : ControlLevel
 
 		getFilePath.AddSpecificInitializationMethod(() =>
 		{
-			Debug.Log("GET FILE PATH INIT METHOD!");
-
 			filePathSet = false;
 
             currentSettingsDetails = SettingsDetails[0];
-
-            Debug.Log("CURRENT SETTINGS DETAILS - SearchString: " + currentSettingsDetails.SearchString);
-
 
             StartCoroutine(GetFilePath(currentSettingsDetails.SearchString, result =>
 			{

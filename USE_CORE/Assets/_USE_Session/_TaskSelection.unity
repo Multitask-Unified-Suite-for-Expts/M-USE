@@ -1125,6 +1125,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 787625325783779650, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 715
+      objectReference: {fileID: 0}
     - target: {fileID: 808266697065247498, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -1538,12 +1543,12 @@ PrefabInstance:
     - target: {fileID: 2707406638531030883, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_fontSize
-      value: 110
+      value: 107
       objectReference: {fileID: 0}
     - target: {fileID: 2707406638531030883, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_fontSizeBase
-      value: 110
+      value: 107
       objectReference: {fileID: 0}
     - target: {fileID: 2755690387770901497, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
@@ -1639,6 +1644,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3143544349350427237, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 715
       objectReference: {fileID: 0}
     - target: {fileID: 3166053501899117219, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
@@ -2220,6 +2230,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5874617893333048085, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 715
+      objectReference: {fileID: 0}
     - target: {fileID: 6007380318695730973, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_AnchorMax.y
@@ -2274,6 +2289,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: HandleConnectToServerButtonPressed
+      objectReference: {fileID: 0}
+    - target: {fileID: 6491024948920052354, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 715
       objectReference: {fileID: 0}
     - target: {fileID: 6567933163184181438, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
@@ -2699,6 +2719,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8097413045216090044, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_ConstraintCount
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 8131217586637052295, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
@@ -3540,7 +3565,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 0.5
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96

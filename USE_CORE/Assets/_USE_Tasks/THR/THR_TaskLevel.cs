@@ -16,8 +16,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     public int TrialsCompleted_Task = 0;
     public int TrialsCorrect_Task = 0;
-    public int BlueSquareTouches_Task = 0;
-    public int WhiteSquareTouches_Task = 0;
+    public int SelectObjectTouches_Task = 0;
+    public int AvoidObjectTouches_Task = 0;
     public int BackdropTouches_Task = 0;
     public int ItiTouches_Task = 0;
     public int TouchRewards_Task = 0;
@@ -99,9 +99,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             ["Trial Count In Task"] = trialLevel.TrialCount_InTask + 1,
             ["Trials Completed"] = TrialsCompleted_Task,
             ["Trials Correct"] = TrialsCorrect_Task,
-            ["Blue Square Touches"] = BlueSquareTouches_Task,
-            ["White Square Touches"] = WhiteSquareTouches_Task,
-            ["Non Square Touches"] = BackdropTouches_Task,
+            ["Select Object Touches"] = SelectObjectTouches_Task,
+            ["Avoid Object Touches"] = AvoidObjectTouches_Task,
+            ["Backdrop Touches"] = BackdropTouches_Task,
             ["ITI Touches"] = ItiTouches_Task,
             ["Touch Rewards"] = TouchRewards_Task,
             ["Release Rewards"] = ReleaseRewards_Task,
@@ -120,9 +120,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nTrialsCorrect: " + trialLevel.TrialsCorrect_Block + " (out of " + trialLevel.TrialsCompleted_Block + ")" +
                         "\nReleasedEarly: " + trialLevel.NumReleasedEarly_Block +
                         "\nReleasedLate: " + trialLevel.NumReleasedLate_Block +
-                        "\nMovedOutsideSquare: " + trialLevel.NumTouchesMovedOutside_Block +
-                        "\nWhiteSquareTouches: " + trialLevel.WhiteSquareTouches_Block +
-                        "\nBlueSquareTouches: " + trialLevel.BlueSquareTouches_Block +
+                        "\nMovedOutsideObject: " + trialLevel.NumTouchesMovedOutside_Block +
+                        "\nAvoidObjectTouches: " + trialLevel.AvoidObjectTouches_Block +
+                        "\nSelectObjectTouches: " + trialLevel.SelectObjectTouches_Block +
                         "\nBackdropTouches: " + trialLevel.BackdropTouches_Block +
                         "\nRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
                         "\n");
@@ -136,8 +136,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.TrialsCompleted_Block);
         BlockData.AddDatum("NumTrialsCorrect", () => trialLevel.TrialsCorrect_Block);
-        BlockData.AddDatum("WhiteSquareTouches_Block", () => trialLevel.WhiteSquareTouches_Block);
-        BlockData.AddDatum("BlueSquareTouches_Block", () => trialLevel.BlueSquareTouches_Block);
+        BlockData.AddDatum("AvoidObjectTouches_Block", () => trialLevel.AvoidObjectTouches_Block);
+        BlockData.AddDatum("SelectObjectTouches_Block", () => trialLevel.SelectObjectTouches_Block);
         BlockData.AddDatum("BackdropTouches_Block", () => trialLevel.BackdropTouches_Block);
         BlockData.AddDatum("ItiTouches_Block", () => trialLevel.NumItiTouches_Block);
         BlockData.AddDatum("NumTouchRewards", () => trialLevel.NumTouchRewards_Block);

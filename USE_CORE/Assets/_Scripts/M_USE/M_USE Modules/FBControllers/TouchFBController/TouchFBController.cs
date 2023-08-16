@@ -104,14 +104,17 @@ public class TouchFBController : MonoBehaviour
             {
                 case "DurationTooLong":
                     Error_Dict["HeldTooLong"]++;
+                    Debug.Log("SHOWING TOUCH FEEDBACK FOR HOLDING TOO LONG!");
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooLong_Prefab, this));
                     break;
                 case "DurationTooShort":
                     Error_Dict["HeldTooShort"]++;
+                    Debug.Log("SHOWING TOUCH FEEDBACK FOR HOLDING TOO SHORT!");
                     ShowTouchFeedback(new TouchFeedback(e.Selection, HeldTooShort_Prefab, this));
                     break;
                 case "MovedTooFar":
                     Error_Dict["MovedTooFar"]++;
+                    Debug.Log("SHOWING TOUCH FEEDBACK FOR MOVING TOO FAR!");
                     ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
                     break;
                 default:

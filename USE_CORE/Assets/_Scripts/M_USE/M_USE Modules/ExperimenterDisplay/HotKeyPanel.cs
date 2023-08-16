@@ -199,6 +199,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED PAUSE GAME HOT KEY---");
                     if(HkPanel.TrialLevel != null)
                         Time.timeScale = Time.timeScale == 1 ? 0 : 1;
                 }
@@ -214,6 +215,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED RESTART BLOCK HOTKEY---");
                     if(HkPanel.TrialLevel != null)
                     {
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
@@ -236,6 +238,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED PREVIOUS BLOCK HOTKEY---");
                     if(HkPanel.TrialLevel != null)
                     {
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
@@ -265,6 +268,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED END BLOCK HOTKEY---");
                     if(HkPanel.TrialLevel != null)
                     {
                         HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
@@ -287,6 +291,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED END TASK HOTKEY---");
                     if(HkPanel.TrialLevel != null)
                     {
                         HkPanel.TrialLevel.AbortCode = 5;
@@ -295,8 +300,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.ClearActiveTrialHandlers();
                         HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                     }
-
-
                 }
             };
             HotKeyList.Add(endTask);
@@ -309,6 +312,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED QUIT GAME HOT KEY---");
                     if(HkPanel.TrialLevel != null)
                         HkPanel.TrialLevel.ForceBlockEnd = true;
 
@@ -333,6 +337,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.T),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED END TRIAL HOT KEY---");
                     if(HkPanel.TrialLevel != null)
                     {
                         GameObject controllers = GameObject.Find("InputManager");
@@ -363,14 +368,13 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.G),
                 hotKeyAction = () =>
                 {
+                    Debug.Log("---PRESSED GIVE REWARD HOT KEY---");
                     if(HkPanel.TrialLevel != null)
                     {
                         if (SessionValues.SyncBoxController != null)
                         {
                             HkPanel.TrialLevel.AudioFBController.Play("Positive");
                             SessionValues.SyncBoxController.SendRewardPulses(SessionValues.SessionDef.RewardHotKeyNumPulses, SessionValues.SessionDef.RewardHotKeyPulseSize);
-                           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",SessionValues.SessionDef.RewardHotKeyNumPulses));
-
                         }
                         else
                             Debug.Log("Tried to send Reward but SyncBoxController is null!");
@@ -389,6 +393,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     GazeCalibrationTaskLevel = HkPanel.SessionLevel.GazeCalibrationTaskLevel;
                     GazeCalibrationTrialLevel = (ControlLevel_Trial_Template)GazeCalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
+
+                    Debug.Log("---PRESSED CALIBRATION HOT KEY---");
 
                     if (HkPanel.TrialLevel != null)
                     {

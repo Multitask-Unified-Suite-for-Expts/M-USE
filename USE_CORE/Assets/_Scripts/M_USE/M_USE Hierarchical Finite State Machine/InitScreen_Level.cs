@@ -130,7 +130,8 @@ public class InitScreen_Level : ControlLevel
             MainPanel_GO.SetActive(false);
             InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
 
-            SessionValues.LoadingCanvas_GO.SetActive(true); //Turn on the loading Canvas/Circle so that it immedietely shows that its loading
+            SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = "Loading \n Configs";
+            SessionValues.LoadingCanvas_GO.SetActive(true); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
     }
@@ -144,6 +145,13 @@ public class InitScreen_Level : ControlLevel
     private IEnumerator ActivateObjectsAfterPlayerPrefsLoaded()
     {
         yield return new WaitForEndOfFrame(); //Have to wait a frame so that the toggle's can load their IsOn value from PlayerPrefs during their Start() method of ToggleManager.cs
+
+        if(SessionValues.WebBuild)
+        {
+            LocalConfig_Toggle.isOn = false;
+            LocalData_Toggle.isOn = false;
+        }
+        
 
         if(LocalConfig_Toggle.isOn)
         {
@@ -252,30 +260,24 @@ public class InitScreen_Level : ControlLevel
     {
         if (selectedGO == LocalConfig_Toggle.gameObject && LocalConfig_Toggle.isOn)
         {
-            DefaultConfig_Toggle.isOn = false;
-            ServerConfig_Toggle.isOn = false;
-            GreyOutPanels_Array[0].SetActive(!ServerData_Toggle.isOn);
+            TurnTogglesOff(new List<Toggle>() { DefaultConfig_Toggle, ServerConfig_Toggle });
             LocalConfig_GO.SetActive(true);
-            ServerConfig_GO.SetActive(false);
-            GreyOutPanels_Array[2].SetActive(false);   
+            GreyOutPanels_Array[0].SetActive(!ServerData_Toggle.isOn);
+            DeactivateObjects(new List<GameObject>() { ServerConfig_GO, GreyOutPanels_Array[2] });  
         }
         else if (selectedGO == ServerConfig_Toggle.gameObject && ServerConfig_Toggle.isOn)
         {
-            DefaultConfig_Toggle.isOn = false;
-            LocalConfig_Toggle.isOn = false;
-            GreyOutPanels_Array[0].SetActive(false);
+            TurnTogglesOff(new List<Toggle>() { DefaultConfig_Toggle, LocalConfig_Toggle });
             ServerConfig_GO.SetActive(true);
-            LocalConfig_GO.SetActive(false);
-            GreyOutPanels_Array[2].SetActive(false);
+            DeactivateObjects(new List<GameObject>() { LocalConfig_GO, GreyOutPanels_Array[0], GreyOutPanels_Array[2] });
             if (ConnectedToServer && !FoldersSet)
                 PopulateServerDropdown();
         }
         else if (selectedGO == DefaultConfig_Toggle.gameObject && DefaultConfig_Toggle.isOn)
         {
-            LocalConfig_Toggle.isOn = false;
-            ServerConfig_Toggle.isOn = false;
-            GreyOutPanels_Array[0].SetActive(!ServerData_Toggle.isOn);
+            TurnTogglesOff(new List<Toggle>() { LocalConfig_Toggle, ServerConfig_Toggle });
             GreyOutPanels_Array[2].SetActive(true);   
+            GreyOutPanels_Array[0].SetActive(!ServerData_Toggle.isOn);
         }
     }
 
@@ -283,31 +285,41 @@ public class InitScreen_Level : ControlLevel
     {
         if (selectedGO == LocalData_Toggle.gameObject && LocalData_Toggle.isOn)
         {
-            ServerData_Toggle.isOn = false;
-            NoData_Toggle.isOn = false;
-            GreyOutPanels_Array[0].SetActive(!ServerConfig_Toggle.isOn);
+            TurnTogglesOff(new List<Toggle>() { ServerData_Toggle, NoData_Toggle });
             LocalData_GO.SetActive(true);
-            ServerData_GO.SetActive(false);
-            GreyOutPanels_Array[1].SetActive(false);   
+            GreyOutPanels_Array[0].SetActive(!ServerConfig_Toggle.isOn);
+            DeactivateObjects(new List<GameObject>() { ServerData_GO, GreyOutPanels_Array[1] });  
         }
         else if (selectedGO == ServerData_Toggle.gameObject && ServerData_Toggle.isOn)
         {
-            LocalData_Toggle.isOn = false;
-            NoData_Toggle.isOn = false;
-            GreyOutPanels_Array[0].SetActive(false);
+            TurnTogglesOff(new List<Toggle>() { LocalData_Toggle, NoData_Toggle });
             ServerData_GO.SetActive(true);
-            LocalData_GO.SetActive(false);
-            GreyOutPanels_Array[1].SetActive(false);
-            
+            DeactivateObjects(new List<GameObject>() { LocalData_GO, GreyOutPanels_Array[0], GreyOutPanels_Array[1] });
         }
         else if (selectedGO == NoData_Toggle.gameObject && NoData_Toggle.isOn)
         {
-            ServerData_Toggle.isOn = false;
-            LocalData_Toggle.isOn = false;
-            GreyOutPanels_Array[0].SetActive(!ServerConfig_Toggle.isOn);
+            TurnTogglesOff(new List<Toggle>() { ServerData_Toggle, LocalData_Toggle });
             GreyOutPanels_Array[1].SetActive(true);   
+            GreyOutPanels_Array[0].SetActive(!ServerConfig_Toggle.isOn);
         }
     }
+
+    private void TurnTogglesOff(List<Toggle> toggles)
+    {
+        foreach(Toggle toggle in toggles)
+        {
+            toggle.isOn = false;
+        }
+    }
+
+    private void DeactivateObjects(List<GameObject> objects)
+    {
+        foreach (GameObject go in objects)
+            go.SetActive(false);
+
+        objects.Clear();
+    }
+
 
     public void OnToggleChange()
     {
@@ -335,14 +347,7 @@ public class InitScreen_Level : ControlLevel
         StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
 
         MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
-        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
-
-        //Block out local toggle options if on web build
-        if(!SessionValues.WebBuild)
-        {
-            GameObject.Find("LocalConfigsToggle_GREYPANEL").SetActive(false);
-            GameObject.Find("LocalDataToggle_GREYPANEL").SetActive(false);
-        }   
+        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen  
 
         LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
         ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
@@ -375,13 +380,11 @@ public class InitScreen_Level : ControlLevel
 
         LocalData_GO = GameObject.Find("LocalData_GO");
         ServerData_GO = GameObject.Find("ServerData_GO");
-        ServerData_GO.SetActive(false);
 
         FolderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
 
         LocalConfig_GO = GameObject.Find("LocalConfig_GO");
         ServerConfig_GO = GameObject.Find("ServerConfig_GO");
-        ServerConfig_GO.SetActive(false);
 
         Settings_GO = GameObject.Find("InitScreen_Settings");
         SettingsPanel_GO = GameObject.Find("SettingsPanel");
@@ -411,6 +414,22 @@ public class InitScreen_Level : ControlLevel
         TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
         dataFileItem.ManualStart(dataFileSpec, dataInputField, dataText);
         LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
+
+
+        if (SessionValues.WebBuild)
+        {
+            LocalData_GO.SetActive(false);
+            LocalConfig_GO.SetActive(false);
+        }
+        else
+        {
+            ServerData_GO.SetActive(false);
+            ServerConfig_GO.SetActive(false);
+
+            //Block out local toggle options if web build:
+            GameObject.Find("LocalConfigsToggle_GREYPANEL").SetActive(false);
+            GameObject.Find("LocalDataToggle_GREYPANEL").SetActive(false);
+        }
 
         MainPanel_GO.SetActive(false);
 

@@ -27,7 +27,7 @@ namespace USE_ExperimentTemplate_Data
             Separator = SessionValues.WebBuild ? '/' : Path.DirectorySeparatorChar;
             FolderPath = SessionValues.SessionDataPath + Separator + "SummaryData";
 
-            if(SessionValues.WebBuild)
+            if(SessionValues.StoringDataOnServer)
                 CoroutineHelper.StartCoroutine(ServerManager.CreateFolder(FolderPath));
             else
                 Directory.CreateDirectory(FolderPath);
@@ -43,7 +43,7 @@ namespace USE_ExperimentTemplate_Data
 
             string filePath = FolderPath + Separator + ConfigName + ".txt";
 
-            if(SessionValues.WebBuild)
+            if(SessionValues.StoringDataOnServer)
             {
                 string content = "";
                 foreach (DictionaryEntry entry in data)

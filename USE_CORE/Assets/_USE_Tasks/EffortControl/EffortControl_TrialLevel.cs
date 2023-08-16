@@ -464,7 +464,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(SideChoice == "Left" ? BalloonContainerLeft : BalloonContainerRight);
             InflateAudioPlayed = false;
             
-            
             if (Response == 1)
             {
                 InflationDurations_Block.Add(InflationDuration);
@@ -478,6 +477,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                 NumAborted_Block++;
                 CurrentTaskLevel.NumAborted_Task++;
+                AbortCode = 6;
 
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;

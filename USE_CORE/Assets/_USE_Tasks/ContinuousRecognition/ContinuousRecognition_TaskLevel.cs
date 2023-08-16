@@ -179,9 +179,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         //Add CurrentBlockString if block wasn't aborted:
         if (trialLevel.AbortCode == 0)
-            BlockSummaryString.AppendLine(CurrentBlockString.ToString());
+            CurrentBlockSummaryString.AppendLine(CurrentBlockString.ToString());
 
-        if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to BlockSummaryString:
+        if (blocksAdded > 1) //If atleast 2 blocks to average, set Averages string and add to CurrentBlockSummaryString:
         {
             BlockAveragesString = "-------------------------------------------------" +
                                 "\n" +
@@ -194,19 +194,19 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                                 "\nAvg NonStimTouches: " + AvgNonStimTouches_Task.ToString("0.00") +
                                 "\nStandard Deviation: " + StanDev.ToString("0.00");
 
-            BlockSummaryString.AppendLine(BlockAveragesString.ToString());
+            CurrentBlockSummaryString.AppendLine(BlockAveragesString.ToString());
         }
 
         //Add Previous blocks string:
         if(PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
+            CurrentBlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
     }
 
     void ClearStrings()
     {
         BlockAveragesString = "";
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
 
     void CalculateStanDev()

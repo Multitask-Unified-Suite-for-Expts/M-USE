@@ -69,11 +69,11 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
 
     public void SetBlockSummaryString()
     {
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
         float avgBlockSearchDuration = 0;
         if (wmTL.SearchDurations_InBlock.Count != 0)
             avgBlockSearchDuration = wmTL.SearchDurations_InBlock.Average();
-        BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
+        CurrentBlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", avgBlockSearchDuration) +
                                       "\n" +

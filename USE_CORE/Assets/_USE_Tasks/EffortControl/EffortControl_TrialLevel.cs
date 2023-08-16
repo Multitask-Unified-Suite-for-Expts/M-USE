@@ -568,7 +568,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             NumAborted_Block++;
             CurrentTaskLevel.NumAborted_Task++;
             CurrentTaskLevel.ClearStrings();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+            CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
 
         ClearTrialSummaryString();

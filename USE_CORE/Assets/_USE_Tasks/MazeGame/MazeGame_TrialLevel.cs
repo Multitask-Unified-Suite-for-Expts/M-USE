@@ -885,7 +885,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
         //    CurrentTaskLevel.ClearStrings();
-        //    CurrentTaskLevel.BlockSummaryString.AppendLine("");
+        //    CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
 
         // Reset the maze so that the correct next step is the start

@@ -112,7 +112,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("<b>Max Trials in Block: </b>" + flTL.MaxTrials + 
+        CurrentBlockSummaryString.AppendLine("<b>Max Trials in Block: </b>" + flTL.MaxTrials + 
                                       "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", flTL.AverageSearchDuration_InBlock) +
@@ -120,9 +120,9 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                                       "\nNum Reward Given: " + flTL.NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock);
-        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         /*if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
+            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
     public override void SetTaskSummaryString()
     {
@@ -160,7 +160,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public void ClearStrings()
     {
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
     public void ResetTaskVariables()
     {

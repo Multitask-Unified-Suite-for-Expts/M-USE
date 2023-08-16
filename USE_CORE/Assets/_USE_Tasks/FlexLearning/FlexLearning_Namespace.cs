@@ -20,9 +20,9 @@ namespace FlexLearning_Namespace
         //public string neutralPatternedColorName;
         //public float? ExternalStimScale;
 
-        public bool StimFacingCamera;
-        public string ShadowType;
-        public bool NeutralITI;
+        // public bool StimFacingCamera;
+        // public string ShadowType;
+        // public bool NeutralITI;
     }
 
     public class FlexLearning_BlockDef : BlockDef
@@ -32,18 +32,18 @@ namespace FlexLearning_Namespace
         //public TrialDef[] TrialDefs;
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public int[] MinMaxTrials;
-        public string BlockName;
-        public string ContextName;
+        // public int[] MinMaxTrials;
+        // public string BlockName;
+        // public string ContextName;
         public int NumInitialTokens;
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
+        // public string BlockEndType;
+        // public float BlockEndThreshold;
+        // public int BlockEndWindow;
         public int NumTokenBar;
         //public int NumPulses;
-        public int PulseSize;
+        // public int PulseSize;
         public bool RandomizedLocations;
         public bool? TokensWithStimOn = null;
 
@@ -117,21 +117,21 @@ namespace FlexLearning_Namespace
         //public TrialStims TrialStims;
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public string BlockName;
+        // public string BlockName;
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
         public bool RandomizedLocations;
         public bool StimFacingCamera;
-        public string ContextName;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
-        public int NumPulses;
+        // public string ContextName;
+        // public string BlockEndType;
+        // public float BlockEndThreshold;
+        // public int BlockEndWindow;
+        // public int NumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;
-        public int PulseSize;
+        // public int PulseSize;
         public bool? TokensWithStimOn;
-        public int MaxTrials;
+        // public int MaxTrials;
         public int[] MinMaxTrials;
 
     }

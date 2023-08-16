@@ -73,11 +73,11 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
 
     public void SetBlockSummaryString()
     {
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
         float avgBlockSearchDuration = 0;
         if (fuWMTL.SearchDurations_InBlock.Count != 0)
             avgBlockSearchDuration = fuWMTL.SearchDurations_InBlock.Average();
-        BlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", fuWMTL.Accuracy_InBlock) +
+        CurrentBlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", fuWMTL.Accuracy_InBlock) +
                                       "\n" +
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", avgBlockSearchDuration) +
                                       "\n" +

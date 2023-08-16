@@ -449,8 +449,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
-            CurrentTaskLevel.BlockSummaryString.Clear();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+            CurrentTaskLevel.CurrentBlockSummaryString.Clear();
+            CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
     }
 

@@ -309,17 +309,17 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Integer value indicating the total number of tokens.
         /// </summary>
-        public int? TotalTokensNum;
+        public int TotalTokensNum;
 
         /// <summary>
         /// Integer value indicating the minimum number of trials.
         /// </summary>
-        public int? MinTrials;
+        public int MinTrials;
 
         /// <summary>
         /// Integer value indicating the maximum number of trials.
         /// </summary>
-        public int? MaxTrials;
+        public int MaxTrials;
 
         /// <summary>
         /// Random number generator used for various random operations.
@@ -390,6 +390,16 @@ namespace USE_Def_Namespace
     
     public abstract class TrialDef
     {
+        /// <summary>
+        /// Integer value indicating the minimum number of trials.
+        /// </summary>
+        public int MinTrials;
+
+        /// <summary>
+        /// Integer value indicating the maximum number of trials.
+        /// </summary>
+        public int MaxTrials;
+        
         /// <summary>
         /// Represents the block count of the trial, corresponding to the BlockCount of BlockDef
         /// </summary>

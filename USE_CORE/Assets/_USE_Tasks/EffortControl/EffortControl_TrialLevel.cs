@@ -363,6 +363,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             correctObjects = new List<GameObject>() {TrialStim, MaxOutline_Left, MaxOutline_Right };
 
+            Inflate = false;
+
+            if (Handler != null)
+                Handler.HandlerActive = true;
+
             Debug.Log("END OF INFLATE BALLOON INIT METHOD");
         });
         InflateBalloon.AddUpdateMethod(() =>

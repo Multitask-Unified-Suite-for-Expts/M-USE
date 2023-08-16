@@ -182,8 +182,10 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddUniversalInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
-
+                Debug.Log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ BLOCK COUNT: " + BlockCount + " BLOCK DEF LENGTH: " + BlockDefs.Length);
                 BlockCount++;
+                Debug.Log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ AFTER BLOCK COUNT: " + BlockCount);
+
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
@@ -842,6 +844,7 @@ namespace USE_ExperimentTemplate_Task
 
             if (rAcc.Count >= windowSize)
             {
+                Debug.Log("WINDOW SIZE: " + windowSize);
                 immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
                 Debug.Log("###IMMEDIATE AVG: " + immediateAvg);
                 Debug.Log("###rACC: " + String.Join(",",rAcc));
@@ -851,7 +854,6 @@ namespace USE_ExperimentTemplate_Task
 
             if (rAcc.Count >= windowSize * 2)
             {
-                Debug.Log("###IS THIS BREAKING IT: rAcc.Count >= windowSize * 2?");
                 prevAvg = (float)rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Average();
                 sumdif = rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Sum() -
                          rAcc.GetRange(rAcc.Count - windowSize, windowSize).Sum();

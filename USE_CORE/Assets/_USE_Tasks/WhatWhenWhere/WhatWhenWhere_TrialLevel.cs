@@ -256,7 +256,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
             AbortCode = 6;
-
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
@@ -358,7 +357,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddSpecificInitializationMethod(() =>
         {
-
             float latestAccuracy;
 
             if (runningAcc.Count > 10)

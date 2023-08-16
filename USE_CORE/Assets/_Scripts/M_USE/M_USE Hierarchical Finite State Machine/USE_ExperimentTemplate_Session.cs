@@ -347,10 +347,13 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
-                if (taskCount >= SessionValues.SessionDef.TaskMappings.Count)
+                if(!SessionValues.WebBuild)
                 {
-                    TasksFinished = true;
-                    return;
+                    if (taskCount >= SessionValues.SessionDef.TaskMappings.Count)
+                    {
+                        TasksFinished = true;
+                        return;
+                    }
                 }
 
                 if (TaskButtonsContainer != null)

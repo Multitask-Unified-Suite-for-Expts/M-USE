@@ -56,7 +56,6 @@ namespace USE_ExperimentTemplate_Data
                 foreach (DictionaryEntry entry in data)
                     dataStream.Write($"{entry.Key}:\t{entry.Value}\n");
             }
-            
         }
     }
 

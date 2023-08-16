@@ -191,13 +191,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;           
+            Handler.MaxDuration = maxObjectTouchDuration.value;
+
+            Debug.Log("END OF EC INIT TRIAL INITIALIZATION METHOD");
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+
+            Debug.Log("END OF INIT TRIAL TERMINATION METHOD");
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------
@@ -212,7 +216,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             RewardContainerLeft.transform.localPosition = new Vector3(StimLeft.transform.position.x, 1.5825f, 0);
             RewardContainerRight.transform.localPosition = new Vector3(StimRight.transform.position.x, 1.5825f, 0);
-
             
             LeftScaleUpAmount = MaxScale / CurrentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / CurrentTrial.NumClicksRight;
@@ -228,6 +231,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            Debug.Log("END OF CHOOSE BALLOON INIT METHOD");
         });
         ChooseBalloon.AddUpdateMethod(() =>
         {
@@ -263,6 +268,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
             RecordChoices();
+
+            Debug.Log("END OF CHOOSE BALLOON TERMINATION METHOD");
         });
 
         //Center Selection state -------------------------------------------------------------------------------------------------------
@@ -292,6 +299,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 DestroyChildren(BalloonContainerLeft);
                 StimLeft.SetActive(false);
             }
+
+            Debug.Log("END OF CENTER SELECTION INIT METHOD");
         });
         CenterSelection.AddUpdateMethod(() =>
         {
@@ -318,6 +327,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.SetTotalTokensNum(SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
+
+            Debug.Log("END OF CENTER SELECTION TERM METHOD");
         });
 
         //Inflate Balloon state -------------------------------------------------------------------------------------------------------
@@ -352,10 +363,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             successfulSelections = 0;
 
             correctObjects = new List<GameObject>() {TrialStim, MaxOutline_Left, MaxOutline_Right };
+
+            Debug.Log("END OF INFLATE BALLOON INIT METHOD");
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
             InflationDuration += Time.deltaTime;
+
             if (Inflate)
             {
                 if (!InflateAudioPlayed)
@@ -434,7 +448,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         }
                     }
                 }
-
             }
 
             //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
@@ -466,11 +479,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 InflationDurations_Block.Add(InflationDuration);
                 CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
-                
-                if(SessionValues.SessionDef.IsHuman)
-                    AudioFBController.Play("EC_HarshPop"); //better for humans
-                else
-                    AudioFBController.Play("EC_NicePop"); //better for monkeys
+                AudioFBController.Play(SessionValues.SessionDef.IsHuman ? "EC_HarshPop" : "EC_NicePop");
             }
             else
             {
@@ -485,6 +494,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             }
             TrialStim.SetActive(false);
+
+            Debug.Log("END OF INFLATE BALLOON TERM METHOD");
         });
 
         //Feedback state -------------------------------------------------------------------------------------------------------
@@ -507,8 +518,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
             }
-            //  else
-            // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
+
+            Debug.Log("END OF FEEDBACK INIT METHOD");
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
@@ -516,6 +527,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
+
+            Debug.Log("END OF FEEDBACK TERM METHOD");
         });
 
         //ITI state -------------------------------------------------------------------------------------------------------

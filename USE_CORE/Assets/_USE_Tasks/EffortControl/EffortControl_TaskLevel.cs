@@ -59,11 +59,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             SetSkyBox(CurrentBlock.ContextName);
         });
 
-        BlockFeedback.AddSpecificInitializationMethod(() =>
-        {
-            //AddBlockValuesToTaskValues();
-            HandleBlockStrings();
-        });
+        BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
     }
 
     private void HandleBlockStrings()
@@ -76,23 +72,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             BlockStringsAdded++;
         }
     }
-
-/*    public void AddBlockValuesToTaskValues()
-    {
-        RewardPulses_Task += trialLevel.RewardPulses_Block;
-        Completions_Task += trialLevel.Completions_Block;
-        Touches_Task += trialLevel.TotalTouches_Block;
-        NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
-        NumChosenRight_Task += trialLevel.NumChosenRight_Block;
-        NumHigherEffortChosen_Task += trialLevel.NumHigherEffortChosen_Block;
-        NumLowerEffortChosen_Task += trialLevel.NumLowerEffortChosen_Block;
-        NumSameEffortChosen_Task += trialLevel.NumSameEffortChosen_Block;
-        NumHigherRewardChosen_Task += trialLevel.NumHigherRewardChosen_Block;
-        NumLowerRewardChosen_Task += trialLevel.NumLowerRewardChosen_Block;
-        NumSameRewardChosen_Task += trialLevel.NumSameRewardChosen_Block;
-        NumAborted_Task += trialLevel.NumAborted_Block;
-
-    }*/
 
     public override OrderedDictionary GetBlockResultsData()
     {

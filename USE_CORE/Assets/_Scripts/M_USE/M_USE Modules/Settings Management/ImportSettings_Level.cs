@@ -51,11 +51,16 @@ public class ImportSettings_Level : ControlLevel
 
 		getFilePath.AddSpecificInitializationMethod(() =>
 		{
+			Debug.Log("GET FILE PATH INIT METHOD!");
+
 			filePathSet = false;
 
             currentSettingsDetails = SettingsDetails[0];
 
-			StartCoroutine(GetFilePath(currentSettingsDetails.SearchString, result =>
+            Debug.Log("CURRENT SETTINGS DETAILS - SearchString: " + currentSettingsDetails.SearchString);
+
+
+            StartCoroutine(GetFilePath(currentSettingsDetails.SearchString, result =>
 			{
 				if(!string.IsNullOrEmpty(result))
 				{
@@ -79,19 +84,19 @@ public class ImportSettings_Level : ControlLevel
             {
 				Debug.Log("Attempting to load settings file at path: " + currentSettingsDetails.FilePath);
 	            StartCoroutine(GetFileContentString(currentSettingsDetails.FilePath, (contentString) =>
-		            {
-			            if (!string.IsNullOrEmpty(contentString))
-			            {
-				            currentSettingsDetails.FileContentString = contentString;
-				            Debug.Log("Successfully loaded file at path: " + currentSettingsDetails.FilePath);
-				            fileLoadingFinished = true;
-			            }
-			            else
-			            {
-				            Debug.Log($"Loaded file {currentSettingsDetails.FileName} but no data was found in it.");
-				            fileLoadingFinished = true;
-			            }
-		            }));
+		        {
+			        if (!string.IsNullOrEmpty(contentString))
+			        {
+				        currentSettingsDetails.FileContentString = contentString;
+				        Debug.Log("Successfully loaded file at path: " + currentSettingsDetails.FilePath);
+				        fileLoadingFinished = true;
+			        }
+			        else
+			        {
+				        Debug.Log($"Loaded file {currentSettingsDetails.FileName} but no data was found in it.");
+				        fileLoadingFinished = true;
+			        }
+		        }));
             }
         });
         loadFile.SpecifyTermination(() => fileLoadingFinished, parseFile, () => fileLoadingFinished = false);

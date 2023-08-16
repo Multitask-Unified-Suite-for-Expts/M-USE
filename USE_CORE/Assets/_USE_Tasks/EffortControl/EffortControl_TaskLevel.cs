@@ -164,7 +164,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
         BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
         BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
-        BlockData.AddDatum("AvgInflationDuration", () =>avgInflationDuration_Block);
+        BlockData.AddDatum("AvgInflationDuration", () => avgInflationDuration_Block);
         
     }
 

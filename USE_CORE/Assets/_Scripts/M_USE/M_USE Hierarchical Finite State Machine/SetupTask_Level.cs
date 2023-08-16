@@ -179,12 +179,11 @@ public class SetupTask_Level : ControlLevel
                 SessionValues.GazeTracker.Init(FrameData, 0);
             SessionValues.MouseTracker.Init(FrameData, 0);
 
-            if(SessionValues.UsingServerConfigs)
-                TrialLevel.LoadTexturesFromServer();
-            else if(SessionValues.UsingDefaultConfigs)
+
+            if(SessionValues.UsingDefaultConfigs || SessionValues.UsingServerConfigs) //currently still loading from resources for server
                 TrialLevel.LoadTexturesFromResources();
             else if(SessionValues.UsingLocalConfigs)
-                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController.
+                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath);
 
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);

@@ -166,11 +166,12 @@ public class TouchFBController : MonoBehaviour
                 prefab.SetActive(false);
     }
 
-
     private void CreatePrefabs()
     {
         if (HeldTooLong_Texture == null || HeldTooShort_Texture == null || MovedTooFar_Texture == null)
+        {
             Debug.Log("ABOUT TO CREATE PREFABS BUT THE TEXTURES ARE STILL NULL!");
+        }
 
         PrefabList = new List<GameObject>();
 

@@ -127,9 +127,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
                         "\n");
 
-        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
     void SetupBlockData()
@@ -151,7 +151,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     void ClearStrings()
     {
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
 
 }

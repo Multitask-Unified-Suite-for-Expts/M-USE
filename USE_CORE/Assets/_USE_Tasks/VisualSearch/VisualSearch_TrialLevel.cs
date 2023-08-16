@@ -344,7 +344,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             AbortedTrials_InBlock++;
             CurrentTaskLevel.AbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+            CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
 
     }

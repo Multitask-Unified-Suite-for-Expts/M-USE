@@ -62,15 +62,6 @@ public class TouchFBController : MonoBehaviour
         };
     }
 
-    public void ClearErrorDict()
-    {
-        foreach (var key in Error_Dict.Keys.ToList())
-        {
-            Error_Dict[key] = 0;
-        }
-    }
-
-
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
     {        
         Handler = handler;

@@ -19,14 +19,14 @@ namespace VisualSearch_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public string BlockName;
+        // public string BlockName;
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
         public int[] nRepetitionsMinMax;
-        public string ContextName;
+        // public string ContextName;
         public int NumInitialTokens;
         public int NumTokenBar;
-        public int PulseSize;
+        // public int PulseSize;
         public bool RandomizedLocations;
         public bool? TokensWithStimOn;
 
@@ -87,13 +87,13 @@ namespace VisualSearch_Namespace
         public Reward[][] TrialStimTokenReward;
         public Reward[] PulseReward;
         public bool? TokensWithStimOn;
-        public int NumPulses;
+        // public int NumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;
-        public int PulseSize;
+        // public int PulseSize;
         public bool RandomizedLocations;
-        public string ContextName;
-        public string BlockName;
+        // public string ContextName;
+        // public string BlockName;
     }
 
     public class VisualSearch_StimDef : StimDef

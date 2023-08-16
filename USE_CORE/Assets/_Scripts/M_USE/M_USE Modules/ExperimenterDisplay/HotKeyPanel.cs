@@ -271,7 +271,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     Debug.Log("---PRESSED END BLOCK HOTKEY---");
                     if(HkPanel.TrialLevel != null)
                     {
-                        HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+                        if (HkPanel.TrialLevel.TokenFBController != null)
+                            HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
 
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();

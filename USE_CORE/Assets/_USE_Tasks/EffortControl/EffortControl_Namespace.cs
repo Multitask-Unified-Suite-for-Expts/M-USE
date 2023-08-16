@@ -11,8 +11,8 @@ namespace EffortControl_Namespace
 
     public class EffortControl_BlockDef : BlockDef
     {
-        public string BlockName;
-        public string ContextName;
+        // public string BlockName;
+        // public string ContextName;
         public int NumTrials;
         public int NumClicksLeft;
         public int NumClicksRight;
@@ -49,8 +49,8 @@ namespace EffortControl_Namespace
 
     public class EffortControl_TrialDef : TrialDef
     {
-        public string BlockName;
-        public string ContextName;
+        // public string BlockName;
+        // public string ContextName;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;

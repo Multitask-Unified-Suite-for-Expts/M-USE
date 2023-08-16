@@ -135,9 +135,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
                         "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block);
-        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         /*if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
+            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     void SetupBlockData()
@@ -171,7 +171,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     public void ClearStrings()
     {
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
     public override void SetTaskSummaryString()
     {

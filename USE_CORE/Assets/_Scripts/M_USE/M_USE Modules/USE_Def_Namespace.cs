@@ -14,94 +14,375 @@ namespace USE_Def_Namespace
         // public int SessionStart_Frame;
         // public float SessionStart_UnityTime;
 
+        /// <summary>
+        /// Represents a dictionary of task mappings in an ordered manner.
+        /// </summary>
         public OrderedDictionary TaskMappings;
+
+        /// <summary>
+        /// A list of task names.
+        /// </summary>
         public List<string> TaskNames;
+
+        /// <summary>
+        /// A dictionary mapping task names to their associated icon file names.
+        /// </summary>
         public Dictionary<string, string> TaskIcons;
 
+        /// <summary>
+        /// Path to the external file associated with the context.
+        /// </summary>
         public string ContextExternalFilePath;
+
+        /// <summary>
+        /// Directory path where task icons are stored.
+        /// </summary>
         public string TaskIconsFolderPath;
+
+        /// <summary>
+        /// Locations for each task icon in a 3D space.
+        /// </summary>
         public Vector3[] TaskIconLocations;
-        
+
+        /// <summary>
+        /// Duration of timeout for task selection. Default is 0f.
+        /// </summary>
         public float TaskSelectionTimeout = 0f;
+
+        /// <summary>
+        /// Indicates if the build is for Mac's main display.
+        /// </summary>
         public bool MacMainDisplayBuild;
+
+        /// <summary>
+        /// Indicates if the actor is human.
+        /// </summary>
         public bool IsHuman;
+
+        /// <summary>
+        /// Indicates if event codes are active.
+        /// </summary>
         public bool EventCodesActive;
+
+        /// <summary>
+        /// Indicates if the sync box is active.
+        /// </summary>
         public bool SyncBoxActive;
+
+        /// <summary>
+        /// Indicates if the serial port is active.
+        /// </summary>
         public bool SerialPortActive;
+
+        /// <summary>
+        /// Address of the serial port.
+        /// </summary>
         public string SerialPortAddress;
+
+        /// <summary>
+        /// Speed of the serial port connection.
+        /// </summary>
         public int SerialPortSpeed;
+
+        /// <summary>
+        /// List of commands to initialize the sync box.
+        /// </summary>
         public List<string> SyncBoxInitCommands;
+
+        /// <summary>
+        /// Number of bytes to be split.
+        /// </summary>
         public int SplitBytes;
-        
+
+        /// <summary>
+        /// Type of eye tracker being used.
+        /// </summary>
         public string EyetrackerType;
+
+        /// <summary>
+        /// Indicates if the eye tracker is active.
+        /// </summary>
         public bool EyeTrackerActive;
+
+        /// <summary>
+        /// Type of selection method being used. Default is "mouse".
+        /// </summary>
         public string SelectionType = "mouse";
+
+        /// <summary>
+        /// Details of the monitor being used.
+        /// </summary>
         public MonitorDetails MonitorDetails;
+
+        /// <summary>
+        /// Details of the screen being used.
+        /// </summary>
         public ScreenDetails ScreenDetails;
-        
+
+        /// <summary>
+        /// Indicates if sonication is active.
+        /// </summary>
         public bool SonicationActive;
 
+        /// <summary>
+        /// Size of the circle for shotgun raycasting in DVA. Default is 1.25f.
+        /// </summary>
         public float ShotgunRayCastCircleSize_DVA = 1.25f;
+
+        /// <summary>
+        /// Spacing between raycasts in DVA for shotgun raycasting. Default is 0.3f.
+        /// </summary>
         public float ShotgunRaycastSpacing_DVA = 0.3f;
+
+        /// <summary>
+        /// Distance of the participant in centimeters. Default is 60f.
+        /// </summary>
         public float ParticipantDistance_CM = 60f;
+
+        /// <summary>
+        /// Number of pulses for the reward hotkey. Default is 1.
+        /// </summary>
         public int RewardHotKeyNumPulses = 1;
+
+        /// <summary>
+        /// Size of each pulse for the reward hotkey in milliseconds. Default is 250.
+        /// </summary>
         public int RewardHotKeyPulseSize = 250;
 
-        public float BlockResultsDuration; //specify for human session configs
+        /// <summary>
+        /// Duration of the block results, specific for human session configurations.
+        /// </summary>
+        public float BlockResultsDuration;
 
+        /// <summary>
+        /// Indicates if background music should be played.
+        /// </summary>
         public bool PlayBackgroundMusic;
 
+        /// <summary>
+        /// Indicates if the task selection is guided.
+        /// </summary>
         public bool GuidedTaskSelection;
 
+        /// <summary>
+        /// Indicates if flash panels are active.
+        /// </summary>
         public bool FlashPanelsActive;
-        
 
+        /// <summary>
+        /// Size of each task button. Default is 225.
+        /// </summary>
         public int TaskButtonSize = 225;
+
+        /// <summary>
+        /// Spacing between task buttons. Default is 25.
+        /// </summary>
         public int TaskButtonSpacing = 25;
+
+        /// <summary>
+        /// Maximum number of task buttons per row. Default is 5.
+        /// </summary>
         public int TaskButtonGridMaxPerRow = 5;
 
-        //If Want to specify positions:
-        public List<int> TaskButtonGridSpots; //put into session config
-        public int NumGridSpots = 20; //leave as 20, but can adjust if needed
+        /// <summary>
+        /// List of positions for task button grid. To be set in session config.
+        /// </summary>
+        public List<int> TaskButtonGridSpots;
 
+        /// <summary>
+        /// Total number of grid spots. Default is 20, but can be adjusted if needed.
+        /// </summary>
+        public int NumGridSpots = 20;
     }
 
     public class TaskDef
     {
+        /// <summary>
+        /// Represents the name of the task.
+        /// </summary>
         public string TaskName;
-        public string ExternalStimFolderPath;
-        public string PrefabStimFolderPath;
-        public string ExternalStimExtension;
-        public List<string[]> FeatureNames;
-        public string neutralPatternedColorName;
-        public float? ExternalStimScale;
-        public List<string> FeedbackControllers;
-        public float TouchFeedbackDuration = 0.3f;
-        public int TotalTokensNum = 5;
-        public bool SerialPortActive, SyncBoxActive, EventCodesActive, RewardPulsesActive, SonicationActive;
-        public string SelectionType;
-        public Dictionary<string, string> CustomSettings;
-        public Vector3 StartButtonPosition = Vector3.zero;
-        public float StartButtonScale = 1.2f;
+ 
+        /// <summary>
+        /// Path to the external file associated with the context.
+        /// </summary>
         public string ContextExternalFilePath;
+        
+        /// <summary>
+        /// Directory path where external stimuli are stored.
+        /// </summary>
+        public string ExternalStimFolderPath;
+
+        /// <summary>
+        /// Directory path where prefab stimuli are stored.
+        /// </summary>
+        public string PrefabStimFolderPath;
+
+        /// <summary>
+        /// File extension used for the external stimuli.
+        /// </summary>
+        public string ExternalStimExtension;
+
+        /// <summary>
+        /// A list of feature names associated with the task.
+        /// </summary>
+        public List<string[]> FeatureNames;
+
+        /// <summary>
+        /// Name of the neutral patterned color.
+        /// </summary>
+        public string NeutralPatternedColorName;
+
+        /// <summary>
+        /// Scale applied to the external stimuli.
+        /// </summary>
+        public float? ExternalStimScale;
+
+        /// <summary>
+        /// List of controllers used for feedback (ie. Audio, Halo, Slider, Token).
+        /// </summary>
+        public List<string> FeedbackControllers;
+
+        /// <summary>
+        /// Duration of selection error touch feedback. Default is 0.3f.
+        /// </summary>
+        public float TouchFeedbackDuration = 0.3f;
+
+        /// <summary>
+        /// Total number of tokens in the token bar. Default is 5.
+        /// </summary>
+        public int TotalTokensNum = 5;
+
+        /// <summary>
+        /// Indicates if the reward pulses are active.
+        /// </summary>
+        public bool RewardPulsesActive;
+
+        /// <summary>
+        /// Represents the type of selection method being used.
+        /// </summary>
+        public string SelectionType;
+
+        /// <summary>
+        /// Custom settings defined as key-value pairs.
+        /// </summary>
+        public Dictionary<string, string> CustomSettings;
+
+        /// <summary>
+        /// Position of the start button. Default is (0,0,0).
+        /// </summary>
+        public Vector3 StartButtonPosition = Vector3.zero;
+
+        /// <summary>
+        /// Scale applied to the start button. Default is 1.2f.
+        /// </summary>
+        public float StartButtonScale = 1.2f;
+
+        /// <summary>
+        /// Indicates whether the stimulus is facing the camera.
+        /// </summary>
+        public bool StimFacingCamera;
+
+        /// <summary>
+        /// Specifies the type of shadow being used or its configuration.
+        /// </summary>
+        public string ShadowType;
+
+        /// <summary>
+        /// Indicates whether the Inter-Trial Interval (ITI) is set to a neutral state or mode.
+        /// </summary>
+        public bool NeutralITI;
+
     }
 
     public class BlockDef
     {
+        /// <summary>
+        /// Represents the count of blocks.
+        /// </summary>
         public int BlockCount;
+
+        /// <summary>
+        /// A list of trial definitions.
+        /// </summary>
         public List<TrialDef> TrialDefs;
-        public int? TotalTokensNum;
-        public int? MinTrials, MaxTrials;
+
+        /// <summary>
+        /// Integer value indicating the total number of tokens.
+        /// </summary>
+        public int TotalTokensNum;
+
+        /// <summary>
+        /// Integer value indicating the minimum number of trials.
+        /// </summary>
+        public int MinTrials;
+
+        /// <summary>
+        /// Integer value indicating the maximum number of trials.
+        /// </summary>
+        public int MaxTrials;
+
+        /// <summary>
+        /// Random number generator used for various random operations.
+        /// </summary>
         public System.Random RandomNumGenerator;
 
+        /// <summary>
+        /// Indicates the type of block end condition.
+        /// </summary>
+        public string BlockEndType;
+
+        /// <summary>
+        /// Threshold value used to determine block end condition.
+        /// </summary>
+        public float BlockEndThreshold;
+
+        /// <summary>
+        /// Window value used in conjunction with the block end condition.
+        /// </summary>
+        public int BlockEndWindow;
+
+        /// <summary>
+        /// Represents the name of the block.
+        /// </summary>
+        public string BlockName;
+
+        /// <summary>
+        /// Represents the name of the context.
+        /// </summary>
+        public string ContextName;
+
+        /// <summary>
+        /// Array containing the minimum and maximum number of trials.
+        /// </summary>
+        public int[] MinMaxTrials;
+
+        /// <summary>
+        /// Number of pulses.
+        /// </summary>
+        public int NumPulses;
+
+        /// <summary>
+        /// Size of each pulse.
+        /// </summary>
+        public int PulseSize;
+
+        /// <summary>
+        /// Generates trial definitions based on block definitions.
+        /// </summary>
         public virtual void GenerateTrialDefsFromBlockDef()
         {
         }
 
+        /// <summary>
+        /// Adds to the trial definitions based on block definitions.
+        /// </summary>
         public virtual void AddToTrialDefsFromBlockDef()
         {
         }
 
+        /// <summary>
+        /// Method for initializing the block.
+        /// </summary>
         public virtual void BlockInitializationMethod()
         {
         }
@@ -109,9 +390,75 @@ namespace USE_Def_Namespace
     
     public abstract class TrialDef
     {
-        public int BlockCount, TrialCountInBlock, TrialCountInTask;
+        /// <summary>
+        /// Integer value indicating the minimum number of trials.
+        /// </summary>
+        public int MinTrials;
+
+        /// <summary>
+        /// Integer value indicating the maximum number of trials.
+        /// </summary>
+        public int MaxTrials;
+        
+        /// <summary>
+        /// Represents the block count of the trial, corresponding to the BlockCount of BlockDef
+        /// </summary>
+        public int BlockCount;
+
+        /// <summary>
+        /// Represents the count of trials within a block.
+        /// </summary>
+        public int TrialCountInBlock;
+
+        /// <summary>
+        /// Represents the count of trials within a task.
+        /// </summary>
+        public int TrialCountInTask;
+
+        /// <summary>
+        /// Unique identifier for a trial.
+        /// </summary>
         public string TrialID;
+
+        /// <summary>
+        /// Object representing the stimuli associated with the trial.
+        /// </summary>
         public TrialStims TrialStims;
+
+        /// <summary>
+        /// Indicates the type of block end condition.
+        /// </summary>
+        public string BlockEndType;
+
+        /// <summary>
+        /// Threshold value used to determine block end condition.
+        /// </summary>
+        public float BlockEndThreshold;
+
+        /// <summary>
+        /// Window value used in conjunction with the block end condition.
+        /// </summary>
+        public int BlockEndWindow;
+
+        /// <summary>
+        /// Represents the name of the block.
+        /// </summary>
+        public string BlockName;
+
+        /// <summary>
+        /// Represents the name of the context.
+        /// </summary>
+        public string ContextName;
+        
+        /// <summary>
+        /// Number of pulses.
+        /// </summary>
+        public int NumPulses;
+
+        /// <summary>
+        /// Size of each pulse.
+        /// </summary>
+        public int PulseSize;
     }
 
     

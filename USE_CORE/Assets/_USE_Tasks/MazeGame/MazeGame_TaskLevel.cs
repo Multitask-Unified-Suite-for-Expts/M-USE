@@ -242,9 +242,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "\nAverage Maze Duration: " +
                              String.Format("{0:0.00}", mazeDurationsList_InBlock.Average());
         
-        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
     public override void SetTaskSummaryString()
     {
@@ -273,7 +273,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         BlockAveragesString = "";
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
 
 

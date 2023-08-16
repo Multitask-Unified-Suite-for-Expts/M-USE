@@ -11,7 +11,7 @@ using USE_ExperimentTemplate_Task;
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector] public int NumRewardPulses_InTask = 0;
+ //   [HideInInspector] public int NumRewardPulses_InTask = 0;
     [HideInInspector] public int NumTokenBarFull_InTask = 0;
     [HideInInspector] public int TotalTokensCollected_InTask = 0;
     [HideInInspector] public int AbortedTrials_InTask = 0;
@@ -99,7 +99,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        BlockSummaryString.AppendLine("\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+        CurrentBlockSummaryString.AppendLine("\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + string.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
                                       "\n" + 
@@ -144,7 +144,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     }
     public void ClearStrings()
     {
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
     public void ResetTaskVariables()
     {

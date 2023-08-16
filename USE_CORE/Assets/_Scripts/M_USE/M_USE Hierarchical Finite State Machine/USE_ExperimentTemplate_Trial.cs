@@ -211,7 +211,8 @@ namespace USE_ExperimentTemplate_Trial
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
-                TouchFBController.ClearErrorDict();
+                
+                TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
             });
             

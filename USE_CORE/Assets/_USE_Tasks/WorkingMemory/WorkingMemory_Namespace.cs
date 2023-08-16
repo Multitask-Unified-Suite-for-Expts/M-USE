@@ -17,16 +17,16 @@ namespace WorkingMemory_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public string BlockName;
+    //    public string BlockName;
         public int NumInitialTokens;
         public int NumTokenBar;
-        public int NumPulses;
-        public int PulseSize;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
+        // public int NumPulses;
+        // public int PulseSize;
+        // public string BlockEndType;
+        // public float BlockEndThreshold;
+        // public int BlockEndWindow;
         public bool StimFacingCamera;
-        public string ContextName;
+        // public string ContextName;
 
         public override void AddToTrialDefsFromBlockDef()
         {
@@ -58,15 +58,15 @@ namespace WorkingMemory_Namespace
         public Reward[][] SearchStimTokenReward;
         //public int[] TargetTokenUpdates, DistractorTokenUpdates;
         public Vector3[] SearchStimLocations, PostSampleDistractorLocations, TargetSampleLocation;
-        public string ContextName;
-        public string BlockName;
+        // public string ContextName;
+        // public string BlockName;
         public int NumInitialTokens;
         public int NumTokenBar;
-        public int NumPulses;
-        public int PulseSize;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
+        // public int NumPulses;
+        // public int PulseSize;
+        // public string BlockEndType;
+        // public float BlockEndThreshold;
+        // public int BlockEndWindow;
         public bool StimFacingCamera;
     }
 

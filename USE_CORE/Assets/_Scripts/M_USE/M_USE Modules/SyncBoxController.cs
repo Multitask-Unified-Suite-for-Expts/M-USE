@@ -52,7 +52,7 @@ public class SyncBoxController
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);
         }
         SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
-
+        
         rewardFinished = true;
     }
     void SendSonication()

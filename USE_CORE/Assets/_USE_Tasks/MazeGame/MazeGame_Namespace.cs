@@ -32,8 +32,8 @@ namespace MazeGame_Namespace
 
     public class MazeGame_BlockDef : BlockDef
     {
-        public string BlockName;
-        public int[] MinMaxTrials;
+        // public string BlockName;
+        // public int[] MinMaxTrials;
         public int RewardRatio;
 
         public Vector2 MazeDims;
@@ -41,15 +41,15 @@ namespace MazeGame_Namespace
         public int MazeNumSquares;
         public int MazeNumTurns;
         public string MazeName;
-        
-        public int PulseSize;
-        public int NumPulses;
+        //
+        // public int PulseSize;
+        // public int NumPulses;
         public bool ViewPath;
-        public string ContextName;
+        // public string ContextName;
         public int SliderInitial;
         
-        public string BlockEndType;
-        public float BlockEndThreshold;
+        // public string BlockEndType;
+        // public float BlockEndThreshold;
         public bool ErrorPenalty;
         
         
@@ -83,18 +83,18 @@ namespace MazeGame_Namespace
 
     public class MazeGame_TrialDef : TrialDef
     {
-        public string BlockName;
-        public int PulseSize;
-        public int NumPulses;
+        // public string BlockName;
+        // public int PulseSize;
+        // public int NumPulses;
         public int RewardRatio;
         public bool ViewPath;
         public bool ErrorPenalty;
-        public string ContextName;
+        // public string ContextName;
         public string MazeName;
         public int SliderInitial;
-        public int MaxTrials;
-        public string BlockEndType;
-        public float BlockEndThreshold;
+        // public int MaxTrials;
+        // public string BlockEndType;
+        // public float BlockEndThreshold;
         public int[] MinMaxTrials;
     }
 

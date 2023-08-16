@@ -29,13 +29,22 @@ namespace USE_ExperimentTemplate_Task
         public string TaskName;
         public string TaskProjectFolder;
         [HideInInspector] public int BlockCount;
-        protected int NumBlocksInTask;
+        // protected int NumBlocksInTask;
+        public int NumAbortedTrials_InTask;
+        public int NumRewardPulses_InTask;
+        
+        public int NumAbortedTrials_InBlock;
+        public int NumRewardPulses_InBlock;
+        
+        public int MinTrials_InBlock;
+        public int MaxTrials_InBlock;
+        
         public ControlLevel_Trial_Template TrialLevel;
         public BlockData BlockData;
         public FrameData FrameData;
         public TrialData TrialData;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
-        [HideInInspector] public StringBuilder BlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
+        [HideInInspector] public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
         private int TaskStringsAdded = 0;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
@@ -68,7 +77,7 @@ namespace USE_ExperimentTemplate_Task
         protected float BlockFbSimpleDuration;
         protected TaskLevelTemplate_Methods TaskLevel_Methods;
 
-        protected int? MinTrials, MaxTrials;
+        // protected int? MinTrials, MaxTrials;
         [HideInInspector] public RenderTexture DrawRenderTexture;
         [HideInInspector] public event EventHandler TaskSkyboxSet_Event;
         [HideInInspector] public bool TaskLevelDefined;
@@ -132,9 +141,12 @@ namespace USE_ExperimentTemplate_Task
                         canvas.gameObject.SetActive(true);
 
                 BlockCount = -1;
-                BlockSummaryString = new StringBuilder();
+                CurrentBlockSummaryString = new StringBuilder();
                 PreviousBlockSummaryString = new StringBuilder();
                 CurrentTaskSummaryString = new StringBuilder();
+
+                NumRewardPulses_InTask = 0;
+                NumAbortedTrials_InTask = 0;
 
                 if (!SessionValues.WebBuild)
                 {
@@ -234,9 +246,12 @@ namespace USE_ExperimentTemplate_Task
                 StartCoroutine(FrameData.AppendDataToBuffer());
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
-            RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-
-
+            RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback, () =>
+            {
+                NumAbortedTrials_InBlock = 0;
+                NumRewardPulses_InBlock = 0;
+            });
+            
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             float blockFeedbackDuration = 0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
@@ -301,11 +316,11 @@ namespace USE_ExperimentTemplate_Task
                     SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
-                if (TrialLevel.TrialSummaryString != null && BlockSummaryString != null)
+                if (TrialLevel.TrialSummaryString != null && CurrentBlockSummaryString != null)
                 {
                     TrialLevel.TrialSummaryString = "";
-                    BlockSummaryString.Clear();
-                    BlockSummaryString.AppendLine("");
+                    CurrentBlockSummaryString.Clear();
+                    CurrentBlockSummaryString.AppendLine("");
                 }
 
                 ClearActiveTaskHandlers();
@@ -353,6 +368,9 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 TaskCam.gameObject.SetActive(false);
+                
+                NumAbortedTrials_InBlock = 0;
+                NumRewardPulses_InBlock = 0;
 
                 if (TaskCanvasses != null)
                     foreach (Canvas canvas in TaskCanvasses)
@@ -821,18 +839,24 @@ namespace USE_ExperimentTemplate_Task
             int? sumdif; //the simple sum of the number of different trial outcomes in the windows used to compute 
                          //immediateAvg and prevAvg
                          
+
             if (rAcc.Count >= windowSize)
             {
                 immediateAvg = (float)rAcc.GetRange(rAcc.Count - windowSize, windowSize).Average();
+                Debug.Log("###IMMEDIATE AVG: " + immediateAvg);
+                Debug.Log("###rACC: " + String.Join(",",rAcc));
             }
             else
                 immediateAvg = null;
 
             if (rAcc.Count >= windowSize * 2)
             {
+                Debug.Log("###IS THIS BREAKING IT: rAcc.Count >= windowSize * 2?");
                 prevAvg = (float)rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Average();
                 sumdif = rAcc.GetRange(rAcc.Count - windowSize * 2, windowSize).Sum() -
                          rAcc.GetRange(rAcc.Count - windowSize, windowSize).Sum();
+                Debug.Log($"###prevAvg: {prevAvg}, sumdif: {sumdif}");
+
             }
             else
             {

@@ -119,7 +119,6 @@ namespace USE_ExperimentTemplate_Task
         {
             TaskLevelDefined = false;
 
-
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
             
             RunBlock = new State("RunBlock");
@@ -182,9 +181,10 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddUniversalInitializationMethod(() =>
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
-
                 BlockCount++;
+                Debug.Log("BLOCK COUNT: " + BlockCount);
                 CurrentBlockDef = BlockDefs[BlockCount];
+                Debug.Log("CURRENT BLOCK DEF: " + CurrentBlockDef);
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;

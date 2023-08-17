@@ -98,6 +98,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary();
         data["Trial Count In Task"] = flTL.TrialCount_InTask + 1;
+        data["Aborted Trials In Task"] = AbortedTrials_InTask;
         data["Reward Pulses"] = NumRewardPulses_InTask;
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;

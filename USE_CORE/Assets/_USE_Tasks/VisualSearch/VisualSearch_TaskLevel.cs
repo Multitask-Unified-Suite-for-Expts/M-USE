@@ -85,6 +85,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = new OrderedDictionary
         {
             ["Trial Count In Task"] = vsTL.TrialCount_InTask + 1,
+            ["Aborted Trials In Task"] = AbortedTrials_InTask,
             ["Reward Pulses"] = NumRewardPulses_InTask,
             ["Token Bar Full"] = NumTokenBarFull_InTask,
             ["Total Tokens Collected"] = TotalTokensCollected_InTask

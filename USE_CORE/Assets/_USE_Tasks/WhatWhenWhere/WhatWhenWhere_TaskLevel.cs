@@ -49,6 +49,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
             ResetBlockVariables();
             SetBlockSummaryString();
+
         });
     }
 
@@ -80,7 +81,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine( "<b>\nMax Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
+        CurrentBlockSummaryString.AppendLine( "<b>\nMax Trials in Block: </b>" + MinTrials_InBlock + 
                                       "\n\nAverage Search Duration: " + CalculateAverageSearchDuration(SearchDurations_InBlock) +
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + DistractorSlotErrorCount_InBlock+
@@ -114,13 +115,13 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
-        BlockData.AddDatum("LearningSpeed", () => LearningSpeed);
+      //  BlockData.AddDatum("LearningSpeed", () => LearningSpeed);
         BlockData.AddDatum("AvgSearchDuration", ()=> CalculateAverageSearchDuration(SearchDurations_InBlock));
         BlockData.AddDatum("NumDistractorSlotError", ()=> DistractorSlotErrorCount_InBlock);
         BlockData.AddDatum("NumSearchSlotError", ()=> SlotErrorCount_InBlock);
         BlockData.AddDatum("NumRepetitionError", ()=> RepetitionErrorCount_InBlock);
         BlockData.AddDatum("NumAbortedTrials", ()=> NumAbortedTrials_InBlock);
-        BlockData.AddDatum("NumRewardPulses", ()=> NumRewardPulses_InTask);
+        BlockData.AddDatum("NumRewardPulses", ()=> NumRewardPulses_InBlock);
     }
 
     public void ClearStrings()

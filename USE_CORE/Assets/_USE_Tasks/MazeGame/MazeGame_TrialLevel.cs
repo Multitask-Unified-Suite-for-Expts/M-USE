@@ -852,7 +852,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     playerViewText = playerView.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, playerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
-                    playerViewTextList.Add(playerViewText);
+                    playerViewText.SetActive(true);
                 }
             }
         }
@@ -867,8 +867,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         if (mazeLoaded)
         {
-            Debug.Log("ABOUT TO DESTROY TILES!");
-
             tiles.DestroyStimGroup();
             mazeLoaded = false;
         }

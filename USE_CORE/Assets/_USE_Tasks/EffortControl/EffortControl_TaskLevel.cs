@@ -106,6 +106,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             ["Trial Count In Task"] = trialLevel.TrialCount_InTask + 1,
             
             ["Completions"] = Completions_Task,
+            ["Aborted Trials"] = NumAborted_Task,
             ["Reward Pulses"] = RewardPulses_Task,
             ["Touches"] = Touches_Task,
             ["Chose Left"] = NumChosenLeft_Task,

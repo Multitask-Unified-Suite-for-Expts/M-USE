@@ -182,9 +182,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
                 BlockCount++;
-                Debug.Log("BLOCK COUNT: " + BlockCount);
+
+                NumAbortedTrials_InBlock = 0;
+                NumRewardPulses_InBlock = 0;
+
                 CurrentBlockDef = BlockDefs[BlockCount];
-                Debug.Log("CURRENT BLOCK DEF: " + CurrentBlockDef);
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;
@@ -246,11 +248,7 @@ namespace USE_ExperimentTemplate_Task
                 StartCoroutine(FrameData.AppendDataToBuffer());
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
-            RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback, () =>
-            {
-                NumAbortedTrials_InBlock = 0;
-                NumRewardPulses_InBlock = 0;
-            });
+            RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             float blockFeedbackDuration = 0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 

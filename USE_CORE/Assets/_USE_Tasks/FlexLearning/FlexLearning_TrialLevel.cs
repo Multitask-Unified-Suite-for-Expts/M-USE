@@ -93,11 +93,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(5f);
+            HaloFBController.SetHaloSize(6f);
             HaloFBController.SetHaloIntensity(5);
         });
         
@@ -129,10 +128,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
 
-#if (!UNITY_WEBGL)
-                if (!playerViewLoaded)
-                    CreateTextOnExperimenterDisplay();
-#endif
+
 
             SetTrialSummaryString();
         });
@@ -189,6 +185,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
+
+            if (!SessionValues.WebBuild)
+                CreateTextOnExperimenterDisplay();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -438,12 +437,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 textLocation.y += 50;
                 Vector3 textSize = new Vector3(2, 2,1);
                 playerViewText = playerView.CreateTextObject("TargetText","TARGET",
-                    Color.red, textLocation, textSize, playerViewParent.transform);
-                
+                    Color.red, textLocation, textSize, playerViewParent.transform);                
+                playerViewText.SetActive(true);
             }
         }
         playerViewLoaded = true;
-        DeactivateChildren(playerViewParent);
     }
     private void DestroyTextOnExperimenterDisplay()
     {

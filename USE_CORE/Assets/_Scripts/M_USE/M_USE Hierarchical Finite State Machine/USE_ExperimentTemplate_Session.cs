@@ -751,6 +751,14 @@ namespace USE_ExperimentTemplate_Session
             });
         }
 
+        private void OnApplicationQuit()
+        {
+            if (CurrentTask == null)
+                Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
+            else
+                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
+        }
+
         private void FindGameObjects()
         {
             try

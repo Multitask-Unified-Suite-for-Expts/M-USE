@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ConfigDynamicUI;
@@ -36,8 +37,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private Tile tile = new Tile();
     private GameObject tileGO;
     public StimGroup tiles; // top of trial level with other variable definitions
-    private Texture2D tileTex;
-    private Texture2D mazeBgTex;
+    public Texture2D tileTex;
+    public Texture2D mazeBgTex;
 
     // Maze Progress Variables
     private bool finishedMaze;
@@ -135,26 +136,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
 
-
-            //THIS WILL EVENTUALLY NEED TO BE ADJUSTED IF START LOADING CONTEXTS/MAZES FROM SERVER!!
-            if (SessionValues.WebBuild)
+            StartCoroutine(LoadTileAndBgTextures(result =>
             {
-                tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-                mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
-            }
-            else
-            {
-                string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
-                tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-                mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
-            }
+                if (MazeContainer == null)
+                    MazeContainer = new GameObject("MazeContainer");
 
-            if (MazeContainer == null)
-                MazeContainer = new GameObject("MazeContainer");
+                if (MazeBackground == null)
+                    MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
+            }));
 
-            if (MazeBackground == null)
-                MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
-            
             //player view variables
             playerViewParent = GameObject.Find("MainCameraCopy");
         });
@@ -427,6 +417,43 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         DefineTrialData();
         DefineFrameData();
+    }
+
+
+    private IEnumerator LoadTileAndBgTextures(Action<bool> callback)
+    {
+        string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
+
+        if (SessionValues.UsingServerConfigs)
+        {
+            yield return StartCoroutine(LoadTexture(contextPath + "/" + currentTaskDef.TileTexture + ".png", textureResult =>
+            {
+                if (textureResult != null)
+                    tileTex = textureResult;
+                else
+                    Debug.Log("TILE TEX RESULT IS NULL!");
+            }));
+
+            yield return StartCoroutine(LoadTexture(contextPath + "/" + currentTaskDef.MazeBackgroundTexture + ".png", textureResult =>
+            {
+                if (textureResult != null)
+                    mazeBgTex = textureResult;
+                else
+                    Debug.Log("MAZE BACKGROUND TEXTURE RESULT IS NULL!");
+            }));
+        }
+        else if (SessionValues.UsingDefaultConfigs)
+        {
+            tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
+            mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
+        }
+        else if (SessionValues.UsingLocalConfigs)
+        {
+            tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
+            mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
+        }
+
+        callback?.Invoke(true);
     }
 
     public void InitializeTrialArrays()

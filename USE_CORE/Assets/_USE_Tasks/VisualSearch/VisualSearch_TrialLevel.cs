@@ -162,7 +162,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren),
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(),
             SearchDisplayDelay, () => 
             {
                 choiceMade = false;
@@ -183,7 +183,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -211,14 +210,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject"); //SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
@@ -235,6 +232,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             AbortedTrials_InBlock++;
             CurrentTaskLevel.AbortedTrials_InTask++;
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             aborted = true;
             SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");

@@ -21,34 +21,14 @@ public abstract class InputTracker : MonoBehaviour
     public float ShotgunThreshold;
     // private event EventHandler<EventArgs> SelectionHandler_UpdateTarget;
 
+
+    public List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
+
+
+
     public delegate bool IsSelectionPossible();
 
-    //Adds a selection handler (automatically checks for selected objects) to this instance of an InputTracker
-    // public void AddSelectionHandler<T>(SelectionHandler<T> selectionHandler, State startState, State endState = null, 
-    //     BoolDelegate selectionIsPossible = null, BoolDelegate selectionCompleteIsPossible = null) where T : StimDef
-    // {
-    //     selectionHandler.MovedPastMaxDistance = false;
-    //     selectionHandler.SelectionStartPosition = null;
-    //     selectionHandler.SelectedGameObject = null;
-    //     if (endState == null)
-    //         endState = startState;
-    //     
-    //     void CheckForSelection_Handler(object sender, EventArgs e)
-    //     {
-    //         selectionHandler.CheckForSelection(TargetedGameObject, CurrentInputScreenPosition, selectionIsPossible, selectionCompleteIsPossible);
-    //     }
-    //
-    //     startState.StateInitializationFinished += (object sender, EventArgs e) =>
-    //     {
-    //         SelectionHandler_UpdateTarget += CheckForSelection_Handler; //just calls selectionHandler's UpdateTarget method
-    //         selectionHandler.Start();
-    //     };
-    //     endState.StateTerminationFinished += (object sender, EventArgs e) =>
-    //     {
-    //         SelectionHandler_UpdateTarget -= CheckForSelection_Handler;
-    //         selectionHandler.Stop();
-    //     };
-    // }
+
     public void Awake()
     {
         ShotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();

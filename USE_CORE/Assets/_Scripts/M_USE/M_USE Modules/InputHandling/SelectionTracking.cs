@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using USE_States;
+using USE_UI;
 
 namespace SelectionTracking
 {
@@ -253,6 +254,10 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
+
+                TargetObjects = new List<GameObject>();
+                DistractorObjects = new List<GameObject>();
+                IrrelevantObjects = new List<GameObject>();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -321,6 +326,20 @@ namespace SelectionTracking
                 return false;
             }
 
+            public bool LastSuccessfulSelectionMatchesStartButton()
+            {
+                List<GameObject> startButtonObjects = SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren;
+                if(startButtonObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                {
+                    foreach( GameObject go in startButtonObjects)
+                    {
+                        if(ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                            return true;
+                    }
+                }
+                return false;
+            }
+
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
@@ -357,9 +376,34 @@ namespace SelectionTracking
                 if (currentTarget == null) //input is not over a gameobject
                 {
                     if (OngoingSelection != null) // the previous frame was a selection
+                    {
                         CheckTermination();
+
+                        if (TargetObjects.Contains(OngoingSelection.SelectedGameObject))
+                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffTargetObject");
+                        else if (DistractorObjects.Contains(OngoingSelection.SelectedGameObject))
+                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffDistractorObject");
+                        else if (IrrelevantObjects.Contains(OngoingSelection.SelectedGameObject))
+                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffIrrelevantObject");
+                        else
+                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
+                    }
                     return;
                 }
+
+
+
+                if (TargetObjects.Contains(currentTarget))
+                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnTargetObject");
+                else if (DistractorObjects.Contains(currentTarget))
+                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnDistractorObject");
+                else if (IrrelevantObjects.Contains(currentTarget))
+                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnIrrelevantObject");
+                else
+                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnObject");
+
+
+
 
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
@@ -443,6 +487,15 @@ namespace SelectionTracking
                         LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
                         SuccessfulSelections.Add(OngoingSelection);
+
+                        if (TargetObjects.Contains(OngoingSelection.SelectedGameObject))
+                            SessionValues.EventCodeManager.SendCodeImmediate("TargetObjectSelected");
+                        else if (DistractorObjects.Contains(OngoingSelection.SelectedGameObject))
+                            SessionValues.EventCodeManager.SendCodeImmediate("DistractorObjectSelected");
+                        else if (IrrelevantObjects.Contains(OngoingSelection.SelectedGameObject))
+                            SessionValues.EventCodeManager.SendCodeImmediate("IrrelevantObjectSelected");
+                        else
+                            SessionValues.EventCodeManager.SendCodeImmediate("ObjectSelected");
                     }
                     else
                     {

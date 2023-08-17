@@ -112,18 +112,14 @@ public class SliderFBController : MonoBehaviour
                         sliderBarFull = true;
                         numSliderBarFull++;
                         audioFBController.Play("TripleCollected");
-                        if (SessionValues.SessionDef.EventCodesActive)
-                            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
                         animationEndTime += updateTime + flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     animationPhase = AnimationPhase.None;
-                    if (SessionValues.SessionDef.EventCodesActive)
-                    {
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
-                    }
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
                     break;
             }
         }

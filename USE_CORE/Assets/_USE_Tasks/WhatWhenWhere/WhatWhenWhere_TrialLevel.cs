@@ -154,14 +154,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             UpdateExperimenterDisplaySummaryStrings();
             InitializeShotgunHandler();
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), ChooseStimulusDelay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
             
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
@@ -256,6 +255,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
@@ -335,7 +335,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
 
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
                         
             if (SessionValues.SyncBoxController != null)
             {

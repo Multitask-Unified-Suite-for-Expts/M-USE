@@ -222,6 +222,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
 
                         HkPanel.TrialLevel.AbortCode = 2;
+                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["RestartBlock"]);
                         HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                         HkPanel.TaskLevel.BlockCount--;
@@ -245,6 +246,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
 
                         HkPanel.TrialLevel.AbortCode = 4;
+                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["PreviousBlock"]);
                         HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                     
@@ -277,6 +279,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
                         HkPanel.TrialLevel.AbortCode = 3;
+                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndBlock"]);
                         HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
                     }
@@ -296,6 +299,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if(HkPanel.TrialLevel != null)
                     {
                         HkPanel.TrialLevel.AbortCode = 5;
+                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndTask"]);
                         HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.FinishTrialCleanup();
                         HkPanel.TrialLevel.ClearActiveTrialHandlers();
@@ -345,6 +349,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         if (!HkPanel.TrialLevel.Paused) 
                         {
                             HkPanel.TrialLevel.AbortCode = 1;
+                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["Paused"]);
                             HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Go to end of trial
                             if (controllers != null) //Deactivate Controllers (so that tokenbar not still on screen):
                                 controllers.SetActive(false);
@@ -400,6 +405,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if (HkPanel.TrialLevel != null)
                     {
                         HkPanel.TrialLevel.AbortCode = 5;
+                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndTask"]);
                         HkPanel.TrialLevel.FinishTrialCleanup();
                         HkPanel.TrialLevel.ResetTrialVariables();
                         HkPanel.TrialLevel.ClearActiveTrialHandlers();

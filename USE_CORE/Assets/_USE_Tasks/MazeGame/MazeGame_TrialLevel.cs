@@ -188,7 +188,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
@@ -270,6 +270,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             aborted = true;
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             CurrentTaskLevel.numAbortedTrials_InBlock++;
             CurrentTaskLevel.numAbortedTrials_InTask++;
             runningPercentError.Add(null);

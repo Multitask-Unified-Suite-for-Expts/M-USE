@@ -204,7 +204,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), DisplayStims);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (SessionValues.SessionDef.IsHuman)
@@ -218,6 +218,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TokenFBController.SetTotalTokensNum(CurrentTrial.NumTokenBar);
             TokenFBController.enabled = true;
+            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
 
             if (CurrentTrial.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
@@ -226,7 +227,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 AddShakeStimScript(trialStims);
 
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
 
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
@@ -334,6 +334,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EndBlock = true;
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
@@ -393,7 +394,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
         });
 
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------

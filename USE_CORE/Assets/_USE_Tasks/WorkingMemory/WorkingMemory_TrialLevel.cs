@@ -140,7 +140,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
@@ -148,6 +148,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
+
+            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
 
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                 
@@ -178,9 +180,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             searchStims.ToggleVisibility(true);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
-            
+
             choiceMade = false;
 
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -205,14 +206,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
@@ -232,6 +231,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 

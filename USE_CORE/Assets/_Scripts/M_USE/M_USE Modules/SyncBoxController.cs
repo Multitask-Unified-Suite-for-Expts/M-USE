@@ -20,8 +20,6 @@ public class SyncBoxController
     private string ultrasoundTriggerDurationTicks;
     private int numTrialsWithoutSonicationAfterMax;
 
-    //public EventCodeManager EventCodeManager;
-   // public Dictionary<string, EventCode> SessionEventCodes;
 
     public void SendCommand(string command)
     {
@@ -43,10 +41,11 @@ public class SyncBoxController
         {
             SendSonication();
         }
+        SessionValues.EventCodeManager.SendRangeCode("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
+
         for (int i = 0; i < numPulses; i++)
         {
             serialPortController.AddToSend("RWD " + pulseSize);//values less than 20 don't consistently work so use between 20-100 (# in 0.1 ms increments)
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SyncBoxController_RewardPulseSent"]);
 
             MsBetweenRewardPulses = 200;
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);

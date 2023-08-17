@@ -172,7 +172,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
-                SessionValues.EventCodeManager.SendCodeImmediate("SetupTrialStarts");
+                SessionValues.EventCodeManager.SendRangeCode("SetupTrialStarts", TrialCount_InTask);
 
                 ResetRelativeStartTime();
 

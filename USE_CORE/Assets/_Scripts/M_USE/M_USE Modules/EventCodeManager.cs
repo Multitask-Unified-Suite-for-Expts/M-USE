@@ -87,6 +87,21 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
+	public void SendRangeCode(string codeString, int valueToAdd)
+	{
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+		{
+			int computedCode = code.Range[0] + valueToAdd;
+			if (computedCode > code.Range[1])
+				Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
+			else
+			{
+				SendCodeImmediate(computedCode);
+			}
+		}
+    }
+
     public void SendCodeImmediate(string codeString)
     {
         EventCode code = SessionEventCodes[codeString];

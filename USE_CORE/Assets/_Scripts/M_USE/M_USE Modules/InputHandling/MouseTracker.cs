@@ -26,13 +26,19 @@ public class MouseTracker : InputTracker
         for (int iButton = 0; iButton < 3; iButton++)
         {
             if (InputBroker.GetMouseButtonUp(iButton))
+            {
                 ButtonCompletedClickCount[iButton]++;
-            
+                SessionValues.EventCodeManager.SendCodeImmediate($"Button{iButton}ReleasedFromObject");
+            }
+
             if (InputBroker.GetMouseButton(iButton))
             {
                 ButtonStatus[iButton] = 1;
                 if (InputBroker.GetMouseButtonDown(iButton))
+                {
                     ButtonPressDuration[iButton] = 0;
+                    SessionValues.EventCodeManager.SendCodeImmediate($"Button{iButton}PressedOnObject");
+                }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;
             }

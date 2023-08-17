@@ -180,7 +180,6 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager.SendCodeImmediate("RunBlockStarts");
                 BlockCount++;
                 Debug.Log("BLOCK COUNT: " + BlockCount);
                 CurrentBlockDef = BlockDefs[BlockCount];
@@ -196,6 +195,8 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ExternalStims = ExternalStims;
                 TrialLevel.RuntimeStims = RuntimeStims;
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
+
+                SessionValues.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
             });
 
             //Hotkeys for WebGL build so we can end task and go to next block
@@ -216,6 +217,7 @@ namespace USE_ExperimentTemplate_Task
                                 Time.timeScale = 1;
 
                             TrialLevel.AbortCode = 5;
+                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
                             TrialLevel.ForceBlockEnd = true;
                             TrialLevel.FinishTrialCleanup();
                             TrialLevel.ClearActiveTrialHandlers();
@@ -234,6 +236,7 @@ namespace USE_ExperimentTemplate_Task
                             if (TrialLevel.AudioFBController.IsPlaying())
                                 TrialLevel.AudioFBController.audioSource.Stop();
                             TrialLevel.AbortCode = 3;
+                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
                             TrialLevel.ForceBlockEnd = true;
                             TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
                         }

@@ -164,7 +164,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), SearchDisplayDelay, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay, () =>
         {
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
         });
@@ -182,7 +182,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
                 ActivateChildren(playerViewParent);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -210,7 +209,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
@@ -218,7 +216,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
@@ -239,6 +236,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.AbortedTrials_InTask++;
             AbortCode = 6;
             aborted = true;  
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });

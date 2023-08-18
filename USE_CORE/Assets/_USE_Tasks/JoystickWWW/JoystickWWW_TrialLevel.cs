@@ -11,6 +11,7 @@ using USE_Settings;
 using USE_DisplayManagement;
 using System.Linq;
 using System.IO;
+using SelectionTracking;
 using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
@@ -102,6 +103,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
     public int NumSliderBarFilled = 0;
     private int sliderGainSteps, sliderLossSteps;
     private bool isSliderValueIncrease = false;
+    public SelectionTracker.SelectionHandler ShotgunHandler;
     
 
     //Player View Variables
@@ -119,6 +121,9 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private GameObject StartButton;
     public float ExternalStimScale;
+    public GameObject instantiatedArena;
+    public GameObject instantiatedPlayer;
+
     
     // Stim Evaluation Variables
     private GameObject trialStim;
@@ -167,10 +172,31 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(12);
             HaloFBController.SetHaloIntensity(5);
+            
+            //GameObject instantiatedArena = Instantiate(arenaPrefab, new Vector3(0, 8, 0), Quaternion.Euler(0, 0, 0));
+            //GameObject instantiatedPlayer = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
-            GameObject instantiatedArena = Resources.Load<GameObject>("ArenaPrefab");
-            GameObject instantiatedPlayer = Resources.Load<GameObject>("Player");
-
+            instantiatedArena = Instantiate(Resources.Load<GameObject>("ArenaPrefab"));
+            instantiatedPlayer = Instantiate(Resources.Load<GameObject>("Player"));
+            SessionValues.JoystickTracker.Player = instantiatedPlayer;
+            instantiatedArena.SetActive(true);
+            instantiatedPlayer.SetActive(true);
+            
+            instantiatedArena.transform.position = new Vector3(0, 8, 0);
+            instantiatedArena.transform.rotation = Quaternion.Euler(0, 0, 0);
+            instantiatedArena.transform.localScale = new Vector3(2, 2, 2);
+            
+            instantiatedPlayer.transform.position = new Vector3(0, 0, 0);
+            instantiatedPlayer.transform.Find("Cylinder").transform.localPosition = new Vector3(0, 0, 0);
+            instantiatedPlayer.transform.Find("JoystickWWW_Camera").transform.localPosition = new Vector3(0, 0, 0);
+            instantiatedPlayer.transform.Find("Cylinder").transform.localRotation = Quaternion.Euler(0, 0, 0);
+            instantiatedPlayer.transform.Find("JoystickWWW_Camera").transform.localRotation = Quaternion.Euler(0, 0, 0);
+            
+            //SessionValues.JoystickTracker.Player = Resources.Load<GameObject>("Player");
+            CurrentTaskLevel.TaskCam.transform.SetParent(instantiatedPlayer.transform, false);
+            SessionValues.JoystickTracker.playerCamTransform = CurrentTaskLevel.TaskCam.transform;
+            SessionValues.JoystickTracker.isActive = true;
+            
             if (StartButton == null)
             {
                 if (SessionValues.SessionDef.IsHuman)
@@ -189,7 +215,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
             #endif
         });
         
-        SetupTrial.AddInitializationMethod(() =>
+        SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (!variablesLoaded)
             {
@@ -205,19 +231,16 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
                 sbDelay = startButtonDelay.value;
         });
         SetupTrial.AddTimer(()=> sbDelay, InitTrial);
-        
-        SessionValues.JoystickTracker.Player = Resources.Load<GameObject>("Player");
-        SessionValues.JoystickTracker.playerCamTransform = CurrentTaskLevel.TaskCam.transform;
-        SessionValues.JoystickTracker.isActive = true;
-        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "JoystickHandler", SessionValues.JoystickTracker, InitTrial, FinalFeedback);
 
-        InitTrial.AddInitializationMethod(() =>
+        ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "JoystickHandler", SessionValues.JoystickTracker, InitTrial, FinalFeedback);
+        
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
-
+            
             ShotgunHandler.HandlerActive = true;
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -246,7 +269,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
         });
         
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
-        ChooseStimulus.AddInitializationMethod(() =>
+        ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
             AssignCorrectStim();
 
@@ -334,7 +357,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
-        SelectionFeedback.AddInitializationMethod(() =>
+        SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
             touchedObjects.Add(selectedSD.StimIndex);
@@ -403,7 +426,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
             }
         });
-        FinalFeedback.AddInitializationMethod(() =>
+        FinalFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
 
@@ -440,7 +463,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
         });
 
         //Define iti state
-        ITI.AddInitializationMethod(() =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
             searchStims.ToggleVisibility(false);
             distractorStims.ToggleVisibility(false);

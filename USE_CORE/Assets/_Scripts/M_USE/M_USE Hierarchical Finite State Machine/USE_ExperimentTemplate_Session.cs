@@ -21,7 +21,6 @@ using Tobii.Research.Unity.CodeExamples;
 using USE_Def_Namespace;
 using System.Runtime.InteropServices;
 #if (!UNITY_WEBGL)
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
 using USE_DisplayManagement;
 //using UnityEngine.Windows.WebCam;

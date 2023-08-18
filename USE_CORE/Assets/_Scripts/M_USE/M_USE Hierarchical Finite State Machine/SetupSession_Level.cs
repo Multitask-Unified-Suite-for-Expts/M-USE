@@ -110,7 +110,11 @@ public class SetupSession_Level : ControlLevel
             loadScene.completed += (_) =>
             {
                 taskSceneLoaded = true;
-                GameObject.Find(taskName + "_Camera").SetActive(false);
+                Debug.Log(taskName);
+                if (GameObject.Find(taskName + "_Camera"))
+                {
+                    GameObject.Find(taskName + "_Camera").SetActive(false);
+                }
             };
         });
 
@@ -198,6 +202,7 @@ public class SetupSession_Level : ControlLevel
         SessionValues.MouseTracker = SessionValues.InputTrackers.GetComponent<MouseTracker>();
         SessionValues.GazeTracker = SessionValues.InputTrackers.GetComponent<GazeTracker>();
         SessionValues.JoystickTracker = SessionValues.InputTrackers.GetComponent<JoystickTracker>();
+        //SessionValues.JoystickTracker.InitializeJoystickTracker();
         //add here rigid body to joystick tracker/input tracker
         //maybe? add here player object to joystick tracker as you did in hierarchy
 

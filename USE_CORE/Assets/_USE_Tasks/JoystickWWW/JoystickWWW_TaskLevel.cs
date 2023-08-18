@@ -49,13 +49,13 @@ public class JoystickWWW_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
-        RunBlock.AddInitializationMethod(() =>
+        RunBlock.AddSpecificInitializationMethod(() =>
         {
             LearningSpeed = -1;
 
             wwwTL.ContextName = wwwBD.ContextName;
 
-            SetSkyBox(wwwBD.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            SetSkyBox(wwwBD.ContextName);
 
             ErrorType_InTask.Add(string.Join(",",wwwTL.ErrorType_InBlock));
             wwwTL.ResetBlockVariables();

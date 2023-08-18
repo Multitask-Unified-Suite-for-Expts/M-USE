@@ -13,17 +13,19 @@ public class JoystickTracker : InputTracker
     public bool isActive;
     public GameObject Player;
 
-    private void Start()
+    public void assignCamera(Camera camera)
     {
-        // playerCamTransform = GameObject.Find("JoystickWWW_Camera")?.transform;
-        // if (playerCamTransform == null)
-        // {
-        //     playerCamTransform = GameObject.FindGameObjectWithTag("JoystickWWW_Camera")?.transform;
-        // }
-        // if (playerCamTransform == null)
-        // {
-        //     Debug.LogError("PlayerCam transform not found. Ensure that your camera is named 'PlayerCam' or tagged as 'PlayerCam'.");
-        // }
+        //Debug.LogError(GameObject.Find("JoystickWWW_Camera")); this is null
+        //playerCamTransform = GameObject.Find("JoystickWWW_Camera").transform;
+        playerCamTransform = camera.transform;
+        if (playerCamTransform == null)
+        {
+            playerCamTransform = GameObject.FindGameObjectWithTag("JoystickWWW_Camera").transform;
+        }
+        if (playerCamTransform == null)
+        { 
+            Debug.LogError("JoystickWWW_Camera transform not found. Ensure that your camera is named 'JoystickWWW_Camera' or tagged as 'JoystickWWW_Camera'.");
+        }
     }
     
     public override void CustomUpdate()
@@ -35,33 +37,36 @@ public class JoystickTracker : InputTracker
         // // Store the joystick input as a Vector2
         // JoystickInput = new Vector2(horizontalInput, verticalInput);
 
-        if (isActive)
+        if (playerCamTransform != null)
         {
-            float horizontalInput = InputBroker.GetAxis("Horizontal");
-            float verticalInput = InputBroker.GetAxis("Vertical");
+            if (isActive)
+            {
+                float horizontalInput = InputBroker.GetAxis("Horizontal");
+                float verticalInput = InputBroker.GetAxis("Vertical");
         
-            Vector3 cameraForward = playerCamTransform.forward;
-            Vector3 cameraRight = playerCamTransform.right;
-            cameraForward.y = 0f;
-            cameraRight.y = 0f;
-            cameraForward.Normalize();
-            cameraRight.Normalize();
+                Vector3 cameraForward = Player.transform.forward;
+                Vector3 cameraRight = Player.transform.right;
+                cameraForward.y = 0f;
+                cameraRight.y = 0f;
+                cameraForward.Normalize();
+                cameraRight.Normalize();
 
-            if (verticalInput > 0f)
-            {
-                moveDirection = cameraForward * verticalInput;
-            }
-            else if (verticalInput < 0f)
-            {
-                moveDirection = cameraForward * verticalInput;
-            }
-            else
-            {
-                moveDirection = Vector3.zero;
-            }
+                if (verticalInput > 0f)
+                {
+                    moveDirection = cameraForward * verticalInput;
+                }
+                else if (verticalInput < 0f)
+                {
+                    moveDirection = cameraForward * verticalInput;
+                }
+                else
+                {
+                    moveDirection = Vector3.zero;
+                }
 
-            Quaternion cameraRotation = Quaternion.Euler(0f, horizontalInput * rotationSpeed * Time.deltaTime, 0f);
-            playerCamTransform.rotation *= cameraRotation;
+                Quaternion cameraRotation = Quaternion.Euler(0f, horizontalInput * rotationSpeed * Time.deltaTime, 0f);
+                playerCamTransform.rotation *= cameraRotation;
+            }
         }
     }
 
@@ -70,7 +75,6 @@ public class JoystickTracker : InputTracker
         if (isActive)
         {
             Player.GetComponent<Rigidbody>().MovePosition(transform.position + moveDirection * movementSpeed * Time.fixedDeltaTime);
-
         }
     }
     

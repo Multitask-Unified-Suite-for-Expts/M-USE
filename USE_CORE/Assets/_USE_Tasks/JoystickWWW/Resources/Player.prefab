@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8665248776927794527}
   - component: {fileID: 8665248776927794525}
   - component: {fileID: 8665248776927794524}
-  - component: {fileID: 8665248776927794515}
+  - component: {fileID: 5410322207813157449}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8665248776927794520}
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 3.2627497, y: 0, z: 23}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 8665248778402385801}
@@ -64,7 +64,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectedStimulus: {fileID: 0}
---- !u!114 &8665248776927794515
+--- !u!114 &5410322207813157449
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,7 +85,7 @@ MonoBehaviour:
   movementSpeed: 15
   rotationSpeed: 180
   playerCamTransform: {fileID: 0}
-  isActive: 0
+  isActive: 1
   Player: {fileID: 8665248776927794520}
 --- !u!1 &8665248776980723241
 GameObject:

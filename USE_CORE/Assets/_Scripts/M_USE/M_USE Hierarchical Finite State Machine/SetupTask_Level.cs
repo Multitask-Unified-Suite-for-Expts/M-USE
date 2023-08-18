@@ -47,6 +47,11 @@ public class SetupTask_Level : ControlLevel
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
             }
 
+            if (TaskName == "JoystickWWW")
+            {
+                SessionValues.JoystickTracker.assignCamera(TaskLevel.TaskCam);
+            }
+
             if (TaskName == "GazeCalibration")
             {
                 //Setup data management

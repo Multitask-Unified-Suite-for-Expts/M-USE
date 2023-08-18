@@ -19,9 +19,6 @@ public class AudioFBController : MonoBehaviour
 
     private string playingClipName = null;
 
-    /*public EventCodeManager EventCodeManager;
-    public Dictionary<string, EventCode> SessionEventCodes;*/
-
 
     public void Init(DataController frameData)
     {

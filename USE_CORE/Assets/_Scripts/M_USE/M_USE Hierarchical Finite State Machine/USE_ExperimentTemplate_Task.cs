@@ -181,9 +181,7 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddUniversalInitializationMethod(() =>
             {
                 BlockCount++;
-                Debug.Log("BLOCK COUNT: " + BlockCount);
                 CurrentBlockDef = BlockDefs[BlockCount];
-                Debug.Log("CURRENT BLOCK DEF: " + CurrentBlockDef);
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;

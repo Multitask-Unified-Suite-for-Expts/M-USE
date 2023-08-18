@@ -19,7 +19,6 @@ public abstract class InputTracker : MonoBehaviour
 
     public ShotgunRaycast ShotgunRaycast;
     public float ShotgunThreshold;
-    // private event EventHandler<EventArgs> SelectionHandler_UpdateTarget;
 
 
     public List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
@@ -43,11 +42,6 @@ public abstract class InputTracker : MonoBehaviour
     {
         CustomUpdate();
         FindCurrentTarget();
-        /*if (TargetedGameObject.GetComponent<StimDefPointer>() != null)
-            TargetedStimDef = TargetedGameObject.GetComponent<StimDefPointer>().StimDef;
-        else
-            TargetedStimDef = null;*/
-        // SelectionHandler_UpdateTarget?.Invoke(this, EventArgs.Empty); //if TargetUpdated has any content, run SelectionHandler UpdateTarget method
     }
 
     public abstract void AddFieldsToFrameData(DataController frameData);

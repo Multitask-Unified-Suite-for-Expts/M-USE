@@ -53,7 +53,7 @@ public class TokenFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
-        trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
+        trialData.AddDatum("TokenChange", () => tokensChange);
         trialData.AddDatum("TokenBarCompletedThisTrial", ()=> tokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
         this.audioFBController = audioFBController;

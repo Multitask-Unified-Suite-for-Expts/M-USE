@@ -28,7 +28,12 @@ public class MouseTracker : InputTracker
             if (InputBroker.GetMouseButtonUp(iButton))
             {
                 ButtonCompletedClickCount[iButton]++;
-                SessionValues.EventCodeManager.SendCodeImmediate($"Button{iButton}ReleasedFromObject");
+
+                if (SimpleRaycastTarget != null)
+                {
+                    HandleButtonEventCode(iButton, "ReleasedFrom");
+                    //Still need to edit it to include the stimdefpointer stuff!!!!
+                }
             }
 
             if (InputBroker.GetMouseButton(iButton))
@@ -37,7 +42,12 @@ public class MouseTracker : InputTracker
                 if (InputBroker.GetMouseButtonDown(iButton))
                 {
                     ButtonPressDuration[iButton] = 0;
-                    SessionValues.EventCodeManager.SendCodeImmediate($"Button{iButton}PressedOnObject");
+
+                    if (SimpleRaycastTarget != null)
+                    {
+                        HandleButtonEventCode(iButton, "PressedOn");
+                        //Still need to edit it to include the stimdefpointer stuff!!!!
+                    }
                 }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;
@@ -84,5 +94,22 @@ public class MouseTracker : InputTracker
             SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
         }
     }
+
+    private void HandleButtonEventCode(int buttonIndex, string buttonAction)
+    {
+        string codeString = $"Button{buttonIndex}{buttonAction}";
+
+        if (TargetObjects.Contains(SimpleRaycastTarget))
+            codeString += "TargetObject";
+        else if (DistractorObjects.Contains(SimpleRaycastTarget))
+            codeString += "DistractorObject";
+        else if (IrrelevantObjects.Contains(SimpleRaycastTarget))
+            codeString += "IrrelevantObject";
+        else
+            codeString += "Object";
+
+        SessionValues.EventCodeManager.SendCodeImmediate(codeString);
+    }
+
 
 }

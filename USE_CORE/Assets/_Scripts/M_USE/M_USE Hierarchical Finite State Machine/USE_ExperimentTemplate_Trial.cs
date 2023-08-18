@@ -146,6 +146,10 @@ namespace USE_ExperimentTemplate_Trial
 
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
+
+                if(!SessionValues.WebBuild && TrialCount_InTask != 0)
+                    SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
                 if(SessionValues.SessionDef.EyeTrackerActive)
                     SessionValues.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
@@ -167,8 +171,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
-                else
-                    SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+                
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 

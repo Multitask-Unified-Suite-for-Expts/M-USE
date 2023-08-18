@@ -295,6 +295,8 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
+            AddDatum("NumRewardPulses_InBlock", () => taskLevel != null ? (taskLevel.NumRewardPulses_InBlock).ToString() : "NoTaskActive");
+            AddDatum("NumAbortedTrials_InBlock", () => taskLevel != null ? (taskLevel.NumAbortedTrials_InBlock).ToString() : "NoTaskActive");
         }
     }
 

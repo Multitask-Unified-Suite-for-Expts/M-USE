@@ -15,7 +15,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int TrialsCompleted_Task;
     [HideInInspector] public int TrialsCorrect_Task;
     [HideInInspector] public int TokenBarCompletions_Task;
-    [HideInInspector] public int TotalRewards_Task;
     [HideInInspector] public float NonStimTouches_Task;
 
     [HideInInspector] public string CurrentBlockString;
@@ -39,7 +38,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         trialLevel = (ContinuousRecognition_TrialLevel) TrialLevel;
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
-        SetupBlockData();
+        DefineBlockData();
         blocksAdded = 0;
 
         RunBlock.AddSpecificInitializationMethod(() =>
@@ -66,17 +65,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public override void SetTaskSummaryString()
     {
-        if(trialLevel.TrialCount_InTask != 0)
-        {
-            CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
-                                            $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} | " +
-                                            $"\t<b># Blocks:</b> {BlockCount} | " +
-                                            $"\t<b># Rewards:</b> {TotalRewards_Task} | " +
-                                            $"\t<b># TbFilled:</b> {TokenBarCompletions_Task}");
-        }
-        else
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
+        CurrentTaskSummaryString.Clear();
+        base.SetTaskSummaryString();
+        
+        CurrentTaskSummaryString.Append($"\t<b># TbFilled:</b> {TokenBarCompletions_Task}");
+        
     }
 
     public override OrderedDictionary GetBlockResultsData()
@@ -94,26 +87,23 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetTaskSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = TrialsCompleted_Task,
-            ["Trials Correct"] = TrialsCorrect_Task,
-            ["TokenBar Completions"] = TokenBarCompletions_Task,
-            ["Total Rewards"] = TotalRewards_Task,
-        };
+        OrderedDictionary data = base.GetTaskSummaryData();
+        
+        data["Trials Completed"] = TrialsCompleted_Task;
+        data["Trials Correct"] = TrialsCorrect_Task;
+        data["TokenBar Completions"] = TokenBarCompletions_Task;
+
         return data;
     }
 
-    void SetupBlockData()
+    private void DefineBlockData()
     {
         BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
         BlockData.AddDatum("NonStimTouches", () => trialLevel.NonStimTouches_Block);
-        BlockData.AddDatum("NumTrials", () => trialLevel.NumTrials_Block);
         BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
         BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
-        BlockData.AddDatum("NumRewards", () => trialLevel.NumRewards_Block);
         BlockData.AddDatum("MaxNumTrials", () => CurrentBlock.MaxNumTrials);
     }
 
@@ -122,12 +112,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         CurrentBlockSummaryString.Clear();
 
-        CurrentBlockString = "<b>Current Block:</b>" +
+        CurrentBlockString = 
                 "\nCorrect: " + trialLevel.NumCorrect_Block +
                 "\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
-                "\nRewards: " + trialLevel.NumRewards_Block +
+                "\nReward Pulses: " + NumRewardPulses_InBlock + 
                 "\nNonStimTouches: " + trialLevel.NonStimTouches_Block;
         if (blocksAdded > 1)
             CurrentBlockString += "\n";
@@ -135,10 +125,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         //Add CurrentBlockString if block wasn't aborted:
         if (trialLevel.AbortCode == 0)
             CurrentBlockSummaryString.AppendLine(CurrentBlockString.ToString());
-
-        //Add Previous blocks string:
-        if(PreviousBlocksString.Length > 0)
-            CurrentBlockSummaryString.AppendLine("\n" + PreviousBlocksString.ToString());
     }
 
 }

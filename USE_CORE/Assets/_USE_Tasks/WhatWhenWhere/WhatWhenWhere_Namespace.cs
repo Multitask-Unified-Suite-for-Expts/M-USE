@@ -74,7 +74,6 @@ namespace WhatWhenWhere_Namespace
         public int[] SliderGain;
         public int[] SliderLoss;
         public int SliderInitial;
-        public int MaxTrials;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

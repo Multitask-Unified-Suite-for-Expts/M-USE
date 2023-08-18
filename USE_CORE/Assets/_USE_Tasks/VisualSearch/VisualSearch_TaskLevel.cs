@@ -11,20 +11,15 @@ using USE_ExperimentTemplate_Task;
 
 public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 {
- //   [HideInInspector] public int NumRewardPulses_InTask = 0;
     [HideInInspector] public int NumTokenBarFull_InTask = 0;
     [HideInInspector] public int TotalTokensCollected_InTask = 0;
-    [HideInInspector] public int AbortedTrials_InTask = 0;
     [HideInInspector] public int NumCorrect_InTask = 0;
     [HideInInspector] public int NumErrors_InTask = 0;
-    [HideInInspector] public List<float> SearchDurationsList_InTask;
-    private double avgSearchDuration = 0;
+    [HideInInspector] public List<float?> SearchDurations_InTask = new List<float?>();
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
     VisualSearch_BlockDef vsBD => GetCurrentBlockDef<VisualSearch_BlockDef>();
-    VisualSearch_TrialDef vsTD;
-    //private VisualSearch_TrialDef vsTD => GetCurrentTrialDef<VisualSearch_TrialDef>();
     VisualSearch_TrialLevel vsTL;
 
 
@@ -42,16 +37,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddSpecificInitializationMethod(() =>
         {
-            vsBD.ContextName = vsBD.ContextName.Trim();
-            vsTL.ContextName = vsBD.ContextName;
-
             SetSkyBox(vsBD.ContextName);
 
-            vsTL.TokensWithStimOn = vsBD.TokensWithStimOn;
             vsTL.ResetBlockVariables();
             //Set the Initial Token Values for the Block
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
+            
             SetBlockSummaryString();
         });
         BlockFeedback.AddSpecificInitializationMethod(() =>
@@ -63,7 +55,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
                 BlockStringsAdded++;
                 PreviousBlocksString.Insert(0, CurrentBlockString);
             }
-            vsTL.SearchDurationsList.Clear();
         });
         AssignBlockData();
     }
@@ -74,7 +65,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         {
             ["Accuracy"] = string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock),
             ["Trials Completed"] = vsTL.TrialCount_InBlock + 1,
-            ["Avg Search Duration"] = vsTL.AverageSearchDuration_InBlock.ToString("0.0") + "s",
+            ["Avg Search Duration"] = CalculateAverageDuration(vsTL.SearchDurations_InBlock).ToString("0.0") + "s",
             ["TokenBar Completions"] = vsTL.NumTokenBarFull_InBlock
         };
         return data;
@@ -82,16 +73,13 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetTaskSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trial Count In Task"] = vsTL.TrialCount_InTask + 1,
-            ["Aborted Trials In Task"] = AbortedTrials_InTask,
-            ["Reward Pulses"] = NumRewardPulses_InTask,
-            ["Token Bar Full"] = NumTokenBarFull_InTask,
-            ["Total Tokens Collected"] = TotalTokensCollected_InTask
-        };
-        if (SearchDurationsList_InTask.Count > 0)
-            data["Average Search Duration"] = SearchDurationsList_InTask.Average();
+        OrderedDictionary data = base.GetTaskSummaryData();
+
+        data["Token Bar Full"] = NumTokenBarFull_InTask;
+        data["Total Tokens Collected"] = TotalTokensCollected_InTask;
+        
+        if (SearchDurations_InTask.Count > 0)
+            data["Average Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
         if(vsTL.TrialCount_InTask != 0)
             data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
         
@@ -102,34 +90,30 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\n" + 
-                                      "\nAvg Search Duration: " + string.Format("{0:0.00}", vsTL.AverageSearchDuration_InBlock) +
+                                      "\nAvg Search Duration: " + string.Format("{0:0.00}", CalculateAverageDuration(vsTL.SearchDurations_InBlock)) +
                                       "\n" + 
-                                      "\nNum Aborted Trials: " + + vsTL.AbortedTrials_InBlock + 
+                                      "\nNum Aborted Trials: " + + NumAbortedTrials_InBlock + 
                                       "\n"+
-                                      "\nNum Reward Given: " + vsTL.NumRewardPulses_InBlock + 
+                                      "\nNum Reward Given: " + NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);
     }
 
     public override void SetTaskSummaryString()
     {
-        if (SearchDurationsList_InTask.Count > 0)
-            avgSearchDuration = Math.Round(SearchDurationsList_InTask.Average(), 2);
+        CurrentTaskSummaryString.Clear();
+        base.SetTaskSummaryString();
+
+        double avgSearchDuration = 0;
+        if (SearchDurations_InTask.Count > 0)
+            avgSearchDuration = Math.Round(CalculateAverageDuration(SearchDurations_InTask), 2);
+
         if (vsTL.TrialCount_InTask != 0)
         {
-            CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
-                                                    $"\n<b># Trials:</b> {vsTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(AbortedTrials_InTask,(vsTL.TrialCount_InTask)),2))*100}% aborted)" + 
-                                                    $"\t<b># Blocks:</b> {BlockCount}" + 
-                                                    $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
-                                                    $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(vsTL.TrialCount_InTask)),2))*100}%" + 
+            CurrentTaskSummaryString.Append($"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(vsTL.TrialCount_InTask)),2))*100}%" + 
                                                     $"\tAvg Search Duration: {avgSearchDuration}" +
                                                     $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
                                                     $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
-        }
-        else
-        {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
             
     }
@@ -138,8 +122,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void AssignBlockData()
     {
         BlockData.AddDatum("Block Accuracy", ()=> (float)vsTL.Accuracy_InBlock);
-        BlockData.AddDatum("Avg Search Duration", ()=> vsTL.AverageSearchDuration_InBlock);
-        BlockData.AddDatum("Num Reward Given", ()=> vsTL.NumRewardPulses_InBlock);
+        BlockData.AddDatum("Search Durations", ()=> String.Join(",", vsTL.SearchDurations_InBlock));
         BlockData.AddDatum("Num Token Bar Filled", ()=> vsTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> vsTL.TotalTokensCollected_InBlock);
     }
@@ -151,10 +134,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         NumCorrect_InTask = 0;
         NumErrors_InTask = 0;
-        NumRewardPulses_InTask = 0;
         NumTokenBarFull_InTask = 0;
         TotalTokensCollected_InTask = 0;
-        AbortedTrials_InTask = 0;
-        SearchDurationsList_InTask.Clear();
+        SearchDurations_InTask.Clear();
     }
 }

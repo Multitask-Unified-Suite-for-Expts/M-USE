@@ -47,14 +47,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     // Block Data Variables
     public string ContextName = "";
     public int NumCorrect_InBlock;
-    public List<float> SearchDurations_InBlock = new List<float>();
+    public List<float?> SearchDurations_InBlock = new List<float?>();
     public int NumErrors_InBlock;
-    public int NumRewardPulses_InBlock;
     public int NumTokenBarFull_InBlock;
     public int TotalTokensCollected_InBlock;
     public float Accuracy_InBlock;
-    public float AverageSearchDuration_InBlock;
-    public int NumAborted_InBlock;
    
     // Trial Data Variables
     private int? SelectedStimIndex = null;
@@ -112,8 +109,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
                         
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
+           
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
+            if (TrialCount_InTask != 0)
+                CurrentTaskLevel.SetTaskSummaryString();
+
             TokenFBController.ResetTokenBarFull();
         });
 
@@ -152,8 +153,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                 
             CurrentTaskLevel.SetBlockSummaryString();
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
+            
         });
         
         // Show the target/sample by itself for some time
@@ -229,9 +229,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             //means the player got timed out and didn't click on anything
 
             aborted = true;
-            NumAborted_InBlock++;
-            CurrentTaskLevel.NumAborted_InTask++;
             AbortCode = 6;
+            SearchDurations_InBlock.Add(null);
+            CurrentTaskLevel.SearchDurations_InTask.Add(null);
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
@@ -288,7 +288,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 {
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                    // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                    NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.NumAbortedTrials_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
                 }
@@ -334,12 +334,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         postSampleDistractorStims.ToggleVisibility(false);
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
-
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"])
+        else
         {
             aborted = true;
-            NumAborted_InBlock++;
-            CurrentTaskLevel.NumAborted_InTask++;
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
@@ -348,14 +347,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public void ResetBlockVariables()
     {
         SearchDurations_InBlock.Clear();
-        AverageSearchDuration_InBlock = 0;
         NumErrors_InBlock = 0;
         NumCorrect_InBlock = 0;
-        NumRewardPulses_InBlock = 0;
         NumTokenBarFull_InBlock = 0;
         Accuracy_InBlock = 0;
         TotalTokensCollected_InBlock = 0;
-        NumAborted_InBlock = 0;
     }
 
     protected override void DefineTrialStims()

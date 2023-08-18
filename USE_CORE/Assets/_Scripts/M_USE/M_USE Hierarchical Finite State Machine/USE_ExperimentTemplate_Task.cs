@@ -198,6 +198,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ExternalStims = ExternalStims;
                 TrialLevel.RuntimeStims = RuntimeStims;
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
+
             });
 
             //Hotkeys for WebGL build so we can end task and go to next block
@@ -285,6 +286,8 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
+                SetTaskSummaryString();
+
                 if (ContinueButtonClicked)
                     ContinueButtonClicked = false;
 
@@ -400,6 +403,22 @@ namespace USE_ExperimentTemplate_Task
             StartCoroutine(HandleSkybox(contextFilePath));
         }
 
+        public float CalculateAverageDuration(List<float?> durations)
+        {
+            float avgDuration;
+            if (durations.Any(item => item.HasValue))
+            {
+                avgDuration = (float)durations
+                    .Where(item => item.HasValue)
+                    .Average(item => item.Value);
+            }
+            else
+            {
+                avgDuration = 0f;
+            }
+
+            return avgDuration;
+        }
 
         private void HandleContinueButtonClick()
         {
@@ -467,7 +486,12 @@ namespace USE_ExperimentTemplate_Task
         
         public virtual OrderedDictionary GetTaskSummaryData()
         {
-            return new OrderedDictionary();
+            return new OrderedDictionary
+            {
+                ["Trial Count In Task"] = TrialLevel.TrialCount_InTask + 1,
+                ["Aborted Trials In Task"] = NumAbortedTrials_InTask,
+                ["Num Reward Pulses"] = NumRewardPulses_InTask
+            };
         }
 
         public virtual OrderedDictionary GetBlockResultsData()
@@ -791,9 +815,15 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void SetTaskSummaryString()
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
-        }
+            decimal percentAbortedTrials = 0;
+            if (TrialLevel.TrialCount_InTask > 0)
+                percentAbortedTrials = (Math.Round(decimal.Divide(NumAbortedTrials_InTask, (TrialLevel.TrialCount_InTask)), 2)) * 100;
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
+                                                $"\n<b># Trials:</b> {TrialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
+                                                $"\t<b># Blocks:</b> {BlockCount}" +
+                                                $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}");
 
+        }
 
     }
 
@@ -1041,4 +1071,6 @@ namespace USE_ExperimentTemplate_Task
         }
         
     }
+
+
 }

@@ -22,7 +22,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     // Block End Variables
     public List<int> runningAcc;
-    public int MinTrials, MaxTrials;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -60,14 +59,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // Block Data Variables
     [HideInInspector] public string ContextName = "";
     [HideInInspector] public int NumCorrect_InBlock;
-    [HideInInspector] public List<float> SearchDurationsList = new List<float>();
+    [HideInInspector] public List<float?> SearchDurations_InBlock = new List<float?>();
     [HideInInspector] public int NumErrors_InBlock;
-    [HideInInspector] public int NumRewardPulses_InBlock;
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
     [HideInInspector] public decimal Accuracy_InBlock;
-    [HideInInspector] public float AverageSearchDuration_InBlock;
-    [HideInInspector] public int AbortedTrials_InBlock;
    
     // Trial Data Variables
     private int? SelectedStimIndex = null;
@@ -127,9 +123,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-
-
-
+           
+            if (TrialCount_InTask != 0)
+                CurrentTaskLevel.SetTaskSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -148,10 +145,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
-
-            CurrentTaskLevel.SetBlockSummaryString();
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -234,10 +227,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             runningAcc.Add(0);
-            AbortedTrials_InBlock++;
-            CurrentTaskLevel.AbortedTrials_InTask++;
+            
             AbortCode = 6;
-            aborted = true;  
+            aborted = true;
+
+            SearchDurations_InBlock.Add(null);
+            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+            
             SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
@@ -246,9 +242,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
-            SearchDurationsList.Add(SearchDuration);
-            CurrentTaskLevel.SearchDurationsList_InTask.Add(SearchDuration);
-            AverageSearchDuration_InBlock = SearchDurationsList.Average();
+            SearchDurations_InBlock.Add(SearchDuration);
+            CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
+
             SetTrialSummaryString();
 
             int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
@@ -296,7 +292,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                    NumRewardPulses_InBlock += NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
                 }
@@ -340,12 +336,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
-
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
+        else
         {
             aborted = true;
-            AbortedTrials_InBlock++;
-            CurrentTaskLevel.AbortedTrials_InTask++;
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
@@ -480,9 +475,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        Debug.Log("MAX TRIALS: " + CurrentTaskLevel.MaxTrials_InBlock + " MIN TRIALS: " + CurrentTaskLevel.MinTrials_InBlock);
         return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            MaxTrials) || TrialCount_InBlock == MaxTrials);
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
+            CurrentTaskLevel.MaxTrials_InBlock) || TrialCount_InBlock == CurrentTaskLevel.MaxTrials_InBlock);
         
     }
 }

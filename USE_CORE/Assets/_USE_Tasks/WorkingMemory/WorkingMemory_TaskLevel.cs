@@ -13,14 +13,11 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     WorkingMemory_BlockDef wmBD => GetCurrentBlockDef<WorkingMemory_BlockDef>();
     WorkingMemory_TrialLevel wmTL;
     public int NumCorrect_InTask = 0;
-    public List<float> SearchDurations_InTask = new List<float>();
+    public List<float?> SearchDurations_InTask = new List<float?>();
     public int NumErrors_InTask = 0;
-   // public int NumRewardPulses_InTask = 0;
     public int NumTokenBarFull_InTask = 0;
     public int TotalTokensCollected_InTask = 0;
     public float Accuracy_InTask = 0;
-    public float AverageSearchDuration_InTask = 0;
-    public int NumAborted_InTask = 0;
     public override void DefineControlLevel()
     {
         wmTL = (WorkingMemory_TrialLevel)TrialLevel;
@@ -41,15 +38,13 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     }
     public override OrderedDictionary GetTaskSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trial Count In Task"] = wmTL.TrialCount_InTask + 1,
-            ["Num Reward Pulses"] = NumRewardPulses_InTask,
-            ["Token Bar Full"] = NumTokenBarFull_InTask,
-            ["Aborted Trials In Task"] = NumAborted_InTask
-        };
+
+        OrderedDictionary data = base.GetTaskSummaryData();
+
+        data["Token Bar Full"] = NumTokenBarFull_InTask;
+        
         if (SearchDurations_InTask.Count > 0)
-            data["Average Search Duration"] = SearchDurations_InTask.Average();
+            data["Average Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
         
         return data;
     }
@@ -61,7 +56,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             ["Trials Completed"] = wmTL.TrialCount_InBlock + 1,
             ["Trials Correct"] = wmTL.NumCorrect_InBlock,
             ["Errors"] = wmTL.NumErrors_InBlock,
-            ["Avg Search Duration"] = wmTL.AverageSearchDuration_InBlock.ToString("0.0") + "s",
+            ["Avg Search Duration"] = CalculateAverageDuration(wmTL.SearchDurations_InBlock).ToString("0.0") + "s",
         };
         return data;
     }
@@ -72,43 +67,37 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         CurrentBlockSummaryString.Clear();
         float avgBlockSearchDuration = 0;
         if (wmTL.SearchDurations_InBlock.Count != 0)
-            avgBlockSearchDuration = wmTL.SearchDurations_InBlock.Average();
+            avgBlockSearchDuration = CalculateAverageDuration(wmTL.SearchDurations_InBlock);
         CurrentBlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
                                       "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", avgBlockSearchDuration) +
                                       "\n" +
-                                      "\nNum Reward Given: " + wmTL.NumRewardPulses_InBlock + 
+                                      "\nNum Reward Given: " + NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + wmTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + wmTL.TotalTokensCollected_InBlock);
     }
     public override void SetTaskSummaryString()
     {
-        float avgTaskSearchDuration = 0;
+        CurrentTaskSummaryString.Clear();
+        base.SetTaskSummaryString();
+
+        double avgSearchDuration = 0;
         if (SearchDurations_InTask.Count > 0)
-            avgTaskSearchDuration = (float)Math.Round(SearchDurations_InTask.Average(), 2);
+            avgSearchDuration = Math.Round(CalculateAverageDuration(SearchDurations_InTask), 2);
+
         if (wmTL.TrialCount_InTask != 0)
         {
-            CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
-                                            $"\n<b># Trials:</b> {wmTL.TrialCount_InTask} ({(Math.Round(decimal.Divide(NumAborted_InTask,(wmTL.TrialCount_InTask)),2))*100}% aborted)" + 
-                                            $"\t<b># Blocks:</b> {BlockCount}" + 
-                                            $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
-                                            $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(wmTL.TrialCount_InTask)),2))*100}%" + 
-                                            $"\tAvg Search Duration: {avgTaskSearchDuration}" +
+
+            CurrentTaskSummaryString.Append( $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(wmTL.TrialCount_InTask)),2))*100}%" + 
+                                            $"\tAvg Search Duration: {avgSearchDuration}" +
                                             $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
                                             $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
         }
-        else
-        {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
-        }
-            
     }
     public void AssignBlockData()
     {
         BlockData.AddDatum("Block Accuracy", ()=> wmTL.Accuracy_InBlock);
-        BlockData.AddDatum("Avg Search Duration", ()=> wmTL.AverageSearchDuration_InBlock);
-        BlockData.AddDatum("Num Reward Given", ()=> wmTL.NumRewardPulses_InBlock);
+        BlockData.AddDatum("Search Durations", ()=> String.Join(",", wmTL.SearchDurations_InBlock));
         BlockData.AddDatum("Num Token Bar Filled", ()=> wmTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("Total Tokens Collected", ()=> wmTL.TotalTokensCollected_InBlock);
     }

@@ -134,6 +134,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.StimFacingCamera)
                 MakeStimFaceCamera();
 
+            UpdateExperimenterDisplaySummaryStrings();
+
             // Determine Start Button onset if the participant has made consecutive errors that exceed the error threshold
             if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
                 sbDelay = timeoutDuration.value;
@@ -151,7 +153,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
-            UpdateExperimenterDisplaySummaryStrings();
             InitializeShotgunHandler();
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), ChooseStimulusDelay, ()=>
@@ -253,8 +254,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             errorTypeString = "AbortedTrial";
-            CurrentTaskLevel.NumAbortedTrials_InBlock++;
-            CurrentTaskLevel.NumAbortedTrials_InTask++;
             AbortCode = 6;
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
@@ -403,12 +402,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         if(AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
-
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
+        else
         {
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
         }
+            
     }
 
     public void MakeStimFaceCamera()
@@ -466,7 +465,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nError: " + errorTypeString +
                              "\n" +
-                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageSearchDuration(SearchDurations_InTrial);
+                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(SearchDurations_InTrial);
     }
 
     

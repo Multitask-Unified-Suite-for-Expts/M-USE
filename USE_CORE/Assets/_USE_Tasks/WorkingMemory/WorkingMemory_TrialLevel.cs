@@ -26,13 +26,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     WorkingMemory_StimDef selectedSD = null;
     
     // Stimuli Variables
-    private StimGroup searchStims, sampleStim, postSampleDistractorStims;
+    private StimGroup searchStims, targetStim, postSampleDistractorStims;
     private GameObject StartButton;
        
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, maxSearchDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
         displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
     private float tokenFbDuration;
     
@@ -330,7 +330,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         TokenFBController.enabled = false;
         searchStims.ToggleVisibility(false);
-        sampleStim.ToggleVisibility(false);
+        targetStim.ToggleVisibility(false);
         postSampleDistractorStims.ToggleVisibility(false);
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
@@ -368,15 +368,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
 
-        sampleStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        targetStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
-            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.SearchStimTokenReward[iStim]);
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.SearchStimProbablisticTokenReward[iStim]);
+            Debug.Log("ST STIM TOKEN REWARD MAG: " + sd.StimTokenRewardMag);
             if (sd.StimTokenRewardMag > 0)
             {
+
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
-                sampleStim.AddStims(newTarg);
+                targetStim.AddStims(newTarg);
                 newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
                 sd.IsTarget = true; //sets the isTarget value to true in the SearchStim Group
             } 
@@ -384,9 +386,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         }
 
         // for (int iT)
-        sampleStim.SetLocations(CurrentTrialDef.TargetSampleLocation);
-        sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-        TrialStims.Add(sampleStim);
+        targetStim.SetLocations(new Vector3[]{ CurrentTrialDef.TargetStimLocation});
+        targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        TrialStims.Add(targetStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
@@ -406,7 +408,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {   
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration"); /*
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration"); 
+        maxSearchDuration = ConfigUiVariables.get<ConfigNumber>("maxSearchDuration"); /*
         trialEndDuration = ConfigUiVariables.get<ConfigNumber>("trialEndDuration"); 
         initTrialDuration = ConfigUiVariables.get<ConfigNumber>("initTrialDuration");
         baselineDuration = ConfigUiVariables.get<ConfigNumber>("baselineDuration"); */
@@ -458,7 +461,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("DistractorStimVisibility", () => postSampleDistractorStims.IsActive);
         FrameData.AddDatum("SearchStimVisibility", ()=> searchStims.IsActive );
-        FrameData.AddDatum("SampleStimVisibility", ()=> sampleStim.IsActive );
+        FrameData.AddDatum("SampleStimVisibility", ()=> targetStim.IsActive );
     }
     void SetTrialSummaryString()
     {

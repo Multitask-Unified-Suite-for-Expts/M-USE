@@ -289,7 +289,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SessionValues.SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
+                    int NumPulses = chooseReward(CurrentTrialDef.ProbablisticPulses);
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
@@ -353,8 +353,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
-        int temp = 0;
-
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)
@@ -366,7 +364,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbablisticTrialStimTokenReward[i]);
             if (sd.StimTokenRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
             else sd.IsTarget = false;
         }

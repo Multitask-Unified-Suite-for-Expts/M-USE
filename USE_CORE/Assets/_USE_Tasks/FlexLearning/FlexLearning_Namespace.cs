@@ -15,8 +15,8 @@ namespace FlexLearning_Namespace
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
         public int NumInitialTokens;
-        public Reward[][] TrialStimTokenReward;
-        public Reward[] PulseReward;
+        public Reward[][] ProbablisticTrialStimTokenReward;
+        public Reward[] ProbablisticPulses;
         public int NumTokenBar;
         public bool RandomizedLocations;
         public bool? TokensWithStimOn = null;
@@ -33,13 +33,13 @@ namespace FlexLearning_Namespace
                 td.TrialStimIndices = TrialStimIndices;
                 td.TrialStimLocations = TrialStimLocations;
                 td.ContextName = ContextName;
-                td.TrialStimTokenReward = TrialStimTokenReward;
+                td.ProbablisticTrialStimTokenReward = ProbablisticTrialStimTokenReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.PulseReward = PulseReward;
+                td.ProbablisticPulses = ProbablisticPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.MaxTrials = MaxTrials;
@@ -69,7 +69,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.PulseReward = PulseReward;
+                td.ProbablisticPulses = ProbablisticPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
@@ -88,8 +88,8 @@ namespace FlexLearning_Namespace
     {
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public Reward[][] TrialStimTokenReward;
-        public Reward[] PulseReward;
+        public Reward[][] ProbablisticTrialStimTokenReward;
+        public Reward[] ProbablisticPulses;
         public bool RandomizedLocations;
         public bool StimFacingCamera;
         public int NumInitialTokens;

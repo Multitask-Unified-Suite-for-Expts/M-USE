@@ -38,9 +38,11 @@ namespace WorkingMemory_Namespace
     public class WorkingMemory_TrialDef : TrialDef
     {
         public int[] SearchStimIndices, PostSampleDistractorIndices;
-
-        public Reward[][] SearchStimTokenReward;
-        public Vector3[] SearchStimLocations, PostSampleDistractorLocations, TargetSampleLocation;
+        public int[] SearchStimTokenReward;
+        public Reward[][] SearchStimProbablisticTokenReward;
+        public Vector3 TargetStimLocation;
+        
+        public Vector3[] SearchStimLocations, PostSampleDistractorLocations;
 
         public int NumInitialTokens;
         public int NumTokenBar;

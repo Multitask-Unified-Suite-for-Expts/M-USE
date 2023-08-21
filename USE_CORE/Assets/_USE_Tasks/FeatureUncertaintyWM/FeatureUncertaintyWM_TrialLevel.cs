@@ -184,7 +184,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
-            TokenFBController.ResetTokenBarFull();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);

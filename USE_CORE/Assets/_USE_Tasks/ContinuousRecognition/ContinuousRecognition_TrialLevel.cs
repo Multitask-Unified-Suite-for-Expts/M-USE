@@ -1119,8 +1119,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-            TokenFBController.ResetTokenBarFull();
-
             if (SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);

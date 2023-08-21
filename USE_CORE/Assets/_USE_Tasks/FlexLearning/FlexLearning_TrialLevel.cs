@@ -70,7 +70,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
-    private bool aborted = false;
 
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
@@ -98,10 +97,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            TokenFBController.ResetTokenBarFull();
-            //Set the context for the upcoming trial
-            ContextName = CurrentTrialDef.ContextName;
-
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "FlexLearning_DirectionalLight");
             if (currentTaskDef.StimFacingCamera)
@@ -123,11 +118,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-           
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
-            CurrentTaskLevel.SetBlockSummaryString();
-            SetTrialSummaryString();
+
+            UpdateExperimenterDisplaySummaryStrings();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -196,32 +188,32 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
 
-            CorrectSelection = selectedSD.IsTarget;
-            if (CorrectSelection)
-            {       
-                NumCorrect_InBlock++;
-                CurrentTaskLevel.NumCorrect_InTask++;
-                runningAcc.Add(1);
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
-            }
-            else
-            {
-                NumErrors_InBlock++;
-                CurrentTaskLevel.NumErrors_InTask++;
-                runningAcc.Add(0);
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
-            }
+        CorrectSelection = selectedSD.IsTarget;
+        if (CorrectSelection)
+        {
+            NumCorrect_InBlock++;
+            CurrentTaskLevel.NumCorrect_InTask++;
+            runningAcc.Add(1);
+            SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+        }
+        else
+        {
+            NumErrors_InBlock++;
+            CurrentTaskLevel.NumErrors_InTask++;
+            runningAcc.Add(0);
+            SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
+        }
 
-            if (selectedGO != null)
-            {
-                SelectedStimIndex = selectedSD.StimIndex;
-                Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
-                SelectedStimLocation = selectedSD.StimLocation;
-            }
-            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
-            SetTrialSummaryString();
+        if (selectedGO != null)
+        {
+            SelectedStimIndex = selectedSD.StimIndex;
+            Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
+            SelectedStimLocation = selectedSD.StimLocation;
+        }
+        Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
+        UpdateExperimenterDisplaySummaryStrings();
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
@@ -229,8 +221,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             runningAcc.Add(0);
             
             AbortCode = 6;
-            aborted = true;
-
             SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             
@@ -279,9 +269,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
-        });
-        TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
-        {
+
             if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
@@ -298,17 +286,22 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
+        TokenFeedback.AddTimer(() => tokenFbDuration, ITI);
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {
-                ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
+                ContextName = "NeutralITI";
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI")));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        {
+            UpdateExperimenterDisplaySummaryStrings();
+        });
+
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineTrialData();
         DefineFrameData();
@@ -338,7 +331,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SetBlockSummaryString();
         else
         {
-            aborted = true;
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
@@ -361,12 +353,20 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
 
-        for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
+        for (int iStim = 0; iStim < CurrentTrialDef.TrialStimIndices.Length; iStim++)
         {
-            FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbablisticTrialStimTokenReward[i]);
-            if (sd.StimTokenRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
-            else sd.IsTarget = false;
+            FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[iStim];
+
+            if (CurrentTrialDef.ProbabilisticTrialStimTokenReward != null)
+                sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim]);
+            else
+                sd.StimTokenRewardMag = CurrentTrialDef.TrialStimTokenReward[iStim];
+
+
+            if (sd.StimTokenRewardMag > 0) 
+                sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
+            else 
+                sd.IsTarget = false;
         }
         
         if (CurrentTrialDef.RandomizedLocations)
@@ -395,21 +395,19 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        aborted = false;
         SessionValues.MouseTracker.ResetClicks();
     }
     private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
-        TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
+        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
-        TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void DefineFrameData()
     {
@@ -478,5 +476,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock) || TrialCount_InBlock == CurrentTaskLevel.MaxTrials_InBlock);
         
+    }
+
+    private void UpdateExperimenterDisplaySummaryStrings()
+    {
+        if (TrialCount_InTask != 0)
+            CurrentTaskLevel.SetTaskSummaryString();
+        CurrentTaskLevel.SetBlockSummaryString();
+        SetTrialSummaryString();
     }
 }

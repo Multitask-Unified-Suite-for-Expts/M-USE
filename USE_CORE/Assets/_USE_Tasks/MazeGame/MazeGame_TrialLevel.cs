@@ -18,7 +18,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Generic Task Variables
     public GameObject MG_CanvasGO;
     private GameObject StartButton;
-
+    [HideInInspector] public string ContextName;
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
     private float percentError;
@@ -420,7 +420,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (currentTaskDef.NeutralITI)
             {
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage"));
+                ContextName = "NeutralITI";
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI"));
             }
         });
 
@@ -835,7 +836,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineTrialData()
     {
-        TrialData.AddDatum("BlockName", ()=> CurrentTaskLevel.mgBD.BlockName);
+        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
@@ -851,8 +852,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineFrameData()
     {
+        FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
-      //  FrameData.AddDatum("SelectedObject", () => selectedGO.name);
+        FrameData.AddDatum("SelectedObject", () => selectedGO.name);
         FrameData.AddDatum("StartedMaze", ()=> startedMaze);
     }
     private void DisableSceneElements()

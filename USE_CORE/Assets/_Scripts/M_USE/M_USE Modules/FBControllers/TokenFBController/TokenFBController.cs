@@ -2,7 +2,7 @@ using UnityEngine;
 using USE_Data;
 using System.Collections.Generic;
 using USE_ExperimentTemplate_Classes;
-
+using System.Collections;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -59,7 +59,7 @@ public class TokenFBController : MonoBehaviour
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
-        trialData.AddDatum("TokenBarCompletedThisTrial", ()=> tokenBarFull);
+        trialData.AddDatum("TokenBarFull", ()=> tokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
         this.audioFBController = audioFBController;
         numCollected = 0;
@@ -115,11 +115,11 @@ public class TokenFBController : MonoBehaviour
     {
         return numCollected;
     }
-    public void ResetTokenBarFull()
+/*    public void ResetTokenBarFull()
     {
         tokenBarFull = false;
 
-    }
+    }*/
     public bool IsTokenBarFull()
     {
         return tokenBarFull;
@@ -201,7 +201,10 @@ public class TokenFBController : MonoBehaviour
     public void Update()
     {
         if (animationPhase == AnimationPhase.None)
+        {
+
             return;
+        }
 
         // Switch to next animation phase if the current one ended
         if (Time.unscaledTime >= animationEndTime)
@@ -232,6 +235,7 @@ public class TokenFBController : MonoBehaviour
                 case AnimationPhase.Flashing:
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
+                    DelayedResetTokenBarFull(flashingTime);
                     if (SessionValues.SessionDef.EventCodesActive)
                     {
                         SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
@@ -260,6 +264,11 @@ public class TokenFBController : MonoBehaviour
                     tokenBoxColor = colorFlashing2;
                 break;
         }
+    }
+    private IEnumerator DelayedResetTokenBarFull(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        tokenBarFull = false;
     }
 
     public TokenFBController SetTotalTokensNum(int numTokens)

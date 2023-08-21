@@ -39,8 +39,8 @@ namespace WorkingMemory_Namespace
     {
         public int[] SearchStimIndices, PostSampleDistractorIndices;
         public int[] SearchStimTokenReward;
-        public Reward[][] SearchStimProbablisticTokenReward;
-        public Vector3 TargetStimLocation;
+        public Reward[][] ProbabilisticSearchStimTokenReward;
+        public Vector3 SampleStimLocation;
         
         public Vector3[] SearchStimLocations, PostSampleDistractorLocations;
 

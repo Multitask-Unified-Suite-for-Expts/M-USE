@@ -96,6 +96,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             SetSkyBox(mgBD.ContextName);
             InitializeMazeSearchingArrays();
 
+            mgTL.ContextName = mgBD.ContextName;
             MinTrials_InBlock = mgBD.MinMaxTrials[0];
             MaxTrials_InBlock = mgBD.MaxTrials;
 
@@ -125,7 +126,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     public void DefineBlockData()
     {
-
+        BlockData.AddDatum("BlockName", () => mgBD.BlockName);
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
         BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", TotalErrors_InBlock)}]");

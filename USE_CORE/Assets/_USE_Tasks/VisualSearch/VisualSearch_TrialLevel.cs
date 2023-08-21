@@ -30,21 +30,18 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private float tokenFbDuration;
     
     // Stim Evaluation Variables
-    private GameObject trialStim;
     private GameObject selectedGO = null;
     private bool CorrectSelection = false;
     VisualSearch_StimDef selectedSD = null;
-    private bool ObjectsCreated = false;
     
     //Player View Variables
     private PlayerViewPanel playerView;
     private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     private GameObject playerViewText;
     private Vector2 textLocation;
-    private bool playerViewLoaded;
-    
+
     // Block Data Variables
-    [HideInInspector] public string ContextName = "";
+    [HideInInspector] public string ContextName;
     [HideInInspector] public int NumCorrect_InBlock;
     [HideInInspector] public int NumErrors_InBlock;
     [HideInInspector] public List<float?> SearchDurations_InBlock = new List<float?>();
@@ -57,14 +54,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
-    private bool aborted = false;
-    private float? selectionDuration = null;
     private bool choiceMade = false;
 
     public GameObject chosenStimObj;
     public VisualSearch_StimDef chosenStimDef;
     public bool StimIsChosen;
-
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
@@ -91,10 +85,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            ResetTrialVariables();
-            TokenFBController.ResetTokenBarFull();
-            //Set the context for the upcoming trial with the Start Button visible
-
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "VisualSearch_DirectionalLight");
             if (currentTaskDef.StimFacingCamera)
@@ -116,11 +106,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
-            
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
-            SetTrialSummaryString();
-            CurrentTaskLevel.SetBlockSummaryString();
+
+            UpdateExperimenterDisplaySummaryStrings();
         });
         
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -140,7 +127,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
-
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
@@ -155,7 +141,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren),
             SearchDisplayDelay, () => 
             {
-                choiceMade = false;
                 SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             });
         
@@ -167,8 +152,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
-            selectionDuration = null;
             TokenFBController.enabled = true;
+            choiceMade = false;
 
             SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
@@ -181,6 +166,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
         });
+
         SearchDisplay.AddUpdateMethod(() =>
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
@@ -195,6 +181,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
+            choiceMade = false;
             CorrectSelection = selectedSD.IsTarget;
 
             if (CorrectSelection)
@@ -217,17 +204,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimIndex = selectedSD.StimIndex;
                 SelectedStimLocation = selectedSD.StimLocation;
             }
-            SetTrialSummaryString();
+            UpdateExperimenterDisplaySummaryStrings();
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             AbortCode = 6;
-            aborted = true;
-
             SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
 
-            SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
@@ -242,7 +226,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurations_InBlock.Add(SearchDuration);
             CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
-            SetTrialSummaryString();
+            UpdateExperimenterDisplaySummaryStrings();
 
             int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
 
@@ -256,13 +240,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddSpecificInitializationMethod(() =>
-        {
+        {/*
             if(!SessionValues.WebBuild)
             {
                 if (playerViewParent.transform.childCount != 0)
                     DestroyChildren(playerViewParent);
             }
-
+*/
             if (selectedSD.StimTokenRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
@@ -275,36 +259,36 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
-        });
-        //TokenFeedback.SpecifyTermination(()=>!TokenFBController.IsAnimating(), () => ITI, ()=>
-        TokenFeedback.AddTimer(()=>tokenFbDuration, () => ITI, ()=>
-        {
+           
             if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
                 if (SessionValues.SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
+                    int NumPulses = chooseReward(CurrentTrialDef.ProbablisticPulses);
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                   // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", NumPulses)); moved to syncbox class
-                    CurrentTaskLevel.NumRewardPulses_InBlock +=  NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask +=  NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
                 }
             }
         });
+        TokenFeedback.AddTimer(() => tokenFbDuration, () => ITI);
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {
-                ContextName = "itiImage";
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage"));
+                ContextName = "NeutralITI";
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI"));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        {
+            UpdateExperimenterDisplaySummaryStrings();
+        });
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineTrialData();
         DefineFrameData();
@@ -334,7 +318,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SetBlockSummaryString();
         else
         {
-            aborted = true;
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
@@ -366,17 +349,21 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         else
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
-        for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
+        for (int iStim = 0; iStim < CurrentTrialDef.TrialStimIndices.Length; iStim++)
         {
-            VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[i];
-            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
+            VisualSearch_StimDef sd = (VisualSearch_StimDef)tStim.stimDefs[iStim];
 
-            if (sd.StimTokenRewardMag > 0) {
+            if (CurrentTrialDef.ProbabilisticTrialStimTokenReward != null)
+                sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim]);
+            else
+                sd.StimTokenRewardMag = CurrentTrialDef.TrialStimTokenReward[iStim];
+
+
+            if (sd.StimTokenRewardMag > 0)
                 sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
-            }
-            else {
+            else
                 sd.IsTarget = false;
-            }
+
         }
 
         if (CurrentTrialDef.RandomizedLocations)
@@ -402,7 +389,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        aborted = false;
         choiceMade = false;
         if (SessionValues.MouseTracker != null)
             SessionValues.MouseTracker.ResetClicks();
@@ -411,19 +397,18 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         // All AddDatum commands for the Trial Data
         TrialData.AddDatum("TrialID", ()=> CurrentTrialDef.TrialID);
-        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
+        TrialData.AddDatum("ContextName", ()=> CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelecteStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
-        TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
-        //FrameData.AddDatum("ContextName", () => ContextName);
+        FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
         FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
     }
@@ -472,6 +457,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
+    }
+
+    private void UpdateExperimenterDisplaySummaryStrings()
+    {
+        if (TrialCount_InTask != 0)
+            CurrentTaskLevel.SetTaskSummaryString();
+        SetTrialSummaryString();
+        CurrentTaskLevel.SetBlockSummaryString();
     }
 
 }

@@ -36,6 +36,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int consecutiveError = 0;
     private List<float?> SearchDurations_InTrial = new List<float?> { };
     public List<int> runningAcc = new List<int>();
+    public string ContextName;
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -367,6 +368,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             if (currentTaskDef.NeutralITI)
             {
+                ContextName = "NeutralITI";
                 string path = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
                 CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + "NeutralITI" + ".png");
             }
@@ -444,7 +446,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void DefineTrialData() //All ".AddDatum" commands for Trial Data
     {
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID); //NaN if only using blockdef structure
-        TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
+        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);
         TrialData.AddDatum("TouchedObjects", () => String.Join(",",TouchedObjects));
@@ -453,6 +455,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
+        FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
         FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);

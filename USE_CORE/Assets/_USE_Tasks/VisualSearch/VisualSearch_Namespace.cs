@@ -13,8 +13,8 @@ namespace VisualSearch_Namespace
 
     public class VisualSearch_BlockDef : BlockDef
     {
-        public Reward[][] TrialStimTokenReward;
-        public Reward[] PulseReward;
+        public Reward[][] ProbabilisticTrialStimTokenReward;
+        public Reward[] ProbabilisticPulses;
         public int NumInitialTokens;
         public int NumTokenBar;
         public bool RandomizedLocations;
@@ -30,7 +30,8 @@ namespace VisualSearch_Namespace
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.ContextName = ContextName;
                 td.BlockName = BlockName;
-                td.PulseReward = PulseReward;
+                td.ProbablisticPulses = ProbabilisticPulses;
+                td.ProbabilisticTrialStimTokenReward = ProbabilisticTrialStimTokenReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
@@ -48,9 +49,10 @@ namespace VisualSearch_Namespace
                 VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];
                 td.ContextName = ContextName;
                 td.BlockName = BlockName;
-                td.PulseReward = PulseReward;
+                td.ProbablisticPulses = ProbabilisticPulses;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumTokenBar = NumTokenBar;
+                td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.TokensWithStimOn = TokensWithStimOn;
 
@@ -63,8 +65,9 @@ namespace VisualSearch_Namespace
     {
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public Reward[][] TrialStimTokenReward;
-        public Reward[] PulseReward;
+        public int[] TrialStimTokenReward;
+        public Reward[][] ProbabilisticTrialStimTokenReward;
+        public Reward[] ProbablisticPulses;
         public bool? TokensWithStimOn;
         public int NumInitialTokens;
         public int NumTokenBar;

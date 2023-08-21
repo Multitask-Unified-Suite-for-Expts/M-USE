@@ -20,25 +20,35 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public int MinTrials, MaxTrials;
        
     // Stim Evaluation Variables
-    private GameObject trialStim;
     private GameObject selectedGO = null;
     private bool CorrectSelection;
     WorkingMemory_StimDef selectedSD = null;
     
     // Stimuli Variables
-    private StimGroup searchStims, targetStim, postSampleDistractorStims;
+    private StimGroup searchStims, sampleStim, postSampleDistractorStims;
     private GameObject StartButton;
        
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
-    [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, maxSearchDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration, 
-        displayPostSampleDistractorsDuration, preTargetDelayDuration, itiDuration;
     private float tokenFbDuration;
+
+    [HideInInspector] public ConfigNumber minObjectTouchDuration;
+    [HideInInspector] public ConfigNumber maxObjectTouchDuration;
+    [HideInInspector] public ConfigNumber maxSearchDuration;
+    [HideInInspector] public ConfigNumber tokenRevealDuration;
+    [HideInInspector] public ConfigNumber tokenUpdateDuration;
+    [HideInInspector] public ConfigNumber tokenFlashingDuration;
+    [HideInInspector] public ConfigNumber selectObjectDuration;
+    [HideInInspector] public ConfigNumber fbDuration;
+    [HideInInspector] public ConfigNumber displaySampleDuration;
+    [HideInInspector] public ConfigNumber postSampleDelayDuration;
+    [HideInInspector] public ConfigNumber displayPostSampleDistractorsDuration;
+    [HideInInspector] public ConfigNumber preTargetDelayDuration;
+    [HideInInspector] public ConfigNumber itiDuration;
     
     //Player View Variables
     private PlayerViewPanel playerView;
-    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     public List<GameObject> playerViewTextList = new List<GameObject>();
     public GameObject playerViewText;
     private Vector2 textLocation;
@@ -55,13 +65,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
    
     // Trial Data Variables
     private int? SelectedStimIndex = null;
-    private string selectedStimName = null;
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
-    private bool RewardGiven = false;
     private bool TouchDurationError = false;
-    private bool aborted = false;
-    private float? selectionDuration = null;
     private bool choiceMade = false;
 
 
@@ -77,16 +83,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         AddActiveStates(new List<State> { InitTrial, DisplaySample, DisplayDistractors, SearchDisplay, SelectionFeedback, TokenFeedback, ITI });
 
-        
-        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-        playerViewText = new GameObject();
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+            playerViewParent = GameObject.Find("MainCameraCopy");
+
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(5f);
+            HaloFBController.SetHaloSize(6f);
             HaloFBController.SetHaloIntensity(5);
         });
+
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
@@ -108,14 +115,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 }
             }
                         
-            if (!configUIVariablesLoaded) LoadConfigUIVariables();
-           
-            SetTrialSummaryString();
-            CurrentTaskLevel.SetBlockSummaryString();
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
+            if (!configUIVariablesLoaded) 
+                LoadConfigUIVariables();
 
-            TokenFBController.ResetTokenBarFull();
+            UpdateExperimenterDisplaySummaryStrings();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -132,51 +135,49 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
-            
+
+            TokenFBController.SetRevealTime(tokenRevealDuration.value);
+            TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
+            TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            ShotgunHandler.HandlerActive = true;
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
-            //Set the token bar settings
-            TokenFBController.enabled = true;
-            TokenFBController
-                .SetRevealTime(tokenRevealDuration.value)
-                .SetUpdateTime(tokenUpdateDuration.value)
-                .SetFlashingTime(tokenFlashingDuration.value);
-
             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-                
-            CurrentTaskLevel.SetBlockSummaryString();
-            
+            ShotgunHandler.HandlerActive = false;
+
+            TokenFBController.enabled = true;
         });
-        
+
         // Show the target/sample by itself for some time
         DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
-          {
-              StateAfterDelay = DisplayDistractors;
-              DelayDuration = postSampleDelayDuration.value;
-          });
+        {
+            if (postSampleDistractorStims.stimDefs.Count != 0)
+                StateAfterDelay = DisplayDistractors;
+            else
+                StateAfterDelay = SearchDisplay;
+            DelayDuration = postSampleDelayDuration.value;
+        });
+
         // Show some distractors without the target/sample
         DisplayDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
-          {
-              StateAfterDelay = SearchDisplay;
-              DelayDuration = preTargetDelayDuration.value;
-          });
+        {
+            StateAfterDelay = SearchDisplay;
+            DelayDuration = preTargetDelayDuration.value;
+        });
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
         SearchDisplay.AddSpecificInitializationMethod(() =>
         {
-            if (!SessionValues.WebBuild)
-                CreateTextOnExperimenterDisplay();
-
-            searchStims.ToggleVisibility(true);
 
             SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
@@ -185,7 +186,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
+
+            ShotgunHandler.HandlerActive = true;
+
+            if (!SessionValues.WebBuild)
+                CreateTextOnExperimenterDisplay();
         });
+
         SearchDisplay.AddUpdateMethod(() =>
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
@@ -197,8 +204,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     choiceMade = true;
             }
         });
+
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
+            choiceMade = false;
             CorrectSelection = selectedSD.IsTarget;
 
             if (CorrectSelection)
@@ -222,16 +231,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimLocation = selectedSD.StimLocation;
             }
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
-            SetTrialSummaryString();
+            UpdateExperimenterDisplaySummaryStrings();
         });
+
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
 
-            aborted = true;
             AbortCode = 6;
             SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
+
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
@@ -240,7 +250,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurations_InBlock.Add(SearchDuration);
             CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
-            SetTrialSummaryString();
+            UpdateExperimenterDisplaySummaryStrings();
 
             int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
 
@@ -249,22 +259,20 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             else 
                 HaloFBController.ShowNegative(selectedGO, depth);
         });
-        SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () => 
-        {
-            HaloFBController.Destroy();
-        });
+
+        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.Destroy(); });
 
 
         // The state that will handle the token feedback and wait for any animations
         TokenFeedback.AddSpecificInitializationMethod(() =>
         {
-            if(!SessionValues.WebBuild)
+            /*if (!SessionValues.WebBuild)
             {
-                if (GameObject.Find("MainCameraCopy").transform.childCount != 0)
-                    DestroyChildren(GameObject.Find("MainCameraCopy"));
-            }
+                if (playerViewParent.transform.childCount != 0)
+                    DestroyChildren(playerViewParent.gameObject);
+            }*/
 
-            searchStims.ToggleVisibility(false);
+            //searchStims.ToggleVisibility(false);
             if (selectedSD.IsTarget)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
@@ -274,10 +282,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 TokenFBController.RemoveTokens(selectedGO, -selectedSD.StimTokenRewardMag);
-                TotalTokensCollected_InBlock -= selectedSD.StimTokenRewardMag;
-                CurrentTaskLevel.TotalTokensCollected_InTask -= selectedSD.StimTokenRewardMag;
+                TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
+                CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
+
+            
         });
+
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
             if (TokenFBController.IsTokenBarFull())
@@ -287,24 +298,26 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 if (SessionValues.SyncBoxController != null)
                 {
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                   // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.NumAbortedTrials_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
-                    RewardGiven = true;
                 }
             }
         });
+
         ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
             {
-                ContextName = "itiImage";
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, ContextName));
+                ContextName = "NeutralITI";
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI"));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
         // Wait for some time at the end
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        {
+            UpdateExperimenterDisplaySummaryStrings();
+        });
 
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineFrameData();
@@ -330,13 +343,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         TokenFBController.enabled = false;
         searchStims.ToggleVisibility(false);
-        targetStim.ToggleVisibility(false);
+        sampleStim.ToggleVisibility(false);
         postSampleDistractorStims.ToggleVisibility(false);
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
         else
         {
-            aborted = true;
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
@@ -362,23 +374,26 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
-        //searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("TokenFeedback"));
+        searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
         TrialStims.Add(searchStims);
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
 
-        targetStim = new StimGroup("TargetStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        sampleStim = new StimGroup("SampleStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
-            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.SearchStimProbablisticTokenReward[iStim]);
-            Debug.Log("ST STIM TOKEN REWARD MAG: " + sd.StimTokenRewardMag);
+            if (CurrentTrialDef.ProbabilisticSearchStimTokenReward != null)
+                sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticSearchStimTokenReward[iStim]);
+            else
+                sd.StimTokenRewardMag = CurrentTrialDef.SearchStimTokenReward[iStim];
+
             if (sd.StimTokenRewardMag > 0)
             {
 
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
-                targetStim.AddStims(newTarg);
+                sampleStim.AddStims(newTarg);
                 newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward
                 sd.IsTarget = true; //sets the isTarget value to true in the SearchStim Group
             } 
@@ -386,9 +401,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         }
 
         // for (int iT)
-        targetStim.SetLocations(new Vector3[]{ CurrentTrialDef.TargetStimLocation});
-        targetStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-        TrialStims.Add(targetStim);
+        sampleStim.SetLocations(new Vector3[]{ CurrentTrialDef.SampleStimLocation});
+        sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
+        TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
@@ -396,13 +411,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(postSampleDistractorStims);
         
      }
-    // protected override bool CheckBlockEnd()
-    // {
-    //     TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-    //     return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-    //         CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-    //         TrialDefs.Count);
-    // }
 
     public void LoadConfigUIVariables()
     {   
@@ -414,7 +422,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         initTrialDuration = ConfigUiVariables.get<ConfigNumber>("initTrialDuration");
         baselineDuration = ConfigUiVariables.get<ConfigNumber>("baselineDuration"); */
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
-        selectionFbDuration = ConfigUiVariables.get<ConfigNumber>("selectionFbDuration");
+        fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
         displaySampleDuration = ConfigUiVariables.get<ConfigNumber>("displaySampleDuration");
         postSampleDelayDuration = ConfigUiVariables.get<ConfigNumber>("postSampleDelayDuration");
         displayPostSampleDistractorsDuration = ConfigUiVariables.get<ConfigNumber>("displayPostSampleDistractorsDuration");
@@ -434,9 +442,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SelectedStimLocation = null;
         SearchDuration = 0;
         CorrectSelection = false;
-        RewardGiven = false;
         TouchDurationError = false;
-        aborted = false;
         choiceMade = false;
 
         selectedGO = null;
@@ -446,26 +452,26 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {
         // All AddDatum commands for the Trial Data
 
-        TrialData.AddDatum("TrialID", ()=> CurrentTrialDef.TrialID);
-        TrialData.AddDatum("Context", ()=> CurrentTrialDef.ContextName);
+        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("ContextName", () => ContextName);
         TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
-        TrialData.AddDatum("RewardGiven", ()=> RewardGiven);
     }
     private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
+        FrameData.AddDatum("ChoiceMade", () => choiceMade);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
         FrameData.AddDatum("DistractorStimVisibility", () => postSampleDistractorStims.IsActive);
         FrameData.AddDatum("SearchStimVisibility", ()=> searchStims.IsActive );
-        FrameData.AddDatum("SampleStimVisibility", ()=> targetStim.IsActive );
+        FrameData.AddDatum("SampleStimVisibility", ()=> sampleStim.IsActive );
     }
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "Selected Object Code: " + SelectedStimIndex +
+        TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n\nCorrect Selection: " + CorrectSelection +
                              "\nTouch Duration Error: " + TouchDurationError +
@@ -476,7 +482,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     }
     private void CreateTextOnExperimenterDisplay()
     {
-        playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
         if (!playerViewLoaded)
         {
             //Create corresponding text on player view of experimenter display
@@ -484,16 +489,23 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 if (stim.IsTarget)
                 {
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
                     playerViewText = playerView.CreateTextObject("TargetText","TARGET",
-                        Color.red, textLocation, textSize, playerViewParent);
+                        Color.red, textLocation, textSize, playerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
                     playerViewLoaded = true;
                 }
             }
         }
+    }
+    private void UpdateExperimenterDisplaySummaryStrings()
+    {
+        if (TrialCount_InTask != 0)
+            CurrentTaskLevel.SetTaskSummaryString();
+        SetTrialSummaryString();
+        CurrentTaskLevel.SetBlockSummaryString();
     }
 }

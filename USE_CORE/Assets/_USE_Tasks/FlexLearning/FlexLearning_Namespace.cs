@@ -19,7 +19,7 @@ namespace FlexLearning_Namespace
         public Reward[] ProbablisticPulses;
         public int NumTokenBar;
         public bool RandomizedLocations;
-        public bool? TokensWithStimOn = null;
+        public bool? TokensWithStimOn = false;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -33,7 +33,7 @@ namespace FlexLearning_Namespace
                 td.TrialStimIndices = TrialStimIndices;
                 td.TrialStimLocations = TrialStimLocations;
                 td.ContextName = ContextName;
-                td.ProbablisticTrialStimTokenReward = ProbablisticTrialStimTokenReward;
+                td.ProbabilisticTrialStimTokenReward = ProbablisticTrialStimTokenReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.RandomizedLocations = RandomizedLocations;
                 td.BlockEndType = BlockEndType;
@@ -43,10 +43,7 @@ namespace FlexLearning_Namespace
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.MaxTrials = MaxTrials;
-                if (TokensWithStimOn != null)
-                    td.TokensWithStimOn = TokensWithStimOn;
-                else
-                    td.TokensWithStimOn = false;
+                td.TokensWithStimOn = TokensWithStimOn;
                 TrialDefs.Add(td);
             }
         }
@@ -70,15 +67,14 @@ namespace FlexLearning_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.ProbablisticPulses = ProbablisticPulses;
+                td.NumPulses = NumPulses;
                 td.NumTokenBar = NumTokenBar;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
+
                 td.MinMaxTrials = MinMaxTrials;
                 td.MaxTrials = MaxTrials;
-                if (TokensWithStimOn != null)
-                    td.TokensWithStimOn = TokensWithStimOn;
-                else
-                    td.TokensWithStimOn = false;
+                td.TokensWithStimOn = TokensWithStimOn;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -88,7 +84,8 @@ namespace FlexLearning_Namespace
     {
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public Reward[][] ProbablisticTrialStimTokenReward;
+        public int[] TrialStimTokenReward;
+        public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbablisticPulses;
         public bool RandomizedLocations;
         public bool StimFacingCamera;

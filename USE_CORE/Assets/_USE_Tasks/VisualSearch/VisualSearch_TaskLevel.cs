@@ -38,7 +38,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             SetSkyBox(vsBD.ContextName);
-
+            vsTL.ContextName = vsBD.ContextName;
             vsTL.ResetBlockVariables();
             //Set the Initial Token Values for the Block
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.NumTokenBar);

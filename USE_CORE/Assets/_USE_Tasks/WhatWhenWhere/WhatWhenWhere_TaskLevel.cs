@@ -45,6 +45,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             MinTrials_InBlock = wwwBD.MinMaxTrials[0];
             MaxTrials_InBlock = wwwBD.MaxTrials;
             
+            wwwTL.ContextName = wwwBD.ContextName;
             SetSkyBox(wwwBD.ContextName);
 
             ResetBlockVariables();

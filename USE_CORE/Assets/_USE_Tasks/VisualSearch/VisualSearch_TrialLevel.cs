@@ -240,13 +240,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddSpecificInitializationMethod(() =>
-        {/*
-            if(!SessionValues.WebBuild)
-            {
-                if (playerViewParent.transform.childCount != 0)
-                    DestroyChildren(playerViewParent);
-            }
-*/
+        {
+            if (!SessionValues.WebBuild)
+                DestroyTextOnExperimenterDisplay();
+
             if (selectedSD.StimTokenRewardMag > 0)
             {
                 TokenFBController.AddTokens(selectedGO, selectedSD.StimTokenRewardMag);
@@ -260,21 +257,29 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
            
+        });
+       
+        TokenFeedback.AddTimer(() => tokenFbDuration, () => ITI, () =>
+        {
             if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
                 if (SessionValues.SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.ProbablisticPulses);
+                    int NumPulses;
+                    if (CurrentTrialDef.ProbablisticNumPulses != null)
+                        NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
+                    else
+                        NumPulses = CurrentTrialDef.NumPulses;
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
+                    TokenFBController.ResetTokenBarFull();
                     RewardGiven = true;
                 }
             }
         });
-        TokenFeedback.AddTimer(() => tokenFbDuration, () => ITI);
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
@@ -324,6 +329,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
 
+        TokenFBController.ResetTokenBarFull();
+
+    }
+    private void DestroyTextOnExperimenterDisplay()
+    {
+        DestroyChildren(playerViewParent);
     }
 
     public void ResetBlockVariables()

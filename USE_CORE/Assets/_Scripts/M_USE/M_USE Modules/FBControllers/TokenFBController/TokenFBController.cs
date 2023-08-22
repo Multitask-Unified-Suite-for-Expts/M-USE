@@ -235,7 +235,7 @@ public class TokenFBController : MonoBehaviour
                 case AnimationPhase.Flashing:
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
-                    DelayedResetTokenBarFull(flashingTime);
+                   // DelayedResetTokenBarFull(0.2f);
                     if (SessionValues.SessionDef.EventCodesActive)
                     {
                         SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
@@ -271,6 +271,10 @@ public class TokenFBController : MonoBehaviour
         tokenBarFull = false;
     }
 
+    public void ResetTokenBarFull()
+    {
+        tokenBarFull = false;
+    }
     public TokenFBController SetTotalTokensNum(int numTokens)
     {
         totalTokensNum = numTokens;

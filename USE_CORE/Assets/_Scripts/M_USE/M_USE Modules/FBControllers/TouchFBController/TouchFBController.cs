@@ -146,7 +146,6 @@ public class TouchFBController : MonoBehaviour
             DeactivatePrefabs();
             Handler.HandlerActive = true;
             FeedbackOn = false;
-            Handler.HandlerActive = true;
         }
     }
 

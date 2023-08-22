@@ -523,6 +523,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
         }
+
+        TokenFBController.ResetTokenBarFull();
+
     }
 
     public void ResetBlockVariables()
@@ -1122,8 +1125,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumPulses));
             }
+            TokenFBController.ResetTokenBarFull();
+
         }
     }
 

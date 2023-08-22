@@ -300,6 +300,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     CurrentTaskLevel.NumAbortedTrials_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+
+                    TokenFBController.ResetTokenBarFull();
+
                 }
             }
         });
@@ -354,6 +357,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
+
+        TokenFBController.ResetTokenBarFull();
+
     }
 
     public void ResetBlockVariables()

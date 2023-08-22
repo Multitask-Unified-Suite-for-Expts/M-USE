@@ -14,7 +14,7 @@ namespace VisualSearch_Namespace
     public class VisualSearch_BlockDef : BlockDef
     {
         public Reward[][] ProbabilisticTrialStimTokenReward;
-        public Reward[] ProbabilisticPulses;
+        public Reward[] ProbabilisticNumPulses;
         public int NumInitialTokens;
         public int NumTokenBar;
         public bool RandomizedLocations;
@@ -30,7 +30,7 @@ namespace VisualSearch_Namespace
                 VisualSearch_TrialDef td = new VisualSearch_TrialDef();
                 td.ContextName = ContextName;
                 td.BlockName = BlockName;
-                td.ProbablisticPulses = ProbabilisticPulses;
+                td.ProbablisticNumPulses = ProbabilisticNumPulses;
                 td.ProbabilisticTrialStimTokenReward = ProbabilisticTrialStimTokenReward;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumTokenBar = NumTokenBar;
@@ -49,7 +49,7 @@ namespace VisualSearch_Namespace
                 VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];
                 td.ContextName = ContextName;
                 td.BlockName = BlockName;
-                td.ProbablisticPulses = ProbabilisticPulses;
+                td.ProbablisticNumPulses = ProbabilisticNumPulses;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumTokenBar = NumTokenBar;
                 td.NumPulses = NumPulses;
@@ -67,7 +67,7 @@ namespace VisualSearch_Namespace
         public Vector3[] TrialStimLocations;
         public int[] TrialStimTokenReward;
         public Reward[][] ProbabilisticTrialStimTokenReward;
-        public Reward[] ProbablisticPulses;
+        public Reward[] ProbablisticNumPulses;
         public bool? TokensWithStimOn;
         public int NumInitialTokens;
         public int NumTokenBar;

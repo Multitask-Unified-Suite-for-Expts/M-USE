@@ -502,6 +502,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
+                TokenFBController.ResetTokenBarFull();
             }
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
@@ -565,6 +566,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         ClearTrialSummaryString();
+        TokenFBController.ResetTokenBarFull();
     }
 
     public void ActivateObjects()

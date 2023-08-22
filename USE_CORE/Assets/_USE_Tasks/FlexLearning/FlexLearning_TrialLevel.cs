@@ -270,6 +270,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
 
+            
+        });
+        TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
+        {
             if (TokenFBController.IsTokenBarFull())
             {
                 NumTokenBarFull_InBlock++;
@@ -277,16 +281,20 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SessionValues.SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.ProbablisticPulses);
+                    int NumPulses;
+                    if (CurrentTrialDef.ProbablisticNumPulses != null)
+                        NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
+                    else
+                        NumPulses = CurrentTrialDef.NumPulses;
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
+                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });
-        TokenFeedback.AddTimer(() => tokenFbDuration, ITI);
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
@@ -336,6 +344,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
+
+        TokenFBController.ResetTokenBarFull();
+
     }
 
     protected override void DefineTrialStims()
@@ -471,7 +482,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        Debug.Log("MAX TRIALS: " + CurrentTaskLevel.MaxTrials_InBlock + " MIN TRIALS: " + CurrentTaskLevel.MinTrials_InBlock);
         return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock) || TrialCount_InBlock == CurrentTaskLevel.MaxTrials_InBlock);

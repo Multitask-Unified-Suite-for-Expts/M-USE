@@ -138,7 +138,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
     public void AssignBlockData()
     {
-
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
         BlockData.AddDatum("BlockAccuracy", ()=> (float)flTL.Accuracy_InBlock);

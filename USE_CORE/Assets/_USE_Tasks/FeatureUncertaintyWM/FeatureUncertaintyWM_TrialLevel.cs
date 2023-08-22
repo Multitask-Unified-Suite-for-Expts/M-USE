@@ -377,6 +377,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
+                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });
@@ -451,6 +452,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
+
+        TokenFBController.ResetTokenBarFull();
     }
 
     public void ResetBlockVariables()

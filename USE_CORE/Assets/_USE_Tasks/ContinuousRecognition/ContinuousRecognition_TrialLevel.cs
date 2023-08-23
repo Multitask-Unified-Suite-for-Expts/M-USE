@@ -113,6 +113,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
 
+
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -168,6 +170,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            AddToStimLists();
+
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
             if (TrialCount_InBlock == 0)
@@ -203,6 +207,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            ShotgunHandler.MinDuration = 1f; //DELETE LATER!!!!!
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
@@ -453,6 +459,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
+    public override void AddToStimLists() //For EventCodes:
+    {
+        foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
+        {
+            if (stim.PreviouslyChosen)
+                SessionValues.DistractorObjects.Add(stim.StimGameObject);
+            else
+                SessionValues.TargetObjects.Add(stim.StimGameObject);   
+        }
+    }
+
     private void CalculateBlockFeedbackLocations()
     {
         BlockFeedbackLocations = new Vector3[CurrentTrial.X_FbLocations.Length * CurrentTrial.Y_FbLocations.Length];
@@ -958,6 +975,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
 
         trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate"));
+
     }
 
     public void CalculateBlockAvgTimeToChoice()

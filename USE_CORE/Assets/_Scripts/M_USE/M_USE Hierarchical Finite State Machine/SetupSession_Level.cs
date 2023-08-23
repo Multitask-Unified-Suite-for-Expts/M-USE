@@ -88,7 +88,6 @@ public class SetupSession_Level : ControlLevel
             if (SessionValues.StoreData)
                 StartCoroutine(CreateSessionDataFolder(result =>
                 {
-                    Debug.Log("CREATING DATA FOLDER!");
                     dataFolderCreated = true;
                 }));
             else

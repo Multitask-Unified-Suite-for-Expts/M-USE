@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
+using USE_StimulusManagement;
 
 public class MouseTracker : InputTracker
 {
@@ -30,10 +31,7 @@ public class MouseTracker : InputTracker
                 ButtonCompletedClickCount[iButton]++;
 
                 if (SimpleRaycastTarget != null)
-                {
-                    HandleButtonEventCode(iButton, "ReleasedFrom");
-                    //Still need to edit it to include the stimdefpointer stuff!!!!
-                }
+                    SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}ReleasedFrom", null);
             }
 
             if (InputBroker.GetMouseButton(iButton))
@@ -44,10 +42,7 @@ public class MouseTracker : InputTracker
                     ButtonPressDuration[iButton] = 0;
 
                     if (SimpleRaycastTarget != null)
-                    {
-                        HandleButtonEventCode(iButton, "PressedOn");
-                        //Still need to edit it to include the stimdefpointer stuff!!!!
-                    }
+                        SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}PressedOn", null);
                 }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;
@@ -93,22 +88,6 @@ public class MouseTracker : InputTracker
             //Find Current Target and return it if found:
             SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
         }
-    }
-
-    private void HandleButtonEventCode(int buttonIndex, string buttonAction)
-    {
-        string codeString = $"Button{buttonIndex}{buttonAction}";
-
-        if (TargetObjects.Contains(SimpleRaycastTarget))
-            codeString += "TargetObject";
-        else if (DistractorObjects.Contains(SimpleRaycastTarget))
-            codeString += "DistractorObject";
-        else if (IrrelevantObjects.Contains(SimpleRaycastTarget))
-            codeString += "IrrelevantObject";
-        else
-            codeString += "Object";
-
-        SessionValues.EventCodeManager.SendCodeImmediate(codeString);
     }
 
 

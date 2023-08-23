@@ -230,9 +230,7 @@ namespace SelectionTracking
             public string HandlerLevel;
             public bool HandlerActive;
 
-            //Just added but not implemented
-            public List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
-
+            private bool HoverOnEventCodeSent; //used so that hover event code is only sent on first frame of hovering. 
 
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
@@ -254,10 +252,6 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
-
-                TargetObjects = new List<GameObject>();
-                DistractorObjects = new List<GameObject>();
-                IrrelevantObjects = new List<GameObject>();
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -375,35 +369,34 @@ namespace SelectionTracking
 
                 if (currentTarget == null) //input is not over a gameobject
                 {
+                    if (HoverOnEventCodeSent && OngoingSelection == null)
+                    {
+                        //For EventCodes:
+                        Debug.Log("EVENTCODE: HoverOffObject");
+                        SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
+                        HoverOnEventCodeSent = false; //reset hover
+                    }
+
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
-                        CheckTermination();
+                        //For EventCodes:
+                        if(OngoingSelection.SelectedGameObject != null)
+                        {
+                            SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
+                            HoverOnEventCodeSent = false; //reset hover
+                        }
 
-                        if (TargetObjects.Contains(OngoingSelection.SelectedGameObject))
-                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffTargetObject");
-                        else if (DistractorObjects.Contains(OngoingSelection.SelectedGameObject))
-                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffDistractorObject");
-                        else if (IrrelevantObjects.Contains(OngoingSelection.SelectedGameObject))
-                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffIrrelevantObject");
-                        else
-                            SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
+                        CheckTermination();
                     }
                     return;
                 }
 
-
-
-                if (TargetObjects.Contains(currentTarget))
-                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnTargetObject");
-                else if (DistractorObjects.Contains(currentTarget))
-                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnDistractorObject");
-                else if (IrrelevantObjects.Contains(currentTarget))
-                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnIrrelevantObject");
-                else
-                    SessionValues.EventCodeManager.SendCodeImmediate("HoverOnObject");
-
-
-
+                //For EventCodes:
+                if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //NEED TO ADD SOMETHING SO THAT IT WONT SEND AGAIN IF SELECTION WAS MADE. 
+                {
+                    SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
+                    HoverOnEventCodeSent = true;
+                }
 
                 //if we have reached this point we know there is a target
                 if (OngoingSelection == null) //no previous selection
@@ -411,6 +404,8 @@ namespace SelectionTracking
                     CheckInit();
                     return;
                 }
+
+                
 
                 //if we have reached this point we know there is a target, there was a previous selection,
                 //and this is not the first frame of new selection
@@ -488,14 +483,9 @@ namespace SelectionTracking
                         LastSuccessfulSelection = OngoingSelection;
                         SuccessfulSelections.Add(OngoingSelection);
 
-                        if (TargetObjects.Contains(OngoingSelection.SelectedGameObject))
-                            SessionValues.EventCodeManager.SendCodeImmediate("TargetObjectSelected");
-                        else if (DistractorObjects.Contains(OngoingSelection.SelectedGameObject))
-                            SessionValues.EventCodeManager.SendCodeImmediate("DistractorObjectSelected");
-                        else if (IrrelevantObjects.Contains(OngoingSelection.SelectedGameObject))
-                            SessionValues.EventCodeManager.SendCodeImmediate("IrrelevantObjectSelected");
-                        else
-                            SessionValues.EventCodeManager.SendCodeImmediate("ObjectSelected");
+                        //For EventCodes:
+                        SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
+                        HoverOnEventCodeSent = false; //reset hover
                     }
                     else
                     {
@@ -505,6 +495,9 @@ namespace SelectionTracking
                         LastUnsuccessfulSelection = OngoingSelection;
                         UnsuccessfulSelections.Add(OngoingSelection);
                         SelectionErrorHandling(termErrors);
+
+                        //For EventCodes:
+                        HoverOnEventCodeSent = false; //reset hover
                     }
                     AllSelections.Add(OngoingSelection);
                     OngoingSelection = null;

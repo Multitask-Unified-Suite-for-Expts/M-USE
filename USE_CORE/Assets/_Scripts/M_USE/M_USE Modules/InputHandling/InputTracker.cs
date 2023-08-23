@@ -1,6 +1,5 @@
 using UnityEngine;
 using USE_Data;
-using USE_States;
 using USE_StimulusManagement;
 using System;
 using System.Collections.Generic;
@@ -19,10 +18,6 @@ public abstract class InputTracker : MonoBehaviour
 
     public ShotgunRaycast ShotgunRaycast;
     public float ShotgunThreshold;
-
-
-    public List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
-
 
 
     public delegate bool IsSelectionPossible();

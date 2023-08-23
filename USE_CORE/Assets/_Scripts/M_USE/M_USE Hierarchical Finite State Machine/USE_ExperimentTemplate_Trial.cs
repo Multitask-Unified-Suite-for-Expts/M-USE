@@ -70,6 +70,20 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
             BackdropStripesTexture, THR_BackdropTexture;
 
+
+        //if anyone uses this test it!
+        public List<GameObject> AssignStimToList(StimGroup sg, List<GameObject> existingList = null)
+        {
+            if (existingList == null)
+                existingList = new List<GameObject>();
+
+            foreach (var stim in sg.stimDefs)
+                existingList.Add(stim.StimGameObject);
+
+            return existingList;
+        }
+
+
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
             return (T)TrialDefs[TrialCount_InBlock];
@@ -156,6 +170,7 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
                 }
 
+                SessionValues.ClearStimLists();
                 DefineTrialStims();
                 StartCoroutine(HandleLoadingStims());
             });
@@ -214,6 +229,8 @@ namespace USE_ExperimentTemplate_Trial
                 
                 TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
+
+                SessionValues.ClearStimLists();
             });
             
             GazeCalibration.AddSpecificInitializationMethod(() =>
@@ -296,6 +313,12 @@ namespace USE_ExperimentTemplate_Trial
         {
             StateAfterDelay = stateAfterDelay;
             DelayDuration = duration;
+        }
+
+        //Used for EventCodes:
+        public virtual void AddToStimLists()
+        {
+
         }
 
         public virtual void FinishTrialCleanup()

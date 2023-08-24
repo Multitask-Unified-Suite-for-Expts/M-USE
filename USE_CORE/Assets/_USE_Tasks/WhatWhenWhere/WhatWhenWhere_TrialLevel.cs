@@ -247,14 +247,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
+            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
+
             consecutiveError++;
             runningAcc.Add(0);
             SearchDurations_InTrial.Add(null);
             CurrentTaskLevel.SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             errorTypeString = "AbortedTrial";
-            AbortCode = 6;
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 

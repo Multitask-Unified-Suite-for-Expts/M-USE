@@ -211,14 +211,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            runningAcc.Add(0);
-            
-            AbortCode = 6;
-            SearchDurations_InBlock.Add(null);
-            CurrentTaskLevel.SearchDurations_InTask.Add(null);
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-            SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
+
+            runningAcc.Add(0);
+
+            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+            SearchDurations_InBlock.Add(null);
+            SetTrialSummaryString();
         });
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   

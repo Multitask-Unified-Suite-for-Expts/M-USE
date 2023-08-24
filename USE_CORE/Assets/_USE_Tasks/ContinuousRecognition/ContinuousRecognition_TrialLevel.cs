@@ -330,11 +330,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
+            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
+
             AudioFBController.Play("Negative");
             EndBlock = true;
-            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
-            AbortCode = 6;
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------

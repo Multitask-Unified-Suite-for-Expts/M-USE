@@ -110,7 +110,7 @@ public class TokenFBController : MonoBehaviour
     {
         return numCollected;
     }
-/*    public void ResetTokenBarFull()
+   public void ResetTokenBarFull()
     {
         tokenBarFull = false;
 
@@ -253,10 +253,6 @@ public class TokenFBController : MonoBehaviour
         }
     }
 
-    public void ResetTokenBarFull()
-    {
-        tokenBarFull = false;
-    }
     public TokenFBController SetTotalTokensNum(int numTokens)
     {
         totalTokensNum = numTokens;

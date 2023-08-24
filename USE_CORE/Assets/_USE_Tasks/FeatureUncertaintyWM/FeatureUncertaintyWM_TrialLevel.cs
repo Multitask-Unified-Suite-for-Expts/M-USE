@@ -218,8 +218,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
-
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
@@ -301,13 +299,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
+            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
 
             aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
-            AbortCode = 6;
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>

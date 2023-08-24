@@ -470,15 +470,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
+                SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+                AbortCode = 6;
+
                 InflationDurations_Block.Add(null);
                 CurrentTaskLevel.InflationDurations_Task.Add(null);
 
-                AbortCode = 6;
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
-                SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             }
             TrialStim.SetActive(false);
         });

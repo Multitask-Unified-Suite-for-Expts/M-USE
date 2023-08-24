@@ -68,7 +68,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int correctTouches_InTrial;
     private int[] backtrackErrors_InTrial;
     private int[] perseverativeErrors_InTrial;
-    private bool aborted;
     private bool choiceMade;
     public List<float> choiceDurationsList = new List<float>();
     
@@ -266,13 +265,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.SpecifyTermination(()=> (mazeDuration > maxMazeDuration.value) || (choiceDuration > 30), ()=> FinishTrial, () =>
         {
             // Timeout Termination
-            aborted = true;
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
-SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-
-	    CurrentTaskLevel.NumAbortedTrials_InBlock++;
-	    CurrentTaskLevel.NumAbortedTrials_InTask++;
 
             CurrentTaskLevel.MazeDurations_InBlock.Add(null);
             CurrentTaskLevel.MazeDurations_InTask.Add(null);
@@ -925,7 +920,6 @@ SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["
         finishedMaze = false;
         startedMaze = false;
         selectedGO = null;
-        aborted = false;
         choiceMade = false;
         CorrectSelection = false;
         ReturnToLast = false;

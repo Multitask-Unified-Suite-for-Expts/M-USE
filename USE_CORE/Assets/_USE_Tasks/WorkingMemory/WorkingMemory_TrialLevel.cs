@@ -231,13 +231,11 @@ ShotgunHandler.HandlerActive = false;
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
-
-            AbortCode = 6;
+            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
             SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
@@ -290,7 +288,7 @@ ShotgunHandler.HandlerActive = false;
                 if (SessionValues.SyncBoxController != null)
                 {
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                    CurrentTaskLevel.NumAbortedTrials_InBlock += CurrentTrialDef.NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
 
                     TokenFBController.ResetTokenBarFull();

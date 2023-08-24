@@ -42,7 +42,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             MaxTrials_InBlock = flBD.MaxTrials;
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             flTL.ContextName = flBD.ContextName;
-            
+
             ResetBlockVariables();
 
             SetSkyBox(flBD.ContextName);

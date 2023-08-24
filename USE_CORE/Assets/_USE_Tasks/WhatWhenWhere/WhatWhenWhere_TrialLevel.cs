@@ -160,7 +160,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
             
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
         });
         ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);

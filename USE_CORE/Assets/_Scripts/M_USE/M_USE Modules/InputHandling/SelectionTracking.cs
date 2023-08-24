@@ -328,7 +328,10 @@ namespace SelectionTracking
                     foreach( GameObject go in startButtonObjects)
                     {
                         if(ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                        {
+                            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                             return true;
+                        }
                     }
                 }
                 return false;

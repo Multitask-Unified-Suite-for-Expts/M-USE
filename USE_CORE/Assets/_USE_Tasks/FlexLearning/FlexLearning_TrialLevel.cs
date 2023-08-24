@@ -164,11 +164,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay, () =>
-        {
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-        });
-
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);

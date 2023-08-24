@@ -190,7 +190,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
             if (currentTaskDef.GuidedMazeSelection)

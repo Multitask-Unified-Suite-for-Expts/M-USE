@@ -230,8 +230,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if(CurrentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
 
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
         });

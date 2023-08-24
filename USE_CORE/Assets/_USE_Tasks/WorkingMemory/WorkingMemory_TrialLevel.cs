@@ -150,8 +150,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 .SetFlashingTime(tokenFlashingDuration.value);
 
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
-
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)

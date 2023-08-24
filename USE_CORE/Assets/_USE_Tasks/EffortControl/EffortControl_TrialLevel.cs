@@ -196,7 +196,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
@@ -888,6 +887,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         ObjectList.Add(MaxOutline_Left);
         ObjectList.Add(MaxOutline_Right);
+
+        SessionValues.TargetObjects.Add(MaxOutline_Left);
+        SessionValues.TargetObjects.Add(MaxOutline_Right);
     }
 
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
@@ -900,6 +902,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             outline.transform.localScale += i * ScaleUpAmount;
             AddRigidBody(outline);
             ObjectList.Add(outline);
+            SessionValues.TargetObjects.Add(outline);
         }
     }
 

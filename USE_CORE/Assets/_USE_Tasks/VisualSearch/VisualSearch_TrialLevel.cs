@@ -166,7 +166,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SearchDisplayDelay, () => 
             {
                 choiceMade = false;
-                SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             });
         
         // Provide delay following start button selection and before stimuli onset

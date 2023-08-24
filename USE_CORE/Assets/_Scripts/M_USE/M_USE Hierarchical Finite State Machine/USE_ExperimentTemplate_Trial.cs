@@ -14,6 +14,7 @@ using USE_UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
+using Dropbox.Api.TeamLog;
 using USE_Def_Namespace;
 
 
@@ -65,6 +66,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
+        [HideInInspector] public string TrialDefSelectionStyle;
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
@@ -72,7 +74,16 @@ namespace USE_ExperimentTemplate_Trial
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            return (T)TrialDefs[TrialCount_InBlock];
+            switch (TrialDefSelectionStyle)
+            {
+                case "Adaptive":
+                    //difficult level is returned by DetermineTrialDefDifficultyLevel()
+                    // search LIST TrialDefs for DL blah
+                    return null; //return trial from above
+                
+                default: 
+                    return (T)TrialDefs[TrialCount_InBlock];
+            }
         }
 
         public T GetTaskLevel<T>() where T: ControlLevel_Task_Template
@@ -194,7 +205,6 @@ namespace USE_ExperimentTemplate_Trial
                 SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
             });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
-
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialStims);

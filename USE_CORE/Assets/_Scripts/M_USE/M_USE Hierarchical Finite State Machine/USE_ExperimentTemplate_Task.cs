@@ -830,6 +830,17 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
+        //CALCULATE ADPATIVE TRIAL DEF 
+        public int DetermineTrialDefDifficultyLevel()
+        {
+            int difficultyLevel = 0;
+            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
+            
+            // 10 TRIAL DLS? 
+            
+            //PASS IN THE DLS, max & min, pos step, # of trials before pos dl switch, neg step, # of trials before neg dl switch
+            return difficultyLevel;
+        }
         public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {

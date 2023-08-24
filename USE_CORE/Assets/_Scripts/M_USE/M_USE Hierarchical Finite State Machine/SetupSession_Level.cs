@@ -85,7 +85,7 @@ public class SetupSession_Level : ControlLevel
         CreateDataFolder.AddDefaultInitializationMethod(() =>
         {
             dataFolderCreated = false;
-            if (SessionValues.StoreData && (SessionValues.StoringDataLocally || SessionValues.StoringDataOnServer))
+            if (SessionValues.StoreData)
                 StartCoroutine(CreateSessionDataFolder(result =>
                 {
                     dataFolderCreated = true;
@@ -158,11 +158,9 @@ public class SetupSession_Level : ControlLevel
         SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}_{SessionValues.SubjectID}";
         ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
 
-        if (SessionValues.UsingServerConfigs)
+        if (SessionValues.StoringDataOnServer)
             SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
-        else if (SessionValues.UsingDefaultConfigs)
-            SessionValues.SessionDataPath = $"{SessionValues.LocateFile.GetPath("Data Folder")}/{SessionValues.FilePrefix}";
-        else if (SessionValues.UsingLocalConfigs)
+        else if (SessionValues.StoringDataLocally)
             SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
 
         SessionValues.TaskSelectionDataPath = SessionValues.UsingLocalConfigs ? SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData" : $"{SessionValues.SessionDataPath}/TaskSelectionData";

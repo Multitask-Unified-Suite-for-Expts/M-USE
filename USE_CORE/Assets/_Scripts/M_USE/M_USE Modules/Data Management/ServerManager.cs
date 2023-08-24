@@ -7,7 +7,7 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //will move to serverConfig
+    public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //input into initscreen. can eventually remove the value. 
 
     public static string RootDataFolder = "DATA"; //They specify path on new init screen
     private static string SessionDataFolder;
@@ -37,9 +37,7 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator TestServerConnection(Action<bool> callback)
     {
-        bool validURL = TestURL();
-
-        if (validURL)
+        if (TestURL())
         {
             string url = $"{ServerURL}/testConnection.php";
             using UnityWebRequest request = UnityWebRequest.Get(url);

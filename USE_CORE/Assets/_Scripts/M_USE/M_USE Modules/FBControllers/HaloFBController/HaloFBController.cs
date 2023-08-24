@@ -11,13 +11,10 @@ public class HaloFBController : MonoBehaviour
     private GameObject instantiated;
     private bool LeaveFBOn = false;
 
-    /*public EventCodeManager EventCodeManager;
-    public Dictionary<string, EventCode> SessionEventCodes;*/
-
-
     // Logging
     private enum State { None, Positive, Negative };
     private State state;
+
 
     public void Init(DataController frameData)
     {

@@ -227,7 +227,8 @@ public class SelectionHandler<T> where T : StimDef
                 }
                 else
                 {
-                    NumTouchDurationError++;                    
+                    NumTouchDurationError++;
+                    SessionValues.EventCodeManager.SendCodeImmediate("TouchDurationError"); //confirm this!
                     if (CurrentTargetDuration <= MinDuration) 
                         SelectionTooShort = true;
                     else if (CurrentTargetDuration >= MaxDuration) 

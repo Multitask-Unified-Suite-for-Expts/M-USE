@@ -48,17 +48,12 @@ public class TokenFBController : MonoBehaviour
     private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
     // Audio
     AudioFBController audioFBController;
-    //Event Codes
-    /*
-    public EventCodeManager EventCodeManager;
-    public Dictionary<string, EventCode> SessionEventCodes;*/
-
 
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
-        trialData.AddDatum("TokenChange", () => tokensChange == 0 ? null : (float?)tokensChange);
+        trialData.AddDatum("TokenChange", () => tokensChange);
         trialData.AddDatum("TokenBarFull", ()=> tokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
         this.audioFBController = audioFBController;
@@ -119,7 +114,7 @@ public class TokenFBController : MonoBehaviour
     {
         tokenBarFull = false;
 
-    }*/
+    }
     public bool IsTokenBarFull()
     {
         return tokenBarFull;
@@ -201,10 +196,7 @@ public class TokenFBController : MonoBehaviour
     public void Update()
     {
         if (animationPhase == AnimationPhase.None)
-        {
-
             return;
-        }
 
         // Switch to next animation phase if the current one ended
         if (Time.unscaledTime >= animationEndTime)
@@ -227,20 +219,15 @@ public class TokenFBController : MonoBehaviour
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
                         audioFBController.Play("TripleCollected");
-                        if (SessionValues.SessionDef.EventCodesActive)
-                            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
-                   // DelayedResetTokenBarFull(0.2f);
-                    if (SessionValues.SessionDef.EventCodesActive)
-                    {
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
-                        SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
-                    }
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
+                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
                     break;
             }
         }
@@ -264,11 +251,6 @@ public class TokenFBController : MonoBehaviour
                     tokenBoxColor = colorFlashing2;
                 break;
         }
-    }
-    private IEnumerator DelayedResetTokenBarFull(float delay)
-    {
-        yield return new WaitForSecondsRealtime(delay);
-        tokenBarFull = false;
     }
 
     public void ResetTokenBarFull()

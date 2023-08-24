@@ -186,9 +186,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
             if (currentTaskDef.GuidedMazeSelection)
@@ -269,8 +268,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // Timeout Termination
             aborted = true;
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
+SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
+	    CurrentTaskLevel.NumAbortedTrials_InBlock++;
+	    CurrentTaskLevel.NumAbortedTrials_InTask++;
 
             CurrentTaskLevel.MazeDurations_InBlock.Add(null);
             CurrentTaskLevel.MazeDurations_InTask.Add(null);
@@ -388,7 +390,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CalculateBlockSummaryString();
             CurrentTaskLevel.SetTaskSummaryString();
         });
-
         TileFlashFeedback.AddSpecificInitializationMethod(() =>
         {
             if (SessionValues.SessionDef.EventCodesActive)
@@ -400,13 +401,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else
                 tile.LastCorrectFlashingFeedback();
         });
-
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOff"]);
         });
-
         ITI.AddSpecificInitializationMethod(() =>
         {
             DisableSceneElements();
@@ -417,14 +416,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             if (finishedMaze)
                 SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOff");
-
+            
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
                 CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI"));
             }
         });
-
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         DefineTrialData();
         DefineFrameData();
@@ -946,8 +944,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(retouchCorrect_InTrial, 0, retouchCorrect_InTrial.Length);
             Array.Clear(retouchErroneous_InTrial, 0, retouchErroneous_InTrial.Length);
         }
-
-       
         pathProgress.Clear();
         pathProgressGO.Clear();
         pathProgressIndex = 0;

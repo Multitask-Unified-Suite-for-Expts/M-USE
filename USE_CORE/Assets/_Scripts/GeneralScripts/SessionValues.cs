@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using SelectionTracking;
 using UnityEngine;
 using USE_Def_Namespace;
@@ -73,11 +74,29 @@ public static class SessionValues
 
     public static SessionDef SessionDef;
 
+    //FOR EVENT CODES:
+    public static List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
+
+
+
 
     static SessionValues()
     {
         LoadPrefabs();
+
+        TargetObjects = new List<GameObject>();
+        DistractorObjects = new List<GameObject>();
+        IrrelevantObjects = new List<GameObject>();
     }
+
+    public static void ClearStimLists()
+    {
+        TargetObjects.Clear();
+        DistractorObjects.Clear();
+        IrrelevantObjects.Clear();
+    }
+
+
 
     private static void LoadPrefabs()
     {

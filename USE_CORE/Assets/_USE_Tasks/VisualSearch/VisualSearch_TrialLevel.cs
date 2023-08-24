@@ -59,6 +59,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public GameObject chosenStimObj;
     public VisualSearch_StimDef chosenStimDef;
     public bool StimIsChosen;
+
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
@@ -138,10 +139,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren),
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(),
             SearchDisplayDelay, () => 
             {
-                SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+                choiceMade = false;
             });
         
         // Provide delay following start button selection and before stimuli onset
@@ -153,9 +154,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
-            choiceMade = false;
+            
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -166,7 +166,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
         });
-
         SearchDisplay.AddUpdateMethod(() =>
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
@@ -181,21 +180,18 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            choiceMade = false;
             CorrectSelection = selectedSD.IsTarget;
 
             if (CorrectSelection)
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject"); //SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
@@ -208,9 +204,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
+CurrentTaskLevel.SearchDurations_InTask.Add(null);
             AbortCode = 6;
-            SearchDurations_InBlock.Add(null);
-            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+		CurrentTaskLevel.NumAbortedTrials_InBlock++;
+		CurrentTaskLevel.NumAbortedTrials_InTask++;
+            aborted = true;
+            SetTrialSummaryString();
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
 
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
@@ -256,7 +256,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
-           
         });
        
         TokenFeedback.AddTimer(() => tokenFbDuration, () => ITI, () =>
@@ -319,7 +318,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 
-        if (AbortCode == 0)
+        if(AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
         else
         {

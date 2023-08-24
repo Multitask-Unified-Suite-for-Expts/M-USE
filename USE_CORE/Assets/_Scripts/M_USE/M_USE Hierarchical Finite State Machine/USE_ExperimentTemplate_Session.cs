@@ -634,7 +634,7 @@ namespace USE_ExperimentTemplate_Session
             setupTask.AddSpecificInitializationMethod(() =>
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
-                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
+                SessionValues.EventCodeManager.SendRangeCode("SetupTaskStarts", taskCount);
 
                 CurrentTask.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
             });

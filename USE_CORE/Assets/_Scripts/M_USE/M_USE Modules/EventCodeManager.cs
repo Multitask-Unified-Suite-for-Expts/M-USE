@@ -87,6 +87,21 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
+	public void SendRangeCode(string codeString, int valueToAdd)
+	{
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+		{
+			int computedCode = code.Range[0] + valueToAdd;
+			if (computedCode > code.Range[1])
+				Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
+			else
+			{
+				SendCodeImmediate(computedCode);
+			}
+		}
+    }
+
     public void SendCodeImmediate(string codeString)
     {
         EventCode code = SessionEventCodes[codeString];
@@ -175,6 +190,36 @@ public class EventCodeManager : MonoBehaviour
 		return new List<int>();
 
 	}
-	
-	
+
+
+    public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
+    {
+        string eventCodeString = "";
+
+        if (!string.IsNullOrEmpty(beginning))
+            eventCodeString += beginning;
+
+        StimDefPointer sdp = target.GetComponent<StimDefPointer>();
+        GameObject go = target;
+
+        if (sdp != null && sdp.StimDef.StimGameObject != null)
+            go = sdp.StimDef.StimGameObject;
+
+        if (SessionValues.TargetObjects.Contains(go))
+            eventCodeString += "TargetObject";
+        else if (SessionValues.DistractorObjects.Contains(go))
+            eventCodeString += "DistractorObject";
+        else if (SessionValues.IrrelevantObjects.Contains(go))
+            eventCodeString += "IrrelevantObject";
+        else
+            eventCodeString += "Object";
+
+        if (!string.IsNullOrEmpty(ending))
+            eventCodeString += ending;
+
+        Debug.Log("EVENTCODE: " + eventCodeString);
+        SessionValues.EventCodeManager.SendCodeImmediate(eventCodeString);
+    }
+
+
 }

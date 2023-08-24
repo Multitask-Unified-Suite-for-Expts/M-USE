@@ -111,6 +111,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
 
+
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -166,6 +168,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            AddToStimLists();
+
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
             if (TrialCount_InBlock == 0)
@@ -202,7 +206,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), DisplayStims);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (SessionValues.SessionDef.IsHuman)
@@ -216,15 +220,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TokenFBController.SetTotalTokensNum(CurrentTrial.NumTokenBar);
             TokenFBController.enabled = true;
+            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
 
             if (CurrentTrial.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
 
             if(CurrentTrial.ShakeStim)
                 AddShakeStimScript(trialStims);
-
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
 
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
@@ -332,6 +334,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             EndBlock = true;
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
@@ -391,7 +394,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOff");
         });
 
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
@@ -450,6 +452,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
+    public override void AddToStimLists() //For EventCodes:
+    {
+        foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
+        {
+            if (stim.PreviouslyChosen)
+                SessionValues.DistractorObjects.Add(stim.StimGameObject);
+            else
+                SessionValues.TargetObjects.Add(stim.StimGameObject);   
+        }
+    }
+
     private void CalculateBlockFeedbackLocations()
     {
         BlockFeedbackLocations = new Vector3[CurrentTrial.X_FbLocations.Length * CurrentTrial.Y_FbLocations.Length];
@@ -964,6 +977,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
 
         trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate"));
+
     }
 
     public void CalculateBlockAvgTimeToChoice()

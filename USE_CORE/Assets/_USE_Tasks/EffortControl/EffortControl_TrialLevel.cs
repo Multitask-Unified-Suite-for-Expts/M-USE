@@ -190,11 +190,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), Delay, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
@@ -314,6 +313,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.SetTotalTokensNum(SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
+            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
         });
 
         //Inflate Balloon state -----------------------------------------------------------------------------------------------------------------------------------------
@@ -426,7 +426,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 Handler.HandlerActive = false;
                                 NumInflations++;
 
-                                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
 
                                 CalculateInflation(); //Sets Inflate to TRUE at end of func
@@ -475,6 +474,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.InflationDurations_Task.Add(null);
 
                 AbortCode = 6;
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
 
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
@@ -494,10 +494,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Destroy(CenteredGO);
 
                 if (SessionValues.SyncBoxController != null)
-                {
                     GiveReward();
-                    SessionValues.EventCodeManager.SendCodeNextFrame("SyncBoxController_RewardPulseSent");
-                }
 
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
@@ -885,6 +882,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         ObjectList.Add(MaxOutline_Left);
         ObjectList.Add(MaxOutline_Right);
+
+        SessionValues.TargetObjects.Add(MaxOutline_Left);
+        SessionValues.TargetObjects.Add(MaxOutline_Right);
     }
 
     void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
@@ -897,6 +897,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             outline.transform.localScale += i * ScaleUpAmount;
             AddRigidBody(outline);
             ObjectList.Add(outline);
+            SessionValues.TargetObjects.Add(outline);
         }
     }
 

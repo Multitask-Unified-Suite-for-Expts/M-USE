@@ -145,11 +145,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), SearchDisplayDelay, () =>
-        {
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-        });
-
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
@@ -163,7 +159,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
                 ActivateChildren(playerViewParent);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -188,23 +183,21 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
 
-        CorrectSelection = selectedSD.IsTarget;
-        if (CorrectSelection)
-        {
-            NumCorrect_InBlock++;
-            CurrentTaskLevel.NumCorrect_InTask++;
-            runningAcc.Add(1);
-            SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
-        }
-        else
-        {
-            NumErrors_InBlock++;
-            CurrentTaskLevel.NumErrors_InTask++;
-            runningAcc.Add(0);
-            SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
-        }
+            CorrectSelection = selectedSD.IsTarget;
+            if (CorrectSelection)
+            {       
+                NumCorrect_InBlock++;
+                CurrentTaskLevel.NumCorrect_InTask++;
+                runningAcc.Add(1);
+                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+            }
+            else
+            {
+                NumErrors_InBlock++;
+                CurrentTaskLevel.NumErrors_InTask++;
+                runningAcc.Add(0);
+                SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
+            }
 
         if (selectedGO != null)
         {
@@ -223,7 +216,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             AbortCode = 6;
             SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
-            
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
@@ -269,8 +262,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
-
-            
         });
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {

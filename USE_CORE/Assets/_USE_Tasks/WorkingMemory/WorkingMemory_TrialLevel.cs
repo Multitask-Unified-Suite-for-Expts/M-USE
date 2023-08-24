@@ -93,7 +93,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             HaloFBController.SetHaloSize(6f);
             HaloFBController.SetHaloIntensity(5);
         });
-
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
@@ -145,18 +144,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
-            ShotgunHandler.HandlerActive = true;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-            ShotgunHandler.HandlerActive = false;
-
+            //Set the token bar settings
             TokenFBController.enabled = true;
+ShotgunHandler.HandlerActive = false;
+           
+            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+                
+            
         });
-
+        
         // Show the target/sample by itself for some time
         DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
         {
@@ -169,17 +169,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         // Show some distractors without the target/sample
         DisplayDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
-        {
-            StateAfterDelay = SearchDisplay;
-            DelayDuration = preTargetDelayDuration.value;
-        });
+          {
+              StateAfterDelay = SearchDisplay;
+              DelayDuration = preTargetDelayDuration.value;
+          });
 
         // Show the target/sample with some other distractors
         // Wait for a click and provide feedback accordingly
         SearchDisplay.AddSpecificInitializationMethod(() =>
         {
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             choiceMade = false;
@@ -192,7 +191,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
         });
-
         SearchDisplay.AddUpdateMethod(() =>
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
@@ -204,7 +202,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     choiceMade = true;
             }
         });
-
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
             choiceMade = false;
@@ -214,14 +211,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
@@ -233,12 +228,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
             UpdateExperimenterDisplaySummaryStrings();
         });
-
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
 
             AbortCode = 6;
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
 
@@ -285,10 +280,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 TotalTokensCollected_InBlock += selectedSD.StimTokenRewardMag;
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
-
-            
         });
-
         TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
         {
             if (TokenFBController.IsTokenBarFull())
@@ -306,7 +298,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-
         ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
@@ -397,7 +388,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (sd.StimTokenRewardMag > 0)
             {
-
                 WorkingMemory_StimDef newTarg = sd.CopyStimDef<WorkingMemory_StimDef>() as WorkingMemory_StimDef;
                 sampleStim.AddStims(newTarg);
                 newTarg.IsTarget = true;//Holds true if the target stim receives non-zero reward

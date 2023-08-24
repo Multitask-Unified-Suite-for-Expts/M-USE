@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
+using USE_StimulusManagement;
 
 public class MouseTracker : InputTracker
 {
@@ -26,13 +27,23 @@ public class MouseTracker : InputTracker
         for (int iButton = 0; iButton < 3; iButton++)
         {
             if (InputBroker.GetMouseButtonUp(iButton))
+            {
                 ButtonCompletedClickCount[iButton]++;
-            
+
+                if (SimpleRaycastTarget != null)
+                    SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}ReleasedFrom", null);
+            }
+
             if (InputBroker.GetMouseButton(iButton))
             {
                 ButtonStatus[iButton] = 1;
                 if (InputBroker.GetMouseButtonDown(iButton))
+                {
                     ButtonPressDuration[iButton] = 0;
+
+                    if (SimpleRaycastTarget != null)
+                        SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}PressedOn", null);
+                }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;
             }
@@ -78,5 +89,6 @@ public class MouseTracker : InputTracker
             SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
         }
     }
+
 
 }

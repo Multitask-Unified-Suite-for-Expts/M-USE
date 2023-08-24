@@ -221,6 +221,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateTransparentBalloons();
             ActivateObjects();
 
+            SessionValues.TargetObjects.Add(StimLeft);
+            SessionValues.TargetObjects.Add(StimRight);
+
+
             SideChoice = null;
 
             if(Handler.AllSelections.Count > 0)

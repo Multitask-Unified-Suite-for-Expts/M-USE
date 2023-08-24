@@ -494,6 +494,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Feedback state ------------------------------------------------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
+            AddTokenInflateAudioPlayed = false;
+
             if (Response == 1)
             {
                 GameObject CenteredGO = new GameObject();

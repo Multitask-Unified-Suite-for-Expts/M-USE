@@ -199,6 +199,8 @@ namespace USE_ExperimentTemplate_Trial
                 Input.ResetInputAxes();
                 if (SessionValues.SessionDef.IsHuman)
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+
+                AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial. 
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>

@@ -518,7 +518,7 @@ namespace USE_ExperimentTemplate_Task
                     // {
                         for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                         {
-                    //        BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
+                            BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
                             BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
                         }
                     // }
@@ -557,7 +557,7 @@ namespace USE_ExperimentTemplate_Task
                     for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                     {
                         BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
-                     //   BlockDefs[iBlock].RandomNumGenerator = new System.Random((int) DateTime.Now.Ticks + iBlock);
+                        BlockDefs[iBlock].RandomNumGenerator = new System.Random((int) DateTime.Now.Ticks + iBlock);
                         BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
                     }
                 }

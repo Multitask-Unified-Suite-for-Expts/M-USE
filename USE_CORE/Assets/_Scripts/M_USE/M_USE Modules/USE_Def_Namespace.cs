@@ -365,7 +365,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Random number generator, used to select random number of max trials in the MinMaxTrials range.
         /// </summary>
-        public System.Random RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks);
+        public System.Random RandomNumGenerator;
         
         /// <summary>
         /// Generates trial definitions based on block definitions.

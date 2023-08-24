@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace USE_Def_Namespace
         // public float SessionStart_UnityTime;
 
         /// <summary>
-        /// Represents a dictionary of task mappings in an ordered manner.
+        /// Represents a dictionary of task mappings where the key is the config folder name and the value is the task name.
         /// </summary>
         public OrderedDictionary TaskMappings;
 
@@ -25,12 +26,12 @@ namespace USE_Def_Namespace
         public List<string> TaskNames;
 
         /// <summary>
-        /// A dictionary mapping task names to their associated icon file names.
+        /// Represents a dictionary of task mappings where the key is the config folder name and the value is the name of the task icons in the TaskIconsFolderPath.
         /// </summary>
         public Dictionary<string, string> TaskIcons;
 
         /// <summary>
-        /// Path to the external file associated with the context.
+        /// Path to the external folder containing the contexts for the session.
         /// </summary>
         public string ContextExternalFilePath;
 
@@ -297,75 +298,75 @@ namespace USE_Def_Namespace
     public class BlockDef
     {
         /// <summary>
-        /// Represents the count of blocks.
+        /// Represents the block number of the specified block.
         /// </summary>
         public int BlockCount;
-
+        
         /// <summary>
-        /// A list of trial definitions.
+        /// A unique string used to label different blocks.
         /// </summary>
-        public List<TrialDef> TrialDefs;
-
+        public string BlockName;
+        
         /// <summary>
-        /// Integer value indicating the total number of tokens.
+        /// Refers to the filename of the PNG texture in the resources folder used during the block.
         /// </summary>
-        public int TotalTokensNum;
-
+        public string ContextName;
+        
         /// <summary>
-        /// Integer value indicating the minimum number of trials.
+        /// Integer value indicating the minimum number of trials in the block.
         /// </summary>
         public int MinTrials;
 
         /// <summary>
-        /// Integer value indicating the maximum number of trials.
+        /// Integer value indicating the maximum number of trials in the block.
         /// </summary>
         public int MaxTrials;
-
+        
         /// <summary>
-        /// Random number generator used for various random operations.
+        /// Integer value indicating the exact number of trials in the block.
         /// </summary>
-        public System.Random RandomNumGenerator;
-
-        /// <summary>
-        /// Indicates the type of block end condition.
-        /// </summary>
-        public string BlockEndType;
-
-        /// <summary>
-        /// Threshold value used to determine block end condition.
-        /// </summary>
-        public float BlockEndThreshold;
-
-        /// <summary>
-        /// Window value used in conjunction with the block end condition.
-        /// </summary>
-        public int BlockEndWindow;
-
-        /// <summary>
-        /// Represents the name of the block.
-        /// </summary>
-        public string BlockName;
-
-        /// <summary>
-        /// Represents the name of the context.
-        /// </summary>
-        public string ContextName;
+        public int NumTrials;
 
         /// <summary>
         /// Array containing the minimum and maximum number of trials.
         /// </summary>
         public int[] MinMaxTrials;
+        
+        /// <summary>
+        /// A strategy defining when to end a block. Options include: CurrentTrialPerformance, SimpleThreshold, ThresholdAndPeak, or ThresholdOrAsymptote.
+        /// </summary>
+        public string BlockEndType;
 
         /// <summary>
-        /// Number of pulses.
+        /// A specified value used in conjunction with the BlockEndType to determine when to conclude a block.
+        /// </summary>
+        public float BlockEndThreshold;
+
+        /// <summary>
+        /// The number of most recent trials evaluated against the block end threshold. 
+        /// </summary>
+        public int BlockEndWindow;
+        
+        /// <summary>
+        /// The number of pulses transmitted to the SyncBox when a pulse reward is given.
         /// </summary>
         public int NumPulses;
 
         /// <summary>
-        /// Size of each pulse.
+        /// The magnitude of each pulse sent from the SyncBox for reward.
         /// </summary>
         public int PulseSize;
 
+        /// <summary>
+        /// A list of trial definitions for the block.
+        /// </summary>
+        public List<TrialDef> TrialDefs;
+
+        /// <summary>
+        /// Random number generator, used to select random number of max trials in the MinMaxTrials range.
+        /// </summary>
+        public System.Random RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks);
+        
         /// <summary>
         /// Generates trial definitions based on block definitions.
         /// </summary>

@@ -185,7 +185,8 @@ public class TokenFBController : MonoBehaviour
 
     public bool IsAnimating()
     {
-        return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
+        return animationPhase != AnimationPhase.None;
+        //return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
     }
 
     public string GetAnimationPhase()

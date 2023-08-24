@@ -251,6 +251,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStim.AddUpdateMethod(() =>
         {
+            if(InputBroker.GetMouseButtonDown(0))
+            {
+                GameObject go = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (go != null)
+                    Debug.Log("HIT: " + go.name);
+
+            }
+
             if (TimeRemaining > 0)
                 TimeRemaining -= Time.deltaTime;
 

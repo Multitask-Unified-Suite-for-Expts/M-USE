@@ -392,7 +392,7 @@ namespace SelectionTracking
                 }
 
                 //For EventCodes:
-                if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //NEED TO ADD SOMETHING SO THAT IT WONT SEND AGAIN IF SELECTION WAS MADE. 
+                if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
                     SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
                     HoverOnEventCodeSent = true;

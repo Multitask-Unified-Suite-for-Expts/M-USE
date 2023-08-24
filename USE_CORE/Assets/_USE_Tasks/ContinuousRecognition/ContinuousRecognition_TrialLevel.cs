@@ -54,10 +54,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public  List<int> ChosenStimIndices;
 
     [HideInInspector] public int NonStimTouches_Block;
-    [HideInInspector] public int NumTrials_Block;
     [HideInInspector] public int NumCorrect_Block;
     [HideInInspector] public int NumTbCompletions_Block;
-    [HideInInspector] public int NumRewards_Block;
     [HideInInspector] public float AvgTimeToChoice_Block;
     [HideInInspector] public float TimeToCompletion_Block;
     [HideInInspector] public float TimeToCompletion_StartTime;
@@ -330,11 +328,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
+            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
+
             AudioFBController.Play("Negative");
             EndBlock = true;
-            SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
-            AbortCode = 6;
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         });
 
         //TOUCH FEEDBACK state -------------------------------------------------------------------------------------------------------
@@ -427,7 +426,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (AbortCode == 0) //Normal
             {
-                NumTrials_Block++;
                 CurrentTaskLevel.TrialsCompleted_Task++;
 
                 if (GotTrialCorrect)
@@ -529,6 +527,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             DeactivatePlayerViewText();
         DestroyFeedbackBorders();
         ContextActive = false;
+
+        if (AbortCode == 0)
+            CurrentTaskLevel.CalculateBlockSummaryString();
+        else
+        {
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
+        }
+
+        TokenFBController.ResetTokenBarFull();
+
     }
 
     public void ResetBlockVariables()
@@ -536,13 +545,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AdjustedPositionsForMac = false;
         ChosenStimIndices.Clear();
         NonStimTouches_Block = 0;
-        NumTrials_Block = 0;
         NumCorrect_Block = 0;
         NumTbCompletions_Block = 0;
         TimeToChoice_Block.Clear();
         AvgTimeToChoice_Block = 0;
         TimeToCompletion_Block = 0;
-        NumRewards_Block = 0;
         score = 0;
     }
 
@@ -1125,16 +1132,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             NumTbCompletions_Block++;
             CurrentTaskLevel.TokenBarCompletions_Task++;
 
-            NumRewards_Block += CurrentTrial.NumRewardPulses;
-            CurrentTaskLevel.TotalRewards_Task += CurrentTrial.NumRewardPulses;
-
-            TokenFBController.ResetTokenBarFull();
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
             if (SessionValues.SyncBoxController != null)
             {
-                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumRewardPulses, CurrentTrial.PulseSize);
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumRewardPulses));
+                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
             }
+            TokenFBController.ResetTokenBarFull();
+
         }
     }
 
@@ -1267,7 +1273,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineFrameData()
     {
-        FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
+        //FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
         FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);

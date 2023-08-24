@@ -13,10 +13,8 @@ namespace THR_Namespace
 
     public class THR_BlockDef : BlockDef
     {
-        public string BlockName;
         public int[] MinMaxNumTrials;
         public bool ShowNegFb;
-        public int PulseSize;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;
         public float AvoidObjectDuration;
@@ -97,7 +95,6 @@ namespace THR_Namespace
         public int MinNumTrials;
         public int MaxNumTrials;
         public bool ShowNegFb;
-        public int PulseSize;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;
         public float AvoidObjectDuration;

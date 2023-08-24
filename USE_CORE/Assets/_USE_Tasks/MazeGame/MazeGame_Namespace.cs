@@ -11,7 +11,6 @@ namespace MazeGame_Namespace
         // public string MazeKeyFilePath;
         // public string MazeFilePath;
 
-        public bool NeutralITI;
         public Vector3 MazePosition;
 
         public float TileSize;
@@ -32,8 +31,6 @@ namespace MazeGame_Namespace
 
     public class MazeGame_BlockDef : BlockDef
     {
-        // public string BlockName;
-        // public int[] MinMaxTrials;
         public int RewardRatio;
 
         public Vector2 MazeDims;
@@ -41,26 +38,19 @@ namespace MazeGame_Namespace
         public int MazeNumSquares;
         public int MazeNumTurns;
         public string MazeName;
-        //
-        // public int PulseSize;
-        // public int NumPulses;
         public bool ViewPath;
-        // public string ContextName;
         public int SliderInitial;
-        
-        // public string BlockEndType;
-        // public float BlockEndThreshold;
         public bool ErrorPenalty;
         
         
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            int num = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
+            MaxTrials = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
             
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
             
-            for (int iTrial = 0; iTrial < num; iTrial++)
+            for (int iTrial = 0; iTrial < MaxTrials; iTrial++)
             {
                 MazeGame_TrialDef td = new MazeGame_TrialDef();
                 td.BlockName = BlockName;
@@ -75,7 +65,7 @@ namespace MazeGame_Namespace
                 td.BlockEndType = BlockEndType;
                 td.MinMaxTrials = MinMaxTrials;
                 td.ErrorPenalty = ErrorPenalty;
-                td.MaxTrials = num;
+                td.MaxTrials = MaxTrials;
                 TrialDefs.Add(td);
             }
         }
@@ -83,18 +73,11 @@ namespace MazeGame_Namespace
 
     public class MazeGame_TrialDef : TrialDef
     {
-        // public string BlockName;
-        // public int PulseSize;
-        // public int NumPulses;
         public int RewardRatio;
         public bool ViewPath;
         public bool ErrorPenalty;
-        // public string ContextName;
         public string MazeName;
         public int SliderInitial;
-        // public int MaxTrials;
-        // public string BlockEndType;
-        // public float BlockEndThreshold;
         public int[] MinMaxTrials;
     }
 

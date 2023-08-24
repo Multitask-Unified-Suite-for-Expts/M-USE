@@ -2,7 +2,7 @@ using UnityEngine;
 using USE_Data;
 using System.Collections.Generic;
 using USE_ExperimentTemplate_Classes;
-
+using System.Collections;
 
 public class TokenFBController : MonoBehaviour
 {
@@ -54,7 +54,7 @@ public class TokenFBController : MonoBehaviour
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange);
-        trialData.AddDatum("TokenBarCompletedThisTrial", ()=> tokenBarFull);
+        trialData.AddDatum("TokenBarFull", ()=> tokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
         this.audioFBController = audioFBController;
         numCollected = 0;
@@ -66,6 +66,7 @@ public class TokenFBController : MonoBehaviour
 
         SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
         SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
+
     }
 
 
@@ -109,7 +110,7 @@ public class TokenFBController : MonoBehaviour
     {
         return numCollected;
     }
-    public void ResetTokenBarFull()
+   public void ResetTokenBarFull()
     {
         tokenBarFull = false;
 

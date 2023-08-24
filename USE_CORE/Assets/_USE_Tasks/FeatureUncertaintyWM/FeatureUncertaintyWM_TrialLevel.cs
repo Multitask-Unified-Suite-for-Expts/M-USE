@@ -184,7 +184,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
-            TokenFBController.ResetTokenBarFull();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -218,8 +217,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 .SetRevealTime(tokenRevealDuration.value)
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
-
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
 
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
@@ -302,13 +299,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
+            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
 
             aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
-            AbortCode = 6;
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
@@ -376,6 +373,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
+                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });
@@ -450,6 +448,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
+
+        TokenFBController.ResetTokenBarFull();
     }
 
     public void ResetBlockVariables()

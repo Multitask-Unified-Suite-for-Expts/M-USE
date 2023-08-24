@@ -181,6 +181,10 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddUniversalInitializationMethod(() =>
             {
                 BlockCount++;
+
+                NumAbortedTrials_InBlock = 0;
+                NumRewardPulses_InBlock = 0;
+
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
@@ -247,11 +251,7 @@ namespace USE_ExperimentTemplate_Task
                 StartCoroutine(FrameData.AppendDataToBuffer());
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
-            RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback, () =>
-            {
-                NumAbortedTrials_InBlock = 0;
-                NumRewardPulses_InBlock = 0;
-            });
+            RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             float blockFeedbackDuration = 0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
@@ -288,6 +288,8 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
+                SetTaskSummaryString();
+
                 if (ContinueButtonClicked)
                     ContinueButtonClicked = false;
 
@@ -403,6 +405,22 @@ namespace USE_ExperimentTemplate_Task
             StartCoroutine(HandleSkybox(contextFilePath));
         }
 
+        public float CalculateAverageDuration(List<float?> durations)
+        {
+            float avgDuration;
+            if (durations.Any(item => item.HasValue))
+            {
+                avgDuration = (float)durations
+                    .Where(item => item.HasValue)
+                    .Average(item => item.Value);
+            }
+            else
+            {
+                avgDuration = 0f;
+            }
+
+            return avgDuration;
+        }
 
         private void HandleContinueButtonClick()
         {
@@ -470,7 +488,12 @@ namespace USE_ExperimentTemplate_Task
         
         public virtual OrderedDictionary GetTaskSummaryData()
         {
-            return new OrderedDictionary();
+            return new OrderedDictionary
+            {
+                ["Trial Count In Task"] = TrialLevel.TrialCount_InTask + 1,
+                ["Aborted Trials In Task"] = NumAbortedTrials_InTask,
+                ["Num Reward Pulses"] = NumRewardPulses_InTask
+            };
         }
 
         public virtual OrderedDictionary GetBlockResultsData()
@@ -794,7 +817,14 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void SetTaskSummaryString()
         {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
+            decimal percentAbortedTrials = 0;
+            if (TrialLevel.TrialCount_InTask > 0)
+                percentAbortedTrials = (Math.Round(decimal.Divide(NumAbortedTrials_InTask, (TrialLevel.TrialCount_InTask)), 2)) * 100;
+            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
+                                                $"\n<b># Trials:</b> {TrialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
+                                                $"\t<b># Blocks:</b> {BlockCount}" +
+                                                $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}");
+
         }
 
 
@@ -803,6 +833,17 @@ namespace USE_ExperimentTemplate_Task
 
     public class TaskLevelTemplate_Methods
     {
+        //CALCULATE ADPATIVE TRIAL DEF 
+        public int DetermineTrialDefDifficultyLevel()
+        {
+            int difficultyLevel = 0;
+            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
+            
+            // 10 TRIAL DLS? 
+            
+            //PASS IN THE DLS, max & min, pos step, # of trials before pos dl switch, neg step, # of trials before neg dl switch
+            return difficultyLevel;
+        }
         public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {

@@ -22,7 +22,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     // Block End Variables
     public List<int> runningAcc;
-    public int MinTrials, MaxTrials;
     
     // Stimuli Variables
     private StimGroup tStim;
@@ -60,21 +59,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // Block Data Variables
     [HideInInspector] public string ContextName = "";
     [HideInInspector] public int NumCorrect_InBlock;
-    [HideInInspector] public List<float> SearchDurationsList = new List<float>();
+    [HideInInspector] public List<float?> SearchDurations_InBlock = new List<float?>();
     [HideInInspector] public int NumErrors_InBlock;
-    [HideInInspector] public int NumRewardPulses_InBlock;
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
     [HideInInspector] public decimal Accuracy_InBlock;
-    [HideInInspector] public float AverageSearchDuration_InBlock;
-    [HideInInspector] public int AbortedTrials_InBlock;
    
     // Trial Data Variables
     private int? SelectedStimIndex = null;
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;
-    private bool aborted = false;
 
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
@@ -93,20 +88,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewText = new GameObject();
             playerViewParent = GameObject.Find("MainCameraCopy");     
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(5f);
+            HaloFBController.SetHaloSize(6f);
             HaloFBController.SetHaloIntensity(5);
         });
         
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            TokenFBController.ResetTokenBarFull();
-            //Set the context for the upcoming trial
-            ContextName = CurrentTrialDef.ContextName;
-
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "FlexLearning_DirectionalLight");
             if (currentTaskDef.StimFacingCamera)
@@ -129,12 +119,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
 
-#if (!UNITY_WEBGL)
-                if (!playerViewLoaded)
-                    CreateTextOnExperimenterDisplay();
-#endif
-
-            SetTrialSummaryString();
+            UpdateExperimenterDisplaySummaryStrings();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -152,10 +137,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
-
-            CurrentTaskLevel.SetBlockSummaryString();
-            if (TrialCount_InTask != 0)
-                CurrentTaskLevel.SetTaskSummaryString();
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -184,6 +165,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
+
+            if (!SessionValues.WebBuild)
+                CreateTextOnExperimenterDisplay();
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -215,35 +199,36 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
-            if (selectedGO != null)
-            {
-                SelectedStimIndex = selectedSD.StimIndex;
-                Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
-                SelectedStimLocation = selectedSD.StimLocation;
-            }
-            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock,(TrialCount_InBlock + 1));
-            SetTrialSummaryString();
+        if (selectedGO != null)
+        {
+            SelectedStimIndex = selectedSD.StimIndex;
+            Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
+            SelectedStimLocation = selectedSD.StimLocation;
+        }
+        Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
+        UpdateExperimenterDisplaySummaryStrings();
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            runningAcc.Add(0);
-            AbortedTrials_InBlock++;
-            CurrentTaskLevel.AbortedTrials_InTask++;
-            AbortCode = 6;
-            aborted = true;  
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-            SetTrialSummaryString();
             SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
+
+            runningAcc.Add(0);
+
+            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+            SearchDurations_InBlock.Add(null);
+            SetTrialSummaryString();
         });
         
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             SearchDuration = SearchDisplay.TimingInfo.Duration;
-            SearchDurationsList.Add(SearchDuration);
-            CurrentTaskLevel.SearchDurationsList_InTask.Add(SearchDuration);
-            AverageSearchDuration_InBlock = SearchDurationsList.Average();
+            SearchDurations_InBlock.Add(SearchDuration);
+            CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
+
             SetTrialSummaryString();
 
             int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
@@ -288,12 +273,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                 if (SessionValues.SyncBoxController != null)
                 {
-                    int NumPulses = chooseReward(CurrentTrialDef.PulseReward);
+                    int NumPulses;
+                    if (CurrentTrialDef.ProbablisticNumPulses != null)
+                        NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
+                    else
+                        NumPulses = CurrentTrialDef.NumPulses;
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                    NumRewardPulses_InBlock += NumPulses;
+                    CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
+                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });
@@ -302,12 +292,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if (currentTaskDef.NeutralITI)
             {
-                ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "itiImage")));
+                ContextName = "NeutralITI";
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI")));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
+        {
+            UpdateExperimenterDisplaySummaryStrings();
+        });
+
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineTrialData();
         DefineFrameData();
@@ -335,15 +329,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
-
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
+        else
         {
-            aborted = true;
-            AbortedTrials_InBlock++;
-            CurrentTaskLevel.AbortedTrials_InTask++;
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
+
+        TokenFBController.ResetTokenBarFull();
+
     }
 
     protected override void DefineTrialStims()
@@ -353,8 +348,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
-        int temp = 0;
-
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)
@@ -363,12 +356,20 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
         TrialStims.Add(tStim);
 
-        for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
+        for (int iStim = 0; iStim < CurrentTrialDef.TrialStimIndices.Length; iStim++)
         {
-            FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[i];
-            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.TrialStimTokenReward[i]);
-            if (sd.StimTokenRewardMag > 0) sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
-            else sd.IsTarget = false;
+            FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[iStim];
+
+            if (CurrentTrialDef.ProbabilisticTrialStimTokenReward != null)
+                sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim]);
+            else
+                sd.StimTokenRewardMag = CurrentTrialDef.TrialStimTokenReward[iStim];
+
+
+            if (sd.StimTokenRewardMag > 0) 
+                sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
+            else 
+                sd.IsTarget = false;
         }
         
         if (CurrentTrialDef.RandomizedLocations)
@@ -397,21 +398,19 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        aborted = false;
         SessionValues.MouseTracker.ResetClicks();
     }
     private void DefineTrialData()
     {
         // All AddDatum commands for the Trial Data
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
-        TrialData.AddDatum("Context", () => CurrentTrialDef.ContextName);
+        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SelectedStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
         TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
-        TrialData.AddDatum("AbortedTrial", ()=> aborted);
     }
     private void DefineFrameData()
     {
@@ -432,12 +431,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 textLocation.y += 50;
                 Vector3 textSize = new Vector3(2, 2,1);
                 playerViewText = playerView.CreateTextObject("TargetText","TARGET",
-                    Color.red, textLocation, textSize, playerViewParent.transform);
-                
+                    Color.red, textLocation, textSize, playerViewParent.transform);                
+                playerViewText.SetActive(true);
             }
         }
         playerViewLoaded = true;
-        DeactivateChildren(playerViewParent);
     }
     private void DestroyTextOnExperimenterDisplay()
     {
@@ -477,8 +475,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, MinTrials,
-            MaxTrials) || TrialCount_InBlock == MaxTrials);
+            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
+            CurrentTaskLevel.MaxTrials_InBlock) || TrialCount_InBlock == CurrentTaskLevel.MaxTrials_InBlock);
         
+    }
+
+    private void UpdateExperimenterDisplaySummaryStrings()
+    {
+        if (TrialCount_InTask != 0)
+            CurrentTaskLevel.SetTaskSummaryString();
+        CurrentTaskLevel.SetBlockSummaryString();
+        SetTrialSummaryString();
     }
 }

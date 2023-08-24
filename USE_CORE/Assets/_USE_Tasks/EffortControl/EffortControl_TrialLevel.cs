@@ -76,7 +76,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float ChooseDuration;
     [HideInInspector] public float InflationDuration;
     //Block specific Data variables:
-    [HideInInspector] public int RewardPulses_Block;
     [HideInInspector] public int TotalTouches_Block;
     [HideInInspector] public int Completions_Block;
     [HideInInspector] public int NumChosenLeft_Block;
@@ -87,7 +86,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumHigherRewardChosen_Block;
     [HideInInspector] public int NumLowerRewardChosen_Block;
     [HideInInspector] public int NumSameRewardChosen_Block;
-    [HideInInspector] public int NumAborted_Block;
     [HideInInspector] public List<float?> InflationDurations_Block = new List<float?>();
     
 
@@ -476,17 +474,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
+                SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+                AbortCode = 6;
+
                 InflationDurations_Block.Add(null);
                 CurrentTaskLevel.InflationDurations_Task.Add(null);
 
-                NumAborted_Block++;
-                CurrentTaskLevel.NumAborted_Task++;
-                AbortCode = 6;
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-
                 AudioFBController.Play("TimeRanOut");
                 TokenFBController.enabled = false;
-                SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             }
             TrialStim.SetActive(false);
         });
@@ -509,6 +505,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
                 AddTokenInflateAudioPlayed = true;
+                TokenFBController.ResetTokenBarFull();
             }
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
@@ -561,18 +558,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(MaxOutline_Right);
         Destroy(MaxOutline_Left);
 
-        if(AbortCode == 0) //Normal
+        if (AbortCode == 0) //Normal
             CurrentTaskLevel.CalculateBlockSummaryString();
-
-        if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"] || AbortCode == AbortCodeDict["EndBlock"]) //If used RestartBlock, PreviousBlock, or EndBlock hotkeys
+        else
         {
-            NumAborted_Block++;
-            CurrentTaskLevel.NumAborted_Task++;
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
 
         ClearTrialSummaryString();
+        TokenFBController.ResetTokenBarFull();
     }
 
     public void ActivateObjects()
@@ -596,8 +593,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameEffortChosen_Block = 0;
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
-        RewardPulses_Block = 0;
-        NumAborted_Block = 0;
         InflationDurations_Block.Clear();
     }
 
@@ -747,16 +742,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
            // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesLeft));
-            RewardPulses_Block += CurrentTrial.NumPulsesLeft;
-            CurrentTaskLevel.RewardPulses_Task += CurrentTrial.NumPulsesLeft;
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
 
         }
         else
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
            // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesRight));
-            RewardPulses_Block += CurrentTrial.NumPulsesRight;
-            CurrentTaskLevel.RewardPulses_Task += CurrentTrial.NumPulsesRight;
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
         }
     }
 

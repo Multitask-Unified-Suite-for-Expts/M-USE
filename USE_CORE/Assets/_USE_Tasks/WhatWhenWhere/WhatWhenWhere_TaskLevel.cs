@@ -45,10 +45,12 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             MinTrials_InBlock = wwwBD.MinMaxTrials[0];
             MaxTrials_InBlock = wwwBD.MaxTrials;
             
+            wwwTL.ContextName = wwwBD.ContextName;
             SetSkyBox(wwwBD.ContextName);
 
             ResetBlockVariables();
             SetBlockSummaryString();
+
         });
     }
 
@@ -65,14 +67,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetTaskSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trial Count In Task"] = wwwTL.TrialCount_InTask + 1,
-            ["Num Reward Pulses"] = NumRewardPulses_InTask,
-            ["Slider Bar Full"] = NumSliderBarFilled_InTask,
-            ["Aborted Trials In Task"] = NumAbortedTrials_InTask,
-            ["Avg Search Duraiton"] = CalculateAverageSearchDuration(SearchDurations_InTask)
-        };
+        OrderedDictionary data = base.GetTaskSummaryData();
+
+        data["Slider Bar Full"] = NumSliderBarFilled_InTask;
+        data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
+        
         
         
         return data;
@@ -80,8 +79,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine( "<b>\nMax Trials in Block: </b>" + wwwTL.CurrentTrialDef.MaxTrials + 
-                                      "\n\nAverage Search Duration: " + CalculateAverageSearchDuration(SearchDurations_InBlock) +
+        CurrentBlockSummaryString.AppendLine( "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock + 
+                                      "\n\nAverage Search Duration: " + CalculateAverageDuration(SearchDurations_InBlock) +
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + DistractorSlotErrorCount_InBlock+
                                       "\nNon-Distractor Slot Error Count: " + SlotErrorCount_InBlock + 
@@ -90,37 +89,26 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     }
     public override void SetTaskSummaryString()
     {
-        if (wwwTL.TrialCount_InTask != 0)
-        {
-            CurrentTaskSummaryString.Clear();
+        CurrentTaskSummaryString.Clear();
+        base.SetTaskSummaryString();
+        
+        double avgSearchDuration = 0;
+        if (SearchDurations_InTask.Count > 0)
+            avgSearchDuration = Math.Round(CalculateAverageDuration(SearchDurations_InTask), 2);
 
-            decimal percentAbortedTrials = (Math.Round(decimal.Divide(NumAbortedTrials_InTask, (wwwTL.TrialCount_InTask)), 2)) * 100;
 
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
-                                            $"\n<b># Trials:</b> {wwwTL.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
-                                            $"\t<b># Blocks:</b> {BlockCount}" +
-                                            $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}" +
-                                            $"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}" + 
-                                            $"\nAvg Search Duration: {CalculateAverageSearchDuration(SearchDurations_InTask)}");
-        }
-        else
-        {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
-        }
-            
+        CurrentTaskSummaryString.Append($"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}" + 
+                                            $"\nAvg Search Duration: {avgSearchDuration}");
     }
 
     private void DefineBlockData()
     {
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
-        BlockData.AddDatum("LearningSpeed", () => LearningSpeed);
-        BlockData.AddDatum("AvgSearchDuration", ()=> CalculateAverageSearchDuration(SearchDurations_InBlock));
+        BlockData.AddDatum("Search Durations", ()=> String.Join(",", SearchDurations_InBlock));
         BlockData.AddDatum("NumDistractorSlotError", ()=> DistractorSlotErrorCount_InBlock);
         BlockData.AddDatum("NumSearchSlotError", ()=> SlotErrorCount_InBlock);
         BlockData.AddDatum("NumRepetitionError", ()=> RepetitionErrorCount_InBlock);
-        BlockData.AddDatum("NumAbortedTrials", ()=> NumAbortedTrials_InBlock);
-        BlockData.AddDatum("NumRewardPulses", ()=> NumRewardPulses_InTask);
     }
 
     public void ClearStrings()
@@ -134,25 +122,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RepetitionErrorCount_InBlock = 0;
         NumCorrectSelections_InBlock = 0;
         NumErrors_InBlock = 0;
-        SearchDurations_InBlock.Clear();
         wwwTL.consecutiveError = 0;
-        
-        wwwTL.runningAcc.Clear();
-    }
-    public float CalculateAverageSearchDuration(List<float?> searchDurations)
-    {
-        float avgSearchDuration;
-        if (searchDurations.Any(item => item.HasValue))
-        {
-            avgSearchDuration = (float)searchDurations
-                .Where(item => item.HasValue)
-                .Average(item => item.Value);
-        }
-        else
-        {
-            avgSearchDuration = 0f;
-        }
 
-        return avgSearchDuration;
+        SearchDurations_InBlock.Clear();
+        wwwTL.runningAcc.Clear();
     }
 }

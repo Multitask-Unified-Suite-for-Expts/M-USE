@@ -393,7 +393,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
 
             if (InputBroker.GetMouseButtonDown(0))
+            {
                 startTime = Time.time;
+
+                //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+                if (Response != 1)
+                {
+                    GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                    if (hitGO == null)
+                        AudioFBController.Play("Negative");
+                }
+            }
 
             if(InputBroker.GetMouseButtonUp(0))
             {
@@ -441,15 +451,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-
-            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
-            if (InputBroker.GetMouseButtonDown(0) && Response != 1)
-            {
-                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
-                if (hitGO == null)
-                    AudioFBController.Play("Negative");
-            }
-
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, Delay);
         InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
@@ -508,7 +509,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.ResetTokenBarFull();
             }
         });
-        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
+        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
         Feedback.AddDefaultTerminationMethod(() =>
         {

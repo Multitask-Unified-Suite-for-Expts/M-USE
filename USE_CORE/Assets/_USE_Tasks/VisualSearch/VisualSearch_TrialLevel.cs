@@ -300,6 +300,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
         DefineFrameData();
     }
+
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+        //target stim are added to SessionValues.TargetObjects
+        //distractor stim are added to SessionValues.DistractorObjects
+        //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)

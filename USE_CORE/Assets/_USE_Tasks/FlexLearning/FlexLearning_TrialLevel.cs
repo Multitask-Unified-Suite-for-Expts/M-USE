@@ -7,6 +7,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
+using ContinuousRecognition_Namespace;
 // #if (!UNITY_WEBGL)
 // using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 // #endif  
@@ -202,7 +203,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         if (selectedGO != null)
         {
             SelectedStimIndex = selectedSD.StimIndex;
-            Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
             SelectedStimLocation = selectedSD.StimLocation;
         }
         Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
@@ -307,6 +307,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+            //target stim are added to SessionValues.TargetObjects
+            //distractor stim are added to SessionValues.DistractorObjects
+            //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
 
     public void MakeStimFaceCamera()
     {

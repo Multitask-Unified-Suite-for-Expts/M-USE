@@ -197,7 +197,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTokenFeedbackTimes();
             SetStimStrings();
-            SetShadowType(CurrentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
+            SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -220,7 +220,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
 
-            if (CurrentTrial.StimFacingCamera)
+            if (CurrentTask.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
 
             if(CurrentTrial.ShakeStim)
@@ -1045,7 +1045,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             CreateGridItem(gridParent, stim);
 
-        if (CurrentTrial.StimFacingCamera)
+        if (CurrentTask.StimFacingCamera)
             MakeStimsFaceCamera(group);
 
         group.ToggleVisibility(true);
@@ -1059,7 +1059,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             stim.StimGameObject.transform.localPosition = stim.StimLocation; //Manually setting pos since stimLocation isn't doing anything
         Generate3DBorders(group);
-        if (CurrentTrial.StimFacingCamera)
+        if (CurrentTask.StimFacingCamera)
             MakeStimsFaceCamera(group);
         group.ToggleVisibility(true);
     }

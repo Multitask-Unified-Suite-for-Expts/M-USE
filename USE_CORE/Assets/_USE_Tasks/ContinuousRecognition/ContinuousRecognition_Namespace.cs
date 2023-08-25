@@ -24,8 +24,7 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
         public int InitialTokenAmount, NumTokenBar, RewardMag;
-        public string ShadowType;
-        public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
+        public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
 
         //Calculated below (DONT SET IN CONFIG!!!):
@@ -97,8 +96,6 @@ namespace ContinuousRecognition_Namespace
                 trial.PulseSize = PulseSize;
                 trial.NumTokenBar = NumTokenBar;
                 trial.FindAllStim = FindAllStim;
-                trial.StimFacingCamera = StimFacingCamera;
-                trial.ShadowType = ShadowType;
                 trial.UseStarfield = UseStarfield;
                 trial.ShakeStim = ShakeStim;
 
@@ -199,8 +196,7 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
         public int InitialTokenAmount, NumTokenBar, RewardMag;
-        public string ShadowType;
-        public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield;
+        public bool ShakeStim, FindAllStim, UseStarfield;
 
         //Not in block config BUT STILL PASSED DOWN:
         public Vector3[] TrialStimLocations;

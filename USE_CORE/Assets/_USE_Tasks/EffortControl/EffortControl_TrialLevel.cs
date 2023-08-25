@@ -486,6 +486,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Feedback state ------------------------------------------------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
+            AddTokenInflateAudioPlayed = true;
+
             if (Response == 1)
             {
                 GameObject CenteredGO = new GameObject();
@@ -498,14 +500,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
-                AddTokenInflateAudioPlayed = true;
-                TokenFBController.ResetTokenBarFull();
             }
         });
-        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !AudioFBController.IsPlaying() && !TokenFBController.IsAnimating(), ITI);
+        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
         Feedback.AddDefaultTerminationMethod(() =>
         {
+            TokenFBController.ResetTokenBarFull();
+
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });

@@ -375,7 +375,7 @@ namespace SelectionTracking
                     if (HoverOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        Debug.Log("EVENTCODE: HoverOffObject");
+                        //Debug.Log("EVENTCODE: HoverOffObject");
                         SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }

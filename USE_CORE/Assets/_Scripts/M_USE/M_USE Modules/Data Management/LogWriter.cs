@@ -7,7 +7,7 @@ using UnityEngine;
 public class LogWriter : MonoBehaviour
 {
     private readonly List<string> LogMessages = new List<string>();
-    public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
+    [HideInInspector] public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
     private bool CreatingLogFolder;
     private bool LogFolderCreated;
     private bool LogFileCreated;

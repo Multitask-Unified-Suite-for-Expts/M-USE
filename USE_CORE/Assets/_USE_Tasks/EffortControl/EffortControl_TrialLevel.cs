@@ -219,6 +219,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CreateTransparentBalloons();
             ActivateObjects();
 
+            SessionValues.TargetObjects.Add(StimLeft);
+            SessionValues.TargetObjects.Add(StimRight);
+
+
             SideChoice = null;
 
             if(Handler.AllSelections.Count > 0)
@@ -389,7 +393,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
 
             if (InputBroker.GetMouseButtonDown(0))
+            {
                 startTime = Time.time;
+
+                //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
+                if (Response != 1)
+                {
+                    GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                    if (hitGO == null)
+                        AudioFBController.Play("Negative");
+                }
+            }
 
             if(InputBroker.GetMouseButtonUp(0))
             {
@@ -437,15 +451,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
-
-            //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
-            if (InputBroker.GetMouseButtonDown(0) && Response != 1)
-            {
-                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
-                if (hitGO == null)
-                    AudioFBController.Play("Negative");
-            }
-
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, Delay);
         InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
@@ -486,7 +491,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Feedback state ------------------------------------------------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
-            AddTokenInflateAudioPlayed = true;
+            AddTokenInflateAudioPlayed = false;
 
             if (Response == 1)
             {
@@ -500,14 +505,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
+                AddTokenInflateAudioPlayed = true;
+                TokenFBController.ResetTokenBarFull();
             }
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
         Feedback.AddDefaultTerminationMethod(() =>
         {
-            TokenFBController.ResetTokenBarFull();
-
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });

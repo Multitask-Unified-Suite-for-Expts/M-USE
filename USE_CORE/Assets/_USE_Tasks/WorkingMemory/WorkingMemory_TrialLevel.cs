@@ -399,9 +399,9 @@ ShotgunHandler.HandlerActive = false;
         sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(sampleStim);
 
-        postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);
+        postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorStimIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
-        postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorLocations);
+        postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorStimLocations);
         TrialStims.Add(postSampleDistractorStims);
         
      }

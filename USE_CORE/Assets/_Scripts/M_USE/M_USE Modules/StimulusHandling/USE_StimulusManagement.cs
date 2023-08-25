@@ -42,7 +42,7 @@ namespace USE_StimulusManagement
 		public int[] BaseTokenGain;
 		public int[] BaseTokenLoss;
 		public int TimesUsedInBlock;
-		public bool isRelevant;
+		public bool IsRelevant;
 		public bool TriggersSonication;
 		public State SetActiveOnInitialization;
 		public State SetInactiveOnTermination;
@@ -146,7 +146,7 @@ namespace USE_StimulusManagement
 			if (BaseTokenLoss != null)
 				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
-			sd.isRelevant = isRelevant;
+			sd.IsRelevant = IsRelevant;
 			return sd;
 		}
 		
@@ -197,7 +197,7 @@ namespace USE_StimulusManagement
 			if (BaseTokenLoss != null)
 				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
-			sd.isRelevant = isRelevant;
+			sd.IsRelevant = IsRelevant;
 			return sd;
 		}
 

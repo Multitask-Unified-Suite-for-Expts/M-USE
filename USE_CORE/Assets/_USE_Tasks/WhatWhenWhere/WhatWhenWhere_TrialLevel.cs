@@ -289,9 +289,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 consecutiveError++;
                 HaloFBController.ShowNegative(selectedGO, depth);
                 if (errorTypeString.Equals("DistractorSlotError"))
-                    stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimsIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
+                    stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
-                    stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimsIndices, selectedSD.StimIndex);
+                    stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
                 SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
             }
@@ -447,8 +447,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID); //NaN if only using blockdef structure
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
-        TrialData.AddDatum("SearchStimsLocations", () => searchStimsLocations);
-        TrialData.AddDatum("DistractorStimsLocations", () => distractorStimsLocations);
+        TrialData.AddDatum("SearchStimLocations", () => searchStimsLocations);
+        TrialData.AddDatum("DistractorStimLocations", () => distractorStimsLocations);
         TrialData.AddDatum("TouchedObjects", () => String.Join(",",TouchedObjects));
         TrialData.AddDatum("SearchDurations", () => String.Join(",",SearchDurations_InTrial));
         TrialData.AddDatum("ErrorType", () => errorTypeString);
@@ -508,8 +508,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
-        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimsIndices);
-        distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimsIndices);
+        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
+        distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimIndices);
        
         searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
         distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
@@ -520,7 +520,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if (CurrentTrialDef.RandomizedLocations)
         {
             var totalStims = searchStims.stimDefs.Concat(distractorStims.stimDefs);
-            var stimLocations = CurrentTrialDef.SearchStimsLocations.Concat(CurrentTrialDef.DistractorStimsLocations);
+            var stimLocations = CurrentTrialDef.SearchStimLocations.Concat(CurrentTrialDef.DistractorStimLocations);
 
             int[] positionIndexArray = Enumerable.Range(0, stimLocations.Count()).ToArray();
             System.Random random = new System.Random();
@@ -533,8 +533,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            searchStims.SetLocations(CurrentTrialDef.SearchStimsLocations);
-            distractorStims.SetLocations(CurrentTrialDef.DistractorStimsLocations);
+            searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
+            distractorStims.SetLocations(CurrentTrialDef.DistractorStimLocations);
         }
 
         searchStimsLocations = String.Join(",", searchStims.stimDefs.Select(s => s.StimLocation));
@@ -557,7 +557,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 else sd.IsCurrentTarget = false;
             }
         
-            for (int iDist = 0; iDist < CurrentTrialDef.DistractorStimsIndices.Length; ++iDist)
+            for (int iDist = 0; iDist < CurrentTrialDef.DistractorStimIndices.Length; ++iDist)
             {
                 WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) distractorStims.stimDefs[iDist];
                 sd.IsDistractor = true;

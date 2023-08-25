@@ -8,11 +8,7 @@ namespace MazeGame_Namespace
 {
     public class MazeGame_TaskDef : TaskDef
     {
-        // public string MazeKeyFilePath;
-        // public string MazeFilePath;
-
         public Vector3 MazePosition;
-
         public float TileSize;
         public string TileTexture;
         public int NumBlinks;
@@ -31,23 +27,21 @@ namespace MazeGame_Namespace
 
     public class MazeGame_BlockDef : BlockDef
     {
-        public int RewardRatio;
-
+        public string MazeName;
         public Vector2 MazeDims;
-        public string MazeStart, MazeFinish;
+        public string MazeStart;
+        public string MazeFinish;
         public int MazeNumSquares;
         public int MazeNumTurns;
-        public string MazeName;
         public bool ViewPath;
-        public int SliderInitial;
         public bool ErrorPenalty;
-        
+        public int RewardRatio;
+
         
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            MaxTrials = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]+1);
-            
+            MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
             TrialDefs = new List<MazeGame_TrialDef>().ConvertAll(x => (TrialDef)x);
             
             for (int iTrial = 0; iTrial < MaxTrials; iTrial++)
@@ -60,10 +54,10 @@ namespace MazeGame_Namespace
                 td.ViewPath = ViewPath;
                 td.ContextName = ContextName;
                 td.MazeName = MazeName;
-                td.SliderInitial = SliderInitial;
+                td.SliderInitialValue = SliderInitialValue;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndType = BlockEndType;
-                td.MinMaxTrials = MinMaxTrials;
+                td.RandomMinMaxTrials = RandomMinMaxTrials;
                 td.ErrorPenalty = ErrorPenalty;
                 td.MaxTrials = MaxTrials;
                 TrialDefs.Add(td);
@@ -73,26 +67,30 @@ namespace MazeGame_Namespace
 
     public class MazeGame_TrialDef : TrialDef
     {
-        public int RewardRatio;
+        public string MazeName;
+        public Vector2 MazeDims;
+        public string MazeStart;
+        public string MazeFinish;
+        public int MazeNumSquares;
+        public int MazeNumTurns;
         public bool ViewPath;
         public bool ErrorPenalty;
-        public string MazeName;
-        public int SliderInitial;
-        public int[] MinMaxTrials;
+        public int RewardRatio;
     }
-
     public class MazeGame_StimDef : StimDef
     {
-    }
+        public bool IsTarget;
+        public int TokenUpdate;
 
+    }
     public class MazeDef
     {
+        public string mName;
         public Vector2 mDims;
-        public int mNumTurns;
-        public int mNumSquares;
         public string mStart;
         public string mFinish;
-        public string mName;
+        public int mNumSquares;
+        public int mNumTurns;
         public string mString;
         
     }

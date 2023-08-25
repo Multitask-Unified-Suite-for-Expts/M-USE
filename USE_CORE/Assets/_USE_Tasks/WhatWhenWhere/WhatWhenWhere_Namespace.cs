@@ -10,10 +10,10 @@ namespace WhatWhenWhere_Namespace
         // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
         public int ErrorThreshold;
-        public int[] SearchStimsIndices;
-        public Vector3[] SearchStimsLocations;
-        public int[] DistractorStimsIndices;
-        public Vector3[] DistractorStimsLocations;
+        public int[] SearchStimIndices;
+        public Vector3[] SearchStimLocations;
+        public int[] DistractorStimIndices;
+        public Vector3[] DistractorStimLocations;
         
         // Configuration of Stimuli
         public bool RandomizedLocations;
@@ -22,12 +22,11 @@ namespace WhatWhenWhere_Namespace
         // Slider Variables
         public int[] SliderGain;
         public int[] SliderLoss;
-        public int SliderInitial;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            MaxTrials = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
             TrialDefs = new List<WhatWhenWhere_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial< MaxTrials; iTrial++)
             {
@@ -35,14 +34,14 @@ namespace WhatWhenWhere_Namespace
                 td.BlockName = BlockName;
                 td.ContextName = ContextName;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
-                td.SearchStimsIndices = SearchStimsIndices;
-                td.DistractorStimsIndices = DistractorStimsIndices;
-                td.SearchStimsLocations = SearchStimsLocations;
-                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.SearchStimIndices = SearchStimIndices;
+                td.DistractorStimIndices = DistractorStimIndices;
+                td.SearchStimLocations = SearchStimLocations;
+                td.DistractorStimLocations = DistractorStimLocations;
                 td.RandomizedLocations = RandomizedLocations;
                 td.SliderGain = SliderGain;
                 td.SliderLoss = SliderLoss;
-                td.SliderInitial = SliderInitial;
+                td.SliderInitial = SliderInitialValue;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
@@ -61,10 +60,10 @@ namespace WhatWhenWhere_Namespace
         // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
         public int ErrorThreshold;
-        public int[] SearchStimsIndices;
-        public Vector3[] SearchStimsLocations;
-        public int[] DistractorStimsIndices;
-        public Vector3[] DistractorStimsLocations;
+        public int[] SearchStimIndices;
+        public Vector3[] SearchStimLocations;
+        public int[] DistractorStimIndices;
+        public Vector3[] DistractorStimLocations;
         
         // Configuration of Stimuli
         public bool RandomizedLocations;

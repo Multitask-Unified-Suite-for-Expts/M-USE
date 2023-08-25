@@ -12,20 +12,18 @@ namespace FlexLearning_Namespace
 
     public class FlexLearning_BlockDef : BlockDef
     {
-        public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
+        public int[] TrialStimIndices;
         public int[] TrialStimTokenReward;
-        public int NumInitialTokens;
         public Reward[][] ProbablisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
-        public int TokenBarCapacity;
         public bool RandomizedLocations;
-        public bool? TokensWithStimOn = false;
+        public bool TokensWithStimOn = false;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            MaxTrials = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
             TrialDefs = new List<FlexLearning_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial < MaxTrials; iTrial++)
             {
@@ -52,12 +50,12 @@ namespace FlexLearning_Namespace
         {
             // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
             MaxTrials = TrialDefs.Count;
-            if (MinMaxTrials != null)
+            if (RandomMinMaxTrials != null)
             {
                 if (RandomNumGenerator == null)
                     Debug.Log("RANDOM NUM GENERATOR NULL!");
-
-                MaxTrials = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
+                else
+                    MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
             }
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
@@ -72,8 +70,7 @@ namespace FlexLearning_Namespace
                 td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
-
-                td.MinMaxTrials = MinMaxTrials;
+                td.RandomMinMaxTrials = RandomMinMaxTrials;
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
                 TrialDefs[iTrial] = td;
@@ -89,16 +86,11 @@ namespace FlexLearning_Namespace
         public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;
-        public bool StimFacingCamera;
-        
-        public bool? TokensWithStimOn;
-        public int[] MinMaxTrials;
-
+        public bool TokensWithStimOn;
     }
 
     public class FlexLearning_StimDef : StimDef
     {
         public bool IsTarget;
-
     }
 }

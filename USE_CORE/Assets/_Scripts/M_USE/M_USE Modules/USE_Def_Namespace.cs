@@ -330,6 +330,11 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Array containing the minimum and maximum number of trials.
         /// </summary>
+        public int[] RandomMinMaxTrials;
+        
+        /// <summary>
+        /// Array containing the minimum and maximum number of trials.
+        /// </summary>
         public int[] MinMaxTrials;
         
         /// <summary>
@@ -358,6 +363,11 @@ namespace USE_Def_Namespace
         public int PulseSize;
         
         /// <summary>
+        /// The initial amount of progress displayed in the slider at the start of the block.
+        /// </summary>
+        public int SliderInitialValue;
+
+        /// <summary>
         /// The number of tokens displayed in the token bar at the start of the block.
         /// </summary>
         public int NumInitialTokens;
@@ -373,7 +383,7 @@ namespace USE_Def_Namespace
         public List<TrialDef> TrialDefs;
 
         /// <summary>
-        /// Random number generator, used to select random number of max trials in the MinMaxTrials range.
+        /// Random number generator, used to select random number of max trials in the RandomMinMaxTrials range.
         /// </summary>
         public System.Random RandomNumGenerator;
         
@@ -410,6 +420,17 @@ namespace USE_Def_Namespace
         /// Integer value indicating the maximum number of trials.
         /// </summary>
         public int MaxTrials;
+        
+        /// <summary>
+        /// Array containing the minimum number of trials, and the maximum is randomly selected within that range.
+        /// </summary>
+        public int[] RandomMinMaxTrials;
+
+        /// <summary>
+        /// Array containing the minimum and maximum number of trials.
+        /// </summary>
+        public int[] MinMaxTrials;
+
         
         /// <summary>
         /// Represents the block count of the trial, corresponding to the BlockCount of BlockDef
@@ -472,6 +493,11 @@ namespace USE_Def_Namespace
         public int PulseSize;
         
         /// <summary>
+        /// The initial amount of progress displayed in the slider at the start of the block.
+        /// </summary>
+        public int SliderInitialValue;
+        
+        /// <summary>
         /// The number of tokens displayed in the token bar at the start of the trial.
         /// </summary>
         public int NumInitialTokens;
@@ -483,5 +509,4 @@ namespace USE_Def_Namespace
 
     }
 
-    
 }

@@ -42,7 +42,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         {
             LearningSpeed = -1;
             
-            MinTrials_InBlock = wwwBD.MinMaxTrials[0];
+            MinTrials_InBlock = wwwBD.RandomMinMaxTrials[0];
             MaxTrials_InBlock = wwwBD.MaxTrials;
             
             wwwTL.ContextName = wwwBD.ContextName;

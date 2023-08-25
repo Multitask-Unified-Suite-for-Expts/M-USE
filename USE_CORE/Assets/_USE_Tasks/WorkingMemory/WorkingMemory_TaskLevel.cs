@@ -31,7 +31,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
             SetSkyBox(wmBD.ContextName);
 
             wmTL.ResetBlockVariables();
-            wmTL.TokenFBController.SetTotalTokensNum(wmBD.NumTokenBar);
+            wmTL.TokenFBController.SetTotalTokensNum(wmBD.TokenBarCapacity);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
             SetBlockSummaryString();
         });

@@ -357,7 +357,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
-        if(CurrentTrialDef.TokensWithStimOn?? false)
+        if(CurrentTrialDef.TokensWithStimOn)
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         else
             tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));

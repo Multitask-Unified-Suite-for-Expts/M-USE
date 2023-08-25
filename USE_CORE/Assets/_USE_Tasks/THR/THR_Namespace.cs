@@ -13,7 +13,6 @@ namespace THR_Namespace
 
     public class THR_BlockDef : BlockDef
     {
-        public int[] MinMaxNumTrials;
         public bool ShowNegFb;
         public int PerfWindowEndTrials;
         public float PerfThresholdEndTrials;
@@ -47,13 +46,13 @@ namespace THR_Namespace
         {
             TrialDefs = new List<THR_TrialDef>().ConvertAll(x => (TrialDef)x);
 
-            for (int i = 0; i < MinMaxNumTrials[1]; i++)
+            for (int i = 0; i < MinMaxTrials[1]; i++)
             {
                 THR_TrialDef trial = new THR_TrialDef();
 
                 trial.TrialName = BlockName;
-                trial.MinNumTrials = MinMaxNumTrials[0];
-                trial.MaxNumTrials = MinMaxNumTrials[1];
+                trial.MinNumTrials = MinMaxTrials[0];
+                trial.MaxNumTrials = MinMaxTrials[1];
                 trial.ShowNegFb = ShowNegFb;
                 trial.PulseSize = PulseSize;
                 trial.PerfWindowEndTrials = PerfWindowEndTrials;

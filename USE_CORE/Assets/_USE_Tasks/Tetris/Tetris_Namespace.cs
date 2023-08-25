@@ -64,7 +64,7 @@ namespace Tetris_Namespace
         //public int[] BaseTokenGain;
         //public int[] BaseTokenLoss;
         //public int TimesUsedInBlock;
-        //public bool isRelevant;
+        //public bool IsRelevant;
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;

@@ -8,22 +8,19 @@ namespace VisualSearch_Namespace
 {
     public class VisualSearch_TaskDef : TaskDef
     {
-        public bool? TokensWithStimOn;
     }
 
     public class VisualSearch_BlockDef : BlockDef
     {
         public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
-        public int NumInitialTokens;
-        public int NumTokenBar;
         public bool RandomizedLocations;
-        public bool? TokensWithStimOn = false;
+        public bool TokensWithStimOn = false;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            MaxTrials = RandomNumGenerator.Next(MinMaxTrials[0], MinMaxTrials[1]);
+            MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
             TrialDefs = new List<VisualSearch_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial < MaxTrials; iTrial++)
             {
@@ -32,8 +29,9 @@ namespace VisualSearch_Namespace
                 td.BlockName = BlockName;
                 td.ProbablisticNumPulses = ProbabilisticNumPulses;
                 td.ProbabilisticTrialStimTokenReward = ProbabilisticTrialStimTokenReward;
+                td.NumPulses = NumPulses;
                 td.NumInitialTokens = NumInitialTokens;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.MaxTrials = MaxTrials;
@@ -51,7 +49,7 @@ namespace VisualSearch_Namespace
                 td.BlockName = BlockName;
                 td.ProbablisticNumPulses = ProbabilisticNumPulses;
                 td.NumInitialTokens = NumInitialTokens;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.TokensWithStimOn = TokensWithStimOn;
@@ -68,16 +66,12 @@ namespace VisualSearch_Namespace
         public int[] TrialStimTokenReward;
         public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbablisticNumPulses;
-        public bool? TokensWithStimOn;
-        public int NumInitialTokens;
-        public int NumTokenBar;
+        public bool TokensWithStimOn;
         public bool RandomizedLocations;
     }
 
     public class VisualSearch_StimDef : StimDef
     {
         public bool IsTarget;
-        public int TokenUpdate;
-
     }
 }

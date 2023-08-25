@@ -11,10 +11,14 @@ namespace WorkingMemory_Namespace
 
     public class WorkingMemory_BlockDef : BlockDef
     {
-        public int NumInitialTokens;
-        public int NumTokenBar;
-        public bool StimFacingCamera;
-
+        public Vector3 SampleStimLocation;
+        public Vector3[] SearchStimLocations;
+        public int[] SearchStimIndices;
+        public Vector3[] PostSampleDistractorLocations;
+        public int[] PostSampleDistractorStimIndices;
+        public int[] SearchStimTokenReward;
+        public Reward[][] ProbabilisticSearchStimTokenReward;
+        
         public override void AddToTrialDefsFromBlockDef()
         {
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
@@ -23,12 +27,11 @@ namespace WorkingMemory_Namespace
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumPulses = NumPulses;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.StimFacingCamera = StimFacingCamera;
                 td.ContextName = ContextName;
                 TrialDefs[iTrial] = td;
             }
@@ -37,16 +40,13 @@ namespace WorkingMemory_Namespace
 
     public class WorkingMemory_TrialDef : TrialDef
     {
-        public int[] SearchStimIndices, PostSampleDistractorIndices;
+        public Vector3 SampleStimLocation;
+        public Vector3[] SearchStimLocations;
+        public int[] SearchStimIndices;
+        public Vector3[] PostSampleDistractorStimLocations;
+        public int[] PostSampleDistractorStimIndices;
         public int[] SearchStimTokenReward;
         public Reward[][] ProbabilisticSearchStimTokenReward;
-        public Vector3 SampleStimLocation;
-        
-        public Vector3[] SearchStimLocations, PostSampleDistractorLocations;
-
-        public int NumInitialTokens;
-        public int NumTokenBar;
-        public bool StimFacingCamera;
     }
 
     public class WorkingMemory_StimDef : StimDef

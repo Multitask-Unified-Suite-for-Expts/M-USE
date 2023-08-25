@@ -38,7 +38,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
-            MinTrials_InBlock = flBD.MinMaxTrials[0];
+            MinTrials_InBlock = flBD.RandomMinMaxTrials[0];
             MaxTrials_InBlock = flBD.MaxTrials;
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             flTL.ContextName = flBD.ContextName;

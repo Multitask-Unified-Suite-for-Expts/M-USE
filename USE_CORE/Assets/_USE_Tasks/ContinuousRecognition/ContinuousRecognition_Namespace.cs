@@ -23,22 +23,18 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_Locations;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int InitialTokenAmount, NumTokenBar, RewardMag;
-        public string ShadowType;
-        public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield, ManuallySpecifyLocation;
+        public int RewardMag;
+        public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
-
-        //Calculated below (DONT SET IN CONFIG!!!):
-        public int MaxNumTrials;
 
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             int maxNumStim = NumObjectsMinMax[1];
             if (FindAllStim)
-                MaxNumTrials = CalculateMaxNumTrials(maxNumStim);
+                MaxTrials = CalculateMaxNumTrials(maxNumStim);
             else
-                MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+                MaxTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
 
 
             //Calculate STIM Locations:
@@ -62,7 +58,7 @@ namespace ContinuousRecognition_Namespace
 
             int numTrialStims = NumObjectsMinMax[0]; //Starts as first num in array and increments by at end of loop for each trial
 
-            for (int trialIndex = 0; trialIndex < MaxNumTrials; trialIndex++)
+            for (int trialIndex = 0; trialIndex < MaxTrials; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
 
@@ -90,15 +86,13 @@ namespace ContinuousRecognition_Namespace
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
-                trial.MaxNumTrials = MaxNumTrials;
+                trial.MaxTrials = MaxTrials;
                 trial.ContextName = ContextName;
                 trial.NumPulses = NumPulses;
                 trial.RewardMag = RewardMag;
                 trial.PulseSize = PulseSize;
-                trial.NumTokenBar = NumTokenBar;
+                trial.TokenBarCapacity = TokenBarCapacity;
                 trial.FindAllStim = FindAllStim;
-                trial.StimFacingCamera = StimFacingCamera;
-                trial.ShadowType = ShadowType;
                 trial.UseStarfield = UseStarfield;
                 trial.ShakeStim = ShakeStim;
 
@@ -198,14 +192,12 @@ namespace ContinuousRecognition_Namespace
         public int[] InitialStimRatio;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int InitialTokenAmount, NumTokenBar, RewardMag;
-        public string ShadowType;
-        public bool ShakeStim, FindAllStim, StimFacingCamera, UseStarfield;
+        public int RewardMag;
+        public bool ShakeStim, FindAllStim, UseStarfield;
 
         //Not in block config BUT STILL PASSED DOWN:
         public Vector3[] TrialStimLocations;
         public int NumTrialStims;
-        public int MaxNumTrials;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

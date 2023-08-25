@@ -45,8 +45,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         {
             SetSkyBox(CurrentBlock.ContextName);
             trialLevel.ContextActive = true;
-            trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.NumTokenBar);
-            trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.InitialTokenAmount);
+            trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.TokenBarCapacity);
+            trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.NumInitialTokens);
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
         });
@@ -104,7 +104,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
         BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
-        BlockData.AddDatum("MaxNumTrials", () => CurrentBlock.MaxNumTrials);
+        BlockData.AddDatum("MaxTrials", () => CurrentBlock.MaxTrials);
     }
 
     public void CalculateBlockSummaryString()

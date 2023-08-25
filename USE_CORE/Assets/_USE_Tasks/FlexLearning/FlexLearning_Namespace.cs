@@ -14,10 +14,11 @@ namespace FlexLearning_Namespace
     {
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
+        public int[] TrialStimTokenReward;
         public int NumInitialTokens;
         public Reward[][] ProbablisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
-        public int NumTokenBar;
+        public int TokenBarCapacity;
         public bool RandomizedLocations;
         public bool? TokensWithStimOn = false;
 
@@ -40,7 +41,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.ProbablisticNumPulses = ProbabilisticNumPulses;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
@@ -68,7 +69,7 @@ namespace FlexLearning_Namespace
                 td.BlockEndWindow = BlockEndWindow;
                 td.ProbablisticNumPulses = ProbabilisticNumPulses;
                 td.NumPulses = NumPulses;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.ContextName = ContextName;
 
@@ -89,8 +90,7 @@ namespace FlexLearning_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;
         public bool StimFacingCamera;
-        public int NumInitialTokens;
-        public int NumTokenBar;
+        
         public bool? TokensWithStimOn;
         public int[] MinMaxTrials;
 

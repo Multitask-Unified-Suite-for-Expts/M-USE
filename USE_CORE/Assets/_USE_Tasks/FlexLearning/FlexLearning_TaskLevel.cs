@@ -48,7 +48,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             SetSkyBox(flBD.ContextName);
             
             //Set the Initial Token Values for the Block
-            flTL.TokenFBController.SetTotalTokensNum(flBD.NumTokenBar);
+            flTL.TokenFBController.SetTotalTokensNum(flBD.TokenBarCapacity);
             flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
             SetBlockSummaryString();
             

@@ -356,6 +356,16 @@ namespace USE_Def_Namespace
         /// The magnitude of each pulse sent from the SyncBox for reward.
         /// </summary>
         public int PulseSize;
+        
+        /// <summary>
+        /// The number of tokens displayed in the token bar at the start of the block.
+        /// </summary>
+        public int NumInitialTokens;
+       
+        /// <summary>
+        /// The number of tokens that the token bar can hold.
+        /// </summary>
+        public int TokenBarCapacity;
 
         /// <summary>
         /// A list of trial definitions for the block.
@@ -460,6 +470,17 @@ namespace USE_Def_Namespace
         /// Size of each pulse.
         /// </summary>
         public int PulseSize;
+        
+        /// <summary>
+        /// The number of tokens displayed in the token bar at the start of the trial.
+        /// </summary>
+        public int NumInitialTokens;
+       
+        /// <summary>
+        /// The number of tokens that the token bar can hold.
+        /// </summary>
+        public int TokenBarCapacity;
+
     }
 
     

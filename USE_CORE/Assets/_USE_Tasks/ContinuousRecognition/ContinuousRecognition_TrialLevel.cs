@@ -197,7 +197,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTokenFeedbackTimes();
             SetStimStrings();
-            SetShadowType(CurrentTrial.ShadowType, "ContinuousRecognition_DirectionalLight");
+            SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -216,11 +216,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TimerBackdropGO.SetActive(true);
             }
 
-            TokenFBController.SetTotalTokensNum(CurrentTrial.NumTokenBar);
+            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.enabled = true;
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
 
-            if (CurrentTrial.StimFacingCamera)
+            if (CurrentTask.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
 
             if(CurrentTrial.ShakeStim)
@@ -295,7 +295,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK OR IF THEY FOUND ALL THE STIM. 
-                    if(PNC_Stim.Count == 0 || TrialCount_InBlock == CurrentTrial.MaxNumTrials-1)
+                    if(PNC_Stim.Count == 0 || TrialCount_InBlock == CurrentTrial.MaxTrials-1)
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
@@ -363,9 +363,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (GotTrialCorrect)
             {
-                if(TrialCount_InBlock == CurrentTrial.MaxNumTrials-1 || PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
+                if(TrialCount_InBlock == CurrentTrial.MaxTrials-1 || PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
                 {
-                    int numToFillBar = CurrentTrial.NumTokenBar - TokenFBController.GetTokenBarValue();
+                    int numToFillBar = CurrentTrial.TokenBarCapacity - TokenFBController.GetTokenBarValue();
                     TokenFBController.AddTokens(ChosenGO, numToFillBar);
                 }
                 else
@@ -1045,7 +1045,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             CreateGridItem(gridParent, stim);
 
-        if (CurrentTrial.StimFacingCamera)
+        if (CurrentTask.StimFacingCamera)
             MakeStimsFaceCamera(group);
 
         group.ToggleVisibility(true);
@@ -1059,7 +1059,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             stim.StimGameObject.transform.localPosition = stim.StimLocation; //Manually setting pos since stimLocation isn't doing anything
         Generate3DBorders(group);
-        if (CurrentTrial.StimFacingCamera)
+        if (CurrentTask.StimFacingCamera)
             MakeStimsFaceCamera(group);
         group.ToggleVisibility(true);
     }

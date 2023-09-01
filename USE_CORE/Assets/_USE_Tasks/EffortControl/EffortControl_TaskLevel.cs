@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 using EffortControl_Namespace;
 
@@ -12,7 +14,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;
-    [HideInInspector] public int RewardPulses_Task = 0;
     [HideInInspector] public int Touches_Task = 0;
     [HideInInspector] public int NumChosenLeft_Task = 0;
     [HideInInspector] public int NumChosenRight_Task = 0;
@@ -22,12 +23,12 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumHigherEffortChosen_Task = 0;
     [HideInInspector] public int NumLowerEffortChosen_Task = 0;
     [HideInInspector] public int NumSameEffortChosen_Task = 0;
-    [HideInInspector] public int NumAborted_Task = 0;
+    [HideInInspector] public List<float?> InflationDurations_Task = new List<float?>();
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
-    EffortControl_BlockDef currentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
+    EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
 
     public override void SpecifyTypes()
@@ -47,20 +48,16 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
         
-        SetupBlockData();
+        DefineBlockData();
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
-            currentBlock.ContextName = currentBlock.ContextName.Trim();
-            SetSkyBox(currentBlock.ContextName, TaskCam.gameObject.GetComponent<Skybox>());
+            CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
+            SetSkyBox(CurrentBlock.ContextName);
         });
 
-        BlockFeedback.AddSpecificInitializationMethod(() =>
-        {
-            AddBlockValuesToTaskValues();
-            HandleBlockStrings();
-        });
+        BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
     }
 
     private void HandleBlockStrings()
@@ -72,23 +69,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             PreviousBlocksString.Insert(0, CurrentBlockString);
             BlockStringsAdded++;
         }
-    }
-
-    public void AddBlockValuesToTaskValues()
-    {
-        RewardPulses_Task += trialLevel.RewardPulses_Block;
-        Completions_Task += trialLevel.Completions_Block;
-        Touches_Task += trialLevel.TotalTouches_Block;
-        NumChosenLeft_Task += trialLevel.NumChosenLeft_Block;
-        NumChosenRight_Task += trialLevel.NumChosenRight_Block;
-        NumHigherEffortChosen_Task += trialLevel.NumHigherEffortChosen_Block;
-        NumLowerEffortChosen_Task += trialLevel.NumLowerEffortChosen_Block;
-        NumSameEffortChosen_Task += trialLevel.NumSameEffortChosen_Block;
-        NumHigherRewardChosen_Task += trialLevel.NumHigherRewardChosen_Block;
-        NumLowerRewardChosen_Task += trialLevel.NumLowerRewardChosen_Block;
-        NumSameRewardChosen_Task += trialLevel.NumSameRewardChosen_Block;
-        NumAborted_Task += trialLevel.NumAborted_Block;
-
     }
 
     public override OrderedDictionary GetBlockResultsData()
@@ -106,20 +86,20 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     public override OrderedDictionary GetTaskSummaryData()
     {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Completions"] = Completions_Task,
-            ["Reward Pulses"] = RewardPulses_Task,
-            ["Touches"] = Touches_Task,
-            ["Chose Left"] = NumChosenLeft_Task,
-            ["Chose Right"] = NumChosenRight_Task,
-            ["Chose Higher Reward"] = NumHigherRewardChosen_Task,
-            ["Chose Lower Reward"] = NumLowerRewardChosen_Task,
-            ["Chose Same Reward"] = NumSameRewardChosen_Task,
-            ["Chose Higher Effort"] = NumHigherEffortChosen_Task,
-            ["Chose Lower Effort"] = NumLowerEffortChosen_Task,
-            ["Chose Same Effort"] = NumSameEffortChosen_Task
-        };
+
+        OrderedDictionary data = base.GetTaskSummaryData();
+
+        data["Completions"] = Completions_Task;
+        data["Touches"] = Touches_Task;
+        data["Chose Left"] = NumChosenLeft_Task;
+        data["Chose Right"] = NumChosenRight_Task;
+        data["Chose Higher Reward"] = NumHigherRewardChosen_Task;
+        data["Chose Lower Reward"] = NumLowerRewardChosen_Task;
+        data["Chose Same Reward"] = NumSameRewardChosen_Task;
+        data["Chose Higher Effort"] = NumHigherEffortChosen_Task;
+        data["Chose Lower Effort"] = NumLowerEffortChosen_Task;
+        data["Chose Same Effort"] = NumSameEffortChosen_Task;
+        data["Avg Inflation Duration"] = CalculateAverageDuration(InflationDurations_Task);
 
         return data;
     }
@@ -127,8 +107,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockString = ("Touches: " + trialLevel.TotalTouches_Block +
-                        "\nReward Pulses: " + trialLevel.RewardPulses_Block +
+        CurrentBlockString = ("\nTouches: " + trialLevel.TotalTouches_Block +
+                        "\nReward Pulses: " + NumRewardPulses_InBlock +
                         "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
                         "\nChose Right: " + trialLevel.NumChosenRight_Block +
                         "\n\nChose Higher Reward: " + trialLevel.NumHigherRewardChosen_Block +
@@ -136,14 +116,13 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChose Same Reward: " + trialLevel.NumSameRewardChosen_Block +
                         "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
                         "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
-                        "\nChoseSameEffort: " + trialLevel.NumSameEffortChosen_Block +
-                        "\n");
-        BlockSummaryString.AppendLine(CurrentBlockString).ToString();
+                        "\nChose Same Effort: " + trialLevel.NumSameEffortChosen_Block);
+        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         /*if (PreviousBlocksString.Length > 0)
-            BlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
+            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
-    void SetupBlockData()
+    void DefineBlockData()
     {
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.Completions_Block);
         BlockData.AddDatum("ChoseLeft", () => trialLevel.NumChosenLeft_Block);
@@ -153,39 +132,32 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoseHigherEffort", () => trialLevel.NumHigherEffortChosen_Block);
         BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
         BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
-        BlockData.AddDatum("RewardPulses", () => trialLevel.RewardPulses_Block);
+        BlockData.AddDatum("AvgInflationDuration", () => CalculateAverageDuration(trialLevel.InflationDurations_Block));
+        
     }
 
     public void ClearStrings()
     {
         CurrentBlockString = "";
-        BlockSummaryString.Clear();
+        CurrentBlockSummaryString.Clear();
     }
     public override void SetTaskSummaryString()
     {
+        CurrentTaskSummaryString.Clear();
+        base.SetTaskSummaryString();
+
         if (trialLevel.TrialCount_InTask != 0)
         {
-            CurrentTaskSummaryString.Clear();
-
-            decimal percentAbortedTrials = (Math.Round(decimal.Divide(NumAborted_Task, (trialLevel.TrialCount_InTask)), 2)) * 100;
             decimal percentChoseLeft = Math.Round(decimal.Divide(NumChosenLeft_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseHigherReward = Math.Round(decimal.Divide(NumHigherRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseHigherEffort = Math.Round(decimal.Divide(NumHigherEffortChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseSameReward = Math.Round(decimal.Divide(NumSameRewardChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
             decimal percentChoseSameEffort = Math.Round(decimal.Divide(NumSameEffortChosen_Task, (trialLevel.TrialCount_InTask)), 2) * 100;
-            
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" + 
-                                            $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" + 
-                                            $"\t<b># Blocks:</b> {BlockCount}" + 
-                                            $"\t<b># Reward Pulses:</b> {RewardPulses_Task}" +
-                                            $"\n# Token Bar Completions: {Completions_Task}" +
+
+            CurrentTaskSummaryString.Append($"\n# Token Bar Completions: {Completions_Task}" +
                                             $"\n% Chose Left: {percentChoseLeft}%" +
-                                            $"\n% Chose Higher Reward: {percentChoseHigherReward}% (Same Reward: {percentChoseSameReward}%)" + 
+                                            $"\n% Chose Higher Reward: {percentChoseHigherReward}% (Same Reward: {percentChoseSameReward}%)" +
                                             $"\n% Chose Higher Effort: {percentChoseHigherEffort}% (Same Effort: {percentChoseSameEffort}%)");
-        }
-        else
-        {
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
         }
             
     }

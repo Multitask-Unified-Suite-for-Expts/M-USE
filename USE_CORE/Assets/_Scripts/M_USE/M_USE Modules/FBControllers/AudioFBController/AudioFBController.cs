@@ -19,9 +19,6 @@ public class AudioFBController : MonoBehaviour
 
     private string playingClipName = null;
 
-    /*public EventCodeManager EventCodeManager;
-    public Dictionary<string, EventCode> SessionEventCodes;*/
-
 
     public void Init(DataController frameData)
     {
@@ -68,8 +65,7 @@ public class AudioFBController : MonoBehaviour
             if (IsPlaying())
                 audioSource.Stop();
             audioSource.PlayOneShot(clip);
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
         }
         else
             Debug.LogWarning("Trying to play clip " + clipName + " but it has not been added");

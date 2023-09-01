@@ -1,5 +1,4 @@
 using GazeCalibration_Namespace;
-using UnityEngine;
 using USE_ExperimentTemplate_Task;
 
 
@@ -15,7 +14,7 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod (() =>
         {
             // Set the Background image as defined in the BlockDef
-            StartCoroutine(HandleSkybox(gcTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark"), TaskCam.gameObject.GetComponent<Skybox>()));
+            StartCoroutine(HandleSkybox(gcTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark")));
         });
     }
     private void SetSettings()
@@ -27,5 +26,7 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         gcTL.MinCircleScale = 0.15f;
         gcTL.ShrinkDuration = 1.5f;
     }
+    
+    
 
 }

@@ -43,7 +43,7 @@ namespace FeatureUncertaintyWM_Namespace
         //{
         //    //pick # of trials from minmax
         //    System.Random rnd = new System.Random();
-        //    int num = rnd.Next(nRepetitionsMinMax[0], nRepetitionsMinMax[1]);
+        //    int num = rnd.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
 
         //    TrialDefs = new List<FeatureUncertaintyWM_TrialDef>().ConvertAll(x => (TrialDef)x);
         //    for (int iTrial = 0; iTrial < num; iTrial++)
@@ -125,7 +125,7 @@ namespace FeatureUncertaintyWM_Namespace
         //public int[] BaseTokenGain;
         //public int[] BaseTokenLoss;
         //public int TimesUsedInBlock;
-        //public bool isRelevant;
+        //public bool IsRelevant;
         //public bool TriggersSonication;
         //public State SetActiveOnInitialization;
         //public State SetInactiveOnTermination;

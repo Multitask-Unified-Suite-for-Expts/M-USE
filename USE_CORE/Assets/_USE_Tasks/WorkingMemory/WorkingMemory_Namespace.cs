@@ -7,26 +7,23 @@ namespace WorkingMemory_Namespace
 {
     public class WorkingMemory_TaskDef : TaskDef
     {
-        public bool StimFacingCamera;
-        public string ShadowType;
-        public bool NeutralITI;
     }
 
     public class WorkingMemory_BlockDef : BlockDef
     {
-        //Already-existing fields (inherited from BlockDef)
-        //public int BlockCount;
-        //public TrialDef[] TrialDefs;
-        public string BlockName;
-        public int NumInitialTokens;
-        public int NumTokenBar;
-        public int NumPulses;
-        public int PulseSize;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
-        public bool StimFacingCamera;
-        public string ContextName;
+        public Vector3 SampleStimLocation;
+        public Vector3[] SearchStimLocations;
+        public int[] SearchStimIndices;
+        public Vector3[] PostSampleDistractorLocations;
+        public int[] PostSampleDistractorStimIndices;
+        public int[] SearchStimTokenReward;
+        public Reward[][] ProbabilisticSearchStimTokenReward;
+
+
+        public float DisplaySampleDuration;
+        public float PostSampleDelayDuration;
+        public float DisplayPostSampleDistractorsDuration;
+        public float PreTargetDelayDuration;
 
         public override void AddToTrialDefsFromBlockDef()
         {
@@ -36,13 +33,16 @@ namespace WorkingMemory_Namespace
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumPulses = NumPulses;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
-                td.StimFacingCamera = StimFacingCamera;
                 td.ContextName = ContextName;
+                td.DisplaySampleDuration = DisplaySampleDuration;
+                td.PostSampleDelayDuration = PostSampleDelayDuration;
+                td.DisplayPostSampleDistractorsDuration = DisplayPostSampleDistractorsDuration;
+                td.PreTargetDelayDuration = PreTargetDelayDuration;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -50,56 +50,22 @@ namespace WorkingMemory_Namespace
 
     public class WorkingMemory_TrialDef : TrialDef
     {
-        //Already-existing fields (inherited from TrialDef)
-        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
-        //public TrialStims TrialStims;
-        public int[] SearchStimIndices, PostSampleDistractorIndices;
+        public Vector3 SampleStimLocation;
+        public Vector3[] SearchStimLocations;
+        public int[] SearchStimIndices;
+        public Vector3[] PostSampleDistractorStimLocations;
+        public int[] PostSampleDistractorStimIndices;
+        public int[] SearchStimTokenReward;
+        public Reward[][] ProbabilisticSearchStimTokenReward;
 
-        public Reward[][] SearchStimTokenReward;
-        //public int[] TargetTokenUpdates, DistractorTokenUpdates;
-        public Vector3[] SearchStimLocations, PostSampleDistractorLocations, TargetSampleLocation;
-        public string ContextName;
-        public string BlockName;
-        public int NumInitialTokens;
-        public int NumTokenBar;
-        public int NumPulses;
-        public int PulseSize;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
-        public bool StimFacingCamera;
+        public float DisplaySampleDuration;
+        public float PostSampleDelayDuration;
+        public float DisplayPostSampleDistractorsDuration;
+        public float PreTargetDelayDuration;
     }
 
     public class WorkingMemory_StimDef : StimDef
     {
-        //Already-existing fields (inherited from Stim  Def)
-        //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
-        //public string StimName;
-        //public string StimPath;
-        //public string PrefabPath;
-        //public string ExternalFilePath;
-        //public string StimFolderPath;
-        //public string StimExtension;
-        //public int StimCode; //optional, for analysis purposes
-        //public string StimID;
-        //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
-        //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector2 StimScreenLocation; //screen position calculated during trial
-        //public float? StimScale;
-        //public bool StimLocationSet;
-        //public bool StimRotationSet;
-        //public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-        //public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        //public TokenReward[] TokenRewards;
-        //public int[] BaseTokenGain;
-        //public int[] BaseTokenLoss;
-        //public int TimesUsedInBlock;
-        //public bool isRelevant;
-        //public bool TriggersSonication;
-        //public State SetActiveOnInitialization;
-        //public State SetInactiveOnTermination;
         public bool IsTarget;
     }
 }

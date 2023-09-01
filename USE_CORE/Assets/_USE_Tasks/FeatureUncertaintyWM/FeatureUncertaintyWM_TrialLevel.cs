@@ -184,7 +184,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (!configUIVariablesLoaded) LoadConfigUIVariables();
             SetTrialSummaryString();
             CurrentTaskLevel.SetBlockSummaryString();
-            TokenFBController.ResetTokenBarFull();
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -219,8 +218,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 .SetUpdateTime(tokenUpdateDuration.value)
                 .SetFlashingTime(tokenFlashingDuration.value);
 
-            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
-
             CurrentTaskLevel.SetBlockSummaryString();
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
@@ -247,7 +244,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CreateTextOnExperimenterDisplay();
             multiCompStims.ToggleVisibility(true);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("StimOn");
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             choiceMade = false;
@@ -280,14 +276,12 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                 SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
                 
             }
@@ -305,12 +299,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
+            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            AbortCode = 6;
 
             aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
-            AbortCode = 6;
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
@@ -378,6 +373,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                     RewardGiven = true;
+                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });
@@ -387,7 +383,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             if (NeutralITI)
             {
                 ContextName = "itiImage";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName), Camera.main.gameObject.GetComponent<Skybox>()));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName)));
                 SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
 
@@ -449,9 +445,11 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
-            CurrentTaskLevel.BlockSummaryString.Clear();
-            CurrentTaskLevel.BlockSummaryString.AppendLine("");
+            CurrentTaskLevel.CurrentBlockSummaryString.Clear();
+            CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
+
+        TokenFBController.ResetTokenBarFull();
     }
 
     public void ResetBlockVariables()

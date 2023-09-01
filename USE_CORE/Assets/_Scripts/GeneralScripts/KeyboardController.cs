@@ -33,7 +33,7 @@ public class KeyboardController : MonoBehaviour
             GenerateGridItems();
         }
         else
-            Debug.LogError("KEYBOARD IS NULL!");
+            Debug.LogError("KEYBOARD GO IS NULL!");
     }
 
     private void Update()
@@ -53,12 +53,23 @@ public class KeyboardController : MonoBehaviour
                     {
                         CurrentInputField = selectedInputField;
                         if(selectedInputField.gameObject.name == "SubjectID_InputField" || selectedInputField.gameObject.name == "SubjectAge_InputField")
-                            Keyboard_GO.transform.localPosition = new Vector3(0, -235f, 0);
+                            Keyboard_GO.transform.localPosition = new Vector3(0, -300f, 0);
                         else
-                            Keyboard_GO.transform.localPosition = new Vector3(0, 235f, 0);
+                            Keyboard_GO.transform.localPosition = new Vector3(0, 300f, 0);
                     }
                 }
             }
+        }
+    }
+
+    public void OnKeyboardGridButtonPressed()
+    {
+        if (CurrentInputField != null)
+        {
+            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
+            string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
+            if(selected != null)
+                CurrentInputField.text += selected;
         }
     }
 
@@ -91,11 +102,10 @@ public class KeyboardController : MonoBehaviour
         else if (clickedGO.name == "CapsButton")
         {
             Caps = !Caps;
+            clickedGO.GetComponentInChildren<TextMeshProUGUI>().text = Caps ? "CAPS" : "Caps";
             foreach (GameObject go in gridItems)
             {
                 TextMeshProUGUI textComponent = go.transform.GetComponentInChildren<TextMeshProUGUI>();
-                if (textComponent.text.ToLower() == "back")
-                    continue;
                 textComponent.text = Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
             }
         }
@@ -105,22 +115,11 @@ public class KeyboardController : MonoBehaviour
         }
     }
 
-    public void OnKeyboardGridButtonPressed()
-    {
-        if (CurrentInputField != null)
-        {
-            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
-            string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
-            if(selected != null)
-                CurrentInputField.text += selected;
-        }
-    }
-
     private void SetCharacterList()
     {
         CharacterList = new List<string>()
         {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/"
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "=", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", ";", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "+", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/", "!"
         };
     }
 

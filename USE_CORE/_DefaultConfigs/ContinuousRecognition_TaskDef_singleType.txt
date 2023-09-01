@@ -1,6 +1,0 @@
-float	ExternalStimScale	.8
-Vector3	StartButtonPosition	[0,0,0]
-float	StartButtonScale	1.2
-bool	MakeStimPopOut	false
-float	TouchFeedbackDuration	0.3
-List<string>	FeedbackControllers	["Audio", "Halo", "Token"]

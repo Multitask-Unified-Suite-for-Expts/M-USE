@@ -18,7 +18,13 @@ namespace WorkingMemory_Namespace
         public int[] PostSampleDistractorStimIndices;
         public int[] SearchStimTokenReward;
         public Reward[][] ProbabilisticSearchStimTokenReward;
-        
+
+
+        public float DisplaySampleDuration;
+        public float PostSampleDelayDuration;
+        public float DisplayPostSampleDistractorsDuration;
+        public float PreTargetDelayDuration;
+
         public override void AddToTrialDefsFromBlockDef()
         {
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
@@ -33,6 +39,10 @@ namespace WorkingMemory_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.ContextName = ContextName;
+                td.DisplaySampleDuration = DisplaySampleDuration;
+                td.PostSampleDelayDuration = PostSampleDelayDuration;
+                td.DisplayPostSampleDistractorsDuration = DisplayPostSampleDistractorsDuration;
+                td.PreTargetDelayDuration = PreTargetDelayDuration;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -47,6 +57,11 @@ namespace WorkingMemory_Namespace
         public int[] PostSampleDistractorStimIndices;
         public int[] SearchStimTokenReward;
         public Reward[][] ProbabilisticSearchStimTokenReward;
+
+        public float DisplaySampleDuration;
+        public float PostSampleDelayDuration;
+        public float DisplayPostSampleDistractorsDuration;
+        public float PreTargetDelayDuration;
     }
 
     public class WorkingMemory_StimDef : StimDef

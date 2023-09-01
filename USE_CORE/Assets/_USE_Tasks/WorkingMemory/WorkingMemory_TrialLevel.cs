@@ -40,10 +40,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber tokenFlashingDuration;
     [HideInInspector] public ConfigNumber selectObjectDuration;
     [HideInInspector] public ConfigNumber fbDuration;
-    [HideInInspector] public ConfigNumber displaySampleDuration;
+/*    [HideInInspector] public ConfigNumber displaySampleDuration;
     [HideInInspector] public ConfigNumber postSampleDelayDuration;
     [HideInInspector] public ConfigNumber displayPostSampleDistractorsDuration;
-    [HideInInspector] public ConfigNumber preTargetDelayDuration;
+    [HideInInspector] public ConfigNumber preTargetDelayDuration;*/
     [HideInInspector] public ConfigNumber itiDuration;
     
     //Player View Variables
@@ -158,20 +158,20 @@ ShotgunHandler.HandlerActive = false;
         });
         
         // Show the target/sample by itself for some time
-        DisplaySample.AddTimer(() => displaySampleDuration.value, Delay, () =>
+        DisplaySample.AddTimer(() => CurrentTrialDef.DisplaySampleDuration, Delay, () =>
         {
             if (postSampleDistractorStims.stimDefs.Count != 0)
                 StateAfterDelay = DisplayDistractors;
             else
                 StateAfterDelay = SearchDisplay;
-            DelayDuration = postSampleDelayDuration.value;
+            DelayDuration = CurrentTrialDef.PostSampleDelayDuration;
         });
 
         // Show some distractors without the target/sample
-        DisplayDistractors.AddTimer(() => displayPostSampleDistractorsDuration.value, Delay, () =>
+        DisplayDistractors.AddTimer(() => CurrentTrialDef.DisplayPostSampleDistractorsDuration, Delay, () =>
           {
               StateAfterDelay = SearchDisplay;
-              DelayDuration = preTargetDelayDuration.value;
+              DelayDuration = CurrentTrialDef.PostSampleDelayDuration;
           });
 
         // Show the target/sample with some other distractors
@@ -417,10 +417,10 @@ ShotgunHandler.HandlerActive = false;
         baselineDuration = ConfigUiVariables.get<ConfigNumber>("baselineDuration"); */
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
-        displaySampleDuration = ConfigUiVariables.get<ConfigNumber>("displaySampleDuration");
+        /*displaySampleDuration = ConfigUiVariables.get<ConfigNumber>("displaySampleDuration");
         postSampleDelayDuration = ConfigUiVariables.get<ConfigNumber>("postSampleDelayDuration");
         displayPostSampleDistractorsDuration = ConfigUiVariables.get<ConfigNumber>("displayPostSampleDistractorsDuration");
-        preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");
+        preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");*/
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");

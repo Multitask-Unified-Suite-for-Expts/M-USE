@@ -154,7 +154,7 @@ ShotgunHandler.HandlerActive = false;
            
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
                 
-            
+            Debug.Log("DISPLAY SAMPLE: " + CurrentTrialDef.DisplaySampleDuration + " POST SAMPLE DELAY : " + CurrentTrialDef.PostSampleDelayDuration);
         });
         
         // Show the target/sample by itself for some time

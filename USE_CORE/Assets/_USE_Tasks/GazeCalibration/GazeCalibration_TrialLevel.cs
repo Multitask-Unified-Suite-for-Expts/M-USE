@@ -147,13 +147,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (SessionValues.TobiiEyeTrackerController.ScreenBasedCalibration != null):true), Init);
 
         if (SpoofGazeWithMouse)
-        {
             SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", SessionValues.MouseTracker, Init, ITI);
-        }
         else
-        {
             SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", SessionValues.GazeTracker, Init, ITI);
-        }
+        
 
         Init.AddUpdateMethod(() =>
         {

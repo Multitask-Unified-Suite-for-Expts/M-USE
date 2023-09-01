@@ -839,7 +839,6 @@ namespace USE_ExperimentTemplate_Task
             int difficultyLevel = 0;
             // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
             
-            // 10 TRIAL DLS? 
             
             //PASS IN THE DLS, max & min, pos step, # of trials before pos dl switch, neg step, # of trials before neg dl switch
             return difficultyLevel;
@@ -852,7 +851,7 @@ namespace USE_ExperimentTemplate_Task
             if (CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials) != null)
                 return CheckTrialRange(rTrialPerformance.Count, minTrials, maxTrials).Value;
 
-            // Add -1 to the running trial performance to indicate an aborted/incomplete trial
+            // Add null to the running trial performance to indicate an aborted/incomplete trial
 
             switch (blockEndType)
             {

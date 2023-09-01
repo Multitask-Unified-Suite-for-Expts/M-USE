@@ -135,7 +135,6 @@ public class Tile : MonoBehaviour
     
     public void NextCorrectFlashingFeedback()
     {
-        // ... code to set flashingTile, originalColor, and flashColor ...
         if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
             flashingTile = mgTL.startTile;
         else

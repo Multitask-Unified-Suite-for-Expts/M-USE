@@ -11,6 +11,7 @@ public class HaloFBController : MonoBehaviour
     private GameObject instantiated;
     private bool LeaveFBOn = false;
 
+    public bool IsFlashing;
     // Logging
     private enum State { None, Positive, Negative };
     private State state;
@@ -48,7 +49,6 @@ public class HaloFBController : MonoBehaviour
             Show2D(NegativeHaloPrefab, gameObj, depth.Value);
 
     }
-
     private void Show(GameObject haloPrefab, GameObject gameObj)
     {
         if (instantiated != null)
@@ -91,6 +91,39 @@ public class HaloFBController : MonoBehaviour
         instantiated.transform.position = worldPos;
     }
 
+    public IEnumerator<WaitForSeconds> FlashHalo(float flashingDuration, int numFlashes, GameObject go)
+    {
+        if (go.GetComponentInChildren<Light>() != null)
+        {
+            instantiated = GetRootObject(go.transform).GetComponentInChildren<Light>().gameObject;
+            instantiated.SetActive(false);
+        }
+        else
+            ShowPositive(go);
+
+        
+        // Calculate the time to stay on and off for each flash
+        float onDuration = flashingDuration / (2 * numFlashes);
+        IsFlashing = true;
+        // Flash the halo for the specified number of times
+        for (int i = 0; i < numFlashes; i++)
+        {
+            instantiated.SetActive(true);
+            yield return new WaitForSeconds(onDuration);
+            
+            instantiated.SetActive(false);
+            yield return new WaitForSeconds(onDuration);
+        }
+
+        IsFlashing = false;
+        Destroy();
+    }
+    
+    // Call this method to start flashing the halo
+    public void StartFlashingHalo(float flashingDuration, int numFlashes, GameObject go)
+    {
+        StartCoroutine(FlashHalo(flashingDuration, numFlashes, go));
+    }
 
     public void Destroy()
     {
@@ -129,6 +162,20 @@ public class HaloFBController : MonoBehaviour
         light = NegativeHaloPrefab.GetComponent<Light>();
         light.intensity = intensity;
         return this;
+    }
+    
+    private GameObject GetRootObject(Transform childTransform)
+    {
+        Transform currentTransform = childTransform;
+
+        // Traverse up the hierarchy until we find the root object.
+        while (currentTransform.parent != null)
+        {
+            currentTransform = currentTransform.parent;
+        }
+
+        // The currentTransform now points to the root object's transform.
+        return currentTransform.gameObject;
     }
 
 }

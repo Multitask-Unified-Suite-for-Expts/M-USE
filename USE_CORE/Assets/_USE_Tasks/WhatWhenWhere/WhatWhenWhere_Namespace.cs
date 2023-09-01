@@ -23,6 +23,8 @@ namespace WhatWhenWhere_Namespace
         public int[] SliderGain;
         public int[] SliderLoss;
 
+        public bool GuidedSequenceLearning;
+
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -50,6 +52,7 @@ namespace WhatWhenWhere_Namespace
                 td.LeaveFeedbackOn = LeaveFeedbackOn;
                 td.ErrorThreshold = ErrorThreshold;
                 td.MaxTrials = MaxTrials;
+                td.GuidedSequenceLearning = GuidedSequenceLearning;
                 TrialDefs.Add(td);
             }
         }
@@ -73,6 +76,8 @@ namespace WhatWhenWhere_Namespace
         public int[] SliderGain;
         public int[] SliderLoss;
         public int SliderInitial;
+
+        public bool GuidedSequenceLearning;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

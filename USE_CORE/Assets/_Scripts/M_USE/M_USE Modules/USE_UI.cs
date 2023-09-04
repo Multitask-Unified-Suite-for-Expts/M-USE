@@ -180,8 +180,8 @@ namespace USE_UI
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
         {
-            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
-            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
+            InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
+            InstructionsOn = InstructionsGO.activeInHierarchy;
             EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 

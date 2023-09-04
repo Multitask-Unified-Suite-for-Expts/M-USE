@@ -325,7 +325,7 @@ namespace SelectionTracking
                 List<GameObject> startButtonObjects = SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren;
                 if(startButtonObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
                 {
-                    foreach( GameObject go in startButtonObjects)
+                    foreach(GameObject go in startButtonObjects)
                     {
                         if(ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
                         {
@@ -369,6 +369,7 @@ namespace SelectionTracking
                     currentTarget = InputTracker.ShotgunModalTarget;
                 else
                     currentTarget = InputTracker.SimpleRaycastTarget;
+
 
                 if (currentTarget == null) //input is not over a gameobject
                 {

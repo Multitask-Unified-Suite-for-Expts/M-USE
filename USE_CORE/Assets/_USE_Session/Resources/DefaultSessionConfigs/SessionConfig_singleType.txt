@@ -5,7 +5,6 @@ string	TaskIconsFolderPath	"DefaultResources/TaskIcons"
 float	TaskSelectionTimeout	2000
 bool	GuidedTaskSelection	false
 bool	IsHuman	true
-bool	StoreData	true
 bool	EventCodesActive	false
 bool	SyncBoxActive	false
 float	BlockResultsDuration	7

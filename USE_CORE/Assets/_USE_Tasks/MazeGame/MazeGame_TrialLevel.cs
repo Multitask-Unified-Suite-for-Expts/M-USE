@@ -53,6 +53,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private bool ErroneousReturnToLast;
     public float tileFbDuration;
     public GameObject startTile;
+    public GameObject finishTile;
     private float tileScale;
 
     // Trial Data Tracking Variables
@@ -389,12 +390,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
-            if (currentTaskDef.GuidedMazeSelection)
-            {
+            // if (currentTaskDef.GuidedMazeSelection)
+            // {
                 tile.NextCorrectFlashingFeedback();
-            }
-            else
-                tile.LastCorrectFlashingFeedback();
+            // }
+            // else
+            //     tile.LastCorrectFlashingFeedback();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -528,10 +529,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (chessCoordName == CurrentTaskLevel.currMaze.mFinish)
             {
                 tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
+                finishTile = tile.gameObject;
                 tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
-            else
+            else if (CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
+            else
+                tile.gameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
             
             tiles.AddStims(tile.gameObject);
         }

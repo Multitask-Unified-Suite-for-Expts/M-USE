@@ -44,6 +44,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public string ContextName;
     private bool retouchLastCorrect = false;
     private int NumErrors_InTrial;
+    private int NumCorrect_InTrial;
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -236,6 +237,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // UpdateCounters_Correct();
                 LastCorrectStimGO = selectedGO;
                 CurrentTaskLevel.NumCorrectSelections_InBlock++;
+                NumCorrect_InTrial++;
                 isSliderValueIncrease = true;
                 SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
@@ -469,21 +471,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        if(CurrentTrialDef.BlockEndType == "SimpleThreshold")
+       
+        // If there is a MaxCorrectTrials defined, end the block when the minimum number of trials is run and the maximum number of correct trials is achieved
+        if (CurrentTrialDef.MaxCorrectTrials != 0)
+            return ( TrialCount_InBlock >= CurrentTaskLevel.MinTrials_InBlock && runningAcc.Count(num => num == 1) >= CurrentTrialDef.MaxCorrectTrials);
+        
+        // If using the SimpleThreshold block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
             return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
                 CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTrialDef.MaxTrials);
-        
-        else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+
+        // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
             return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
-        else
-        {
-            Debug.Log($"Cannot handle {CurrentTrialDef.BlockEndType} Block End Type. Forced block switch not applied.");
-            return false;
-        }
+         
+        Debug.Log($"Cannot handle {CurrentTrialDef.BlockEndType} Block End Type. Forced block switch not applied.");
+         return false;
         
+         
     }
     public override void FinishTrialCleanup()
     {
@@ -521,7 +529,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public override void ResetTrialVariables()
     {
         NumErrors_InTrial = 0;
-        
+        NumCorrect_InTrial = 0;
+
         numTouchedStims = 0;
         searchDuration = 0;
         sliderGainSteps = 0;

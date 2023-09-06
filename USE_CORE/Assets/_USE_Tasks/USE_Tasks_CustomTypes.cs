@@ -14,7 +14,6 @@ using FeatureUncertaintyWM_Namespace;
 using JoystickWWW_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
-using TobiiGaze_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -132,17 +131,6 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(GazeCalibration_BlockDef),
                 TrialDefType = typeof(GazeCalibration_TrialDef),
                 StimDefType = typeof(GazeCalibration_StimDef)
-            }
-        }
-        ,{
-            "TobiiGaze", new TaskTypes
-            {
-                TaskLevelType = typeof(TobiiGaze_TaskLevel),
-                TrialLevelType = typeof(TobiiGaze_TrialLevel),
-                TaskDefType = typeof(TobiiGaze_TaskDef),
-                BlockDefType = typeof(TobiiGaze_BlockDef),
-                TrialDefType = typeof(TobiiGaze_TrialDef),
-                StimDefType = typeof(TobiiGaze_StimDef)
             }
         }
 

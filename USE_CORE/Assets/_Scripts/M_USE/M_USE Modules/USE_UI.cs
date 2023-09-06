@@ -162,6 +162,7 @@ namespace USE_UI
                     Time.timeScale = 1;
 
                 TrialLevel.AbortCode = 5;
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.FinishTrialCleanup();
                 TrialLevel.ClearActiveTrialHandlers();
@@ -180,9 +181,7 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
             InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
-            if (SessionValues.SessionDef.EventCodesActive)
-                EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
-
+            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
         //Called at end of SetupTrial (TrialLevel)
@@ -238,7 +237,7 @@ namespace USE_UI
             if (setInactiveOnTerm != null)
             {
                 SetInactiveOnTermination = setInactiveOnTerm;
-                SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
+                SetInactiveOnTermination.StateTerminationFinished += DeactivateOnStateTerm;
             }
         }
 
@@ -252,7 +251,7 @@ namespace USE_UI
                 StartButtonGO.SetActive(true);
         }
 
-        private void InactivateOnStateTerm(object sender, EventArgs e)
+        private void DeactivateOnStateTerm(object sender, EventArgs e)
         {
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;

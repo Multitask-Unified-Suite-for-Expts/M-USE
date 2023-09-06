@@ -14,6 +14,7 @@ using USE_UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
+using Dropbox.Api.TeamLog;
 using USE_Def_Namespace;
 
 
@@ -65,14 +66,38 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
+        [HideInInspector] public string TrialDefSelectionStyle;
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
             BackdropStripesTexture, THR_BackdropTexture;
 
+
+        //if anyone uses this test it!
+        public List<GameObject> AssignStimToList(StimGroup sg, List<GameObject> existingList = null)
+        {
+            if (existingList == null)
+                existingList = new List<GameObject>();
+
+            foreach (var stim in sg.stimDefs)
+                existingList.Add(stim.StimGameObject);
+
+            return existingList;
+        }
+
+
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            return (T)TrialDefs[TrialCount_InBlock];
+            switch (TrialDefSelectionStyle)
+            {
+                case "Adaptive":
+                    //difficult level is returned by DetermineTrialDefDifficultyLevel()
+                    // search LIST TrialDefs for DL blah
+                    return null; //return trial from above
+                
+                default: 
+                    return (T)TrialDefs[TrialCount_InBlock];
+            }
         }
 
         public T GetTaskLevel<T>() where T: ControlLevel_Task_Template
@@ -146,6 +171,10 @@ namespace USE_ExperimentTemplate_Trial
 
                 TrialCount_InTask++;
                 TrialCount_InBlock++;
+
+                if(!SessionValues.WebBuild && TrialCount_InTask != 0)
+                    SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+
                 FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
                 if(SessionValues.SessionDef.EyeTrackerActive)
                     SessionValues.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
@@ -156,6 +185,7 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
                 }
 
+                SessionValues.ClearStimLists();
                 DefineTrialStims();
                 StartCoroutine(HandleLoadingStims());
             });
@@ -167,12 +197,11 @@ namespace USE_ExperimentTemplate_Trial
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
-                else
-                    SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+                
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
-                SessionValues.EventCodeManager.SendCodeImmediate("SetupTrialStarts");
+                SessionValues.EventCodeManager.SendRangeCode("SetupTrialStarts", TrialCount_InTask);
 
                 ResetRelativeStartTime();
 
@@ -184,6 +213,8 @@ namespace USE_ExperimentTemplate_Trial
                 Input.ResetInputAxes();
                 if (SessionValues.SessionDef.IsHuman)
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+
+                AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial. 
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -191,7 +222,6 @@ namespace USE_ExperimentTemplate_Trial
                 SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
             });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
-
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialStims);
@@ -211,8 +241,11 @@ namespace USE_ExperimentTemplate_Trial
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
-                TouchFBController.ClearErrorDict();
+                
+                TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
+
+                SessionValues.ClearStimLists();
             });
             
             GazeCalibration.AddSpecificInitializationMethod(() =>
@@ -295,6 +328,12 @@ namespace USE_ExperimentTemplate_Trial
         {
             StateAfterDelay = stateAfterDelay;
             DelayDuration = duration;
+        }
+
+        //Used for EventCodes:
+        public virtual void AddToStimLists()
+        {
+
         }
 
         public virtual void FinishTrialCleanup()
@@ -566,56 +605,56 @@ namespace USE_ExperimentTemplate_Trial
             return contextPath;
         }
 
+        //Timing is off:
+        //public void LoadTexturesFromServer()
+        //{
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            HeldTooLongTexture = result;
+        //            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+        //        }
+        //        else
+        //            Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
+        //    }));
 
-        public void LoadTexturesFromServer()
-        {
-            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
-            {
-                if (result != null)
-                {
-                    HeldTooLongTexture = result;
-                    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
-                }
-                else
-                    Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
-            }));
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            Debug.Log("Got the HeldTooShort Texture from the server!");
+        //            HeldTooShortTexture = result;
+        //            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+        //        }
+        //        else
+        //            Debug.Log("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
+        //    }));
 
-            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
-            {
-                if (result != null)
-                {
-                    Debug.Log("Got the HeldTooShort Texture from the server!");
-                    HeldTooShortTexture = result;
-                    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-                }
-                else
-                    Debug.Log("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
-            }));
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/bg.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            Debug.Log("Got the BackdropStripesTexture from the server!");
+        //            BackdropStripesTexture = result;
+        //            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+        //        }
+        //        else
+        //            Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
 
-            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/bg.png", result =>
-            {
-                if (result != null)
-                {
-                    Debug.Log("Got the BackdropStripesTexture from the server!");
-                    BackdropStripesTexture = result;
-                    TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
-                }
-                else
-                    Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
+        //    }));
 
-            }));
-
-            StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
-            {
-                if (result != null)
-                {
-                    Debug.Log("Got the THR_BackDropTexture from the server!");
-                    THR_BackdropTexture = result;
-                }
-                else
-                    Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
-            }));
-        }
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            Debug.Log("Got the THR_BackDropTexture from the server!");
+        //            THR_BackdropTexture = result;
+        //        }
+        //        else
+        //            Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
+        //    }));
+        //}
 
         public void LoadTexturesFromResources()
         {

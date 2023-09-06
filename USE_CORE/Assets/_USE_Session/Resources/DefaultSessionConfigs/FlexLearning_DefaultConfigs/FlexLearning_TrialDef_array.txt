@@ -1,4 +1,4 @@
-TrialID	BlockCount	TrialStimIndices	TrialStimLocations	TrialStimTokenReward	RandomizedLocations
+TrialID	BlockCount	TrialStimIndices	TrialStimLocations	ProbabilisticTrialStimTokenReward	RandomizedLocations
  NNNew.4.0001	1	[1, 11, 21]	[[3.0, -7.9, 0],[-7.9, -3.0, 0],[7.9, 3.0, 0]]	[[{"NumReward":3,"Probability":1}], [{"NumReward":-3,"Probability":1}], [{"NumReward":-3,"Probability":1}]]	FALSE
  NNNew.4.0002	1	[2, 12, 22]	[[-8.5, 0.5, 0],[0.5, 8.5, 0],[8.5, -0.5, 0]]	[[{"NumReward":3,"Probability":1}], [{"NumReward":-3,"Probability":1}], [{"NumReward":-3,"Probability":1}]]	FALSE
  NNNew.4.0003	1	[3, 13, 23]	[[-3.0, 7.9, 0],[3.0, -7.9, 0],[-7.9, -3.0, 0]]	[[{"NumReward":3,"Probability":1}], [{"NumReward":-3,"Probability":1}], [{"NumReward":-3,"Probability":1}]]	FALSE

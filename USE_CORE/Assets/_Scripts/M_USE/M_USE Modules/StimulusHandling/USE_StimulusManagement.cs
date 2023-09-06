@@ -42,7 +42,7 @@ namespace USE_StimulusManagement
 		public int[] BaseTokenGain;
 		public int[] BaseTokenLoss;
 		public int TimesUsedInBlock;
-		public bool isRelevant;
+		public bool IsRelevant;
 		public bool TriggersSonication;
 		public State SetActiveOnInitialization;
 		public State SetInactiveOnTermination;
@@ -146,7 +146,7 @@ namespace USE_StimulusManagement
 			if (BaseTokenLoss != null)
 				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
-			sd.isRelevant = isRelevant;
+			sd.IsRelevant = IsRelevant;
 			return sd;
 		}
 		
@@ -197,7 +197,7 @@ namespace USE_StimulusManagement
 			if (BaseTokenLoss != null)
 				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
-			sd.isRelevant = isRelevant;
+			sd.IsRelevant = IsRelevant;
 			return sd;
 		}
 
@@ -208,6 +208,9 @@ namespace USE_StimulusManagement
 			{
 				StimGameObject.SetActive(visibility);
 				toggled = true;
+
+				if (visibility)
+					SessionValues.EventCodeManager.SendRangeCode("Quaddle", StimIndex);
 			}
 
 			return toggled;
@@ -773,7 +776,8 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		private void ActivateOnStateInit(object sender, EventArgs e)
+
+        private void ActivateOnStateInit(object sender, EventArgs e)
 		{
 			ToggleVisibility(true);
 		}
@@ -936,11 +940,6 @@ namespace USE_StimulusManagement
 
 				stimDefs.RemoveAt(0);
 				sd.DestroyStimGameObject();
-				// GameObject tempGo = sd.StimGameObject;
-				// sd.StimGameObject = null;
-				// foreach (Transform child in tempGo.transform)
-				// 	GameObject.Destroy(child.gameObject);
-				// GameObject.Destroy(tempGo);
 			}
 		}
 
@@ -950,6 +949,8 @@ namespace USE_StimulusManagement
 			{
 				stim.ToggleVisibility(visibility);
 			}
+
+            SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
 
 			IsActive = visibility;
 		}

@@ -346,10 +346,13 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
-                if (taskCount >= SessionValues.SessionDef.TaskMappings.Count)
+                if(!SessionValues.WebBuild)
                 {
-                    TasksFinished = true;
-                    return;
+                    if (taskCount >= SessionValues.SessionDef.TaskMappings.Count)
+                    {
+                        TasksFinished = true;
+                        return;
+                    }
                 }
 
                 if (TaskButtonsContainer != null)
@@ -631,7 +634,7 @@ namespace USE_ExperimentTemplate_Session
             setupTask.AddSpecificInitializationMethod(() =>
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
-                SessionValues.EventCodeManager.SendCodeImmediate("SetupTaskStarts");
+                SessionValues.EventCodeManager.SendRangeCode("SetupTaskStarts", taskCount);
 
                 CurrentTask.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
             });
@@ -746,6 +749,14 @@ namespace USE_ExperimentTemplate_Session
 
                 StartCoroutine(FrameData.AppendDataToFile());
             });
+        }
+
+        private void OnApplicationQuit()
+        {
+            if (CurrentTask == null)
+                Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
+            else
+                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
         }
 
         private void FindGameObjects()

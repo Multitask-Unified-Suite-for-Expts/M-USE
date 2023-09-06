@@ -1,4 +1,4 @@
-TrialID	BlockCount	TrialStimIndices	TrialStimLocations	TrialStimTokenReward
+TrialID	BlockCount	TrialStimIndices	TrialStimLocations	ProbabilisticTrialStimTokenReward
 VSn0.TDSIM0	1	[1]	[[-15,6, 0.0]]	[[{"NumReward":3,"Probability":1}]]
 VSn12.TDSIM1	1	[1,0,2,3,4,5,6,7,8,9]	[[15,-10, 0],[-4, 10, 0],[0, 5, 0],[0, -4, 0],[-10, 4, 0],[10, 4.5, 0],[5, -10, 0],[-5, -4.5, 0.0],[8, 0, 0],[15, 0, 0]]	[[{"NumReward":3,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}], [{"NumReward":0,"Probability":1}]]
 VSn0.TDSIM0	1	[7]	[[4.00,4.50, 0.0]]	[[{"NumReward":3,"Probability":1}]]

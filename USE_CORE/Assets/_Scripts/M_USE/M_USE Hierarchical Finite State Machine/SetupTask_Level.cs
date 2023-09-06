@@ -42,7 +42,7 @@ public class SetupTask_Level : ControlLevel
             //Setup data management
             TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;
 
-            if (SessionValues.UsingServerConfigs && SessionValues.StoringDataOnServer) //MAY NEED TO CHECK THIS LOGIC
+            if (SessionValues.StoringDataOnServer)
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
             }
@@ -184,12 +184,11 @@ public class SetupTask_Level : ControlLevel
                 SessionValues.GazeTracker.Init(FrameData, 0);
             SessionValues.MouseTracker.Init(FrameData, 0);
 
-            if(SessionValues.UsingServerConfigs)
-                TrialLevel.LoadTexturesFromServer();
-            else if(SessionValues.UsingDefaultConfigs)
+
+            if(SessionValues.UsingDefaultConfigs || SessionValues.UsingServerConfigs) //currently still loading from resources for server
                 TrialLevel.LoadTexturesFromResources();
             else if(SessionValues.UsingLocalConfigs)
-                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath); //loading the textures before Init'ing the TouchFbController.
+                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath);
 
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);

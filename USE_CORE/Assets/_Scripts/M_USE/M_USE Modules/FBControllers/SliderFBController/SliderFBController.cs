@@ -112,18 +112,14 @@ public class SliderFBController : MonoBehaviour
                         sliderBarFull = true;
                         numSliderBarFull++;
                         audioFBController.Play("TripleCollected");
-                        if (SessionValues.SessionDef.EventCodesActive)
-                            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
                         animationEndTime += updateTime + flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     animationPhase = AnimationPhase.None;
-                    if (SessionValues.SessionDef.EventCodesActive)
-                    {
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
-                    }
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
                     break;
             }
         }
@@ -169,7 +165,12 @@ public class SliderFBController : MonoBehaviour
     public void UpdateSliderValue(float sliderChange)
     {
         sliderValueChange = sliderChange;
+        Debug.Log("SLIDER CHANGE: " + sliderValueChange);
         targetValue = Slider.value + sliderValueChange;
+        
+        if (targetValue < 0)
+            targetValue = 0;
+        
         AnimateSlider(sliderValueChange);
     }
 

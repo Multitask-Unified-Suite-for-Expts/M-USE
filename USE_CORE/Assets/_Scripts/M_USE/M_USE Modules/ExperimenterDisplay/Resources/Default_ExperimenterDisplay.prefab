@@ -1160,14 +1160,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1598724723860863872}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fdb3fd5e65a19154bac54d4b3f25d208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gazePointPrefab: {fileID: 0}
   maxTrailLength: 10
   trailLifetime: 1
+  pointSize: 5
 --- !u!1 &1653235002206278793
 GameObject:
   m_ObjectHideFlags: 0

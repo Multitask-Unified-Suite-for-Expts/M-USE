@@ -7,7 +7,7 @@ using UnityEngine;
 public class LogWriter : MonoBehaviour
 {
     private readonly List<string> LogMessages = new List<string>();
-    public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
+    [HideInInspector] public bool StoreDataIsSet; //turned true by sessionLevel script when it sets SessionValues.StoreData's value
     private bool CreatingLogFolder;
     private bool LogFolderCreated;
     private bool LogFileCreated;
@@ -122,12 +122,12 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator CreateLogFolder()
     {
-        if (SessionValues.WebBuild)
+        if (SessionValues.StoringDataOnServer)
         {
             if (ServerManager.SessionDataFolderCreated)
                 yield return ServerManager.CreateFolder(ServerLogFolderPath);
         }
-        else
+        else if (SessionValues.StoringDataLocally)
             Directory.CreateDirectory(LocalLogFolderPath);
         
         CreatingLogFolder = false;
@@ -136,13 +136,13 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator CreateLogFile()
     {
-        if (SessionValues.WebBuild)
+        if (SessionValues.StoringDataOnServer)
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
             yield return ServerManager.CreateFileAsync(ServerLogFilePath, content);
         }
-        else
+        else if (SessionValues.StoringDataLocally)
         {
             using StreamWriter createFileWriter = File.CreateText(LocalLogFilePath);
             WriteLogMessagesLocally(createFileWriter);
@@ -152,13 +152,13 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator AppendDataToLogFile()
     {
-        if (SessionValues.WebBuild)
+        if (SessionValues.StoringDataOnServer)
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
             yield return ServerManager.AppendToFileAsync(ServerLogFilePath, content);
         }
-        else
+        else if(SessionValues.StoringDataLocally)
         {
             using StreamWriter appendFileWriter = File.AppendText(LocalLogFilePath);
             WriteLogMessagesLocally(appendFileWriter);

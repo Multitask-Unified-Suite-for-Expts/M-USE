@@ -4,6 +4,7 @@ using Dropbox.Api.TeamPolicies;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using USE_States;
+using USE_UI;
 
 namespace SelectionTracking
 {
@@ -243,9 +244,7 @@ namespace SelectionTracking
             public bool HandlerActive;
             public GameObject playerObject;
 
-            //Just added but not implemented
-            public List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
-
+            private bool HoverOnEventCodeSent; //used so that hover event code is only sent on first frame of hovering. 
 
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
@@ -335,6 +334,23 @@ namespace SelectionTracking
                 return false;
             }
 
+            public bool LastSuccessfulSelectionMatchesStartButton()
+            {
+                List<GameObject> startButtonObjects = SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren;
+                if(startButtonObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                {
+                    foreach( GameObject go in startButtonObjects)
+                    {
+                        if(ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                        {
+                            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
@@ -370,9 +386,34 @@ namespace SelectionTracking
 
                 if (currentTarget == null) //input is not over a gameobject
                 {
+                    if (HoverOnEventCodeSent && OngoingSelection == null)
+                    if (HoverOnEventCodeSent && OngoingSelection == null)
+                    {
+                        //For EventCodes:
+                        //Debug.Log("EVENTCODE: HoverOffObject");
+                       // SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject"); //CAN UN COMMENT LATER
+                        HoverOnEventCodeSent = false; //reset hover
+                    }
+
                     if (OngoingSelection != null) // the previous frame was a selection
+                    {
+                        //For EventCodes:
+                        if(HoverOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
+                        {
+                            //SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
+                            HoverOnEventCodeSent = false; //reset hover
+                        }
+
                         CheckTermination();
+                    }
                     return;
+                }
+
+                //For EventCodes:
+                if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
+                {
+                    //SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
+                    HoverOnEventCodeSent = true;
                 }
 
                 //if we have reached this point we know there is a target
@@ -381,6 +422,8 @@ namespace SelectionTracking
                     CheckInit();
                     return;
                 }
+
+                
 
                 //if we have reached this point we know there is a target, there was a previous selection,
                 //and this is not the first frame of new selection
@@ -457,6 +500,10 @@ namespace SelectionTracking
                         LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
                         SuccessfulSelections.Add(OngoingSelection);
+
+                        //For EventCodes:
+                        SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
+                        HoverOnEventCodeSent = false; //reset hover
                     }
                     else
                     {
@@ -466,6 +513,9 @@ namespace SelectionTracking
                         LastUnsuccessfulSelection = OngoingSelection;
                         UnsuccessfulSelections.Add(OngoingSelection);
                         SelectionErrorHandling(termErrors);
+
+                        //For EventCodes:
+                        HoverOnEventCodeSent = false; //reset hover
                     }
                     AllSelections.Add(OngoingSelection);
                     OngoingSelection = null;

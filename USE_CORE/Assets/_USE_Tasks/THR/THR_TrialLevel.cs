@@ -150,7 +150,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
 
         });
-        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatches(SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : USE_Square.StartButtonChildren) || StartButton == null, CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
+        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton() || StartButton == null, CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //AVOID OBJECT state ------------------------------------------------------------------------------------------------------------------------
@@ -376,13 +376,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
                 ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
+                CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumReleasePulses;
+                CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumReleasePulses;
                 SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumReleasePulses));
             }
             if (GiveTouchReward && SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
                 TouchRewards_Trial += CurrentTrial.NumTouchPulses;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumReleasePulses));
+                CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumTouchPulses;
+                CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumTouchPulses;
+                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumTouchPulses));
             }
         });
         Reward.SpecifyTermination(() => true, ITI);
@@ -409,6 +413,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
+
+    //Not used yet:
+    //public override void AddToStimLists()
+    //{
+    //    SessionValues.TargetObjects.Add(MainObjectGO);
+    //    SessionValues.TargetObjects.Add(MainObjectGO.transform.Find("Border").gameObject);
+    //    SessionValues.TargetObjects.Add(MainObjectGO.transform.Find("MainCircle").gameObject);
+    //    SessionValues.TargetObjects.Add(MainObjectGO.transform.Find("PlayIcon").gameObject);
+    //    //SessionValues.DistractorObjects.Add(MainObjectGO.transform.Find("CoverCircle").gameObject);
+    //}
+
     private void UpdateData()
     {
         SelectObjectTouches_Block += SelectObjectTouches_Trial;

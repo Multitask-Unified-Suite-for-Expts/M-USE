@@ -27,7 +27,7 @@ namespace USE_ExperimentTemplate_Data
             Separator = SessionValues.WebBuild ? '/' : Path.DirectorySeparatorChar;
             FolderPath = SessionValues.SessionDataPath + Separator + "SummaryData";
 
-            if(SessionValues.WebBuild)
+            if(SessionValues.StoringDataOnServer)
                 CoroutineHelper.StartCoroutine(ServerManager.CreateFolder(FolderPath));
             else
                 Directory.CreateDirectory(FolderPath);
@@ -43,7 +43,7 @@ namespace USE_ExperimentTemplate_Data
 
             string filePath = FolderPath + Separator + ConfigName + ".txt";
 
-            if(SessionValues.WebBuild)
+            if(SessionValues.StoringDataOnServer)
             {
                 string content = "";
                 foreach (DictionaryEntry entry in data)
@@ -56,7 +56,6 @@ namespace USE_ExperimentTemplate_Data
                 foreach (DictionaryEntry entry in data)
                     dataStream.Write($"{entry.Key}:\t{entry.Value}\n");
             }
-            
         }
     }
 
@@ -296,6 +295,8 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddDatum("TaskName", () => taskLevel != null ? taskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
+            AddDatum("NumRewardPulses_InBlock", () => taskLevel != null ? (taskLevel.NumRewardPulses_InBlock).ToString() : "NoTaskActive");
+            AddDatum("NumAbortedTrials_InBlock", () => taskLevel != null ? (taskLevel.NumAbortedTrials_InBlock).ToString() : "NoTaskActive");
         }
     }
 

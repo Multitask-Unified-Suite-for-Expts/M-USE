@@ -638,9 +638,7 @@ namespace USE_Data
 				}
 				else
 				{
-					Debug.Log("BEFORE!");
 					Directory.CreateDirectory(folderPath);
-					Debug.Log("AFTER!");
 					using StreamWriter dataStream = File.CreateText(folderPath + Path.DirectorySeparatorChar + fileName);
 					dataStream.Write(fileHeaders);
 

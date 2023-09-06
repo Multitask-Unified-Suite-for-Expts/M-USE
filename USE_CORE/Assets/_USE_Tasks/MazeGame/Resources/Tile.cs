@@ -118,24 +118,24 @@ public class Tile : MonoBehaviour
         choiceFeedback = true;
     }
 
-    public void LastCorrectFlashingFeedback()
-    {
-        // FAILS TO SELECT LAST CORRECT AFTER ERROR
-        fbColor = PREV_CORRECT_COLOR;
-        if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
-            flashingTile = mgTL.startTile;
-        else // somewhere along the path, can now index through pathProgress
-            flashingTile = mgTL.pathProgressGO[mgTL.pathProgressGO.Count - 1];
-
-        isFlashing = true;
-        flashStartTime = Time.unscaledTime;
-        originalTileColor = flashingTile.GetComponent<Renderer>().material.color; // before it starts flashing set color
-        numFlashes = 0;
-    }
+    // public void LastCorrectFlashingFeedback()
+    // {
+    //     // FAILS TO SELECT LAST CORRECT AFTER ERROR
+    //     fbColor = PREV_CORRECT_COLOR;
+    //     if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
+    //         flashingTile = mgTL.startTile;
+    //     else // somewhere along the path, can now index through pathProgress
+    //         flashingTile = mgTL.pathProgressGO[mgTL.pathProgressGO.Count - 1];
+    //
+    //     isFlashing = true;
+    //     flashStartTime = Time.unscaledTime;
+    //     if 
+    //     originalTileColor = flashingTile.GetComponent<Renderer>().material.color; // before it starts flashing set color
+    //     numFlashes = 0;
+    // }
     
     public void NextCorrectFlashingFeedback()
     {
-        // ... code to set flashingTile, originalColor, and flashColor ...
         if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
             flashingTile = mgTL.startTile;
         else
@@ -143,7 +143,12 @@ public class Tile : MonoBehaviour
 
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
-        originalTileColor = flashingTile.GetComponent<Renderer>().material.color; // before it starts flashing set color
+        if (flashingTile == mgTL.startTile)
+            originalTileColor = START_COLOR;
+        else if (flashingTile == mgTL.finishTile)
+            originalTileColor = FINISH_COLOR;
+        else
+            originalTileColor = DEFAULT_TILE_COLOR;// before it starts flashing set color
         numFlashes = 0;
     }
 
@@ -182,10 +187,18 @@ public class Tile : MonoBehaviour
             if (elapsed >=  interval)
             {
                // if ((mgTL != null ? !mgTL.viewPath : !mrtTL.viewPath) || correctnessCode != 1)
-                if (!mgTL.viewPath || correctnessCode != 1)
+                if (!mgTL.viewPath || correctnessCode != 1 && correctnessCode != 2)
                 {
                     gameObject.GetComponent<Renderer>().material.color = originalTileColor;
                 }
+                 else if(mgTL.viewPath && correctnessCode == 2)
+                     gameObject.GetComponent<Renderer>().material.color = CORRECT_COLOR;
+                // else
+                // {
+                //     gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
+                //
+                // }
+
                 choiceFeedback = false;
             }
         }

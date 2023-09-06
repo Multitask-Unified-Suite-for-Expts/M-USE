@@ -39,10 +39,6 @@ namespace WorkingMemory_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.ContextName = ContextName;
-                td.DisplaySampleDuration = DisplaySampleDuration;
-                td.PostSampleDelayDuration = PostSampleDelayDuration;
-                td.DisplayPostSampleDistractorsDuration = DisplayPostSampleDistractorsDuration;
-                td.PreTargetDelayDuration = PreTargetDelayDuration;
                 TrialDefs[iTrial] = td;
             }
         }

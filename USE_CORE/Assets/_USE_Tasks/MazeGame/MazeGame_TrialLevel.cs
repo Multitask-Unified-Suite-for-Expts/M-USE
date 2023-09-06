@@ -53,6 +53,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private bool ErroneousReturnToLast;
     public float tileFbDuration;
     public GameObject startTile;
+    public GameObject finishTile;
     private float tileScale;
 
     // Trial Data Tracking Variables
@@ -333,7 +334,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SelectionFeedback.AddTimer(() => finishedMaze? finishedFbDuration:tileFbDuration, Delay, () =>
         {
             
-            choiceMade = false;
             if (currentTaskDef.UsingFixedRatioReward)
             {
                 if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
@@ -389,12 +389,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
-            if (currentTaskDef.GuidedMazeSelection)
-            {
+            // if (currentTaskDef.GuidedMazeSelection)
+            // {
                 tile.NextCorrectFlashingFeedback();
-            }
-            else
-                tile.LastCorrectFlashingFeedback();
+            // }
+            // else
+            //     tile.LastCorrectFlashingFeedback();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -528,10 +528,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (chessCoordName == CurrentTaskLevel.currMaze.mFinish)
             {
                 tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
+                finishTile = tile.gameObject;
                 tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
-            else
+            else if (CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
+            else
+                tile.gameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
             
             tiles.AddStims(tile.gameObject);
         }
@@ -590,14 +593,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         
         if (touchedCoord.chessCoord == CurrentTaskLevel.currMaze.mNextStep)
         {
-            SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
 
-            correctTouches_InTrial++;
-            CurrentTaskLevel.CorrectTouches_InBlock++;
-            CurrentTaskLevel.CorrectTouches_InTask++;
-            
-            CorrectSelection = true;
-            
             // Provides feedback for last correct tile touch and updates next tile step
             if (pathProgress.Contains(touchedCoord))
             {
@@ -616,7 +612,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 tileFbDuration = tile.PREV_CORRECT_FEEDBACK_SECONDS;
                 return 2;
             }
-            
+
+            if (!ReturnToLast)
+            {
+                SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
+
+                correctTouches_InTrial++;
+                CurrentTaskLevel.CorrectTouches_InBlock++;
+                CurrentTaskLevel.CorrectTouches_InTask++;
+
+                CorrectSelection = true;
+            }
             // Helps set progress on the experimenter display
             pathProgress.Add(touchedCoord);
             pathProgressGO.Add(tile.gameObject);
@@ -676,7 +682,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             // Set the correct next step to the last correct tile touch, only when this is the first time off path
             if (consecutiveErrors == 1)
+            {
                 CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
+                GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
+            }
 
             tileFbDuration = tile.INCORRECT_RULEABIDING_SECONDS;
             return 10;
@@ -719,9 +728,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             // Set the correct next step to the last correct tile touch
             if (consecutiveErrors == 1)
-                CurrentTaskLevel.currMaze.mNextStep =
-                    CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
-            
+            {
+                CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
+                GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
+            }
+
+
             tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
             return 20;
         }
@@ -743,7 +755,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
         // Set the correct next step to the last correct tile touch
         if (consecutiveErrors == 1)
+        {
             CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
+            GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
+
+        }
 
         tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
         return 20;

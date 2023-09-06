@@ -21,6 +21,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
     public WhatWhenWhere_TaskDef currentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
 
+    // Block Ending Variable
+    public List<float?> runningPercentError = new List<float?>();
+    private float percentError;
+
     //stim group
     private StimGroup searchStims, distractorStims;
     private List<int> TouchedObjects = new List<int>();
@@ -28,7 +32,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // feedback variables
     public int numTouchedStims = 0;
     private bool trialComplete = false;
-    
+    private GameObject targetStimGameObject;
+    private List<GameObject> GrayHalos = new List<GameObject>();
 
     
     //Trial Data Logging variables
@@ -37,6 +42,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private List<float?> SearchDurations_InTrial = new List<float?> { };
     public List<int> runningAcc = new List<int>();
     public string ContextName;
+    private bool retouchLastCorrect = false;
+    private int NumErrors_InTrial;
+    private int NumCorrect_InTrial;
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -75,10 +83,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Stimuli Variables
     private GameObject StartButton;
-    
+
     // Stim Evaluation Variables
     private GameObject selectedGO = null;
     private WhatWhenWhere_StimDef selectedSD = null;
+    private GameObject LastCorrectStimGO;
+
     private bool CorrectSelection;
     private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
     private bool choiceMade = false;
@@ -90,21 +100,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
         State InitTrial = new State("InitTrial");
         State ChooseStimulus = new State("ChooseStimulus");
-        State ChooseStimulusDelay = new State("ChooseStimulusDelay");
+        State FlashNextCorrectStim = new State("FlashNextCorrectStim");
         State SelectionFeedback = new State("SelectionFeedback");
         State FinalFeedback = new State("FinalFeedback");
         State ITI = new State("ITI");
         AddActiveStates(new List<State>
         {
-            InitTrial, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI, ChooseStimulusDelay
+            InitTrial, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI, FlashNextCorrectStim
         });
 
         string[] stateNames = new string[]
-            {"InitTrial", "ChooseStimulus", "ChooseStimulusDelay", "SelectionFeedback", "FinalFeedback", "ITI", "ChooseStimulusDelay"};
+            {"InitTrial", "ChooseStimulus", "FlashNextCorrectStim", "SelectionFeedback", "FinalFeedback", "ITI"};
 
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
+            
             
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(12);
@@ -156,20 +167,38 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             InitializeShotgunHandler();
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), ChooseStimulusDelay, ()=>
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
+            SliderFBController.SetUpdateDuration(fbDuration.value);
+            SliderFBController.SetFlashingDuration(flashingFbDuration.value);
             
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
+
+            DelayDuration = chooseStimOnsetDelay.value;
+            if (CurrentTrialDef.GuidedSequenceLearning)
+                StateAfterDelay = FlashNextCorrectStim;
+            else
+                StateAfterDelay = ChooseStimulus;
+            
         });
-        ChooseStimulusDelay.AddTimer(() => chooseStimOnsetDelay.value, ChooseStimulus);
         
+        FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
+        {
+            AssignCorrectStim();
+            HaloFBController.StartFlashingHalo(1f, 2, targetStimGameObject);
+        });
+        
+        FlashNextCorrectStim.SpecifyTermination(()=> !HaloFBController.IsFlashing, ChooseStimulus);
+       
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
-            AssignCorrectStim();
+            if (!CurrentTrialDef.GuidedSequenceLearning)
+                AssignCorrectStim();
+           
             searchDuration = 0;
 
             if(!SessionValues.WebBuild)
@@ -206,7 +235,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (CorrectSelection)
             {
                 // UpdateCounters_Correct();
+                LastCorrectStimGO = selectedGO;
                 CurrentTaskLevel.NumCorrectSelections_InBlock++;
+                NumCorrect_InTrial++;
                 isSliderValueIncrease = true;
                 SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
@@ -214,6 +245,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 runningAcc.Add(0);
                 CurrentTaskLevel.NumErrors_InBlock++;
+                NumErrors_InTrial++;
                 //UpdateCounters_Incorrect(correctIndex);
                 isSliderValueIncrease = false;
                 SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
@@ -224,7 +256,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.RepetitionErrorCount_InBlock++;
                     errorTypeString = "RepetitionError";
                     SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
+
+                    if (selectedGO == LastCorrectStimGO)
+                        retouchLastCorrect = true;
+                    
                 }
+                
                 // Slot Errors
                 else
                 {
@@ -257,6 +294,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             errorTypeString = "AbortedTrial";
+            
+            runningPercentError.Add(null);
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
@@ -268,13 +307,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SearchDurations_InBlock.Add(searchDuration);
             CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
            // totalFbDuration = (fbDuration.value + flashingFbDuration.value);
-            SliderFBController.SetUpdateDuration(fbDuration.value);
-            SliderFBController.SetFlashingDuration(flashingFbDuration.value);
-
+            
             int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection)
             {
+                if (GrayHalos.Count > 0)
+                {
+                    // if correcting a previous error, delete all the existing gray halos
+                    foreach (GameObject grayHalo in GrayHalos)
+                    {
+                        Destroy(grayHalo);
+                    }
+                }
                 consecutiveError = 0;
                 HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
@@ -286,20 +331,39 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             else //Chose Incorrect
             {
-                consecutiveError++;
-                HaloFBController.ShowNegative(selectedGO, depth);
-                if (errorTypeString.Equals("DistractorSlotError"))
+                
+                // RETOUCH LAST CORRECT doesn't INCREMENT CONSECUTIVE ERROR
+                if(!retouchLastCorrect)
+                    consecutiveError++;
+
+                if (GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)")?.gameObject == null)
+                {
+                    HaloFBController.ShowNegative(selectedGO, depth);
+                    GrayHalos.Add(GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)").gameObject);
+                }
+
+                if (selectedSD.IsDistractor)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
                     stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
-                SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
+                
+                if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance" && numTouchedStims != 0 && consecutiveError == 1)
+                {
+                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
+                    numTouchedStims -= 1;
+                }
+                else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
+                
+
             }
+            
             selectedGO = null;
         });
         
         //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
-        SelectionFeedback.AddTimer(()=>fbDuration.value, Delay, () =>
+        SelectionFeedback.AddTimer(()=> fbDuration.value, Delay, () =>
         {
             DelayDuration = 0;
             
@@ -308,22 +372,48 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             UpdateExperimenterDisplaySummaryStrings();
 
-            if (CorrectSelection)
+            // If the sequence has been completed, send to slider feedback state
+            if (trialComplete)
+                StateAfterDelay = FinalFeedback;
+            else
             {
-                if(trialComplete)
-                    StateAfterDelay = FinalFeedback;
-                else
-                    StateAfterDelay = ChooseStimulus;
-                CorrectSelection = false;
+                // If there is a MaxTrialErrors defined in the BlockDef and the number of errors in the trial exceed that value, send to ITI
+                if(CurrentTrialDef.MaxTrialErrors != null && NumErrors_InTrial >= CurrentTrialDef.MaxTrialErrors)
+                {
+                    StateAfterDelay = ITI;
+                }
+
+                // If there is either no MaxTrialErrors or the error threshold hasn't been met, either move onto the next stim in the sequence or terminate the trial for an incorrect choice
+                else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+                {
+                    if (CorrectSelection)
+                    {
+                        if (CurrentTrialDef.GuidedSequenceLearning)
+                            StateAfterDelay = FlashNextCorrectStim;
+                        else
+                            StateAfterDelay = ChooseStimulus;
+                    }
+                    else
+                        StateAfterDelay = ITI;
+                }
+
+                // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
+                else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+                {
+                    if (CurrentTrialDef.GuidedSequenceLearning)
+                        StateAfterDelay = FlashNextCorrectStim;
+                    else
+                        StateAfterDelay = ChooseStimulus;
+                }
             }
-            else 
-                StateAfterDelay = ITI;
+
+            CorrectSelection = false;
             
         });
         FinalFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
-
+            
             trialComplete = false;
             errorTypeString = "None";
 
@@ -334,7 +424,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             runningAcc.Add(1);
             NumSliderBarFilled += 1;
             CurrentTaskLevel.NumSliderBarFilled_InTask++;
-
+            
+            percentError = (float)decimal.Divide(NumErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
+            runningPercentError.Add(percentError);
+            
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
                         
             if (SessionValues.SyncBoxController != null)
@@ -385,9 +478,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-            CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTrialDef.BlockEndWindow,
-            CurrentTrialDef.MaxTrials);
+       
+        // If there is a MaxCorrectTrials defined, end the block when the minimum number of trials is run and the maximum number of correct trials is achieved
+        if (CurrentTrialDef.MaxCorrectTrials != 0)
+            return ( TrialCount_InBlock >= CurrentTaskLevel.MinTrials_InBlock && runningAcc.Count(num => num == 1) >= CurrentTrialDef.MaxCorrectTrials);
+        
+        // If using the SimpleThreshold block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+                CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
+                CurrentTrialDef.MaxTrials);
+
+        // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
+                CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
+                CurrentTaskLevel.MaxTrials_InBlock);
+         
+        Debug.Log($"Cannot handle {CurrentTrialDef.BlockEndType} Block End Type. Forced block switch not applied.");
+         return false;
+        
+         
     }
     public override void FinishTrialCleanup()
     {
@@ -402,6 +513,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SliderFBController.SliderGO.SetActive(false);
         SliderFBController.SliderHaloGO.SetActive(false);
 
+        
         if(AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
         else
@@ -423,6 +535,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
+        NumErrors_InTrial = 0;
+        NumCorrect_InTrial = 0;
+
         numTouchedStims = 0;
         searchDuration = 0;
         sliderGainSteps = 0;
@@ -430,13 +545,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         stimIdx = null;
         selectedGO = null;
         selectedSD = null;
+        LastCorrectStimGO = null;
         CorrectSelection = false;
         choiceMade = false;
+        retouchLastCorrect = false;
         
         SearchDurations_InTrial.Clear();
         TouchedObjects.Clear();
         errorTypeString = "";
         SliderFBController.ResetSliderBarFull();
+        GrayHalos.Clear();
     }
 
     
@@ -465,6 +583,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Selected Object Indices: " + string.Join(",",TouchedObjects) +
                              "\nCorrect Selection? : " + CorrectSelection +
+                             "\nPercent Error : " + percentError +
                              "\n" +
                              "\nError: " + errorTypeString +
                              "\n" +
@@ -510,10 +629,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //StimGroup constructor which creates a subset of an already-existing StimGroup 
         searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
         distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimIndices);
-       
-        searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
-        distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
 
+        if (CurrentTrialDef.GuidedSequenceLearning)
+        {
+            searchStims.SetVisibilityOnOffStates(GetStateFromName("FlashNextCorrectStim"), GetStateFromName("ITI"));
+            distractorStims.SetVisibilityOnOffStates(GetStateFromName("FlashNextCorrectStim"), GetStateFromName("ITI"));
+        }
+        else
+        {
+            searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
+            distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
+        }
+        
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);
         
@@ -544,17 +671,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-------------------------------------------------------------MISCELLANEOUS METHODS--------------------------------------------------------------------------
     private void AssignCorrectStim()
     {
+        targetStimGameObject = null;
+        
         //if we haven't finished touching all stims
         if (numTouchedStims < CurrentTrialDef.CorrectObjectTouchOrder.Length)
         {
             //find which stimulus is currently target
             correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[numTouchedStims] - 1;
-        
+
             for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; iStim++)
             {
                 WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) searchStims.stimDefs[iStim];
-                if (iStim == correctIndex) sd.IsCurrentTarget = true;
-                else sd.IsCurrentTarget = false;
+                if (iStim == correctIndex)
+                {
+                    sd.IsCurrentTarget = true;
+                    targetStimGameObject = sd.StimGameObject;
+                }
+                else 
+                    sd.IsCurrentTarget = false;
             }
         
             for (int iDist = 0; iDist < CurrentTrialDef.DistractorStimIndices.Length; ++iDist)
@@ -609,6 +743,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetTrialSummaryString();
         if (TrialCount_InTask != 0)
             CurrentTaskLevel.SetTaskSummaryString();
+    }
+    GameObject GetRootObject(Transform childTransform)
+    {
+        Transform currentTransform = childTransform;
+
+        // Traverse up the hierarchy until we find the root object.
+        while (currentTransform.parent != null)
+        {
+            currentTransform = currentTransform.parent;
+        }
+
+        // The currentTransform now points to the root object's transform.
+        return currentTransform.gameObject;
     }
 }
 

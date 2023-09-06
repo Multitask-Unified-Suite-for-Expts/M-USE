@@ -165,7 +165,12 @@ public class SliderFBController : MonoBehaviour
     public void UpdateSliderValue(float sliderChange)
     {
         sliderValueChange = sliderChange;
+        Debug.Log("SLIDER CHANGE: " + sliderValueChange);
         targetValue = Slider.value + sliderValueChange;
+        
+        if (targetValue < 0)
+            targetValue = 0;
+        
         AnimateSlider(sliderValueChange);
     }
 

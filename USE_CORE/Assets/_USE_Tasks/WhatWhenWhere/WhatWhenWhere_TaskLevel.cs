@@ -126,5 +126,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
         SearchDurations_InBlock.Clear();
         wwwTL.runningAcc.Clear();
+        wwwTL.runningPercentError.Clear();
+
     }
 }

@@ -373,19 +373,20 @@ namespace SelectionTracking
                 if (currentTarget == null) //input is not over a gameobject
                 {
                     if (HoverOnEventCodeSent && OngoingSelection == null)
+                    if (HoverOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
                         //Debug.Log("EVENTCODE: HoverOffObject");
-                        SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
+                       // SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject"); //CAN UN COMMENT LATER
                         HoverOnEventCodeSent = false; //reset hover
                     }
 
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
                         //For EventCodes:
-                        if(OngoingSelection.SelectedGameObject != null)
+                        if(HoverOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
                         {
-                            SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
+                            //SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
                             HoverOnEventCodeSent = false; //reset hover
                         }
 
@@ -397,7 +398,7 @@ namespace SelectionTracking
                 //For EventCodes:
                 if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
-                    SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
+                    //SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
                     HoverOnEventCodeSent = true;
                 }
 

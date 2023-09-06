@@ -325,7 +325,7 @@ namespace SelectionTracking
             {
                 List<GameObject> startButtonChildren = SessionValues.GetStartButtonChildren();
 
-                if (startButtonChildren != null && LastSuccessfulSelection != null && LastSuccessfulSelection.SelectedGameObject != null)
+                if (startButtonChildren != null && LastSuccessfulSelection?.SelectedGameObject != null)
                 {
                     foreach (GameObject go in startButtonChildren)
                     {

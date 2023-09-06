@@ -178,7 +178,7 @@ namespace USE_ExperimentTemplate_Task
 
 
                 //Send Reward Pulses for Ansen's Camera at Start of Task:
-                SessionValues.SyncBoxController?.SendRewardPulses(3, 250); //Does he want to specify the amount and size?
+                //SessionValues.SyncBoxController?.SendCameraSyncPulse(3, 250); //Does he want to specify the amount and size?
 
 
             });
@@ -340,7 +340,7 @@ namespace USE_ExperimentTemplate_Task
             AddDefaultControlLevelTerminationMethod(() =>
             {
                 //Send Reward Pulses for Ansen's Camera at End of Task:
-                SessionValues.SyncBoxController?.SendRewardPulses(2, 250); //Does he want to specify the amount and size?
+                //SessionValues.SyncBoxController?.SendCameraSyncPulse(3, 250); //Does he want to specify the amount and size?
 
 
                 if (SessionValues.SessionDataControllers != null)

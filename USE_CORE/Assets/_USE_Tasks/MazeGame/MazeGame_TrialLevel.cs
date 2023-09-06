@@ -71,7 +71,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int[] perseverativeErrors_InTrial;
     private bool choiceMade;
     public List<float> choiceDurationsList = new List<float>();
-    
+
 
     // Task Level Defined Color Variables
     [HideInInspector]
@@ -104,6 +104,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
+    private List<string> SelectedTiles_InTrial = new List<string>();
     // private StimDef selectedSD;
 
     // Slider & Animation variables
@@ -237,6 +238,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.ChoiceDurations_InBlock.Add(choiceDuration);
                     CurrentTaskLevel.ChoiceDurations_InTask.Add(choiceDuration);
                     selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
+                    SelectedTiles_InTrial.Add(selectedGO.name);
                     SelectionHandler.ClearSelections();
                 }
             }
@@ -858,6 +860,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
+        TrialData.AddDatum("SelectedTiles", ()=> string.Join(",", SelectedTiles_InTrial));
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
         TrialData.AddDatum("RetouchCorrect", () => $"[{string.Join(", ", retouchCorrect_InTrial)}]");
@@ -965,6 +968,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(retouchCorrect_InTrial, 0, retouchCorrect_InTrial.Length);
             Array.Clear(retouchErroneous_InTrial, 0, retouchErroneous_InTrial.Length);
         }
+        SelectedTiles_InTrial.Clear();
         pathProgress.Clear();
         pathProgressGO.Clear();
         pathProgressIndex = 0;

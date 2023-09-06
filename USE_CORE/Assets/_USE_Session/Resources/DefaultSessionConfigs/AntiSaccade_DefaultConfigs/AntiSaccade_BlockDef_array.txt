@@ -1,0 +1,2 @@
+ContextName	NumTrials	TargetStimIndex	DistractorStimIndices	TargetStimPosition	DistractorStimPositions	SpacialCuePosition
+AntiSaccade	3	0	[1]	[400, 0, 0]	[[-400, 0, 0]]	[-400, 0, 0]

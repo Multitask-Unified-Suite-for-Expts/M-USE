@@ -13,6 +13,7 @@ using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
 //using FinderGame_Namespace;
 //using Kia_Task_Namespace;
+using AntiSaccade_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -145,6 +146,17 @@ static public class USE_Tasks_CustomTypes
             }
         }
 
+        ,{
+            "AntiSaccade", new TaskTypes
+            {
+                TaskLevelType = typeof(AntiSaccade_TaskLevel),
+                TrialLevelType = typeof(AntiSaccade_TrialLevel),
+                TaskDefType = typeof(AntiSaccade_TaskDef),
+                BlockDefType = typeof(AntiSaccade_BlockDef),
+                TrialDefType = typeof(AntiSaccade_TrialDef),
+                StimDefType = typeof(AntiSaccade_StimDef)
+            }
+        }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#
     };
 

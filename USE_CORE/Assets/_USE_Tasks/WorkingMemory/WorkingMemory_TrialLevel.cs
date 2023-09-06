@@ -316,6 +316,18 @@ ShotgunHandler.HandlerActive = false;
         DefineTrialData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+        //target stim are added to SessionValues.TargetObjects
+        //distractor stim are added to SessionValues.DistractorObjects
+        //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)
@@ -334,9 +346,8 @@ ShotgunHandler.HandlerActive = false;
         }
 
         TokenFBController.enabled = false;
-        searchStims.ToggleVisibility(false);
-        sampleStim.ToggleVisibility(false);
-        postSampleDistractorStims.ToggleVisibility(false);
+
+
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
         else
@@ -396,7 +407,6 @@ ShotgunHandler.HandlerActive = false;
 
         // for (int iT)
         sampleStim.SetLocations(new Vector3[]{ CurrentTrialDef.SampleStimLocation});
-        sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorStimIndices);

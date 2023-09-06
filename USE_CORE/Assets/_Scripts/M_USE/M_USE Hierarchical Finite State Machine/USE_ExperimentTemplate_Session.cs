@@ -662,7 +662,7 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
-            runTask.AddFixedUpdateMethod(() =>
+            runTask.AddUpdateMethod(() =>
             {
                 SessionValues.EventCodeManager.EventCodeFixedUpdate();
             });

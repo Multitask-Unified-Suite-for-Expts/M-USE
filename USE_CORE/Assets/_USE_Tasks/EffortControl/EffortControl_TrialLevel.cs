@@ -151,6 +151,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             LoadConfigUIVariables();
+
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
@@ -159,10 +160,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
+        //Setup Handler:
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
+        //Enable Touch Feedback:
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
 
+        //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
@@ -758,9 +761,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void DisableAllGameobjects()
     {
-        StimLeft.SetActive(false);
-        StimRight.SetActive(false);
-        BalloonOutline.SetActive(false);
+        if(StimLeft != null)
+            StimLeft.SetActive(false);
+        if(StimRight != null)
+            StimRight.SetActive(false);
+        if(BalloonOutline != null)
+            BalloonOutline.SetActive(false);
     }
 
     void LoadConfigUIVariables()
@@ -964,7 +970,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
-        TrialData.AddDatum("ClicksNeeded", () => InflationsNeeded);
+        TrialData.AddDatum("InflationsNeeded", () => InflationsNeeded);
         TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
         TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);
         TrialData.AddDatum("NumCoinsLeft", () => CurrentTrial.NumCoinsLeft);

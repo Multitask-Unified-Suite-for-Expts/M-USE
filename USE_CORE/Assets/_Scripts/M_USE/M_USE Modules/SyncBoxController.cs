@@ -54,7 +54,7 @@ public class SyncBoxController
         
         rewardFinished = true;
     }
-    void SendSonication()
+    public void SendSonication()
     {
         if ((maxConsecutiveSonicationTrials == null ||
             numConsecutiveSonicationTrials < maxConsecutiveSonicationTrials && numTrialsUntilNextSonication == 0) &&
@@ -73,5 +73,6 @@ public class SyncBoxController
             sonicationBlockedThisTrial = true;
         }
     }
-    
+
+
 }

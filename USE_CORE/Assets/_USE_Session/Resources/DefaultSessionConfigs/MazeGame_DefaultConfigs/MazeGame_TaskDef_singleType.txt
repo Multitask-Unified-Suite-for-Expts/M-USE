@@ -15,4 +15,4 @@ float[]	DefaultTileColor	[1, 1, 1]
 bool	UsingFixedRatioReward	true
 string	MazeBackgroundTexture	"MazeBackgroundImage"
 Vector3	MazePosition	[0, 0.5, 0]
-bool	GuidedMazeSelection	true
+bool	GuidedMazeSelection	false

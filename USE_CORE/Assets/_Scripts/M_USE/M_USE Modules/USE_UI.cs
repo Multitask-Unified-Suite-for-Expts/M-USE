@@ -36,6 +36,7 @@ namespace USE_UI
 
         [HideInInspector] public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
+            { "AntiSaccade", "Select the target stim to earn your reward!" },
             { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. Complete all trials to win! If you choose an object you've chosen in a previous trial, you lose!" },
             { "EffortControl", "Choose a balloon to inflate based on the effort required (number of clicks) and the reward amount (number of tokens). Inflate and pop the balloon by clicking it the required number of times!"},
             { "FlexLearning", "The maximal token gain is associated with one specific visual feature that defines one of the objects. Learn the visual feature that provides the most reward!"},
@@ -44,11 +45,10 @@ namespace USE_UI
             { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
             { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
-            { "WWW_2D", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" }
-
         };
         [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
+            { "AntiSaccade", "Anti Saccade"},
             { "ContinuousRecognition", "Continuous Recognition" },
             { "EffortControl", "Effort Control" },
             { "FlexLearning", "Flexible Learning" },
@@ -57,11 +57,11 @@ namespace USE_UI
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
             { "WorkingMemory", "Working Memory" },
-            { "WWW_2D", "What When Where"}
         };
 
         [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
         {
+            { "AntiSaccade", new Vector3(0, 0, 1000f) },
             { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
             { "EffortControl", new Vector3(0, 0, 500f) },
             { "FlexLearning", new Vector3(0, 0, 1000f) },
@@ -180,8 +180,8 @@ namespace USE_UI
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
         {
-            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
-            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
+            InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
+            InstructionsOn = InstructionsGO.activeInHierarchy;
             EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 

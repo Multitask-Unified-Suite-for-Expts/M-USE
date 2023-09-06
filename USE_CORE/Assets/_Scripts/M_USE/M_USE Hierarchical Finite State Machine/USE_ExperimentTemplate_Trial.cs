@@ -197,7 +197,9 @@ namespace USE_ExperimentTemplate_Trial
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
-                
+
+                //turning off instructions text at start of each trial, in case they left them on during last trial.
+                TurnOffInstructionsText();
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
@@ -465,6 +467,18 @@ namespace USE_ExperimentTemplate_Trial
             foreach (GameObject go in objects)
                 go.GetComponent<Renderer>().material.color = color;
         }
+
+        private void TurnOffInstructionsText()
+        {
+            if (SessionValues.SessionDef.IsHuman && SessionValues.HumanStartPanel != null && SessionValues.HumanStartPanel.InstructionsOn)
+            {
+                SessionValues.HumanStartPanel.InstructionsGO.SetActive(false);
+                SessionValues.HumanStartPanel.InstructionsOn = false;
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+            }
+        }
+
+
 
 
 

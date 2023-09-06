@@ -378,7 +378,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumReleasePulses;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumReleasePulses));
             }
             if (GiveTouchReward && SessionValues.SyncBoxController != null)
             {
@@ -386,7 +385,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 TouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumTouchPulses;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumTouchPulses));
             }
         });
         Reward.SpecifyTermination(() => true, ITI);

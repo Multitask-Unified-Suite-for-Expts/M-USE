@@ -209,8 +209,8 @@ namespace USE_StimulusManagement
 				StimGameObject.SetActive(visibility);
 				toggled = true;
 
-				if (visibility)
-					SessionValues.EventCodeManager.SendRangeCode("Quaddle", StimIndex);
+				/*if (visibility)
+					SessionValues.EventCodeManager.SendRangeCode("Quaddle", StimIndex);*/
 			}
 
 			return toggled;
@@ -950,7 +950,7 @@ namespace USE_StimulusManagement
 				stim.ToggleVisibility(visibility);
 			}
 
-            SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
+            //SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
 
 			IsActive = visibility;
 		}

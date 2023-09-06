@@ -218,7 +218,7 @@ public class EventCodeManager : MonoBehaviour
             eventCodeString += ending;
 
         Debug.Log("EVENTCODE: " + eventCodeString);
-        SessionValues.EventCodeManager.SendCodeImmediate(eventCodeString);
+       // SessionValues.EventCodeManager.SendCodeImmediate(eventCodeString);
     }
 
 

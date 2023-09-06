@@ -45,7 +45,7 @@ public class SyncBoxController
 
         for (int i = 0; i < numPulses; i++)
         {
-            serialPortController.AddToSend("RWD " + pulseSize);//values less than 20 don't consistently work so use between 20-100 (# in 0.1 ms increments)
+            serialPortController.AddToSend("RWD " + pulseSize);//values less than 250 don't consistently work so use between 250-500 (# in 0.1 ms increments)
 
             MsBetweenRewardPulses = 200;
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);

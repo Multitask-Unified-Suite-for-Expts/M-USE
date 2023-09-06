@@ -54,6 +54,7 @@ public class SyncBoxController
         
         rewardFinished = true;
     }
+
     public void SendSonication()
     {
         if ((maxConsecutiveSonicationTrials == null ||

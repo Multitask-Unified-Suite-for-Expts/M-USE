@@ -346,9 +346,8 @@ ShotgunHandler.HandlerActive = false;
         }
 
         TokenFBController.enabled = false;
-        searchStims.ToggleVisibility(false);
-        sampleStim.ToggleVisibility(false);
-        postSampleDistractorStims.ToggleVisibility(false);
+
+
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
         else
@@ -408,7 +407,6 @@ ShotgunHandler.HandlerActive = false;
 
         // for (int iT)
         sampleStim.SetLocations(new Vector3[]{ CurrentTrialDef.SampleStimLocation});
-        sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorIndices);

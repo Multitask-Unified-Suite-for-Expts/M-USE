@@ -11,7 +11,6 @@ namespace EffortControl_Namespace
 
     public class EffortControl_BlockDef : BlockDef
     {
-        public int NumTrials;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;

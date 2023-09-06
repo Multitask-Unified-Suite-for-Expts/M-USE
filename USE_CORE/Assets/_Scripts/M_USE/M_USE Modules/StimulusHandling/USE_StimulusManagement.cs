@@ -201,19 +201,9 @@ namespace USE_StimulusManagement
 			return sd;
 		}
 
-		public bool ToggleVisibility(bool visibility)
+		public void ToggleVisibility(bool visibility)
 		{
-			bool toggled = false;
-			if (StimGameObject.activeInHierarchy != visibility)
-			{
-				StimGameObject.SetActive(visibility);
-				toggled = true;
-
-				if (visibility)
-					SessionValues.EventCodeManager.SendRangeCode("Quaddle", StimIndex);
-			}
-
-			return toggled;
+            StimGameObject.SetActive(visibility);
 		}
 
 		public void AddToStimGroup(StimGroup sg)
@@ -773,8 +763,10 @@ namespace USE_StimulusManagement
 			{
 				SetInactiveOnTermination = setInactiveOnTerm;
 				SetInactiveOnTermination.StateTerminationFinished += InactivateOnStateTerm;
-			}
-		}
+            }
+        }
+
+
 
 
         private void ActivateOnStateInit(object sender, EventArgs e)
@@ -949,13 +941,12 @@ namespace USE_StimulusManagement
 			{
 				stim.ToggleVisibility(visibility);
 			}
-
             SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
-
 			IsActive = visibility;
 		}
 
-		public void SetLocations(IEnumerable<Vector3> locs)
+
+        public void SetLocations(IEnumerable<Vector3> locs)
 		{
 			Vector3[] LocArray = locs.ToArray();
 			if (LocArray.Length == stimDefs.Count)

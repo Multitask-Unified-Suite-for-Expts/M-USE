@@ -23,19 +23,18 @@ public class InputFieldManager : MonoBehaviour
         PlayerPrefs.SetString(playerPrefKey, inputField.text);
     }
 
-    private string GetDefaultValue()
+    private string GetDefaultValue() 
     {
         if (inputField_GO.name.ToLower().Contains("subjectid"))
             return "Player";
         else if (inputField_GO.name.ToLower().Contains("subjectage"))
             return "50";
         else if (inputField_GO.name.ToLower().Contains("serverurl"))
-            return "http://m-use.psy.vanderbilt.edu:8080";
+            return "http://m-use.psy.vanderbilt.edu:8080"; //Eventually delete when go public
         else if (inputField_GO.name.ToLower().Contains("serverdata"))
             return "DATA";
         else
             return "DefaultValue";
-        
     }
 
 }

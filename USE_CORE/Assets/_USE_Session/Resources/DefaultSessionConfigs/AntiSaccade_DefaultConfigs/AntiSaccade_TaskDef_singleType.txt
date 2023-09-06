@@ -1,0 +1,2 @@
+float	ExternalStimScale	3
+List<string>	FeedbackControllers	["Audio", "Halo", "Token"]

@@ -168,7 +168,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Debug.Log("INIT TRIAL - START!");
+
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
+            Debug.Log("INIT TRIAL - AFTER SKYBOX STUFF!");
 
             //Set handler active in case they ran out of time mid inflation and it was never set back to active
             if (Handler != null)
@@ -179,6 +183,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DisableAllGameobjects();
 
             ResetToOriginalPositions();
+
+            Debug.Log("INIT TRIAL - AFTER DISABLING GAME OBJECTS AND RESETTING TO ORIGINAL POSITIONS!");
 
             if(TrialStim != null)
             {
@@ -192,6 +198,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
+
+            Debug.Log("AFTER SELECTION HANDLER PART OF INIT TRIAL!");
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {

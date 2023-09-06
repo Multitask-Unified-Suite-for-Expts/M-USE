@@ -178,13 +178,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Debug.Log("INIT TRIAL - START!");
+
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
+            Debug.Log("INIT TRIAL - AFTER SKYBOX STUFF!");
 
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
             SelectionHandler.MinDuration = minObjectTouchDuration.value;
             SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            Debug.Log("AFTER SELECTION HANDLER PART OF INIT TRIAL!");
         });
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>

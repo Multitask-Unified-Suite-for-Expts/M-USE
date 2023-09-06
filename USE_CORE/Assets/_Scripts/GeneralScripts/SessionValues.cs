@@ -79,7 +79,6 @@ public static class SessionValues
 
 
 
-
     static SessionValues()
     {
         LoadPrefabs();
@@ -89,14 +88,14 @@ public static class SessionValues
         IrrelevantObjects = new List<GameObject>();
     }
 
+
+
     public static void ClearStimLists()
     {
         TargetObjects.Clear();
         DistractorObjects.Clear();
         IrrelevantObjects.Clear();
     }
-
-
 
     private static void LoadPrefabs()
     {

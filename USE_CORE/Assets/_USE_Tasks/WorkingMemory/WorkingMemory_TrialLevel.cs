@@ -127,7 +127,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Debug.Log("INIT TRIAL - AFTER HANDLER STUFF!");
+
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+
+            Debug.Log("INIT TRIAL - AFTER SKYBOX!");
 
             if (SessionValues.WebBuild)
                 TokenFBController.AdjustTokenBarSizing(110);
@@ -141,9 +145,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
-
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            Debug.Log("INIT TRIAL - AFTER HANDLER STUFF!");
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>

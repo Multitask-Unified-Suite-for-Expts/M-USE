@@ -321,6 +321,7 @@ namespace SelectionTracking
             }
 
 
+            //Main method used by tasks to check if selection matches start button:
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
                 List<GameObject> startButtonChildren = SessionValues.GetStartButtonChildren();

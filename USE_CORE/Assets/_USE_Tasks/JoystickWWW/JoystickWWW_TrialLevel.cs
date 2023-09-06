@@ -122,7 +122,7 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
     public float ExternalStimScale;
     public GameObject instantiatedArena;
-    public GameObject instantiatedPlayer;
+    //public GameObject instantiatedPlayer;
 
     
     // Stim Evaluation Variables
@@ -172,29 +172,30 @@ public class JoystickWWW_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(12);
             HaloFBController.SetHaloIntensity(5);
-            
-            //GameObject instantiatedArena = Instantiate(arenaPrefab, new Vector3(0, 8, 0), Quaternion.Euler(0, 0, 0));
-            //GameObject instantiatedPlayer = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity);
 
             instantiatedArena = Instantiate(Resources.Load<GameObject>("ArenaPrefab"));
-            instantiatedPlayer = Instantiate(Resources.Load<GameObject>("Player"));
-            SessionValues.JoystickTracker.Player = instantiatedPlayer;
+            //instantiatedPlayer = Instantiate(Resources.Load<GameObject>("Player"));
+            SessionValues.JoystickTracker.Player = GameObject.Find("Player");
+            //SessionValues.JoystickTracker.Player = instantiatedPlayer;
+            //SessionValues.JoystickTracker.playerCamTransform = TaskLevel.TaskCam.transform;
             instantiatedArena.SetActive(true);
-            instantiatedPlayer.SetActive(true);
+            //instantiatedPlayer.SetActive(true);
+            //Debug.Log("camera: " + instantiatedPlayer.transform.Find("JoystickWWW_Camera"));
             
             instantiatedArena.transform.position = new Vector3(0, 8, 0);
             instantiatedArena.transform.rotation = Quaternion.Euler(0, 0, 0);
             instantiatedArena.transform.localScale = new Vector3(2, 2, 2);
             
-            instantiatedPlayer.transform.position = new Vector3(0, 0, 0);
-            instantiatedPlayer.transform.Find("Cylinder").transform.localPosition = new Vector3(0, 0, 0);
-            instantiatedPlayer.transform.Find("JoystickWWW_Camera").transform.localPosition = new Vector3(0, 0, 0);
-            instantiatedPlayer.transform.Find("Cylinder").transform.localRotation = Quaternion.Euler(0, 0, 0);
-            instantiatedPlayer.transform.Find("JoystickWWW_Camera").transform.localRotation = Quaternion.Euler(0, 0, 0);
+            //SessionValues.JoystickTracker.Player.transform.position = new Vector3(0, 0, 0);
+            //instantiatedPlayer.transform.position = new Vector3(0, 0, 0);
+            //instantiatedPlayer.transform.Find("Cylinder").transform.localPosition = new Vector3(0, 0, 0);
+            //instantiatedPlayer.transform.Find("Cylinder").transform.localRotation = Quaternion.Euler(0, 0, 0);
+            //CurrentTaskLevel.TaskCam.transform.SetParent(instantiatedPlayer.transform, false);
+            //SessionValues.JoystickTracker.Player.transform.Find("JoystickWWW_Camera").transform.localPosition = new Vector3(0, 0, 0);
+            //SessionValues.JoystickTracker.Player.transform.Find("JoystickWWW_Camera").transform.localRotation = Quaternion.Euler(0, 0, 0);
+            //instantiatedPlayer.transform.Find("JoystickWWW_Camera").transform.localPosition = new Vector3(0, 0, 0);
+            //instantiatedPlayer.transform.Find("JoystickWWW_Camera").transform.localRotation = Quaternion.Euler(0, 0, 0);
             
-            //SessionValues.JoystickTracker.Player = Resources.Load<GameObject>("Player");
-            CurrentTaskLevel.TaskCam.transform.SetParent(instantiatedPlayer.transform, false);
-            SessionValues.JoystickTracker.playerCamTransform = CurrentTaskLevel.TaskCam.transform;
             SessionValues.JoystickTracker.isActive = true;
             
             if (StartButton == null)

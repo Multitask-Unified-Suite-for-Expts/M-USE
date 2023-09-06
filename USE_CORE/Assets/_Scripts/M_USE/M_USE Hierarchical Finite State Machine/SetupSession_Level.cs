@@ -202,7 +202,7 @@ public class SetupSession_Level : ControlLevel
         SessionValues.MouseTracker = SessionValues.InputTrackers.GetComponent<MouseTracker>();
         SessionValues.GazeTracker = SessionValues.InputTrackers.GetComponent<GazeTracker>();
         SessionValues.JoystickTracker = SessionValues.InputTrackers.GetComponent<JoystickTracker>();
-        //SessionValues.JoystickTracker.InitializeJoystickTracker();
+        //SessionValues.JoystickTracker.assignCamera();
         //add here rigid body to joystick tracker/input tracker
         //maybe? add here player object to joystick tracker as you did in hierarchy
 

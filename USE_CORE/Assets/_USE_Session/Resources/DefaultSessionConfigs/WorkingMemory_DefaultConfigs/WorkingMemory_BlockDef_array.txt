@@ -1,2 +1,2 @@
-BlockName	BlockCount	ContextName	NumInitialTokens	NumTokenBar
+BlockName	BlockCount	ContextName	NumInitialTokens	TokenBarCapacity
  WM	1	014_027_014_002_2	0	4

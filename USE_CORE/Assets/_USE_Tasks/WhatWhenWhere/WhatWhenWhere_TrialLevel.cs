@@ -372,12 +372,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             UpdateExperimenterDisplaySummaryStrings();
 
+            // If the sequence has been completed, send to slider feedback state
             if (trialComplete)
                 StateAfterDelay = FinalFeedback;
             else
             {
-                // Condition where the trial ends after an error is made
-                if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+                // If there is a MaxTrialErrors defined in the BlockDef and the number of errors in the trial exceed that value, send to ITI
+                if(CurrentTrialDef.MaxTrialErrors != null && NumErrors_InTrial >= CurrentTrialDef.MaxTrialErrors)
+                {
+                    StateAfterDelay = ITI;
+                }
+
+                // If there is either no MaxTrialErrors or the error threshold hasn't been met, either move onto the next stim in the sequence or terminate the trial for an incorrect choice
+                else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                 {
                     if (CorrectSelection)
                     {
@@ -389,8 +396,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     else
                         StateAfterDelay = ITI;
                 }
-                
-                // Condition where the trial continues even if an error is made
+
+                // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
                 {
                     if (CurrentTrialDef.GuidedSequenceLearning)

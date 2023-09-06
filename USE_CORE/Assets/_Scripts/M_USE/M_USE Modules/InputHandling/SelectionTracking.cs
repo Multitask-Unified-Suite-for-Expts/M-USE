@@ -309,7 +309,7 @@ namespace SelectionTracking
 
             public bool LastSuccessfulSelectionMatches(List<GameObject> gameObjects) //Used for startbutton since it has 3 children GO's
             {
-                if (gameObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                if (gameObjects != null && LastSuccessfulSelection != null && LastSuccessfulSelection.SelectedGameObject != null)
                 {
                     foreach (GameObject go in gameObjects)
                     {
@@ -320,14 +320,16 @@ namespace SelectionTracking
                 return false;
             }
 
+
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
-                List<GameObject> startButtonObjects = SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren;
-                if(startButtonObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                List<GameObject> startButtonChildren = SessionValues.GetStartButtonChildren();
+
+                if (startButtonChildren != null && LastSuccessfulSelection != null && LastSuccessfulSelection.SelectedGameObject != null)
                 {
-                    foreach( GameObject go in startButtonObjects)
+                    foreach (GameObject go in startButtonChildren)
                     {
-                        if(ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                        if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
                         {
                             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                             return true;
@@ -336,6 +338,7 @@ namespace SelectionTracking
                 }
                 return false;
             }
+
 
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {

@@ -194,6 +194,12 @@ public class EventCodeManager : MonoBehaviour
 
     public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
     {
+        if (target == null)
+        {
+            Debug.LogError("TARGET IS NULL WHEN CALLING CHECK-FOR-AND-SEND-EVENTCODE!!!!!");
+            return;
+        }
+
         StringBuilder eventCodeBuilder = new StringBuilder();
 
         if (!string.IsNullOrEmpty(beginning))
@@ -217,7 +223,7 @@ public class EventCodeManager : MonoBehaviour
         if (!string.IsNullOrEmpty(ending))
             eventCodeBuilder.Append(ending);
 
-        //Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
+        Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
         //SessionValues.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
     }
 

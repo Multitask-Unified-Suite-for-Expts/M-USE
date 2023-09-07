@@ -262,33 +262,6 @@ namespace USE_UI
 
     }
 
-    public class USE_TaskButton : MonoBehaviour //No longer used
-    {
-        public GameObject TaskButtonGO;
-        public float ButtonSize = 10f;
-        public Color ButtonColor = new Color(1f, 1f, 1f, 1f);
-        public RawImage Image;
-        public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        public string configName;
-        public string taskName;
-        
-        public USE_TaskButton(Canvas parent, Vector3 localPos, float size, string configName)
-        {
-            LocalPosition = localPos;
-            ButtonSize = size;
-            TaskButtonGO = new GameObject(configName);
-            TaskButtonGO.AddComponent<USE_TaskButton>();
-            TaskButtonGO.GetComponent<USE_TaskButton>().configName = configName;
-            Image = TaskButtonGO.AddComponent<RawImage>();
-            TaskButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = ButtonColor;
-            TaskButtonGO.transform.localPosition = LocalPosition;
-            TaskButtonGO.SetActive(true);
-        }
-    }
-
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
@@ -317,7 +290,9 @@ namespace USE_UI
 
             StartButtonChildren = new List<GameObject>();
             foreach (Transform child in StartButtonGO.transform)
+            {
                 StartButtonChildren.Add(child.gameObject);
+            }
             StartButtonGO.SetActive(false);
 
             return StartButtonGO;

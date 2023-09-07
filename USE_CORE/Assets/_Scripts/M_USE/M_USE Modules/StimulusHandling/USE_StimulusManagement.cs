@@ -781,6 +781,8 @@ namespace USE_StimulusManagement
 		private void InactivateOnStateTerm(object sender, EventArgs e)
 		{
 			ToggleVisibility(false);
+			SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
+			SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
 		}
 
 		public void AddStims(StimDef stim)
@@ -945,7 +947,7 @@ namespace USE_StimulusManagement
 			{
 				stim.ToggleVisibility(visibility);
 			}
-            SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
+			SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
 			IsActive = visibility;
 		}
 

@@ -16,9 +16,11 @@ namespace AntiSaccade_Namespace
     {
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
-        public Vector3 TargetStimPosition;
-        public Vector3[] DistractorStimPositions;
         public Vector3 SpacialCuePosition;
+        public Vector3 TargetStimPosition;
+        public Vector3 TargetStimFbPosition;
+        public Vector3[] DistractorStimFbPositions;
+        public int RewardMag;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -31,9 +33,10 @@ namespace AntiSaccade_Namespace
                 td.TargetStimIndex = TargetStimIndex;
                 td.DistractorStimIndices = DistractorStimIndices;
                 td.TargetStimPosition = TargetStimPosition;
-                td.DistractorStimPositions = DistractorStimPositions;
+                td.TargetStimFbPosition = TargetStimFbPosition;
+                td.DistractorStimFbPositions = DistractorStimFbPositions;
                 td.SpacialCuePosition = SpacialCuePosition;
-
+                td.RewardMag = RewardMag;
                 TrialDefs.Add(td);
             }
         }
@@ -43,14 +46,15 @@ namespace AntiSaccade_Namespace
     {
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
-        public Vector3 TargetStimPosition;
-        public Vector3[] DistractorStimPositions;
         public Vector3 SpacialCuePosition;
-
+        public Vector3 TargetStimPosition;
+        public Vector3 TargetStimFbPosition;
+        public Vector3[] DistractorStimFbPositions;
+        public int RewardMag;
     }
 
     public class AntiSaccade_StimDef : StimDef
     {
-
+        public bool IsTarget;
     }
 }

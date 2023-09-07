@@ -55,11 +55,16 @@ public class SyncBoxController
         rewardFinished = true;
     }
 
+    public void SendCameraSyncPulses(int numPulses, int pulseSize)
+    {
+
+    }
+
     public void SendSonication()
     {
-        if ((maxConsecutiveSonicationTrials == null ||
-            numConsecutiveSonicationTrials < maxConsecutiveSonicationTrials && numTrialsUntilNextSonication == 0) &&
-            sonicationSentThisTrial == false)
+        if ((maxConsecutiveSonicationTrials == null
+            || numConsecutiveSonicationTrials < maxConsecutiveSonicationTrials && numTrialsUntilNextSonication == 0)
+            && sonicationSentThisTrial == false)
         {
             serialPortController.AddToSend("RWB " + ultrasoundTriggerDurationTicks);
             SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);

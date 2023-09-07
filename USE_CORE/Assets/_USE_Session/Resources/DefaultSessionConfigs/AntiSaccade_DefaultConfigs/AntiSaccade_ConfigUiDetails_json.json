@@ -22,7 +22,7 @@
 		},
 
 		"preCueDuration": {
-			"value": 1.5,
+			"value": 1.25,
 			"min": 0.01,
 			"max": 20.0,
 			"precision": 0,
@@ -32,7 +32,7 @@
 		},
 
 		"alertCueDuration": {
-			"value": 0.5,
+			"value": 0.2,
 			"min": 0.01,
 			"max": 2.0,
 			"precision": 0,
@@ -52,7 +52,7 @@
 		},
 
 		"displayTargetDuration": {
-			"value": 0.5,
+			"value": 1.0,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 0,
@@ -62,7 +62,7 @@
 		},
 
 		"maskDuration": {
-			"value": 0.5,
+			"value": 1.0,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 0,
@@ -72,7 +72,7 @@
 		},
 
 		"postMaskDelayDuration": {
-			"value": 0.5,
+			"value": 0.01,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 0,
@@ -82,7 +82,7 @@
 		},
 
 		"chooseStimDuration": {
-			"value": 4,
+			"value": 4.0,
 			"min": 0.01,
 			"max": 10.0,
 			"precision": 0,

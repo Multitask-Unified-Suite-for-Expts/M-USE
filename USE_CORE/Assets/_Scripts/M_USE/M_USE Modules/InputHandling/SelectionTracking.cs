@@ -491,8 +491,7 @@ namespace SelectionTracking
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:
-                        if(OngoingSelection?.SelectedGameObject != null)
-                            SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
+                        SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
                         HoverOnEventCodeSent = false; //reset hover
                     }
                     else

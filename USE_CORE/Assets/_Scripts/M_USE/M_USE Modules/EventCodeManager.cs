@@ -196,7 +196,7 @@ public class EventCodeManager : MonoBehaviour
     {
         if (target == null)
         {
-            Debug.LogError("TARGET IS NULL WHEN CALLING CHECK-FOR-AND-SEND-EVENTCODE!!!!!");
+            Debug.Log("TARGET IS NULL WHEN CALLING CHECK-FOR-AND-SEND-EVENTCODE!!!!!");
             return;
         }
 

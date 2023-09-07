@@ -40,10 +40,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber tokenFlashingDuration;
     [HideInInspector] public ConfigNumber selectObjectDuration;
     [HideInInspector] public ConfigNumber fbDuration;
-/*    [HideInInspector] public ConfigNumber displaySampleDuration;
-    [HideInInspector] public ConfigNumber postSampleDelayDuration;
-    [HideInInspector] public ConfigNumber displayPostSampleDistractorsDuration;
-    [HideInInspector] public ConfigNumber preTargetDelayDuration;*/
     [HideInInspector] public ConfigNumber itiDuration;
     
     //Player View Variables
@@ -127,11 +123,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            Debug.Log("INIT TRIAL - AFTER HANDLER STUFF!");
-
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
-
-            Debug.Log("INIT TRIAL - AFTER SKYBOX!");
 
             if (SessionValues.WebBuild)
                 TokenFBController.AdjustTokenBarSizing(110);
@@ -147,19 +139,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-
-            Debug.Log("INIT TRIAL - AFTER HANDLER STUFF!");
         });
 
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
-ShotgunHandler.HandlerActive = false;
+            ShotgunHandler.HandlerActive = false;
            
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
-                
-            Debug.Log("DISPLAY SAMPLE: " + CurrentTrialDef.DisplaySampleDuration + " POST SAMPLE DELAY : " + CurrentTrialDef.PostSampleDelayDuration);
         });
         
         // Show the target/sample by itself for some time

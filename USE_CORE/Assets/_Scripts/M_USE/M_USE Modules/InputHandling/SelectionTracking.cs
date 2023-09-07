@@ -379,7 +379,7 @@ namespace SelectionTracking
                     if (HoverOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        //Debug.Log("EVENTCODE: HoverOffObject (manual)");
+                        Debug.Log("EVENTCODE: HoverOffObject (manual)");
                         //SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }
@@ -491,7 +491,8 @@ namespace SelectionTracking
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:
-                        SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
+                        if(OngoingSelection?.SelectedGameObject != null)
+                            SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
                         HoverOnEventCodeSent = false; //reset hover
                     }
                     else

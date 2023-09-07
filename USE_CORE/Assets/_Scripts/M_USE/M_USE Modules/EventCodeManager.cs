@@ -194,6 +194,12 @@ public class EventCodeManager : MonoBehaviour
 
     public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
     {
+        if (target == null)
+        {
+            Debug.LogError("TARGET IS NULL WHEN CALLING CHECK-FOR-AND-SEND-EVENTCODE!!!!!");
+            return;
+        }
+
         StringBuilder eventCodeBuilder = new StringBuilder();
 
         if (!string.IsNullOrEmpty(beginning))

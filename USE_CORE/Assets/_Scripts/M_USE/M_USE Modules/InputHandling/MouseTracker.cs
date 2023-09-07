@@ -42,7 +42,7 @@ public class MouseTracker : InputTracker
                     ButtonPressDuration[iButton] = 0;
 
                     if (SimpleRaycastTarget != null)
-                        SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}PressedOn", null);
+                       SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}PressedOn", null);
                 }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;

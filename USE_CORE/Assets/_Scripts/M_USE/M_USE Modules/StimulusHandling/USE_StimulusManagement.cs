@@ -272,7 +272,7 @@ namespace USE_StimulusManagement
 
         public IEnumerator Load(Action<GameObject> callback)
         {
-			SessionValues.Using2DStim = FileName.Contains("png");
+			SessionValues.Using2DStim = FileName.ToLower().Contains("png") || FileName.ToLower().StartsWith("2d");
 
 			if (SessionValues.UsingDefaultConfigs)
 			{
@@ -359,7 +359,7 @@ namespace USE_StimulusManagement
 		{
 			string fullPath = "DefaultResources/Stimuli/" + FileName.Split('.')[0];
 			StimGameObject = LoadModel(fullPath);
-
+			
 			PositionRotationScale();
 			if (!string.IsNullOrEmpty(StimName))
 				StimGameObject.name = StimName;
@@ -463,6 +463,7 @@ namespace USE_StimulusManagement
 			{
 				//parse filename for stimExtension and assign
 			}
+
 			
 			switch (StimExtension.ToLower())
 			{
@@ -623,6 +624,9 @@ namespace USE_StimulusManagement
 						StimGameObject = Object.Instantiate(Resources.Load(filePath) as GameObject);
 						if (StimGameObject == null)
 							Debug.Log("STIM GO IS NULL!!!!!!!!!");
+
+						if(SessionValues.Using2DStim && CanvasGameObject != null)
+							StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
 					}
                     else
 						StimGameObject = assetLoader.LoadFromFile(filePath);

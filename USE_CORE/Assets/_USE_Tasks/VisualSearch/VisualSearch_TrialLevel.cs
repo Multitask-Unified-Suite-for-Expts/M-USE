@@ -276,7 +276,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
-                    TokenFBController.ResetTokenBarFull();
                     RewardGiven = true;
                 }
             }

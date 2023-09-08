@@ -22,7 +22,6 @@ namespace MazeGame_Namespace
         public bool UsingFixedRatioReward;
         public string MazeBackgroundTexture;
         public float SpaceBetweenTiles;
-        public bool GuidedMazeSelection;
     }
 
     public class MazeGame_BlockDef : BlockDef
@@ -36,8 +35,9 @@ namespace MazeGame_Namespace
         public bool ViewPath;
         public bool ErrorPenalty;
         public int RewardRatio;
+        public bool GuidedMazeSelection;
+        public bool DarkenNonPathTiles;
 
-        
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -60,6 +60,8 @@ namespace MazeGame_Namespace
                 td.RandomMinMaxTrials = RandomMinMaxTrials;
                 td.ErrorPenalty = ErrorPenalty;
                 td.MaxTrials = MaxTrials;
+                td.GuidedMazeSelection = GuidedMazeSelection;
+                td.DarkenNonPathTiles = DarkenNonPathTiles;
                 TrialDefs.Add(td);
             }
         }
@@ -76,6 +78,8 @@ namespace MazeGame_Namespace
         public bool ViewPath;
         public bool ErrorPenalty;
         public int RewardRatio;
+        public bool GuidedMazeSelection;
+        public bool DarkenNonPathTiles;
     }
     public class MazeGame_StimDef : StimDef
     {

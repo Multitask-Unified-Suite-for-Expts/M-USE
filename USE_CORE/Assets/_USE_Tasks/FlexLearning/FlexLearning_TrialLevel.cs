@@ -127,7 +127,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO);
-
+        GameObject newGameObject = new GameObject("CRASHDUMMY");
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
@@ -143,6 +143,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            Destroy(newGameObject);
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
 
@@ -152,6 +154,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
         SearchDisplay.AddSpecificInitializationMethod(() =>
         {
+            newGameObject.SetActive(true);
+
+
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
 
@@ -281,7 +286,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
-                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });

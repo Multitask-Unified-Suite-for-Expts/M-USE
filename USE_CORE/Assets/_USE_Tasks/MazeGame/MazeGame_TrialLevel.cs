@@ -191,7 +191,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
-            if (currentTaskDef.GuidedMazeSelection)
+            if (CurrentTrialDef.GuidedMazeSelection)
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile;
@@ -368,7 +368,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
             }
-            else if (CheckTileFlash() || currentTaskDef.GuidedMazeSelection)
+            else if (CheckTileFlash() || CurrentTrialDef.GuidedMazeSelection)
             {
                 StateAfterDelay = TileFlashFeedback;
             }
@@ -544,7 +544,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 finishTile = tile.gameObject;
                 tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
-            else if (CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
+            else if (!CurrentTrialDef.DarkenNonPathTiles || CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
             else
                 tile.gameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
@@ -977,7 +977,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + currentTaskDef.GuidedMazeSelection +
+                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.GuidedMazeSelection +
                              "\n" + 
                              "\n<b>Percent Error: </b>" +  String.Format("{0:0.00}%", percentError*100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial.Sum() +

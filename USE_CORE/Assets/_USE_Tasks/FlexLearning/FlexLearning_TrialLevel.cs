@@ -7,6 +7,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
 using USE_ExperimentTemplate_Task;
+using ContinuousRecognition_Namespace;
 // #if (!UNITY_WEBGL)
 // using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 // #endif  
@@ -126,7 +127,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO);
-
+        GameObject newGameObject = new GameObject("CRASHDUMMY");
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
@@ -140,10 +141,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
-
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
 
+            Destroy(newGameObject);
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
 
@@ -153,6 +154,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // SEARCH DISPLAY STATE ----------------------------------------------------------------------------------------
         SearchDisplay.AddSpecificInitializationMethod(() =>
         {
+            newGameObject.SetActive(true);
+
+
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
 
@@ -202,7 +206,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         if (selectedGO != null)
         {
             SelectedStimIndex = selectedSD.StimIndex;
-            Debug.Log("SELECTED STIM INDEX: " + SelectedStimIndex);
             SelectedStimLocation = selectedSD.StimLocation;
         }
         Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
@@ -283,7 +286,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
                     RewardGiven = true;
-                    TokenFBController.ResetTokenBarFull();
                 }
             }
         });
@@ -307,6 +309,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+            //target stim are added to SessionValues.TargetObjects
+            //distractor stim are added to SessionValues.DistractorObjects
+            //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
 
     public void MakeStimFaceCamera()
     {

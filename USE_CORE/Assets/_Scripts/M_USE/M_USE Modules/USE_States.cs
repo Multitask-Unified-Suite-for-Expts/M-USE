@@ -691,7 +691,7 @@ namespace USE_States
 		/// <summary>
 		/// Whether this Control Level is the Main Level of the experiment.
 		/// </summary>
-		public bool isHighestLevel;
+		public bool isMainLevel;
 		public bool CallDefineLevelAutomatically = true;
 		public bool quitApplicationAtEnd = false;
 
@@ -924,39 +924,89 @@ namespace USE_States
 		{
             Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
-			InitializeControlLevel();
-			if (isHighestLevel)
+			try
 			{
-				if (!mainLevelSpecified)
-				{
-					mainLevelSpecified = true;
-				}
-				else
-				{
-					Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
-				}
+				InitializeControlLevel();
+                if (isMainLevel)
+                {
+                    if (!mainLevelSpecified)
+                    {
+                        mainLevelSpecified = true;
+                    }
+                    else
+                    {
+                        Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
+                    }
+                }
 			}
-		}
-		void Update()
-		{
-			if (isHighestLevel & !Paused)
+			catch (Exception e)
 			{
-				RunControlLevelUpdate();
+                string errorMessage = "###############################################################################################################" + Environment.NewLine;
+                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+                errorMessage += "###############################################################################################################";
+
+                Debug.LogError(errorMessage);
+
 			}
+
 		}
 		void FixedUpdate()
 		{
-			if (isHighestLevel & !Paused)
+			try
 			{
-				RunControlLevelFixedUpdate();
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelFixedUpdate();
+                }
+			}
+			catch (Exception e)
+			{
+                string errorMessage = "###############################################################################################################" + Environment.NewLine;
+                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+                errorMessage += "###############################################################################################################";
+
+                Debug.LogError(errorMessage);
+
+			}
+
+		}
+		public virtual void Update()
+		{
+			try
+			{
+                if (isMainLevel & !Paused)
+                {
+                    RunControlLevelUpdate();
+                }
+		    }
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
 			}
 		}
 		void LateUpdate()
 		{
-			if (isHighestLevel & !Paused)
+			try
 			{
-				RunControlLevelLateUpdate();
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelLateUpdate();
+                }
 			}
+			catch (Exception e)
+			{
+                string errorMessage = "###############################################################################################################" + Environment.NewLine;
+                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+                errorMessage += "###############################################################################################################";
+
+                Debug.LogError(errorMessage);
+			}
+
 		}
 
 		public void SpecifyCurrentState(State state)
@@ -964,6 +1014,17 @@ namespace USE_States
 			CurrentState = state;
 		}
 
+		public void RunControlLevelFixedUpdate()
+		{
+			if (!Paused)
+			{
+				CheckInitialization();
+				if (CurrentState != null)
+				{
+					CurrentState.RunStateFixedUpdate();
+				}
+			}
+		}
 
 		public void RunControlLevelUpdate()
 		{
@@ -973,18 +1034,6 @@ namespace USE_States
 				if (CurrentState != null)
 				{
 					CurrentState.RunStateUpdate();
-				}
-			}
-		}
-		
-		public void RunControlLevelFixedUpdate()
-		{
-			if (!Paused)
-			{
-				// CheckInitialization();
-				if (CurrentState != null)
-				{
-					CurrentState.RunStateFixedUpdate();
 				}
 			}
 		}
@@ -1064,7 +1113,7 @@ namespace USE_States
 			initialized = false;
 			EndFrame = Time.frameCount;
 			Duration = Time.time - StartTimeAbsolute;
-			if (isHighestLevel)
+			if (isMainLevel)
 			{
 				if (quitApplicationAtEnd)
 				{

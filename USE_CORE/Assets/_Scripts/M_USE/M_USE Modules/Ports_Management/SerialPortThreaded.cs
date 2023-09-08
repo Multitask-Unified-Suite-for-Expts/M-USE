@@ -70,30 +70,30 @@ public class SerialPortThreaded : MonoBehaviour
 				long currTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
 				if (currTime - lastSentTimeStamp > minMsBetweenSending * 10000)
 				{
-					ExpectedResponseCode er = null;
+					ExpectedResponseCode expectedResponseCode = null;
 					lock (toSendBuffer)
 					{
 						sp.Write(toSendBuffer[0].Code + "\n");
 						lastSentTimeStamp = currTime;
 						lock (sentBuffer)
 							sentBuffer.Add(currTime.ToString() + "\t" + toSendBuffer[0].Code);
-						er = toSendBuffer[0].ExpectedResponseCode;
+						expectedResponseCode = toSendBuffer[0].ExpectedResponseCode;
 						toSendBuffer.RemoveAt(0);
 					}
 
-					if (er != null)
+					if (expectedResponseCode != null)
 					{
 						if (checkForResponseCode != null)
 						{
 							lock (responseCheckLocker)
 							{
-								checkForResponseCode = er;
+								checkForResponseCode = expectedResponseCode;
 								checkForResponseCode.TimeAdded = currTime;
 							}
 						}
 						else
 						{
-							checkForResponseCode = er;
+							checkForResponseCode = expectedResponseCode;
 							checkForResponseCode.TimeAdded = currTime;
 						}
 						_waitForRecvCodeDetected.WaitOne();

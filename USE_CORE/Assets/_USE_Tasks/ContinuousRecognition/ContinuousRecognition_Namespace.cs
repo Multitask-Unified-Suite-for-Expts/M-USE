@@ -23,18 +23,21 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_Locations;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int RewardMag;
+        public int InitialTokenAmount, RewardMag;
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
+
+        //Calculated below (DONT SET IN CONFIG!!!):
+        public int MaxNumTrials;
 
 
         public override void GenerateTrialDefsFromBlockDef()
         {
             int maxNumStim = NumObjectsMinMax[1];
             if (FindAllStim)
-                MaxTrials = CalculateMaxNumTrials(maxNumStim);
+                MaxNumTrials = CalculateMaxNumTrials(maxNumStim);
             else
-                MaxTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
+                MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
 
 
             //Calculate STIM Locations:
@@ -58,7 +61,7 @@ namespace ContinuousRecognition_Namespace
 
             int numTrialStims = NumObjectsMinMax[0]; //Starts as first num in array and increments by at end of loop for each trial
 
-            for (int trialIndex = 0; trialIndex < MaxTrials; trialIndex++)
+            for (int trialIndex = 0; trialIndex < MaxNumTrials; trialIndex++)
             {   
                 ContinuousRecognition_TrialDef trial = new ContinuousRecognition_TrialDef();
 
@@ -86,7 +89,7 @@ namespace ContinuousRecognition_Namespace
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
-                trial.MaxTrials = MaxTrials;
+                trial.MaxNumTrials = MaxNumTrials;
                 trial.ContextName = ContextName;
                 trial.NumPulses = NumPulses;
                 trial.RewardMag = RewardMag;
@@ -192,12 +195,13 @@ namespace ContinuousRecognition_Namespace
         public int[] InitialStimRatio;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int RewardMag;
+        public int InitialTokenAmount, RewardMag;
         public bool ShakeStim, FindAllStim, UseStarfield;
 
         //Not in block config BUT STILL PASSED DOWN:
         public Vector3[] TrialStimLocations;
         public int NumTrialStims;
+        public int MaxNumTrials;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

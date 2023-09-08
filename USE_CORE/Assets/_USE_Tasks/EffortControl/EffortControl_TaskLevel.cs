@@ -10,7 +10,7 @@ using EffortControl_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector] public string ContextName;
+    //[HideInInspector] public string ContextName;
 
     //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;

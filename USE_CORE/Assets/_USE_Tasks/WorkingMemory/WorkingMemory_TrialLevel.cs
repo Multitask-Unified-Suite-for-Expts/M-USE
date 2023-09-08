@@ -40,10 +40,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber tokenFlashingDuration;
     [HideInInspector] public ConfigNumber selectObjectDuration;
     [HideInInspector] public ConfigNumber fbDuration;
-/*    [HideInInspector] public ConfigNumber displaySampleDuration;
-    [HideInInspector] public ConfigNumber postSampleDelayDuration;
-    [HideInInspector] public ConfigNumber displayPostSampleDistractorsDuration;
-    [HideInInspector] public ConfigNumber preTargetDelayDuration;*/
     [HideInInspector] public ConfigNumber itiDuration;
     
     //Player View Variables
@@ -141,7 +137,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
-
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
@@ -150,11 +145,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
-ShotgunHandler.HandlerActive = false;
+            ShotgunHandler.HandlerActive = false;
            
             SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
-                
-            Debug.Log("DISPLAY SAMPLE: " + CurrentTrialDef.DisplaySampleDuration + " POST SAMPLE DELAY : " + CurrentTrialDef.PostSampleDelayDuration);
         });
         
         // Show the target/sample by itself for some time
@@ -290,9 +283,6 @@ ShotgunHandler.HandlerActive = false;
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
-
-                    TokenFBController.ResetTokenBarFull();
-
                 }
             }
         });
@@ -316,6 +306,18 @@ ShotgunHandler.HandlerActive = false;
         DefineTrialData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+        //target stim are added to SessionValues.TargetObjects
+        //distractor stim are added to SessionValues.DistractorObjects
+        //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)
@@ -334,9 +336,8 @@ ShotgunHandler.HandlerActive = false;
         }
 
         TokenFBController.enabled = false;
-        searchStims.ToggleVisibility(false);
-        sampleStim.ToggleVisibility(false);
-        postSampleDistractorStims.ToggleVisibility(false);
+
+
         if (AbortCode == 0)
             CurrentTaskLevel.SetBlockSummaryString();
         else
@@ -396,7 +397,6 @@ ShotgunHandler.HandlerActive = false;
 
         // for (int iT)
         sampleStim.SetLocations(new Vector3[]{ CurrentTrialDef.SampleStimLocation});
-        sampleStim.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
         TrialStims.Add(sampleStim);
 
         postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorStimIndices);

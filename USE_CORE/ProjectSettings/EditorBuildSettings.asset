@@ -42,7 +42,7 @@ EditorBuildSettings:
     path: Assets/_USE_Tasks/FlexLearning/FlexLearning.unity
     guid: a25508fa0608ebf44858b79271ccc086
   - enabled: 0
-    path: Assets/_USE_Tasks/MazeReactionTest/MazeReactionTest.unity
+    path: 
     guid: d33ffa443a8948f44843e5e19199e612
   - enabled: 1
     path: Assets/_USE_Tasks/FeatureUncertaintyWM/FeatureUncertaintyWM.unity
@@ -50,4 +50,7 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_USE_Tasks/GazeCalibration/GazeCalibration.unity
     guid: f95a2d16a11db7846854768b108fbfe2
+  - enabled: 1
+    path: Assets/_USE_Tasks/AntiSaccade/AntiSaccade.unity
+    guid: 15cba97e398964a13aabd8a4d07ec48e
   m_configObjects: {}

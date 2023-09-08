@@ -662,7 +662,7 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
-            runTask.AddFixedUpdateMethod(() =>
+            runTask.AddUpdateMethod(() =>
             {
                 SessionValues.EventCodeManager.EventCodeFixedUpdate();
             });
@@ -966,7 +966,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        SessionValues.SerialSentData.AppendDataToBuffer();
+                        StartCoroutine(SessionValues.SerialSentData.AppendDataToBuffer());
                     }
                     catch (Exception e)
                     {
@@ -978,7 +978,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        SessionValues.SerialRecvData.AppendDataToBuffer();
+                        StartCoroutine(SessionValues.SerialRecvData.AppendDataToBuffer());
                     }
                     catch (Exception e)
                     {

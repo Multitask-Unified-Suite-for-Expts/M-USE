@@ -175,6 +175,12 @@ namespace USE_ExperimentTemplate_Task
                     SessionValues.HumanStartPanel.SetTaskLevel(this);
                     SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
                 }
+
+
+                //Send Reward Pulses for Ansen's Camera at Start of Task:
+                //SessionValues.SyncBoxController?.SendCameraSyncPulse(3, 250); //Does he want to specify the amount and size?
+
+
             });
 
             //RunBlock State-----------------------------------------------------------------------------------------------------
@@ -333,6 +339,10 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
+                //Send Reward Pulses for Ansen's Camera at End of Task:
+                //SessionValues.SyncBoxController?.SendCameraSyncPulse(3, 250); //Does he want to specify the amount and size?
+
+
                 if (SessionValues.SessionDataControllers != null)
                 {
                     SessionValues.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);

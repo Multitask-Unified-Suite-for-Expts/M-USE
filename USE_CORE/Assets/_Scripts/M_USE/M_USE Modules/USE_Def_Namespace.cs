@@ -286,7 +286,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Specifies the type of shadow being used or its configuration.
         /// </summary>
-        public string ShadowType;
+        public string ShadowType = "None";
 
         /// <summary>
         /// Indicates whether the Inter-Trial Interval (ITI) is set to a neutral state or mode.

@@ -22,8 +22,12 @@ namespace SelectionTracking
             {
                 SelectionHandler newHandler = GetDefaultSelectionHandler(handlerName);
                 newHandler.HandlerName = handlerName;
+
                 newHandler.HandlerLevel = handlerLevel.ToLower();
                 newHandler.InputTracker = inputTracker;
+
+                newHandler.InputTracker.UsingShotgunHandler = handlerName.ToLower().Contains("shotgun"); //Newly added to hopefully fix EventCode stuff
+
                 newHandler.selectionTracker = this;
                 if (setActiveOnInit != null)
                     setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;
@@ -309,7 +313,7 @@ namespace SelectionTracking
 
             public bool LastSuccessfulSelectionMatches(List<GameObject> gameObjects) //Used for startbutton since it has 3 children GO's
             {
-                if (gameObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                if (gameObjects != null && LastSuccessfulSelection != null && LastSuccessfulSelection.SelectedGameObject != null)
                 {
                     foreach (GameObject go in gameObjects)
                     {
@@ -320,14 +324,17 @@ namespace SelectionTracking
                 return false;
             }
 
+
+            //Main method used by tasks to check if selection matches start button:
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
-                List<GameObject> startButtonObjects = SessionValues.SessionDef.IsHuman ? SessionValues.HumanStartPanel.StartButtonChildren : SessionValues.USE_StartButton.StartButtonChildren;
-                if(startButtonObjects != null && LastSuccessfulSelection.SelectedGameObject != null)
+                List<GameObject> startButtonChildren = SessionValues.GetStartButtonChildren();
+
+                if (startButtonChildren != null && LastSuccessfulSelection?.SelectedGameObject != null)
                 {
-                    foreach( GameObject go in startButtonObjects)
+                    foreach (GameObject go in startButtonChildren)
                     {
-                        if(ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                        if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
                         {
                             SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                             return true;
@@ -336,6 +343,7 @@ namespace SelectionTracking
                 }
                 return false;
             }
+
 
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
@@ -373,11 +381,10 @@ namespace SelectionTracking
                 if (currentTarget == null) //input is not over a gameobject
                 {
                     if (HoverOnEventCodeSent && OngoingSelection == null)
-                    if (HoverOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        //Debug.Log("EVENTCODE: HoverOffObject");
-                       // SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject"); //CAN UN COMMENT LATER
+                        Debug.Log("EVENTCODE: HoverOffObject (manual)");
+                        //SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }
 
@@ -386,7 +393,7 @@ namespace SelectionTracking
                         //For EventCodes:
                         if(HoverOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
                         {
-                            //SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
+                            SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
                             HoverOnEventCodeSent = false; //reset hover
                         }
 
@@ -398,7 +405,7 @@ namespace SelectionTracking
                 //For EventCodes:
                 if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
-                    //SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
+                    SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
                     HoverOnEventCodeSent = true;
                 }
 

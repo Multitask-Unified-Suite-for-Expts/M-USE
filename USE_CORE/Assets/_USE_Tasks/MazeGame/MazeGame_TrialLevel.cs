@@ -71,7 +71,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int[] perseverativeErrors_InTrial;
     private bool choiceMade;
     public List<float> choiceDurationsList = new List<float>();
-    
+
 
     // Task Level Defined Color Variables
     [HideInInspector]
@@ -104,6 +104,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
+    private List<string> SelectedTiles_InTrial = new List<string>();
     // private StimDef selectedSD;
 
     // Slider & Animation variables
@@ -190,7 +191,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
-            if (currentTaskDef.GuidedMazeSelection)
+            if (CurrentTrialDef.GuidedMazeSelection)
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile;
@@ -237,6 +238,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.ChoiceDurations_InBlock.Add(choiceDuration);
                     CurrentTaskLevel.ChoiceDurations_InTask.Add(choiceDuration);
                     selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
+                    SelectedTiles_InTrial.Add(selectedGO.name);
                     SelectionHandler.ClearSelections();
                 }
             }
@@ -366,7 +368,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
             }
-            else if (CheckTileFlash() || currentTaskDef.GuidedMazeSelection)
+            else if (CheckTileFlash() || CurrentTrialDef.GuidedMazeSelection)
             {
                 StateAfterDelay = TileFlashFeedback;
             }
@@ -423,6 +425,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+        //target stim are added to SessionValues.TargetObjects
+        //distractor stim are added to SessionValues.DistractorObjects
+        //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
 
     private IEnumerator LoadTileAndBgTextures(Action<bool> callback)
     {
@@ -531,7 +544,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 finishTile = tile.gameObject;
                 tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
-            else if (CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
+            else if (!CurrentTrialDef.DarkenNonPathTiles || CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
                 tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
             else
                 tile.gameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
@@ -847,6 +860,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
+        TrialData.AddDatum("SelectedTiles", ()=> string.Join(",", SelectedTiles_InTrial));
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
         TrialData.AddDatum("RetouchCorrect", () => $"[{string.Join(", ", retouchCorrect_InTrial)}]");
@@ -954,6 +968,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(retouchCorrect_InTrial, 0, retouchCorrect_InTrial.Length);
             Array.Clear(retouchErroneous_InTrial, 0, retouchErroneous_InTrial.Length);
         }
+        SelectedTiles_InTrial.Clear();
         pathProgress.Clear();
         pathProgressGO.Clear();
         pathProgressIndex = 0;
@@ -962,7 +977,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + currentTaskDef.GuidedMazeSelection +
+                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.GuidedMazeSelection +
                              "\n" + 
                              "\n<b>Percent Error: </b>" +  String.Format("{0:0.00}%", percentError*100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial.Sum() +

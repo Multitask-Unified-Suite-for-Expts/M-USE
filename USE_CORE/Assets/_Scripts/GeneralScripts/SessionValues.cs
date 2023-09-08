@@ -79,7 +79,6 @@ public static class SessionValues
 
 
 
-
     static SessionValues()
     {
         LoadPrefabs();
@@ -89,6 +88,8 @@ public static class SessionValues
         IrrelevantObjects = new List<GameObject>();
     }
 
+
+
     public static void ClearStimLists()
     {
         TargetObjects.Clear();
@@ -96,12 +97,27 @@ public static class SessionValues
         IrrelevantObjects.Clear();
     }
 
-
-
     private static void LoadPrefabs()
     {
         BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
         BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
     }
+
+    public static List<GameObject> GetStartButtonChildren()
+    {
+        if(SessionDef == null)
+            Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
+        else
+        {
+            if (SessionDef.IsHuman && HumanStartPanel.StartButtonChildren != null)
+                return HumanStartPanel.StartButtonChildren;
+            else if (!SessionDef.IsHuman && USE_StartButton.StartButtonChildren != null)
+                return USE_StartButton.StartButtonChildren;
+        }
+        Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
+        return null;
+    }
+
+
 
 }

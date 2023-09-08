@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using USE_Utilities;
 using System.Threading;
 using USE_ExperimentTemplate_Classes;
+using System.Text;
 
 public class EventCodeManager : MonoBehaviour 
 {
@@ -32,10 +33,6 @@ public class EventCodeManager : MonoBehaviour
 	private SerialPortThreaded serialPortController;
 	public SyncBoxController SyncBoxController;
 
-    void Awake()
-    {
-        // serialPortController = GameObject.Find("ScriptManager").GetComponent<SerialPortThreaded>();
-    }
 
     public void EventCodeFixedUpdate()
     {
@@ -122,7 +119,10 @@ public class EventCodeManager : MonoBehaviour
     
     public void SendCodeNextFrame(int code)
     {
-        toSendBuffer.Add(code);
+        if (!toSendBuffer.Contains(code))
+            toSendBuffer.Add(code);
+        else
+            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
     }
 
 	public void SendCodeNextFrame(string codeString)
@@ -194,10 +194,16 @@ public class EventCodeManager : MonoBehaviour
 
     public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
     {
-        string eventCodeString = "";
+        if (target == null)
+        {
+            Debug.Log("TARGET IS NULL WHEN CALLING CHECK-FOR-AND-SEND-EVENTCODE!!!!!");
+            return;
+        }
+
+        StringBuilder eventCodeBuilder = new StringBuilder();
 
         if (!string.IsNullOrEmpty(beginning))
-            eventCodeString += beginning;
+            eventCodeBuilder.Append(beginning);
 
         StimDefPointer sdp = target.GetComponent<StimDefPointer>();
         GameObject go = target;
@@ -206,19 +212,19 @@ public class EventCodeManager : MonoBehaviour
             go = sdp.StimDef.StimGameObject;
 
         if (SessionValues.TargetObjects.Contains(go))
-            eventCodeString += "TargetObject";
+            eventCodeBuilder.Append("TargetObject");
         else if (SessionValues.DistractorObjects.Contains(go))
-            eventCodeString += "DistractorObject";
+            eventCodeBuilder.Append("DistractorObject");
         else if (SessionValues.IrrelevantObjects.Contains(go))
-            eventCodeString += "IrrelevantObject";
+            eventCodeBuilder.Append("IrrelevantObject");
         else
-            eventCodeString += "Object";
+            eventCodeBuilder.Append("Object");
 
         if (!string.IsNullOrEmpty(ending))
-            eventCodeString += ending;
+            eventCodeBuilder.Append(ending);
 
-        Debug.Log("EVENTCODE: " + eventCodeString);
-        SessionValues.EventCodeManager.SendCodeImmediate(eventCodeString);
+        Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
+        //SessionValues.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
     }
 
 

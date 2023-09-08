@@ -191,7 +191,8 @@ namespace USE_ExperimentTemplate_Session
                 
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
-                CreateSessionSettingsFolder();
+                if(SessionValues.StoreData)
+                    CreateSessionSettingsFolder();
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)
                     SessionValues.FlashPanelController.TurnOffFlashPanels();

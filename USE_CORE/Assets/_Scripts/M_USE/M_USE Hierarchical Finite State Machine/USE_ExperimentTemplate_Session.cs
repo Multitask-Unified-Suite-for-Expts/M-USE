@@ -94,6 +94,8 @@ namespace USE_ExperimentTemplate_Session
 
         private FlashPanelController FlashPanelController;
         public bool runSessionLevelCalibration;
+
+        public bool waitForSerialPort;
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -155,7 +157,7 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             
 
-            bool waitForSerialPort = false;
+            //bool waitForSerialPort = false;
 
             //SetupSession State---------------------------------------------------------------------------------------------------------------
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
@@ -164,23 +166,58 @@ namespace USE_ExperimentTemplate_Session
 
             SceneLoading = false;
             AsyncOperation loadScene = null;
+            setupSession.AddSpecificInitializationMethod(() =>
+            {
+                
+            });
+
             setupSession.AddUpdateMethod(() =>
             {
+                if (SessionValues.SessionDef == null)
+                    return;
+
+                if(SessionValues.SessionDef.SerialPortActive && !waitForSerialPort && (SessionValues.SerialPortController == null))
+                {
+                    SessionValues.SerialPortController = GameObject.Find("MiscScripts").GetComponent<SerialPortThreaded>();
+
+                    Debug.Log($"1 {Time.frameCount} IS THE SERIAL PORT CONTROLLER NULL? " + (SessionValues.SerialPortController == null ? "YES" : "NO"));
+
+                    if (SessionValues.SessionDef.SyncBoxActive)
+                        {
+                            SessionValues.SyncBoxController = new SyncBoxController();
+                            SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
+                            
+                        }
+
+                    Debug.Log($"2 {Time.frameCount} IS THE SERIAL PORT CONTROLLER NULL? " + (SessionValues.SerialPortController == null ? "YES" : "NO"));
+
+                    if (SessionValues.SessionDef.EventCodesActive)
+                        {
+                            SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
+                            SessionValues.EventCodeManager.codesActive = true;
+                        }
+                        waitForSerialPort = true;
+
+                        SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
+                        SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
+                    
+                    Debug.Log($"3 {Time.frameCount} IS THE SERIAL PORT CONTROLLER NULL? " + (SessionValues.SerialPortController == null ? "YES" : "NO"));
+                    SessionValues.SerialPortController.Initialize();
+                    Debug.Log($"4 {Time.frameCount} IS THE SERIAL PORT CONTROLLER NULL? " + (SessionValues.SerialPortController == null ? "YES" : "NO"));
+                }
+
                 if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
                 {
                     if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
                         SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
-                    waitForSerialPort = false;
-                }
 
-                if (SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
-                {
-                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
-                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
-                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
-                    runSessionLevelCalibration = true;
+                    foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
+                    {
+                        Debug.Log("STR " + str);
+                    }
+//                    waitForSerialPort = false;
                 }
+                
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
@@ -193,40 +230,32 @@ namespace USE_ExperimentTemplate_Session
                 SummaryData.Init();
                 CreateSessionSettingsFolder();
 
+                SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
+                SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
+
+
                 if (!SessionValues.SessionDef.FlashPanelsActive)
                     SessionValues.FlashPanelController.TurnOffFlashPanels();
                 else
                     SessionValues.FlashPanelController.runPattern = true;
                 
-                if (SessionValues.SessionDef.SerialPortActive)
-                {
-                    SessionValues.SerialPortController = new SerialPortThreaded();
-                    if (SessionValues.SessionDef.SyncBoxActive)
-                    {
-                        SessionValues.SyncBoxController = new SyncBoxController();
-                        SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
-                        SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
-                        SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
-                    }
-
-                    if (SessionValues.SessionDef.EventCodesActive)
-                    {
-                        SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
-                        SessionValues.EventCodeManager.codesActive = true;
-                    }
-                    waitForSerialPort = true;
-
-                    SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
-                    SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
-                   
-                    SessionValues.SerialPortController.Initialize();
-                }
                 if (!SessionValues.WebBuild)
                 {
                     InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
+
+                if(SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
+                {
+                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
+                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    runSessionLevelCalibration = true;
+                }
+
+                
             });
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------

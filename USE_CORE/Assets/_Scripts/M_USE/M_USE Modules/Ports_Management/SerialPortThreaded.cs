@@ -35,9 +35,9 @@ public class SerialPortThreaded : MonoBehaviour
 		sp = new SerialPort(SerialPortAddress, SerialPortSpeed);
 		sp.Open();
 		new Thread(FinishInit).Start();
-	}
+    }
 
-	private void FinishInit()
+    private void FinishInit()
 	{
 		Thread.Sleep(initTimeout);
 		sp.ReadTimeout = 1;
@@ -48,7 +48,9 @@ public class SerialPortThreaded : MonoBehaviour
 		active = true;
 		StartSendLoop();
 		StartRecvLoop();
-		Thread.CurrentThread.Abort();
+        SessionValues.SessionLevel.waitForSerialPort = false;
+        Thread.CurrentThread.Abort();
+		
 	}
 
 	public void StartSendLoop()

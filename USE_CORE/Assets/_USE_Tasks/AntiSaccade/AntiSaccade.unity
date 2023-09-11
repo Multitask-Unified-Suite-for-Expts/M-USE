@@ -232,12 +232,12 @@ PrefabInstance:
     - target: {fileID: 1428180067561469861, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 1428180067561469861, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 1428180067561469861, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
@@ -297,12 +297,12 @@ PrefabInstance:
     - target: {fileID: 8897097813794134360, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 8897097813794134360, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 8897097813794134360, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
@@ -423,12 +423,12 @@ PrefabInstance:
     - target: {fileID: 818984003618810292, guid: b87c4f4daf3db4f06a50e4f92492b9a3,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 818984003618810292, guid: b87c4f4daf3db4f06a50e4f92492b9a3,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 818984003618810292, guid: b87c4f4daf3db4f06a50e4f92492b9a3,
         type: 3}
@@ -539,12 +539,12 @@ PrefabInstance:
     - target: {fileID: 1428180067561469861, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 1428180067561469861, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 1428180067561469861, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
@@ -604,12 +604,12 @@ PrefabInstance:
     - target: {fileID: 8897097813794134360, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 8897097813794134360, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 200
+      value: 250
       objectReference: {fileID: 0}
     - target: {fileID: 8897097813794134360, guid: 1cb24da8ec7b5465a988d4d1dc1c982c,
         type: 3}
@@ -1105,8 +1105,8 @@ MonoBehaviour:
   AntiSaccade_CanvasGO: {fileID: 1452712387}
   PreCue_GO: {fileID: 1846419271}
   SpatialCue_GO: {fileID: 1157687749}
-  Mask_Target_GO: {fileID: 1004883549}
-  Mask_Cue_GO: {fileID: 496977899}
+  TargetMask_GO: {fileID: 1004883549}
+  CueMask_GO: {fileID: 496977899}
   minObjectTouchDuration:
     name: 
     hidden: 0

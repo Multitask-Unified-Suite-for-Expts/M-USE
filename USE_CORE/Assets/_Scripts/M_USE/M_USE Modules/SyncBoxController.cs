@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-using USE_ExperimentTemplate_Classes;
+
 
 public class SyncBoxController
 {
     [HideInInspector] public SerialPortThreaded serialPortController;
-    // private string filePrefix;
 
     private bool usingSonication; //idk said something about adding to the trial level
     private bool sonicationSentThisFrame;
@@ -57,7 +56,13 @@ public class SyncBoxController
 
     public void SendCameraSyncPulses(int numPulses, int pulseSize)
     {
-
+        for (int i = 0; i < numPulses; i++)
+        {
+            serialPortController.AddToSend("RWB " + pulseSize); //RWD or RWB??
+            MsBetweenRewardPulses = 200;
+            Thread.Sleep(MsBetweenRewardPulses + pulseSize / 10);
+        }
+        rewardFinished = true;
     }
 
     public void SendSonication()

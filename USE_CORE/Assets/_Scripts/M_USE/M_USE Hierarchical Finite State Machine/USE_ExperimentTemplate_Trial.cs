@@ -384,7 +384,6 @@ namespace USE_ExperimentTemplate_Trial
                 ForceBlockEnd = false;
                 return true;
             }
-
             return false;
         }
 
@@ -411,8 +410,8 @@ namespace USE_ExperimentTemplate_Trial
         {
             AbortCodeDict = new Dictionary<string, int>();
 
-            if (!AbortCodeDict.ContainsKey("Pause"))
-                AbortCodeDict.Add("Pause", 1);
+            if (!AbortCodeDict.ContainsKey("EndTrial"))
+                AbortCodeDict.Add("EndTrial", 1);
 
             if (!AbortCodeDict.ContainsKey("RestartBlock"))
                 AbortCodeDict.Add("RestartBlock", 2);

@@ -178,7 +178,8 @@ namespace USE_ExperimentTemplate_Task
 
 
                 //Send Reward Pulses for Ansen's Camera at Start of Task:
-                //SessionValues.SyncBoxController?.SendCameraSyncPulse(3, 250); //Does he want to specify the amount and size?
+                if(SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(3, 250); //Does he want to specify the amount and size?
 
 
             });
@@ -204,6 +205,8 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.RuntimeStims = RuntimeStims;
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
+                TrialLevel.ForceBlockEnd = false;
+
                 SessionValues.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
             });
 
@@ -213,42 +216,7 @@ namespace USE_ExperimentTemplate_Task
                 RunBlock.AddUpdateMethod(() =>
                 {
                     if (TrialLevel != null)
-                    {
-                        if (InputBroker.GetKeyUp(KeyCode.P)) //Pause Game:
-                        {
-                            Time.timeScale = Time.timeScale == 1 ? 0 : 1;
-                        }
-
-                        if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
-                        {
-                            if (Time.timeScale == 0) //if paused, unpause before ending task
-                                Time.timeScale = 1;
-
-                            TrialLevel.AbortCode = 5;
-                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
-                            TrialLevel.ForceBlockEnd = true;
-                            TrialLevel.FinishTrialCleanup();
-                            TrialLevel.ClearActiveTrialHandlers();
-                            SpecifyCurrentState(FinishTask);
-                        }
-
-                        if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
-                        {
-                            TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-
-                            Time.timeScale = 1;//if paused, unpause before ending block
-
-                            if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
-                                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
-
-                            if (TrialLevel.AudioFBController.IsPlaying())
-                                TrialLevel.AudioFBController.audioSource.Stop();
-                            TrialLevel.AbortCode = 3;
-                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
-                            TrialLevel.ForceBlockEnd = true;
-                            TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
-                        }
-                    }
+                        HandleWebBuildHotKeys();
                 });
             }
 
@@ -339,9 +307,9 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
-                //Send Reward Pulses for Ansen's Camera at End of Task:
-                //SessionValues.SyncBoxController?.SendCameraSyncPulse(3, 250); //Does he want to specify the amount and size?
-
+                //Send Reward Pulses for Ansen's Camera at Start of Task:
+                if (SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(3, 250); //Does he want to specify the amount and size?
 
                 if (SessionValues.SessionDataControllers != null)
                 {
@@ -413,6 +381,47 @@ namespace USE_ExperimentTemplate_Task
                 contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
+        }
+
+        private void HandleWebBuildHotKeys()
+        {
+            if (InputBroker.GetKeyUp(KeyCode.P)) //Pause Game HotKey:
+            {
+                Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+            }
+
+            if (InputBroker.GetKeyUp(KeyCode.E)) //End Task HotKey
+            {
+                Time.timeScale = 1; //if paused, unpause before ending task
+
+                TrialLevel.AbortCode = 5;
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
+                TrialLevel.ForceBlockEnd = true;
+                TrialLevel.FinishTrialCleanup();
+                TrialLevel.ClearActiveTrialHandlers();
+                SpecifyCurrentState(FinishTask);
+            }
+
+            if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block HotKey
+            {
+                Time.timeScale = 1; //if paused, unpause before ending block
+
+                if (TrialLevel.TokenFBController != null)
+                {
+                    TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+                    TrialLevel.TokenFBController.enabled = false;
+                }
+
+                if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
+                    SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+
+                if (TrialLevel.AudioFBController.IsPlaying())
+                    TrialLevel.AudioFBController.audioSource.Stop();
+                TrialLevel.AbortCode = 3;
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
+                TrialLevel.ForceBlockEnd = true; //I THINK THIS IS NOT GETTING SET BACK TO FALSE IN RIGHT SPOT!
+                TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
+            }
         }
 
         public float CalculateAverageDuration(List<float?> durations)

@@ -22,8 +22,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     //Set In Inspector:
     public GameObject PreCue_GO;
     public GameObject SpatialCue_GO;
-    public GameObject Mask_Target_GO;
-    public GameObject Mask_Cue_GO;
+    public GameObject TargetMask_GO;
+    public GameObject CueMask_GO;
 
     private StimGroup targetStim;
     private StimGroup distractorStims;
@@ -72,6 +72,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             HaloFBController.SetHaloSize(4f);
             HaloFBController.SetHaloIntensity(2);
+
+            TokenFBController.AdjustTokenBarSizing(150);
         });
 
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -85,7 +87,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Setup Handler:
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ChooseStim);
         //Enable Touch Feedback:
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, AntiSaccade_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 25, AntiSaccade_CanvasGO);
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -130,18 +132,19 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             PreCue_GO.SetActive(false);
             SpatialCue_GO.SetActive(false);
 
-            Mask_Target_GO.transform.localPosition = CurrentTrialDef.TargetStimPosition;
-            Mask_Cue_GO.transform.localPosition = SpatialCue_GO.transform.localPosition;
-            Mask_Target_GO.SetActive(true);
-            Mask_Cue_GO.SetActive(true);
+            TargetMask_GO.transform.localPosition = CurrentTrialDef.TargetStimPosition;
+            CueMask_GO.transform.localPosition = new Vector3(SpatialCue_GO.transform.localPosition.x, SpatialCue_GO.transform.localPosition.y - 50f, SpatialCue_GO.transform.localPosition.z);
+            //CueMask_GO.transform.localPosition = SpatialCue_GO.transform.localPosition;
+            TargetMask_GO.SetActive(true);
+            CueMask_GO.SetActive(true);
         });
         Mask.AddTimer(() => maskDuration.value, PostMaskDelay);
 
         //PostMaskDelay state ----------------------------------------------------------------------------------------------------------------------------------------------
         PostMaskDelay.AddSpecificInitializationMethod(() =>
         {
-            Mask_Target_GO.SetActive(false);
-            Mask_Cue_GO.SetActive(false);
+            TargetMask_GO.SetActive(false);
+            CueMask_GO.SetActive(false);
         });
         PostMaskDelay.AddTimer(() => postMaskDelayDuration.value, ChooseStim);
 

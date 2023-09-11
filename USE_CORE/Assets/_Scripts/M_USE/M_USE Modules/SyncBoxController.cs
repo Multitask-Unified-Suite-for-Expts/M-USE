@@ -12,7 +12,7 @@ public class SyncBoxController
     private bool sonicationSentThisTrial;
     private int numConsecutiveSonicationTrials;
     private bool rewardFinished;
-    private int MsBetweenRewardPulses;
+    private int MsBetweenRewardPulses = 200; //MAKE THIS A CONFIGURABLE VARIABLE!
     public bool sonicationBlockedThisTrial;
     public int numTrialsUntilNextSonication;
     public int? maxConsecutiveSonicationTrials;
@@ -45,8 +45,6 @@ public class SyncBoxController
         for (int i = 0; i < numPulses; i++)
         {
             serialPortController.AddToSend("RWD " + pulseSize);//values less than 250 don't consistently work so use between 250-500 (# in 0.1 ms increments)
-
-            MsBetweenRewardPulses = 200;
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);
         }
         SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
@@ -58,8 +56,7 @@ public class SyncBoxController
     {
         for (int i = 0; i < numPulses; i++)
         {
-            serialPortController.AddToSend("RWB " + pulseSize); //RWD or RWB??
-            MsBetweenRewardPulses = 200;
+            serialPortController.AddToSend("RWB " + pulseSize);
             Thread.Sleep(MsBetweenRewardPulses + pulseSize / 10);
         }
         rewardFinished = true;

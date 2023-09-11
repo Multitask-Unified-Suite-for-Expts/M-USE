@@ -3,23 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
-using EffortControl_Namespace;
+
 
 namespace AntiSaccade_Namespace
 {
     public class AntiSaccade_TaskDef : TaskDef
     {
-
     }
 
     public class AntiSaccade_BlockDef : BlockDef
     {
+        public bool RandomSpatialCueColor;
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
-        public Vector3 SpacialCuePosition;
-        public Vector3 TargetStimPosition;
-        public Vector3 TargetStimFbPosition;
-        public Vector3[] DistractorStimFbPositions;
+        public Vector3 SpacialCue_Pos;
+        public Vector3 TargetStim_DisplayPos;
+        public Vector3 TargetStim_ChoosePos;
+        public Vector3[] DistractorStims_ChoosePos;
         public int RewardMag;
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -29,13 +29,14 @@ namespace AntiSaccade_Namespace
             for(int i = 0; i < NumTrials; i++)
             {
                 AntiSaccade_TrialDef td = new AntiSaccade_TrialDef();
+                td.RandomSpatialCueColor = RandomSpatialCueColor;
                 td.ContextName = ContextName;
                 td.TargetStimIndex = TargetStimIndex;
                 td.DistractorStimIndices = DistractorStimIndices;
-                td.TargetStimPosition = TargetStimPosition;
-                td.TargetStimFbPosition = TargetStimFbPosition;
-                td.DistractorStimFbPositions = DistractorStimFbPositions;
-                td.SpacialCuePosition = SpacialCuePosition;
+                td.TargetStim_DisplayPos = TargetStim_DisplayPos;
+                td.TargetStim_ChoosePos = TargetStim_ChoosePos;
+                td.DistractorStims_ChoosePos = DistractorStims_ChoosePos;
+                td.SpacialCue_Pos = SpacialCue_Pos;
                 td.RewardMag = RewardMag;
                 TrialDefs.Add(td);
             }
@@ -44,12 +45,13 @@ namespace AntiSaccade_Namespace
 
     public class AntiSaccade_TrialDef : TrialDef
     {
+        public bool RandomSpatialCueColor;
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
-        public Vector3 SpacialCuePosition;
-        public Vector3 TargetStimPosition;
-        public Vector3 TargetStimFbPosition;
-        public Vector3[] DistractorStimFbPositions;
+        public Vector3 SpacialCue_Pos;
+        public Vector3 TargetStim_DisplayPos;
+        public Vector3 TargetStim_ChoosePos;
+        public Vector3[] DistractorStims_ChoosePos;
         public int RewardMag;
     }
 

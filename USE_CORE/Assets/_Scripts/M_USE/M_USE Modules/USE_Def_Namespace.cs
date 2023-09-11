@@ -370,7 +370,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// The number of tokens displayed in the token bar at the start of the block.
         /// </summary>
-        public int NumInitialTokens;
+        public int NumInitialTokens = 0;
        
         /// <summary>
         /// The number of tokens that the token bar can hold.

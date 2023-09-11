@@ -419,23 +419,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddSpecificInitializationMethod(() =>
-        {
-            //if (AbortCode == 0) //Normal
-            //{
-            //    CurrentTaskLevel.TrialsCompleted_Task++;
-
-            //    if (GotTrialCorrect)
-            //    {
-            //        NumCorrect_Block++;
-            //        CurrentTaskLevel.TrialsCorrect_Task++;
-            //    }
-
-            //    CurrentTaskLevel.CalculateBlockSummaryString();
-            //}
-            //else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
-            //    EndBlock = true;
-        });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
         //---------------------------------------------------------------------------------------------------------------------------------
         DefineTrialData();

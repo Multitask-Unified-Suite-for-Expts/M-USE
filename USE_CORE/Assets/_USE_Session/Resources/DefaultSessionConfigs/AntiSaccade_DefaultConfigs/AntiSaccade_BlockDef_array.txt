@@ -1,9 +1,9 @@
-ContextName	NumTrials	TargetStimIndex	DistractorStimIndices	SpacialCuePosition	TargetStimPosition	TargetStimFbPosition	DistractorStimFbPositions	RewardMag
-AntiSaccade	1	0	[1, 2]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	2	[1, 3]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	1	[0, 3]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	3	[0, 2]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	0	[1, 2]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	2	[1, 3]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	1	[0, 3]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
-AntiSaccade	1	3	[0, 2]	[-550, 25, 0]	[550, -25, 0]	[-550, -25, 0]	[[550, -25, 0], [0, -25, 0]]	5
+ContextName	NumTrials	RandomSpatialCueColor	TargetStimIndex	DistractorStimIndices	SpacialCue_Pos	TargetStim_DisplayPos	TargetStim_ChoosePos	DistractorStims_ChoosePos	RewardMag	TokenBarCapacity
+LinearDark	1	TRUE	0	[1, 2, 3]	[-550, 25, 0]	[550, -25, 0]	[-700, -25, 0]	[[-225, -25, 0], [225, -25, 0], [700, -25, 0]]	4	4
+LinearDark	1	TRUE	2	[1, 3, 0]	[-550, 25, 0]	[550, -25, 0]	[-225, -25, 0]	[[-700, -25, 0], [225, -25, 0], [700, -25, 0]]	4	4
+LinearDark	1	TRUE	1	[0, 3, 2]	[-550, 25, 0]	[550, -25, 0]	[225, -25, 0]	[[-700, -25, 0], [-225, -25, 0], [700, -25, 0]]	4	4
+LinearDark	1	TRUE	3	[0, 2, 1]	[-550, 25, 0]	[550, -25, 0]	[700, -25, 0]	[[-700, -25, 0], [-225, -25, 0], [225, -25, 0]]	4	4
+LinearDark	1	TRUE	0	[1, 2, 3]	[-550, 25, 0]	[550, -25, 0]	[-700, -25, 0]	[[-225, -25, 0], [225, -25, 0], [700, -25, 0]]	4	4
+LinearDark	1	TRUE	2	[1, 3, 0]	[-550, 25, 0]	[550, -25, 0]	[-225, -25, 0]	[[-700, -25, 0], [225, -25, 0], [700, -25, 0]]	4	4
+LinearDark	1	TRUE	1	[0, 3, 2]	[-550, 25, 0]	[550, -25, 0]	[225, -25, 0]	[[-700, -25, 0], [-225, -25, 0], [700, -25, 0]]	4	4
+LinearDark	1	TRUE	3	[0, 2, 1]	[-550, 25, 0]	[550, -25, 0]	[700, -25, 0]	[[-700, -25, 0], [-225, -25, 0], [225, -25, 0]]	4	4

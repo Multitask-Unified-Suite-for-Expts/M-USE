@@ -228,7 +228,8 @@ namespace USE_ExperimentTemplate_Session
                 
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
-                CreateSessionSettingsFolder();
+                if(SessionValues.StoreData)
+                    CreateSessionSettingsFolder();
 
                 SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
                 SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;

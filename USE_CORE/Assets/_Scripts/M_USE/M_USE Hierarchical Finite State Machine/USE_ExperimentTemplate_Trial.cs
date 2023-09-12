@@ -72,6 +72,10 @@ namespace USE_ExperimentTemplate_Trial
             BackdropStripesTexture, THR_BackdropTexture;
 
 
+        private float Camera_PulseSentTime = 0f;
+
+
+
         //if anyone uses this test it!
         public List<GameObject> AssignStimToList(StimGroup sg, List<GameObject> existingList = null)
         {
@@ -207,6 +211,18 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
+
+
+                //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                {
+                    if (Time.time - Camera_PulseSentTime > SessionValues.SessionDef.Camera_TrialPulseMinGap_Sec)
+                    {
+                        SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TrialStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                        Camera_PulseSentTime = Time.time;
+                    }
+                }
+
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>
@@ -437,33 +453,6 @@ namespace USE_ExperimentTemplate_Trial
 
 
         //Added helper methods for trials.
-
-        public Color32 GetRandomColor()
-        {
-            return new Color32((byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), 255);
-        }
-
-        public string TurnIntArrayIntoString(int[] array)
-        {
-            string s = "[";
-            foreach (var num in array)
-                s += num + ", ";
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            return s;
-        }
-
-        public string TurnVectorArrayIntoString(Vector3[] array)
-        {
-            string s = "[";
-            foreach (var num in array)
-                s += num + ", ";
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            return s;
-        }
-
-
         public void ActivateChildren(GameObject parent)
         {
             foreach (Transform child in parent.transform)

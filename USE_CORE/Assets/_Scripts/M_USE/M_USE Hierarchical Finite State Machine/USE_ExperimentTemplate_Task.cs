@@ -130,56 +130,56 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
             TrialLevel.TaskLevel = this;
-        
+
             Add_ControlLevel_InitializationMethod(() =>
             {
-                TaskCam.gameObject.SetActive(true);
+            TaskCam.gameObject.SetActive(true);
 
-                if (TaskCanvasses != null)
-                    foreach (Canvas canvas in TaskCanvasses)
-                        canvas.gameObject.SetActive(true);
+            if (TaskCanvasses != null)
+                foreach (Canvas canvas in TaskCanvasses)
+                    canvas.gameObject.SetActive(true);
 
-                BlockCount = -1;
-                CurrentBlockSummaryString = new StringBuilder();
-                PreviousBlockSummaryString = new StringBuilder();
-                CurrentTaskSummaryString = new StringBuilder();
+            BlockCount = -1;
+            CurrentBlockSummaryString = new StringBuilder();
+            PreviousBlockSummaryString = new StringBuilder();
+            CurrentTaskSummaryString = new StringBuilder();
 
-                NumRewardPulses_InTask = 0;
-                NumAbortedTrials_InTask = 0;
+            NumRewardPulses_InTask = 0;
+            NumAbortedTrials_InTask = 0;
 
-                if (!SessionValues.WebBuild)
+            if (!SessionValues.WebBuild)
+            {
+                if (configUI == null)
+                    configUI = FindObjectOfType<ConfigUI>();
+                configUI.clear();
+                if (ConfigUiVariables != null)
+                    configUI.store = ConfigUiVariables;
+                else
+                    configUI.store = new ConfigVarStore();
+                configUI.GenerateUI();
+
+                if (TaskName == "GazeCalibration")
                 {
-                    if (configUI == null)
-                        configUI = FindObjectOfType<ConfigUI>();
-                    configUI.clear();
-                    if (ConfigUiVariables != null)
-                        configUI.store = ConfigUiVariables;
-                    else
-                        configUI.store = new ConfigVarStore();
-                    configUI.GenerateUI();
-
-                    if (TaskName == "GazeCalibration")
-                    {
-                        BlockDef bd = new BlockDef();
-                        BlockDefs = new BlockDef[] { bd };
-                        bd.GenerateTrialDefsFromBlockDef();
-                    }
+                    BlockDef bd = new BlockDef();
+                    BlockDefs = new BlockDef[] { bd };
+                    bd.GenerateTrialDefsFromBlockDef();
                 }
+            }
 
-                SessionValues.InputManager.SetActive(true);
+            SessionValues.InputManager.SetActive(true);
 
-                if (SessionValues.SessionDef.IsHuman)
-                {
-                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                    SessionValues.HumanStartPanel.SetTaskLevel(this);
-                    SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-                }
+            if (SessionValues.SessionDef.IsHuman)
+            {
+                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
+                SessionValues.HumanStartPanel.SetTaskLevel(this);
+                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+            }
 
 
-                //Send Reward Pulses for Ansen's Camera at Start of Task:
-                if(SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(3, 250); //Does he want to specify the amount and size?
+            //Send Reward Pulses for Ansen's Camera at Start of Task:
+            if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
 
             });
@@ -307,9 +307,9 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
-                //Send Reward Pulses for Ansen's Camera at Start of Task:
-                if (SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(3, 250); //Does he want to specify the amount and size?
+                //Send Reward Pulses for Ansen's Camera at End of Task:
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskEnd_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
                 if (SessionValues.SessionDataControllers != null)
                 {

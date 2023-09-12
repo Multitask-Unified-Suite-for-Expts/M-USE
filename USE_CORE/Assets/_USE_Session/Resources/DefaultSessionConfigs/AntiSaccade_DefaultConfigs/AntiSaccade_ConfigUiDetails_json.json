@@ -41,13 +41,13 @@
 			"hidden": false
 		},
 
-		"spacialCueDuration": {
+		"spatialCueDuration": {
 			"value": 0.75,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 0,
 			"isRange": true,
-			"name": "SpacialCue Duration",
+			"name": "SpatialCue Duration",
 			"hidden": false
 		},
 
@@ -92,7 +92,7 @@
 		},
 
 		"feedbackDuration": {
-			"value": 1.6,
+			"value": 1.7,
 			"min": 1.0,
 			"max": 5.0,
 			"precision": 0,

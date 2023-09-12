@@ -503,19 +503,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.AddTokens(CenteredGO, SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
                 Destroy(CenteredGO);
 
-                if (SessionValues.SyncBoxController != null)
-                    GiveReward();
-
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
+
                 AddTokenInflateAudioPlayed = true;
-                TokenFBController.ResetTokenBarFull();
             }
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
-        Feedback.AddDefaultTerminationMethod(() =>
+        Feedback.AddUniversalTerminationMethod(() =>
         {
+            if(TokenFBController.IsTokenBarFull())
+            {
+                if(SessionValues.SyncBoxController != null)
+                    GiveReward();
+
+                TokenFBController.ResetTokenBarFull();
+            }
+            
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
@@ -745,7 +750,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (SideChoice == "Left")
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
-           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesLeft));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
 
@@ -753,7 +757,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         else
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
-           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesRight));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
         }

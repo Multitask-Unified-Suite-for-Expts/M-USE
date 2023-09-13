@@ -16,6 +16,10 @@ public class HaloFBController : MonoBehaviour
     private enum State { None, Positive, Negative };
     private State state;
 
+    public bool IsHaloGameObjectNull()
+    {
+        return instantiated == null;
+    }
 
     public void Init(DataController frameData)
     {

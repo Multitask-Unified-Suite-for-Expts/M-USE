@@ -7,8 +7,8 @@ using USE_StimulusManagement;
 using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
-using UnityEditor.UIElements;
 using System;
+
 
 public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 {
@@ -93,6 +93,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             TokenFBController.enabled = false;
+
             LoadConfigUIVariables();
 
             //Set string of Whether its AntiSaccade or ProSaccade by checking if X values are the same. 
@@ -105,7 +106,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 SpatialCue_GO.GetComponent<Image>().sprite = Resources.Load<Sprite>(CurrentTrialDef.SpatialCue_Icon);
 
             //Set Mask Icon:
-            if(!string.IsNullOrEmpty(CurrentTrialDef.Mask_Icon) && IconsList.Contains(CurrentTrialDef.Mask_Icon))
+            if (!string.IsNullOrEmpty(CurrentTrialDef.Mask_Icon) && IconsList.Contains(CurrentTrialDef.Mask_Icon))
                 Mask_GO.GetComponent<Image>().sprite = Resources.Load<Sprite>(CurrentTrialDef.Mask_Icon);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -130,12 +131,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //PreCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         PreCue.AddSpecificInitializationMethod(() =>
         {
-            if(CurrentTrialDef.PreCue_Size > 0)
+            if (CurrentTrialDef.PreCue_Size > 0)
                 PreCue_GO.GetComponent<RectTransform>().sizeDelta = new Vector2(CurrentTrialDef.PreCue_Size, CurrentTrialDef.PreCue_Size);
             PreCue_GO.SetActive(true);
         });
 
-        PreCue.AddTimer(() => preCueDuration.value, AlertCue);
+        PreCue.AddTimer(() => preCueDuration.value, AlertCue, () => PreCue_GO.SetActive(false));
 
         //AlertCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         AlertCue.AddSpecificInitializationMethod(() => AudioFBController.Play("ContinueBeep"));
@@ -150,7 +151,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SpatialCue_GO.transform.localPosition = CurrentTrialDef.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
         });
-        SpatialCue.AddTimer(() => spatialCueDuration.value, DisplayTarget);
+        SpatialCue.AddTimer(() => spatialCueDuration.value, DisplayTarget, () => SpatialCue_GO.SetActive(false));
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() => SpatialCue_GO.SetActive(false));
@@ -159,7 +160,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Mask state ----------------------------------------------------------------------------------------------------------------------------------------------
         Mask.AddSpecificInitializationMethod(() =>
         {
-            PreCue_GO.SetActive(false);
+            //PreCue_GO.SetActive(false);
 
             if (CurrentTrialDef.RandomMaskColor)
                 Mask_GO.GetComponent<Image>().color = GetRandomColor();
@@ -181,7 +182,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             TargetStim_GO.SetActive(true);
 
             PreCue_GO.SetActive(false);
-            SpatialCue_GO.SetActive(false);
+            // SpatialCue_GO.SetActive(false);
 
             ChosenGO = null;
             ChosenStim = null;
@@ -194,7 +195,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         {
             ChosenGO = Handler.LastSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<AntiSaccade_StimDef>();
-            if(ChosenStim != null)
+            if (ChosenStim != null)
                 stimChosen = true;
         });
         ChooseStim.SpecifyTermination(() => stimChosen, Feedback);
@@ -203,20 +204,24 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Feedback state ----------------------------------------------------------------------------------------------------------------------------------------------
         float rotationSpeed = 260f;
         float totalRotation = 0f;
+        float haloDuration = AudioFBController.GetClip("Positive").length;
+        float haloStartTime = 0f;
 
         Feedback.AddSpecificInitializationMethod(() =>
         {
             SpinCorrectSelection = false;
             totalRotation = 0f;
 
-            if(ChosenStim == null)
+            if (ChosenStim == null)
                 return;
+
+            haloStartTime = Time.time;
 
             int? depth = SessionValues.Using2DStim ? 10 : (int?)null;
 
             if (ChosenStim.IsTarget)
             {
-                if(CurrentTrialDef.UseSpinAnimation)
+                if (CurrentTrialDef.UseSpinAnimation)
                     SpinCorrectSelection = true;
                 HaloFBController.ShowPositive(ChosenGO, depth);
                 TokenFBController.AddTokens(ChosenGO, CurrentTrialDef.RewardMag);
@@ -231,27 +236,34 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         });
         Feedback.AddUpdateMethod(() =>
         {
-            if(SpinCorrectSelection)
+            if (SpinCorrectSelection)
             {
                 float rotationAmount = rotationSpeed * Time.deltaTime;
                 if (rotationAmount + totalRotation >= 360)
                     rotationAmount -= (rotationAmount + totalRotation - 360);
                 ChosenStim.StimGameObject.transform.Rotate(Vector3.forward, rotationAmount);
                 totalRotation += rotationAmount;
-                if(totalRotation >= 360f)
+                if (totalRotation >= 360f)
                 {
                     transform.rotation = Quaternion.Euler(0f, 0f, 0f);
                     SpinCorrectSelection = false;
                 }
+            }
+
+            if (Time.time - haloStartTime > haloDuration && !HaloFBController.IsHaloGameObjectNull())
+            {
+                Debug.Log("DESTROYING!!!!");
+                HaloFBController.Destroy();
+                //haloStartTime = Time.time; //this neccessary?
             }
         });
         Feedback.AddTimer(() => feedbackDuration.value, ITI);
         Feedback.SpecifyTermination(() => !stimChosen, ITI, () => AudioFBController.Play("Negative"));
         Feedback.AddUniversalTerminationMethod(() =>
         {
-            if(TokenFBController.IsTokenBarFull())
+            if (TokenFBController.IsTokenBarFull())
             {
-                if(SessionValues.SyncBoxController != null)
+                if (SessionValues.SyncBoxController != null)
                 {
                     SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
@@ -260,7 +272,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.ResetTokenBarFull();
             }
             TokenFBController.enabled = false;
-            //HaloFBController.Destroy(); //moving up
+            HaloFBController.Destroy(); //moving up
             TargetStim_GO.SetActive(false);
         });
 
@@ -271,12 +283,27 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
         DefineFrameData();
 
-}
+    }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
+    private void DeactivateLingeringGameObjects()
+    {
+        if (Mask_GO.activeInHierarchy)
+            Mask_GO.SetActive(false);
+        if (SpatialCue_GO.activeInHierarchy)
+            SpatialCue_GO.SetActive(false);
+        if (PreCue_GO.activeInHierarchy)
+            PreCue_GO.SetActive(false);
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        DeactivateLingeringGameObjects();
+    }
+
     private void CreateGameObjects()
     {
-        if(PreCue_GO == null)
+        if (PreCue_GO == null)
         {
             PreCue_GO = new GameObject("PreCue");
             PreCue_GO.SetActive(false);
@@ -290,7 +317,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             preCueImage.color = new Color32(24, 255, 0, 255);
         }
 
-        if(SpatialCue_GO == null)
+        if (SpatialCue_GO == null)
         {
             SpatialCue_GO = new GameObject("SpatialCue");
             SpatialCue_GO.SetActive(false);
@@ -302,7 +329,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             spatialCueImage.sprite = Resources.Load<Sprite>("Star"); //initially using Star as default
         }
 
-        if(Mask_GO == null)
+        if (Mask_GO == null)
         {
             Mask_GO = new GameObject("Mask");
             Mask_GO.SetActive(false);
@@ -371,12 +398,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private void SetDataStrings()
     {
-        if(CurrentTrialDef.DistractorStimIndices.Length > 0)
+        if (CurrentTrialDef.DistractorStimIndices.Length > 0)
             DistractorStimIndices_String = TurnIntArrayIntoString(CurrentTrialDef.DistractorStimIndices);
 
-        if(CurrentTrialDef.DistractorStims_ChoosePos.Length > 0)
+        if (CurrentTrialDef.DistractorStims_ChoosePos.Length > 0)
             DistractorStimsChoosePos_String = TurnVectorArrayIntoString(CurrentTrialDef.DistractorStims_ChoosePos);
     }
 
 }
+
 

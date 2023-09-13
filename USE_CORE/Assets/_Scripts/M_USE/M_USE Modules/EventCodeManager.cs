@@ -223,8 +223,8 @@ public class EventCodeManager : MonoBehaviour
         if (!string.IsNullOrEmpty(ending))
             eventCodeBuilder.Append(ending);
 
-        Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
-        //SessionValues.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
+        //Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
+        SessionValues.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
     }
 
 

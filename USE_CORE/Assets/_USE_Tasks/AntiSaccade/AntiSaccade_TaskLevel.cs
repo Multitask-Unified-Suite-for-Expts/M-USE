@@ -1,7 +1,4 @@
-using USE_Settings;
-using USE_StimulusManagement;
 using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Block;
 using AntiSaccade_Namespace;
 
 
@@ -30,6 +27,8 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         {
             //trialLevel.ResetBlockVariables();
             SetSkyBox(CurrentBlock.ContextName);
+            trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.TokenBarCapacity);
+            trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.NumInitialTokens);
         });
 
     }

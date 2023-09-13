@@ -22,9 +22,9 @@
 		},
 
 		"preCueDuration": {
-			"value": 1.25,
-			"min": 0.01,
-			"max": 20.0,
+			"value": 1.0,
+			"min": 0.5,
+			"max": 5.0,
 			"precision": 0,
 			"isRange": true,
 			"name": "PreCue Duration",
@@ -32,7 +32,7 @@
 		},
 
 		"alertCueDuration": {
-			"value": 0.2,
+			"value": 0.5,
 			"min": 0.01,
 			"max": 2.0,
 			"precision": 0,
@@ -41,13 +41,13 @@
 			"hidden": false
 		},
 
-		"spacialCueDuration": {
-			"value": 0.5,
+		"spatialCueDuration": {
+			"value": 0.75,
 			"min": 0.01,
 			"max": 5.0,
 			"precision": 0,
 			"isRange": true,
-			"name": "SpacialCue Duration",
+			"name": "SpatialCue Duration",
 			"hidden": false
 		},
 
@@ -72,8 +72,8 @@
 		},
 
 		"postMaskDelayDuration": {
-			"value": 0.01,
-			"min": 0.01,
+			"value": 0.1,
+			"min": 0.001,
 			"max": 5.0,
 			"precision": 0,
 			"isRange": true,
@@ -82,7 +82,7 @@
 		},
 
 		"chooseStimDuration": {
-			"value": 4.0,
+			"value": 5.0,
 			"min": 0.01,
 			"max": 10.0,
 			"precision": 0,
@@ -92,8 +92,8 @@
 		},
 
 		"feedbackDuration": {
-			"value": 1.0,
-			"min": 0.01,
+			"value": 1.7,
+			"min": 1.0,
 			"max": 5.0,
 			"precision": 0,
 			"isRange": true,
@@ -102,8 +102,8 @@
 		},
 
 		"itiDuration": {
-			"value": 0.01,
-			"min": 0.01,
+			"value": 0.5,
+			"min": 0.001,
 			"max": 10.0,
 			"precision": 0,
 			"isRange": true,

@@ -3,23 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
-using EffortControl_Namespace;
+
 
 namespace AntiSaccade_Namespace
 {
     public class AntiSaccade_TaskDef : TaskDef
     {
-
     }
 
     public class AntiSaccade_BlockDef : BlockDef
     {
+        public int PreCue_Size;
+        public string SpatialCue_Icon;
+        public string Mask_Icon;
+        public bool UseSpinAnimation;
+        public bool RandomSpatialCueColor;
+        public bool RandomMaskColor;
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
-        public Vector3 SpacialCuePosition;
-        public Vector3 TargetStimPosition;
-        public Vector3 TargetStimFbPosition;
-        public Vector3[] DistractorStimFbPositions;
+        public Vector3 SpatialCue_Pos;
+        public Vector3 TargetStim_DisplayPos;
+        public Vector3 TargetStim_ChoosePos;
+        public Vector3[] DistractorStims_ChoosePos;
         public int RewardMag;
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -29,13 +34,19 @@ namespace AntiSaccade_Namespace
             for(int i = 0; i < NumTrials; i++)
             {
                 AntiSaccade_TrialDef td = new AntiSaccade_TrialDef();
+                td.PreCue_Size = PreCue_Size;
+                td.SpatialCue_Icon = SpatialCue_Icon;
+                td.Mask_Icon = Mask_Icon;
+                td.UseSpinAnimation = UseSpinAnimation;
+                td.RandomSpatialCueColor = RandomSpatialCueColor;
+                td.RandomMaskColor = RandomMaskColor;
                 td.ContextName = ContextName;
                 td.TargetStimIndex = TargetStimIndex;
                 td.DistractorStimIndices = DistractorStimIndices;
-                td.TargetStimPosition = TargetStimPosition;
-                td.TargetStimFbPosition = TargetStimFbPosition;
-                td.DistractorStimFbPositions = DistractorStimFbPositions;
-                td.SpacialCuePosition = SpacialCuePosition;
+                td.TargetStim_DisplayPos = TargetStim_DisplayPos;
+                td.TargetStim_ChoosePos = TargetStim_ChoosePos;
+                td.DistractorStims_ChoosePos = DistractorStims_ChoosePos;
+                td.SpatialCue_Pos = SpatialCue_Pos;
                 td.RewardMag = RewardMag;
                 TrialDefs.Add(td);
             }
@@ -44,12 +55,18 @@ namespace AntiSaccade_Namespace
 
     public class AntiSaccade_TrialDef : TrialDef
     {
+        public int PreCue_Size;
+        public string SpatialCue_Icon;
+        public string Mask_Icon;
+        public bool UseSpinAnimation;
+        public bool RandomSpatialCueColor;
+        public bool RandomMaskColor;
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
-        public Vector3 SpacialCuePosition;
-        public Vector3 TargetStimPosition;
-        public Vector3 TargetStimFbPosition;
-        public Vector3[] DistractorStimFbPositions;
+        public Vector3 SpatialCue_Pos;
+        public Vector3 TargetStim_DisplayPos;
+        public Vector3 TargetStim_ChoosePos;
+        public Vector3[] DistractorStims_ChoosePos;
         public int RewardMag;
     }
 

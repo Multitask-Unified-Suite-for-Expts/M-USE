@@ -14,7 +14,6 @@ using USE_UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
-using Dropbox.Api.TeamLog;
 using USE_Def_Namespace;
 
 
@@ -71,6 +70,10 @@ namespace USE_ExperimentTemplate_Trial
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
             BackdropStripesTexture, THR_BackdropTexture;
+
+
+        private float Camera_PulseSentTime = 0f;
+
 
 
         //if anyone uses this test it!
@@ -208,6 +211,18 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
+
+
+                //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                {
+                    if (Time.time - Camera_PulseSentTime > SessionValues.SessionDef.Camera_TrialPulseMinGap_Sec)
+                    {
+                        SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TrialStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                        Camera_PulseSentTime = Time.time;
+                    }
+                }
+
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>
@@ -384,7 +399,6 @@ namespace USE_ExperimentTemplate_Trial
                 ForceBlockEnd = false;
                 return true;
             }
-
             return false;
         }
 
@@ -411,8 +425,8 @@ namespace USE_ExperimentTemplate_Trial
         {
             AbortCodeDict = new Dictionary<string, int>();
 
-            if (!AbortCodeDict.ContainsKey("Pause"))
-                AbortCodeDict.Add("Pause", 1);
+            if (!AbortCodeDict.ContainsKey("EndTrial"))
+                AbortCodeDict.Add("EndTrial", 1);
 
             if (!AbortCodeDict.ContainsKey("RestartBlock"))
                 AbortCodeDict.Add("RestartBlock", 2);
@@ -438,7 +452,7 @@ namespace USE_ExperimentTemplate_Trial
         }
 
 
-        //Added helper methods for trials. 
+        //Added helper methods for trials.
         public void ActivateChildren(GameObject parent)
         {
             foreach (Transform child in parent.transform)

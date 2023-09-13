@@ -160,8 +160,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Mask state ----------------------------------------------------------------------------------------------------------------------------------------------
         Mask.AddSpecificInitializationMethod(() =>
         {
-            //PreCue_GO.SetActive(false);
-
             if (CurrentTrialDef.RandomMaskColor)
                 Mask_GO.GetComponent<Image>().color = GetRandomColor();
 
@@ -180,9 +178,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         {
             TargetStim_GO.transform.localPosition = CurrentTrialDef.TargetStim_ChoosePos;
             TargetStim_GO.SetActive(true);
-
-            PreCue_GO.SetActive(false);
-            // SpatialCue_GO.SetActive(false);
 
             ChosenGO = null;
             ChosenStim = null;

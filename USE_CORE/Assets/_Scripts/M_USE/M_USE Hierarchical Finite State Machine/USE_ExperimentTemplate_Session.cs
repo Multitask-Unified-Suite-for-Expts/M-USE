@@ -206,7 +206,7 @@ namespace USE_ExperimentTemplate_Session
                     Debug.Log($"4 {Time.frameCount} IS THE SERIAL PORT CONTROLLER NULL? " + (SessionValues.SerialPortController == null ? "YES" : "NO"));
                 }
 
-                if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
+                /*if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
                 {
                     if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
                         SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
@@ -216,7 +216,7 @@ namespace USE_ExperimentTemplate_Session
                         Debug.Log("STR " + str);
                     }
 //                    waitForSerialPort = false;
-                }
+                }*/
                 
             });
 

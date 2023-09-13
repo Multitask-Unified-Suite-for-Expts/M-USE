@@ -924,8 +924,8 @@ namespace USE_States
 		{
             Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
-			/*try
-			{*/
+			try
+			{
 				InitializeControlLevel();
                 if (isMainLevel)
                 {
@@ -938,74 +938,74 @@ namespace USE_States
                         Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
                     }
                 }
-			//}
-			/*catch (Exception e)
-			{
-                string errorMessage = "###############################################################################################################" + Environment.NewLine;
-                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
-                errorMessage += "###############################################################################################################";
-
-                Debug.Log(errorMessage);
-
-			}*/
-
-		}
-		void FixedUpdate()
-		{
-			/*try
-			{*/
-				if (isMainLevel & !Paused)
-                {
-                    RunControlLevelFixedUpdate();
-                }
-			/*}
-			catch (Exception e)
-			{
-                string errorMessage = "###############################################################################################################" + Environment.NewLine;
-                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
-                errorMessage += "###############################################################################################################";
-
-                Debug.Log(errorMessage);
-
-			}*/
-
-		}
-		public virtual void Update()
-		{
-			/*try
-			{*/
-                if (isMainLevel & !Paused)
-                {
-                    RunControlLevelUpdate();
-                }
-		    /*}
+			}
 			catch (Exception e)
 			{
 				string errorMessage = "###############################################################################################################" + Environment.NewLine;
-                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
 				errorMessage += "###############################################################################################################";
 
 				Debug.Log(errorMessage);
 
-			}*/
+			}
+
+		}
+		void FixedUpdate()
+		{
+			try
+			{
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelFixedUpdate();
+                }
+			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.Log(errorMessage);
+
+			}
+
+		}
+		public virtual void Update()
+		{
+			try
+			{
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelUpdate();
+                }
+			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.Log(errorMessage);
+
+			}
 		}
 		void LateUpdate()
 		{
-			/*try
-			{*/
+			try
+			{
 				if (isMainLevel & !Paused)
-                {
-                    RunControlLevelLateUpdate();
-                }
-			/*}
+				{
+					RunControlLevelLateUpdate();
+				}
+			}
 			catch (Exception e)
 			{
-                string errorMessage = "###############################################################################################################" + Environment.NewLine;
-                errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
-                errorMessage += "###############################################################################################################";
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
 
-                Debug.Log(errorMessage);
-			}*/
+				Debug.Log(errorMessage);
+			}
 
 		}
 

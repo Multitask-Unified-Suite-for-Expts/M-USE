@@ -18,15 +18,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int TrialsCorrect_Task = 0;
     [HideInInspector] public int TokenBarsCompleted_Task = 0;
 
-    public override void SpecifyTypes()
-    {
-        TaskLevelType = typeof(AntiSaccade_TaskLevel);
-        TrialLevelType = typeof(AntiSaccade_TrialLevel);
-        TaskDefType = typeof(AntiSaccade_TaskDef);
-        BlockDefType = typeof(AntiSaccade_BlockDef);
-        TrialDefType = typeof(AntiSaccade_TrialDef);
-        StimDefType = typeof(AntiSaccade_StimDef);
-    }
 
     public override void DefineControlLevel()
     {

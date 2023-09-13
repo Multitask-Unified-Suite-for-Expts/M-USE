@@ -1,8 +1,6 @@
 using UnityEngine;
 using USE_Data;
-using System.Collections.Generic;
-using USE_ExperimentTemplate_Classes;
-using System.Collections;
+
 
 public class TokenFBController : MonoBehaviour
 {
@@ -186,7 +184,6 @@ public class TokenFBController : MonoBehaviour
     public bool IsAnimating()
     {
         return animationPhase != AnimationPhase.None;
-        //return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
     }
 
     public string GetAnimationPhase()

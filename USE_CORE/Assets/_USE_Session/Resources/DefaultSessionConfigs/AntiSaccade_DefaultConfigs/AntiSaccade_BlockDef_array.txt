@@ -1,2 +1,9 @@
-ContextName	NumTrials	TargetStimIndex	DistractorStimIndices	SpacialCuePosition	TargetStimPosition	TargetStimFbPosition	DistractorStimFbPositions	RewardMag
-AntiSaccade	3	0	[1, 2]	[-500, 0, 0]	[500, 0, 0]	[-500, 0, 0]	[[500, 0, 0], [0, 0, 0]]	5
+ContextName	NumTrials	PreCue_Size	SpatialCue_Icon	Mask_Icon	UseSpinAnimation	RandomSpatialCueColor	RandomMaskColor	TargetStimIndex	DistractorStimIndices	SpatialCue_Pos	TargetStim_DisplayPos	TargetStim_ChoosePos	DistractorStims_ChoosePos	RewardMag	TokenBarCapacity	NumPulses	PulseSize
+darkFun	1	75	Star	QuestionMark	TRUE	TRUE	TRUE	0	[1, 2, 3]	[-500, 25, 0]	[500, -25, 0]	[-675, -25, 0]	[[-225, -25, 0], [225, -25, 0], [675, -25, 0]]	4	4	2	250
+darkSpotlight	1	75	Heart	QuestionMark	TRUE	TRUE	TRUE	2	[1, 3, 0]	[-500, 25, 0]	[500, -25, 0]	[-225, -25, 0]	[[-675, -25, 0], [225, -25, 0], [675, -25, 0]]	4	4	2	250
+darkFun	1	75	Circle	QuestionMark	TRUE	TRUE	TRUE	1	[0, 3, 2]	[-500, 25, 0]	[500, -25, 0]	[225, -25, 0]	[[-675, -25, 0], [-225, -25, 0], [675, -25, 0]]	4	4	2	250
+darkSpotlight	1	75	Star	QuestionMark	TRUE	TRUE	TRUE	3	[0, 2, 1]	[-500, 25, 0]	[500, -25, 0]	[675, -25, 0]	[[-675, -25, 0], [-225, -25, 0], [225, -25, 0]]	4	4	2	250
+darkFun	1	75	Heart	QuestionMark	TRUE	TRUE	TRUE	0	[1, 2, 3]	[-500, 25, 0]	[500, -25, 0]	[-675, -25, 0]	[[-225, -25, 0], [225, -25, 0], [675, -25, 0]]	4	4	2	250
+darkSpotlight	1	75	Circle	QuestionMark	TRUE	TRUE	TRUE	2	[1, 3, 0]	[-500, 25, 0]	[500, -25, 0]	[-225, -25, 0]	[[-675, -25, 0], [225, -25, 0], [675, -25, 0]]	4	4	2	250
+darkFun	1	75	Star	QuestionMark	TRUE	TRUE	TRUE	1	[0, 3, 2]	[-500, 25, 0]	[500, -25, 0]	[225, -25, 0]	[[-675, -25, 0], [-225, -25, 0], [675, -25, 0]]	4	4	2	250
+darkSpotlight	1	75	Heart	QuestionMark	TRUE	TRUE	TRUE	3	[0, 2, 1]	[-500, 25, 0]	[500, -25, 0]	[675, -25, 0]	[[-675, -25, 0], [-225, -25, 0], [225, -25, 0]]	4	4	2	250

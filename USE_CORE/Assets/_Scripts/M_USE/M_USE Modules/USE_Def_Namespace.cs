@@ -194,6 +194,37 @@ namespace USE_Def_Namespace
         /// Total number of grid spots. Default is 20, but can be adjusted if needed.
         /// </summary>
         public int NumGridSpots = 20;
+
+        /// <summary>
+        /// Pulse size for the Camera. Default is 250. 
+        /// </summary>
+        public bool SendCameraPulses;
+
+        /// <summary>
+        /// Pulse size for the Camera. Default is 250. 
+        /// </summary>
+        public int Camera_PulseSize_Ticks = 250;
+
+        /// <summary>
+        /// Camera's Num Pulses to be sent at start of Task. Default is 3. 
+        /// </summary>
+        public int Camera_TaskStart_NumPulses = 3;
+
+        /// <summary>
+        /// Camera's Num Pulses to be sent at end of Task. Default is 2. 
+        /// </summary>
+        public int Camera_TaskEnd_NumPulses = 2;
+
+        /// <summary>
+        /// Camera's Num Pulses to be sent during SetupTrial. Default is 1. 
+        /// </summary>
+        public int Camera_TrialStart_NumPulses = 1;
+
+        /// <summary>
+        /// Camera's Min amount of time between sending pulses during SetupTrial. Default is 8. 
+        /// </summary>
+        public int Camera_TrialPulseMinGap_Sec = 8;
+
     }
 
     public class TaskDef
@@ -370,7 +401,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// The number of tokens displayed in the token bar at the start of the block.
         /// </summary>
-        public int NumInitialTokens;
+        public int NumInitialTokens = 0;
        
         /// <summary>
         /// The number of tokens that the token bar can hold.

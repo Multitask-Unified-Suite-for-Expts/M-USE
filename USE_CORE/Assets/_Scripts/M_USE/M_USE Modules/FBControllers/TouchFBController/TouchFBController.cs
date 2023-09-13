@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
-using USE_ExperimentTemplate_Classes;
 using USE_Data;
 using SelectionTracking;
 using System;
-using UnityEngine.UI;
 using System.Linq;
-using System.Collections;
+
 
 public class TouchFBController : MonoBehaviour
 {

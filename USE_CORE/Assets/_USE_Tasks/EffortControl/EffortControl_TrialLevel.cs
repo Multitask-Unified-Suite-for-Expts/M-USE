@@ -547,7 +547,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialTouches = 0;
     }
 
-    public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
+    private void DeactivateGameObjects()
     {
         if (TrialStim != null && TrialStim.activeInHierarchy)
             TrialStim.SetActive(false);
@@ -566,6 +566,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Destroy(MaxOutline_Right);
         Destroy(MaxOutline_Left);
+    }
+
+    public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
+    {
+        DeactivateGameObjects();
 
         if (AbortCode == 0) //Normal
             CurrentTaskLevel.CalculateBlockSummaryString();

@@ -460,6 +460,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.ResetTokenBarFull();
     }
 
+    private void HandleTokenUpdate()
+    {
+        if (TokenFBController.IsTokenBarFull())
+        {
+            NumTbCompletions_Block++;
+            CurrentTaskLevel.TokenBarCompletions_Task++;
+
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
+            SessionValues.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+            TokenFBController.ResetTokenBarFull();
+
+        }
+    }
+
     public override void AddToStimLists() //For EventCodes:
     {
         foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
@@ -1112,22 +1128,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 Destroy(border);
         }
         BorderPrefabList.Clear();
-    }
-
-    private void HandleTokenUpdate()
-    {
-        if(TokenFBController.IsTokenBarFull())
-        {
-            NumTbCompletions_Block++;
-            CurrentTaskLevel.TokenBarCompletions_Task++;
-
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-
-            SessionValues.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-            TokenFBController.ResetTokenBarFull();
-
-        }
     }
 
     private List<int> ShuffleList(List<int> list)

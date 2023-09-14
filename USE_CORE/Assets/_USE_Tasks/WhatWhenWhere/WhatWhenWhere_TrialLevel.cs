@@ -339,17 +339,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 
                 errorTypeString = "None";
             }
-            else if(!retouchLastCorrect)//Chose Incorrect
+            else //Chose Incorrect
             {
+                AudioFBController.Play("Negative");
+                if (retouchLastCorrect)
+                    return;
                 
                 // RETOUCH LAST CORRECT doesn't INCREMENT CONSECUTIVE ERROR
                 consecutiveError++;
                 perseverationCounter++;
-
+                
                 if (GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)")?.gameObject == null)
                 {
                     HaloFBController.ShowNegative(selectedGO, depth);
-                    AudioFBController.Play("Negative");
                     GrayHalos.Add(GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)").gameObject);
                 }
 
@@ -367,9 +369,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
-                
-
             }
+            
             
             selectedGO = null;
         });

@@ -31,15 +31,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
 
-    public override void SpecifyTypes()
-    {
-        TaskLevelType = typeof(EffortControl_TaskLevel);
-        TrialLevelType = typeof(EffortControl_TrialLevel);
-        TaskDefType = typeof(EffortControl_TaskDef);
-        BlockDefType = typeof(EffortControl_BlockDef);
-        TrialDefType = typeof(EffortControl_TrialDef);
-        StimDefType = typeof(EffortControl_StimDef);
-    }
 
     public override void DefineControlLevel()
     {

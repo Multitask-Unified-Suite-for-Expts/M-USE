@@ -23,15 +23,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public int blocksAdded;
 
 
-    public override void SpecifyTypes()
-    {
-        TaskLevelType = typeof(ContinuousRecognition_TaskLevel);
-        TrialLevelType = typeof(ContinuousRecognition_TrialLevel);
-        TaskDefType = typeof(ContinuousRecognition_TaskDef);
-        BlockDefType = typeof(ContinuousRecognition_BlockDef);
-        TrialDefType = typeof(ContinuousRecognition_TrialDef);
-        StimDefType = typeof(ContinuousRecognition_StimDef);
-    }
 
     public override void DefineControlLevel()
     {

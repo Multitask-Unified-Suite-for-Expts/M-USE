@@ -69,7 +69,7 @@ namespace USE_ExperimentTemplate_Trial
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
-            BackdropStripesTexture, THR_BackdropTexture;
+            MoveTooFarTexture, THR_BackdropTexture;
 
 
         private float Camera_PulseSentTime = 0f;
@@ -636,7 +636,7 @@ namespace USE_ExperimentTemplate_Trial
         //Timing is off:
         //public void LoadTexturesFromServer()
         //{
-        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HeldTooLong.png", result =>
         //    {
         //        if (result != null)
         //        {
@@ -647,11 +647,10 @@ namespace USE_ExperimentTemplate_Trial
         //            Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
         //    }));
 
-        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HeldTooShort.png", result =>
         //    {
         //        if (result != null)
         //        {
-        //            Debug.Log("Got the HeldTooShort Texture from the server!");
         //            HeldTooShortTexture = result;
         //            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
         //        }
@@ -663,20 +662,18 @@ namespace USE_ExperimentTemplate_Trial
         //    {
         //        if (result != null)
         //        {
-        //            Debug.Log("Got the BackdropStripesTexture from the server!");
-        //            BackdropStripesTexture = result;
-        //            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+        //            MoveTooFarTexture = result;
+        //            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
         //        }
         //        else
         //            Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
 
         //    }));
 
-        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/THR_Backdrop.png", result =>
         //    {
         //        if (result != null)
         //        {
-        //            Debug.Log("Got the THR_BackDropTexture from the server!");
         //            THR_BackdropTexture = result;
         //        }
         //        else
@@ -686,27 +683,28 @@ namespace USE_ExperimentTemplate_Trial
 
         public void LoadTexturesFromResources()
         {
-            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HorizontalStripes");
-            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/VerticalStripes");
-            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
-            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/Concrete4");
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooLong");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooShort");
+            MoveTooFarTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/THR_Backdrop");
 
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
         }
 
-        public void LoadTextures(string ContextExternalFilePath)
-        {
-            HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));
-            HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
-            BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
-            THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
+        //Currently just having all 3 (local, server, default) load from Resources:
+        //public void LoadTextures(string ContextExternalFilePath)
+        //{
+        //    HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooLong.png"));
+        //    HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooShort.png"));
+        //    MoveTooFarTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
+        //    THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "THR_Backdrop.png"));
 
-            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
-            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
-        }
+        //    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+        //    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+        //    TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
+        //}
 
         public virtual void ResetTrialVariables()
         {

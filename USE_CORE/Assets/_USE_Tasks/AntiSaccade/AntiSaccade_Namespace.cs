@@ -25,6 +25,7 @@ namespace AntiSaccade_Namespace
         public Vector3 TargetStim_DisplayPos;
         public Vector3 TargetStim_ChoosePos;
         public Vector3[] DistractorStims_ChoosePos;
+        public float HaloFbDuration;
         public int RewardMag;
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -46,6 +47,7 @@ namespace AntiSaccade_Namespace
                 td.TargetStim_DisplayPos = TargetStim_DisplayPos;
                 td.TargetStim_ChoosePos = TargetStim_ChoosePos;
                 td.DistractorStims_ChoosePos = DistractorStims_ChoosePos;
+                td.HaloFbDuration = HaloFbDuration;
                 td.SpatialCue_Pos = SpatialCue_Pos;
                 td.RewardMag = RewardMag;
                 TrialDefs.Add(td);
@@ -67,6 +69,7 @@ namespace AntiSaccade_Namespace
         public Vector3 TargetStim_DisplayPos;
         public Vector3 TargetStim_ChoosePos;
         public Vector3[] DistractorStims_ChoosePos;
+        public float HaloFbDuration;
         public int RewardMag;
     }
 

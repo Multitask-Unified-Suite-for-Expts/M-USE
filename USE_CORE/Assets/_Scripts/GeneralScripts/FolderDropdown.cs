@@ -13,7 +13,7 @@ public class FolderDropdown : MonoBehaviour
         if (dropdown == null)
             Debug.LogError("The FolderDropdown's dropdown component is null!");
 
-        dropdown.captionText.text = "**Connect to your server to populate the dropdown**";
+        dropdown.captionText.text = "**Connect to server to populate the dropdown**";
     }
 
     public void SetFolders(List<string> sessionConfigFolders)

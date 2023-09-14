@@ -72,46 +72,6 @@
 			"hidden": false
 		},
 
-		"displaySampleDuration": {
-			"value": 1.0,
-			"min": 0.0,
-			"max": 10.0,
-			"precision": 0,
-			"isRange": true,
-			"name": "Display Sample Duration",
-			"hidden": false
-		},
-
-		"postSampleDelayDuration": {
-			"value": 0.5,
-			"min": 0.0,
-			"max": 10.0,
-			"precision": 0,
-			"isRange": true,
-			"name": "Post-Sample Delay Duration",
-			"hidden": false
-		},
-
-		"displayPostSampleDistractorsDuration": {
-			"value": 0.5,
-			"min": 0.0,
-			"max": 10.0,
-			"precision": 0,
-			"isRange": true,
-			"name": "Display Post-Sample Distractors Duration",
-			"hidden": false
-		},
-
-		"preTargetDelayDuration": {
-			"value": 0.5,
-			"min": 0.0,
-			"max": 10.0,
-			"precision": 0,
-			"isRange": true,
-			"name": "Pre-Target Delay Duration",
-			"hidden": false
-		},
-
 		"itiDuration": {
 			"value": 0.01,
 			"min": 0.0,

@@ -41,6 +41,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine.UI;
 using System.Collections;
+using System.Text;
 
 namespace USE_States
 {
@@ -1150,26 +1151,6 @@ namespace USE_States
             return new Color32((byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), 255);
         }
 
-        public string TurnIntArrayIntoString(int[] array)
-        {
-            string s = "[";
-            foreach (var num in array)
-                s += num + ", ";
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            return s;
-        }
-
-        public string TurnVectorArrayIntoString(Vector3[] array)
-        {
-            string s = "[";
-            foreach (var num in array)
-                s += num + ", ";
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            return s;
-        }
-
 
         public static Texture2D LoadPNG(string filePath)
         {
@@ -1211,23 +1192,20 @@ namespace USE_States
             filePath = filePath.Trim();
 			Texture2D tex = null;
 
-            if (SessionValues.WebBuild)
+			if (SessionValues.UsingDefaultConfigs)
+                tex = Resources.Load<Texture2D>(filePath);
+			else if (SessionValues.UsingServerConfigs)
 			{
-				if(SessionValues.UsingDefaultConfigs)
-					tex = Resources.Load<Texture2D>(filePath);
-                else
-				{
-					yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
-                    {
-                        if (result != null)
-							tex = result;
-                        else
-                            Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
-                    }));
-                }
-			}
-			else
-				tex = LoadPNG(filePath);
+                yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
+                {
+                    if (result != null)
+                        tex = result;
+                    else
+                        Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
+                }));
+            }
+			else if (SessionValues.UsingLocalConfigs)
+                tex = LoadPNG(filePath);
 
 			callback?.Invoke(tex);
         }

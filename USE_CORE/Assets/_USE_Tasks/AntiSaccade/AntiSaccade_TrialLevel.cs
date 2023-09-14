@@ -100,7 +100,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            Debug.Log("CEFP: " + SessionValues.SessionDef.ContextExternalFilePath);
+            IconsLoaded = false;
 
             StartCoroutine(LoadAndSetIcons());
 
@@ -124,7 +124,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true && IconsLoaded, InitTrial);
 
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ChooseStim); //Setup Handler
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 25, AntiSaccade_CanvasGO); //Enable Touch Feedback:
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO); //Enable Touch Feedback:
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -200,7 +200,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-            ChosenGO = Handler.LastSelection.SelectedGameObject;
+            ChosenGO = Handler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<AntiSaccade_StimDef>();
             if (ChosenStim != null)
                 stimChosen = true;

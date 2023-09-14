@@ -563,7 +563,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1.05f);
+        HaloFBController.SetHaloSize(1.25f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)
@@ -1050,9 +1050,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             CreateGridItem(gridParent, stim);
 
-        if (CurrentTask.StimFacingCamera)
-            MakeStimsFaceCamera(group);
-
         group.ToggleVisibility(true);
     }
 
@@ -1157,69 +1154,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void SetStimStrings()
     {
-        //Locations String;
-        string s = "";
         if (CurrentTrial.TrialStimLocations.Length > 0)
-        {
-            s += "[";
-            foreach (var trial in CurrentTrial.TrialStimLocations)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            Locations_String = s;
-        }
+            Locations_String = $"[{string.Join(", ", CurrentTrial.TrialStimLocations)}]";
         if (Locations_String == null)
             PNC_String = "-";
 
-        //PC String
-        s = "";
         if (PC_Stim.Count > 0)
-        {
-            s += "[";
-            foreach (var trial in PC_Stim)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            PC_String = s;
-        }
-        if (PC_String == null)
-            PC_String = "-";
+            PC_String = $"[{string.Join(", ", PC_Stim)}]";
+        PC_String ??= "-";
 
-        //New String
-        s = "";
         if (PNC_Stim.Count > 0)
-        {
-            s += "[";
-            foreach (var trial in PNC_Stim)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            PNC_String = s;
-        }
-        if (PNC_String == null)
-            PNC_String = "-";
+            PNC_String = $"[{string.Join(", ", PNC_Stim)}]";
+        PNC_String ??= "-";
 
-        //PNC String
-        s = "";
         if (New_Stim.Count > 0)
-        {
-            s += "[";
-            foreach (var trial in New_Stim)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            New_String = s;
-        }
-        if (New_String == null)
-            New_String = "-";
+            New_String = $"[{string.Join(", ", New_Stim)}]";
+        New_String ??= "-";
 
     }
 

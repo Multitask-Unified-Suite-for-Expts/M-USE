@@ -296,7 +296,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             { DetermineContextPath(CurrentTrialDef.SpatialCue_Icon), SpatialCue_GO },
             { DetermineContextPath(CurrentTrialDef.Mask_Icon), Mask_GO }
         };
-
         foreach(var entry in iconDict)
         {
             yield return LoadTexture(entry.Key, texResult =>
@@ -310,8 +309,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                     Debug.Log("TEX RESULT IS NULL!");
             });
         }
-
-        Debug.Log("DONE LOADING ICONS!");
         IconsLoaded = true;
     }
 
@@ -326,7 +323,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         else if (SessionValues.UsingLocalConfigs)
             filePath = GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fileName);
 
-        Debug.Log(fileName + " PATH: " + filePath);
         return filePath;
     }
 
@@ -394,20 +390,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TokenBarCompletions_Block = 0;
     }
 
-    //private void DeactivateGameObjects()
-    //{
-    //    if (Mask_GO.activeInHierarchy)
-    //        Mask_GO.SetActive(false);
-    //    if (SpatialCue_GO.activeInHierarchy)
-    //        SpatialCue_GO.SetActive(false);
-    //    if (PreCue_GO.activeInHierarchy)
-    //        PreCue_GO.SetActive(false);
-    //}
-
     public override void FinishTrialCleanup()
     {
         DestroyGameObjects();
-        //DeactivateGameObjects();
 
         if (AbortCode == 0)
         {
@@ -491,10 +476,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void SetDataStrings()
     {
         if (CurrentTrialDef.DistractorStimIndices.Length > 0)
-            DistractorStimIndices_String = TurnIntArrayIntoString(CurrentTrialDef.DistractorStimIndices);
+            DistractorStimIndices_String = $"[{string.Join(", ", CurrentTrialDef.DistractorStimIndices)}]";
 
         if (CurrentTrialDef.DistractorStims_ChoosePos.Length > 0)
-            DistractorStimsChoosePos_String = TurnVectorArrayIntoString(CurrentTrialDef.DistractorStims_ChoosePos);
+            DistractorStimsChoosePos_String = $"[{string.Join(", ", CurrentTrialDef.DistractorStims_ChoosePos)}]";
     }
 
 }

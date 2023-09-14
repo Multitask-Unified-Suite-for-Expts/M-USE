@@ -179,7 +179,7 @@ namespace USE_ExperimentTemplate_Session
                 if(SessionValues.SessionDef.SerialPortActive && !waitForSerialPort && (SessionValues.SerialPortController == null))
                 {
                     SessionValues.SerialPortController = GameObject.Find("MiscScripts").GetComponent<SerialPortThreaded>();
-
+                    
                     Debug.Log($"1 {Time.frameCount} IS THE SERIAL PORT CONTROLLER NULL? " + (SessionValues.SerialPortController == null ? "YES" : "NO"));
 
                     if (SessionValues.SessionDef.SyncBoxActive)
@@ -231,8 +231,12 @@ namespace USE_ExperimentTemplate_Session
                 if(SessionValues.StoreData)
                     CreateSessionSettingsFolder();
 
-                SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
-                SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
+                if (SessionValues.SessionDef.SerialPortActive)
+                {
+                    SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
+                    SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
+                }
+               
 
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)

@@ -945,7 +945,7 @@ namespace USE_States
 				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
 				errorMessage += "###############################################################################################################";
 
-				Debug.Log(errorMessage);
+				Debug.LogError(errorMessage);
 
 			}
 
@@ -965,7 +965,7 @@ namespace USE_States
 				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
 				errorMessage += "###############################################################################################################";
 
-				Debug.Log(errorMessage);
+				Debug.LogError(errorMessage);
 
 			}
 
@@ -985,7 +985,7 @@ namespace USE_States
 				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
 				errorMessage += "###############################################################################################################";
 
-				Debug.Log(errorMessage);
+				Debug.LogError(errorMessage);
 
 			}
 		}
@@ -1004,7 +1004,7 @@ namespace USE_States
 				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
 				errorMessage += "###############################################################################################################";
 
-				Debug.Log(errorMessage);
+				Debug.LogError(errorMessage);
 			}
 
 		}

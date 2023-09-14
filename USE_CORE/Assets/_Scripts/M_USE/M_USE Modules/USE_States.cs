@@ -1161,23 +1161,20 @@ namespace USE_States
             filePath = filePath.Trim();
 			Texture2D tex = null;
 
-            if (SessionValues.WebBuild)
+			if (SessionValues.UsingDefaultConfigs)
+                tex = Resources.Load<Texture2D>(filePath);
+			else if (SessionValues.UsingServerConfigs)
 			{
-				if(SessionValues.UsingDefaultConfigs)
-					tex = Resources.Load<Texture2D>(filePath);
-                else
-				{
-					yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
-                    {
-                        if (result != null)
-							tex = result;
-                        else
-                            Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
-                    }));
-                }
-			}
-			else
-				tex = LoadPNG(filePath);
+                yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
+                {
+                    if (result != null)
+                        tex = result;
+                    else
+                        Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
+                }));
+            }
+			else if (SessionValues.UsingLocalConfigs)
+                tex = LoadPNG(filePath);
 
 			callback?.Invoke(tex);
         }

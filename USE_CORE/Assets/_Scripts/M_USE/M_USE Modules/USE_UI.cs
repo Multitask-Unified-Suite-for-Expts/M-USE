@@ -36,8 +36,8 @@ namespace USE_UI
 
         [HideInInspector] public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
-            { "AntiSaccade", "Select the target stim to earn your reward!" },
-            { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. Complete all trials to win! If you choose an object you've chosen in a previous trial, you lose!" },
+            { "AntiSaccade", "Select the target object to earn your reward! Don't let the distractor objects fool you!" },
+            { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. If you choose an object you've chosen in a previous trial, you lose!" },
             { "EffortControl", "Choose a balloon to inflate based on the effort required (number of clicks) and the reward amount (number of tokens). Inflate and pop the balloon by clicking it the required number of times!"},
             { "FlexLearning", "The maximal token gain is associated with one specific visual feature that defines one of the objects. Learn the visual feature that provides the most reward!"},
             { "MazeGame", "Navigate your way from the start of the maze to the end of the maze to earn your reward. An incorrect step will require re-touching the last correct step." },

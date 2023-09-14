@@ -29,12 +29,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, preCueDuration, alertCueDuration, spatialCueDuration, displayTargetDuration, maskDuration, postMaskDelayDuration, chooseStimDuration, feedbackDuration, itiDuration;
 
-    //MAIN TARGET:
-    private GameObject TargetStim_GO;
-
     private GameObject ChosenGO = null;
     private AntiSaccade_StimDef ChosenStim = null;
-
 
     //DATA:
     [HideInInspector] public string SaccadeType;
@@ -47,13 +43,17 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private string DistractorStimIndices_String;
     private string DistractorStimsChoosePos_String;
 
-
     private bool SpinCorrectSelection;
 
     private List<string> IconsList;
 
     private bool GotTrialCorrect;
 
+
+    //MAIN TARGET:
+    private GameObject TargetStim_GO;
+
+    private bool IconsLoaded;
 
 
     public override void DefineControlLevel()
@@ -100,6 +100,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            Debug.Log("CEFP: " + SessionValues.SessionDef.ContextExternalFilePath);
+
+            StartCoroutine(LoadAndSetIcons());
+
             TokenFBController.enabled = false;
 
             LoadConfigUIVariables();
@@ -117,7 +121,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (!string.IsNullOrEmpty(CurrentTrialDef.Mask_Icon) && IconsList.Contains(CurrentTrialDef.Mask_Icon))
                 Mask_GO.GetComponent<Image>().sprite = Resources.Load<Sprite>(CurrentTrialDef.Mask_Icon);
         });
-        SetupTrial.SpecifyTermination(() => true, InitTrial);
+        SetupTrial.SpecifyTermination(() => true && IconsLoaded, InitTrial);
 
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ChooseStim); //Setup Handler
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 25, AntiSaccade_CanvasGO); //Enable Touch Feedback:
@@ -207,7 +211,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Feedback state ----------------------------------------------------------------------------------------------------------------------------------------------
         float rotationSpeed = 260f;
         float totalRotation = 0f;
-
         Feedback.AddSpecificInitializationMethod(() =>
         {
             SpinCorrectSelection = false;
@@ -286,56 +289,45 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
-    public override void ResetTrialVariables()
+    private IEnumerator LoadAndSetIcons()
     {
-        GotTrialCorrect = false;
-    }
-
-    public void ResetBlockVariables()
-    {
-        TrialsCorrect_Block = 0;
-        TrialCompletions_Block = 0;
-        TokenBarCompletions_Block = 0;
-    }
-
-    private void DeactivateGameObjects()
-    {
-        if (Mask_GO.activeInHierarchy)
-            Mask_GO.SetActive(false);
-        if (SpatialCue_GO.activeInHierarchy)
-            SpatialCue_GO.SetActive(false);
-        if (PreCue_GO.activeInHierarchy)
-            PreCue_GO.SetActive(false);
-    }
-
-    public override void FinishTrialCleanup()
-    {
-        DeactivateGameObjects();
-
-        if (AbortCode == 0)
+        Dictionary<string, GameObject> iconDict = new Dictionary<string, GameObject>()
         {
-            TrialCompletions_Block++;
-            CurrentTaskLevel.TrialsCompleted_Task++;
+            { DetermineContextPath(CurrentTrialDef.SpatialCue_Icon), SpatialCue_GO },
+            { DetermineContextPath(CurrentTrialDef.Mask_Icon), Mask_GO }
+        };
 
-            if (GotTrialCorrect)
+        foreach(var entry in iconDict)
+        {
+            yield return LoadTexture(entry.Key, texResult =>
             {
-                TrialsCorrect_Block++;
-                CurrentTaskLevel.TrialsCorrect_Task++;
-            }
-            CurrentTaskLevel.CalculateBlockSummaryString();
+                if (texResult != null)
+                {
+                    Sprite sprite = Sprite.Create(texResult, new Rect(0, 0, texResult.width, texResult.height), Vector2.zero);
+                    entry.Value.GetComponent<Image>().sprite = sprite;
+                }
+                else
+                    Debug.Log("TEX RESULT IS NULL!");
+            });
         }
-        else
-        {
-            CurrentTaskLevel.NumAbortedTrials_InBlock++;
-            CurrentTaskLevel.NumAbortedTrials_InTask++;
-        }
+
+        Debug.Log("DONE LOADING ICONS!");
+        IconsLoaded = true;
     }
 
-    private void SetTrialSummaryString()
+    //WILL NEED TO TEST THIS METHOD FOR LOCAL AND SERVER CONFIGS!!!
+    private string DetermineContextPath(string fileName)
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nSaccade Type: " + SaccadeType +
-                             "\nNum Distractors: " + CurrentTrialDef.DistractorStimIndices.Length;
+        string filePath = "";
+        if (SessionValues.UsingDefaultConfigs)
+            filePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{fileName}";
+        else if (SessionValues.UsingServerConfigs)
+            filePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{fileName}.png";
+        else if (SessionValues.UsingLocalConfigs)
+            filePath = GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fileName);
+
+        Debug.Log(fileName + " PATH: " + filePath);
+        return filePath;
     }
 
     private void CreateGameObjects()
@@ -378,6 +370,69 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             maskImage.sprite = Resources.Load<Sprite>("QuestionMark");
             maskImage.color = Color.black;
         }
+    }
+
+    private void DestroyGameObjects()
+    {
+        if(PreCue_GO != null)
+            Destroy(PreCue_GO);
+        if(SpatialCue_GO != null)
+            Destroy(SpatialCue_GO);
+        if(Mask_GO != null)
+            Destroy(Mask_GO);
+    }
+
+    public override void ResetTrialVariables()
+    {
+        GotTrialCorrect = false;
+    }
+
+    public void ResetBlockVariables()
+    {
+        TrialsCorrect_Block = 0;
+        TrialCompletions_Block = 0;
+        TokenBarCompletions_Block = 0;
+    }
+
+    //private void DeactivateGameObjects()
+    //{
+    //    if (Mask_GO.activeInHierarchy)
+    //        Mask_GO.SetActive(false);
+    //    if (SpatialCue_GO.activeInHierarchy)
+    //        SpatialCue_GO.SetActive(false);
+    //    if (PreCue_GO.activeInHierarchy)
+    //        PreCue_GO.SetActive(false);
+    //}
+
+    public override void FinishTrialCleanup()
+    {
+        DestroyGameObjects();
+        //DeactivateGameObjects();
+
+        if (AbortCode == 0)
+        {
+            TrialCompletions_Block++;
+            CurrentTaskLevel.TrialsCompleted_Task++;
+
+            if (GotTrialCorrect)
+            {
+                TrialsCorrect_Block++;
+                CurrentTaskLevel.TrialsCorrect_Task++;
+            }
+            CurrentTaskLevel.CalculateBlockSummaryString();
+        }
+        else
+        {
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
+        }
+    }
+
+    private void SetTrialSummaryString()
+    {
+        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+                             "\nSaccade Type: " + SaccadeType +
+                             "\nNum Distractors: " + CurrentTrialDef.DistractorStimIndices.Length;
     }
 
     private void LoadConfigUIVariables()

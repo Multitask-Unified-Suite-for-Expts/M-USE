@@ -395,7 +395,7 @@ namespace USE_ExperimentTemplate_Session
                 GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
                 int size = SessionValues.WebBuild ? 250 : SessionValues.SessionDef.TaskButtonSize; //using 250 for web build
                 gridLayout.cellSize = new Vector2(size, size);
-                gridLayout.constraintCount = SessionValues.WebBuild ? 4 : SessionValues.SessionDef.TaskButtonGridMaxPerRow; //using 4 for WebBuild
+                gridLayout.constraintCount = SessionValues.WebBuild ? 3 : SessionValues.SessionDef.TaskButtonGridMaxPerRow; //using 3 for WebBuild since there are 9 tasks
                 int spacing = SessionValues.WebBuild ? 45 : SessionValues.SessionDef.TaskButtonSpacing; //using 45 for web build
                 gridLayout.spacing = new Vector2(spacing, spacing);
 

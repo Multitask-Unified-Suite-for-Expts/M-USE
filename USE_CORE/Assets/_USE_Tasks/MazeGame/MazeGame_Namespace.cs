@@ -37,6 +37,7 @@ namespace MazeGame_Namespace
         public int RewardRatio;
         public bool GuidedMazeSelection;
         public bool DarkenNonPathTiles;
+        public int TileFlashingRatio = 1;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -62,6 +63,7 @@ namespace MazeGame_Namespace
                 td.MaxTrials = MaxTrials;
                 td.GuidedMazeSelection = GuidedMazeSelection;
                 td.DarkenNonPathTiles = DarkenNonPathTiles;
+                td.TileFlashingRatio = TileFlashingRatio;
                 TrialDefs.Add(td);
             }
         }
@@ -80,6 +82,7 @@ namespace MazeGame_Namespace
         public int RewardRatio;
         public bool GuidedMazeSelection;
         public bool DarkenNonPathTiles;
+        public int TileFlashingRatio;
     }
     public class MazeGame_StimDef : StimDef
     {

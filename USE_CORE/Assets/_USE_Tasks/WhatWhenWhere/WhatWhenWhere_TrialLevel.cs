@@ -349,6 +349,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)")?.gameObject == null)
                 {
                     HaloFBController.ShowNegative(selectedGO, depth);
+                    AudioFBController.Play("Negative");
                     GrayHalos.Add(GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)").gameObject);
                 }
 
@@ -411,7 +412,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
                 {
-                    Debug.Log("NUMTOUCHED STIMS: " + numTouchedStims);
                     if (CurrentTrialDef.GuidedSequenceLearning || (perseverationCounter >= 1 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else

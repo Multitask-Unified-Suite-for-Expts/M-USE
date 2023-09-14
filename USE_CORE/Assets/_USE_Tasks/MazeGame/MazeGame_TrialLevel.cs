@@ -991,10 +991,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void AssignFlashingTiles()
     {
         
-        Debug.Log("hello" + CurrentTrialDef.GuidedMazeSelection);
         if (!CurrentTrialDef.GuidedMazeSelection)
             return;
-        Debug.Log(CurrentTaskLevel.currMaze.mPath[0]);
 
         for (int i = 0; i < CurrentTaskLevel.currMaze.mPath.Count; i++)
         {

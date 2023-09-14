@@ -48,6 +48,7 @@ public class Tile : MonoBehaviour
     private float flashStartTime;
     public GameObject flashingTile;
     private int numFlashes;
+    public bool assignedTileFlash;
 
     public bool choiceFeedback;
     private float fbStartTime;

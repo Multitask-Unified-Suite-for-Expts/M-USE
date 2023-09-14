@@ -33,6 +33,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int numTouchedStims = 0;
     private bool trialComplete = false;
     private GameObject targetStimGameObject;
+    private GameObject previousTargetStimGameObject;
     private List<GameObject> GrayHalos = new List<GameObject>();
 
     
@@ -71,6 +72,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int NumSliderBarFilled = 0;
     private int sliderGainSteps, sliderLossSteps;
     private bool isSliderValueIncrease = false;
+    private int perseverationCounter;
+    private bool returnToLast;
+    private bool startedSequence;
     
 
     //Player View Variables
@@ -187,6 +191,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
         {
+            //previousTargetStimGameObject = targetStimGameObject;
             AssignCorrectStim();
             HaloFBController.StartFlashingHalo(1f, 2, targetStimGameObject);
         });
@@ -208,6 +213,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
             choiceMade = false;
+            returnToLast = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn();
 
@@ -234,6 +240,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (CorrectSelection)
             {
+                startedSequence = true;
                 // UpdateCounters_Correct();
                 LastCorrectStimGO = selectedGO;
                 CurrentTaskLevel.NumCorrectSelections_InBlock++;
@@ -321,7 +328,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
                 consecutiveError = 0;
-                HaloFBController.ShowPositive(selectedGO, depth);
+                perseverationCounter = 0;
+                // Only show positive if there isn't an existing halo around the object
+                if(GetRootObject(selectedGO.transform).transform.Find("PositiveHaloLight(Clone)")?.gameObject == null)
+                    HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -329,12 +339,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 
                 errorTypeString = "None";
             }
-            else //Chose Incorrect
+            else if(!retouchLastCorrect)//Chose Incorrect
             {
                 
                 // RETOUCH LAST CORRECT doesn't INCREMENT CONSECUTIVE ERROR
-                if(!retouchLastCorrect)
-                    consecutiveError++;
+                consecutiveError++;
+                perseverationCounter++;
 
                 if (GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)")?.gameObject == null)
                 {
@@ -350,6 +360,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 
                 if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance" && numTouchedStims != 0 && consecutiveError == 1)
                 {
+                    returnToLast = true;
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                     numTouchedStims -= 1;
                 }
@@ -400,7 +411,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning)
+                    Debug.Log("NUMTOUCHED STIMS: " + numTouchedStims);
+                    if (CurrentTrialDef.GuidedSequenceLearning || (perseverationCounter >= 1 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;
@@ -561,7 +573,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         choiceMade = false;
         retouchLastCorrect = false;
-        
+        startedSequence = false;
+        perseverationCounter = 0;
         SearchDurations_InTrial.Clear();
         TouchedObjects.Clear();
         errorTypeString = "";

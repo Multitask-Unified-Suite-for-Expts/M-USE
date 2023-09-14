@@ -518,7 +518,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if(SessionValues.SyncBoxController != null)
                     GiveReward();
 
-                TokenFBController.ResetTokenBarFull();
             }
             
             TokenFBController.enabled = false;

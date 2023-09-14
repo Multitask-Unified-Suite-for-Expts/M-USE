@@ -925,39 +925,89 @@ namespace USE_States
 		{
             Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
-			InitializeControlLevel();
-			if (isMainLevel)
+			try
 			{
-				if (!mainLevelSpecified)
-				{
-					mainLevelSpecified = true;
-				}
-				else
-				{
-					Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
-				}
+				InitializeControlLevel();
+                if (isMainLevel)
+                {
+                    if (!mainLevelSpecified)
+                    {
+                        mainLevelSpecified = true;
+                    }
+                    else
+                    {
+                        Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
+                    }
+                }
 			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
+			}
+
 		}
 		void FixedUpdate()
 		{
-			if (isMainLevel & !Paused)
+			try
 			{
-				RunControlLevelFixedUpdate();
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelFixedUpdate();
+                }
 			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
+			}
+
 		}
 		public virtual void Update()
 		{
-			if (isMainLevel & !Paused)
+			try
 			{
-				RunControlLevelUpdate();
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelUpdate();
+                }
+			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
 			}
 		}
 		void LateUpdate()
 		{
-			if (isMainLevel & !Paused)
+			try
 			{
-				RunControlLevelLateUpdate();
+				if (isMainLevel & !Paused)
+				{
+					RunControlLevelLateUpdate();
+				}
 			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+			}
+
 		}
 
 		public void SpecifyCurrentState(State state)

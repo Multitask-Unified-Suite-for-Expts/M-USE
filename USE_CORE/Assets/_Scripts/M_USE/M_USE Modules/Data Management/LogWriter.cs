@@ -101,7 +101,7 @@ public class LogWriter : MonoBehaviour
             }
         }
 
-        if (LogMessages.Count >= Capacity)
+        if (LogMessages.Count >= Capacity && LogFolderCreated) //adding "and LogFolderCreated" to try and prevent the bug seema's encountering
         {
             if(!LogFileCreated)
                 StartCoroutine(CreateLogFile());
@@ -172,7 +172,10 @@ public class LogWriter : MonoBehaviour
             return;
 
         if (!LogFolderCreated)
+        {
             Debug.Log("TRYING TO WRITE DATA ONAPPLICATIONQUIT BUT LOG FOLDER HASNT BEEN CREATED YET!");
+            return; //Do we want this here to stop from getting down below since no log folder created? //or maybe not neccessary cuz creating a file also creates folder?
+        }
 
         if (LogFileCreated)
             StartCoroutine(AppendDataToLogFile());

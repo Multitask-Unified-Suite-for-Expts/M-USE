@@ -30,7 +30,10 @@ namespace WhatWhenWhere_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
+            if (RandomMinMaxTrials != null)
+                MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
+            else
+                MaxTrials = MinMaxTrials[1];
             TrialDefs = new List<WhatWhenWhere_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial< MaxTrials; iTrial++)
             {

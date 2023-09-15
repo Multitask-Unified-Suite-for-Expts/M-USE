@@ -104,7 +104,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
 
         CurrentTaskSummaryString.Append($"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}" + 
-                                            $"\nAvg Search Duration: {avgSearchDuration}");
+                                            $"\nAvg Search Duration: {avgSearchDuration}" +
+                                            $"\nRetouch Correct: {retouchCorrectCounter_InTask}" +
+                                            $"\nRetouch Erroneous: {retouchErroneousCounter_InTask}");
+                                            ;
     }
 
     private void DefineBlockData()

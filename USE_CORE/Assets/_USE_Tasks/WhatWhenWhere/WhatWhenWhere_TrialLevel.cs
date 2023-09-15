@@ -236,7 +236,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, ()=>
         {
-            UpdateExperimenterDisplaySummaryStrings();
             CorrectSelection = selectedSD.IsCurrentTarget;
 
             if (CorrectSelection)
@@ -301,6 +300,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
+            UpdateExperimenterDisplaySummaryStrings();
+
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
@@ -403,7 +404,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (!CurrentTrialDef.LeaveFeedbackOn) 
                 HaloFBController.Destroy();
             
-            UpdateExperimenterDisplaySummaryStrings();
 
             // If the sequence has been completed, send to slider feedback state
             if (trialComplete)
@@ -444,6 +444,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             retouchErroneous = false;
             retouchCorrect = false;
+            
+            UpdateExperimenterDisplaySummaryStrings();
         });
         FinalFeedback.AddSpecificInitializationMethod(() =>
         {
@@ -638,11 +640,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Selected Object Indices: " + string.Join(",",TouchedObjects) +
                              "\nCorrect Selection? : " + CorrectSelection +
-                             "\nPercent Error : " + percentError +
+                             "\nLast Trial's Percent Error : " + percentError +
                              "\n" +
                              "\nError: " + errorTypeString +
                              "\n" +
-                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(SearchDurations_InTrial);
+                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(SearchDurations_InTrial) +
+                             "\nRetouch Correct: " + retouchCorrectCounter_InTrial +
+                             "\nRetouch Erroneous: " + retouchErroneousCounter_InTrial;
     }
 
     

@@ -12,8 +12,6 @@ public class FolderDropdown : MonoBehaviour
         dropdown = GetComponent<TMP_Dropdown>();
         if (dropdown == null)
             Debug.LogError("The FolderDropdown's dropdown component is null!");
-
-        dropdown.captionText.text = "**Connect to server to populate the dropdown**";
     }
 
     public void SetFolders(List<string> sessionConfigFolders)

@@ -11,6 +11,7 @@ namespace EffortControl_Namespace
 
     public class EffortControl_BlockDef : BlockDef
     {
+        public bool TokensInMiddleOfOutlines;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;
@@ -29,6 +30,7 @@ namespace EffortControl_Namespace
                 EffortControl_TrialDef td = new EffortControl_TrialDef();
                 td.BlockName = BlockName;
                 td.ContextName = ContextName;
+                td.TokensInMiddleOfOutlines = TokensInMiddleOfOutlines;
                 td.NumClicksLeft = NumClicksLeft;
                 td.NumClicksRight = NumClicksRight;
                 td.NumCoinsLeft = NumCoinsLeft;
@@ -46,6 +48,7 @@ namespace EffortControl_Namespace
 
     public class EffortControl_TrialDef : TrialDef
     {
+        public bool TokensInMiddleOfOutlines;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;

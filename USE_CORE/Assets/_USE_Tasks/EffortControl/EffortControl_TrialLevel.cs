@@ -206,11 +206,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             MiddleBarrier.SetActive(true);
 
-            BalloonContainerLeft.transform.localPosition = new Vector3(-1.14f, -1.5f, .5f);
-            BalloonContainerRight.transform.localPosition = new Vector3(1.14f, -1.5f, .5f);
+            StimLeft.transform.position += new Vector3(0, .01f, 0);
+            StimRight.transform.position += new Vector3(0, .01f, 0);
 
-            RewardContainerLeft.transform.localPosition = new Vector3(StimLeft.transform.position.x, 1.5825f, 0);
-            RewardContainerRight.transform.localPosition = new Vector3(StimRight.transform.position.x, 1.5825f, 0);
+            BalloonContainerLeft.transform.localPosition = new Vector3(-1.14f, -1.45f, .5f);
+            BalloonContainerRight.transform.localPosition = new Vector3(1.14f, -1.45f, .5f);
+
+            float tokensYPos = CurrentTrial.TokensInMiddleOfOutlines ? .54f : 1.5825f;
+            RewardContainerLeft.transform.localPosition = new Vector3(StimLeft.transform.position.x, tokensYPos, 0);
+            RewardContainerRight.transform.localPosition = new Vector3(StimRight.transform.position.x, tokensYPos, 0);
             
             LeftScaleUpAmount = MaxScale / CurrentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / CurrentTrial.NumClicksRight;
@@ -224,7 +228,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             SessionValues.TargetObjects.Add(StimLeft);
             SessionValues.TargetObjects.Add(StimRight);
-
 
             SideChoice = null;
 
@@ -260,7 +263,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
             SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
-            
+
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
@@ -942,7 +945,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
             RewardClone.transform.localScale *= scaler;
-            RewardClone.transform.Translate(new Vector3(i * width, 0.028f, 0), Space.World);
+            RewardClone.transform.Translate(new Vector3(i * width, 0.028f, -.0001f), Space.World);
             RewardClone.name = "Reward" + SideChoice + (i + 1);
             AddRigidBody(RewardClone);
             ObjectList.Add(RewardClone);

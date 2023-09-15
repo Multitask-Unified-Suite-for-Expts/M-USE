@@ -181,6 +181,8 @@ namespace USE_ExperimentTemplate_Task
             if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
                 SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
+                if (SessionValues.SessionDef.FlashPanelsActive)
+                    GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
 
             });
 

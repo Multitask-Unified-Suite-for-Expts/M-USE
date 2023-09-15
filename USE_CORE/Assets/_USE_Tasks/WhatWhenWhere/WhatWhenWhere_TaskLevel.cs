@@ -44,8 +44,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             LearningSpeed = -1;
-            
-            MinTrials_InBlock = wwwBD.RandomMinMaxTrials[0];
+
+            if (wwwBD.RandomMinMaxTrials != null)
+                MinTrials_InBlock = wwwBD.RandomMinMaxTrials[0];
+            else
+                MinTrials_InBlock = wwwBD.MinMaxTrials[0];
             MaxTrials_InBlock = wwwBD.MaxTrials;
             
             wwwTL.ContextName = wwwBD.ContextName;

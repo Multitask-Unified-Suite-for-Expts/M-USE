@@ -36,7 +36,7 @@ namespace AntiSaccade_Namespace
         public float HaloFbDuration;
         public int RewardMag;
         public float PreCueDuration;
-        //public float AlertCueDuration;
+        public float AlertCueDuration;
         public float AlertCueDelayDuration;
         public float SpatialCueDuration;
         public float SpatialCueDelayDuration;

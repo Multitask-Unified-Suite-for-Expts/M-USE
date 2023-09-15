@@ -562,6 +562,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
         HaloFBController.SetHaloSize(1.25f);
+        HaloFBController.SetHaloIntensity(1.5f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)

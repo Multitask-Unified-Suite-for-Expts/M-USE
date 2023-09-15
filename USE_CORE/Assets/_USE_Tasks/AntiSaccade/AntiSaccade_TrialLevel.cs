@@ -58,14 +58,16 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         State InitTrial = new State("InitTrial");
         State PreCue = new State("PreCue");
         State AlertCue = new State("AlertCue");
+        State AlertCueDelay = new State("AlertCueDelay");
         State SpatialCue = new State("SpatialCue");
+        State SpatialCueDelay = new State("SpatialCueDelay");
         State DisplayTarget = new State("DisplayTarget");
         State Mask = new State("Mask");
         State PostMaskDelay = new State("PostMaskDelay");
         State ChooseStim = new State("ChooseStim");
         State Feedback = new State("Feedback");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, PreCue, AlertCue, SpatialCue, DisplayTarget, Mask, PostMaskDelay, ChooseStim, Feedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, PreCue, AlertCue, AlertCueDelay, SpatialCue, SpatialCueDelay, DisplayTarget, Mask, PostMaskDelay, ChooseStim, Feedback, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -88,7 +90,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             HaloFBController.SetHaloSize(3.5f);
             HaloFBController.SetHaloIntensity(.75f);
-
             TokenFBController.AdjustTokenBarSizing(145);
         });
 
@@ -116,7 +117,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true && IconsLoaded, InitTrial);
 
-        var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ChooseStim); //Setup Handler
+        var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO); //Enable Touch Feedback:
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,6 +130,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
 
+            //***** SET TARGET STIM *****
             TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
 
             SetTrialSummaryString();
@@ -146,8 +148,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         PreCue.AddTimer(() => CurrentTrialDef.PreCueDuration, AlertCue, () => PreCue_GO.SetActive(false));
 
         //AlertCue state ----------------------------------------------------------------------------------------------------------------------------------------------
+        float audioClipLength = AudioFBController.GetClip("ContinueBeep").length;
         AlertCue.AddSpecificInitializationMethod(() => AudioFBController.Play("ContinueBeep"));
-        AlertCue.AddTimer(() => CurrentTrialDef.AlertCueDuration, SpatialCue);
+        AlertCue.AddTimer(() => audioClipLength, AlertCueDelay);
+
+        //AlertCueDELAY state ----------------------------------------------------------------------------------------------------------------------------------------------
+        AlertCueDelay.AddTimer(() => CurrentTrialDef.AlertCueDelayDuration, SpatialCue);
 
         //SpatialCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         SpatialCue.AddSpecificInitializationMethod(() =>
@@ -158,7 +164,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SpatialCue_GO.transform.localPosition = CurrentTrialDef.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
         });
-        SpatialCue.AddTimer(() => CurrentTrialDef.SpatialCueDuration, DisplayTarget, () => SpatialCue_GO.SetActive(false));
+        SpatialCue.AddTimer(() => CurrentTrialDef.SpatialCueDuration, SpatialCueDelay, () => SpatialCue_GO.SetActive(false));
+
+        //SpatialCueDELAY state ----------------------------------------------------------------------------------------------------------------------------------------------
+        SpatialCueDelay.AddTimer(() => CurrentTrialDef.SpatialCueDelayDuration, DisplayTarget);
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddTimer(() => CurrentTrialDef.DisplayTargetDuration, Mask);
@@ -198,7 +207,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (ChosenStim != null)
             {
                 stimChosen = true;
-                if(CurrentTrialDef.DeactivateNonSelectedStimOnSel)
+                if (CurrentTrialDef.DeactivateNonSelectedStimOnSel)
                     DeactivateStimNotSelected();
             }
         });
@@ -216,7 +225,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (ChosenStim == null)
                 return;
 
-            int? depth = SessionValues.Using2DStim ? 10 : (int?)null;
+            int? haloDepth = SessionValues.Using2DStim ? 10 : (int?)null;
+
+            float? tokenYAdjustment = -5f; //used to adjust where the tokens appear in relation to GameObject
 
             if (ChosenStim.IsTarget)
             {
@@ -225,14 +236,14 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrialDef.UseSpinAnimation)
                     SpinCorrectSelection = true;
 
-                HaloFBController.ShowPositive(ChosenGO, depth);
-                TokenFBController.AddTokens(ChosenGO, CurrentTrialDef.RewardMag);
+                HaloFBController.ShowPositive(ChosenGO, haloDepth);
+                TokenFBController.AddTokens(ChosenGO, CurrentTrialDef.RewardMag, tokenYAdjustment);
                 SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
             else
             {
-                HaloFBController.ShowNegative(ChosenGO, depth);
-                TokenFBController.RemoveTokens(ChosenGO, CurrentTrialDef.RewardMag);
+                HaloFBController.ShowNegative(ChosenGO, haloDepth);
+                TokenFBController.RemoveTokens(ChosenGO, CurrentTrialDef.RewardMag, tokenYAdjustment);
                 SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
             }
         });
@@ -443,6 +454,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialStims.Add(targetStim);
 
         distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimIndices);
+        foreach (AntiSaccade_StimDef stim in distractorStims.stimDefs)
+            stim.IsTarget = false; //just in case one was still true
         distractorStims.SetLocations(CurrentTrialDef.DistractorStims_ChoosePos);
         distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStim"), GetStateFromName("Feedback"));
         TrialStims.Add(distractorStims);

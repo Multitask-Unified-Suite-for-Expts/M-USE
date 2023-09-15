@@ -384,6 +384,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                     numTouchedStims -= 1;
+                    if (GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveHaloLight(Clone)")?.gameObject != null)
+                        Destroy(GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveHaloLight(Clone)").gameObject);
                 }
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
@@ -431,7 +433,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 1 && startedSequence))
+                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 2 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;

@@ -255,7 +255,7 @@ namespace USE_Data
             {
                 for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
 				{
-					Debug.LogWarning(Time.frameCount + " Appended data = " + dataToUpdateNextFrame[i].Name + dataToUpdateNextFrame[i].ValueAsString);
+					//Debug.LogWarning(Time.frameCount + " Appended data = " + dataToUpdateNextFrame[i].Name + dataToUpdateNextFrame[i].ValueAsString);
 					PreviousFrameHeldDataValues[dataToUpdateNextFrame[i].Pos] = dataToUpdateNextFrame[i].ValueAsString;
 				}
 				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));

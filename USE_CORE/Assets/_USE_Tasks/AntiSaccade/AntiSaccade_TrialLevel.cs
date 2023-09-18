@@ -162,13 +162,21 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
         });
-        SpatialCue.AddTimer(() => CurrentTrial.SpatialCueDuration, SpatialCueDelay, () => SpatialCue_GO.SetActive(false));
+        SpatialCue.AddTimer(() => CurrentTrial.SpatialCueDuration, SpatialCueDelay, () =>
+        {
+            if (!CurrentTrial.SpatialCueActiveThroughDisplayTarget)
+                SpatialCue_GO.SetActive(false);
+        });
 
         //SpatialCueDELAY state ----------------------------------------------------------------------------------------------------------------------------------------------
         SpatialCueDelay.AddTimer(() => CurrentTrial.SpatialCueDelayDuration, DisplayTarget);
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
-        DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, Mask);
+        DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, Mask, () =>
+        {
+            if (CurrentTrial.SpatialCueActiveThroughDisplayTarget)
+                SpatialCue_GO.SetActive(false);
+        });
 
         //Mask state ----------------------------------------------------------------------------------------------------------------------------------------------
         Mask.AddSpecificInitializationMethod(() =>

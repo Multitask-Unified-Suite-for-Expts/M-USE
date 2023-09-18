@@ -23,6 +23,7 @@ namespace AntiSaccade_Namespace
         public int PreCue_Size;
         public string SpatialCue_Icon;
         public string Mask_Icon;
+        public bool SpatialCueActiveThroughDisplayTarget;
         public bool UseSpinAnimation;
         public bool DeactivateNonSelectedStimOnSel;
         public bool RandomSpatialCueColor;

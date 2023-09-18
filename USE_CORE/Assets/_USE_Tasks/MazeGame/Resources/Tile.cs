@@ -13,59 +13,47 @@ using USE_ExperimentTemplate_Trial;
 
 public class Tile : MonoBehaviour
 {
-
-    // Tiles are distiguished by their (x, y) coordinate 
-    // This means the bottom-left-most tile is (1, 1).
-    public Coords mCoord;
-    public float sliderValueChange;
-    private MazeGame_TrialLevel mgTL = null;
-    //private MazeReactionTest_TrialLevel mrtTL = null;
-
+    // SET IN THE INSPECTOR
+    public MazeGame_TrialLevel mgTL;
+    
+    [HideInInspector] public Coords mCoord;
+    [HideInInspector] public float sliderValueChange;
+    
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
-    public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
-    public Color FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
-    public Color CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
-    public Color PREV_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
-    public Color INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
-    public Color INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
-    public Color DEFAULT_TILE_COLOR = new Color(1, 1, 1);
-    public int NUM_BLINKS = 4;
+    [HideInInspector]public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
+    [HideInInspector] public Color FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
+    [HideInInspector] public Color CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
+    [HideInInspector] public Color PREV_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
+    [HideInInspector] public Color INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
+    [HideInInspector] public Color INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
+    [HideInInspector] public Color DEFAULT_TILE_COLOR = new Color(1, 1, 1);
+    [HideInInspector] public int NUM_BLINKS = 4;
 
     // FEEDBACK LENGTH IN SECONDS
-    public float CORRECT_FEEDBACK_SECONDS = 0.5f;
-    public float PREV_CORRECT_FEEDBACK_SECONDS = 0.5f;
-    public float INCORRECT_RULEABIDING_SECONDS = 0.5f;
-    public float INCORRECT_RULEBREAKING_SECONDS = 1;
-    public float TILE_BLINKING_DURATION = 2;
-    public float TIMEOUT_SECONDS = 10.0f;
+    [HideInInspector] public float CORRECT_FEEDBACK_SECONDS = 0.5f;
+    [HideInInspector] public float PREV_CORRECT_FEEDBACK_SECONDS = 0.5f;
+    [HideInInspector] public float INCORRECT_RULEABIDING_SECONDS = 0.5f;
+    [HideInInspector] public float INCORRECT_RULEBREAKING_SECONDS = 1;
+    [HideInInspector] public float TILE_BLINKING_DURATION = 2;
+    [HideInInspector] public float TIMEOUT_SECONDS = 10.0f;
 
-    private bool tileFlash;
     private Color fbColor;
-    public Color originalTileColor;
-    public Color baseColor;
-    private int done = 0;
-    public bool isFlashing = false;
     private float flashStartTime;
-    public GameObject flashingTile;
-    private int numFlashes;
-    public bool assignedTileFlash;
-
-    public bool choiceFeedback;
     private float fbStartTime;
     private int correctnessCode;
+    private int numFlashes;
+
+    [HideInInspector] public Color originalTileColor;
+    [HideInInspector] public Color baseColor;
+    [HideInInspector] public bool isFlashing = false;
+    [HideInInspector] public bool assignedTileFlash;
+    [HideInInspector] public bool choiceFeedback;
+    [HideInInspector] public GameObject flashingTile;
+
+
     void Start()
     {
         gameObject.GetComponent<Renderer>().material.color = baseColor;
-
-      //  if (GameObject.Find("MazeGame_Scripts") != null)
-       // {
-            mgTL = GameObject.Find("MazeGame_Scripts").GetComponent<MazeGame_TrialLevel>();
-        //}
-        /*
-        else
-        {
-            mrtTL = GameObject.Find("MazeReactionTest_Scripts").GetComponent<MazeReactionTest_TrialLevel>();
-        }*/
     }
 
 
@@ -137,6 +125,8 @@ public class Tile : MonoBehaviour
     
     public void NextCorrectFlashingFeedback()
     {
+        Debug.Log("IS mgTL null? " + (mgTL == null ? "YES" : "no"));
+        Debug.Log("IS mgTL.pathProgressGO null? " + (mgTL.pathProgressGO == null ? "YES" : "no"));
         if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
             flashingTile = mgTL.startTile;
         else

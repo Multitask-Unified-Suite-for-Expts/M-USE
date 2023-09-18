@@ -95,22 +95,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ad1545e9b1e744bb59391ac0ae879c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mgTL: {fileID: 0}
   mCoord:
-    X: 5
-    Y: 5
+    chessCoord: 
+  sliderValueChange: 0
   START_COLOR: {r: 0.94, g: 0.93, b: 0.48, a: 1}
   FINISH_COLOR: {r: 0.37, g: 0.59, b: 0.94, a: 1}
   CORRECT_COLOR: {r: 0.62, g: 1, b: 0.5, a: 1}
-  LAST_CORRECT_COLOR: {r: 0.2, g: 0.7, b: 0.5, a: 1}
+  PREV_CORRECT_COLOR: {r: 0.2, g: 0.7, b: 0.5, a: 1}
   INCORRECT_RULEABIDING_COLOR: {r: 1, g: 0.5, b: 0.25, a: 1}
   INCORRECT_RULEBREAKING_COLOR: {r: 0, g: 0, b: 0, a: 1}
   DEFAULT_TILE_COLOR: {r: 1, g: 1, b: 1, a: 1}
+  NUM_BLINKS: 4
   CORRECT_FEEDBACK_SECONDS: 0.5
   PREV_CORRECT_FEEDBACK_SECONDS: 0.5
   INCORRECT_RULEABIDING_SECONDS: 0.5
   INCORRECT_RULEBREAKING_SECONDS: 1
+  TILE_BLINKING_DURATION: 2
   TIMEOUT_SECONDS: 10
+  originalTileColor: {r: 0, g: 0, b: 0, a: 0}
   baseColor: {r: 1, g: 1, b: 1, a: 1}
+  isFlashing: 0
+  assignedTileFlash: 0
+  choiceFeedback: 0
+  flashingTile: {fileID: 0}
 --- !u!65 &8210162124966877721
 BoxCollider:
   m_ObjectHideFlags: 0

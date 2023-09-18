@@ -235,6 +235,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
                     SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
+                    
+                    SessionValues.SyncBoxController.SendCommand("ECH 0");
                 }
                
 
@@ -248,7 +250,6 @@ namespace USE_ExperimentTemplate_Session
                     InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
-                SessionValues.SyncBoxController.SendCommand("ECH 0");
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
 
                 if(SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)

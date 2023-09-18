@@ -37,6 +37,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            vsBD.ContextName = vsBD.ContextName.Trim();
             SetSkyBox(vsBD.ContextName);
             vsTL.ContextName = vsBD.ContextName;
             vsTL.ResetBlockVariables();

@@ -1,3 +1,35 @@
 {
+    "PreCueOn": {
+        "Value": 20000,
+        "Description": "PreCue Appears"
+    },
+    "PreCueOff": {
+        "Value": 20001,
+        "Description": "PreCue Disappears"
+    },
+    "SpatialCueOn": {
+        "Value": 20002,
+        "Description": "Spatial Cue Appears"
+    },
+    "SpatialCueOff": {
+        "Value": 20003,
+        "Description": "Spatial Cue Disappears"
+    },
+    "TargetOn": {
+        "Value": 20004,
+        "Description": "Target Appears"
+    },
+    "TargetOff": {
+        "Value": 20005,
+        "Description": "Target Disappears"
+    },
+    "MaskOn": {
+        "Value": 20006,
+        "Description": "Mask Appears"
+    },
+    "MaskOff": {
+        "Value": 20007,
+        "Description": "Mask Disappears"
+    }
 
 }

@@ -468,7 +468,7 @@ namespace USE_States
 				TimingInfo.Duration = -1;
 				if (ParentLevel.PreviousState != null)
 				{
-					Debug.Log(Time.frameCount + "UPDATING PREVIOUS STATE DURATION DATAAAAAAAAAAAAAA");
+					//Debug.Log(Time.frameCount + "UPDATING PREVIOUS STATE DURATION DATAAAAAAAAAAAAAA");
 					UpdateDurationData();
 				}
 				if (StateActiveInitialization != null)

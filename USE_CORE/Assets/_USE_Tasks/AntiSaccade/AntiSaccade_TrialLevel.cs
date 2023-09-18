@@ -114,6 +114,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 StartCoroutine(LoadSpacialCueAndMaskIcons());
             else
                 Debug.LogError("CANT SET THE SPATIAL CUE AND MASK ICONS BECAUSE ATLEAST ONE OF THEM IS NULL!");
+
+            //***** SET TARGET STIM *****
+            TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
         });
         SetupTrial.SpecifyTermination(() => true && IconsLoaded, InitTrial);
 
@@ -130,9 +133,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
 
-            //***** SET TARGET STIM *****
-            TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
-
             SetTrialSummaryString();
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
@@ -143,8 +143,14 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.PreCue_Size > 0)
                 PreCue_GO.GetComponent<RectTransform>().sizeDelta = new Vector2(CurrentTrial.PreCue_Size, CurrentTrial.PreCue_Size);
             PreCue_GO.SetActive(true);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["PreCueOn"]);
+
         });
-        PreCue.AddTimer(() => CurrentTrial.PreCueDuration, AlertCue, () => PreCue_GO.SetActive(false));
+        PreCue.AddTimer(() => CurrentTrial.PreCueDuration, AlertCue, () =>
+        {
+            PreCue_GO.SetActive(false);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["PreCueOff"]);
+        });
 
         //AlertCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         AlertCue.AddSpecificInitializationMethod(() => AudioFBController.Play("ContinueBeep"));
@@ -161,21 +167,35 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOn"]);
+
         });
         SpatialCue.AddTimer(() => CurrentTrial.SpatialCueDuration, SpatialCueDelay, () =>
         {
             if (!CurrentTrial.SpatialCueActiveThroughDisplayTarget)
+            {
                 SpatialCue_GO.SetActive(false);
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOff"]);
+            }
         });
 
         //SpatialCueDELAY state ----------------------------------------------------------------------------------------------------------------------------------------------
         SpatialCueDelay.AddTimer(() => CurrentTrial.SpatialCueDelayDuration, DisplayTarget);
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
+        DisplayTarget.AddSpecificInitializationMethod(() =>
+        {
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOn"]);
+        });
         DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, Mask, () =>
         {
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOff"]);
+
             if (CurrentTrial.SpatialCueActiveThroughDisplayTarget)
+            {
                 SpatialCue_GO.SetActive(false);
+                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOff"]);
+            }
         });
 
         //Mask state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -186,8 +206,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             Mask_GO.transform.localPosition = new Vector3(CurrentTrial.TargetStim_DisplayPos.x, CurrentTrial.TargetStim_DisplayPos.y + 25f, CurrentTrial.TargetStim_DisplayPos.z); //have to adjust the Y cuz pics have padding
             Mask_GO.SetActive(true);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MaskOn"]);
+
         });
-        Mask.AddTimer(() => CurrentTrial.MaskDuration, PostMaskDelay, () => Mask_GO.SetActive(false));
+        Mask.AddTimer(() => CurrentTrial.MaskDuration, PostMaskDelay, () =>
+        {
+            Mask_GO.SetActive(false);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MaskOff"]);
+        });
+
 
         //PostMaskDelay state ----------------------------------------------------------------------------------------------------------------------------------------------
         PostMaskDelay.AddTimer(() => CurrentTrial.PostMaskDelayDuration, ChooseStim);
@@ -198,6 +225,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         {
             TargetStim_GO.transform.localPosition = CurrentTrial.TargetStim_ChoosePos;
             TargetStim_GO.SetActive(true);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOn"]);
 
             ChosenGO = null;
             ChosenStim = null;
@@ -291,6 +319,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.enabled = false;
             TargetStim_GO.SetActive(false);
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOff"]);
         });
 
 
@@ -303,6 +332,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
+    public override void AddToStimLists()
+    {
+        foreach(AntiSaccade_StimDef stim in targetStim.stimDefs)
+            SessionValues.TargetObjects.Add(stim.StimGameObject);
+    }
+
     private IEnumerator LoadSpacialCueAndMaskIcons()
     {
         Dictionary<string, GameObject> iconDict = new Dictionary<string, GameObject>()

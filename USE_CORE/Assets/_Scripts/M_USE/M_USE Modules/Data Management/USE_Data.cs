@@ -259,8 +259,8 @@ namespace USE_Data
 					PreviousFrameHeldDataValues[dataToUpdateNextFrame[i].Pos] = dataToUpdateNextFrame[i].ValueAsString;
 				}
 				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
-				if(name.ToLower().Contains("trial"))
-					Debug.LogWarning("DATA ADDED TO BUFFER! SETTING AppendDataToBufferNextFrame to FALSE! " + Time.frameCount);
+				//if(name.ToLower().Contains("trial"))
+				//	Debug.LogWarning("DATA ADDED TO BUFFER! SETTING AppendDataToBufferNextFrame to FALSE! " + Time.frameCount);
                 appendDataToBufferNextFrame = false;
 			}
 			if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
@@ -627,8 +627,8 @@ namespace USE_Data
 				{
 					if(dataToUpdateNextFrame.Count > 0)
 					{
-                        if (name.ToLower().Contains("trial"))
-                            Debug.LogWarning("SETTING TO TRUE! (" + name + ") " + Time.frameCount);
+                        //if (name.ToLower().Contains("trial"))
+                        //    Debug.LogWarning("SETTING TO TRUE! (" + name + ") " + Time.frameCount);
                         PreviousFrameHeldDataValues = currentVals.ToList();
                         appendDataToBufferNextFrame = true;
                     }
@@ -690,8 +690,8 @@ namespace USE_Data
 
 				if (!appendDataToBufferNextFrame) //If NOT waiting...
 				{
-                    if (name.ToLower().Contains("trial"))
-                        Debug.LogWarning("APPENDING DATA TO FILE! (" + name + ") " + Time.frameCount);
+                    //if (name.ToLower().Contains("trial"))
+                    //    Debug.LogWarning("APPENDING DATA TO FILE! (" + name + ") " + Time.frameCount);
 					if (SessionValues.StoringDataOnServer)
 						yield return StartCoroutine(AppendDataToServerFile(content));
 					else

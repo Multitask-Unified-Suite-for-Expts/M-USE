@@ -24,7 +24,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public int DistractorSlotErrorCount_InBlock;
     public int NumCorrectSelections_InBlock;
     public int NumErrors_InBlock;
-    
+
+    public int retouchErroneousCounter_InTask;
+    public int retouchCorrectCounter_InTask;
+    public int perseverationCounter_InTask;
     
     public int LearningSpeed = -1;
 
@@ -71,7 +74,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
         data["Slider Bar Full"] = NumSliderBarFilled_InTask;
         data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
-        
+
+        data["Retouch Correct"] = retouchCorrectCounter_InTask;
+        data["Retouch Erroneous"] = retouchErroneousCounter_InTask;
+        data["Perseverations"] = perseverationCounter_InTask;
         
         
         return data;
@@ -98,7 +104,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
 
         CurrentTaskSummaryString.Append($"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}" + 
-                                            $"\nAvg Search Duration: {avgSearchDuration}");
+                                            $"\nAvg Search Duration: {avgSearchDuration}" +
+                                            $"\nRetouch Correct: {retouchCorrectCounter_InTask}" +
+                                            $"\nRetouch Erroneous: {retouchErroneousCounter_InTask}");
+                                            ;
     }
 
     private void DefineBlockData()
@@ -127,6 +136,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         SearchDurations_InBlock.Clear();
         wwwTL.runningAcc.Clear();
         wwwTL.runningPercentError.Clear();
+
+        retouchErroneousCounter_InTask = 0;
+        retouchCorrectCounter_InTask = 0;
+        perseverationCounter_InTask = 0;
 
     }
 }

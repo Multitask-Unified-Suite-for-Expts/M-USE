@@ -239,9 +239,9 @@ namespace USE_Data
 				{
 					PreviousFrameHeldDataValues[i] = dataToUpdateNextFrame[i].ValueAsString;
 				}
-				dataBuffer.Add(String.Join("\t", PreviousFrameHeldDataValues.ToArray()));
-				appendDataToBufferNextFrame = false;
-				if (dataBuffer.Count == capacity | appendDataToFileNextFrame)
+				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
+                appendDataToBufferNextFrame = false;
+				if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
 				{
 					StartCoroutine(AppendDataToFile());
 				}
@@ -252,17 +252,18 @@ namespace USE_Data
 		public void UpdateData()
 		{
 			if (appendDataToBufferNextFrame)
-			{
-				
-				for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
+            {
+                for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
 				{
 					Debug.LogWarning(Time.frameCount + " Appended data = " + dataToUpdateNextFrame[i].Name + dataToUpdateNextFrame[i].ValueAsString);
 					PreviousFrameHeldDataValues[dataToUpdateNextFrame[i].Pos] = dataToUpdateNextFrame[i].ValueAsString;
 				}
-				dataBuffer.Add(String.Join("\t", PreviousFrameHeldDataValues.ToArray()));
-				appendDataToBufferNextFrame = false;
+				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
+				if(name.ToLower().Contains("trial"))
+					Debug.LogWarning("DATA ADDED TO BUFFER! SETTING AppendDataToBufferNextFrame to FALSE! " + Time.frameCount);
+                appendDataToBufferNextFrame = false;
 			}
-			if (dataBuffer.Count == capacity | appendDataToFileNextFrame)
+			if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
 			{
 				appendDataToFileNextFrame = false;
 				StartCoroutine(AppendDataToFile());
@@ -621,20 +622,24 @@ namespace USE_Data
 				
 				for (int i = 0; i < data.Count; i++) // get current value of each variable
 					currentVals[i] = data[i].ValueAsString;
+
+				if(DataControllerHoldsFrames)
+				{
+					if(dataToUpdateNextFrame.Count > 0)
+					{
+                        if (name.ToLower().Contains("trial"))
+                            Debug.LogWarning("SETTING TO TRUE! (" + name + ") " + Time.frameCount);
+                        PreviousFrameHeldDataValues = currentVals.ToList();
+                        appendDataToBufferNextFrame = true;
+                    }
+				}
+                else // if we don't need to hold data for a frame to get accurate times, append all data to string buffer
+                {
+                    dataBuffer.Add(string.Join("\t", currentVals));
+                    if (dataBuffer.Count == capacity)
+                        yield return StartCoroutine(AppendDataToFile());
+                }
 				
-				if (!DataControllerHoldsFrames) 
-					// if we don't need to hold data for a frame to get accurate times, append all data to string buffer
-				{
-					dataBuffer.Add(String.Join("\t", currentVals));
-					if (dataBuffer.Count == capacity)
-						yield return StartCoroutine(AppendDataToFile());
-				}
-				else if (dataToUpdateNextFrame.Count > 0)
-				{
-					//Debug.LogError("adsfgsadgh");
-					PreviousFrameHeldDataValues = currentVals.ToList();
-					appendDataToBufferNextFrame = true;
-				}
 				frameChecker = Time.frameCount;
 			}
             OnLogChanged?.Invoke();
@@ -681,22 +686,24 @@ namespace USE_Data
 		{
 			if (storeData && fileName != null && dataBuffer.Count > 0)
 			{
-				string content = String.Join("\n", dataBuffer.ToArray());
+				string content = string.Join("\n", dataBuffer.ToArray());
 
-				if (!appendDataToBufferNextFrame)
+				if (!appendDataToBufferNextFrame) //If NOT waiting...
 				{
+                    if (name.ToLower().Contains("trial"))
+                        Debug.LogWarning("APPENDING DATA TO FILE! (" + name + ") " + Time.frameCount);
 					if (SessionValues.StoringDataOnServer)
 						yield return StartCoroutine(AppendDataToServerFile(content));
 					else
 					{
-						using StreamWriter dataStream =
-							File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName);
+						using StreamWriter dataStream = File.AppendText(folderPath + Path.DirectorySeparatorChar + fileName);
 						dataStream.Write("\n" + content);
 					}
-				}
-				else
+                }
+                else
 				{
-					Debug.Log("Waiting to write data");
+                    if (name.ToLower().Contains("trial"))
+                        Debug.LogWarning("---------- Waiting to write data to file ( " + name + ") ----------");
 					appendDataToFileNextFrame = true;
 				}
 
@@ -736,16 +743,16 @@ namespace USE_Data
 			{
 				if (timingTypes == null)//add all state timing information to data
 				{
-					this.AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
-					this.AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
-					this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
-					this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
-					this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
-					this.dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
-					this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
-					this.dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeRelative",() => s.TimingInfo.EndTimeRelative, data.Count - 1));
-					this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
-					this.dataToUpdateNextFrame.Add(new HeldDatum<float>("Duration",() => s.TimingInfo.Duration, data.Count - 1));
+					AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
+					AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
+					AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
+					AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
+					AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+					dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
+					AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+					dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeRelative",() => s.TimingInfo.EndTimeRelative, data.Count - 1));
+					AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+					dataToUpdateNextFrame.Add(new HeldDatum<float>("Duration",() => s.TimingInfo.Duration, data.Count - 1));
 				}
 				else //specify which timing information to add
 				{
@@ -754,28 +761,28 @@ namespace USE_Data
 						switch (t)
 						{
 							case "StartFrame":
-								this.AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
+								AddDatum(s.StateName + "_StartFrame", () => s.TimingInfo.StartFrame);
 								break;
 							case "EndFrame":
-								this.AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
+								AddDatum(s.StateName + "_EndFrame", () => s.TimingInfo.EndFrame);
 								break;
 							case "StartTimeAbsolute":
-								this.AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
+								AddDatum(s.StateName + "_StartTimeAbsolute", () => s.TimingInfo.StartTimeAbsolute);
 								break;
 							case "StartTimeRelative":
-								this.AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
+								AddDatum(s.StateName + "_StartTimeRelative", () => s.TimingInfo.StartTimeRelative);
 								break;
 							case "EndTimeAbsolute":
-								this.AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
-								this.dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeAbsolute",() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
+								AddDatum(s.StateName + "_EndTimeAbsolute", () => s.TimingInfo.EndTimeAbsolute);
+								dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeAbsolute",() => s.TimingInfo.EndTimeAbsolute, data.Count - 1));
 								break;
 							case "EndTimeRelative":
-								this.AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
-								this.dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeRelative",() => s.TimingInfo.EndTimeRelative, data.Count - 1));
+								AddDatum(s.StateName + "_EndTimeRelative", () => s.TimingInfo.EndTimeRelative);
+								dataToUpdateNextFrame.Add(new HeldDatum<float>("EndTimeRelative",() => s.TimingInfo.EndTimeRelative, data.Count - 1));
 								break;
 							case "Duration":
-								this.AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
-								this.dataToUpdateNextFrame.Add(new HeldDatum<float>("Duration",() => s.TimingInfo.Duration, data.Count - 1));
+								AddDatum(s.StateName + "_Duration", () => s.TimingInfo.Duration);
+								dataToUpdateNextFrame.Add(new HeldDatum<float>("Duration",() => s.TimingInfo.Duration, data.Count - 1));
 								break;
 							default:
 								Debug.Log("Attempted to add state timing information called \"" + t + "\", but this is not a known timing information type.");

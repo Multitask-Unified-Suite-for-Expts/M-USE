@@ -469,9 +469,7 @@ namespace USE_States
 				if (ParentLevel.PreviousState != null)
 				{
 					Debug.Log(Time.frameCount + "UPDATING PREVIOUS STATE DURATION DATAAAAAAAAAAAAAA");
-					ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
-					ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
-					ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
+					UpdateDurationData();
 				}
 				if (StateActiveInitialization != null)
 				{
@@ -488,7 +486,8 @@ namespace USE_States
 			}
 		}
 
-		public void UpdateDurationData(){
+		public void UpdateDurationData()
+		{
 			// the duration of a State should include its last frame, so needs to be measured at the start of the following State
 			ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
 			ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;

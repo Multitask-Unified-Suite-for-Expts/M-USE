@@ -1193,7 +1193,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineTrialData()
     {
-        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("Context", () => CurrentTrial.ContextName);
         TrialData.AddDatum("Starfield", () => CurrentTrial.UseStarfield);
         TrialData.AddDatum("Num_UnseenStim", () => Unseen_Stim.Count);
@@ -1203,7 +1202,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("StimLocations", () => Locations_String);
         TrialData.AddDatum("ChoseCorrectly", () => GotTrialCorrect);
         TrialData.AddDatum("CurrentTrialStims", () => TrialStimIndices);
-        TrialData.AddDatum("PC_Percentage", () => PC_Percentage_String);
+        TrialData.AddDatum("PC_Percentage", () => CalculatePercentagePC());
     }
 
     private void DefineFrameData()

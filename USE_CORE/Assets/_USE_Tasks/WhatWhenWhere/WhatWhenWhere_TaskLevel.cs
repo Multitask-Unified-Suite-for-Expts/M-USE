@@ -118,6 +118,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
         BlockData.AddDatum("Search Durations", ()=> String.Join(",", SearchDurations_InBlock));
+        BlockData.AddDatum("NumErrors_InBlock", ()=> NumErrors_InBlock);
         BlockData.AddDatum("NumDistractorSlotError", ()=> DistractorSlotErrorCount_InBlock);
         BlockData.AddDatum("NumSearchSlotError", ()=> SlotErrorCount_InBlock);
         BlockData.AddDatum("NumRepetitionError", ()=> RepetitionErrorCount_InBlock);

@@ -639,6 +639,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("DistractorStimLocations", () => distractorStimsLocations);
         TrialData.AddDatum("TouchedObjects", () => String.Join(",",TouchedObjects));
         TrialData.AddDatum("SearchDurations", () => String.Join(",",SearchDurations_InTrial));
+        TrialData.AddDatum("NumErrors_InTrial", () => NumErrors_InTrial);
         TrialData.AddDatum("ErrorType", () => errorTypeString);
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrectCounter_InTrial);
         TrialData.AddDatum("RetouchErroneous", () => retouchErroneousCounter_InTrial);

@@ -861,6 +861,24 @@ public class ImportSettings_Level : ControlLevel
                 }
                 fieldInfo.SetValue(settingsInstance, valuesList);
             }
+            else if (fieldType.Equals(typeof(List<int>)))
+            {
+                if (StartsOrEndsWithBrackets(fieldValue))
+                    fieldValue = fieldValue.Substring(1, fieldValue.Length - 2);
+
+                string[] sArray = fieldValue.Split(',');
+                List<int> valuesList = new List<int>();
+
+                foreach (string s in sArray)
+                {
+                    if (int.TryParse(s, out int intValue))
+						valuesList.Add(intValue);
+                    
+                }
+
+                fieldInfo.SetValue(settingsInstance, valuesList);
+            }
+
             else if (fieldType.Equals(typeof(MonitorDetails)))
             {
                 var deserializedValue = JsonConvert.DeserializeObject<MonitorDetails>(fieldValue);

@@ -199,7 +199,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
 
-
+            MazeBackground.SetActive(true);
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
@@ -396,6 +396,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             DisableSceneElements();
             if (!SessionValues.WebBuild)
                 DestroyChildren(playerViewParent);
+            MazeBackground.SetActive(false);
 
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
 

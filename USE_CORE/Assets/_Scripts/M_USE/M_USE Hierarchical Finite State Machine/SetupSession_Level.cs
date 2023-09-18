@@ -189,8 +189,7 @@ public class SetupSession_Level : ControlLevel
     private void SetupInputManagement(State inputActive, State inputInactive)
     {
 
-        // ADD BACK IN !!!
-//        SessionValues.EventCodeManager.splitBytes = SessionValues.SessionDef.SplitBytes;
+        SessionValues.EventCodeManager.splitBytes = SessionValues.SessionDef.SplitBytes;
 
         SessionValues.InputManager = new GameObject("InputManager");
         SessionValues.InputManager.SetActive(true);

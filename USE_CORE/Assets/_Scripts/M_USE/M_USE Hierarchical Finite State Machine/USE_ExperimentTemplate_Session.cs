@@ -238,7 +238,6 @@ namespace USE_ExperimentTemplate_Session
                 }
                
 
-
                 if (!SessionValues.SessionDef.FlashPanelsActive)
                     SessionValues.FlashPanelController.TurnOffFlashPanels();
                 else
@@ -249,6 +248,7 @@ namespace USE_ExperimentTemplate_Session
                     InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
+                SessionValues.SyncBoxController.SendCommand("ECH 0");
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
 
                 if(SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
@@ -561,26 +561,24 @@ namespace USE_ExperimentTemplate_Session
             });
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
-            
 
-            selectTask.AddTimer(
-                () => SessionValues.SessionDef != null ? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask,
-                () =>
+
+            selectTask.AddTimer(() => SessionValues.SessionDef != null ? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
+            {
+                foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                 {
-                    foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
-                    {
-                        //Find the next task in the list that is still interactable
-                        string configName = (string)task.Key;
+                    //Find the next task in the list that is still interactable
+                    string configName = (string)task.Key;
 
-                        // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
-                            continue;
+                    // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                    if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
+                        continue;
 
-                        taskAutomaticallySelected = true;
-                        selectedConfigFolderName = configName;
-                        break;
-                    }
-                });
+                    taskAutomaticallySelected = true;
+                    selectedConfigFolderName = configName;
+                    break;
+                }
+            });
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {

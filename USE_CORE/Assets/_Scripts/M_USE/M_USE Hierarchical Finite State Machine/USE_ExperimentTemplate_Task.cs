@@ -874,9 +874,17 @@ namespace USE_ExperimentTemplate_Task
 
             switch (blockEndType)
             {
-                case "CurrentTrialPerformance":
+                case "CurrentTrialPercentError":
                     Debug.Log("####CHECKING BLOCK END, rTrialPerformance.Count: " + rTrialPerformance.Count + ", (rTrialPerformance[rTrialPerformance.Count - 1]: " + (rTrialPerformance[rTrialPerformance.Count - 1]));
 
+                    if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    {
+                        Debug.Log("Block ending due to trial performance below threshold.");
+                        return true;
+                    }
+                    else
+                        return false;
+                case "CurrentTrialErrorCount":
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");

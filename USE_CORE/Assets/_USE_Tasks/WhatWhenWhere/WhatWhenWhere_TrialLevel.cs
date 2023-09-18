@@ -23,6 +23,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
+    public List<float?> runningErrorCount = new List<float?>();
     private float percentError;
 
     //stim group
@@ -317,6 +318,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             errorTypeString = "AbortedTrial";
             
             runningPercentError.Add(null);
+            runningErrorCount.Add(null);
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
@@ -465,6 +467,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             percentError = (float)decimal.Divide(NumErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
             runningPercentError.Add(percentError);
             
+            Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
+            runningErrorCount.Add(NumErrors_InTrial);
+            
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
                         
             if (SessionValues.SyncBoxController != null)
@@ -539,10 +544,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CurrentTrialDef.MaxTrials);
 
         // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
-        if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+        if (CurrentTrialDef.BlockEndType == "CurrentTrialPercentError")
             return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
+        
+        // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "CurrentTrialErrorCount")
+            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningErrorCount,
+                CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
+                CurrentTaskLevel.MaxTrials_InBlock);
+
          
         Debug.Log($"Cannot handle {CurrentTrialDef.BlockEndType} Block End Type. Forced block switch not applied.");
          return false;

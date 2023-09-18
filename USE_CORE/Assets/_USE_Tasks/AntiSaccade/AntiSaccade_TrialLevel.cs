@@ -470,7 +470,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TargetStimDisplayPos", () => CurrentTrial.TargetStim_DisplayPos.ToString());
         TrialData.AddDatum("TargetStimChoosePos", () => CurrentTrial.TargetStim_ChoosePos.ToString());
         TrialData.AddDatum("DistractorStimsChoosePos", () => DistractorStimsChoosePos_String);
-        TrialData.AddDatum("Context", () => CurrentTrial.ContextName);
     }
 
     private void DefineFrameData()

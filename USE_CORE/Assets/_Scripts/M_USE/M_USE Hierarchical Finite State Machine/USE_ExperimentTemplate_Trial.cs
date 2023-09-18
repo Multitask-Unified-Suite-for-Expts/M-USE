@@ -594,7 +594,7 @@ namespace USE_ExperimentTemplate_Trial
             }
             return selectedReward.NumReward;
         }
-        public void SetShadowType(String ShadowType, String LightName)
+        public void SetShadowType(string ShadowType, string LightName)
         {
             ShadowType = ShadowType.ToLower();
             //User options are None, Soft, Hard

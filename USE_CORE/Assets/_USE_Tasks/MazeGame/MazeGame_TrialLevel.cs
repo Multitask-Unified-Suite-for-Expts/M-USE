@@ -168,8 +168,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             // Load Maze at the start of every trial to keep the mNextStep consistent
             CurrentTaskLevel.SetTaskSummaryString();
-            
-
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -201,8 +199,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
 
-            InstantiateCurrMaze();
-            tiles.ToggleVisibility(true);
 
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
@@ -421,6 +417,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     public override void AddToStimLists()
     {
+        foreach (StimDef stim in tiles.stimDefs)
+        {
+            Debug.Log("STIM GAME OBJECT NAME; " + stim.StimGameObject);
+            if(CurrentTaskLevel.currMaze.mPath.Contains(stim.StimGameObject.name))
+                Debug.Log("IT WORKS!! " + stim.StimGameObject.name);
+        }
         //NEED TO FILL OUT THIS METHOD SO THAT:
         //target stim are added to SessionValues.TargetObjects
         //distractor stim are added to SessionValues.DistractorObjects
@@ -483,7 +485,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock);
     }
-    private void InstantiateCurrMaze()
+    protected override void DefineTrialStims()
     {
         // This will Load all tiles within the maze and the background of the maze
 
@@ -495,21 +497,23 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * currentTaskDef.SpaceBetweenTiles,
             mazeHeight + 2 * (currentTaskDef.SpaceBetweenTiles), 0.1f);
-        MazeBackground.SetActive(true);
+        MazeBackground.SetActive(false);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
-        tiles = new StimGroup("Tiles");
+        tiles = new StimGroup("Tiles", GetStateFromName("ChooseTile"), GetStateFromName("ITI"));
 
         for (var x = 1; x <= mazeDims.x; x++)
         for (var y = 1; y <= mazeDims.y; y++)
         {
-            // Configures Tile objects and Prefab within the maze container
+            // Instantiate the tile
             tile = Instantiate(TilePrefab, MazeContainer.transform);
+            StimDef tileStimDef = new StimDef(tiles, tile.gameObject);
+            
             SetGameConfigs();
             tile.transform.localScale = new Vector3(currentTaskDef.TileSize, currentTaskDef.TileSize, 0.15f);
-            tile.gameObject.SetActive(true);
-            tile.gameObject.GetComponent<Tile>().enabled = true;
-            tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
+            tileStimDef.StimGameObject.SetActive(false);
+            tileStimDef.StimGameObject.GetComponent<Tile>().enabled = true;
+            tileStimDef.StimGameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
             var displaceX = (2 * (x - 1) + 1) * (currentTaskDef.TileSize / 2) + currentTaskDef.SpaceBetweenTiles * (x - 1);
             var displaceY = (2 * (y - 1) + 1) * (currentTaskDef.TileSize / 2) + currentTaskDef.SpaceBetweenTiles * (y - 1);
             var newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);
@@ -518,33 +522,35 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // Assigns ChessCoordName to the tile 
             string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string chessCoordName = $"{alphabet[x-1]}{y}";
-            tile.mCoord = new Coords(chessCoordName);
-            tile.gameObject.name = chessCoordName;
+            tileStimDef.StimGameObject.GetComponent<Tile>().mCoord = new Coords(chessCoordName);
+            tileStimDef.StimGameObject.name = chessCoordName;
             // Assigns Reward magnitude for each tile (set to proportional to the number of squares in path)
-            tile.GetComponent<Tile>().sliderValueChange = 1f / CurrentTaskLevel.currMaze.mNumSquares; //FIX THE REWARD MAG BELOW USING STIM DEF ???
+            tileStimDef.StimGameObject.GetComponent<Tile>().sliderValueChange = 1f / CurrentTaskLevel.currMaze.mNumSquares; //FIX THE REWARD MAG BELOW USING STIM DEF ???
 
             if (chessCoordName == CurrentTaskLevel.currMaze.mStart)
             {
-                tile.gameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
-                startTile = tile.gameObject; // Have to define to perform feedback if they haven't selected the start yet 
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
+                startTile = tileStimDef.StimGameObject; // Have to define to perform feedback if they haven't selected the start yet 
                 //Consider making a separate group for the tiles in the path, this might not improve function that much?
             }
                 
             else if (chessCoordName == CurrentTaskLevel.currMaze.mFinish)
             {
-                tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
-                finishTile = tile.gameObject;
-                tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
+                finishTile = tileStimDef.StimGameObject;
+                tileStimDef.StimGameObject.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
             else if (!CurrentTrialDef.DarkenNonPathTiles || CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
-                tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
             else
-                tile.gameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
             
-            tiles.AddStims(tile.gameObject);
+            tiles.AddStims(tileStimDef);
             
         }
         mazeLoaded = true;
+        //Make sure to reset the maze to start at the start tile
+        CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mStart;
         AssignFlashingTiles();
         TrialStims.Add(tiles);
     }
@@ -990,15 +996,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     private void AssignFlashingTiles()
     {
-        
+
         if (!CurrentTrialDef.GuidedMazeSelection)
             return;
 
         for (int i = 0; i < CurrentTaskLevel.currMaze.mPath.Count; i++)
         {
-            Debug.Log(CurrentTaskLevel.currMaze.mPath[i]);
+            string flashingTileName;
             if (i % CurrentTrialDef.TileFlashingRatio == 0)
-                GameObject.Find(CurrentTaskLevel.currMaze.mPath[i]).GetComponent<Tile>().assignedTileFlash = true;
+                tiles.stimDefs.Find(item => item.StimGameObject.name == CurrentTaskLevel.currMaze.mPath[i])
+                    .StimGameObject.GetComponent<Tile>().assignedTileFlash = true;
         }
     }
 }

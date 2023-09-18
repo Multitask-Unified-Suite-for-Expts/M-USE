@@ -88,7 +88,6 @@ namespace MazeGame_Namespace
     {
         public bool IsTarget;
         public int TokenUpdate;
-
     }
     public class MazeDef
     {

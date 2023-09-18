@@ -25,7 +25,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public List<int> runningAcc;
     
     // Stimuli Variables
-    private StimGroup tStim;
+    private StimGroup searchStim;
     private GameObject StartButton;
 
     // ConfigUI Variables
@@ -307,12 +307,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     public override void AddToStimLists()
     {
-        //NEED TO FILL OUT THIS METHOD SO THAT:
-            //target stim are added to SessionValues.TargetObjects
-            //distractor stim are added to SessionValues.DistractorObjects
-            //irrelevant stim are added to SessionValues.IrrelevantObjects
-
-        //Can look at ContinuousRecognition's method as an example
+        foreach (FlexLearning_StimDef stim in searchStim.stimDefs)
+        {
+            if (stim.IsTarget)
+                SessionValues.TargetObjects.Add(stim.StimGameObject);
+            else
+                SessionValues.DistractorObjects.Add(stim.StimGameObject);   
+        }
     }
 
     public void MakeStimFaceCamera()
@@ -329,7 +330,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.WebBuild)
             DestroyTextOnExperimenterDisplay();
 
-        tStim.ToggleVisibility(false);
+        searchStim.ToggleVisibility(false);
         
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
@@ -355,17 +356,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
-        tStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
+        searchStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
         if(TokensWithStimOn?? false)
-            tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
+            searchStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         else
-            tStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
-        TrialStims.Add(tStim);
+            searchStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
+        TrialStims.Add(searchStim);
 
         for (int iStim = 0; iStim < CurrentTrialDef.TrialStimIndices.Length; iStim++)
         {
-            FlexLearning_StimDef sd = (FlexLearning_StimDef)tStim.stimDefs[iStim];
+            FlexLearning_StimDef sd = (FlexLearning_StimDef)searchStim.stimDefs[iStim];
 
             if (CurrentTrialDef.ProbabilisticTrialStimTokenReward != null)
                 sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim]);
@@ -387,12 +388,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             for (int i = 0; i < CurrentTrialDef.TrialStimIndices.Length; i++)
             {
-                tStim.stimDefs[i].StimLocation = CurrentTrialDef.TrialStimLocations.ElementAt(positionIndexArray[i]);
+                searchStim.stimDefs[i].StimLocation = CurrentTrialDef.TrialStimLocations.ElementAt(positionIndexArray[i]);
             }
         }
         else
         {
-            tStim.SetLocations(CurrentTrialDef.TrialStimLocations);
+            searchStim.SetLocations(CurrentTrialDef.TrialStimLocations);
         }
     }
     public override void ResetTrialVariables()
@@ -424,13 +425,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
-        FrameData.AddDatum("TrialStimVisibility", () => tStim == null? false:tStim.IsActive);
+        FrameData.AddDatum("TrialStimVisibility", () => searchStim == null? false:searchStim.IsActive);
     }
 
     private void CreateTextOnExperimenterDisplay()
     {
         //Create corresponding text on player view of experimenter display
-        foreach (FlexLearning_StimDef stim in tStim.stimDefs)
+        foreach (FlexLearning_StimDef stim in searchStim.stimDefs)
         {
             if (stim.IsTarget)
             {

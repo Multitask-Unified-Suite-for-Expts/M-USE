@@ -310,12 +310,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     public override void AddToStimLists()
     {
-        //NEED TO FILL OUT THIS METHOD SO THAT:
-        //target stim are added to SessionValues.TargetObjects
-        //distractor stim are added to SessionValues.DistractorObjects
-        //irrelevant stim are added to SessionValues.IrrelevantObjects
+        
+        foreach (WorkingMemory_StimDef stim in searchStims.stimDefs)
+        {
+            if (stim.IsTarget)
+                SessionValues.TargetObjects.Add(stim.StimGameObject);
+            else
+                SessionValues.DistractorObjects.Add(stim.StimGameObject);   
+        }
 
-        //Can look at ContinuousRecognition's method as an example
+        foreach (WorkingMemory_StimDef stim in postSampleDistractorStims.stimDefs)
+        {
+            SessionValues.DistractorObjects.Add(stim.StimGameObject);
+        }
     }
 
     public void MakeStimFaceCamera()
@@ -411,16 +418,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration"); 
-        maxSearchDuration = ConfigUiVariables.get<ConfigNumber>("maxSearchDuration"); /*
-        trialEndDuration = ConfigUiVariables.get<ConfigNumber>("trialEndDuration"); 
-        initTrialDuration = ConfigUiVariables.get<ConfigNumber>("initTrialDuration");
-        baselineDuration = ConfigUiVariables.get<ConfigNumber>("baselineDuration"); */
+        maxSearchDuration = ConfigUiVariables.get<ConfigNumber>("maxSearchDuration"); 
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");
-        /*displaySampleDuration = ConfigUiVariables.get<ConfigNumber>("displaySampleDuration");
-        postSampleDelayDuration = ConfigUiVariables.get<ConfigNumber>("postSampleDelayDuration");
-        displayPostSampleDistractorsDuration = ConfigUiVariables.get<ConfigNumber>("displayPostSampleDistractorsDuration");
-        preTargetDelayDuration = ConfigUiVariables.get<ConfigNumber>("preTargetDelayDuration");*/
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");

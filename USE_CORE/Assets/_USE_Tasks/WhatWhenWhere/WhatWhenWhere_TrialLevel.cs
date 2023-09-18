@@ -258,13 +258,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                runningAcc.Add(0);
-                CurrentTaskLevel.NumErrors_InBlock++;
-                NumErrors_InTrial++;
-                //UpdateCounters_Incorrect(correctIndex);
+                
                 isSliderValueIncrease = false;
                 SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
-
                 //Repetition Error
                 if (TouchedObjects.Contains(selectedSD.StimIndex))
                 {
@@ -300,9 +296,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
                     }
                 }
+                
+                runningAcc.Add(0);
+                if (!retouchErroneous)
+                {
+                    CurrentTaskLevel.NumErrors_InBlock++;
+                    NumErrors_InTrial++;
+                }
+            
             }
+            
+            
             UpdateExperimenterDisplaySummaryStrings();
-
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
@@ -383,7 +388,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
                 
-                if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance" && numTouchedStims != 0 && consecutiveError == 1)
+                if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial") && numTouchedStims != 0 && consecutiveError == 1)
                 {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                     numTouchedStims -= 1;
@@ -433,7 +438,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
-                else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+                else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
                     if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 2 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
@@ -521,12 +526,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     public override void AddToStimLists()
     {
-        //NEED TO FILL OUT THIS METHOD SO THAT:
-        //target stim are added to SessionValues.TargetObjects
-        //distractor stim are added to SessionValues.DistractorObjects
-        //irrelevant stim are added to SessionValues.IrrelevantObjects
-
-        //Can look at ContinuousRecognition's method as an example
+        foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
+            SessionValues.TargetObjects.Add(stim.StimGameObject);
+        
+        foreach (WhatWhenWhere_StimDef stim in distractorStims.stimDefs)
+            SessionValues.DistractorObjects.Add(stim.StimGameObject);
     }
 
     protected override bool CheckBlockEnd()
@@ -543,13 +547,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTrialDef.MaxTrials);
 
-        // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
+        // If using the CurrentTrialPercentError block end, use the following CheckBlockEnd method
         if (CurrentTrialDef.BlockEndType == "CurrentTrialPercentError")
             return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
         
-        // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
+        // If using the CurrentTrialErrorCount block end, use the following CheckBlockEnd method
         if (CurrentTrialDef.BlockEndType == "CurrentTrialErrorCount")
             return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningErrorCount,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
@@ -653,6 +657,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Selected Object Indices: " + string.Join(",",TouchedObjects) +
                              "\nCorrect Selection? : " + CorrectSelection +
                              "\nLast Trial's Percent Error : " + percentError +
+                             "\nNum Errors in Trial : " + NumErrors_InTrial +
                              "\n" +
                              "\nError: " + errorTypeString +
                              "\n" +

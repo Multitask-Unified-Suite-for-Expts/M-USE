@@ -254,7 +254,8 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims[0].DestroyStimGroup();
                     TrialStims.RemoveAt(0);
                 }
-                WriteDataFiles();
+
+                StartCoroutine(WriteDataFiles());
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
@@ -377,18 +378,18 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
-        public void WriteDataFiles()
+        public IEnumerator WriteDataFiles()
         {
-            StartCoroutine(TrialData.AppendDataToBuffer());
-            StartCoroutine(TrialData.AppendDataToFile());
-            StartCoroutine(FrameData.AppendDataToBuffer());
-            StartCoroutine(FrameData.AppendDataToFile());
+            yield return StartCoroutine(TrialData.AppendDataToBuffer());
+            yield return StartCoroutine(TrialData.AppendDataToFile());
+            yield return StartCoroutine(FrameData.AppendDataToBuffer());
+            yield return StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             if (SessionValues.SessionDef.SerialPortActive)
             {
-                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
         }
         
@@ -594,7 +595,7 @@ namespace USE_ExperimentTemplate_Trial
             }
             return selectedReward.NumReward;
         }
-        public void SetShadowType(String ShadowType, String LightName)
+        public void SetShadowType(string ShadowType, string LightName)
         {
             ShadowType = ShadowType.ToLower();
             //User options are None, Soft, Hard
@@ -623,11 +624,13 @@ namespace USE_ExperimentTemplate_Trial
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)
+            {
                 contextPath = filePaths[0];
+            }
             else
             {
-                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
                 Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
             }
 
             return contextPath;

@@ -151,6 +151,13 @@ public class InitScreen_Level : ControlLevel
             LocalConfig_Toggle.isOn = false;
             LocalData_Toggle.isOn = false;
         }
+
+        if(!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn) //if none are on to start, turn on grey out panels
+        {
+            Debug.LogWarning("SETTING ALL PANELS ACTIVE!");
+            foreach (var panel in GreyOutPanels_Array)
+                panel.SetActive(true);
+        }
         
 
         if(LocalConfig_Toggle.isOn)
@@ -162,6 +169,8 @@ public class InitScreen_Level : ControlLevel
         {
             ServerConfig_GO.SetActive(true);
             LocalConfig_GO.SetActive(false);
+            if(!ConnectedToServer)
+                GreyOutPanels_Array[2].SetActive(true); //set config folder grey out panel active since they havent connected to server yet
         }
 
         if (LocalData_Toggle.isOn)
@@ -178,7 +187,7 @@ public class InitScreen_Level : ControlLevel
         if (!ServerConfig_Toggle.isOn && !ServerData_Toggle.isOn)
             GreyOutPanels_Array[0].SetActive(true);
 
-        if(NoData_Toggle.isOn)
+        if(NoData_Toggle.isOn || (ServerData_Toggle.isOn && !ConnectedToServer)) //set server data grey out panel on since they havent connected to server
             GreyOutPanels_Array[1].SetActive(true);
 
         if(DefaultConfig_Toggle.isOn)
@@ -269,7 +278,10 @@ public class InitScreen_Level : ControlLevel
         {
             TurnTogglesOff(new List<Toggle>() { DefaultConfig_Toggle, LocalConfig_Toggle });
             ServerConfig_GO.SetActive(true);
-            DeactivateObjects(new List<GameObject>() { LocalConfig_GO, GreyOutPanels_Array[0], GreyOutPanels_Array[2] });
+            List<GameObject> deactivateList = new List<GameObject>() { LocalConfig_GO, GreyOutPanels_Array[0] };
+            if (ConnectedToServer)
+                deactivateList.Add(GreyOutPanels_Array[2]);
+            DeactivateObjects(deactivateList);
             if (ConnectedToServer && !FoldersSet)
                 PopulateServerDropdown();
         }
@@ -294,7 +306,10 @@ public class InitScreen_Level : ControlLevel
         {
             TurnTogglesOff(new List<Toggle>() { LocalData_Toggle, NoData_Toggle });
             ServerData_GO.SetActive(true);
-            DeactivateObjects(new List<GameObject>() { LocalData_GO, GreyOutPanels_Array[0], GreyOutPanels_Array[1] });
+            List<GameObject> toDeactivate = new List<GameObject>() { LocalData_GO, GreyOutPanels_Array[0] };
+            if (ConnectedToServer)
+                toDeactivate.Add(GreyOutPanels_Array[1]);
+            DeactivateObjects(toDeactivate);
         }
         else if (selectedGO == NoData_Toggle.gameObject && NoData_Toggle.isOn)
         {
@@ -495,6 +510,10 @@ public class InitScreen_Level : ControlLevel
             {
                 PlayAudio(Connected_AudioClip);
                 ConnectedToServer = true;
+                if(ServerConfig_Toggle.isOn)
+                    GreyOutPanels_Array[2].SetActive(false);
+                if(ServerData_Toggle.isOn)
+                    GreyOutPanels_Array[1].SetActive(false);
                 ConnectToServerButton_GO.GetComponent<Image>().color = Color.green;
                 ConnectToServerButton_GO.GetComponentInChildren<Text>().text = "Connected";
                 GreenCheckMark_GO.SetActive(true);

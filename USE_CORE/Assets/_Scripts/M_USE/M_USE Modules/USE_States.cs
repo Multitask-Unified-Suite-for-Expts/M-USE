@@ -468,10 +468,8 @@ namespace USE_States
 				TimingInfo.Duration = -1;
 				if (ParentLevel.PreviousState != null)
 				{
-					// the duration of a State should include its last frame, so needs to be measured at the start of the following State
-					ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
-					ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
-					ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
+					//Debug.Log(Time.frameCount + "UPDATING PREVIOUS STATE DURATION DATAAAAAAAAAAAAAA");
+					UpdateDurationData();
 				}
 				if (StateActiveInitialization != null)
 				{
@@ -486,6 +484,14 @@ namespace USE_States
 					StateInitializationFinished?.Invoke(this, EventArgs.Empty);
 				}
 			}
+		}
+
+		public void UpdateDurationData()
+		{
+			// the duration of a State should include its last frame, so needs to be measured at the start of the following State
+			ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
+			ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
+			ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
 		}
 
 		void RunInitializationMethods()

@@ -770,9 +770,6 @@ namespace USE_StimulusManagement
             }
         }
 
-
-
-
         private void ActivateOnStateInit(object sender, EventArgs e)
 		{
 			ToggleVisibility(true);
@@ -785,7 +782,22 @@ namespace USE_StimulusManagement
 			SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;
 		}
 
-		public void AddStims(StimDef stim)
+
+        public void ToggleVisibility(bool visibility)
+        {
+            foreach (StimDef stim in stimDefs)
+            {
+                stim.ToggleVisibility(visibility);
+            }
+            SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
+            IsActive = visibility;
+        }
+
+
+
+
+
+        public void AddStims(StimDef stim)
 		{
 			stim.AddToStimGroup(this);
 			// stim.ToggleVisibility(false);
@@ -940,17 +952,6 @@ namespace USE_StimulusManagement
 				sd.DestroyStimGameObject();
 			}
 		}
-
-		public void ToggleVisibility(bool visibility)
-		{
-			foreach (StimDef stim in stimDefs)
-			{
-				stim.ToggleVisibility(visibility);
-			}
-			SessionValues.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
-			IsActive = visibility;
-		}
-
 
         public void SetLocations(IEnumerable<Vector3> locs)
 		{

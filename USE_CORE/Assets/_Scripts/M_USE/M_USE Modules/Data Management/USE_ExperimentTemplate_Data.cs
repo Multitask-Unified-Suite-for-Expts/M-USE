@@ -257,6 +257,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("SubjectAge", () => SessionValues.SubjectAge);
             AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddStateTimingData(sessionLevel);
+            DataControllerHoldsFrames = true;
         }
     }
 
@@ -297,6 +298,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("NumRewardPulses_InBlock", () => taskLevel != null ? (taskLevel.NumRewardPulses_InBlock).ToString() : "NoTaskActive");
             AddDatum("NumAbortedTrials_InBlock", () => taskLevel != null ? (taskLevel.NumAbortedTrials_InBlock).ToString() : "NoTaskActive");
+            DataControllerHoldsFrames = true;
         }
     }
 
@@ -313,6 +315,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InBlock", () => trialLevel != null ? (trialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
             AddDatum("AbortCode", () => trialLevel != null ? (trialLevel.AbortCode).ToString() : "NoTaskActive");
+            DataControllerHoldsFrames = true;
         }
     }
 

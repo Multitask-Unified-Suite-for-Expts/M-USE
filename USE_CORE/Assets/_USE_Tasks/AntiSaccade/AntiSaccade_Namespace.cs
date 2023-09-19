@@ -23,6 +23,7 @@ namespace AntiSaccade_Namespace
         public int PreCue_Size;
         public string SpatialCue_Icon;
         public string Mask_Icon;
+        public bool SpatialCueActiveThroughDisplayTarget;
         public bool UseSpinAnimation;
         public bool DeactivateNonSelectedStimOnSel;
         public bool RandomSpatialCueColor;
@@ -36,7 +37,7 @@ namespace AntiSaccade_Namespace
         public float HaloFbDuration;
         public int RewardMag;
         public float PreCueDuration;
-        //public float AlertCueDuration;
+        public float AlertCueDuration;
         public float AlertCueDelayDuration;
         public float SpatialCueDuration;
         public float SpatialCueDelayDuration;

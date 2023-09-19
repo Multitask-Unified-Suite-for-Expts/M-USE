@@ -221,6 +221,8 @@ namespace USE_ExperimentTemplate_Task
                         HandleWebBuildHotKeys();
                 });
             }
+            
+            RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
 
             RunBlock.AddLateUpdateMethod(() =>
             {

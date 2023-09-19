@@ -212,7 +212,7 @@ namespace USE_Data
 
 		public void ManuallyDefine(int cap = 100)
 		{
-		//everything in Start() should be triggered by init screen Confirm button press
+			//everything in Start() should be triggered by init screen Confirm button press
 			if (!Defined)
 			{
 				Defined = true;
@@ -220,7 +220,7 @@ namespace USE_Data
 			}
 		}
 
-		void OnStart()
+		void OnStart() //DONT THINK THIS IS EVER GETTING CALLED!!!
 		{
 			//everything in Start() should be triggered by init screen Confirm button press
 			if (!Defined)
@@ -235,6 +235,7 @@ namespace USE_Data
 			}
 			if (appendDataToBufferNextFrame)
 			{
+				Debug.LogWarning("THIS IS NEVER GETTING HIT!!!!");
 				for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
 				{
 					PreviousFrameHeldDataValues[i] = dataToUpdateNextFrame[i].ValueAsString;
@@ -259,13 +260,17 @@ namespace USE_Data
 					PreviousFrameHeldDataValues[dataToUpdateNextFrame[i].Pos] = dataToUpdateNextFrame[i].ValueAsString;
 				}
 				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
-				//if(name.ToLower().Contains("trial"))
-				//	Debug.LogWarning("DATA ADDED TO BUFFER! SETTING AppendDataToBufferNextFrame to FALSE! " + Time.frameCount);
-                appendDataToBufferNextFrame = false;
+				if (name.ToLower().Contains("trial"))
+					Debug.LogWarning("TRIAL DATA ADDED TO BUFFER! " + Time.frameCount);
+				appendDataToBufferNextFrame = false;
 			}
+
 			if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
 			{
-				appendDataToFileNextFrame = false;
+                if (name.ToLower().Contains("trial"))
+                    Debug.LogWarning("TRIAL DATA ADDED TO FILE! " + Time.frameCount);
+
+                appendDataToFileNextFrame = false;
 				StartCoroutine(AppendDataToFile());
 			}
 		}
@@ -627,9 +632,9 @@ namespace USE_Data
 				{
 					if(dataToUpdateNextFrame.Count > 0)
 					{
-                        //if (name.ToLower().Contains("trial"))
-                        //    Debug.LogWarning("SETTING TO TRUE! (" + name + ") " + Time.frameCount);
-                        PreviousFrameHeldDataValues = currentVals.ToList();
+						if (name.ToLower().Contains("trial"))
+							Debug.LogWarning("SETTING TO TRUE! (" + name + ") " + Time.frameCount);
+						PreviousFrameHeldDataValues = currentVals.ToList();
                         appendDataToBufferNextFrame = true;
                     }
 				}
@@ -690,8 +695,8 @@ namespace USE_Data
 
 				if (!appendDataToBufferNextFrame) //If NOT waiting...
 				{
-                    //if (name.ToLower().Contains("trial"))
-                    //    Debug.LogWarning("APPENDING DATA TO FILE! (" + name + ") " + Time.frameCount);
+					if (name.ToLower().Contains("trial"))
+						Debug.LogWarning("APPENDING TRIAL DATA TO FILE! (" + name + ") " + Time.frameCount);
 					if (SessionValues.StoringDataOnServer)
 						yield return StartCoroutine(AppendDataToServerFile(content));
 					else

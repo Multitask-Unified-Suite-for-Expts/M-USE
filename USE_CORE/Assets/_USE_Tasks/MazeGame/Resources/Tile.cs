@@ -62,15 +62,6 @@ public class Tile : MonoBehaviour
         if (!isFlashing)
         {
             correctnessCode = mgTL.ManageTileTouch(this);
-/*
-            if (mgTL != null)
-            {
-                correctnessCode = mgTL.ManageTileTouch(this);
-            }
-            else
-            {
-                correctnessCode = mrtTL.ManageTileTouch(this);
-            }*/
             ColorFeedback(correctnessCode);
         }
     }
@@ -125,8 +116,6 @@ public class Tile : MonoBehaviour
     
     public void NextCorrectFlashingFeedback()
     {
-        Debug.Log("IS mgTL null? " + (mgTL == null ? "YES" : "no"));
-        Debug.Log("IS mgTL.pathProgressGO null? " + (mgTL.pathProgressGO == null ? "YES" : "no"));
         if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
             flashingTile = mgTL.startTile;
         else
@@ -177,18 +166,13 @@ public class Tile : MonoBehaviour
         
             if (elapsed >=  interval)
             {
-               // if ((mgTL != null ? !mgTL.viewPath : !mrtTL.viewPath) || correctnessCode != 1)
                 if (!mgTL.viewPath || correctnessCode != 1 && correctnessCode != 2)
                 {
                     gameObject.GetComponent<Renderer>().material.color = originalTileColor;
                 }
                  else if(mgTL.viewPath && correctnessCode == 2)
                      gameObject.GetComponent<Renderer>().material.color = CORRECT_COLOR;
-                // else
-                // {
-                //     gameObject.GetComponent<Renderer>().material.color = DEFAULT_TILE_COLOR;
-                //
-                // }
+               
 
                 choiceFeedback = false;
             }

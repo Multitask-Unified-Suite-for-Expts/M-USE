@@ -118,6 +118,19 @@ public static class SessionValues
         return null;
     }
 
+    public static string GetNiceIntegers(int numDigits, int desiredNum)
+    {
+
+        if (desiredNum >= 999)
+            return desiredNum.ToString();
+        else if (desiredNum >= 99)
+            return "0" + desiredNum;
+        else if (desiredNum >= 9)
+            return "00" + desiredNum;
+        else
+            return "000" + desiredNum;
+    }
+
 
 
 }

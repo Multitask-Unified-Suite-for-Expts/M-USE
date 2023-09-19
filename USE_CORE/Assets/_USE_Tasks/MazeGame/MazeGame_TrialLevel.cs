@@ -6,6 +6,7 @@ using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -213,7 +214,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             //TouchFBController.SetPrefabSizes(tileScale);
             MazeBackground.SetActive(true);
-
+            if(!tiles.IsActive)
+                tiles.ToggleVisibility(true);
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
@@ -357,7 +359,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else if (CheckTileFlash() || (CurrentTrialDef.GuidedMazeSelection && GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Tile>().assignedTileFlash))
             {
-                Debug.Log("PATHPROGRESSINDEX + 1: " + (pathProgressIndex + 1));
                 StateAfterDelay = TileFlashFeedback;
             }
             else
@@ -379,7 +380,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
-            tiles.ToggleVisibility(true);
+            if (!tiles.IsActive)
+                tiles.ToggleVisibility(true);
             MazeBackground.SetActive(true);
             tile.NextCorrectFlashingFeedback();
         });
@@ -390,11 +392,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddSpecificInitializationMethod(() =>
         {
+
             DisableSceneElements();
             if (!SessionValues.WebBuild)
                 DestroyChildren(playerViewParent);
             MazeBackground.SetActive(false);
-
+            tiles.ToggleVisibility(false);
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
 
             if (finishedMaze)
@@ -417,9 +420,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         foreach (StimDef stim in tiles.stimDefs)
         {
-            Debug.Log("STIM GAME OBJECT NAME; " + stim.StimGameObject);
-            if(CurrentTaskLevel.currMaze.mPath.Contains(stim.StimGameObject.name))
-                Debug.Log("IT WORKS!! " + stim.StimGameObject.name);
+            if (CurrentTaskLevel.currMaze.mPath.Contains(stim.StimGameObject.name))
+                SessionValues.TargetObjects.Add(stim.StimGameObject);
         }
         //NEED TO FILL OUT THIS METHOD SO THAT:
         //target stim are added to SessionValues.TargetObjects
@@ -498,9 +500,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MazeBackground.SetActive(false);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
-        string tileInitState = CurrentTrialDef.GuidedMazeSelection ? "TileFlashFeedback" : "ChooseTile";
-        Debug.Log("THIS IS THE STATE NAME: " +  tileInitState);
-        tiles = new StimGroup("Tiles", GetStateFromName(tileInitState), GetStateFromName("ITI"));
+        tiles = new StimGroup("Tiles");
 
         
         for (var x = 1; x <= mazeDims.x; x++)
@@ -805,9 +805,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
-        configVariablesLoaded = true;
 
         SetGameConfigs();
+        configVariablesLoaded = true;
     }
 
     private void SetGameConfigs()
@@ -931,11 +931,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.WebBuild)
             DestroyChildren(playerViewParent);
 
-        if (mazeLoaded)
+        /*if (mazeLoaded)
         {
             tiles.DestroyStimGroup();
             mazeLoaded = false;
-        }
+        }*/
         
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
@@ -959,6 +959,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SliderFBController.ResetSliderBarFull();
         mazeDuration = 0;
         mazeStartTime = 0;
+        mazeLoaded = false;
         choiceDuration = 0;
         choiceStartTime = 0;
         finishedMaze = false;
@@ -968,7 +969,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         ReturnToLast = false;
         ErroneousReturnToLast = false;
-
+        configVariablesLoaded = false;
         SessionValues.MouseTracker.ResetClicks();
         
         correctTouches_InTrial = 0;

@@ -225,27 +225,16 @@ namespace USE_ExperimentTemplate_Data
         public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
         {
             fileCreated = false;
-            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount) + ".txt";
+            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + SessionValues.GetNiceIntegers(4, trialCount) + ".txt";
             StartCoroutine(CreateFile());
         }
 
         public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)
         {
-            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) + "_" +
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + SessionValues.GetNiceIntegers(4, taskCount) + "_" +
                          suffix;
         }
-        public string GetNiceIntegers(int numDigits, int desiredNum)
-        {
-
-            if (desiredNum >= 999)
-                return desiredNum.ToString();
-            else if (desiredNum >= 99)
-                return "0" + desiredNum;
-            else if (desiredNum >= 9)
-                return "00" + desiredNum;
-            else
-                return "000" + desiredNum;
-        }
+        
     }
 
     public class SessionData : USE_Template_DataController

@@ -645,8 +645,9 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
                     StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
-                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
-                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+                //     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
+                //     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+                //
                 }
             });
 
@@ -729,19 +730,19 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
-                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialRecvData", "SessionLevel");
-                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialSentData", "SessionLevel");
+                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "SerialRecvData", "TaskSelection");
+                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "SerialSentData", "TaskSelection");
 
 
                 }
 
                 if (SessionValues.SessionDef.EyeTrackerActive)
                 {
-                    SessionValues.GazeData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "GazeData", "SessionLevel");
+                    SessionValues.GazeData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "GazeData", "TaskSelection");
                     SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData" + SessionValues.GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
                 }
 
-                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "FrameData", "SessionLevel");
+                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "FrameData", "SessionLevel");
                 FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
 
                 FrameData.gameObject.SetActive(true);
@@ -863,7 +864,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (!Application.isEditor)
                 {
-                    StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                    StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionConfigs", () =>
                     {
                         StartCoroutine(CopySessionConfigFolderToDataFolder());
                     }));
@@ -872,7 +873,7 @@ namespace USE_ExperimentTemplate_Session
             else if (SessionValues.UsingLocalConfigs)
             {
                 string sourceFolderPath = SessionValues.ConfigFolderPath;
-                string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionConfigs";
                 CopyLocalFolder(sourceFolderPath, destinationFolderPath);
             }
             else if (SessionValues.UsingDefaultConfigs)

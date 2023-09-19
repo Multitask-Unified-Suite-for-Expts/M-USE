@@ -887,6 +887,7 @@ namespace USE_ExperimentTemplate_Task
                     else
                         return false;
                 case "CurrentTrialErrorCount":
+                    Debug.Log("CHECKING BLOCK END - ERROR COUNT: " + rTrialPerformance[rTrialPerformance.Count - 1] + "THRESHOLD: " + performanceThreshold);
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");

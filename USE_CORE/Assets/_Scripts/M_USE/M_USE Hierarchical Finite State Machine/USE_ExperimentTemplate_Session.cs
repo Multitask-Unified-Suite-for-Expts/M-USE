@@ -193,18 +193,20 @@ namespace USE_ExperimentTemplate_Session
                         SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
                     
                     SessionValues.SerialPortController.Initialize();
-                }
 
-                if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
-                {
-                    if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
-                        SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
-
-                    foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
+                    if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
                     {
-                        Debug.Log("STR " + str);
+                        if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
+                            SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
+
+                        foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
+                        {
+                            Debug.Log("STR " + str);
+                        }
                     }
                 }
+
+                
 
             });
 

@@ -732,8 +732,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "SerialRecvData", "TaskSelection");
                     SessionValues.SerialSentData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "SerialSentData", "TaskSelection");
-
-
+                    Debug.Log("FOLDER PATH: " + SessionValues.SerialSentData.folderPath);
                 }
 
                 if (SessionValues.SessionDef.EyeTrackerActive)

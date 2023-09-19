@@ -40,7 +40,7 @@ public class SetupTask_Level : ControlLevel
         OtherSetup.AddSpecificInitializationMethod(() =>
         {  
             //Setup data management
-            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;
+            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + SessionValues.SerialRecvData.GetNiceIntegers(4,SessionValues.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
 
             if (SessionValues.StoringDataOnServer)
             {

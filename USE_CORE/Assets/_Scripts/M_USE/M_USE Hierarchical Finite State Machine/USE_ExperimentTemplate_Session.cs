@@ -44,7 +44,7 @@ namespace USE_ExperimentTemplate_Session
         public ControlLevel_Task_Template CurrentTask;
         public ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
-        protected int taskCount;
+        public int taskCount;
 
         //For Loading config information
         public SessionDetails SessionDetails;
@@ -166,11 +166,6 @@ namespace USE_ExperimentTemplate_Session
 
             SceneLoading = false;
             AsyncOperation loadScene = null;
-            setupSession.AddSpecificInitializationMethod(() =>
-            {
-                
-            });
-
             setupSession.AddUpdateMethod(() =>
             {
                 if (SessionValues.SessionDef == null)
@@ -202,13 +197,13 @@ namespace USE_ExperimentTemplate_Session
 
                 if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
                 {
-                  /*  if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
+                    if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
                         SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
 
                     foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
                     {
                         Debug.Log("STR " + str);
-                    }*/
+                    }
                 }
 
             });
@@ -645,10 +640,12 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
                     StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
-                //     SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
-                //     SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
-                //
+                    SessionValues.SerialRecvData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + SessionValues.SerialRecvData.GetNiceIntegers(4, taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialRecvData";
+                    SessionValues.SerialSentData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + SessionValues.SerialSentData.GetNiceIntegers(4, taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialSentData";
+
                 }
+
+                StartCoroutine(FrameData.AppendDataToFile());
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
@@ -708,7 +705,10 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
 
-                if(CurrentTask.TaskName != "GazeCalibration")
+                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+
+                if (CurrentTask.TaskName != "GazeCalibration")
                     SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 
@@ -730,19 +730,20 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
-                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "SerialRecvData", "TaskSelection");
-                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "SerialSentData", "TaskSelection");
-                    Debug.Log("FOLDER PATH: " + SessionValues.SerialSentData.folderPath);
+                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "TaskSelection");
+                    SessionValues.SerialRecvData.fileName = SessionValues.FilePrefix + "__SerialRecvData_" + FrameData.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
+                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "TaskSelection");
+                    SessionValues.SerialSentData.fileName = SessionValues.FilePrefix + "__SerialSentData_" + FrameData.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
                 }
 
                 if (SessionValues.SessionDef.EyeTrackerActive)
                 {
-                    SessionValues.GazeData.CreateNewTaskIndexedFolder(taskCount, SessionValues.SessionDataPath, "GazeData", "TaskSelection");
-                    SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData" + SessionValues.GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+                    SessionValues.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "GazeData", "TaskSelectionData");
+                    SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData_" + SessionValues.GazeData.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
                 }
 
-                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "FrameData", "SessionLevel");
-                FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+                FrameData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "TaskSelection");
+                FrameData.fileName = SessionValues.FilePrefix + "__FrameData_" + FrameData.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
 
                 FrameData.gameObject.SetActive(true);
 

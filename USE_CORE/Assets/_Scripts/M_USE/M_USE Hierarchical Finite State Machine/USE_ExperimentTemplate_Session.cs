@@ -228,6 +228,7 @@ namespace USE_ExperimentTemplate_Session
                 
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
+
                 if(SessionValues.StoreData)
                     CreateSessionSettingsFolder();
 
@@ -916,8 +917,6 @@ namespace USE_ExperimentTemplate_Session
                 string subDestinationFolderPath = Path.Combine(destinationDir.FullName, subDir.Name);
                 CopyLocalFolder(subDir.FullName, subDestinationFolderPath);
             }
-
-            Debug.Log("Local Folder Folder copied successfully!");
         }
         
 

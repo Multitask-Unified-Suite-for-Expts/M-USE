@@ -262,6 +262,38 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(previousBlock);
 
+
+            // End Trial Game Hot Key
+            //COMMENTING OUT BECAUSE: 1) It's not used, and 2) It's basically the same as EndBlock hotkey. 
+            //HotKey endTrial = new HotKey
+            //{
+            //    keyDescription = "T",
+            //    actionName = "End Trial",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.T),
+            //    hotKeyAction = () =>
+            //    {
+            //        Debug.Log("---PRESSED END TRIAL HOT KEY---");
+            //        if (HkPanel.TrialLevel != null)
+            //        {
+            //            if (HkPanel.TrialLevel.TokenFBController != null)
+            //            {
+            //                HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+            //                HkPanel.TrialLevel.TokenFBController.enabled = false;
+            //            }
+
+            //            if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
+            //                HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+
+            //            HkPanel.TrialLevel.AbortCode = 1;
+            //            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndTrial"]);
+            //            HkPanel.TrialLevel.ForceBlockEnd = true;
+            //            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Go to end of trial
+            //        }
+            //    }
+            //};
+            //HotKeyList.Add(endTrial);
+
+
             //End Block Hot Key
             HotKey endBlock = new HotKey
             {
@@ -274,10 +306,14 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if(HkPanel.TrialLevel != null)
                     {
                         if (HkPanel.TrialLevel.TokenFBController != null)
+                        {
                             HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+                            HkPanel.TrialLevel.TokenFBController.enabled = false;
+                        }
 
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+
                         HkPanel.TrialLevel.AbortCode = 3;
                         SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndBlock"]);
                         HkPanel.TrialLevel.ForceBlockEnd = true;
@@ -333,38 +369,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 }
             };
             HotKeyList.Add(quitGame);
-
-            // End Trial Game Hot Key
-            HotKey endTrial = new HotKey
-            {
-                keyDescription = "T",
-                actionName = "End Trial",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.T),
-                hotKeyAction = () =>
-                {
-                    Debug.Log("---PRESSED END TRIAL HOT KEY---");
-                    if(HkPanel.TrialLevel != null)
-                    {
-                        GameObject controllers = GameObject.Find("InputManager");
-                        if (!HkPanel.TrialLevel.Paused) 
-                        {
-                            HkPanel.TrialLevel.AbortCode = 1;
-                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["Paused"]);
-                            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Go to end of trial
-                            if (controllers != null) //Deactivate Controllers (so that tokenbar not still on screen):
-                                controllers.SetActive(false);
-                            HkPanel.TrialLevel.Paused = true;
-                        }
-                        else
-                        {
-                            if (controllers == null)
-                                HkPanel.SessionLevel.FindInactiveGameObjectByName("Controllers").SetActive(true);
-                            HkPanel.TrialLevel.Paused = false;
-                        }
-                    }
-                }
-            };
-            HotKeyList.Add(endTrial);
 
             //Reward HotKey:
             HotKey reward = new HotKey

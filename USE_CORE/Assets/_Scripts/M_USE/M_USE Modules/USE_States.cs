@@ -41,6 +41,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine.UI;
 using System.Collections;
+using System.Text;
 
 namespace USE_States
 {
@@ -467,10 +468,8 @@ namespace USE_States
 				TimingInfo.Duration = -1;
 				if (ParentLevel.PreviousState != null)
 				{
-					// the duration of a State should include its last frame, so needs to be measured at the start of the following State
-					ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
-					ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
-					ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
+					//Debug.Log(Time.frameCount + "UPDATING PREVIOUS STATE DURATION DATAAAAAAAAAAAAAA");
+					UpdateDurationData();
 				}
 				if (StateActiveInitialization != null)
 				{
@@ -485,6 +484,14 @@ namespace USE_States
 					StateInitializationFinished?.Invoke(this, EventArgs.Empty);
 				}
 			}
+		}
+
+		public void UpdateDurationData()
+		{
+			// the duration of a State should include its last frame, so needs to be measured at the start of the following State
+			ParentLevel.PreviousState.TimingInfo.EndTimeAbsolute = Time.time;
+			ParentLevel.PreviousState.TimingInfo.EndTimeRelative = Time.time - ParentLevel.StartTimeRelative;
+			ParentLevel.PreviousState.TimingInfo.Duration = Time.time - ParentLevel.PreviousState.TimingInfo.StartTimeAbsolute;
 		}
 
 		void RunInitializationMethods()
@@ -924,39 +931,89 @@ namespace USE_States
 		{
             Debug.Log("Awake " + ControlLevelName);
 			Paused = true;
-			InitializeControlLevel();
-			if (isMainLevel)
+			try
 			{
-				if (!mainLevelSpecified)
-				{
-					mainLevelSpecified = true;
-				}
-				else
-				{
-					Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
-				}
+				InitializeControlLevel();
+                if (isMainLevel)
+                {
+                    if (!mainLevelSpecified)
+                    {
+                        mainLevelSpecified = true;
+                    }
+                    else
+                    {
+                        Debug.LogError("Attempted to specify more than one main ControlLevel. Only one per experiment!");
+                    }
+                }
 			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
+			}
+
 		}
 		void FixedUpdate()
 		{
-			if (isMainLevel & !Paused)
+			try
 			{
-				RunControlLevelFixedUpdate();
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelFixedUpdate();
+                }
 			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
+			}
+
 		}
 		public virtual void Update()
 		{
-			if (isMainLevel & !Paused)
+			try
 			{
-				RunControlLevelUpdate();
+				if (isMainLevel & !Paused)
+                {
+                    RunControlLevelUpdate();
+                }
+			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+
 			}
 		}
 		void LateUpdate()
 		{
-			if (isMainLevel & !Paused)
+			try
 			{
-				RunControlLevelLateUpdate();
+				if (isMainLevel & !Paused)
+				{
+					RunControlLevelLateUpdate();
+				}
 			}
+			catch (Exception e)
+			{
+				string errorMessage = "###############################################################################################################" + Environment.NewLine;
+				errorMessage += "[ERROR] An error occurred: " + e.GetBaseException() + Environment.NewLine;
+				errorMessage += "###############################################################################################################";
+
+				Debug.LogError(errorMessage);
+			}
+
 		}
 
 		public void SpecifyCurrentState(State state)
@@ -1094,6 +1151,13 @@ namespace USE_States
 		}
 
 
+
+        public Color32 GetRandomColor()
+        {
+            return new Color32((byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), 255);
+        }
+
+
         public static Texture2D LoadPNG(string filePath)
         {
             Texture2D tex = null;
@@ -1134,23 +1198,20 @@ namespace USE_States
             filePath = filePath.Trim();
 			Texture2D tex = null;
 
-            if (SessionValues.WebBuild)
+			if (SessionValues.UsingDefaultConfigs)
+                tex = Resources.Load<Texture2D>(filePath);
+			else if (SessionValues.UsingServerConfigs)
 			{
-				if(SessionValues.UsingDefaultConfigs)
-					tex = Resources.Load<Texture2D>(filePath);
-                else
-				{
-					yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
-                    {
-                        if (result != null)
-							tex = result;
-                        else
-                            Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
-                    }));
-                }
-			}
-			else
-				tex = LoadPNG(filePath);
+                yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
+                {
+                    if (result != null)
+                        tex = result;
+                    else
+                        Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
+                }));
+            }
+			else if (SessionValues.UsingLocalConfigs)
+                tex = LoadPNG(filePath);
 
 			callback?.Invoke(tex);
         }

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
 using USE_StimulusManagement;
+using static UnityEngine.GraphicsBuffer;
 
 public class MouseTracker : InputTracker
 {
     public int[] ButtonCompletedClickCount = {0, 0 , 0};
     public int[] ButtonStatus = {0, 0, 0};
     public float[] ButtonPressDuration = {0, 0, 0};
+
 
     public void ResetClicks()
     {
@@ -26,12 +28,14 @@ public class MouseTracker : InputTracker
     {
         for (int iButton = 0; iButton < 3; iButton++)
         {
+            GameObject target = UsingShotgunHandler ? ShotgunModalTarget : SimpleRaycastTarget;
+
             if (InputBroker.GetMouseButtonUp(iButton))
             {
                 ButtonCompletedClickCount[iButton]++;
 
-                if (SimpleRaycastTarget != null)
-                    SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}ReleasedFrom", null);
+                if (target != null)
+                    SessionValues.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}ReleasedFrom", null);
             }
 
             if (InputBroker.GetMouseButton(iButton))
@@ -41,8 +45,8 @@ public class MouseTracker : InputTracker
                 {
                     ButtonPressDuration[iButton] = 0;
 
-                    if (SimpleRaycastTarget != null)
-                        SessionValues.EventCodeManager.CheckForAndSendEventCode(SimpleRaycastTarget, $"Button{iButton}PressedOn", null);
+                    if (target != null)
+                       SessionValues.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}PressedOn", null);
                 }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;

@@ -152,6 +152,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             LoadConfigUIVariables();
+
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
@@ -160,10 +161,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
+        //Setup Handler:
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
+        //Enable Touch Feedback:
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
 
+        //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
@@ -204,11 +207,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             MiddleBarrier.SetActive(true);
 
-            BalloonContainerLeft.transform.localPosition = new Vector3(-1.14f, -1.5f, .5f);
-            BalloonContainerRight.transform.localPosition = new Vector3(1.14f, -1.5f, .5f);
+            StimLeft.transform.position += new Vector3(0, .01f, 0);
+            StimRight.transform.position += new Vector3(0, .01f, 0);
 
-            RewardContainerLeft.transform.localPosition = new Vector3(StimLeft.transform.position.x, 1.5825f, 0);
-            RewardContainerRight.transform.localPosition = new Vector3(StimRight.transform.position.x, 1.5825f, 0);
+            BalloonContainerLeft.transform.localPosition = new Vector3(-1.14f, -1.45f, .5f);
+            BalloonContainerRight.transform.localPosition = new Vector3(1.14f, -1.45f, .5f);
+
+            float tokensYPos = CurrentTrial.TokensInMiddleOfOutlines ? .54f : 1.5825f;
+            RewardContainerLeft.transform.localPosition = new Vector3(StimLeft.transform.position.x, tokensYPos, 0);
+            RewardContainerRight.transform.localPosition = new Vector3(StimRight.transform.position.x, tokensYPos, 0);
             
             LeftScaleUpAmount = MaxScale / CurrentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / CurrentTrial.NumClicksRight;
@@ -222,7 +229,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             SessionValues.TargetObjects.Add(StimLeft);
             SessionValues.TargetObjects.Add(StimRight);
-
 
             SideChoice = null;
 
@@ -258,7 +264,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
             SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
-            
+
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
             AudioFBController.Play("EC_BalloonChosen");
@@ -501,19 +507,23 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TokenFBController.AddTokens(CenteredGO, SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
                 Destroy(CenteredGO);
 
-                if (SessionValues.SyncBoxController != null)
-                    GiveReward();
-
                 Completions_Block++;
                 CurrentTaskLevel.Completions_Task++;
+
                 AddTokenInflateAudioPlayed = true;
-                TokenFBController.ResetTokenBarFull();
             }
         });
         Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
         Feedback.SpecifyTermination(() => true && Response != 1, ITI);
-        Feedback.AddDefaultTerminationMethod(() =>
+        Feedback.AddUniversalTerminationMethod(() =>
         {
+            if(TokenFBController.IsTokenBarFull())
+            {
+                if(SessionValues.SyncBoxController != null)
+                    GiveReward();
+
+            }
+            
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
@@ -540,7 +550,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialTouches = 0;
     }
 
-    public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
+    private void DeactivateGameObjects()
     {
         if (TrialStim != null && TrialStim.activeInHierarchy)
             TrialStim.SetActive(false);
@@ -559,6 +569,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Destroy(MaxOutline_Right);
         Destroy(MaxOutline_Left);
+    }
+
+    public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
+    {
+        DeactivateGameObjects();
 
         if (AbortCode == 0) //Normal
             CurrentTaskLevel.CalculateBlockSummaryString();
@@ -755,7 +770,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (SideChoice == "Left")
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
-           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesLeft));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
 
@@ -763,7 +777,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         else
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
-           // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",currentTrial.NumPulsesRight));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
         }
@@ -771,9 +784,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void DisableAllGameobjects()
     {
-        StimLeft.SetActive(false);
-        StimRight.SetActive(false);
-        BalloonOutline.SetActive(false);
+        if(StimLeft != null)
+            StimLeft.SetActive(false);
+        if(StimRight != null)
+            StimRight.SetActive(false);
+        if(BalloonOutline != null)
+            BalloonOutline.SetActive(false);
     }
 
     void LoadConfigUIVariables()
@@ -941,7 +957,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             GameObject RewardClone = Instantiate(Reward, pos, Reward.transform.rotation, container.transform);
             RewardClone.transform.localScale *= scaler;
-            RewardClone.transform.Translate(new Vector3(i * width, 0.028f, 0), Space.World);
+            RewardClone.transform.Translate(new Vector3(i * width, 0.028f, -.0001f), Space.World);
             RewardClone.name = "Reward" + SideChoice + (i + 1);
             AddRigidBody(RewardClone);
             ObjectList.Add(RewardClone);
@@ -976,7 +992,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
-        TrialData.AddDatum("ClicksNeeded", () => InflationsNeeded);
+        TrialData.AddDatum("InflationsNeeded", () => InflationsNeeded);
         TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
         TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);
         TrialData.AddDatum("NumCoinsLeft", () => CurrentTrial.NumCoinsLeft);

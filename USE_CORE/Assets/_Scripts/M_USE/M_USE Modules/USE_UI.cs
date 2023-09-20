@@ -36,7 +36,8 @@ namespace USE_UI
 
         [HideInInspector] public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
         {
-            { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. Complete all trials to win! If you choose an object you've chosen in a previous trial, you lose!" },
+            { "AntiSaccade", "You get a brief glimpse of the target object, and then must select it among the distractor objects!" },
+            { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. If you choose an object you've chosen in a previous trial, you lose!" },
             { "EffortControl", "Choose a balloon to inflate based on the effort required (number of clicks) and the reward amount (number of tokens). Inflate and pop the balloon by clicking it the required number of times!"},
             { "FlexLearning", "The maximal token gain is associated with one specific visual feature that defines one of the objects. Learn the visual feature that provides the most reward!"},
             { "MazeGame", "Navigate your way from the start of the maze to the end of the maze to earn your reward. An incorrect step will require re-touching the last correct step." },
@@ -44,32 +45,32 @@ namespace USE_UI
             { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
             { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
             { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
-
         };
         [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
         {
+            { "AntiSaccade", "Anti Saccade"},
             { "ContinuousRecognition", "Continuous Recognition" },
             { "EffortControl", "Effort Control" },
             { "FlexLearning", "Flexible Learning" },
-            {"JoystickWWW", "Joystick What When Where"},
             { "MazeGame", "Maze Game" },
             { "THR", "Touch Hold Release" },
             { "VisualSearch", "Visual Search" },
             { "WhatWhenWhere", "What When Where" },
-            { "WorkingMemory", "Working Memory" }
+            { "WorkingMemory", "Working Memory" },
         };
 
         [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
         {
+            { "AntiSaccade", new Vector3(0, 0, 1000f) },
             { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
             { "EffortControl", new Vector3(0, 0, 500f) },
             { "FlexLearning", new Vector3(0, 0, 1000f) },
-            { "JoystickWWW", new Vector3(0, 0, 500f) },
             { "MazeGame", new Vector3(0, 0, 500f) },
             { "THR", new Vector3(0, 0, 1000f) },
             { "VisualSearch", new Vector3(0, 0, 1000f) },
             { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-            { "WorkingMemory", new Vector3(0, 0, 1000f) }
+            { "WorkingMemory", new Vector3(0, 0, 1000f) },
+            { "WWW_2D", new Vector3(0, 0, 500f) }
         };
 
         [HideInInspector] public string TaskName;
@@ -179,8 +180,8 @@ namespace USE_UI
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
         {
-            InstructionsGO.SetActive(InstructionsGO.activeInHierarchy ? false : true);
-            InstructionsOn = InstructionsGO.activeInHierarchy ? true : false;
+            InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
+            InstructionsOn = InstructionsGO.activeInHierarchy;
             EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
@@ -261,33 +262,6 @@ namespace USE_UI
 
     }
 
-    public class USE_TaskButton : MonoBehaviour //No longer used
-    {
-        public GameObject TaskButtonGO;
-        public float ButtonSize = 10f;
-        public Color ButtonColor = new Color(1f, 1f, 1f, 1f);
-        public RawImage Image;
-        public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        public string configName;
-        public string taskName;
-        
-        public USE_TaskButton(Canvas parent, Vector3 localPos, float size, string configName)
-        {
-            LocalPosition = localPos;
-            ButtonSize = size;
-            TaskButtonGO = new GameObject(configName);
-            TaskButtonGO.AddComponent<USE_TaskButton>();
-            TaskButtonGO.GetComponent<USE_TaskButton>().configName = configName;
-            Image = TaskButtonGO.AddComponent<RawImage>();
-            TaskButtonGO.transform.SetParent(parent.transform, false);
-            Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = new Vector2(ButtonSize, ButtonSize);
-            Image.color = ButtonColor;
-            TaskButtonGO.transform.localPosition = LocalPosition;
-            TaskButtonGO.SetActive(true);
-        }
-    }
-
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
@@ -316,7 +290,9 @@ namespace USE_UI
 
             StartButtonChildren = new List<GameObject>();
             foreach (Transform child in StartButtonGO.transform)
+            {
                 StartButtonChildren.Add(child.gameObject);
+            }
             StartButtonGO.SetActive(false);
 
             return StartButtonGO;

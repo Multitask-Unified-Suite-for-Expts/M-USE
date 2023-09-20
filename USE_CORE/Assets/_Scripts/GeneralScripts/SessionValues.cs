@@ -80,7 +80,6 @@ public static class SessionValues
 
 
 
-
     static SessionValues()
     {
         LoadPrefabs();
@@ -90,6 +89,8 @@ public static class SessionValues
         IrrelevantObjects = new List<GameObject>();
     }
 
+
+
     public static void ClearStimLists()
     {
         TargetObjects.Clear();
@@ -97,12 +98,40 @@ public static class SessionValues
         IrrelevantObjects.Clear();
     }
 
-
-
     private static void LoadPrefabs()
     {
         BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
         BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
     }
+
+    public static List<GameObject> GetStartButtonChildren()
+    {
+        if(SessionDef == null)
+            Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
+        else
+        {
+            if (SessionDef.IsHuman && HumanStartPanel.StartButtonChildren != null)
+                return HumanStartPanel.StartButtonChildren;
+            else if (!SessionDef.IsHuman && USE_StartButton.StartButtonChildren != null)
+                return USE_StartButton.StartButtonChildren;
+        }
+        Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
+        return null;
+    }
+
+    public static string GetNiceIntegers(int numDigits, int desiredNum)
+    {
+
+        if (desiredNum >= 999)
+            return desiredNum.ToString();
+        else if (desiredNum >= 99)
+            return "0" + desiredNum;
+        else if (desiredNum >= 9)
+            return "00" + desiredNum;
+        else
+            return "000" + desiredNum;
+    }
+
+
 
 }

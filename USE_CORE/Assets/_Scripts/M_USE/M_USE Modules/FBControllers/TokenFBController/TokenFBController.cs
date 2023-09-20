@@ -1,8 +1,6 @@
 using UnityEngine;
 using USE_Data;
-using System.Collections.Generic;
-using USE_ExperimentTemplate_Classes;
-using System.Collections;
+
 
 public class TokenFBController : MonoBehaviour
 {
@@ -92,14 +90,14 @@ public class TokenFBController : MonoBehaviour
         );
     }
 
-    public void AddTokens(GameObject gameObj, int numTokens)
+    public void AddTokens(GameObject gameObj, int numTokens, float? yAdj = null)
     {
-        AnimateTokens(Color.green, gameObj, numTokens);
+        AnimateTokens(Color.green, gameObj, numTokens, yAdj);
     }
 
-    public void RemoveTokens(GameObject gameObj, int numTokens)
+    public void RemoveTokens(GameObject gameObj, int numTokens, float? yAdj = null)
     {
-        AnimateTokens(Color.grey, gameObj, -numTokens);
+        AnimateTokens(Color.grey, gameObj, -numTokens, yAdj);
     }
 
     public void SetTokenBarValue(int value)
@@ -186,7 +184,6 @@ public class TokenFBController : MonoBehaviour
     public bool IsAnimating()
     {
         return animationPhase != AnimationPhase.None;
-        //return animationPhase != AnimationPhase.None || audioFBController.IsPlaying();
     }
 
     public string GetAnimationPhase()
@@ -305,10 +302,12 @@ public class TokenFBController : MonoBehaviour
     }
 
     // gameObjPos should be at the center of the object
-    private void AnimateTokens(Color color, GameObject gameObj, int numTokens)
+    private void AnimateTokens(Color color, GameObject gameObj, int numTokens, float? yAdj = null)
     {
+        Vector3 yAdjusted = new Vector3(0, yAdj == null ? 0 : yAdj.Value, 0); //Ability to adjust how far above/below the GameObject the tokens appear
+
         // Viewport pos is in [0, 1] where (0, 0) is bottom right
-        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObj.transform.position);
+        Vector2 viewportPos = Camera.main.WorldToViewportPoint(gameObj.transform.position + yAdjusted);
         // GUI pos has (0, 0) is top left
         Vector2 pos = new Vector2(viewportPos.x * Screen.width, (1 - viewportPos.y) * Screen.height);
 

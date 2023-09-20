@@ -10,7 +10,7 @@ using EffortControl_Namespace;
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
-    [HideInInspector] public string ContextName;
+    //[HideInInspector] public string ContextName;
 
     //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;
@@ -32,15 +32,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     private EffortControl_TaskDef currentTaskDef => GetTaskDef<EffortControl_TaskDef>();
     EffortControl_TrialLevel trialLevel;
 
-    public override void SpecifyTypes()
-    {
-        TaskLevelType = typeof(EffortControl_TaskLevel);
-        TrialLevelType = typeof(EffortControl_TrialLevel);
-        TaskDefType = typeof(EffortControl_TaskDef);
-        BlockDefType = typeof(EffortControl_BlockDef);
-        TrialDefType = typeof(EffortControl_TrialDef);
-        StimDefType = typeof(EffortControl_StimDef);
-    }
 
     public override void DefineControlLevel()
     {

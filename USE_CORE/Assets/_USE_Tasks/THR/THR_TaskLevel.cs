@@ -27,15 +27,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public int TouchesMovedOutside_Task = 0;
 
 
-    public override void SpecifyTypes()
-    {
-        TaskLevelType = typeof(THR_TaskLevel);
-        TrialLevelType = typeof(THR_TrialLevel);
-        TaskDefType = typeof(THR_TaskDef);
-        BlockDefType = typeof(THR_BlockDef);
-        TrialDefType = typeof(THR_TrialDef);
-        StimDefType = typeof(THR_StimDef);
-    }
 
     public override void DefineControlLevel()
     {
@@ -63,21 +54,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             }
         });
     }
-
-/*    public override void SetTaskSummaryString() // MOVED TO TASK TEMPLATE
-    {
-        if (trialLevel.TrialCount_InTask != 0)
-        {
-            CurrentTaskSummaryString.Clear();
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
-                                            $"\n<b># Trials:</b> {trialLevel.TrialCount_InTask} | " +
-                                            $"\t<b># Blocks:</b> {BlockCount} | " +
-                                            $"\t<b># Rewards:</b> {TouchRewards_Task + ReleaseRewards_Task}");
-        }
-        else
-            CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>");
-    }
-*/
 
     public override OrderedDictionary GetBlockResultsData()
     {

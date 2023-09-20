@@ -43,7 +43,7 @@ namespace USE_ExperimentTemplate_Session
         public ControlLevel_Task_Template CurrentTask;
         public ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
-        protected int taskCount;
+        public int taskCount;
 
         //For Loading config information
         public SessionDetails SessionDetails;
@@ -93,6 +93,8 @@ namespace USE_ExperimentTemplate_Session
 
         private FlashPanelController FlashPanelController;
         public bool runSessionLevelCalibration;
+
+        public bool waitForSerialPort;
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -154,7 +156,7 @@ namespace USE_ExperimentTemplate_Session
             bool taskAutomaticallySelected = false;
             
 
-            bool waitForSerialPort = false;
+            //bool waitForSerialPort = false;
 
             //SetupSession State---------------------------------------------------------------------------------------------------------------
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
@@ -165,21 +167,46 @@ namespace USE_ExperimentTemplate_Session
             AsyncOperation loadScene = null;
             setupSession.AddUpdateMethod(() =>
             {
-                if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
+                if (SessionValues.SessionDef == null)
+                    return;
+
+                if(SessionValues.SessionDef.SerialPortActive && !waitForSerialPort && (SessionValues.SerialPortController == null))
                 {
-                    if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
-                        SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
-                    waitForSerialPort = false;
+                    SessionValues.SerialPortController = GameObject.Find("MiscScripts").GetComponent<SerialPortThreaded>();
+                    
+                    if (SessionValues.SessionDef.SyncBoxActive)
+                        {
+                            SessionValues.SyncBoxController = new SyncBoxController();
+                            SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
+                            
+                        }
+
+                    if (SessionValues.SessionDef.EventCodesActive)
+                        {
+                            SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
+                            SessionValues.EventCodeManager.codesActive = true;
+                        }
+                        waitForSerialPort = true;
+
+                        SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
+                        SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
+                    
+                    SessionValues.SerialPortController.Initialize();
+
+                    if (waitForSerialPort && Time.time - StartTimeAbsolute > SessionValues.SerialPortController.initTimeout / 1000f + 0.5f)
+                    {
+                        if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
+                            SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
+
+                        foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
+                        {
+                            Debug.Log("STR " + str);
+                        }
+                    }
                 }
 
-                if (SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
-                {
-                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
-                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
-                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
-                    runSessionLevelCalibration = true;
-                }
+                
+
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
@@ -190,42 +217,40 @@ namespace USE_ExperimentTemplate_Session
                 
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
-                CreateSessionSettingsFolder();
+
+                if(SessionValues.StoreData)
+                    CreateSessionSettingsFolder();
+
+                if (SessionValues.SessionDef.SerialPortActive)
+                {
+                    SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
+                    SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
+                  }
+               
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)
                     SessionValues.FlashPanelController.TurnOffFlashPanels();
                 else
                     SessionValues.FlashPanelController.runPattern = true;
                 
-                if (SessionValues.SessionDef.SerialPortActive)
-                {
-                    SessionValues.SerialPortController = new SerialPortThreaded();
-                    if (SessionValues.SessionDef.SyncBoxActive)
-                    {
-                        SessionValues.SyncBoxController = new SyncBoxController();
-                        SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
-                        SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
-                        SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
-                    }
-
-                    if (SessionValues.SessionDef.EventCodesActive)
-                    {
-                        SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
-                        SessionValues.EventCodeManager.codesActive = true;
-                    }
-                    waitForSerialPort = true;
-
-                    SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
-                    SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
-                   
-                    SessionValues.SerialPortController.Initialize();
-                }
                 if (!SessionValues.WebBuild)
                 {
                     InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
+
+                if(SessionValues.SessionDef != null && SessionValues.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
+                {
+                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
+                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                    gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
+                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
+                    runSessionLevelCalibration = true;
+                }
+
+                
             });
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
@@ -394,7 +419,7 @@ namespace USE_ExperimentTemplate_Session
                 GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
                 int size = SessionValues.WebBuild ? 250 : SessionValues.SessionDef.TaskButtonSize; //using 250 for web build
                 gridLayout.cellSize = new Vector2(size, size);
-                gridLayout.constraintCount = SessionValues.WebBuild ? 4 : SessionValues.SessionDef.TaskButtonGridMaxPerRow; //using 4 for WebBuild
+                gridLayout.constraintCount = SessionValues.WebBuild ? 5 : SessionValues.SessionDef.TaskButtonGridMaxPerRow; //using 5 for WebBuild since there are 9 tasks
                 int spacing = SessionValues.WebBuild ? 45 : SessionValues.SessionDef.TaskButtonSpacing; //using 45 for web build
                 gridLayout.spacing = new Vector2(spacing, spacing);
 
@@ -506,6 +531,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     HumanVersionToggleButton.SetActive(true);
                     ToggleAudioButton.SetActive(true);
+                    if(!SessionValues.SessionDef.PlayBackgroundMusic)
+                        ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
                 }
             });
 
@@ -526,26 +553,24 @@ namespace USE_ExperimentTemplate_Session
             });
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
-            
 
-            selectTask.AddTimer(
-                () => SessionValues.SessionDef != null ? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask,
-                () =>
+
+            selectTask.AddTimer(() => SessionValues.SessionDef != null ? SessionValues.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
+            {
+                foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
                 {
-                    foreach (DictionaryEntry task in SessionValues.SessionDef.TaskMappings)
-                    {
-                        //Find the next task in the list that is still interactable
-                        string configName = (string)task.Key;
+                    //Find the next task in the list that is still interactable
+                    string configName = (string)task.Key;
 
-                        // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                        if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
-                            continue;
+                    // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                    if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
+                        continue;
 
-                        taskAutomaticallySelected = true;
-                        selectedConfigFolderName = configName;
-                        break;
-                    }
-                });
+                    taskAutomaticallySelected = true;
+                    selectedConfigFolderName = configName;
+                    break;
+                }
+            });
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
@@ -621,9 +646,12 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
                     StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
-                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialRecvData", CurrentTask.TaskName);
-                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2, SessionValues.SessionDataPath, "SerialSentData", CurrentTask.TaskName);
+                    SessionValues.SerialRecvData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "Task" +SessionValues.GetNiceIntegers(4, taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialRecvData";
+                    SessionValues.SerialSentData.folderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "Task" +SessionValues.GetNiceIntegers(4, taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialSentData";
+
                 }
+
+                StartCoroutine(FrameData.AppendDataToFile());
             });
 
             //automatically finish tasks after running one - placeholder for proper selection
@@ -662,7 +690,7 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
-            runTask.AddFixedUpdateMethod(() =>
+            runTask.AddUpdateMethod(() =>
             {
                 SessionValues.EventCodeManager.EventCodeFixedUpdate();
             });
@@ -683,7 +711,13 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
 
-                if(CurrentTask.TaskName != "GazeCalibration")
+                if (SessionValues.SessionDef.SerialPortActive)
+                {
+                    StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                    StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+                }
+
+                if (CurrentTask.TaskName != "GazeCalibration")
                     SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
 
@@ -705,20 +739,21 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SessionValues.SessionDef.SerialPortActive)
                 {
-                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialRecvData", "SessionLevel");
-                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.SessionDataPath, "SerialSentData", "SessionLevel");
 
-
+                    SessionValues.SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "Task");
+                    SessionValues.SerialRecvData.fileName = SessionValues.FilePrefix + "__SerialRecvData_" + SessionValues.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
+                    SessionValues.SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "Task");
+                    SessionValues.SerialSentData.fileName = SessionValues.FilePrefix + "__SerialSentData_" + SessionValues.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
                 }
 
                 if (SessionValues.SessionDef.EyeTrackerActive)
                 {
-                    SessionValues.GazeData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "GazeData", "SessionLevel");
-                    SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData" + SessionValues.GazeData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+                    SessionValues.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "Task");
+                    SessionValues.GazeData.fileName = SessionValues.FilePrefix + "__GazeData_" + SessionValues.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
                 }
 
-                FrameData.CreateNewTaskIndexedFolder((taskCount + 1) * 2 - 1, SessionValues.TaskSelectionDataPath, "FrameData", "SessionLevel");
-                FrameData.fileName = SessionValues.FilePrefix + "__FrameData" + FrameData.GetNiceIntegers(4, (taskCount + 1) * 2 - 1) + "SessionLevel.txt";
+                FrameData.CreateNewTaskIndexedFolder(taskCount + 1, SessionValues.SessionDataPath, "TaskSelectionData", "Task");
+                FrameData.fileName = SessionValues.FilePrefix + "__FrameData_" + SessionValues.GetNiceIntegers(4, taskCount + 1) + "_TaskSelection.txt";
 
                 FrameData.gameObject.SetActive(true);
 
@@ -839,7 +874,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (!Application.isEditor)
                 {
-                    StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings", () =>
+                    StartCoroutine(CreateFolderOnServer(SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionConfigs", () =>
                     {
                         StartCoroutine(CopySessionConfigFolderToDataFolder());
                     }));
@@ -848,7 +883,7 @@ namespace USE_ExperimentTemplate_Session
             else if (SessionValues.UsingLocalConfigs)
             {
                 string sourceFolderPath = SessionValues.ConfigFolderPath;
-                string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionSettings";
+                string destinationFolderPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "SessionConfigs";
                 CopyLocalFolder(sourceFolderPath, destinationFolderPath);
             }
             else if (SessionValues.UsingDefaultConfigs)
@@ -880,8 +915,6 @@ namespace USE_ExperimentTemplate_Session
                 string subDestinationFolderPath = Path.Combine(destinationDir.FullName, subDir.Name);
                 CopyLocalFolder(subDir.FullName, subDestinationFolderPath);
             }
-
-            Debug.Log("Local Folder Folder copied successfully!");
         }
         
 
@@ -966,7 +999,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        SessionValues.SerialSentData.AppendDataToBuffer();
+                        StartCoroutine(SessionValues.SerialSentData.AppendDataToBuffer());
                     }
                     catch (Exception e)
                     {
@@ -978,7 +1011,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        SessionValues.SerialRecvData.AppendDataToBuffer();
+                        StartCoroutine(SessionValues.SerialRecvData.AppendDataToBuffer());
                     }
                     catch (Exception e)
                     {

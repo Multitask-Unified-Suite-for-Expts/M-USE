@@ -283,7 +283,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 58
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -539,7 +539,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: MazeGame_TrialLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -580,38 +579,33 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
   MG_CanvasGO: {fileID: 859525660}
-  runningPercentError: []
+  ContextName: 
   MinTrials: 0
   mazeDefName: 
   MazeBackground: {fileID: 0}
   tiles:
     stimGroupName: 
     IsActive: 0
+  tileTex: {fileID: 0}
+  mazeBgTex: {fileID: 0}
   consecutiveErrors: 0
   pathProgressGO: []
   viewPath: 0
   tileFbDuration: 0
   startTile: {fileID: 0}
+  finishTile: {fileID: 0}
   mazeDuration: 0
   choiceDurationsList: []
-  contextName: 
   NumBlinks: 0
   TilePrefab: {fileID: 925009272087881901, guid: 5796f049ef3372046b3edd4795fcdc39,
     type: 3}
   MazeFilePath: 
-  spaceBetweenTiles:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
   mazeOnsetDelay:
     name: 
     hidden: 0
@@ -723,7 +717,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: MazeGame_TaskLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -735,6 +728,12 @@ MonoBehaviour:
   TaskName: MazeGame
   TaskProjectFolder: 
   BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
   TrialLevel: {fileID: 1860654110}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -774,6 +773,7 @@ MonoBehaviour:
   MazeStart: []
   MazeFinish: []
   MazeName: []
+  MazeString: []
   currMaze:
     mPath: []
     mStart: 
@@ -784,29 +784,24 @@ MonoBehaviour:
     mDims: {x: 0, y: 0}
     mName: 
     sideRestricted: 0
-  totalErrors_InBlock: 
-  perseverativeErrors_InBlock: 
-  backtrackErrors_InBlock: 
-  ruleAbidingErrors_InBlock: 
-  ruleBreakingErrors_InBlock: 
-  retouchCorrect_InBlock: 
-  retouchErroneous_InBlock: 
-  correctTouches_InBlock: 0
-  numRewardPulses_InBlock: 0
-  numAbortedTrials_InBlock: 0
-  nonStimTouches_InBlock: 0
-  numSliderBarFull_InBlock: 0
-  totalErrors_InTask: 0
-  perseverativeErrors_InTask: 0
-  backtrackErrors_InTask: 0
-  ruleAbidingErrors_InTask: 0
-  ruleBreakingErrors_InTask: 0
-  retouchCorrect_InTask: 0
-  retouchErroneous_InTask: 0
-  correctTouches_InTask: 0
-  numRewardPulses_InTask: 0
-  numAbortedTrials_InTask: 0
-  numSliderBarFull_InTask: 0
+  TotalErrors_InBlock: 
+  PerseverativeErrors_InBlock: 
+  BacktrackErrors_InBlock: 
+  RuleAbidingErrors_InBlock: 
+  RuleBreakingErrors_InBlock: 
+  RetouchCorrect_InBlock: 
+  RetouchErroneous_InBlock: 
+  CorrectTouches_InBlock: 0
+  NumSliderBarFull_InBlock: 0
+  TotalErrors_InTask: 0
+  PerseverativeErrors_InTask: 0
+  BacktrackErrors_InTask: 0
+  RuleAbidingErrors_InTask: 0
+  RuleBreakingErrors_InTask: 0
+  RetouchCorrect_InTask: 0
+  RetouchErroneous_InTask: 0
+  CorrectTouches_InTask: 0
+  NumSliderBarFull_InTask: 0
   BlockAveragesString: 
   CurrentBlockString: 
 --- !u!4 &1860654112

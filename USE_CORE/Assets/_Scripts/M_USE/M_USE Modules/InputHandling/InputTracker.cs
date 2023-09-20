@@ -19,6 +19,9 @@ public abstract class InputTracker : MonoBehaviour
     public ShotgunRaycast ShotgunRaycast;
     public float ShotgunThreshold;
 
+    public bool UsingShotgunHandler;
+
+
 
     public delegate bool IsSelectionPossible();
 

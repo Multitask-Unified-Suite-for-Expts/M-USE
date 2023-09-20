@@ -193,7 +193,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             BackdropTouchTime = Time.time;
                             AvoidObjectStartTime += CurrentTrial.TimeoutDuration;
                             Input.ResetInputAxes();
-                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, BackdropStripesTexture, CurrentTrial.TimeoutDuration));
+                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, THR_BackdropTexture, CurrentTrial.TimeoutDuration));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -259,7 +259,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             BackdropTouchTime = Time.time;
                             SelectObjectStartTime += CurrentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
                             Input.ResetInputAxes();
-                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, BackdropStripesTexture, CurrentTrial.TimeoutDuration));
+                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, THR_BackdropTexture, CurrentTrial.TimeoutDuration));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -351,7 +351,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     else if (HeldTooLong)
                         StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, HeldTooLongTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
                     else if (MovedOutside)
-                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, BackdropStripesTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
+                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, MoveTooFarTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
                 }
             }
             AudioPlayed = true;
@@ -378,7 +378,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumReleasePulses;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumReleasePulses));
             }
             if (GiveTouchReward && SessionValues.SyncBoxController != null)
             {
@@ -386,7 +385,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 TouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumTouchPulses;
-                SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrial.NumTouchPulses));
             }
         });
         Reward.SpecifyTermination(() => true, ITI);

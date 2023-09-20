@@ -40,7 +40,7 @@ public class SetupTask_Level : ControlLevel
         OtherSetup.AddSpecificInitializationMethod(() =>
         {  
             //Setup data management
-            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + TaskLevel.ConfigFolderName;
+            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "Task" +SessionValues.GetNiceIntegers(4,SessionValues.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
 
             if (SessionValues.StoringDataOnServer)
             {
@@ -185,10 +185,15 @@ public class SetupTask_Level : ControlLevel
             SessionValues.MouseTracker.Init(FrameData, 0);
 
 
-            if(SessionValues.UsingDefaultConfigs || SessionValues.UsingServerConfigs) //currently still loading from resources for server
-                TrialLevel.LoadTexturesFromResources();
-            else if(SessionValues.UsingLocalConfigs)
-                TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath);
+            TrialLevel.LoadTexturesFromResources();
+            //CURRENTLY STILL LOADING THE SHARED TEXTURES FROM RESOURCES:
+            //if (SessionValues.UsingDefaultConfigs)
+            //    TrialLevel.LoadTexturesFromResources();
+            //else if (SessionValues.UsingServerConfigs)
+            //    TrialLevel.LoadTexturesFromServer();
+            //else if (SessionValues.UsingLocalConfigs)
+            //    TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath);
+
 
             //Automatically giving TouchFbController;
             TrialLevel.TouchFBController.Init(TrialData, FrameData);

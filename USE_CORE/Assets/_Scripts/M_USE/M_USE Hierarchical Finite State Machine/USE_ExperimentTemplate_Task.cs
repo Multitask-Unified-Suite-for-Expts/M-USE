@@ -133,51 +133,60 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
             TrialLevel.TaskLevel = this;
-        
+
             Add_ControlLevel_InitializationMethod(() =>
             {
-                TaskCam.gameObject.SetActive(true);
+            TaskCam.gameObject.SetActive(true);
 
-                if (TaskCanvasses != null)
-                    foreach (Canvas canvas in TaskCanvasses)
-                        canvas.gameObject.SetActive(true);
+            if (TaskCanvasses != null)
+                foreach (Canvas canvas in TaskCanvasses)
+                    canvas.gameObject.SetActive(true);
 
-                BlockCount = -1;
-                CurrentBlockSummaryString = new StringBuilder();
-                PreviousBlockSummaryString = new StringBuilder();
-                CurrentTaskSummaryString = new StringBuilder();
+            BlockCount = -1;
+            CurrentBlockSummaryString = new StringBuilder();
+            PreviousBlockSummaryString = new StringBuilder();
+            CurrentTaskSummaryString = new StringBuilder();
 
-                NumRewardPulses_InTask = 0;
-                NumAbortedTrials_InTask = 0;
+            NumRewardPulses_InTask = 0;
+            NumAbortedTrials_InTask = 0;
 
-                if (!SessionValues.WebBuild)
+            if (!SessionValues.WebBuild)
+            {
+                if (configUI == null)
+                    configUI = FindObjectOfType<ConfigUI>();
+                configUI.clear();
+                if (ConfigUiVariables != null)
+                    configUI.store = ConfigUiVariables;
+                else
+                    configUI.store = new ConfigVarStore();
+                configUI.GenerateUI();
+
+                if (TaskName == "GazeCalibration")
                 {
-                    if (configUI == null)
-                        configUI = FindObjectOfType<ConfigUI>();
-                    configUI.clear();
-                    if (ConfigUiVariables != null)
-                        configUI.store = ConfigUiVariables;
-                    else
-                        configUI.store = new ConfigVarStore();
-                    configUI.GenerateUI();
-
-                    if (TaskName == "GazeCalibration")
-                    {
-                        BlockDef bd = new BlockDef();
-                        BlockDefs = new BlockDef[] { bd };
-                        bd.GenerateTrialDefsFromBlockDef();
-                    }
+                    BlockDef bd = new BlockDef();
+                    BlockDefs = new BlockDef[] { bd };
+                    bd.GenerateTrialDefsFromBlockDef();
                 }
+            }
 
-                SessionValues.InputManager.SetActive(true);
+            SessionValues.InputManager.SetActive(true);
 
-                if (SessionValues.SessionDef.IsHuman)
-                {
-                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                    SessionValues.HumanStartPanel.SetTaskLevel(this);
-                    SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-                }
+            if (SessionValues.SessionDef.IsHuman)
+            {
+                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
+                SessionValues.HumanStartPanel.SetTaskLevel(this);
+                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+            }
+
+
+            //Send Reward Pulses for Ansen's Camera at Start of Task:
+            if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+
+                if (SessionValues.SessionDef.FlashPanelsActive)
+                    GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
+
             });
 
             //RunBlock State-----------------------------------------------------------------------------------------------------
@@ -201,6 +210,8 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.RuntimeStims = RuntimeStims;
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
+                TrialLevel.ForceBlockEnd = false;
+
                 SessionValues.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
             });
 
@@ -210,44 +221,11 @@ namespace USE_ExperimentTemplate_Task
                 RunBlock.AddUpdateMethod(() =>
                 {
                     if (TrialLevel != null)
-                    {
-                        if (InputBroker.GetKeyUp(KeyCode.P)) //Pause Game:
-                        {
-                            Time.timeScale = Time.timeScale == 1 ? 0 : 1;
-                        }
-
-                        if (InputBroker.GetKeyUp(KeyCode.E)) //End Task
-                        {
-                            if (Time.timeScale == 0) //if paused, unpause before ending task
-                                Time.timeScale = 1;
-
-                            TrialLevel.AbortCode = 5;
-                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
-                            TrialLevel.ForceBlockEnd = true;
-                            TrialLevel.FinishTrialCleanup();
-                            TrialLevel.ClearActiveTrialHandlers();
-                            SpecifyCurrentState(FinishTask);
-                        }
-
-                        if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block
-                        {
-                            TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-
-                            Time.timeScale = 1;//if paused, unpause before ending block
-
-                            if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
-                                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
-
-                            if (TrialLevel.AudioFBController.IsPlaying())
-                                TrialLevel.AudioFBController.audioSource.Stop();
-                            TrialLevel.AbortCode = 3;
-                            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
-                            TrialLevel.ForceBlockEnd = true;
-                            TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
-                        }
-                    }
+                        HandleWebBuildHotKeys();
                 });
             }
+            
+            RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
 
             RunBlock.AddLateUpdateMethod(() =>
             {
@@ -336,6 +314,10 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
+                //Send Reward Pulses for Ansen's Camera at End of Task:
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskEnd_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+
                 if (SessionValues.SessionDataControllers != null)
                 {
                     SessionValues.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
@@ -406,6 +388,47 @@ namespace USE_ExperimentTemplate_Task
                 contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
+        }
+
+        private void HandleWebBuildHotKeys()
+        {
+            if (InputBroker.GetKeyUp(KeyCode.P)) //Pause Game HotKey:
+            {
+                Time.timeScale = Time.timeScale == 1 ? 0 : 1;
+            }
+
+            if (InputBroker.GetKeyUp(KeyCode.E)) //End Task HotKey
+            {
+                Time.timeScale = 1; //if paused, unpause before ending task
+
+                TrialLevel.AbortCode = 5;
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
+                TrialLevel.ForceBlockEnd = true;
+                TrialLevel.FinishTrialCleanup();
+                TrialLevel.ClearActiveTrialHandlers();
+                SpecifyCurrentState(FinishTask);
+            }
+
+            if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block HotKey
+            {
+                Time.timeScale = 1; //if paused, unpause before ending block
+
+                if (TrialLevel.TokenFBController != null)
+                {
+                    TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+                    TrialLevel.TokenFBController.enabled = false;
+                }
+
+                if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
+                    SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+
+                if (TrialLevel.AudioFBController.IsPlaying())
+                    TrialLevel.AudioFBController.audioSource.Stop();
+                TrialLevel.AbortCode = 3;
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
+                TrialLevel.ForceBlockEnd = true; //I THINK THIS IS NOT GETTING SET BACK TO FALSE IN RIGHT SPOT!
+                TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
+            }
         }
 
         public float CalculateAverageDuration(List<float?> durations)
@@ -868,9 +891,18 @@ namespace USE_ExperimentTemplate_Task
 
             switch (blockEndType)
             {
-                case "CurrentTrialPerformance":
-                    Debug.Log("####CHECKING BLOCK END, rTrialPerformance.Count: " + rTrialPerformance.Count + ", (rTrialPerformance[rTrialPerformance.Count - 1]: " + (rTrialPerformance[rTrialPerformance.Count - 1]));
+                case "CurrentTrialPercentError":
+                    Debug.Log("CHECKING BLOCK END - rTrialPerformance.Count: " + rTrialPerformance.Count + ", PERCENT ERROR " + (rTrialPerformance[rTrialPerformance.Count - 1]));
 
+                    if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
+                    {
+                        Debug.Log("Block ending due to trial performance below threshold.");
+                        return true;
+                    }
+                    else
+                        return false;
+                case "CurrentTrialErrorCount":
+                    Debug.Log("CHECKING BLOCK END - ERROR COUNT: " + rTrialPerformance[rTrialPerformance.Count - 1] + "THRESHOLD: " + performanceThreshold);
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         Debug.Log("Block ending due to trial performance below threshold.");

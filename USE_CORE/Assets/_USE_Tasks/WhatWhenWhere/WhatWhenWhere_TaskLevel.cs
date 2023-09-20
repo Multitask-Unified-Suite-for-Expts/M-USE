@@ -24,7 +24,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public int DistractorSlotErrorCount_InBlock;
     public int NumCorrectSelections_InBlock;
     public int NumErrors_InBlock;
-    
+
+    public int retouchErroneousCounter_InTask;
+    public int retouchCorrectCounter_InTask;
+    public int perseverationCounter_InTask;
     
     public int LearningSpeed = -1;
 
@@ -41,8 +44,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             LearningSpeed = -1;
-            
-            MinTrials_InBlock = wwwBD.RandomMinMaxTrials[0];
+
+            if (wwwBD.RandomMinMaxTrials != null)
+                MinTrials_InBlock = wwwBD.RandomMinMaxTrials[0];
+            else
+                MinTrials_InBlock = wwwBD.MinMaxTrials[0];
             MaxTrials_InBlock = wwwBD.MaxTrials;
             
             wwwTL.ContextName = wwwBD.ContextName;
@@ -71,7 +77,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
         data["Slider Bar Full"] = NumSliderBarFilled_InTask;
         data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
-        
+
+        data["Retouch Correct"] = retouchCorrectCounter_InTask;
+        data["Retouch Erroneous"] = retouchErroneousCounter_InTask;
+        data["Perseverations"] = perseverationCounter_InTask;
         
         
         return data;
@@ -98,7 +107,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
 
         CurrentTaskSummaryString.Append($"\n# Slider Bar Completions: {NumSliderBarFilled_InTask}" + 
-                                            $"\nAvg Search Duration: {avgSearchDuration}");
+                                            $"\nAvg Search Duration: {avgSearchDuration}" +
+                                            $"\nRetouch Correct: {retouchCorrectCounter_InTask}" +
+                                            $"\nRetouch Erroneous: {retouchErroneousCounter_InTask}");
+                                            ;
     }
 
     private void DefineBlockData()
@@ -106,6 +118,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
         BlockData.AddDatum("Search Durations", ()=> String.Join(",", SearchDurations_InBlock));
+        BlockData.AddDatum("NumErrors_InBlock", ()=> NumErrors_InBlock);
         BlockData.AddDatum("NumDistractorSlotError", ()=> DistractorSlotErrorCount_InBlock);
         BlockData.AddDatum("NumSearchSlotError", ()=> SlotErrorCount_InBlock);
         BlockData.AddDatum("NumRepetitionError", ()=> RepetitionErrorCount_InBlock);
@@ -127,6 +140,11 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         SearchDurations_InBlock.Clear();
         wwwTL.runningAcc.Clear();
         wwwTL.runningPercentError.Clear();
+        wwwTL.runningErrorCount.Clear();
+
+        retouchErroneousCounter_InTask = 0;
+        retouchCorrectCounter_InTask = 0;
+        perseverationCounter_InTask = 0;
 
     }
 }

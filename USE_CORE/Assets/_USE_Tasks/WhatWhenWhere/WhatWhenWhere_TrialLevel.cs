@@ -22,6 +22,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
+    public List<float?> runningErrorCount = new List<float?>();
     private float percentError;
 
     //stim group
@@ -36,12 +37,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     
     //Trial Data Logging variables
-    private string errorTypeString = "";
+    private string selectionClassification = "";
+    private List<string> selectionClassifications_InTrial = new List<string>();
     public int consecutiveError = 0;
     private List<float?> SearchDurations_InTrial = new List<float?> { };
     public List<int> runningAcc = new List<int>();
     public string ContextName;
-    private bool retouchLastCorrect = false;
+    private bool retouchErroneous = false;
+    private int retouchErroneousCounter_InTrial;
+    private bool retouchCorrect;
+    private int retouchCorrectCounter_InTrial;
     private int NumErrors_InTrial;
     private int NumCorrect_InTrial;
 
@@ -70,6 +75,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int NumSliderBarFilled = 0;
     private int sliderGainSteps, sliderLossSteps;
     private bool isSliderValueIncrease = false;
+    private int perseverationCounter_InTrial;
+    private bool startedSequence;
     
 
     //Player View Variables
@@ -125,7 +132,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (!SessionValues.WebBuild)
             {
                 //player view variables
-                playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
+                playerView = new PlayerViewPanel();
                 playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
             }
         });
@@ -184,6 +191,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
         {
+            //previousTargetStimGameObject = targetStimGameObject;
             AssignCorrectStim();
             HaloFBController.StartFlashingHalo(1f, 2, targetStimGameObject);
         });
@@ -226,37 +234,49 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, ()=>
         {
-            UpdateExperimenterDisplaySummaryStrings();
             CorrectSelection = selectedSD.IsCurrentTarget;
 
             if (CorrectSelection)
             {
+                startedSequence = true;
+
+                selectionClassification = "Correct";
                 // UpdateCounters_Correct();
+                if (selectedGO == LastCorrectStimGO)
+                {
+                    retouchCorrect = true;
+                    retouchCorrectCounter_InTrial++;
+                    CurrentTaskLevel.retouchCorrectCounter_InTask++;
+                    selectionClassification = "RetouchCorrect";
+                }
+
                 LastCorrectStimGO = selectedGO;
                 CurrentTaskLevel.NumCorrectSelections_InBlock++;
                 NumCorrect_InTrial++;
                 isSliderValueIncrease = true;
                 SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
+                
             }
             else
             {
-                runningAcc.Add(0);
-                CurrentTaskLevel.NumErrors_InBlock++;
-                NumErrors_InTrial++;
-                //UpdateCounters_Incorrect(correctIndex);
+                
                 isSliderValueIncrease = false;
                 SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
-
                 //Repetition Error
                 if (TouchedObjects.Contains(selectedSD.StimIndex))
                 {
                     CurrentTaskLevel.RepetitionErrorCount_InBlock++;
-                    errorTypeString = "RepetitionError";
+                    selectionClassification = "RepetitionError";
                     SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
 
-                    if (selectedGO == LastCorrectStimGO)
-                        retouchLastCorrect = true;
-                    
+                    if (selectedGO == LastCorrectStimGO && consecutiveError == 0)
+                    {
+                        retouchErroneous = true;
+                        retouchErroneousCounter_InTrial++;
+                        CurrentTaskLevel.retouchErroneousCounter_InTask++;
+                        selectionClassification = "RetouchErroneous";
+                    }
+
                 }
                 
                 // Slot Errors
@@ -266,18 +286,29 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     if (selectedSD.IsDistractor)
                     {
                         CurrentTaskLevel.DistractorSlotErrorCount_InBlock++;
-                        errorTypeString = "DistractorSlotError";
+                        selectionClassification = "DistractorSlotError";
                         SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
                     {
                         CurrentTaskLevel.SlotErrorCount_InBlock++;
-                        errorTypeString = "SlotError";
+                        selectionClassification = "SlotError";
                         SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
                     }
                 }
+                
+                runningAcc.Add(0);
+                if (!retouchErroneous)
+                {
+                    CurrentTaskLevel.NumErrors_InBlock++;
+                    NumErrors_InTrial++;
+                }
+            
             }
+            selectionClassifications_InTrial.Add(selectionClassification);
+
+            UpdateExperimenterDisplaySummaryStrings();
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
@@ -290,9 +321,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SearchDurations_InTrial.Add(null);
             CurrentTaskLevel.SearchDurations_InBlock.Add(null);
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
-            errorTypeString = "AbortedTrial";
+            selectionClassification = "AbortedTrial";
+            selectionClassifications_InTrial.Add(selectionClassification);
             
             runningPercentError.Add(null);
+            runningErrorCount.Add(null);
         });
         // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
@@ -318,21 +351,33 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
                 consecutiveError = 0;
-                HaloFBController.ShowPositive(selectedGO, depth);
+                // Only show positive if there isn't an existing halo around the object
+                if(GetRootObject(selectedGO.transform).transform.Find("PositiveHaloLight(Clone)")?.gameObject == null)
+                    HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
                     trialComplete = true;
                 
-                errorTypeString = "None";
+                selectionClassification = "None";
             }
             else //Chose Incorrect
             {
+                AudioFBController.Play("Negative");
+                if (retouchErroneous)
+                    return;
                 
-                // RETOUCH LAST CORRECT doesn't INCREMENT CONSECUTIVE ERROR
-                if(!retouchLastCorrect)
-                    consecutiveError++;
-
+                
+                // ERRONEOUS RETOUCH LAST CORRECT doesn't INCREMENT CONSECUTIVE ERROR
+                if (consecutiveError >= 1)
+                {
+                    perseverationCounter_InTrial++;
+                    CurrentTaskLevel.perseverationCounter_InTask++;
+                }
+                consecutiveError++;
+                Debug.Log("PERSEVERATION COUNT: " + perseverationCounter_InTrial);
+                
+                
                 if (GetRootObject(selectedGO.transform).transform.Find("NegativeHaloLight(Clone)")?.gameObject == null)
                 {
                     HaloFBController.ShowNegative(selectedGO, depth);
@@ -345,16 +390,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
                 
-                if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance" && numTouchedStims != 0 && consecutiveError == 1)
+                if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial") && numTouchedStims != 0 && consecutiveError == 1)
                 {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                     numTouchedStims -= 1;
+                    if (GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveHaloLight(Clone)")?.gameObject != null)
+                        Destroy(GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveHaloLight(Clone)").gameObject);
                 }
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
-                
-
             }
+            
             
             selectedGO = null;
         });
@@ -367,14 +413,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (!CurrentTrialDef.LeaveFeedbackOn) 
                 HaloFBController.Destroy();
             
-            UpdateExperimenterDisplaySummaryStrings();
 
+            // If the sequence has been completed, send to slider feedback state
             if (trialComplete)
                 StateAfterDelay = FinalFeedback;
             else
             {
-                // Condition where the trial ends after an error is made
-                if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+                // If there is a MaxTrialErrors defined in the BlockDef and the number of errors in the trial exceed that value, send to ITI
+                if(CurrentTrialDef.MaxTrialErrors != null && NumErrors_InTrial >= CurrentTrialDef.MaxTrialErrors)
+                {
+                    StateAfterDelay = ITI;
+                }
+
+                // If there is either no MaxTrialErrors or the error threshold hasn't been met, either move onto the next stim in the sequence or terminate the trial for an incorrect choice
+                else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                 {
                     if (CorrectSelection)
                     {
@@ -386,11 +438,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     else
                         StateAfterDelay = ITI;
                 }
-                
-                // Condition where the trial continues even if an error is made
-                else if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+
+                // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
+                else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning)
+                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 2 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;
@@ -399,13 +451,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             CorrectSelection = false;
             
+            retouchErroneous = false;
+            retouchCorrect = false;
+            
+            UpdateExperimenterDisplaySummaryStrings();
         });
         FinalFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
             
             trialComplete = false;
-            errorTypeString = "None";
+            selectionClassification = "None";
 
             //Destroy all created text objects on Player View of Experimenter Display
             if(!SessionValues.WebBuild)
@@ -418,12 +474,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             percentError = (float)decimal.Divide(NumErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
             runningPercentError.Add(percentError);
             
+            Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
+            runningErrorCount.Add(NumErrors_InTrial);
+            
             SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
                         
             if (SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
-               // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); //moved to syncbox class
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
@@ -465,6 +523,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
+            SessionValues.TargetObjects.Add(stim.StimGameObject);
+        
+        foreach (WhatWhenWhere_StimDef stim in distractorStims.stimDefs)
+            SessionValues.DistractorObjects.Add(stim.StimGameObject);
+    }
+
     protected override bool CheckBlockEnd()
     {
         TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
@@ -479,11 +548,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTrialDef.MaxTrials);
 
-        // If using the CurrentTrialPerformance block end, use the following CheckBlockEnd method
-        if (CurrentTrialDef.BlockEndType == "CurrentTrialPerformance")
+        // If using the CurrentTrialPercentError block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "CurrentTrialPercentError")
             return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
+        
+        // If using the CurrentTrialErrorCount block end, use the following CheckBlockEnd method
+        if (CurrentTrialDef.BlockEndType == "CurrentTrialErrorCount")
+            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningErrorCount,
+                CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
+                CurrentTaskLevel.MaxTrials_InBlock);
+
          
         Debug.Log($"Cannot handle {CurrentTrialDef.BlockEndType} Block End Type. Forced block switch not applied.");
          return false;
@@ -528,6 +604,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         NumErrors_InTrial = 0;
         NumCorrect_InTrial = 0;
 
+        retouchCorrectCounter_InTrial = 0;
+        retouchErroneousCounter_InTrial = 0;
+        perseverationCounter_InTrial = 0;
         numTouchedStims = 0;
         searchDuration = 0;
         sliderGainSteps = 0;
@@ -538,11 +617,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         LastCorrectStimGO = null;
         CorrectSelection = false;
         choiceMade = false;
-        retouchLastCorrect = false;
-        
+        retouchErroneous = false;
+        retouchCorrect = false;
+        startedSequence = false;
+        perseverationCounter_InTrial = 0;
         SearchDurations_InTrial.Clear();
         TouchedObjects.Clear();
-        errorTypeString = "";
+        selectionClassification = "";
+        selectionClassifications_InTrial.Clear();
         SliderFBController.ResetSliderBarFull();
         GrayHalos.Clear();
     }
@@ -558,8 +640,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SearchStimLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimLocations", () => distractorStimsLocations);
         TrialData.AddDatum("TouchedObjects", () => String.Join(",",TouchedObjects));
+        TrialData.AddDatum("SelectionClassifications", () => String.Join(",", selectionClassifications_InTrial));
         TrialData.AddDatum("SearchDurations", () => String.Join(",",SearchDurations_InTrial));
-        TrialData.AddDatum("ErrorType", () => errorTypeString);
+        TrialData.AddDatum("NumErrors", () => NumErrors_InTrial);
+        TrialData.AddDatum("RetouchCorrect", () => retouchCorrectCounter_InTrial);
+        TrialData.AddDatum("RetouchErroneous", () => retouchErroneousCounter_InTrial);
     }
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
@@ -573,11 +658,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Selected Object Indices: " + string.Join(",",TouchedObjects) +
                              "\nCorrect Selection? : " + CorrectSelection +
-                             "\nPercent Error : " + percentError +
+                             "\nLast Trial's Percent Error : " + percentError +
+                             "\nNum Errors in Trial : " + NumErrors_InTrial +
                              "\n" +
-                             "\nError: " + errorTypeString +
+                             "\nError: " + selectionClassification +
                              "\n" +
-                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(SearchDurations_InTrial);
+                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(SearchDurations_InTrial) +
+                             "\nRetouch Correct: " + retouchCorrectCounter_InTrial +
+                             "\nRetouch Erroneous: " + retouchErroneousCounter_InTrial;
     }
 
     
@@ -599,6 +687,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         //config UI variables
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");

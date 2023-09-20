@@ -26,5 +26,4 @@ public class FolderDropdown : MonoBehaviour
         dropdown.ClearOptions();
         dropdown.AddOptions(options);
     }
-
 }

@@ -6,6 +6,7 @@ using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -71,7 +72,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int[] perseverativeErrors_InTrial;
     private bool choiceMade;
     public List<float> choiceDurationsList = new List<float>();
-    
+    private int flashingCounter;
 
     // Task Level Defined Color Variables
     [HideInInspector]
@@ -104,6 +105,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
+    private List<string> SelectedTiles_InTrial = new List<string>();
     // private StimDef selectedSD;
 
     // Slider & Animation variables
@@ -167,8 +169,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             // Load Maze at the start of every trial to keep the mNextStep consistent
             CurrentTaskLevel.SetTaskSummaryString();
-            
-
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -190,7 +190,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOn"]);
 
-            if (currentTaskDef.GuidedMazeSelection)
+            if (CurrentTrialDef.GuidedMazeSelection)
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile;
@@ -199,9 +199,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
-
-            InstantiateCurrMaze();
-            tiles.ToggleVisibility(true);
 
             if (!SessionValues.WebBuild)
                 CreateTextOnExperimenterDisplay();
@@ -216,7 +213,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddSpecificInitializationMethod(() =>
         {
             //TouchFBController.SetPrefabSizes(tileScale);
-
+            MazeBackground.SetActive(true);
+            if(!tiles.IsActive)
+                tiles.ToggleVisibility(true);
             choiceStartTime = Time.unscaledTime;
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
@@ -237,6 +236,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.ChoiceDurations_InBlock.Add(choiceDuration);
                     CurrentTaskLevel.ChoiceDurations_InTask.Add(choiceDuration);
                     selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
+                    SelectedTiles_InTrial.Add(selectedGO.name);
                     SelectionHandler.ClearSelections();
                 }
             }
@@ -263,7 +263,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
         });
-        ChooseTile.SpecifyTermination(()=> (mazeDuration > maxMazeDuration.value) || (choiceDuration > 30), ()=> FinishTrial, () =>
+        ChooseTile.SpecifyTermination(()=> (mazeDuration > CurrentTrialDef.MaxMazeDuration) || (choiceDuration > CurrentTrialDef.MaxChoiceDuration), ()=> FinishTrial, () =>
         {
             // Timeout Termination
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
@@ -297,30 +297,22 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 AudioFBController.Play("Positive");
                 if (CurrentTrialDef.ErrorPenalty)
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
-                //if (SessionValues.SessionDef.EventCodesActive)
-                    //  EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]); 
             }
             else if (ErroneousReturnToLast)
             {
                 AudioFBController.Play("Negative");
-                //if (SessionValues.SessionDef.EventCodesActive)
-                    //EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
             }
             else if (CorrectSelection)
             {
                 SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
                 if(!SessionValues.WebBuild)
                     playerViewParent.transform.Find((pathProgressIndex + 1).ToString()).GetComponent<Text>().color = new Color(0, 0.392f, 0);
-
-                //if (SessionValues.SessionDef.EventCodesActive)
-                    // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Rewarded"]);
             }
             else if (selectedGO != null && !ErroneousReturnToLast)
             {
                 AudioFBController.Play("Negative");
                 if (CurrentTrialDef.ErrorPenalty && consecutiveErrors == 1)
                     SliderFBController.UpdateSliderValue(-selectedGO.GetComponent<Tile>().sliderValueChange);
-                // EventCodeManager.SendCodeNextFrame(SessionEventCodes["Unrewarded"]);
             }
                
             selectedGO = null; //Reset selectedGO before the next touch evaluation
@@ -333,7 +325,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SelectionFeedback.AddTimer(() => finishedMaze? finishedFbDuration:tileFbDuration, Delay, () =>
         {
-            
             if (currentTaskDef.UsingFixedRatioReward)
             {
                 if (CorrectSelection && correctTouches_InTrial % CurrentTrialDef.RewardRatio == 0 )
@@ -366,7 +357,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
             }
-            else if (CheckTileFlash() || currentTaskDef.GuidedMazeSelection)
+            else if (CheckTileFlash() || (CurrentTrialDef.GuidedMazeSelection && GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Tile>().assignedTileFlash))
             {
                 StateAfterDelay = TileFlashFeedback;
             }
@@ -389,12 +380,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (SessionValues.SessionDef.EventCodesActive)
                 SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["FlashingTileFbOn"]);
-            // if (currentTaskDef.GuidedMazeSelection)
-            // {
-                tile.NextCorrectFlashingFeedback();
-            // }
-            // else
-            //     tile.LastCorrectFlashingFeedback();
+            if (!tiles.IsActive)
+                tiles.ToggleVisibility(true);
+            MazeBackground.SetActive(true);
+            tile.NextCorrectFlashingFeedback();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -403,10 +392,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddSpecificInitializationMethod(() =>
         {
+
             DisableSceneElements();
             if (!SessionValues.WebBuild)
                 DestroyChildren(playerViewParent);
-
+            MazeBackground.SetActive(false);
+            tiles.ToggleVisibility(false);
             SessionValues.EventCodeManager.SendCodeNextFrame(TaskEventCodes["MazeOff"]);
 
             if (finishedMaze)
@@ -423,6 +414,22 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    public override void AddToStimLists()
+    {
+        foreach (StimDef stim in tiles.stimDefs)
+        {
+            if (CurrentTaskLevel.currMaze.mPath.Contains(stim.StimGameObject.name))
+                SessionValues.TargetObjects.Add(stim.StimGameObject);
+        }
+        //NEED TO FILL OUT THIS METHOD SO THAT:
+        //target stim are added to SessionValues.TargetObjects
+        //distractor stim are added to SessionValues.DistractorObjects
+        //irrelevant stim are added to SessionValues.IrrelevantObjects
+
+        //Can look at ContinuousRecognition's method as an example
+    }
 
     private IEnumerator LoadTileAndBgTextures(Action<bool> callback)
     {
@@ -478,7 +485,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock);
     }
-    private void InstantiateCurrMaze()
+    protected override void DefineTrialStims()
     {
         // This will Load all tiles within the maze and the background of the maze
 
@@ -490,21 +497,25 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         MazeBackground.transform.SetParent(MazeContainer.transform); // setting it last so that it doesn't cover tiles
         MazeBackground.transform.localScale = new Vector3(mazeLength + 2 * currentTaskDef.SpaceBetweenTiles,
             mazeHeight + 2 * (currentTaskDef.SpaceBetweenTiles), 0.1f);
-        MazeBackground.SetActive(true);
+        MazeBackground.SetActive(false);
         var bottomLeftMazePos = mazeCenter - new Vector3(mazeLength / 2, mazeHeight / 2, 0);
 
         tiles = new StimGroup("Tiles");
 
+        
         for (var x = 1; x <= mazeDims.x; x++)
         for (var y = 1; y <= mazeDims.y; y++)
         {
-            // Configures Tile objects and Prefab within the maze container
+            // Instantiate the tile
             tile = Instantiate(TilePrefab, MazeContainer.transform);
-            SetGameConfigs();
+            tile.mgTL = this;
+
+            StimDef tileStimDef = new StimDef(tiles, tile.gameObject);
+            
             tile.transform.localScale = new Vector3(currentTaskDef.TileSize, currentTaskDef.TileSize, 0.15f);
-            tile.gameObject.SetActive(true);
-            tile.gameObject.GetComponent<Tile>().enabled = true;
-            tile.gameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
+            tileStimDef.StimGameObject.SetActive(false);
+            tileStimDef.StimGameObject.GetComponent<Tile>().enabled = true;
+            tileStimDef.StimGameObject.GetComponent<MeshRenderer>().sharedMaterial.mainTexture = tileTex;
             var displaceX = (2 * (x - 1) + 1) * (currentTaskDef.TileSize / 2) + currentTaskDef.SpaceBetweenTiles * (x - 1);
             var displaceY = (2 * (y - 1) + 1) * (currentTaskDef.TileSize / 2) + currentTaskDef.SpaceBetweenTiles * (y - 1);
             var newTilePosition = bottomLeftMazePos + new Vector3(displaceX, displaceY, 0);
@@ -513,32 +524,37 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             // Assigns ChessCoordName to the tile 
             string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string chessCoordName = $"{alphabet[x-1]}{y}";
-            tile.mCoord = new Coords(chessCoordName);
-            tile.gameObject.name = chessCoordName;
+            tileStimDef.StimGameObject.GetComponent<Tile>().mCoord = new Coords(chessCoordName);
+            tileStimDef.StimGameObject.name = chessCoordName;
             // Assigns Reward magnitude for each tile (set to proportional to the number of squares in path)
-            tile.GetComponent<Tile>().sliderValueChange = 1f / CurrentTaskLevel.currMaze.mNumSquares; //FIX THE REWARD MAG BELOW USING STIM DEF ???
+            tileStimDef.StimGameObject.GetComponent<Tile>().sliderValueChange = 1f / CurrentTaskLevel.currMaze.mNumSquares; //FIX THE REWARD MAG BELOW USING STIM DEF ???
 
             if (chessCoordName == CurrentTaskLevel.currMaze.mStart)
             {
-                tile.gameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
-                startTile = tile.gameObject; // Have to define to perform feedback if they haven't selected the start yet 
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.START_COLOR);
+                startTile = tileStimDef.StimGameObject; // Have to define to perform feedback if they haven't selected the start yet 
                 //Consider making a separate group for the tiles in the path, this might not improve function that much?
             }
                 
             else if (chessCoordName == CurrentTaskLevel.currMaze.mFinish)
             {
-                tile.gameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
-                finishTile = tile.gameObject;
-                tile.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.FINISH_COLOR);
+                finishTile = tileStimDef.StimGameObject;
+                tileStimDef.StimGameObject.GetComponent<Tile>().sliderValueChange = (float)tile.GetComponent<Tile>().sliderValueChange; // to ensure it fills all the way up
             }
-            else if (CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
-                tile.gameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
+            else if (!CurrentTrialDef.DarkenNonPathTiles || CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
             else
-                tile.gameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
             
-            tiles.AddStims(tile.gameObject);
+            tiles.AddStims(tileStimDef);
+            
         }
         mazeLoaded = true;
+        //Make sure to reset the maze to start at the start tile
+        CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mStart;
+
+        AssignFlashingTiles();
         TrialStims.Add(tiles);
     }
     public bool CheckTileFlash()
@@ -684,7 +700,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (consecutiveErrors == 1)
             {
                 CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
-                GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
+                if (CurrentTaskLevel.currMaze.mNextStep == CurrentTaskLevel.currMaze.mStart)
+                    GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.START_COLOR;
+                else
+                    GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
             }
 
             tileFbDuration = tile.INCORRECT_RULEABIDING_SECONDS;
@@ -730,7 +749,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (consecutiveErrors == 1)
             {
                 CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
-                GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
+                if(CurrentTaskLevel.currMaze.mNextStep == CurrentTaskLevel.currMaze.mStart)
+                    GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.START_COLOR;
+                else
+                    GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
             }
 
 
@@ -757,8 +779,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (consecutiveErrors == 1)
         {
             CurrentTaskLevel.currMaze.mNextStep = CurrentTaskLevel.currMaze.mPath[CurrentTaskLevel.currMaze.mPath.FindIndex(pathCoord => pathCoord == CurrentTaskLevel.currMaze.mNextStep) - 1];
-            GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
-
+            if (CurrentTaskLevel.currMaze.mNextStep == CurrentTaskLevel.currMaze.mStart)
+                GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.START_COLOR;
+            else
+                GameObject.Find(CurrentTaskLevel.currMaze.mNextStep).GetComponent<Renderer>().material.color = tile.DEFAULT_TILE_COLOR;
         }
 
         tileFbDuration = tile.INCORRECT_RULEBREAKING_SECONDS;
@@ -778,8 +802,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         incorrectRuleBreakingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleBreakingFbDuration");
         tileBlinkingDuration = ConfigUiVariables.get<ConfigNumber>("tileBlinkingDuration");
         maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
+        maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+
+        SetGameConfigs();
         configVariablesLoaded = true;
     }
 
@@ -847,6 +874,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", ()=> mazeDefName);
+        TrialData.AddDatum("SelectedTiles", ()=> string.Join(",", SelectedTiles_InTrial));
         TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
         TrialData.AddDatum("RetouchCorrect", () => $"[{string.Join(", ", retouchCorrect_InTrial)}]");
@@ -903,11 +931,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (!SessionValues.WebBuild)
             DestroyChildren(playerViewParent);
 
-        if (mazeLoaded)
+        /*if (mazeLoaded)
         {
             tiles.DestroyStimGroup();
             mazeLoaded = false;
-        }
+        }*/
         
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
@@ -931,6 +959,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         SliderFBController.ResetSliderBarFull();
         mazeDuration = 0;
         mazeStartTime = 0;
+        mazeLoaded = false;
         choiceDuration = 0;
         choiceStartTime = 0;
         finishedMaze = false;
@@ -940,7 +969,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         ReturnToLast = false;
         ErroneousReturnToLast = false;
-
+        configVariablesLoaded = false;
         SessionValues.MouseTracker.ResetClicks();
         
         correctTouches_InTrial = 0;
@@ -954,6 +983,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Array.Clear(retouchCorrect_InTrial, 0, retouchCorrect_InTrial.Length);
             Array.Clear(retouchErroneous_InTrial, 0, retouchErroneous_InTrial.Length);
         }
+        SelectedTiles_InTrial.Clear();
         pathProgress.Clear();
         pathProgressGO.Clear();
         pathProgressIndex = 0;
@@ -962,7 +992,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + currentTaskDef.GuidedMazeSelection +
+                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.GuidedMazeSelection +
                              "\n" + 
                              "\n<b>Percent Error: </b>" +  String.Format("{0:0.00}%", percentError*100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial.Sum() +
@@ -978,5 +1008,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\n<b>Maze Duration: </b>" + String.Format("{0:0.0}", mazeDuration) +
                              "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
+    }
+
+    private void AssignFlashingTiles()
+    {
+
+        if (!CurrentTrialDef.GuidedMazeSelection)
+            return;
+
+        for (int i = 0; i < CurrentTaskLevel.currMaze.mPath.Count; i++)
+        {
+            if (i % CurrentTrialDef.TileFlashingRatio == 0)
+                tiles.stimDefs.Find(item => item.StimGameObject.name == CurrentTaskLevel.currMaze.mPath[i])
+                    .StimGameObject.GetComponent<Tile>().assignedTileFlash = true;
+        }
     }
 }

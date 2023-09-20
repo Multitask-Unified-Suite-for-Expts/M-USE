@@ -14,7 +14,6 @@ using USE_UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
-using Dropbox.Api.TeamLog;
 using USE_Def_Namespace;
 
 
@@ -76,7 +75,11 @@ namespace USE_ExperimentTemplate_Trial
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
-            BackdropStripesTexture, THR_BackdropTexture;
+            MoveTooFarTexture, THR_BackdropTexture;
+
+
+        private float Camera_PulseSentTime = 0f;
+
 
 
         //if anyone uses this test it!
@@ -212,7 +215,9 @@ namespace USE_ExperimentTemplate_Trial
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
-                
+
+                //turning off instructions text at start of each trial, in case they left them on during last trial.
+                TurnOffInstructionsText();
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
@@ -221,6 +226,18 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
+
+
+                //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                {
+                    if (Time.time - Camera_PulseSentTime > SessionValues.SessionDef.Camera_TrialPulseMinGap_Sec)
+                    {
+                        SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TrialStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                        Camera_PulseSentTime = Time.time;
+                    }
+                }
+
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>
@@ -252,7 +269,8 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims[0].DestroyStimGroup();
                     TrialStims.RemoveAt(0);
                 }
-                WriteDataFiles();
+
+                StartCoroutine(WriteDataFiles());
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
@@ -260,6 +278,7 @@ namespace USE_ExperimentTemplate_Trial
                 
                 TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
+                TrialSummaryString = "";
 
                 SessionValues.ClearStimLists();
             });
@@ -376,18 +395,18 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
-        public void WriteDataFiles()
+        public IEnumerator WriteDataFiles()
         {
-            StartCoroutine(TrialData.AppendDataToBuffer());
-            StartCoroutine(TrialData.AppendDataToFile());
-            StartCoroutine(FrameData.AppendDataToBuffer());
-            StartCoroutine(FrameData.AppendDataToFile());
+            yield return StartCoroutine(TrialData.AppendDataToBuffer());
+            yield return StartCoroutine(TrialData.AppendDataToFile());
+            yield return StartCoroutine(FrameData.AppendDataToBuffer());
+            yield return StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             if (SessionValues.SessionDef.SerialPortActive)
             {
-                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
         }
         
@@ -398,7 +417,6 @@ namespace USE_ExperimentTemplate_Trial
                 ForceBlockEnd = false;
                 return true;
             }
-
             return false;
         }
 
@@ -425,8 +443,8 @@ namespace USE_ExperimentTemplate_Trial
         {
             AbortCodeDict = new Dictionary<string, int>();
 
-            if (!AbortCodeDict.ContainsKey("Pause"))
-                AbortCodeDict.Add("Pause", 1);
+            if (!AbortCodeDict.ContainsKey("EndTrial"))
+                AbortCodeDict.Add("EndTrial", 1);
 
             if (!AbortCodeDict.ContainsKey("RestartBlock"))
                 AbortCodeDict.Add("RestartBlock", 2);
@@ -452,7 +470,7 @@ namespace USE_ExperimentTemplate_Trial
         }
 
 
-        //Added helper methods for trials. 
+        //Added helper methods for trials.
         public void ActivateChildren(GameObject parent)
         {
             foreach (Transform child in parent.transform)
@@ -481,6 +499,18 @@ namespace USE_ExperimentTemplate_Trial
             foreach (GameObject go in objects)
                 go.GetComponent<Renderer>().material.color = color;
         }
+
+        private void TurnOffInstructionsText()
+        {
+            if (SessionValues.SessionDef.IsHuman && SessionValues.HumanStartPanel != null && SessionValues.HumanStartPanel.InstructionsOn)
+            {
+                SessionValues.HumanStartPanel.InstructionsGO.SetActive(false);
+                SessionValues.HumanStartPanel.InstructionsOn = false;
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+            }
+        }
+
+
 
 
 
@@ -582,7 +612,7 @@ namespace USE_ExperimentTemplate_Trial
             }
             return selectedReward.NumReward;
         }
-        public void SetShadowType(String ShadowType, String LightName)
+        public void SetShadowType(string ShadowType, string LightName)
         {
             ShadowType = ShadowType.ToLower();
             //User options are None, Soft, Hard
@@ -611,11 +641,13 @@ namespace USE_ExperimentTemplate_Trial
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 
             if (filePaths.Length >= 1)
+            {
                 contextPath = filePaths[0];
+            }
             else
             {
-                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
                 Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
+                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
             }
 
             return contextPath;
@@ -624,7 +656,7 @@ namespace USE_ExperimentTemplate_Trial
         //Timing is off:
         //public void LoadTexturesFromServer()
         //{
-        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HorizontalStripes.png", result =>
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HeldTooLong.png", result =>
         //    {
         //        if (result != null)
         //        {
@@ -635,11 +667,10 @@ namespace USE_ExperimentTemplate_Trial
         //            Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
         //    }));
 
-        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/VerticalStripes.png", result =>
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HeldTooShort.png", result =>
         //    {
         //        if (result != null)
         //        {
-        //            Debug.Log("Got the HeldTooShort Texture from the server!");
         //            HeldTooShortTexture = result;
         //            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
         //        }
@@ -651,20 +682,18 @@ namespace USE_ExperimentTemplate_Trial
         //    {
         //        if (result != null)
         //        {
-        //            Debug.Log("Got the BackdropStripesTexture from the server!");
-        //            BackdropStripesTexture = result;
-        //            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+        //            MoveTooFarTexture = result;
+        //            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
         //        }
         //        else
         //            Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
 
         //    }));
 
-        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/Concrete4.png", result =>
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/THR_Backdrop.png", result =>
         //    {
         //        if (result != null)
         //        {
-        //            Debug.Log("Got the THR_BackDropTexture from the server!");
         //            THR_BackdropTexture = result;
         //        }
         //        else
@@ -674,27 +703,28 @@ namespace USE_ExperimentTemplate_Trial
 
         public void LoadTexturesFromResources()
         {
-            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HorizontalStripes");
-            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/VerticalStripes");
-            BackdropStripesTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
-            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/Concrete4");
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooLong");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooShort");
+            MoveTooFarTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/THR_Backdrop");
 
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
+            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
         }
 
-        public void LoadTextures(string ContextExternalFilePath)
-        {
-            HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HorizontalStripes.png"));
-            HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "VerticalStripes.png"));
-            BackdropStripesTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
-            THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "Concrete4.png"));
+        //Currently just having all 3 (local, server, default) load from Resources:
+        //public void LoadTextures(string ContextExternalFilePath)
+        //{
+        //    HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooLong.png"));
+        //    HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooShort.png"));
+        //    MoveTooFarTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
+        //    THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "THR_Backdrop.png"));
 
-            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
-            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = BackdropStripesTexture;
-        }
+        //    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+        //    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+        //    TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
+        //}
 
         public virtual void ResetTrialVariables()
         {

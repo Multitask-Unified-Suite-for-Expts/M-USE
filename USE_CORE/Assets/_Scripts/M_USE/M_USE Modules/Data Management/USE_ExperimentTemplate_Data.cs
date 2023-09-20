@@ -41,7 +41,7 @@ namespace USE_ExperimentTemplate_Data
             data["Start Time"] = state.StartTimeAbsolute;
             data["Duration"] = state.Duration;
 
-            string filePath = FolderPath + Separator + ConfigName + ".txt";
+            string filePath = FolderPath + Separator + "Task" + SessionValues.GetNiceIntegers(4,SessionValues.SessionLevel.taskCount +1) + "_SummaryData_" +ConfigName + ".txt";
 
             if(SessionValues.StoringDataOnServer)
             {
@@ -225,27 +225,16 @@ namespace USE_ExperimentTemplate_Data
         public void CreateNewTrialIndexedFile(int trialCount, string filePrefix)
         {
             fileCreated = false;
-            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + GetNiceIntegers(4, trialCount) + ".txt";
+            fileName = filePrefix + "__" + DataControllerName + "_Trial_" + SessionValues.GetNiceIntegers(4, trialCount) + ".txt";
             StartCoroutine(CreateFile());
         }
 
         public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)
         {
-            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + GetNiceIntegers(4, taskCount) + "_" +
-                         suffix;
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + suffix  + SessionValues.GetNiceIntegers(4, taskCount);
+                         
         }
-        public string GetNiceIntegers(int numDigits, int desiredNum)
-        {
-
-            if (desiredNum >= 999)
-                return desiredNum.ToString();
-            else if (desiredNum >= 99)
-                return "0" + desiredNum;
-            else if (desiredNum >= 9)
-                return "00" + desiredNum;
-            else
-                return "000" + desiredNum;
-        }
+        
     }
 
     public class SessionData : USE_Template_DataController
@@ -257,6 +246,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("SubjectAge", () => SessionValues.SubjectAge);
             AddDatum("SessionTime", () => SessionValues.FilePrefix);
             AddStateTimingData(sessionLevel);
+            DataControllerHoldsFrames = true;
         }
     }
 
@@ -297,6 +287,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("NumRewardPulses_InBlock", () => taskLevel != null ? (taskLevel.NumRewardPulses_InBlock).ToString() : "NoTaskActive");
             AddDatum("NumAbortedTrials_InBlock", () => taskLevel != null ? (taskLevel.NumAbortedTrials_InBlock).ToString() : "NoTaskActive");
+            DataControllerHoldsFrames = true;
         }
     }
 
@@ -313,6 +304,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InBlock", () => trialLevel != null ? (trialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
             AddDatum("AbortCode", () => trialLevel != null ? (trialLevel.AbortCode).ToString() : "NoTaskActive");
+            DataControllerHoldsFrames = true;
         }
     }
 

@@ -651,7 +651,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &604788861
 RectTransform:
@@ -832,6 +832,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   StoreDataIsSet: 0
+--- !u!114 &1017469094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017469087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9533cf77105441f1a9b7b06a27cfa83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SerialPortAddress: 
+  SerialPortSpeed: 0
+  dataVerbosity: 0
+  maxRecvCodeCheckTime: 10
+  minMsBetweenSending: 3
+  msBetweenReceiving: 1
+  readTimeout: 1
+  writeTimeout: 3
+  initTimeout: 2000
+  lastSentTimeStamp: 0
+  active: 0
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -1482,6 +1505,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2585374366896651021, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_FontData.m_MaxSize
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 2585374366896651021, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_FontData.m_MinSize
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2585374366896651021, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 2629498562450590998, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
@@ -2173,6 +2211,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5388344282585589149, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 175
+      objectReference: {fileID: 0}
+    - target: {fileID: 5388344282585589149, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 720
+      objectReference: {fileID: 0}
     - target: {fileID: 5610038090375749628, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_IsActive
@@ -2738,6 +2786,11 @@ PrefabInstance:
       propertyPath: m_ConstraintCount
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 8110217526979964476, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 850
+      objectReference: {fileID: 0}
     - target: {fileID: 8131217586637052295, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: onValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -2947,6 +3000,7 @@ MonoBehaviour:
   InitCamGO: {fileID: 0}
   LogWriter: {fileID: 0}
   runSessionLevelCalibration: 0
+  waitForSerialPort: 0
 --- !u!4 &1375570696
 Transform:
   m_ObjectHideFlags: 0

@@ -697,12 +697,12 @@ PrefabInstance:
     - target: {fileID: 2037724434211703114, guid: 70574ce0b277a4908afa3060c797d6c2,
         type: 3}
       propertyPath: m_Spacing.x
-      value: 105
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 2037724434211703114, guid: 70574ce0b277a4908afa3060c797d6c2,
         type: 3}
       propertyPath: m_Spacing.y
-      value: 85
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 2037724434211703114, guid: 70574ce0b277a4908afa3060c797d6c2,
         type: 3}
@@ -712,12 +712,12 @@ PrefabInstance:
     - target: {fileID: 2037724434211703114, guid: 70574ce0b277a4908afa3060c797d6c2,
         type: 3}
       propertyPath: m_CellSize.x
-      value: 125
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 2037724434211703114, guid: 70574ce0b277a4908afa3060c797d6c2,
         type: 3}
       propertyPath: m_CellSize.y
-      value: 125
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 2037724434211703114, guid: 70574ce0b277a4908afa3060c797d6c2,
         type: 3}
@@ -1010,6 +1010,12 @@ MonoBehaviour:
   TaskName: ContinuousRecognition
   TaskProjectFolder: 
   BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
   TrialLevel: {fileID: 1101764165}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -1046,7 +1052,6 @@ MonoBehaviour:
   TrialsCompleted_Task: 0
   TrialsCorrect_Task: 0
   TokenBarCompletions_Task: 0
-  TotalRewards_Task: 0
   NonStimTouches_Task: 0
   CurrentBlockString: 
   blocksAdded: 0
@@ -1103,6 +1108,7 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   BackdropStripesTexture: {fileID: 0}
@@ -1139,10 +1145,8 @@ MonoBehaviour:
   VariablesLoaded: 0
   ChosenStimIndices: 
   NonStimTouches_Block: 0
-  NumTrials_Block: 0
   NumCorrect_Block: 0
   NumTbCompletions_Block: 0
-  NumRewards_Block: 0
   AvgTimeToChoice_Block: 0
   TimeToCompletion_Block: 0
   TimeToCompletion_StartTime: 0

@@ -72,6 +72,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: ada645a54a12a48069725923f52635df, type: 3}
   - name: SHORT_INFLATION
     clip: {fileID: 8300000, guid: 3cfdc27883853407e878ec6a5ef14208, type: 3}
+  - name: ContinueBeep
+    clip: {fileID: 8300000, guid: f0d667c5c7d1145a4be073edcde238ee, type: 3}
   audioSource: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:
@@ -89,6 +91,7 @@ MonoBehaviour:
     type: 3}
   NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
     type: 3}
+  IsFlashing: 0
 --- !u!114 &3953842124438570051
 MonoBehaviour:
   m_ObjectHideFlags: 0

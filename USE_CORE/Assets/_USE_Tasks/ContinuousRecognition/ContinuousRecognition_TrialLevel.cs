@@ -97,8 +97,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject DisplayResultsContainerGO;
 
-
-    //Moving from namespace:
     public int WrongStimIndex;
     public bool GotTrialCorrect;
     public float TimeChosen_Trial;
@@ -108,8 +106,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public string New_String;
     public string PNC_String;
     public string PC_Percentage_String;
-
-
 
 
 
@@ -124,14 +120,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         State ITI = new State("ITI");
         AddActiveStates(new List<State> { InitTrial, DisplayStims, ChooseStim, TouchFeedback, TokenUpdate, DisplayResults, ITI });
 
-        OriginalTimerPosition = TimerBackdropGO.transform.position;
-
-        playerView = new PlayerViewPanel();
-        playerViewText = new GameObject();
-        playerViewTextList = new List<GameObject>();
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            OriginalTimerPosition = TimerBackdropGO.transform.position;
+
+            playerView = new PlayerViewPanel();
+            playerViewText = new GameObject("PlayerViewText");
+            playerViewTextList = new List<GameObject>();
+
             SetControllerBlockValues();
 
             if (StartButton == null)
@@ -422,28 +419,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddSpecificInitializationMethod(() =>
-        {
-            if (AbortCode == 0) //Normal
-            {
-                CurrentTaskLevel.TrialsCompleted_Task++;
-
-                if (GotTrialCorrect)
-                {
-                    NumCorrect_Block++;
-                    CurrentTaskLevel.TrialsCorrect_Task++;
-                }
-
-                CurrentTaskLevel.CalculateBlockSummaryString();
-            }
-            else if (AbortCode == AbortCodeDict["Pause"]) //If used Pause hotkey to end trial, end entire Block
-                EndBlock = true;
-        });
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
-
-        //FinishTrial State (default state) -----------------------------------------------------------------------------------------------
-        FinishTrial.AddDefaultTerminationMethod(() => SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff"));
-
         //---------------------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
         DefineFrameData();
@@ -451,6 +427,53 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
+    public override void FinishTrialCleanup()
+    {
+        DeactivateTextObjects();
+        if (playerViewTextList != null && playerViewTextList.Count > 0)
+            DeactivatePlayerViewText();
+        DestroyFeedbackBorders();
+        ContextActive = false;
+        SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+
+        if (AbortCode == 0)
+        {
+            CurrentTaskLevel.TrialsCompleted_Task++;
+
+            if (GotTrialCorrect)
+            {
+                NumCorrect_Block++;
+                CurrentTaskLevel.TrialsCorrect_Task++;
+            }
+
+            CurrentTaskLevel.CalculateBlockSummaryString();
+        }
+        else
+        {
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
+
+            if (AbortCode == AbortCodeDict["EndTrial"])
+                EndBlock = true;
+        }
+
+        TokenFBController.ResetTokenBarFull();
+    }
+
+    private void HandleTokenUpdate()
+    {
+        if (TokenFBController.IsTokenBarFull())
+        {
+            NumTbCompletions_Block++;
+            CurrentTaskLevel.TokenBarCompletions_Task++;
+
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
+            SessionValues.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+        }
+    }
+
     public override void AddToStimLists() //For EventCodes:
     {
         foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
@@ -520,26 +543,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         StimIsChosen = false;
     }
 
-    public override void FinishTrialCleanup()
-    {
-        DeactivateTextObjects();
-        if(playerViewTextList != null && playerViewTextList.Count > 0)
-            DeactivatePlayerViewText();
-        DestroyFeedbackBorders();
-        ContextActive = false;
-
-        if (AbortCode == 0)
-            CurrentTaskLevel.CalculateBlockSummaryString();
-        else
-        {
-            CurrentTaskLevel.NumAbortedTrials_InBlock++;
-            CurrentTaskLevel.NumAbortedTrials_InTask++;
-        }
-
-        TokenFBController.ResetTokenBarFull();
-
-    }
-
     public void ResetBlockVariables()
     {
         AdjustedPositionsForMac = false;
@@ -558,7 +561,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1.05f);
+        HaloFBController.SetHaloSize(1.25f);
+        HaloFBController.SetHaloIntensity(1.5f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)
@@ -1045,9 +1049,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             CreateGridItem(gridParent, stim);
 
-        if (CurrentTask.StimFacingCamera)
-            MakeStimsFaceCamera(group);
-
         group.ToggleVisibility(true);
     }
 
@@ -1125,25 +1126,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         BorderPrefabList.Clear();
     }
 
-    private void HandleTokenUpdate()
-    {
-        if(TokenFBController.IsTokenBarFull())
-        {
-            NumTbCompletions_Block++;
-            CurrentTaskLevel.TokenBarCompletions_Task++;
-
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-
-            if (SessionValues.SyncBoxController != null)
-            {
-                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-            }
-            TokenFBController.ResetTokenBarFull();
-
-        }
-    }
-
     private List<int> ShuffleList(List<int> list)
     {
         if (list.Count == 1)
@@ -1171,69 +1153,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void SetStimStrings()
     {
-        //Locations String;
-        string s = "";
         if (CurrentTrial.TrialStimLocations.Length > 0)
-        {
-            s += "[";
-            foreach (var trial in CurrentTrial.TrialStimLocations)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            Locations_String = s;
-        }
+            Locations_String = $"[{string.Join(", ", CurrentTrial.TrialStimLocations)}]";
         if (Locations_String == null)
             PNC_String = "-";
 
-        //PC String
-        s = "";
         if (PC_Stim.Count > 0)
-        {
-            s += "[";
-            foreach (var trial in PC_Stim)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            PC_String = s;
-        }
-        if (PC_String == null)
-            PC_String = "-";
+            PC_String = $"[{string.Join(", ", PC_Stim)}]";
+        PC_String ??= "-";
 
-        //New String
-        s = "";
         if (PNC_Stim.Count > 0)
-        {
-            s += "[";
-            foreach (var trial in PNC_Stim)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            PNC_String = s;
-        }
-        if (PNC_String == null)
-            PNC_String = "-";
+            PNC_String = $"[{string.Join(", ", PNC_Stim)}]";
+        PNC_String ??= "-";
 
-        //PNC String
-        s = "";
         if (New_Stim.Count > 0)
-        {
-            s += "[";
-            foreach (var trial in New_Stim)
-            {
-                s += trial + ", ";
-            }
-            s = s.Substring(0, s.Length - 2);
-            s += "]";
-            New_String = s;
-        }
-        if (New_String == null)
-            New_String = "-";
+            New_String = $"[{string.Join(", ", New_Stim)}]";
+        New_String ??= "-";
 
     }
 
@@ -1258,7 +1193,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineTrialData()
     {
-        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("Context", () => CurrentTrial.ContextName);
         TrialData.AddDatum("Starfield", () => CurrentTrial.UseStarfield);
         TrialData.AddDatum("Num_UnseenStim", () => Unseen_Stim.Count);
@@ -1268,7 +1202,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("StimLocations", () => Locations_String);
         TrialData.AddDatum("ChoseCorrectly", () => GotTrialCorrect);
         TrialData.AddDatum("CurrentTrialStims", () => TrialStimIndices);
-        TrialData.AddDatum("PC_Percentage", () => PC_Percentage_String);
+        TrialData.AddDatum("PC_Percentage", () => CalculatePercentagePC());
     }
 
     private void DefineFrameData()

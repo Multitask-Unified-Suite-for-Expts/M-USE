@@ -233,21 +233,21 @@ namespace USE_Data
 					StartCoroutine(CreateFile());
 				}
 			}
-			if (appendDataToBufferNextFrame)
-			{
-				Debug.LogWarning("THIS IS NEVER GETTING HIT!!!!");
-				for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
-				{
-					PreviousFrameHeldDataValues[i] = dataToUpdateNextFrame[i].ValueAsString;
-				}
-				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
-                appendDataToBufferNextFrame = false;
-				if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
-				{
-					StartCoroutine(AppendDataToFile());
-				}
-				appendDataToFileNextFrame = false;
-			}
+			//if (appendDataToBufferNextFrame)
+			//{
+			//	Debug.LogWarning("THIS IS NEVER GETTING HIT!!!!");
+			//	for (int i = 0; i < dataToUpdateNextFrame.Count; i++)
+			//	{
+			//		PreviousFrameHeldDataValues[i] = dataToUpdateNextFrame[i].ValueAsString;
+			//	}
+			//	dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
+   //             appendDataToBufferNextFrame = false;
+			//	if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
+			//	{
+			//		StartCoroutine(AppendDataToFile());
+			//	}
+			//	appendDataToFileNextFrame = false;
+			//}
 		}
 
 		public void UpdateData()
@@ -260,9 +260,9 @@ namespace USE_Data
 					PreviousFrameHeldDataValues[dataToUpdateNextFrame[i].Pos] = dataToUpdateNextFrame[i].ValueAsString;
 				}
 				dataBuffer.Add(string.Join("\t", PreviousFrameHeldDataValues.ToArray()));
+				appendDataToBufferNextFrame = false;
 				if (name.ToLower().Contains("trial"))
 					Debug.LogWarning("TRIAL DATA ADDED TO BUFFER! " + Time.frameCount);
-				appendDataToBufferNextFrame = false;
 			}
 
 			if (dataBuffer.Count == capacity || appendDataToFileNextFrame)
@@ -270,9 +270,10 @@ namespace USE_Data
                 if (name.ToLower().Contains("trial"))
                     Debug.LogWarning("TRIAL DATA ADDED TO FILE! " + Time.frameCount);
 
-                appendDataToFileNextFrame = false;
 				StartCoroutine(AppendDataToFile());
+				appendDataToFileNextFrame = false;
 			}
+
 		}
 
 		/// <summary>

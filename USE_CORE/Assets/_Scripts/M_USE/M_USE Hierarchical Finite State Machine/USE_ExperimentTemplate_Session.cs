@@ -541,6 +541,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     HumanVersionToggleButton.SetActive(true);
                     ToggleAudioButton.SetActive(true);
+                    if(!SessionValues.SessionDef.PlayBackgroundMusic)
+                        ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
                 }
             });
 

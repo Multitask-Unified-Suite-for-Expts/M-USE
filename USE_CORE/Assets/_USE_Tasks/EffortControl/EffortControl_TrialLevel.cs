@@ -7,6 +7,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using Random = UnityEngine.Random;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -573,6 +574,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.ResetTokenBarFull();
     }
 
+    public override void DefineCustomTrialDefSelection()
+    {
+        TrialDefSelectionStyle = CurrentTrial.TrialDefSelectionStyle;
+        posStep = CurrentTrial.PosStep;
+        negStep = CurrentTrial.NegStep;
+        
+        double randomDouble = CurrentTrial.DifficultyLevel * Random.Range(0.4f, 0.6f);
+        difficultyLevel = (int)randomDouble;
+    }
+
     public void ActivateObjects()
     {
         foreach (GameObject go in ObjectList)
@@ -634,16 +645,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             EffortChoice = CompareValues(CurrentTrial.NumClicksRight, CurrentTrial.NumClicksLeft);
             RewardChoice = CompareValues(CurrentTrial.NumCoinsRight, CurrentTrial.NumCoinsLeft);
         }
-
+        
         if (EffortChoice == "Higher")
         {
             NumHigherEffortChosen_Block++;
             CurrentTaskLevel.NumHigherEffortChosen_Task++;
+            runningPerformance.Add(1);
         }
         else if (EffortChoice == "Lower")
         {
             NumLowerEffortChosen_Block++;
             CurrentTaskLevel.NumLowerEffortChosen_Task++;
+            runningPerformance.Add(0);
         }
         else
         {
@@ -774,8 +787,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         choiceToTouchDelay = ConfigUiVariables.get<ConfigNumber>("choiceToTouchDelay");
         sbToBalloonDelay = ConfigUiVariables.get<ConfigNumber>("sbToBalloonDelay");
     }
-
-
+    
     void CreateObjects()
     {
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);

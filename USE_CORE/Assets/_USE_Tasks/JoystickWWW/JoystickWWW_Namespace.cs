@@ -7,25 +7,35 @@ namespace JoystickWWW_Namespace
 {
     public class JoystickWWW_BlockDef : BlockDef
     {
-        public string BlockName;
-        public string ContextName;
+        
+        // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
         public int[] nRepetitionsMinMax;
         public int[] SearchStimsIndices;
         public int[] DistractorStimsIndices;
         public Vector3[] SearchStimsLocations;
         public Vector3[] DistractorStimsLocations;
+        
+        // Configuration of Stimuli
+        public bool LeaveFeedbackOn;
+        public int ErrorThreshold;
+        
         public int[] SliderGain;
         public int[] SliderLoss;
+        
+        // Slider Variables
         public int SliderInitial;
         public bool RandomizedLocations;
-        public string BlockEndType;
+        
+        public bool GuidedSequenceLearning;
+        public int MaxCorrectTrials;
+        
+        /*public string BlockEndType;
         public float BlockEndThreshold;
         public int BlockEndWindow;
         public int NumPulses;
-        public int PulseSize;
-        public bool LeaveFeedbackOn;
-        public int ErrorThreshold;
+        public int PulseSize;*/
+        
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -39,10 +49,10 @@ namespace JoystickWWW_Namespace
                 td.BlockName = BlockName;
                 td.ContextName = ContextName;
                 td.CorrectObjectTouchOrder = CorrectObjectTouchOrder;
-                td.SearchStimsIndices = SearchStimsIndices;
-                td.DistractorStimsIndices = DistractorStimsIndices;
-                td.SearchStimsLocations = SearchStimsLocations;
-                td.DistractorStimsLocations = DistractorStimsLocations;
+                td.SearchStimIndices = SearchStimsIndices;
+                td.DistractorStimIndices = DistractorStimsIndices;
+                td.SearchStimLocations = SearchStimsLocations;
+                td.DistractorStimLocations = DistractorStimsLocations;
                 td.RandomizedLocations = RandomizedLocations;
                 td.SliderGain = SliderGain;
                 td.SliderLoss = SliderLoss;
@@ -55,6 +65,8 @@ namespace JoystickWWW_Namespace
                 td.LeaveFeedbackOn = LeaveFeedbackOn;
                 td.ErrorThreshold = ErrorThreshold;
                 td.MaxTrials = num;
+                td.MaxCorrectTrials = MaxCorrectTrials;
+                td.GuidedSequenceLearning = GuidedSequenceLearning;
                 TrialDefs.Add(td);
             }
         }
@@ -62,30 +74,25 @@ namespace JoystickWWW_Namespace
 
     public class JoystickWWW_TrialDef : TrialDef
     {
-        public string BlockName;
-        public string ContextName;
-        //ObjectNums refers to items in a list of objects to be loaded from resources folder
-        
-        //CorrectObjectOrder is an array of same length as ObjectNums, refers to elements in that array (e.g. {2 3 1 4} refers to 2nd object specified in ObjectNums
+        // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
-        public int[] nRepetitionsMinMax;
-        public int[] SearchStimsIndices;
-        public int[] DistractorStimsIndices;
-        public Vector3[] SearchStimsLocations;
-        public Vector3[] DistractorStimsLocations;
+        public int ErrorThreshold;
+        public int[] SearchStimIndices;
+        public int[] DistractorStimIndices;
+        public Vector3[] SearchStimLocations;
+        public Vector3[] DistractorStimLocations;
+        
+        // Configuration of Stimuli
         public bool RandomizedLocations;
+        public bool LeaveFeedbackOn;
+
+        // Slider Variables
         public int[] SliderGain;
         public int[] SliderLoss;
         public int SliderInitial;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
-        public int NumPulses;
-        public int PulseSize;
-        public bool LeaveFeedbackOn;
-        public int ErrorThreshold;
-
-        public int MaxTrials;
+        
+        public bool GuidedSequenceLearning;
+        public int MaxCorrectTrials;
     }
 
     public class JoystickWWW_StimDef : StimDef
@@ -97,15 +104,6 @@ namespace JoystickWWW_Namespace
 
     public class JoystickWWW_TaskDef : TaskDef
     {
-        Vector3 ButtonPosition;
-        Vector3 ButtonScale;
-        Vector3 FBSquarePosition;
-        Vector3 FBSquareScale;
-        Vector3 ButtonColor;
-        string ButtonText;
-        string ContextExternalFilePath;
-        string ShadowType;
-        bool NeutralITI;
     }
     //Any other custom classes useful for the functioning of the task could be included in this namespace.
 }

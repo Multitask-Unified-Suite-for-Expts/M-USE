@@ -54,6 +54,9 @@ namespace USE_ExperimentTemplate_Task
         public TaskDef TaskDef;
         public BlockDef[] BlockDefs;
         private BlockDef CurrentBlockDef;
+        
+        public string TrialDefSelectionStyle;
+        
         public BlockDef currentBlockDef
         {
             get
@@ -826,23 +829,33 @@ namespace USE_ExperimentTemplate_Task
                                                 $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}");
 
         }
-
+        
+//CALCULATE ADPATIVE TRIAL DEF 
+        public int DetermineTrialDefDifficultyLevel(int difficultyLevel, List<int> runningPerformance, int posStep, int negStep)
+        {
+            if (runningPerformance.Count == 0)
+                return difficultyLevel;
+            
+            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
+            Debug.LogWarning("runningPerformance size: " + runningPerformance.Count + "/////// last: " + runningPerformance.Last());
+            if (runningPerformance.Last() == 0)
+                difficultyLevel -= negStep;
+                if (difficultyLevel < 0)
+                    difficultyLevel = 0;
+                
+            else if (runningPerformance.Last() == 1)
+                difficultyLevel += posStep;
+                if (difficultyLevel > CurrentBlockDef.TrialDefs.Count)
+                    difficultyLevel = CurrentBlockDef.TrialDefs.Count - 1;
+                
+            return difficultyLevel;
+        }
 
     }
 
 
     public class TaskLevelTemplate_Methods
     {
-        //CALCULATE ADPATIVE TRIAL DEF 
-        public int DetermineTrialDefDifficultyLevel()
-        {
-            int difficultyLevel = 0;
-            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
-            
-            
-            //PASS IN THE DLS, max & min, pos step, # of trials before pos dl switch, neg step, # of trials before neg dl switch
-            return difficultyLevel;
-        }
         public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {

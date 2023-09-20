@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_States;
@@ -88,7 +87,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject selectedGO = null;
     private WhatWhenWhere_StimDef selectedSD = null;
     private GameObject LastCorrectStimGO;
-
     private bool CorrectSelection;
     private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
     private bool choiceMade = false;
@@ -138,7 +136,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 variablesLoaded = true;
                 LoadConfigUiVariables();
-
             }
 
             //Set the Stimuli Light/Shadow settings

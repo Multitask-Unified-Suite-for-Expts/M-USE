@@ -26,7 +26,14 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public FrameData FrameData;
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
+        
+        public int difficultyLevel;
+        public int posStep;
+        public int negStep;
+        public string TrialDefSelectionStyle;
+        
         protected int NumTrialsInBlock;
+        public List<int> runningPerformance;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -66,7 +73,6 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
-        [HideInInspector] public string TrialDefSelectionStyle;
 
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
@@ -85,16 +91,21 @@ namespace USE_ExperimentTemplate_Trial
             return existingList;
         }
 
+        public virtual void DefineCustomTrialDefSelection()
+        {
+        }
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
             switch (TrialDefSelectionStyle)
             {
-                case "Adaptive":
-                    //difficult level is returned by DetermineTrialDefDifficultyLevel()
-                    // search LIST TrialDefs for DL blah
-                    return null; //return trial from above
-                
+                case "adaptive":
+                    int currentDifficultyLevel = TaskLevel.DetermineTrialDefDifficultyLevel(difficultyLevel, runningPerformance, posStep, negStep);
+                    Debug.LogWarning("cur difficulty level: " + currentDifficultyLevel);
+                    Debug.LogWarning("TrialCount_InBlock: " + TrialCount_InBlock + " ------ TrialDefs size: " + TrialDefs.Count);
+                    return (T)TrialDefs[currentDifficultyLevel];
+                case "default":
+                    return (T)TrialDefs[TrialCount_InBlock];
                 default: 
                     return (T)TrialDefs[TrialCount_InBlock];
             }
@@ -162,6 +173,7 @@ namespace USE_ExperimentTemplate_Trial
                 TrialCount_InBlock = -1;
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
+                
                 //DetermineNumTrialsInBlock();
             });
 
@@ -193,6 +205,9 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                if (TrialCount_InBlock == 0)
+                    DefineCustomTrialDefSelection();
+                
                 SessionValues.LoadingCanvas_GO.SetActive(false);
 
                 if (SessionValues.WebBuild)
@@ -241,6 +256,7 @@ namespace USE_ExperimentTemplate_Trial
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
+                
                 
                 TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();

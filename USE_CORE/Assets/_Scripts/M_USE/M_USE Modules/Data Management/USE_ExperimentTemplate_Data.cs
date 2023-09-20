@@ -41,7 +41,7 @@ namespace USE_ExperimentTemplate_Data
             data["Start Time"] = state.StartTimeAbsolute;
             data["Duration"] = state.Duration;
 
-            string filePath = FolderPath + Separator + ConfigName + ".txt";
+            string filePath = FolderPath + Separator + "Task" + SessionValues.GetNiceIntegers(4,SessionValues.SessionLevel.taskCount +1) + "_SummaryData_" +ConfigName + ".txt";
 
             if(SessionValues.StoringDataOnServer)
             {
@@ -231,8 +231,8 @@ namespace USE_ExperimentTemplate_Data
 
         public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)
         {
-            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + SessionValues.GetNiceIntegers(4, taskCount) + "_" +
-                         suffix;
+            folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + suffix  + SessionValues.GetNiceIntegers(4, taskCount);
+                         
         }
         
     }

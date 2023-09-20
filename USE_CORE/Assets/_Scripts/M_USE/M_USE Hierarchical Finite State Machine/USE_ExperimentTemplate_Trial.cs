@@ -262,6 +262,7 @@ namespace USE_ExperimentTemplate_Trial
                 
                 TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
+                TrialSummaryString = "";
 
                 SessionValues.ClearStimLists();
             });

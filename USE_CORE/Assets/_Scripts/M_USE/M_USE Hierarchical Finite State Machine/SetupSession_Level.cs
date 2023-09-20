@@ -292,7 +292,7 @@ public class SetupSession_Level : ControlLevel
         {
             SessionValues.SerialSentData = (SerialSentData)SessionValues.SessionDataControllers.InstantiateDataController<SerialSentData>
                 ("SerialSentData", SessionValues.StoreData, SessionValues.TaskSelectionDataPath 
-                                                + Path.DirectorySeparatorChar + "0001_TaskSelection");
+                                                + Path.DirectorySeparatorChar + "Task0001");
             SessionValues.SerialSentData.fileName = SessionValues.FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
             SessionValues.SerialSentData.sessionLevel = SessionLevel;
             SessionValues.SerialSentData.InitDataController();
@@ -300,14 +300,14 @@ public class SetupSession_Level : ControlLevel
 
             SessionValues.SerialRecvData = (SerialRecvData)SessionValues.SessionDataControllers.InstantiateDataController<SerialRecvData>
                 ("SerialRecvData", SessionValues.StoreData, SessionValues.TaskSelectionDataPath
-                                                                       + Path.DirectorySeparatorChar + "0001_TaskSelection" );
+                                                                       + Path.DirectorySeparatorChar + "Task0001" );
             SessionValues.SerialRecvData.fileName = SessionValues.FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
             SessionValues.SerialRecvData.sessionLevel = SessionLevel;
             SessionValues.SerialRecvData.InitDataController();
             SessionValues.SerialRecvData.ManuallyDefine();
         }
 
-        SessionLevel.FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", SessionValues.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "0001_TaskSelection");
+        SessionLevel.FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", SessionValues.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
         SessionLevel.FrameData.fileName = SessionValues.FilePrefix + "__FrameData_0001_TaskSelection.txt";
         SessionLevel.FrameData.sessionLevel = SessionLevel;
         SessionLevel.FrameData.InitDataController();
@@ -320,7 +320,7 @@ public class SetupSession_Level : ControlLevel
 
         if (SessionValues.SessionDef.EyeTrackerActive)
         {
-            SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", SessionValues.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData");
+            SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", SessionValues.StoreData, SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
 
             SessionValues.GazeData.fileName = "TaskSelection__GazeData.txt";
             SessionValues.GazeData.sessionLevel = SessionLevel;

@@ -39,4 +39,6 @@ public class VertexWobble : MonoBehaviour
     {
         return new Vector2(Mathf.Sin(time * sinMultiplier), Mathf.Cos(time * cosMultiplier));
     }
+
+    
 }

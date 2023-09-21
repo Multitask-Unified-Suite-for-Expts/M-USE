@@ -6,20 +6,20 @@ using UnityEngine;
 
 public class RecursiveFileFinder
 {
-    private static Dictionary<(string path, string filename), List<String>> Cache;
+    private static Dictionary<(string path, string filename), List<string>> Cache;
     private static HashSet<string> CachedPaths;
 
-    public static List<String> FindFile(string path, string filename, string extension)
+    public static List<string> FindFile(string path, string filename, string extension)
     {
         if (Cache == null)
         {
-            Cache = new Dictionary<(string, string), List<String>>();
+            Cache = new Dictionary<(string, string), List<string>>();
             CachedPaths = new HashSet<string>();
         }
 
         if (CachedPaths.Contains(path))
         {
-            if (Cache.TryGetValue((path, filename), out List<String> filenames))
+            if (Cache.TryGetValue((path, filename), out List<string> filenames))
             {
                 return filenames;
             }
@@ -27,7 +27,7 @@ public class RecursiveFileFinder
         }
         CachedPaths.Add(path);
 
-        Cache.Add((path, filename), new List<String>());
+        Cache.Add((path, filename), new List<string>());
         PopulateCache(path, extension);
 
         return Cache[(path, filename)];
@@ -35,19 +35,19 @@ public class RecursiveFileFinder
 
     private static void PopulateCache(string path, string extension)
     {
-        List<String> allFilenames = Directory.GetFiles(path, $"*{extension}", SearchOption.AllDirectories).ToList();
+        List<string> allFilenames = Directory.GetFiles(path, $"*{extension}", SearchOption.AllDirectories).ToList();
         allFilenames.RemoveAll(t => Path.GetFileName(t).StartsWith("."));
 
-        foreach (String filePath in allFilenames)
+        foreach (string filePath in allFilenames)
         {
-            String filename = Path.GetFileName(filePath);
-            if (Cache.TryGetValue((path, filename), out List<String> filenames))
+            string filename = Path.GetFileName(filePath);
+            if (Cache.TryGetValue((path, filename), out List<string> filenames))
             {
                 filenames.Add(filePath);
             }
             else
             {
-                Cache.Add((path, filename), new List<String>() { filePath });
+                Cache.Add((path, filename), new List<string>() { filePath });
             }
 
         }

@@ -339,6 +339,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         HkPanel.TrialLevel.ForceBlockEnd = true;
                         HkPanel.TrialLevel.FinishTrialCleanup();
                         HkPanel.TrialLevel.ClearActiveTrialHandlers();
+                        HkPanel.TrialLevel.WriteDataFiles();
                         HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
                     }
                 }

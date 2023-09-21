@@ -255,7 +255,7 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
 
-                StartCoroutine(WriteDataFiles());
+                WriteDataFiles();
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
@@ -379,18 +379,19 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
-        public IEnumerator WriteDataFiles()
+        public void WriteDataFiles()
         {
-            yield return StartCoroutine(TrialData.AppendDataToBuffer());
-            yield return StartCoroutine(TrialData.AppendDataToFile());
-            yield return StartCoroutine(FrameData.AppendDataToBuffer());
-            yield return StartCoroutine(FrameData.AppendDataToFile());
+            Debug.Log("TRIAL DATA " + TrialData.data.Count + " TRIAL DATA PATH: " + TrialData.folderPath + " TRIAL DATA FILE NAME: " + TrialData.fileName);
+            StartCoroutine(TrialData.AppendDataToBuffer());
+            StartCoroutine(TrialData.AppendDataToFile());
+            StartCoroutine(FrameData.AppendDataToBuffer());
+            StartCoroutine(FrameData.AppendDataToFile());
             if (SessionValues.SessionDef.EyeTrackerActive)
-                yield return StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             if (SessionValues.SessionDef.SerialPortActive)
             {
-                yield return StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-                yield return StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
             }
         }
         

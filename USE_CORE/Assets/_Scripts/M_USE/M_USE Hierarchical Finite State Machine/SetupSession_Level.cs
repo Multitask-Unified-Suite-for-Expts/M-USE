@@ -67,7 +67,7 @@ public class SetupSession_Level : ControlLevel
                     SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;  //set event codes to parsed content
                 }
                 else
-                    Debug.LogError($"The {importSettings_Level.SettingsDetails[0].SearchString} has been parsed, but is unable to be set as it is not a SessionConfig, EventCode, or DisplayConfig file.");
+                    Debug.LogError($"The {importSettings_Level.SettingsDetails[0].SearchString} has been parsed, but is unable to be set as it is not a SessionConfig or EventCode file.");
 
                 importSettings_Level.importPaused = false;
                 settingsImported = true;

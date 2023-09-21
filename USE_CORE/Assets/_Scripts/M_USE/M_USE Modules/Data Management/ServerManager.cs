@@ -19,7 +19,7 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
-    public static string RootConfigFolder = "CONFIGS"; //Marcus wants us to hardcode it. TELL THEM TO NAME FOLDER CONFIGS!
+    public static string RootConfigFolder = "CONFIGS"; //We tell them in the documentation the folder needs to be named CONFIGS.
     public static string SessionConfigFolder; //Set with the value of the Dropdown after they click confirm
     public static string SessionConfigFolderPath
     {

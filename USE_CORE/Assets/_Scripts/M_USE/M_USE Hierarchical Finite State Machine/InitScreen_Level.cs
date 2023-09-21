@@ -154,7 +154,6 @@ public class InitScreen_Level : ControlLevel
 
         if(!LocalConfig_Toggle.isOn && !ServerConfig_Toggle.isOn && !DefaultConfig_Toggle.isOn) //if none are on to start, turn on grey out panels
         {
-            Debug.LogWarning("SETTING ALL PANELS ACTIVE!");
             foreach (var panel in GreyOutPanels_Array)
                 panel.SetActive(true);
         }

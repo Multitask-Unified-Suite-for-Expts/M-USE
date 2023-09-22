@@ -722,6 +722,7 @@ GameObject:
   - component: {fileID: 1017469092}
   - component: {fileID: 1017469093}
   - component: {fileID: 1017469094}
+  - component: {fileID: 1017469095}
   m_Layer: 0
   m_Name: MiscScripts
   m_TagString: Untagged
@@ -843,6 +844,18 @@ MonoBehaviour:
   initTimeout: 2000
   lastSentTimeStamp: 0
   active: 0
+--- !u!114 &1017469095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017469087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f521075767474dcca3ce41fcafb6d59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -2966,11 +2979,11 @@ MonoBehaviour:
   ActiveTaskLevels: []
   CurrentTask: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 0}
+  taskCount: 0
   SessionDetails: {fileID: 0}
   LocateFile: {fileID: 0}
   FrameData: {fileID: 0}
   CameraMirrorTexture: {fileID: 0}
-  DisplayController: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
   Starfield: {fileID: 1391649313}
   HumanVersionToggleButton: {fileID: 2071187616}

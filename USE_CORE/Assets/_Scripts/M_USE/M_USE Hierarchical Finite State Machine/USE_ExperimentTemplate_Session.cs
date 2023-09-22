@@ -65,8 +65,6 @@ namespace USE_ExperimentTemplate_Session
         private List<string> selectedConfigsList = new List<string>();
         public StringBuilder PreviousTaskSummaryString = new StringBuilder();
 
-        [HideInInspector] public DisplayController DisplayController;
-
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Already in scene, so find them:
@@ -125,8 +123,6 @@ namespace USE_ExperimentTemplate_Session
 
             FindGameObjects();
             LoadPrefabs();
-
-            SetDisplayController();
 
             SessionValues.LocateFile = gameObject.AddComponent<LocateFile>();
 
@@ -311,8 +307,7 @@ namespace USE_ExperimentTemplate_Session
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
 
-                if (!SessionValues.WebBuild)
-                    HumanVersionToggleButton.SetActive(false);
+                HumanVersionToggleButton.SetActive(SessionValues.SessionDef.IsHuman);
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
 
@@ -320,26 +315,10 @@ namespace USE_ExperimentTemplate_Session
 
                 if(!SessionValues.WebBuild)
                 {
-                    if (SessionValues.DisplayController.SwitchDisplays) //SwitchDisplay stuff doesnt full work yet!
-                    {
-                        SessionCam.targetDisplay = 1;
-
-                        Canvas experimenterCanvas = GameObject.Find("ExperimenterCanvas").GetComponent<Canvas>();
-                        experimenterCanvas.targetDisplay = 0;
-                        foreach (Transform child in experimenterDisplay.transform)
-                        {
-                            Camera cam = child.GetComponent<Camera>();
-                            if (cam != null)
-                                cam.targetDisplay = 1 - cam.targetDisplay;
-                        }
-                    }
-                    else
-                    {
-                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                        CameraMirrorTexture.Create();
-                        SessionCam.targetTexture = CameraMirrorTexture;
-                        mainCameraCopy_Image.texture = CameraMirrorTexture;
-                    }
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    SessionCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
                 }
 
                 SessionValues.EventCodeManager.SendCodeImmediate("SelectTaskStarts");
@@ -678,15 +657,10 @@ namespace USE_ExperimentTemplate_Session
 
                 if(!SessionValues.WebBuild)
                 {
-                    if (SessionValues.DisplayController.SwitchDisplays)
-                        CurrentTask.TaskCam.targetDisplay = 1;
-                    else
-                    {
-                        CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                        CameraMirrorTexture.Create();
-                        CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
-                        mainCameraCopy_Image.texture = CameraMirrorTexture;
-                    }
+                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraMirrorTexture.Create();
+                    CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
+                    mainCameraCopy_Image.texture = CameraMirrorTexture;
                 }
             });
             
@@ -843,13 +817,6 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.USE_StartButton.StartButtonPrefab = StartButtonPrefabGO;
         }
 
-        private void SetDisplayController()
-        {
-            DisplayController = gameObject.AddComponent<DisplayController>();
-            DisplayController.HandleDisplays();
-            SessionValues.DisplayController = DisplayController;
-        }
-
         private void CreateExperimenterDisplay()
         {
             experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
@@ -863,6 +830,8 @@ namespace USE_ExperimentTemplate_Session
         {
             mirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = mirrorCamGO.AddComponent<Camera>();
+            Skybox skybox = mirrorCamGO.AddComponent<Skybox>();
+            skybox.material = Resources.Load<Material>("NewBackground!");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
             mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();

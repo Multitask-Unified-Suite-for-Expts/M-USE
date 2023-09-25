@@ -15,6 +15,8 @@ public static class SessionValues
     public static bool WebBuild;
     public static bool Using2DStim;
 
+    public static readonly string DefaultStimFolderPath = "DefaultResources/Stimuli";
+
     //Info Collected from Init Screen Panels:
     public static string SubjectID;
     public static string SubjectAge;

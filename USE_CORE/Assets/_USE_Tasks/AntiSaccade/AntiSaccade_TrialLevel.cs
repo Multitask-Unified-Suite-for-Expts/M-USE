@@ -8,6 +8,7 @@ using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using System;
+using Siccity.GLTFUtility;
 
 
 public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
@@ -168,7 +169,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
             SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOn"]);
-
         });
         SpatialCue.AddTimer(() => CurrentTrial.SpatialCueDuration, SpatialCueDelay, () =>
         {

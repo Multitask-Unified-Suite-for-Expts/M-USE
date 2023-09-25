@@ -747,31 +747,6 @@ namespace USE_ExperimentTemplate_Task
 
 
 
-
-        //DELETE DUPLICATE LATER
-        public bool FileStringContainsTabs(string fileContent)
-        {
-            string[] lines = fileContent.Split('\n');
-            for (int i = 0; i < lines.Length; i++)
-            {
-                string line = lines[i].Trim();
-
-                if (line.Contains('\t'))
-                {
-                    int tabCount = line.Split('\t').Length; //check if all lines have same number of tabs 
-                    for (int j = i + 1; j < lines.Length; j++)
-                    {
-                        string nextLine = lines[j].Trim();
-                        if (!string.IsNullOrEmpty(nextLine) && nextLine.Split('\t').Length != tabCount)
-                            return false; //Inconsistent number of tab-separated values
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
         public void AddTaskStimDefsToTaskStimGroup<T>(StimGroup sg, IEnumerable<T> stimDefs) where T : StimDef
         {
             sg.AddStims(stimDefs);

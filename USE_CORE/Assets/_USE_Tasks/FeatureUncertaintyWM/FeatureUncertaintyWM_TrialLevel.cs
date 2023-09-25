@@ -745,9 +745,9 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
             //do with all other stimdef fields
             sd.StimGameObject = GenerateMultiCompStim(sd);
             sd.StimName = "MC_Stim_" + (iStim + 1);
-            sd.AssignStimDefPointeToObjectHierarchy(sd.StimGameObject, sd);
+            sd.AssignStimDefPointerToObjectHierarchy(sd.StimGameObject, sd);
             multiCompStims.AddStims(sd); //make a new stim group, add it
-            sd.AssignStimDefPointeToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, sd);
+            sd.AssignStimDefPointerToObjectHierarchy(multiCompStims.stimDefs[iStim].StimGameObject, sd);
             sd.StimGameObject.transform.localPosition = CurrentTrialDef.mcStimLocations[iStim];
             sd.StimGameObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
             sd.StimGameObject.SetActive(false);

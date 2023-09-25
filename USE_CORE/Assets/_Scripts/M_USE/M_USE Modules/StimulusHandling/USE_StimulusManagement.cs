@@ -10,7 +10,7 @@ using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
 using System.Collections;
-
+using Siccity.GLTFUtility;
 
 namespace USE_StimulusManagement
 {
@@ -272,12 +272,11 @@ namespace USE_StimulusManagement
 
         public IEnumerator Load(Action<GameObject> callback)
         {
-			SessionValues.Using2DStim = FileName.ToLower().Contains("png") || FileName.ToLower().StartsWith("2d");
+			SessionValues.Using2DStim = FileName.ToLower().Contains("png");
 
 			if (SessionValues.UsingDefaultConfigs)
 			{
                 StimGameObject = LoadPrefabFromResources();
-				callback?.Invoke(StimGameObject);
 			}
             else
             {
@@ -290,7 +289,7 @@ namespace USE_StimulusManagement
 							if (returnedStimGO != null)
 								StimGameObject = returnedStimGO;
 							else
-								Debug.Log("RETURNED STIM GAMEOBJECT IS NULL!!!!!!");
+								Debug.LogError("TRIED TO LOAD STIM FROM SERVER BUT ITS NULL!");
 						}));
 					}
 					else if(SessionValues.UsingLocalConfigs)
@@ -310,43 +309,41 @@ namespace USE_StimulusManagement
                     Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
 					callback?.Invoke(null);
                 }
-
-
-                if (!string.IsNullOrEmpty(StimName))
-                    StimGameObject.name = StimName;
-                else
-                {
-                    string[] FileNameStrings;
-                    if (FileName.Contains("\\"))
-                        FileNameStrings = FileName.Split('\\');
-                    else
-                        FileNameStrings = FileName.Split('/');
-
-                    string splitString = FileNameStrings[FileNameStrings.Length - 1];
-                    StimGameObject.name = splitString.Split('.')[0];
-                }
-
-				callback?.Invoke(StimGameObject);
             }
+
+			SetStimName();
+            PositionRotationScale();
+            AddMesh();
+            ToggleVisibility(false);
+            AssignStimDefPointerToObjectHierarchy(StimGameObject, this);
+
+            callback?.Invoke(StimGameObject);
         }
 		
-		//MAY NEED TO CHANGE THE PATH FOR WHEN NOT IN EDITOR!
 		public GameObject LoadPrefabFromResources()
 		{
-			string fullPath = "DefaultResources/Stimuli/" + FileName.Split('.')[0];
-			StimGameObject = LoadModel(fullPath);
-			
-			PositionRotationScale();
-			if (!string.IsNullOrEmpty(StimName))
-				StimGameObject.name = StimName;
-			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
-			return StimGameObject;
-		}
+			try
+			{
+				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName.Split('.')[0]}";
+				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
+
+				if (SessionValues.Using2DStim && CanvasGameObject != null)
+					StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
+
+				return StimGameObject;
+
+			}
+			catch(Exception e)
+			{
+                Debug.LogError($"ERROR LOADING {FileName} FROM RESOURCES! " + e.Message);
+				return null;
+            }
+        }
 
 
         public IEnumerator LoadExternalStimFromServer(Action<GameObject> callback) //ONLY WORKS FOR 2D Stim
 		{
-			string filePath = $"Resources/Stimuli/{FileName}"; //may need to document this or make it configurable or something
+			string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}"; //may need to document this or make it configurable or something
 
 			yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
 			{
@@ -365,7 +362,7 @@ namespace USE_StimulusManagement
 					PositionRotationScale();
 					if (!string.IsNullOrEmpty(StimName))
 						StimGameObject.name = StimName;
-					AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
+					AssignStimDefPointerToObjectHierarchy(StimGameObject, this);
 					callback?.Invoke(StimGameObject);
 				}
 				else
@@ -375,9 +372,8 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
 		{
-			//add StimExtesion to file path if it doesn't already contain it
-			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension))
-			{
+			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension)) //add StimExtesion to file path if it doesn't already contain it
+            {
 				if (!StimExtension.StartsWith("."))
 					FileName = FileName + "." + StimExtension;
 				else
@@ -409,13 +405,11 @@ namespace USE_StimulusManagement
 					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + 
 					               StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
 			}
-
 			
 			switch (StimExtension.ToLower())
 			{
 				case ".fbx":
                     StimGameObject = LoadModel(FileName);
-					PositionRotationScale();
 					break;
 				case ".png":
 					StimGameObject = new GameObject();//give it name
@@ -423,19 +417,27 @@ namespace USE_StimulusManagement
 					stimGOImage.texture = LoadPNG(FileName);
 					if (CanvasGameObject != null)
 						StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
-					PositionRotationScale();
 					break;
-				default:
+				case ".glb":
+					LoadGitf();
+					break;
+                case ".gltf":
+                    LoadGitf();
+                    break;
+                default:
 					break;
 			}
-			
-			if (!string.IsNullOrEmpty(StimName))
-				StimGameObject.name = StimName;
-			AssignStimDefPointeToObjectHierarchy(StimGameObject, this);
+
 			return StimGameObject;
 		}
 
-        public GameObject LoadModel(string filePath, bool visibiility = false)
+		public GameObject LoadGitf()
+		{
+            StimGameObject = Importer.LoadFromFile(FileName);
+			return StimGameObject;
+        }
+
+        public GameObject LoadModel(string filePath)
         {
             using (var assetLoader = new AssetLoader())
             {
@@ -444,18 +446,7 @@ namespace USE_StimulusManagement
                     var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
                     assetLoaderOptions.AutoPlayAnimations = true;
                     assetLoaderOptions.AddAssetUnloader = true;
-
-                    if (SessionValues.UsingDefaultConfigs)
-                    {
-                        StimGameObject = Object.Instantiate(Resources.Load(filePath) as GameObject);
-                        if (StimGameObject == null)
-                            Debug.Log("STIM GO IS NULL!!!!!!!!!");
-
-                        if (SessionValues.Using2DStim && CanvasGameObject != null)
-                            StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
-                    }
-                    else
-						StimGameObject = assetLoader.LoadFromFile(filePath);
+					StimGameObject = assetLoader.LoadFromFile(filePath);
                 }
                 catch (Exception e)
                 {
@@ -463,9 +454,6 @@ namespace USE_StimulusManagement
                     return null;
                 }
             }
-            PositionRotationScale();
-            AddMesh();
-            ToggleVisibility(visibiility);
             return StimGameObject;
         }
 
@@ -476,11 +464,28 @@ namespace USE_StimulusManagement
             if (StimRotation != null)
                 StimGameObject.transform.rotation = Quaternion.Euler(StimRotation);
 
-            if (StimScale == null)
-                StimScale = 1;
+			StimScale ??= 1;
 
             StimGameObject.transform.localScale = new Vector3(StimScale.Value, StimScale.Value, StimScale.Value);
         }
+
+        private void SetStimName()
+        {
+            if (!string.IsNullOrEmpty(StimName))
+                StimGameObject.name = StimName;
+            else
+            {
+                string[] FileNameStrings;
+                if (FileName.Contains("\\"))
+                    FileNameStrings = FileName.Split('\\');
+                else
+                    FileNameStrings = FileName.Split('/');
+
+                string splitString = FileNameStrings[FileNameStrings.Length - 1];
+                StimGameObject.name = splitString.Split('.')[0];
+            }
+        }
+
 
         public Texture2D LoadPNG(string filePath, bool visibility = false)
 		{
@@ -514,7 +519,7 @@ namespace USE_StimulusManagement
             return objects;
         }
 
-        public void AssignStimDefPointeToObjectHierarchy(GameObject parentObject, StimDef sd)
+        public void AssignStimDefPointerToObjectHierarchy(GameObject parentObject, StimDef sd)
         {
             List<GameObject> objectsInHierarchy = GetAllObjectsInHierarchy(parentObject);
             foreach (GameObject obj in objectsInHierarchy)

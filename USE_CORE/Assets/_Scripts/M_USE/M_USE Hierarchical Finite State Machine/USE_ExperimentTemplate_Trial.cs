@@ -212,7 +212,6 @@ namespace USE_ExperimentTemplate_Trial
 
                 ResetTrialVariables();
 
-
                 //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
                 if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
                 {
@@ -231,7 +230,7 @@ namespace USE_ExperimentTemplate_Trial
                 if (SessionValues.SessionDef.IsHuman)
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
 
-                AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial. 
+                AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>

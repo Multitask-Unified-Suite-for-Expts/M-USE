@@ -11,7 +11,6 @@ namespace EffortControl_Namespace
 
     public class EffortControl_BlockDef : BlockDef
     {
-        public bool TokensInMiddleOfOutlines;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;
@@ -21,6 +20,8 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
+        public bool TokensInMiddleOfOutlines;
+
         public override void GenerateTrialDefsFromBlockDef()
         {
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
@@ -41,14 +42,12 @@ namespace EffortControl_Namespace
                 td.PulseSizeRight = PulseSizeRight;
                 td.ClicksPerOutline = ClicksPerOutline;
                 TrialDefs.Add(td);
-
             }
         }
     }
 
     public class EffortControl_TrialDef : TrialDef
     {
-        public bool TokensInMiddleOfOutlines;
         public int NumClicksLeft;
         public int NumClicksRight;
         public int NumCoinsLeft;
@@ -58,6 +57,7 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
+        public bool TokensInMiddleOfOutlines;
     }
 
     public class EffortControl_StimDef : StimDef

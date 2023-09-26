@@ -517,12 +517,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddUniversalTerminationMethod(() =>
         {
             if(TokenFBController.IsTokenBarFull())
-            {
-                if(SessionValues.SyncBoxController != null)
-                    GiveReward();
-
-            }
-            
+                GiveReward();
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
@@ -754,6 +749,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void GiveReward()
     {
+        if (SessionValues.SyncBoxController == null)
+            return;
+
         if (SideChoice == "Left")
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);

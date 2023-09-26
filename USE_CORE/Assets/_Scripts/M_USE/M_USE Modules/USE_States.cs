@@ -712,10 +712,7 @@ namespace USE_States
 		public bool Paused = true;
 
 		public abstract void DefineControlLevel();
-		public virtual void LoadSettings()
-		{
 
-		}
 
 		public void InitializeControlLevel()
 		{
@@ -736,7 +733,6 @@ namespace USE_States
 			Duration = -1;
 			controlLevelTerminationSpecifications = new List<ControlLevelTerminationSpecification>();
 
-            LoadSettings();
             if (CallDefineLevelAutomatically)
                 DefineControlLevel();
 

@@ -284,6 +284,9 @@ namespace USE_ExperimentTemplate_Task
             //FinishTask State-----------------------------------------------------------------------------------------------------
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                if (TrialLevel.TouchFBController != null && TrialLevel.TouchFBController.TouchFbEnabled)
+                    TrialLevel.TouchFBController.DisableTouchFeedback();
+
                 if (TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 

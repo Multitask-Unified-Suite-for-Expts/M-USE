@@ -76,9 +76,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
-            playerViewParent = GameObject.Find("MainCameraCopy");     
-            
+            if (!SessionValues.WebBuild)
+            {
+                playerView = gameObject.AddComponent<PlayerViewPanel>();
+                playerViewParent = GameObject.Find("MainCameraCopy");
+            }
+
             // Initialize FB Controller Values
             HaloFBController.SetHaloSize(6f);
             HaloFBController.SetHaloIntensity(5);

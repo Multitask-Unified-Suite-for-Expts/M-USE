@@ -87,7 +87,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool MakeStimPopOut;
 
     private PlayerViewPanel playerView;
-    private Transform playerViewParent;
+    private GameObject playerViewParent;
     private GameObject playerViewText;
     public List<GameObject> playerViewTextList;
     
@@ -125,9 +125,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             OriginalTimerPosition = TimerBackdropGO.transform.position;
 
-            playerView = new PlayerViewPanel();
-            playerViewText = new GameObject("PlayerViewText");
-            playerViewTextList = new List<GameObject>();
+            if (!SessionValues.WebBuild)
+            {
+                playerView = gameObject.AddComponent<PlayerViewPanel>();
+                playerViewParent = GameObject.Find("MainCameraCopy");
+                playerViewTextList = new List<GameObject>();
+            }
 
             SetControllerBlockValues();
 
@@ -144,9 +147,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-
-            if(!SessionValues.WebBuild)
-                playerViewParent = GameObject.Find("MainCameraCopy").transform;
 
             PC_Stim = new List<int>();
             PNC_Stim = new List<int>();
@@ -513,7 +513,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         for(int i=0; i < CurrentTrial.NumTrialStims; ++i)
         {
-            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent.transform);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);
             string stimString = "Target";
@@ -521,9 +521,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentStim.PreviouslyChosen)
                 stimString = "PC";
 
-            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
+            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent.transform);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
             playerViewTextList.Add(playerViewText);
+            playerViewText.SetActive(true);
         }
     }
 

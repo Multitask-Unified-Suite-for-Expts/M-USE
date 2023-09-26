@@ -145,8 +145,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
             }));
 
-            //player view variables
-            playerViewParent = GameObject.Find("MainCameraCopy");
+            if(!SessionValues.WebBuild) //player view variables
+            {
+                playerView = gameObject.AddComponent<PlayerViewPanel>();
+                playerViewParent = GameObject.Find("MainCameraCopy");
+            }
         });
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
@@ -423,12 +426,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTaskLevel.currMaze.mPath.Contains(stim.StimGameObject.name))
                 SessionValues.TargetObjects.Add(stim.StimGameObject);
         }
-        //NEED TO FILL OUT THIS METHOD SO THAT:
-        //target stim are added to SessionValues.TargetObjects
-        //distractor stim are added to SessionValues.DistractorObjects
-        //irrelevant stim are added to SessionValues.IrrelevantObjects
-
-        //Can look at ContinuousRecognition's method as an example
     }
 
     private IEnumerator LoadTileAndBgTextures(Action<bool> callback)
@@ -904,7 +901,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void CreateTextOnExperimenterDisplay()
     {
         // sets parent for any playerView elements on experimenter display
-        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         for (int i = 0; i < CurrentTaskLevel.currMaze.mPath.Count; i++)
         {
             foreach (StimDef sd in tiles.stimDefs)

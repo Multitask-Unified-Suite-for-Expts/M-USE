@@ -82,7 +82,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     //Player View Variables
     private PlayerViewPanel playerView;
-    private Transform playerViewParent; // Helps set things onto the player view in the experimenter display
+    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     public List<GameObject> playerViewTextList;
     public GameObject playerViewText;
     private Vector2 textLocation;
@@ -131,12 +131,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (StartButton == null)
                 InitializeStartButton(InitTrial, InitTrial);
 
-            if (!SessionValues.WebBuild)
+            if (!SessionValues.WebBuild) //player view variables
             {
-                //player view variables
-                playerView = new PlayerViewPanel();
-                playerViewParent = GameObject.Find("MainCameraCopy").transform; // sets parent for any playerView elements on experimenter display
+                playerView = gameObject.AddComponent<PlayerViewPanel>();
+                playerViewParent = GameObject.Find("MainCameraCopy");
             }
+
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -677,11 +677,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
-            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent);
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent.transform);
             textLocation.y += 75;
             playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
                 CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
-                Color.red, textLocation, new Vector2(200, 200), playerViewParent);
+                Color.red, textLocation, new Vector2(200, 200), playerViewParent.transform);
             playerViewText.SetActive(true);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
         }

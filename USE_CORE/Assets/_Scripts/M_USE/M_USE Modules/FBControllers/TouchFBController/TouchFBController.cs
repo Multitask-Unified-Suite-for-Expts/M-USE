@@ -12,8 +12,6 @@ public class TouchFBController : MonoBehaviour
     public GameObject InstantiatedGO;
     public GameObject TaskCanvasGO;
     public Canvas TaskCanvas;
-    //public GameObject TouchFeedback_CanvasGO;
-    //public Canvas TouchFeedback_Canvas;
     public AudioFBController audioFBController;
     private static GameObject HeldTooLong_Prefab;
     private static GameObject HeldTooShort_Prefab;
@@ -22,6 +20,8 @@ public class TouchFBController : MonoBehaviour
     public float FeedbackSize = 150f; //Default is 150;
     public float FeedbackDuration = .3f; //Default is .3
     public bool FeedbackOn;
+    public bool TouchFbEnabled;
+
     //Textures are currently set in The Trial Template "LoadTextures" method:
     public static Texture2D HeldTooLong_Texture;
     public static Texture2D HeldTooShort_Texture;
@@ -61,7 +61,8 @@ public class TouchFBController : MonoBehaviour
     }
 
     public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
-    {        
+    {
+        TouchFbEnabled = true;
         Handler = handler;
         FeedbackDuration = fbDuration;
         FeedbackSize = fbSize;
@@ -79,6 +80,7 @@ public class TouchFBController : MonoBehaviour
 
     public void DisableTouchFeedback()
     {
+        TouchFbEnabled = false;
         Handler.TouchErrorFeedback -= OnTouchErrorFeedback;
     }
 
@@ -129,11 +131,11 @@ public class TouchFBController : MonoBehaviour
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
         SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOn"]);
 
-        Invoke("DestroyTouchFeedback", FeedbackDuration);            
+        Invoke(nameof(DestroyTouchFeedback), FeedbackDuration);            
         
     }
 
-    public void DestroyTouchFeedback() //Called in the Invoke("DestroyTouchFeedback") above ^^
+    public void DestroyTouchFeedback() //Called in ShowTouchFeedback method above ^^
     {
         if (InstantiatedGO != null)
         {
@@ -155,9 +157,7 @@ public class TouchFBController : MonoBehaviour
     private void CreatePrefabs()
     {
         if (HeldTooLong_Texture == null || HeldTooShort_Texture == null || MovedTooFar_Texture == null)
-        {
             Debug.Log("ABOUT TO CREATE PREFABS BUT THE TEXTURES ARE STILL NULL!");
-        }
 
         PrefabList = new List<GameObject>();
 
@@ -177,26 +177,11 @@ public class TouchFBController : MonoBehaviour
         renderer.color = new Color32(224, 78, 92, 235);
 
         go.transform.localScale = new Vector3(FeedbackSize, FeedbackSize, 1f);
-        //Image image = go.AddComponent<Image>();
-        //image.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
-        //image.color = new Color32(224, 78, 92, 235);
-        //image.rectTransform.sizeDelta = new Vector2(FeedbackSize, FeedbackSize);
         
         go.SetActive(false);
         PrefabList.Add(go); 
         return go;
     }
-
-    //private void CreateFbCanvas()
-    //{
-    //    TouchFeedback_CanvasGO = new GameObject("TouchFeedback_CanvasGO");
-    //    TouchFeedback_Canvas = TouchFeedback_CanvasGO.AddComponent<Canvas>();
-    //    TouchFeedback_Canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-    //    TouchFeedback_CanvasGO.AddComponent<CanvasScaler>();
-    //    TouchFeedback_CanvasGO.AddComponent<GraphicRaycaster>();
-    //    TouchFeedback_CanvasGO.GetComponent<RectTransform>().position = new Vector3(0, 0, 0);
-    //    TouchFeedback_Canvas.sortingOrder = 3000;
-    //}
 
     public void ClearErrorCounts()
     {
@@ -234,8 +219,8 @@ public class TouchFBController : MonoBehaviour
         {
             Vector2 localPoint;
             RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.position);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.position); //Converts GOs position to screen coordinates
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint); //Converts screen pos to a pos relative to canvas. 
             return localPoint;
         }
     }

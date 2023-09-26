@@ -8,7 +8,6 @@ using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using System;
-using Siccity.GLTFUtility;
 
 
 public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template

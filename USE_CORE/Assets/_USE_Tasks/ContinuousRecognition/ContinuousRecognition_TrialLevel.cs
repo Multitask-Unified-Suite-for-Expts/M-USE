@@ -45,7 +45,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool StimIsChosen;
-    [HideInInspector] public bool MacMainDisplayBuild;
     [HideInInspector] public bool AdjustedPositionsForMac;
     [HideInInspector] public bool ContextActive;
     [HideInInspector] public bool VariablesLoaded;
@@ -187,7 +186,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (CurrentTrial.UseStarfield)
                 Starfield.SetActive(true);
-            
+
+            //Should add this to other tasks as well!
+            if (SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor)
+                TokenFBController.AdjustTokenBarSizing(100);
+
             TokenFBController.enabled = false;
 
             TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();

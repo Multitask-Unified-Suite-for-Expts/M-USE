@@ -690,7 +690,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        float tokenSize = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 212 : 106; //need to test these on mac
+        float tokenSize = 106f;
         float yOffset = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 45 : 5; //need to test these on mac
 
         //mac is 1920 x 1200, mac fullscreen is 3456x2160, Ipad is 1920x1200
@@ -874,17 +874,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier.transform.SetParent(EC_CanvasGO.transform, false);
         Image image = MiddleBarrier.AddComponent<Image>();
         image.rectTransform.anchoredPosition = Vector2.zero;
-
-        if (SessionValues.SessionDef.MacMainDisplayBuild)
-            image.transform.localScale = new Vector3(.06f, 15f, .001f);
-        else
-            image.transform.localScale = new Vector3(.06f, 11f, .001f);
-
-
-        #if (UNITY_WEBGL && !UNITY_EDITOR)
-            image.transform.localScale = new Vector3(.06f, 15f, .001f);
-        #endif
-
+        image.transform.localScale = new Vector3(.06f, 20f, .001f);
         MiddleBarrier.SetActive(false);
     }
 

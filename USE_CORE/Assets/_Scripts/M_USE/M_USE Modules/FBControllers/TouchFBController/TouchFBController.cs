@@ -234,7 +234,7 @@ public class TouchFBController : MonoBehaviour
         {
             Vector2 localPoint;
             RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.position);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.root.position);
             RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint);
             return localPoint;
         }

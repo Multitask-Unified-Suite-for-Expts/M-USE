@@ -44,11 +44,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             LearningSpeed = -1;
-
-            if (wwwBD.RandomMinMaxTrials != null)
-                MinTrials_InBlock = wwwBD.RandomMinMaxTrials[0];
-            else
-                MinTrials_InBlock = wwwBD.MinMaxTrials[0];
+            MinTrials_InBlock = wwwBD.MinTrials;
             MaxTrials_InBlock = wwwBD.MaxTrials;
             
             wwwTL.ContextName = wwwBD.ContextName;
@@ -88,7 +84,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine( "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock + 
+        CurrentBlockSummaryString.AppendLine( "<b>\nMin Trials in Block: </b>" + MinTrials_InBlock + 
+                                            "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock + 
                                       "\n\nAverage Search Duration: " + CalculateAverageDuration(SearchDurations_InBlock) +
                                       "\n" +
                                       "\nDistractor Slot Error Count: " + DistractorSlotErrorCount_InBlock+

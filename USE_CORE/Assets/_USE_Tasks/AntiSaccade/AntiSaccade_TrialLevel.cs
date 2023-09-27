@@ -97,11 +97,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             IconsLoaded = false;
-
             TokenFBController.enabled = false;
-
             LoadConfigUIVariables();
-
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
 
@@ -503,6 +500,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineTrialData()
     {
+        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("GotTrialCorrect", () => GotTrialCorrect);
         TrialData.AddDatum("SaccadeType", () => SaccadeType);
         TrialData.AddDatum("RandomSpatialCue", () => CurrentTrial.RandomSpatialCueColor);

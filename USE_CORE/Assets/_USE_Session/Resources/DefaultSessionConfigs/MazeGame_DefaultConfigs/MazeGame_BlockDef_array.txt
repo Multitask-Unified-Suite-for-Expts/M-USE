@@ -1,4 +1,4 @@
-BlockName	BlockCount	RandomMinMaxTrials	ViewPath	NumPulses	PulseSize	ContextName	MazeName	RewardRatio	BlockEndType	BlockEndThreshold	ErrorPenalty
- NNNew.4	1	[4, 4]	TRUE	3	250	004_015_010_001_4	M6X6_T0_L6_A2_F2_00000000	5	CurrentTrialPerformance	0.5	FALSE
- IDSame.1	2	[4, 4]	TRUE	3	250	004_015_010_001_3	M6X6_T1_L6_E1_A2_00000001	5	CurrentTrialPerformance	0.5	FALSE
- EDSame.2	3	[4, 4]	TRUE	3	250	004_015_010_001_4	M6X6_T1_L6_D1_A3_00000000	5	CurrentTrialPerformance	0.5	FALSE
+BlockName	BlockCount	RandomMinMaxTrials	ViewPath	NumPulses	PulseSize	ContextName	MazeName	RewardRatio	BlockEndType	BlockEndThreshold	ErrorPenalty	MaxMazeDuration	MaxChoiceDuration
+ NNNew.4	1	[4, 4]	TRUE	3	250	004_015_010_001_4	M6X6_T0_L6_A2_F2_00000000	5	CurrentTrialPercentError	0.5	FALSE	120	30
+ IDSame.1	2	[4, 4]	TRUE	3	250	004_015_010_001_3	M6X6_T1_L6_E1_A2_00000001	5	CurrentTrialPercentError	0.5	FALSE	120	30
+ EDSame.2	3	[4, 4]	TRUE	3	250	004_015_010_001_4	M6X6_T1_L6_D1_A3_00000000	5	CurrentTrialPercentError	0.5	FALSE	120	30

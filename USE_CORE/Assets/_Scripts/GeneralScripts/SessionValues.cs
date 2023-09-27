@@ -16,6 +16,7 @@ public static class SessionValues
     public static bool Using2DStim;
 
     public static readonly string DefaultStimFolderPath = "DefaultResources/Stimuli";
+    public static readonly string DefaultContextFolderPath = "DefaultResources/Contexts";
 
     //Info Collected from Init Screen Panels:
     public static string SubjectID;

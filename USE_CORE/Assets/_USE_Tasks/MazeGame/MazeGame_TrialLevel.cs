@@ -136,14 +136,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
 
-            StartCoroutine(LoadTileAndBgTextures(result =>
-            {
-                if (MazeContainer == null)
-                    MazeContainer = new GameObject("MazeContainer");
-
-                if (MazeBackground == null)
-                    MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
-            }));
+            FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
             if(!SessionValues.WebBuild) //player view variables
             {
@@ -151,6 +144,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 playerViewParent = GameObject.Find("MainCameraCopy");
             }
         });
+
+
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (StartButton == null)
@@ -428,8 +423,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private IEnumerator LoadTileAndBgTextures(Action<bool> callback)
+    private IEnumerator LoadTileAndBgTextures()
     {
+        if (MazeBackground != null || MazeContainer != null) //since its gonna be called every trial, only want it to load them the first time. 
+        {
+            TrialFilesLoaded = true; //Setting this to true triggers the LoadTrialTextures state to end
+            yield break; 
+        }
+
         string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
 
         if (SessionValues.UsingServerConfigs)
@@ -439,7 +440,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (textureResult != null)
                     tileTex = textureResult;
                 else
-                    Debug.Log("TILE TEX RESULT IS NULL!");
+                    Debug.LogWarning("TILE TEX RESULT IS NULL!");
             }));
 
             yield return StartCoroutine(LoadTexture(contextPath + "/" + currentTaskDef.MazeBackgroundTexture + ".png", textureResult =>
@@ -447,13 +448,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (textureResult != null)
                     mazeBgTex = textureResult;
                 else
-                    Debug.Log("MAZE BACKGROUND TEXTURE RESULT IS NULL!");
+                    Debug.LogWarning("MAZE BACKGROUND TEXTURE RESULT IS NULL!");
             }));
         }
         else if (SessionValues.UsingDefaultConfigs)
         {
-            tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-            mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
+            tileTex = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/{currentTaskDef.TileTexture}");
+            mazeBgTex = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/{currentTaskDef.MazeBackgroundTexture}");
         }
         else if (SessionValues.UsingLocalConfigs)
         {
@@ -461,7 +462,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
         }
 
-        callback?.Invoke(true);
+        if (MazeContainer == null)
+            MazeContainer = new GameObject("MazeContainer");
+
+        if (MazeBackground == null)
+            MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
+
+        TrialFilesLoaded = true; //Setting this to true triggers the LoadTrialTextures state to end
     }
 
     public void InitializeTrialArrays()
@@ -485,7 +492,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         // This will Load all tiles within the maze and the background of the maze
-
         mazeDims = CurrentTaskLevel.currMaze.mDims;
         var mazeCenter = MazeBackground.transform.localPosition;
 

@@ -287,7 +287,6 @@ namespace USE_ExperimentTemplate_Trial
                 var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
                 var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
-                //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
                 GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
                 GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;

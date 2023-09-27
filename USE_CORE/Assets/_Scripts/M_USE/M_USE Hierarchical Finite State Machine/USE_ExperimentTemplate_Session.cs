@@ -172,21 +172,20 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.SerialPortController = GameObject.Find("MiscScripts").GetComponent<SerialPortThreaded>();
                     
                     if (SessionValues.SessionDef.SyncBoxActive)
-                        {
-                            SessionValues.SyncBoxController = new SyncBoxController();
-                            SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
-                            
-                        }
+                    {
+                        SessionValues.SyncBoxController = new SyncBoxController();
+                        SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
+                    }
 
                     if (SessionValues.SessionDef.EventCodesActive)
-                        {
-                            SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
-                            SessionValues.EventCodeManager.codesActive = true;
-                        }
-                        waitForSerialPort = true;
+                    {
+                        SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
+                        SessionValues.EventCodeManager.codesActive = true;
+                    }
+                    waitForSerialPort = true;
 
-                        SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
-                        SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
+                    SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
+                    SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
                     
                     SessionValues.SerialPortController.Initialize();
 
@@ -194,16 +193,8 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
                             SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
-
-                        foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
-                        {
-                            Debug.Log("STR " + str);
-                        }
                     }
                 }
-
-                
-
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
@@ -222,7 +213,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
                     SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
-                  }
+                }
                
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)

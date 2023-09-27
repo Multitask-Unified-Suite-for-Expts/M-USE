@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using HiddenMaze;
 using MazeGame_Namespace;
-using TriLib.Samples;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;

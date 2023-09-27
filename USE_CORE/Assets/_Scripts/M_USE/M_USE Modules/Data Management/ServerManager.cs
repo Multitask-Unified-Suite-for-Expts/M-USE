@@ -10,6 +10,7 @@ public static class ServerManager //Used with the PHP scripts
     public static string ServerURL = "http://m-use.psy.vanderbilt.edu:8080"; //input into initscreen. can eventually remove the value. 
 
     public static readonly string ServerStimFolderPath = "Resources/Stimuli"; //path to stim folder. currently just having them set it up this way. 
+    public static readonly string ServerContextFolderPath = "Resources/Contexts"; //path to contexts folder. currently just having them set it up this way. 
 
     public static string RootDataFolder = "DATA"; //They specify path on new init screen
     private static string SessionDataFolder;

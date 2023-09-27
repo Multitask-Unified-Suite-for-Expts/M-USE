@@ -58,7 +58,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private string EffortChoice; //higher or lower
 
     //To center the balloon they selected:
-    protected float CenteringSpeed;
+    protected float CenteringSpeed = 1.5f;
     private Vector3 CenteredPos;
     [HideInInspector] public bool Flashing;
 
@@ -143,8 +143,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (!ObjectsCreated)
                 CreateObjects();
-
-            CenteringSpeed = 1.5f;
         });
 
         //SETUP TRIAL state ---------------------------------------------------------------------------------------------------------------------------------------------

@@ -256,7 +256,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TimerText.text = TimeRemaining.ToString("0");
 
-            ChosenGO = ShotgunHandler.LastSelection.SelectedGameObject;
+            ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
             if (ChosenStim != null) //They Clicked a Stim
@@ -377,7 +377,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value + .05f) && !TokenFBController.IsAnimating(), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value) && !TokenFBController.IsAnimating(), DisplayResults);
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
@@ -512,11 +512,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateTextOnExperimenterDisplay()
     {
-        Vector2 textLocation = new Vector2();
-
         for(int i=0; i < CurrentTrial.NumTrialStims; ++i)
         {
-            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent.transform);
+            Vector2 textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent.transform);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);
             string stimString = "Target";

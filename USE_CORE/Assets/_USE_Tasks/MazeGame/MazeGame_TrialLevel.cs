@@ -458,8 +458,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
         else if (SessionValues.UsingLocalConfigs)
         {
-            tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-            mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
+            tileTex = LoadExternalPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
+            mazeBgTex = LoadExternalPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
         }
 
         if (MazeContainer == null)

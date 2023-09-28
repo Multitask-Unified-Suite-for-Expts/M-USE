@@ -74,7 +74,9 @@ public class AudioFBController : MonoBehaviour
 
     public bool IsPlaying()
     {
-        return audioSource.isPlaying;
+        if(audioSource != null)
+            return audioSource.isPlaying;
+        return false;
     }
 
     private void Update()

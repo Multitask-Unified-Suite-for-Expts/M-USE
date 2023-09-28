@@ -327,7 +327,7 @@ namespace USE_StimulusManagement
 		{
 			try
 			{
-				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName.Split('.')[0]}";
+				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
 				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
 				return StimGameObject;
 			}
@@ -339,7 +339,7 @@ namespace USE_StimulusManagement
         }
 
 
-        public IEnumerator Load2DStimFromServer(Action<GameObject> callback) //ONLY WORKS FOR 2D Stim
+        public IEnumerator Load2DStimFromServer(Action<GameObject> callback)
 		{
 			string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
 

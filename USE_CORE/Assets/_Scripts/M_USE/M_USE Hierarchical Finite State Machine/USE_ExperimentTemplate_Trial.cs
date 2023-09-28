@@ -664,10 +664,10 @@ namespace USE_ExperimentTemplate_Trial
             }
             else if (SessionValues.UsingLocalConfigs)
             {
-                HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooLong.png"));
-                HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooShort.png"));
-                MovedTooFarTexture = LoadPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "bg.png"));
-                THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "THR_Backdrop.png"));
+                HeldTooLongTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooLong.png"));
+                HeldTooShortTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooShort.png"));
+                MovedTooFarTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "bg.png"));
+                THR_BackdropTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "THR_Backdrop.png"));
             }
             else if (SessionValues.UsingServerConfigs)
             {

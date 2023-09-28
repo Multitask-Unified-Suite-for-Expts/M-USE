@@ -141,7 +141,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                             compGO.transform.parent = mcCompHolder.transform;
                             RawImage compGOImage = compGO.AddComponent<RawImage>();
                             string stimPath = ExternalStims.stimDefs[compStimIndex].FileName;
-                            compGOImage.texture = LoadPNG(stimPath);
+                            compGOImage.texture = LoadExternalPNG(stimPath);
                             compGOImage.rectTransform.localScale = new Vector3(0.05f, 0.05f, 0.05f); //add the var in the config later                      
                             compGO.GetComponent<RawImage>().raycastTarget = false;
                             compStimCopies.Add(compGO);

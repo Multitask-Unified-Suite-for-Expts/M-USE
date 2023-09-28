@@ -464,7 +464,7 @@ namespace USE_ExperimentTemplate_Session
                         image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
                     }
                     else if(SessionValues.UsingLocalConfigs)
-                        image.texture = LoadPNG(SessionValues.SessionDef.TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
+                        image.texture = LoadExternalPNG(SessionValues.SessionDef.TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
 
                     if (SessionValues.SessionDef.GuidedTaskSelection)

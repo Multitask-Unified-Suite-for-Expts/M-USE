@@ -1154,7 +1154,7 @@ namespace USE_States
         }
 
 
-        public static Texture2D LoadPNG(string filePath)
+        public static Texture2D LoadExternalPNG(string filePath)
         {
             Texture2D tex = null;
             byte[] fileData;
@@ -1177,7 +1177,7 @@ namespace USE_States
                 if (result != null)
 					tex = result;
                 else
-                    Debug.Log("TEX RESULT IS NULL!");
+                    Debug.LogWarning("TEX RESULT IS NULL!");
             });
 
 			if (tex != null)
@@ -1186,7 +1186,7 @@ namespace USE_States
 				SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
 			}
 			else
-				Debug.Log("NOT SETTING SKYBOX BECAUSE TEX IS NULL!");
+				Debug.LogWarning("NOT SETTING SKYBOX BECAUSE TEX IS NULL!");
         }
 
         public static IEnumerator LoadTexture(string filePath, Action<Texture2D> callback)
@@ -1207,7 +1207,7 @@ namespace USE_States
                 }));
             }
 			else if (SessionValues.UsingLocalConfigs)
-                tex = LoadPNG(filePath);
+                tex = LoadExternalPNG(filePath);
 
 			callback?.Invoke(tex);
         }
@@ -1215,7 +1215,7 @@ namespace USE_States
         public static Material CreateSkybox(Texture2D tex)
         {
 			if (tex == null)
-				Debug.Log("TEX IS NULL WHEN TRYING TO CREATE SKYBOX!");
+				Debug.LogWarning("TEX IS NULL WHEN TRYING TO CREATE SKYBOX!");
 
 			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
 

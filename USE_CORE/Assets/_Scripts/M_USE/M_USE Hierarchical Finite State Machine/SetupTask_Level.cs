@@ -146,12 +146,9 @@ public class SetupTask_Level : ControlLevel
 
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), SessionValues.InputManager.transform);
 
-            
             List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
-            int totalTokensNum = TaskLevel.TaskDef.TotalTokensNum;
 
-
-            fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(totalTokensNum);
+            fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(TaskLevel.TaskDef.TotalTokensNum);
 
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
@@ -183,7 +180,6 @@ public class SetupTask_Level : ControlLevel
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         break;
 
                     case "Halo":
@@ -196,7 +192,6 @@ public class SetupTask_Level : ControlLevel
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
 
@@ -206,7 +201,6 @@ public class SetupTask_Level : ControlLevel
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
 

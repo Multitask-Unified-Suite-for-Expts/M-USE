@@ -1072,16 +1072,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (BorderPrefabList.Count == 0)
             BorderPrefabList = new List<GameObject>();
 
+        //Default stim require border to be moved up by .1
+        Vector3 adjustment = SessionValues.UsingDefaultConfigs ? new Vector3(0, .1f, 0) : Vector3.zero;
+
         foreach (var stim in group.stimDefs)
         {
             if (stim.StimIndex == WrongStimIndex)
             {
-                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + adjustment, Quaternion.identity);
                 BorderPrefabList.Add(redBorder);
             }
             else
             {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
+                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + adjustment, Quaternion.identity);
                 BorderPrefabList.Add(greenBorder);
             }
         }

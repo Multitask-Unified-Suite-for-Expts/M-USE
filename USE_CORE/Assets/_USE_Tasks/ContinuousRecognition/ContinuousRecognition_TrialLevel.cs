@@ -31,7 +31,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject GreenBorderPrefab_2D;
     public GameObject RedBorderPrefab_2D;
     public GameObject Starfield;
-    [HideInInspector] public List<GameObject> BorderPrefabList;
+    [HideInInspector] public List<GameObject> BorderList;
 
     //moving over from trial def
     [HideInInspector] public List<int> PC_Stim;
@@ -1069,24 +1069,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void Generate3DBorders(StimGroup group)
     {
-        if (BorderPrefabList.Count == 0)
-            BorderPrefabList = new List<GameObject>();
+        if (BorderList.Count == 0)
+            BorderList = new List<GameObject>();
 
         //Default stim require border to be moved up by .1
         Vector3 adjustment = SessionValues.UsingDefaultConfigs ? new Vector3(0, .1f, 0) : Vector3.zero;
 
         foreach (var stim in group.stimDefs)
         {
-            if (stim.StimIndex == WrongStimIndex)
-            {
-                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + adjustment, Quaternion.identity);
-                BorderPrefabList.Add(redBorder);
-            }
-            else
-            {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + adjustment, Quaternion.identity);
-                BorderPrefabList.Add(greenBorder);
-            }
+            GameObject border = Instantiate(stim.StimIndex == WrongStimIndex ? RedBorderPrefab : GreenBorderPrefab, stim.StimGameObject.transform.position + adjustment, Quaternion.identity);
+            BorderList.Add(border);
         }
     }
 
@@ -1106,12 +1098,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject Create2DBorder(StimDef stim)
     {
-        GameObject border;
-        if (stim.StimIndex == WrongStimIndex)
-            border = Instantiate(RedBorderPrefab_2D);
-        else
-            border = Instantiate(GreenBorderPrefab_2D);
-        BorderPrefabList.Add(border);
+        GameObject border = Instantiate(stim.StimIndex == WrongStimIndex ? RedBorderPrefab_2D : GreenBorderPrefab_2D);
+        BorderList.Add(border);
         return border;
     }
 
@@ -1123,12 +1111,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void DestroyFeedbackBorders()
     {
-        foreach (GameObject border in BorderPrefabList)
+        foreach (GameObject border in BorderList)
         {
             if (border != null)
                 Destroy(border);
         }
-        BorderPrefabList.Clear();
+        BorderList.Clear();
+
+        
     }
 
     private List<int> ShuffleList(List<int> list)

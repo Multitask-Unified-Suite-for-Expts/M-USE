@@ -94,6 +94,8 @@ namespace USE_ExperimentTemplate_Session
         public bool runSessionLevelCalibration;
 
         public bool waitForSerialPort;
+
+
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -103,7 +105,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevel = this;
 
             SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
-            SessionValues.LoadingController = GameObject.Find("Circle").GetComponent<LoadingController>();
+            SessionValues.LoadingController = SessionValues.LoadingCanvas_GO.GetComponent<LoadingController>();
             SessionValues.LoadingCanvas_GO.SetActive(false);
 
 
@@ -545,7 +547,7 @@ namespace USE_ExperimentTemplate_Session
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
-                SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
+                //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
                 SessionValues.LoadingCanvas_GO.SetActive(true);
 
                 TaskButtonsContainer.SetActive(false);

@@ -96,7 +96,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             InitializeMazeSearchingArrays();
 
             mgTL.ContextName = mgBD.ContextName;
-            MinTrials_InBlock = mgBD.RandomMinMaxTrials[0];
+            MinTrials_InBlock = mgBD.MinTrials;
             MaxTrials_InBlock = mgBD.MaxTrials;
 
             FindMaze();

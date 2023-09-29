@@ -757,6 +757,7 @@ namespace USE_Data
 
 		void OnApplicationQuit()
 		{
+			StartCoroutine(AppendDataToBuffer());
             StartCoroutine(AppendDataToFile());
 		}
 

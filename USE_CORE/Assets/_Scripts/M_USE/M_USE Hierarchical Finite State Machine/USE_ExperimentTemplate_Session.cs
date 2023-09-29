@@ -521,8 +521,8 @@ namespace USE_ExperimentTemplate_Session
                         taskAutomaticallySelected = false;
                     }
                 }
-                AppendSerialData();
-                StartCoroutine(FrameData.AppendDataToBuffer());
+                
+                DataLateUpdate();
             });
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
@@ -592,8 +592,7 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddLateUpdateMethod(() =>
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
-                AppendSerialData();
-                StartCoroutine(FrameData.AppendDataToBuffer());
+                DataLateUpdate();
             });
 
             loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, setupTask, () =>
@@ -657,10 +656,7 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
-            runTask.AddUpdateMethod(() =>
-            {
-                SessionValues.EventCodeManager.EventCodeFixedUpdate();
-            });
+            runTask.AddUpdateMethod(() => { SessionValues.EventCodeManager.SendBufferedEventCodes(); });
             
             runTask.AddLateUpdateMethod(() =>
             {
@@ -1060,6 +1056,13 @@ namespace USE_ExperimentTemplate_Session
         public void SetCurrentTask<T>(string taskName) where T : ControlLevel_Task_Template
         {
             CurrentTask = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
+        }
+
+        public void DataLateUpdate()
+        {
+            AppendSerialData();
+            StartCoroutine(FrameData.AppendDataToBuffer());
+            SessionValues.EventCodeManager.EventCodeLateUpdate();
         }
     }
 }

@@ -23,6 +23,7 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
+        
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
@@ -67,6 +68,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool TrialStimsLoaded;
         [HideInInspector] public string TrialDefSelectionStyle;
 
+  
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
             MovedTooFarTexture, THR_BackdropTexture;
@@ -96,13 +98,9 @@ namespace USE_ExperimentTemplate_Trial
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
+            
             switch (TrialDefSelectionStyle)
             {
-                case "Adaptive":
-                    //difficult level is returned by DetermineTrialDefDifficultyLevel()
-                    // search LIST TrialDefs for DL blah
-                    return null; //return trial from above
-                
                 default: 
                     return (T)TrialDefs[TrialCount_InBlock];
             }
@@ -398,15 +396,16 @@ namespace USE_ExperimentTemplate_Trial
         {
             StartCoroutine(TrialData.AppendDataToBuffer());
             StartCoroutine(TrialData.AppendDataToFile());
+            
             StartCoroutine(FrameData.AppendDataToBuffer());
             StartCoroutine(FrameData.AppendDataToFile());
+            
             if (SessionValues.SessionDef.EyeTrackerActive)
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-            if (SessionValues.SessionDef.SerialPortActive)
-            {
-                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
-            }
+            
+            StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+            StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+            
         }
         
         public bool CheckForcedBlockEnd()
@@ -428,16 +427,6 @@ namespace USE_ExperimentTemplate_Trial
         {
 
         }
-
-        private void OnApplicationQuit()
-        {
-            if (TrialData != null)
-            {
-                StartCoroutine(TrialData.AppendDataToBuffer());
-                StartCoroutine(TrialData.AppendDataToFile());
-            }
-        }
-
         private void AddAbortCodeKeys()
         {
             AbortCodeDict = new Dictionary<string, int>();

@@ -46,6 +46,10 @@ namespace THR_Namespace
         {
             TrialDefs = new List<THR_TrialDef>().ConvertAll(x => (TrialDef)x);
 
+            // assign min and max for the block
+            MinTrials = MinMaxTrials[0];
+            MaxTrials = MinMaxTrials[1];
+
             for (int i = 0; i < MinMaxTrials[1]; i++)
             {
                 THR_TrialDef trial = new THR_TrialDef();

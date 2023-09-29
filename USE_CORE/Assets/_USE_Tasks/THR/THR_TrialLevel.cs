@@ -494,9 +494,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "Rewarding: " + (CurrentTrial.RewardTouch ? "Touch" : "Release") +
-                              "\nRandomPosition: " + ((CurrentTrial.RandomObjectPosition ? "True" : "False")) +
-                              "\nRandomSize: " + ((CurrentTrial.RandomObjectSize ? "True" : "False"));
+        TrialSummaryString = "Reward Protocol: " + (CurrentTrial.RewardTouch ? "Touch" : "Release") +
+                              "\nRandom Position: " + ((CurrentTrial.RandomObjectPosition ? "True" : "False")) +
+                              "\nRandom Size: " + ((CurrentTrial.RandomObjectSize ? "True" : "False"));
     }
 
     protected override bool CheckBlockEnd()

@@ -220,14 +220,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         });
 
-        SearchDisplay.AddUniversalTerminationMethod(() =>
-        {
-            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
-        });
-
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
+            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
+
             SearchDuration = SearchDisplay.TimingInfo.Duration;
             SearchDurations_InBlock.Add(SearchDuration);
             CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
@@ -336,9 +333,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 
-        if(AbortCode == 0)
-            CurrentTaskLevel.SetBlockSummaryString();
-        else
+        if(AbortCode != 0) 
         {
             CurrentTaskLevel.NumAbortedTrials_InBlock++;
             CurrentTaskLevel.NumAbortedTrials_InTask++;
@@ -346,6 +341,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
 
+        CurrentTaskLevel.SetBlockSummaryString();
         TokenFBController.ResetTokenBarFull();
 
     }

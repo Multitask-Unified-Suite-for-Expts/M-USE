@@ -34,7 +34,7 @@ public class EventCodeManager : MonoBehaviour
 	public SyncBoxController SyncBoxController;
 
 
-    public void EventCodeFixedUpdate()
+    public void SendBufferedEventCodes()
     {
         if (Time.frameCount > frameChecker)
         {

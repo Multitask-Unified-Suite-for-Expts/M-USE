@@ -20,7 +20,17 @@ namespace VisualSearch_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
-            MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
+            if (RandomMinMaxTrials != null)
+            {
+                MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
+                MinTrials = RandomMinMaxTrials[0];
+            }
+            else
+            {
+                MaxTrials = MinMaxTrials[1];
+                MinTrials = MinMaxTrials[0];
+            }
+
             TrialDefs = new List<VisualSearch_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial < MaxTrials; iTrial++)
             {
@@ -42,6 +52,9 @@ namespace VisualSearch_Namespace
         }
         public override void AddToTrialDefsFromBlockDef()
         {
+            MaxTrials = TrialDefs.Count;
+            MinTrials = TrialDefs.Count;
+
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 VisualSearch_TrialDef td = (VisualSearch_TrialDef)TrialDefs[iTrial];

@@ -44,17 +44,20 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             //Set the Initial Token Values for the Block
             vsTL.TokenFBController.SetTotalTokensNum(vsBD.TokenBarCapacity);
             vsTL.TokenFBController.SetTokenBarValue(vsBD.NumInitialTokens);
+
+            MinTrials_InBlock = vsBD.MinTrials;
+            MaxTrials_InBlock = vsBD.MaxTrials;
             
             SetBlockSummaryString();
         });
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
-            {
+            {/*
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 BlockStringsAdded++;
-                PreviousBlocksString.Insert(0, CurrentBlockString);
+                PreviousBlocksString.Insert(0, CurrentBlockString);*/
             }
         });
         AssignBlockData();
@@ -89,12 +92,11 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine("\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
-                                      "\n" + 
+        CurrentBlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
+                                            "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
+                                            "\n\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\nAvg Search Duration: " + string.Format("{0:0.00}", CalculateAverageDuration(vsTL.SearchDurations_InBlock)) +
-                                      "\n" + 
                                       "\nNum Aborted Trials: " + + NumAbortedTrials_InBlock + 
-                                      "\n"+
                                       "\nNum Reward Given: " + NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + vsTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + vsTL.TotalTokensCollected_InBlock);

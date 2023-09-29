@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using EffortControl_Namespace;
 
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
-    //[HideInInspector] public string ContextName;
-
     //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;
     [HideInInspector] public int Touches_Task = 0;
@@ -109,8 +106,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\nChose Same Effort: " + trialLevel.NumSameEffortChosen_Block);
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        /*if (PreviousBlocksString.Length > 0)
-            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     void DefineBlockData()

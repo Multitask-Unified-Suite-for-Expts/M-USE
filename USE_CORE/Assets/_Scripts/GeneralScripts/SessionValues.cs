@@ -44,7 +44,6 @@ public static class SessionValues
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
     public static HumanStartPanel HumanStartPanel;
-    public static DisplayController DisplayController;
     public static ExperimenterDisplayController ExperimenterDisplayController;
     public static SessionDataControllers SessionDataControllers;
     public static LocateFile LocateFile;

@@ -31,9 +31,16 @@ namespace WhatWhenWhere_Namespace
         {
             //pick # of trials from minmax
             if (RandomMinMaxTrials != null)
+            {
                 MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
+                MinTrials = RandomMinMaxTrials[0];
+            }
             else
+            {
                 MaxTrials = MinMaxTrials[1];
+                MinTrials = MinMaxTrials[0];
+            }
+
             TrialDefs = new List<WhatWhenWhere_TrialDef>().ConvertAll(x => (TrialDef)x);
             for (int iTrial = 0; iTrial< MaxTrials; iTrial++)
             {

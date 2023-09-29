@@ -39,6 +39,8 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            MinTrials_InBlock = CurrentBlock.MinTrials;
+            MaxTrials_InBlock = CurrentBlock.MaxTrials;
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
         });
@@ -46,11 +48,11 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             if(!SessionValues.WebBuild)
-            {
+            {/*
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";
                 BlockStringsAdded++;
-                PreviousBlocksString.Insert(0, CurrentBlockString);
+                PreviousBlocksString.Insert(0, CurrentBlockString);*/
             }
         });
     }
@@ -90,16 +92,18 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = ("<b>Block Name: " + "(" + CurrentBlock.BlockName + "):" + "</b>" +
-                        "\nTrialsCorrect: " + trialLevel.TrialsCorrect_Block + " (out of " + trialLevel.TrialsCompleted_Block + ")" +
-                        "\nReleasedEarly: " + trialLevel.NumReleasedEarly_Block +
-                        "\nReleasedLate: " + trialLevel.NumReleasedLate_Block +
-                        "\nMovedOutsideObject: " + trialLevel.NumTouchesMovedOutside_Block +
-                        "\nAvoidObjectTouches: " + trialLevel.AvoidObjectTouches_Block +
-                        "\nSelectObjectTouches: " + trialLevel.SelectObjectTouches_Block +
-                        "\nBackdropTouches: " + trialLevel.BackdropTouches_Block +
-                        "\nRewards: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block) +
-                        "\n");
+        CurrentBlockString = ("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
+                             "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
+                                "<b>\n\nBlock Name: " + CurrentBlock.BlockName + "</b>" +
+                        "\nTrials Correct: " + trialLevel.TrialsCorrect_Block + 
+                        "\nReleased Early: " + trialLevel.NumReleasedEarly_Block +
+                        "\nReleased Late: " + trialLevel.NumReleasedLate_Block +
+                        "\nMoved Outside Object: " + trialLevel.NumTouchesMovedOutside_Block +
+                        "\n\nAvoid Object Touches: " + trialLevel.AvoidObjectTouches_Block +
+                        "\nSelect Object Touches: " + trialLevel.SelectObjectTouches_Block +
+                        "\nBackdrop Touches: " + trialLevel.BackdropTouches_Block +
+                        "\nNum Pulses: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block)
+                        );
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         if (PreviousBlocksString.Length > 0)

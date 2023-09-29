@@ -505,7 +505,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         tiles = new StimGroup("Tiles");
 
-        
         for (var x = 1; x <= mazeDims.x; x++)
         for (var y = 1; y <= mazeDims.y; y++)
         {
@@ -548,10 +547,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (!CurrentTrialDef.DarkenNonPathTiles || CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
                 tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
             else
-                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
-            
-            tiles.AddStims(tileStimDef);
-            
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));            
         }
         mazeLoaded = true;
         //Make sure to reset the maze to start at the start tile

@@ -214,8 +214,7 @@ namespace USE_StimulusManagement
 			}
 			else
 			{
-				Debug.LogWarning("Attempted to add stim " + StimName + " to StimGroup " +
-				                 sg.stimGroupName + " but this stimulus is already a member of this StimGroup.");
+				Debug.LogWarning("Attempted to add stim " + StimName + " to StimGroup " + sg.stimGroupName + " but this stimulus is already a member of this StimGroup.");
 			}
 		}
 

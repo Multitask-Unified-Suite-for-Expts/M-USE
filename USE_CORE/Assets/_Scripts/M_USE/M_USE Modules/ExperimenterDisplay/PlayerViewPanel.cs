@@ -36,7 +36,6 @@ public class PlayerViewPanel:MonoBehaviour
         lineRenderer.endColor = color;
         lineRenderer.startWidth = 200f;
         lineRenderer.endWidth = 200f;
-        Debug.Log($"START POS: {start} END POS: {end}");
         lineRenderer.SetPosition(0, start);
         lineRenderer.SetPosition(1, end);
         lineRenderer.sortingOrder = 1000;
@@ -79,7 +78,8 @@ public class PlayerViewPanel:MonoBehaviour
         Text txt = textObject.GetComponent<Text>();
         txt.text = text;
         txt.color = col;
-        txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        //txt.font = Resources.GetBuiltinResource<Font>("Arial.ttf"); //Arial.ttf was breaking game in new Unity Editor
         txt.fontStyle = FontStyle.Bold;
         txt.alignment = TextAnchor.MiddleCenter;
 

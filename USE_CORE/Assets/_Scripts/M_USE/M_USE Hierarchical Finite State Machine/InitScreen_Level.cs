@@ -48,9 +48,8 @@ public class InitScreen_Level : ControlLevel
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
 
-    private State SetupInitScreen;
     private State StartScreen;
-    private State CollectInfo;
+    private State CollectInfoScreen;
 
     private FolderDropdown FolderDropdown;
 
@@ -68,24 +67,18 @@ public class InitScreen_Level : ControlLevel
 
     public override void DefineControlLevel()
     {
-        SetupInitScreen = new State("SetupInitScreen");
         StartScreen = new State("StartScreen");
-        CollectInfo = new State("CollectInfo");
-        AddActiveStates(new List<State> { SetupInitScreen, StartScreen, CollectInfo});
+        CollectInfoScreen = new State("CollectInfoScreen");
+        AddActiveStates(new List<State> { StartScreen, CollectInfoScreen });
 
         SetGameObjects();
-
-        //Setup InitScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        SetupInitScreen.AddSpecificInitializationMethod(() =>
-        {
-            if (SessionValues.WebBuild)
-                GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-        });
-        SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddSpecificInitializationMethod(() =>
         {
+            if (SessionValues.WebBuild)
+                GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+
             StartPanel_GO.SetActive(true);
         });
         StartScreen.AddUpdateMethod(() =>
@@ -96,20 +89,20 @@ public class InitScreen_Level : ControlLevel
             if (InputBroker.GetKeyUp(KeyCode.Escape))
                 Application.Quit();
         });
-        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
+        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen, () =>
         {
             ConfirmButtonPressed = false;
             StartPanel_GO.SetActive(false);
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
-        CollectInfo.AddSpecificInitializationMethod(() =>
+        CollectInfoScreen.AddSpecificInitializationMethod(() =>
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
             Settings_GO.SetActive(true);
         });
-        CollectInfo.AddUpdateMethod(() =>
+        CollectInfoScreen.AddUpdateMethod(() =>
         {
             if (MainPanel_GO.transform.localPosition != Vector3.zero)
                 MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 1000 * Time.deltaTime);
@@ -123,7 +116,7 @@ public class InitScreen_Level : ControlLevel
             if (InputBroker.GetKeyUp(KeyCode.Escape))
                 Application.Quit();
         });
-        CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
+        CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
 

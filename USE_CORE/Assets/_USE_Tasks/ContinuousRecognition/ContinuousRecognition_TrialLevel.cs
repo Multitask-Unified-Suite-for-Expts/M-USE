@@ -31,7 +31,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject GreenBorderPrefab_2D;
     public GameObject RedBorderPrefab_2D;
     public GameObject Starfield;
-    [HideInInspector] public List<GameObject> BorderPrefabList;
+    [HideInInspector] public List<GameObject> BorderList;
 
     //moving over from trial def
     [HideInInspector] public List<int> PC_Stim;
@@ -45,7 +45,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool CompletedAllTrials;
     [HideInInspector] public bool EndBlock;
     [HideInInspector] public bool StimIsChosen;
-    [HideInInspector] public bool MacMainDisplayBuild;
     [HideInInspector] public bool AdjustedPositionsForMac;
     [HideInInspector] public bool ContextActive;
     [HideInInspector] public bool VariablesLoaded;
@@ -87,7 +86,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool MakeStimPopOut;
 
     private PlayerViewPanel playerView;
-    private Transform playerViewParent;
+    private GameObject playerViewParent;
     private GameObject playerViewText;
     public List<GameObject> playerViewTextList;
     
@@ -125,9 +124,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             OriginalTimerPosition = TimerBackdropGO.transform.position;
 
-            playerView = new PlayerViewPanel();
-            playerViewText = new GameObject("PlayerViewText");
-            playerViewTextList = new List<GameObject>();
+            if (!SessionValues.WebBuild)
+            {
+                playerView = gameObject.AddComponent<PlayerViewPanel>();
+                playerViewParent = GameObject.Find("MainCameraCopy");
+                playerViewTextList = new List<GameObject>();
+            }
 
             SetControllerBlockValues();
 
@@ -144,9 +146,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-
-            if(!SessionValues.WebBuild)
-                playerViewParent = GameObject.Find("MainCameraCopy").transform;
 
             PC_Stim = new List<int>();
             PNC_Stim = new List<int>();
@@ -187,7 +186,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (CurrentTrial.UseStarfield)
                 Starfield.SetActive(true);
-            
+
+            //Should add this to other tasks as well!
+            if (SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor)
+                TokenFBController.AdjustTokenBarSizing(100);
+
             TokenFBController.enabled = false;
 
             TimerText = TimerTextGO.GetComponent<TextMeshProUGUI>();
@@ -253,7 +256,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TimerText.text = TimeRemaining.ToString("0");
 
-            ChosenGO = ShotgunHandler.LastSelection.SelectedGameObject;
+            ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
             if (ChosenStim != null) //They Clicked a Stim
@@ -374,7 +377,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value + .05f) && !TokenFBController.IsAnimating(), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value) && !TokenFBController.IsAnimating(), DisplayResults);
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
@@ -509,11 +512,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateTextOnExperimenterDisplay()
     {
-        Vector2 textLocation = new Vector2();
-
         for(int i=0; i < CurrentTrial.NumTrialStims; ++i)
         {
-            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent);
+            Vector2 textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent.transform);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);
             string stimString = "Target";
@@ -521,9 +522,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentStim.PreviouslyChosen)
                 stimString = "PC";
 
-            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent);
+            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent.transform);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
             playerViewTextList.Add(playerViewText);
+            playerViewText.SetActive(true);
         }
     }
 
@@ -1067,21 +1069,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void Generate3DBorders(StimGroup group)
     {
-        if (BorderPrefabList.Count == 0)
-            BorderPrefabList = new List<GameObject>();
+        if (BorderList.Count == 0)
+            BorderList = new List<GameObject>();
+
+        //Default stim require border to be moved up by .1
+        Vector3 adjustment = SessionValues.UsingDefaultConfigs ? new Vector3(0, .1f, 0) : Vector3.zero;
 
         foreach (var stim in group.stimDefs)
         {
-            if (stim.StimIndex == WrongStimIndex)
-            {
-                GameObject redBorder = Instantiate(RedBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
-                BorderPrefabList.Add(redBorder);
-            }
-            else
-            {
-                GameObject greenBorder = Instantiate(GreenBorderPrefab, stim.StimGameObject.transform.position + new Vector3(0, .1f, 0), Quaternion.identity);
-                BorderPrefabList.Add(greenBorder);
-            }
+            GameObject border = Instantiate(stim.StimIndex == WrongStimIndex ? RedBorderPrefab : GreenBorderPrefab, stim.StimGameObject.transform.position + adjustment, Quaternion.identity);
+            BorderList.Add(border);
         }
     }
 
@@ -1101,12 +1098,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject Create2DBorder(StimDef stim)
     {
-        GameObject border;
-        if (stim.StimIndex == WrongStimIndex)
-            border = Instantiate(RedBorderPrefab_2D);
-        else
-            border = Instantiate(GreenBorderPrefab_2D);
-        BorderPrefabList.Add(border);
+        GameObject border = Instantiate(stim.StimIndex == WrongStimIndex ? RedBorderPrefab_2D : GreenBorderPrefab_2D);
+        BorderList.Add(border);
         return border;
     }
 
@@ -1118,12 +1111,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void DestroyFeedbackBorders()
     {
-        foreach (GameObject border in BorderPrefabList)
+        foreach (GameObject border in BorderList)
         {
             if (border != null)
                 Destroy(border);
         }
-        BorderPrefabList.Clear();
+        BorderList.Clear();
+
+        
     }
 
     private List<int> ShuffleList(List<int> list)

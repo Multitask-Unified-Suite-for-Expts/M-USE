@@ -31,6 +31,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             trialLevel.ResetBlockVariables();
+            CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
         });
 
@@ -62,12 +63,12 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 
     private void DefineBlockData()
     {
+        BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
         BlockData.AddDatum("SaccadeType", () => trialLevel.SaccadeType);
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
         BlockData.AddDatum("TrialsCorrect", () => trialLevel.TrialsCorrect_Block);
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
-
     }
 
     public void CalculateBlockSummaryString()

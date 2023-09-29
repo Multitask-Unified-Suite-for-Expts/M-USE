@@ -81,15 +81,6 @@
       "isRange": 1,
       "hidden": 0
     },
-    "maxMazeDuration": {
-      "name": "Max Maze Duration",
-      "value": 120,
-      "min": 300,
-      "max": 20,
-      "precision": 1,
-      "isRange": 1,
-      "hidden": 0
-    },
     "minObjectTouchDuration": {
       "name": "Min Object Touch Duration",
       "value": 0.1,

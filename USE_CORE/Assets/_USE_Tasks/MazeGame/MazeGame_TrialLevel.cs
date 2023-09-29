@@ -136,18 +136,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             HaloFBController.SetHaloSize(5);
 
-            StartCoroutine(LoadTileAndBgTextures(result =>
+            FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
+
+            if(!SessionValues.WebBuild) //player view variables
             {
-                if (MazeContainer == null)
-                    MazeContainer = new GameObject("MazeContainer");
-
-                if (MazeBackground == null)
-                    MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
-            }));
-
-            //player view variables
-            playerViewParent = GameObject.Find("MainCameraCopy");
+                playerView = gameObject.AddComponent<PlayerViewPanel>();
+                playerViewParent = GameObject.Find("MainCameraCopy");
+            }
         });
+
+
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             if (StartButton == null)
@@ -423,16 +421,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTaskLevel.currMaze.mPath.Contains(stim.StimGameObject.name))
                 SessionValues.TargetObjects.Add(stim.StimGameObject);
         }
-        //NEED TO FILL OUT THIS METHOD SO THAT:
-        //target stim are added to SessionValues.TargetObjects
-        //distractor stim are added to SessionValues.DistractorObjects
-        //irrelevant stim are added to SessionValues.IrrelevantObjects
-
-        //Can look at ContinuousRecognition's method as an example
     }
 
-    private IEnumerator LoadTileAndBgTextures(Action<bool> callback)
+    private IEnumerator LoadTileAndBgTextures()
     {
+        if (MazeBackground != null || MazeContainer != null) //since its gonna be called every trial, only want it to load them the first time. 
+        {
+            TrialFilesLoaded = true; //Setting this to true triggers the LoadTrialTextures state to end
+            yield break; 
+        }
+
         string contextPath = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath;
 
         if (SessionValues.UsingServerConfigs)
@@ -442,7 +440,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (textureResult != null)
                     tileTex = textureResult;
                 else
-                    Debug.Log("TILE TEX RESULT IS NULL!");
+                    Debug.LogWarning("TILE TEX RESULT IS NULL!");
             }));
 
             yield return StartCoroutine(LoadTexture(contextPath + "/" + currentTaskDef.MazeBackgroundTexture + ".png", textureResult =>
@@ -450,21 +448,27 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (textureResult != null)
                     mazeBgTex = textureResult;
                 else
-                    Debug.Log("MAZE BACKGROUND TEXTURE RESULT IS NULL!");
+                    Debug.LogWarning("MAZE BACKGROUND TEXTURE RESULT IS NULL!");
             }));
         }
         else if (SessionValues.UsingDefaultConfigs)
         {
-            tileTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.TileTexture);
-            mazeBgTex = Resources.Load<Texture2D>("DefaultResources/Contexts/" + currentTaskDef.MazeBackgroundTexture);
+            tileTex = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/{currentTaskDef.TileTexture}");
+            mazeBgTex = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/{currentTaskDef.MazeBackgroundTexture}");
         }
         else if (SessionValues.UsingLocalConfigs)
         {
-            tileTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
-            mazeBgTex = LoadPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
+            tileTex = LoadExternalPNG(GetContextNestedFilePath(contextPath, currentTaskDef.TileTexture));
+            mazeBgTex = LoadExternalPNG(GetContextNestedFilePath(contextPath, currentTaskDef.MazeBackgroundTexture));
         }
 
-        callback?.Invoke(true);
+        if (MazeContainer == null)
+            MazeContainer = new GameObject("MazeContainer");
+
+        if (MazeBackground == null)
+            MazeBackground = CreateSquare("MazeBackground", mazeBgTex, currentTaskDef.MazePosition, new Vector3(5, 5, 5));
+
+        TrialFilesLoaded = true; //Setting this to true triggers the LoadTrialTextures state to end
     }
 
     public void InitializeTrialArrays()
@@ -488,7 +492,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         // This will Load all tiles within the maze and the background of the maze
-
         mazeDims = CurrentTaskLevel.currMaze.mDims;
         var mazeCenter = MazeBackground.transform.localPosition;
 
@@ -502,7 +505,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         tiles = new StimGroup("Tiles");
 
-        
         for (var x = 1; x <= mazeDims.x; x++)
         for (var y = 1; y <= mazeDims.y; y++)
         {
@@ -545,10 +547,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             else if (!CurrentTrialDef.DarkenNonPathTiles || CurrentTaskLevel.currMaze.mPath.Contains((chessCoordName)))
                 tileStimDef.StimGameObject.GetComponent<Tile>().setColor(tile.DEFAULT_TILE_COLOR);
             else
-                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));
-            
-            tiles.AddStims(tileStimDef);
-            
+                tileStimDef.StimGameObject.GetComponent<Tile>().setColor(new Color(0.5f, 0.5f, 0.5f));            
         }
         mazeLoaded = true;
         //Make sure to reset the maze to start at the start tile
@@ -904,7 +903,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void CreateTextOnExperimenterDisplay()
     {
         // sets parent for any playerView elements on experimenter display
-        playerView = new PlayerViewPanel(); //GameObject.Find("PlayerViewCanvas").GetComponent<PlayerViewPanel>()
         for (int i = 0; i < CurrentTaskLevel.currMaze.mPath.Count; i++)
         {
             foreach (StimDef sd in tiles.stimDefs)

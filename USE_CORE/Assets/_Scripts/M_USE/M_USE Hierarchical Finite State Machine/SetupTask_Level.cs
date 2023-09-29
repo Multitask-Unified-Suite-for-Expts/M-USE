@@ -19,12 +19,14 @@ public class SetupTask_Level : ControlLevel
     private FrameData FrameData;
     private TrialData TrialData;
     private string TaskDataPath, ConfigFolderName, TaskName;
+    private bool SharedTexturesLoaded = false;
 
     public override void DefineControlLevel()
     {
         State VerifyTask = new State("VerifyTask");
+        State LoadSharedTextures = new State("LoadSharedTextures");
         State OtherSetup = new State("OtherSetup");
-        AddActiveStates(new List<State> {VerifyTask, OtherSetup});
+        AddActiveStates(new List<State> {VerifyTask, LoadSharedTextures, OtherSetup });
         
         verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
         VerifyTask.AddChildLevel(verifyTask_Level);
@@ -32,10 +34,17 @@ public class SetupTask_Level : ControlLevel
         {
             verifyTask_Level.TaskLevel = TaskLevel;
         });
-            
-        VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup, () =>
+        VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, LoadSharedTextures, () =>
         {
+            TrialLevel = TaskLevel.TrialLevel;
         });
+
+        LoadSharedTextures.AddUniversalInitializationMethod(() =>
+        {
+            SharedTexturesLoaded = false;
+            StartCoroutine(LoadTextures());
+        });
+        LoadSharedTextures.SpecifyTermination(() => SharedTexturesLoaded, OtherSetup, () => SharedTexturesLoaded = false);
 
         OtherSetup.AddSpecificInitializationMethod(() =>
         {  
@@ -78,9 +87,9 @@ public class SetupTask_Level : ControlLevel
             TrialData = (TrialData) SessionValues.SessionDataControllers.InstantiateDataController<TrialData>(
                 "TrialData", ConfigFolderName, SessionValues.StoreData,
                 TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
-            
-            
-            TrialLevel = TaskLevel.TrialLevel;
+
+            //TrialLevel = TaskLevel.TrialLevel; //Moved up to verifyTask term method so that it exists before loading shared textures
+
             TrialData.taskLevel = TaskLevel;
             TrialData.trialLevel = TrialLevel;
             TrialData.sessionLevel = SessionValues.SessionLevel;
@@ -133,35 +142,13 @@ public class SetupTask_Level : ControlLevel
             TaskLevel.TrialData = TrialData;
             TaskName = TaskLevel.TaskName;
             TaskLevel.TrialLevel = TrialLevel;
-            //user-defined task control level 
 
 
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), SessionValues.InputManager.transform);
 
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"),
-                SessionValues.InputManager.transform);
-
-            
             List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
-            int totalTokensNum = TaskLevel.TaskDef.TotalTokensNum;
 
-
-            //GOTTA BE A BETTER WAY TO DO THIS:
-            /*fbControllers.GetComponent<AudioFBController>().SessionEventCodes =
-                SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<HaloFBController>().SessionEventCodes =
-                SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<TokenFBController>().SessionEventCodes =
-                SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<SliderFBController>().SessionEventCodes =
-                SessionValues.EventCodeManager.SessionEventCodes;
-            fbControllers.GetComponent<TouchFBController>().SessionEventCodes =
-                SessionValues.EventCodeManager.SessionEventCodes;
-                */
-
-            fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(totalTokensNum);
-
-
-            // TrialLevel.SelectionTracker = SelectionTracker;
+            fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(TaskLevel.TaskDef.TotalTokensNum);
 
             TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
             TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
@@ -170,24 +157,12 @@ public class SetupTask_Level : ControlLevel
             TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
             TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
 
-          //  TrialLevel.TouchFBController.EventCodeManager = SessionValues.EventCodeManager;
-
             if (TaskLevel.CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = TaskLevel.CustomTaskEventCodes;
 
             if (SessionValues.SessionDef.EyeTrackerActive)
                 SessionValues.GazeTracker.Init(FrameData, 0);
             SessionValues.MouseTracker.Init(FrameData, 0);
-
-
-            TrialLevel.LoadTexturesFromResources();
-            //CURRENTLY STILL LOADING THE SHARED TEXTURES FROM RESOURCES:
-            //if (SessionValues.UsingDefaultConfigs)
-            //    TrialLevel.LoadTexturesFromResources();
-            //else if (SessionValues.UsingServerConfigs)
-            //    TrialLevel.LoadTexturesFromServer();
-            //else if (SessionValues.UsingLocalConfigs)
-            //    TrialLevel.LoadTextures(SessionValues.SessionDef.ContextExternalFilePath);
 
 
             //Automatically giving TouchFbController;
@@ -205,7 +180,6 @@ public class SetupTask_Level : ControlLevel
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         break;
 
                     case "Halo":
@@ -218,7 +192,6 @@ public class SetupTask_Level : ControlLevel
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
 
@@ -228,7 +201,6 @@ public class SetupTask_Level : ControlLevel
                             TrialLevel.AudioFBController.Init(FrameData);
                             audioInited = true;
                         }
-
                         TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
                         break;
 
@@ -253,8 +225,14 @@ public class SetupTask_Level : ControlLevel
                 StartCoroutine(SessionValues.GazeData.CreateFile());
 
         });
-        
-        OtherSetup.SpecifyTermination(() => true, () => null, () => { });
+        OtherSetup.SpecifyTermination(() => true, () => null);
+
+    }
+
+    public IEnumerator LoadTextures()
+    {
+        yield return StartCoroutine(TrialLevel.LoadSharedTrialTextures());
+        SharedTexturesLoaded = true;
     }
 
     public static IEnumerator HandleCreateExternalFolder(string configName)

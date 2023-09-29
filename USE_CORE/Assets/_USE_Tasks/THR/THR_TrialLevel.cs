@@ -351,7 +351,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                     else if (HeldTooLong)
                         StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, HeldTooLongTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
                     else if (MovedOutside)
-                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, MoveTooFarTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
+                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, MovedTooFarTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
                 }
             }
             AudioPlayed = true;

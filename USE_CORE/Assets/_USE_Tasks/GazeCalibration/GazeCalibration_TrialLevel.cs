@@ -110,8 +110,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             AssignCalibPositions();
 
             // Create necessary variables to display text onto the Experimenter Display
-            PlayerViewPanel = new PlayerViewPanel();
-            PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
+            if (!SessionValues.WebBuild)
+            {
+                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
+            }
 
             GC_CanvasGO = GameObject.Find("GazeCalibration_Canvas");
 

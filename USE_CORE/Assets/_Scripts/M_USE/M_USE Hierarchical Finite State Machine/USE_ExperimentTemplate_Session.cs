@@ -94,6 +94,8 @@ namespace USE_ExperimentTemplate_Session
         public bool runSessionLevelCalibration;
 
         public bool waitForSerialPort;
+
+
         public override void DefineControlLevel()
         {
             #if (UNITY_WEBGL)
@@ -103,7 +105,7 @@ namespace USE_ExperimentTemplate_Session
             SessionValues.SessionLevel = this;
 
             SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
-            SessionValues.LoadingController = GameObject.Find("Circle").GetComponent<LoadingController>();
+            SessionValues.LoadingController = SessionValues.LoadingCanvas_GO.GetComponent<LoadingController>();
             SessionValues.LoadingCanvas_GO.SetActive(false);
 
 
@@ -172,21 +174,20 @@ namespace USE_ExperimentTemplate_Session
                     SessionValues.SerialPortController = GameObject.Find("MiscScripts").GetComponent<SerialPortThreaded>();
                     
                     if (SessionValues.SessionDef.SyncBoxActive)
-                        {
-                            SessionValues.SyncBoxController = new SyncBoxController();
-                            SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
-                            
-                        }
+                    {
+                        SessionValues.SyncBoxController = new SyncBoxController();
+                        SessionValues.SyncBoxController.serialPortController = SessionValues.SerialPortController;
+                    }
 
                     if (SessionValues.SessionDef.EventCodesActive)
-                        {
-                            SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
-                            SessionValues.EventCodeManager.codesActive = true;
-                        }
-                        waitForSerialPort = true;
+                    {
+                        SessionValues.EventCodeManager.SyncBoxController = SessionValues.SyncBoxController;
+                        SessionValues.EventCodeManager.codesActive = true;
+                    }
+                    waitForSerialPort = true;
 
-                        SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
-                        SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
+                    SessionValues.SerialPortController.SerialPortAddress = SessionValues.SessionDef.SerialPortAddress;
+                    SessionValues.SerialPortController.SerialPortSpeed = SessionValues.SessionDef.SerialPortSpeed;
                     
                     SessionValues.SerialPortController.Initialize();
 
@@ -194,16 +195,8 @@ namespace USE_ExperimentTemplate_Session
                     {
                         if (SessionValues.SessionDef.SyncBoxActive && SessionValues.SessionDef.SyncBoxInitCommands != null)
                             SessionValues.SyncBoxController.SendCommand((List<string>)SessionValues.SessionDef.SyncBoxInitCommands);
-
-                        foreach (string str in SessionValues.SessionDef.SyncBoxInitCommands)
-                        {
-                            Debug.Log("STR " + str);
-                        }
                     }
                 }
-
-                
-
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
@@ -222,7 +215,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     SessionValues.SerialSentData.sc = SessionValues.SerialPortController;
                     SessionValues.SerialRecvData.sc = SessionValues.SerialPortController;
-                  }
+                }
                
 
                 if (!SessionValues.SessionDef.FlashPanelsActive)
@@ -473,7 +466,7 @@ namespace USE_ExperimentTemplate_Session
                         image.texture = Resources.Load<Texture2D>($"{SessionValues.SessionDef.TaskIconsFolderPath}/{taskName}");
                     }
                     else if(SessionValues.UsingLocalConfigs)
-                        image.texture = LoadPNG(SessionValues.SessionDef.TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
+                        image.texture = LoadExternalPNG(SessionValues.SessionDef.TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
 
                     if (SessionValues.SessionDef.GuidedTaskSelection)
@@ -554,7 +547,7 @@ namespace USE_ExperimentTemplate_Session
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
-                SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
+                //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
                 SessionValues.LoadingCanvas_GO.SetActive(true);
 
                 TaskButtonsContainer.SetActive(false);

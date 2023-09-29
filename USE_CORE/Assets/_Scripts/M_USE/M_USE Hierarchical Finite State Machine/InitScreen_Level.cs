@@ -92,6 +92,9 @@ public class InitScreen_Level : ControlLevel
         {
             if (StartPanel_GO.transform.localPosition != Vector3.zero)
                 StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
+
+            if (InputBroker.GetKeyUp(KeyCode.Escape))
+                Application.Quit();
         });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
         {
@@ -116,6 +119,9 @@ public class InitScreen_Level : ControlLevel
                 if (ErrorHandled())
                     ErrorHandling_GO.SetActive(false);
             }
+
+            if (InputBroker.GetKeyUp(KeyCode.Escape))
+                Application.Quit();
         });
         CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
@@ -130,7 +136,7 @@ public class InitScreen_Level : ControlLevel
             MainPanel_GO.SetActive(false);
             InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
 
-            SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = "Loading \n Configs";
+            //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = "Loading \n Configs";
             SessionValues.LoadingCanvas_GO.SetActive(true); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
@@ -158,7 +164,7 @@ public class InitScreen_Level : ControlLevel
                 panel.SetActive(true);
         }
         
-
+        //Config Toggles:
         if(LocalConfig_Toggle.isOn)
         {
             LocalConfig_GO.SetActive(true);
@@ -172,6 +178,7 @@ public class InitScreen_Level : ControlLevel
                 GreyOutPanels_Array[2].SetActive(true); //set config folder grey out panel active since they havent connected to server yet
         }
 
+        //Data Toggles:
         if (LocalData_Toggle.isOn)
         {
             LocalData_GO.SetActive(true);
@@ -222,7 +229,7 @@ public class InitScreen_Level : ControlLevel
                     return true;
                 break;
             default:
-                Debug.LogError("DEFAULT ERROR HANDLED SWITCH STATEMENT!");
+                Debug.LogWarning("DEFAULT ERROR HANDLED SWITCH STATEMENT!");
                 break;
         }
         return false;
@@ -261,7 +268,7 @@ public class InitScreen_Level : ControlLevel
             SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
         }
         else
-            Debug.LogError("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
+            Debug.LogWarning("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
     }
 
     private void HandleConfigToggle(GameObject selectedGO)
@@ -440,7 +447,7 @@ public class InitScreen_Level : ControlLevel
             ServerData_GO.SetActive(false);
             ServerConfig_GO.SetActive(false);
 
-            //Block out local toggle options if web build:
+            //Un-Block out local toggle options if not web build:
             GameObject.Find("LocalConfigsToggle_GREYPANEL").SetActive(false);
             GameObject.Find("LocalDataToggle_GREYPANEL").SetActive(false);
         }
@@ -523,7 +530,7 @@ public class InitScreen_Level : ControlLevel
             }
             else
             {
-                Debug.Log("UNABLE TO CONNECT TO SERVER!");
+                Debug.LogWarning("UNABLE TO CONNECT TO SERVER!");
                 PlayAudio(Error_AudioClip);
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
                 RedX_GO.SetActive(true);

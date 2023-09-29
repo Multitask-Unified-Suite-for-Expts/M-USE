@@ -256,11 +256,8 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-                if (SessionValues.StoreData)
-                    StartCoroutine(FrameData.AppendDataToBuffer());
-
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.EventCodeLateUpdate();
+               StartCoroutine(FrameData.AppendDataToBuffer());
+               SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -274,11 +271,13 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionValues.SessionDef.IsHuman && BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
-                if (SessionValues.StoreData)
-                {
-                    StartCoroutine(BlockData.AppendDataToBuffer());
-                    StartCoroutine(BlockData.AppendDataToFile());
-                }
+                StartCoroutine(BlockData.AppendDataToBuffer()); 
+                StartCoroutine(BlockData.AppendDataToFile());
+
+                StartCoroutine(FrameData.AppendDataToBuffer());
+                StartCoroutine(FrameData.AppendDataToFile());
+
+
             });
 
             //FinishTask State-----------------------------------------------------------------------------------------------------

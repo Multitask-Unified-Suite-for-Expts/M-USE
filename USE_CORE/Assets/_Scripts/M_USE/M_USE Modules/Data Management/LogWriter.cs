@@ -1,3 +1,30 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
+
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -13,13 +40,13 @@ public class LogWriter : MonoBehaviour
     private bool LogFileCreated;
     private readonly int Capacity = 50;
 
-    private string ServerLogFolderPath
+    private string ServerLog_FolderPath
     {
         get
         {
             if (string.IsNullOrEmpty(ServerManager.SessionDataFolderPath))
             {
-                Debug.Log("Trying to Get ServerLogFolderPath but ServerManager.SessionDataFolderPath hasnt been set yet!");
+                Debug.LogWarning("Trying to Get ServerLogFolderPath but ServerManager.SessionDataFolderPath hasnt been set yet!");
                 return null;
             }
             else
@@ -29,13 +56,13 @@ public class LogWriter : MonoBehaviour
         }
     }
 
-    private string LocalLogFolderPath
+    private string LocalLog_FolderPath
     {
         get
         {
             if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
             {
-                Debug.Log("Trying to Get LocalLogFolderPath but SessionValues.SessionDataPath hasnt been set yet!");
+                Debug.LogWarning("Trying to Get LocalLogFolderPath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
             }
             else
@@ -43,7 +70,7 @@ public class LogWriter : MonoBehaviour
         }
     }
 
-    private string ServerLogFilePath
+    private string ServerLog_FilePath
     {
         get
         {
@@ -57,7 +84,7 @@ public class LogWriter : MonoBehaviour
         }
     }
 
-    private string LocalLogFilePath
+    private string LocalLog_FilePath
     {
         get
         {
@@ -125,10 +152,10 @@ public class LogWriter : MonoBehaviour
         if (SessionValues.StoringDataOnServer)
         {
             if (ServerManager.SessionDataFolderCreated)
-                yield return ServerManager.CreateFolder(ServerLogFolderPath);
+                yield return ServerManager.CreateFolder(ServerLog_FolderPath);
         }
         else if (SessionValues.StoringDataLocally)
-            Directory.CreateDirectory(LocalLogFolderPath);
+            Directory.CreateDirectory(LocalLog_FolderPath);
         
         CreatingLogFolder = false;
         LogFolderCreated = true;
@@ -140,11 +167,11 @@ public class LogWriter : MonoBehaviour
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
-            yield return ServerManager.CreateFileAsync(ServerLogFilePath, content);
+            yield return ServerManager.CreateFileAsync(ServerLog_FilePath, content);
         }
         else if (SessionValues.StoringDataLocally)
         {
-            using StreamWriter createFileWriter = File.CreateText(LocalLogFilePath);
+            using StreamWriter createFileWriter = File.CreateText(LocalLog_FilePath);
             WriteLogMessagesLocally(createFileWriter);
         }
         LogFileCreated = true;
@@ -156,11 +183,11 @@ public class LogWriter : MonoBehaviour
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
-            yield return ServerManager.AppendToFileAsync(ServerLogFilePath, content);
+            yield return ServerManager.AppendToFileAsync(ServerLog_FilePath, content);
         }
         else if(SessionValues.StoringDataLocally)
         {
-            using StreamWriter appendFileWriter = File.AppendText(LocalLogFilePath);
+            using StreamWriter appendFileWriter = File.AppendText(LocalLog_FilePath);
             WriteLogMessagesLocally(appendFileWriter);
         }
     }

@@ -1,3 +1,29 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Collections;
@@ -65,154 +91,6 @@ namespace USE_ExperimentTemplate_Data
         public ControlLevel_Session_Template sessionLevel;
         public ControlLevel_Task_Template taskLevel;
         public ControlLevel_Trial_Template trialLevel;
-
-        private readonly string ConnectionString = "Server=localhost;Database=MUSE;Uid=root;Pwd=attention;";
-
-        //public MySqlConnection Connection
-        //{
-        //    get
-        //    {
-        //        return new MySqlConnection(ConnectionString);
-        //    }
-        //}
-
-        //public void TestConnectionToDB()
-        //{
-        //    using (var conn = Connection)
-        //    {
-        //        conn.Open();
-        //        using (var cmd = conn.CreateCommand())
-        //        {
-        //            cmd.CommandText = @"SELECT * FROM Task;";
-
-        //            using (MySqlDataReader reader = cmd.ExecuteReader())
-        //            {
-        //                while (reader.Read())
-        //                {
-        //                    Debug.Log((int)reader["Id"]);
-        //                    Debug.Log((reader.GetString(reader.GetOrdinal("Name"))));
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
-
-
-
-        //Dict to hold all the sql data types, so they will be correct for sql command
-        Dictionary<string, string> TypeDict_SQL = new Dictionary<string, string>()
-        {
-            { "Boolean", "BIT" },
-            { "Byte", "TINYINT" },
-            { "Short", "SMALLINT" },
-            { "Int32", "INT" },
-            { "Int", "INT" },
-            { "Long", "BIGINT" },
-            { "Float", "REAL" },
-            { "Double", "FLOAT" },
-            { "Decimal", "DECIMAL" },
-            { "Single", "REAL" },
-            { "DateTime", "DATETIME" },
-            { "String", "NVARCHAR(MAX)" }
-        };
-
-        public string GetSQLType(IDatum datum)
-        {
-            var full = datum.GetType().ToString();
-            string[] split = Regex.Split(full, @"\b" + "System." + @"\b");
-            string dataType = new string(split[split.Length - 1].Where(c => c != ']').ToArray());
-            return TypeDict_SQL[dataType];
-        }
-        public string GetSQLType(string typeName) //Overload for if already have the 1 word sys type string:
-        {
-            return TypeDict_SQL[typeName];
-        }
-
-        public void LogDataController()
-        {
-            Debug.Log("DATA CONTROLLER NAME: " + name);
-            Debug.Log("---------------------------");
-            foreach (var datum in data)
-            {
-                Debug.Log("Name: " + datum.Name + " | Type: " + GetSQLType(datum));
-                Debug.Log("---------------------------");
-            }
-        }
-
-        //public bool DoesSQLTableExist()
-        //{
-        //    bool tableExists = new bool();
-        //    using (SqlConnection conn = Connection)
-        //    {
-        //        conn.Open();
-        //        using (SqlCommand cmd = conn.CreateCommand())
-        //        {
-        //            cmd.CommandText = $@"SELECT * FROM {name};";
-        //            SqlDataReader reader = cmd.ExecuteReader();
-        //            tableExists = reader.Read();
-        //            reader.Close();
-        //        }
-        //        conn.Close();
-        //        return tableExists;
-        //    }
-        //}
-
-        public void CreateTable_SQL() //currently using the datacontrollers name as the TableName
-        {
-            //if (!DoesSQLTableExist())
-            //{
-            //    using (SqlConnection conn = Connection)
-            //    {
-            //        conn.Open();
-            //        using (SqlCommand cmd = conn.CreateCommand())
-            //        {
-            //            string sqlString = $"CREATE TABLE {name} (Id INT PRIMARY KEY";
-            //            foreach (IDatum datum in data)
-            //            {
-            //                var sqlType = GetSQLType(datum);
-            //                if (sqlType == null)
-            //                    Debug.Log(datum.Name + " Does not have a matching SQL Type in the dictionary");
-            //                else
-            //                    sqlString += $", {datum.Name} {sqlType}";
-            //            }
-            //            sqlString += ")";
-            //            cmd.CommandText = sqlString;
-            //            cmd.ExecuteNonQuery();
-            //        }
-            //        conn.Close();
-            //    }
-            //}
-        }
-
-        public void AddData_SQL()
-        {
-            ////First check if table exists in DB:
-            //if (DoesSQLTableExist())
-            //{
-            //    using (SqlConnection conn = Connection)
-            //    {
-            //        conn.Open();
-            //        DataTable dataTable = new DataTable();
-
-            //        //Add all columns first:
-            //        foreach (var datum in data)
-            //            dataTable.Columns.Add(datum.Name);
-
-            //        //Then add all rows:
-            //        foreach (var datum in data)
-            //            dataTable.Rows.Add(datum.ValueAsString);
-
-            //        using (SqlBulkCopy bulkCopy = new SqlBulkCopy(conn))
-            //        {
-            //            bulkCopy.DestinationTableName = name;
-            //            bulkCopy.WriteToServer(dataTable);
-            //        }
-            //    }
-            //}
-            //else
-            //    Debug.Log($"There is no SQL table in the database with the name {name}");
-        }
-
 
 
         public override void DefineDataController()

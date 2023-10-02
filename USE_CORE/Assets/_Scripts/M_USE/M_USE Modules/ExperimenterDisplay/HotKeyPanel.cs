@@ -1,3 +1,29 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -261,37 +287,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 }
             };
             HotKeyList.Add(previousBlock);
-
-
-            // End Trial Game Hot Key
-            //COMMENTING OUT BECAUSE: 1) It's not used, and 2) It's basically the same as EndBlock hotkey. 
-            //HotKey endTrial = new HotKey
-            //{
-            //    keyDescription = "T",
-            //    actionName = "End Trial",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.T),
-            //    hotKeyAction = () =>
-            //    {
-            //        Debug.Log("---PRESSED END TRIAL HOT KEY---");
-            //        if (HkPanel.TrialLevel != null)
-            //        {
-            //            if (HkPanel.TrialLevel.TokenFBController != null)
-            //            {
-            //                HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-            //                HkPanel.TrialLevel.TokenFBController.enabled = false;
-            //            }
-
-            //            if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
-            //                HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
-
-            //            HkPanel.TrialLevel.AbortCode = 1;
-            //            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndTrial"]);
-            //            HkPanel.TrialLevel.ForceBlockEnd = true;
-            //            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial")); //Go to end of trial
-            //        }
-            //    }
-            //};
-            //HotKeyList.Add(endTrial);
 
 
             //End Block Hot Key

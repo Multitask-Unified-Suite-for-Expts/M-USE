@@ -10,7 +10,7 @@ See http://m-use.psy.vanderbilt.edu for full documentation, descriptions, and a 
 
 <div style="background-color: #d4edda; padding: 10px; border: 1px solid #c3e6cb;">
     :warning: <strong>Important:</strong><br>
-    At present the suite requires the 2020.3.40f1 version of the Unity editor. We are rapidly working to fix this issue.
+    Currently, the suite requires the 2020.3.40f1 version of the Unity editor.
 </div>
 
 <br>

@@ -34,17 +34,14 @@ public class HaloFBController : MonoBehaviour
     public GameObject NegativeHaloPrefab;
 
     private GameObject instantiated;
-    private bool LeaveFBOn = false;
 
+    private bool LeaveFBOn = false;
     public bool IsFlashing;
-    // Logging
+
     private enum State { None, Positive, Negative };
     private State state;
 
-    public bool IsHaloGameObjectNull()
-    {
-        return instantiated == null;
-    }
+
 
     public void Init(DataController frameData)
     {
@@ -54,6 +51,11 @@ public class HaloFBController : MonoBehaviour
             Destroy(instantiated);
         }
         instantiated = null;
+    }
+
+    public bool IsHaloGameObjectNull()
+    {
+        return instantiated == null;
     }
 
     public void SetLeaveFeedbackOn()
@@ -76,28 +78,26 @@ public class HaloFBController : MonoBehaviour
             Show(NegativeHaloPrefab, gameObj);
         else
             Show2D(NegativeHaloPrefab, gameObj, depth.Value);
-
     }
     private void Show(GameObject haloPrefab, GameObject gameObj)
     {
-        if (instantiated != null)
+        if (instantiated != null && !LeaveFBOn)
         {
-            if (!LeaveFBOn)
-            {
-                Debug.LogWarning("Trying to show HaloFB but one is already being shown");
-                Destroy(instantiated);
-            }
+            Debug.LogWarning("Trying to show HaloFB but one is already being shown");
+            Destroy(instantiated);   
         }
+
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, rootObj.transform);
         instantiated.transform.SetParent(rootObj.transform);
-        if(SessionValues.SessionDef.EventCodesActive)
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
         // Position the haloPrefab behind the game object
         float distanceBehind = 1.5f; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         instantiated.transform.position = behindPos;
+
+        if(SessionValues.SessionDef.EventCodesActive)
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
     }
 
     public void Show2D(GameObject haloPrefab, GameObject gameObj, float depth = 10)

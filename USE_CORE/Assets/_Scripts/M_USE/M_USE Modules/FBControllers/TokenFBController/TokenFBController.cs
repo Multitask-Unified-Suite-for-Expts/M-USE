@@ -73,8 +73,6 @@ public class TokenFBController : MonoBehaviour
     // Audio
     AudioFBController audioFBController;
 
-    private bool IsFullScreen;
-
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
@@ -92,7 +90,6 @@ public class TokenFBController : MonoBehaviour
 
         SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
         SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
-
     }
 
 

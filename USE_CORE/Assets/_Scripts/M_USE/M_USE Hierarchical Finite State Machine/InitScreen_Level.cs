@@ -397,10 +397,10 @@ public class InitScreen_Level : ControlLevel
         ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
         LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
 
-        GreyOutPanels_Array = new GameObject[3];
-        GreyOutPanels_Array[0] = GameObject.Find("GreyOutPanel_ServerURL");
-        GreyOutPanels_Array[1] = GameObject.Find("GreyOutPanel_Data");
-        GreyOutPanels_Array[2] = GameObject.Find("GreyOutPanel_Config");
+        GreyOutPanels_Array = new GameObject[3]
+        {
+            GameObject.Find("GreyOutPanel_ServerURL"), GameObject.Find("GreyOutPanel_Data"), GameObject.Find("GreyOutPanel_Config")
+        };
         foreach (GameObject go in GreyOutPanels_Array)
             go.SetActive(false);
 
@@ -428,9 +428,11 @@ public class InitScreen_Level : ControlLevel
 
 
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
-        FileSpec configFileSpec = new FileSpec();
-        configFileSpec.name = "Config Folder";
-        configFileSpec.isFolder = true;
+        FileSpec configFileSpec = new FileSpec
+        {
+            name = "Config Folder",
+            isFolder = true
+        };
         SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
         TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
@@ -438,9 +440,11 @@ public class InitScreen_Level : ControlLevel
         configFileItem.ManualStart(configFileSpec, configInputField, configText);
         LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
-        FileSpec dataFileSpec = new FileSpec();
-        dataFileSpec.name = "Data Folder";
-        dataFileSpec.isFolder = true;
+        FileSpec dataFileSpec = new FileSpec
+        {
+            name = "Data Folder",
+            isFolder = true
+        };
         SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
         TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();

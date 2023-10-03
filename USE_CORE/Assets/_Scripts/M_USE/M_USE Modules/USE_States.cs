@@ -1114,11 +1114,11 @@ namespace USE_States
 			{
 				if (quitApplicationAtEnd)
 				{
-#if UNITY_EDITOR
+					#if UNITY_EDITOR
 					{
 						UnityEditor.EditorApplication.isPlaying = false;
 					}
-#endif
+					#endif
 					// if (Application.isEditor)
 					// {
 					//     UnityEditor.EditorApplication.isPlaying = false;

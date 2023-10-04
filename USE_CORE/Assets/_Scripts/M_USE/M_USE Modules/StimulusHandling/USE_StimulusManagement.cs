@@ -301,7 +301,7 @@ namespace USE_StimulusManagement
 
 			if (SessionValues.UsingDefaultConfigs)
 			{
-                StimGameObject = LoadPrefabFromResources();
+                LoadPrefabFromResources();
 			}
             else
             {
@@ -309,23 +309,17 @@ namespace USE_StimulusManagement
                 {
 					if (SessionValues.UsingServerConfigs)
 					{
-						yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer(returnedStimGO =>
-						{
-							if (returnedStimGO != null)
-								StimGameObject = returnedStimGO;
-							else
-								Debug.LogError("TRIED TO LOAD STIM FROM SERVER BUT ITS NULL!");
-						}));
+						yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
 					}
 					else if(SessionValues.UsingLocalConfigs)
 					{
-						StimGameObject = LoadExternalStimFromFile();
+						LoadExternalStimFromFile();
 					}
                 }
                 else if (StimDimVals != null)
                 {
                     FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-                    StimGameObject = LoadExternalStimFromFile();
+                    LoadExternalStimFromFile();
                 }
                 else if (!string.IsNullOrEmpty(PrefabPath)) //this one neccessary?
 					StimGameObject = Resources.Load<GameObject>(PrefabPath);
@@ -349,23 +343,21 @@ namespace USE_StimulusManagement
             callback?.Invoke(StimGameObject);
         }
 		
-		public GameObject LoadPrefabFromResources()
+		public void LoadPrefabFromResources()
 		{
 			try
 			{
 				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
 				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
-				return StimGameObject;
 			}
 			catch(Exception e)
 			{
                 Debug.LogError($"ERROR LOADING {FileName} FROM RESOURCES! " + e.Message);
-				return null;
             }
         }
 
 
-        public IEnumerator Load2DStimFromServer(Action<GameObject> callback)
+        public IEnumerator Load2DStimFromServer()
 		{
 			string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
 
@@ -377,7 +369,6 @@ namespace USE_StimulusManagement
 					StimGameObject.SetActive(false);
 					RawImage image = StimGameObject.AddComponent<RawImage>();
 					image.texture = textureResult;
-					callback?.Invoke(StimGameObject);
 				}
 				else
 					Debug.LogWarning("TRIED TO LOAD 2D STIM FROM SERVER BUT THE RESULTING TEXTURE IS NULL!");
@@ -413,17 +404,17 @@ namespace USE_StimulusManagement
 			
 			switch (StimExtension.ToLower())
 			{
-				case ".fbx":
-                    //StimGameObject = LoadModel_Trilib(FileName);
-					break;
 				case ".png":
-					StimGameObject = LoadExternalPNG(FileName);
+					LoadExternalPNG(FileName);
 					break;
 				case ".glb":
-					LoadExternalGITF();
+					LoadExternalGITF(FileName);
 					break;
                 case ".gltf":
-                    LoadExternalGITF();
+                    LoadExternalGITF(FileName);
+                    break;
+                case ".fbx":
+                    //LoadModel_Trilib(FileName);
                     break;
                 default:
 					break;
@@ -432,13 +423,12 @@ namespace USE_StimulusManagement
 			return StimGameObject;
 		}
 
-		public GameObject LoadExternalGITF()
+		public void LoadExternalGITF(string filePath)
 		{
 			StimGameObject = Importer.LoadFromFile(FileName);
-			return StimGameObject;
 		}
 
-		public GameObject LoadExternalPNG(string filePath)
+		public void LoadExternalPNG(string filePath)
         {
 			StimGameObject = new GameObject();
             RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
@@ -451,32 +441,30 @@ namespace USE_StimulusManagement
 				stimGOImage.texture = tex;
             }
             else
-                Debug.LogError("STIM FILE DOES NOT EXIST AT PATH: " + filePath);
-
-            return StimGameObject;
+                Debug.LogError("STIM FILE DOES NOT EXIST AT LOCAL PATH: " + filePath);
         }
 
-        //   public GameObject LoadModel_Trilib(string filePath)
-        //   {
-        //       using (var assetLoader = new AssetLoader())
-        //       {
-        //           try
-        //           {
-        //               var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
-        //               assetLoaderOptions.AutoPlayAnimations = true;
-        //               assetLoaderOptions.AddAssetUnloader = true;
-        //StimGameObject = assetLoader.LoadFromFile(filePath);
-        //           }
-        //           catch (Exception e)
-        //           {
-        //               Debug.LogError(e.ToString());
-        //               return null;
-        //           }
-        //       }
-        //       return StimGameObject;
-        //   }
 
-        private void PositionRotationScale()
+		//TRILIB METHOD:
+		//public void LoadModel_Trilib(string filePath)
+		//{
+		//	using (var assetLoader = new AssetLoader())
+		//	{
+		//		try
+		//		{
+		//			var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
+		//			assetLoaderOptions.AutoPlayAnimations = true;
+		//			assetLoaderOptions.AddAssetUnloader = true;
+		//			StimGameObject = assetLoader.LoadFromFile(filePath);
+		//		}
+		//		catch (Exception e)
+		//		{
+		//			Debug.LogError(e.ToString());
+		//		}
+		//	}
+		//}
+
+		private void PositionRotationScale()
         {
             StimGameObject.transform.localPosition = StimLocation;
 
@@ -877,7 +865,8 @@ namespace USE_StimulusManagement
 		{
 			foreach (StimDef sd in stimDefs)
 			{
-				if (sd.StimGameObject == null){
+				if (sd.StimGameObject == null)
+				{
 					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
 					{
 						if (stimResultGO != null)

@@ -23,8 +23,7 @@ SOFTWARE.
 */
 
 
-using System;
-using System.Collections;
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -74,7 +73,7 @@ public class LoadingController : MonoBehaviour
 
     private void RotateStar()
     {
-        Star_GO.transform.Rotate(Vector3.forward, StarRotationSpeed * Time.deltaTime);
+        Star_GO.transform.Rotate(Vector3.back, StarRotationSpeed * Time.deltaTime);
     }
 
     private void LoadingCircleAnimation()

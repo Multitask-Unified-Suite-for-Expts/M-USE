@@ -134,7 +134,7 @@ public static class SessionValues
     public static List<GameObject> GetStartButtonChildren()
     {
         if(SessionDef == null)
-            Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
+            Debug.LogWarning("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
         else
         {
             if (SessionDef.IsHuman && HumanStartPanel.StartButtonChildren != null)
@@ -142,7 +142,7 @@ public static class SessionValues
             else if (!SessionDef.IsHuman && USE_StartButton.StartButtonChildren != null)
                 return USE_StartButton.StartButtonChildren;
         }
-        Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
+        Debug.LogWarning("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
         return null;
     }
 

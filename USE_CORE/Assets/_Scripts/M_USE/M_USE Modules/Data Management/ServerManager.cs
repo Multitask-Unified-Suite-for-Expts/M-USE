@@ -263,6 +263,7 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
+
     public static void SetSessionDataFolder(string sessionDataFolder)
     {
         SessionDataFolder = sessionDataFolder;

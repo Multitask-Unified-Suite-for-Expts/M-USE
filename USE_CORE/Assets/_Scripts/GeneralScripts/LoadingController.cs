@@ -23,11 +23,15 @@ SOFTWARE.
 */
 
 
+
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-//NT: USE THIS CLASS BY SETTING SessionValues.LoadingCanvas_GO Active or Inactive!
+/*
+ USE THIS CLASS BY SETTING SessionValues.LoadingCanvas_GO ACTIVE OR INACTIVE!
+*/
 
 public class LoadingController : MonoBehaviour
 {
@@ -38,14 +42,27 @@ public class LoadingController : MonoBehaviour
 
     //For star animation:
     public GameObject Star_GO;
-    private float starRotationSpeed = 125f;
+    private readonly float StarRotationSpeed = 125f;
+
+    private TextMeshProUGUI LoadingText;
 
 
     void Start()
     {
         FillCircle_Image = FillCircle_GO.GetComponent<Image>();
-        Progress = 0f;
-        FillCircle_Image.fillAmount = Progress;
+        if (FillCircle_Image == null)
+            Debug.LogWarning("FILL CIRCLE IMAGE IS NULL!");
+        else
+        {
+            Progress = 0f;
+            FillCircle_Image.fillAmount = Progress;
+        }
+
+        LoadingText = SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>();
+        if (LoadingText == null)
+            Debug.LogWarning("LOADING TEXT IS NULL!");
+        else
+            LoadingText.text = "Loading..";
     }
 
     private void Update()
@@ -56,16 +73,16 @@ public class LoadingController : MonoBehaviour
 
     private void RotateStar()
     {
-        Star_GO.transform.Rotate(Vector3.forward, starRotationSpeed * Time.deltaTime);
+        Star_GO.transform.Rotate(Vector3.back, StarRotationSpeed * Time.deltaTime);
     }
 
     private void LoadingCircleAnimation()
     {
         if (FillCircle_GO.activeInHierarchy)
         {
-            Progress += 1f * Time.deltaTime;
+            Progress += Time.deltaTime;
             if (Progress >= 1f)
-                Progress = 0f;
+                Progress -= 1f;
             FillCircle_Image.fillAmount = Progress;
         }
     }

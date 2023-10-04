@@ -434,10 +434,11 @@ namespace USE_StimulusManagement
 
 		public GameObject LoadExternalGITF()
 		{
-            StimGameObject = Importer.LoadFromFile(FileName);
+			StimGameObject = Importer.LoadFromFile(FileName);
 			return StimGameObject;
-        }
-        public GameObject LoadExternalPNG(string filePath)
+		}
+
+		public GameObject LoadExternalPNG(string filePath)
         {
 			StimGameObject = new GameObject();
             RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();

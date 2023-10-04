@@ -25,7 +25,7 @@ SOFTWARE.
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro;
-
+using System;
 
 public class FolderDropdown : MonoBehaviour
 {
@@ -35,11 +35,17 @@ public class FolderDropdown : MonoBehaviour
     {
         dropdown = GetComponent<TMP_Dropdown>();
         if (dropdown == null)
-            Debug.LogError("The FolderDropdown's dropdown component is null!");
+            Debug.LogWarning("DROPDOWN IS NULL!");
     }
 
     public void SetFolders(List<string> sessionConfigFolders)
     {
+        if(sessionConfigFolders == null || sessionConfigFolders.Count < 1)
+        {
+            Debug.LogWarning("TRYING TO SET FOLDERS BUT THE SessionConfigFolders PARAMETER IS NULL OR EMPTY!");
+            return;
+        }
+
         List<TMP_Dropdown.OptionData> options = new List<TMP_Dropdown.OptionData>();
 
         foreach(string folder in sessionConfigFolders)

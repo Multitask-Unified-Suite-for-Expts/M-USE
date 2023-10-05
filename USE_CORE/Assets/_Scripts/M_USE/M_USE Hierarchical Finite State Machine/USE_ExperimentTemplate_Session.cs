@@ -621,13 +621,15 @@ namespace USE_ExperimentTemplate_Session
             });
 
             loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, setupTask, () =>
-
             {
                 DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
+
+                SetTasksMainBackground(); 
+
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
 
@@ -782,6 +784,19 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
         }
 
+        //Method is used to have every task set their main background as the MUSE blue background
+        private void SetTasksMainBackground()
+        {
+            if (CurrentTask.TaskCam != null)
+            {
+                if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
+                    skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
+                skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
+            }
+            else
+                Debug.LogWarning("TASK CAM IS NULL!");
+        }
+
         private void FindGameObjects()
         {
             try
@@ -845,7 +860,7 @@ namespace USE_ExperimentTemplate_Session
             mirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = mirrorCamGO.AddComponent<Camera>();
             Skybox skybox = mirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("NewBackground!");
+            skybox.material = Resources.Load<Material>("MUSE_MainBackground");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
             mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();

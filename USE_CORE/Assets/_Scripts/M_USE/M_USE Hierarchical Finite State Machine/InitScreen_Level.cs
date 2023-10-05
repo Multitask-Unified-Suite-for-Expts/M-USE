@@ -299,6 +299,8 @@ public class InitScreen_Level : ControlLevel
             List<GameObject> deactivateList = new List<GameObject>() { LocalConfig_GO, GreyOutPanels_Array[0] };
             if (ConnectedToServer)
                 deactivateList.Add(GreyOutPanels_Array[2]);
+            else
+                GreyOutPanels_Array[2].SetActive(true);
             DeactivateObjects(deactivateList);
             if (ConnectedToServer && !FoldersSet)
                 PopulateServerDropdown();

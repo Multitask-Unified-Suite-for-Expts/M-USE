@@ -345,7 +345,7 @@ namespace USE_ExperimentTemplate_Trial
                 SessionValues.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             });
 
-           GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
+            GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
            {
                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                foreach (Canvas canvas in TaskLevel.TaskCanvasses)

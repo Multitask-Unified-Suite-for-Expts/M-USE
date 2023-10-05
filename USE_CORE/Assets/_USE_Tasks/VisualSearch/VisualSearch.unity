@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311915, g: 0.3807396, b: 0.35872662, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311924, g: 0.38073963, b: 0.3587269, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -213,6 +213,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -311,6 +312,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -346,7 +348,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: VisualSearch_TrialLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -387,10 +388,12 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 2800000, guid: 47b4a2dd1c0432a469c082a17ab4256a, type: 3}
   HeldTooShortTexture: {fileID: 2800000, guid: 386006c0d81ea3442b946e37d70067af, type: 3}
-  BackdropStripesTexture: {fileID: 0}
+  MovedTooFarTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
+  TrialFilesLoaded: 0
   VS_CanvasGO: {fileID: 37832912}
   minObjectTouchDuration:
     name: 
@@ -464,23 +467,11 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  gratingSquareDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
   ContextName: 
   NumCorrect_InBlock: 0
   NumErrors_InBlock: 0
-  SearchDurationsList: []
-  NumRewardPulses_InBlock: 0
   NumTokenBarFull_InBlock: 0
   TotalTokensCollected_InBlock: 0
-  AverageSearchDuration_InBlock: 0
-  AbortedTrials_InBlock: 0
   chosenStimObj: {fileID: 0}
   StimIsChosen: 0
   PreSearch_TouchFbErrorCount: 0
@@ -497,7 +488,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: VisualSearch_TaskLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -509,6 +499,12 @@ MonoBehaviour:
   TaskName: VisualSearch
   TaskProjectFolder: 
   BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
   TrialLevel: {fileID: 1441289828}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -542,13 +538,10 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  NumRewardPulses_InTask: 0
   NumTokenBarFull_InTask: 0
   TotalTokensCollected_InTask: 0
-  AbortedTrials_InTask: 0
   NumCorrect_InTask: 0
   NumErrors_InTask: 0
-  SearchDurationsList_InTask: []
   CurrentBlockString: 
   BlockStringsAdded: 0
 --- !u!4 &1441289830
@@ -561,6 +554,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -576,7 +570,6 @@ GameObject:
   - component: {fileID: 1981090710}
   - component: {fileID: 1981090709}
   - component: {fileID: 1981090708}
-  - component: {fileID: 1981090711}
   m_Layer: 0
   m_Name: VisualSearch_Camera
   m_TagString: MainCamera
@@ -645,16 +638,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -60}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!45 &1981090711
-Skybox:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1981090707}
-  m_Enabled: 1
-  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}

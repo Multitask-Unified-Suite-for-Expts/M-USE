@@ -36,7 +36,8 @@ using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
 using System.Collections;
-using Siccity.GLTFUtility;
+using GLTFast;
+using System.Threading.Tasks;
 
 namespace USE_StimulusManagement
 {
@@ -300,21 +301,20 @@ namespace USE_StimulusManagement
 			SessionValues.Using2DStim = FileName.ToLower().Contains("png");
 
 			if (SessionValues.UsingDefaultConfigs)
-			{
-                LoadPrefabFromResources();
-			}
+				LoadPrefabFromResources();
             else
             {
                 if (!string.IsNullOrEmpty(FileName))
                 {
 					if (SessionValues.UsingServerConfigs)
 					{
-						yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
+                        if (SessionValues.Using2DStim)
+							yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
+						else
+							Load3DStimFromServer();
 					}
 					else if(SessionValues.UsingLocalConfigs)
-					{
 						LoadExternalStimFromFile();
-					}
                 }
                 else if (StimDimVals != null)
                 {
@@ -330,11 +330,16 @@ namespace USE_StimulusManagement
                 }
             }
 
+
+			//PROB NEED A BETTER SOLUTION FOR THIS!! HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
+			yield return new WaitUntil(() => StimGameObject != null);
+
+
 			//For 2D stim, set as child of Canvas:
             if (SessionValues.Using2DStim && CanvasGameObject != null)
                 StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
 
-            SetStimName();
+			SetStimName();
             PositionRotationScale();
             AddMesh();
             ToggleVisibility(false);
@@ -359,9 +364,9 @@ namespace USE_StimulusManagement
 
         public IEnumerator Load2DStimFromServer()
 		{
-			string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
+            string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
 
-			yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
 			{
 				if (textureResult != null)
 				{
@@ -375,7 +380,7 @@ namespace USE_StimulusManagement
 			}));
 		}
 
-		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
+		public async void LoadExternalStimFromFile(string stimFilePath = "")
 		{
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension)) //add StimExtesion to file path if it doesn't already contain it
             {
@@ -408,10 +413,10 @@ namespace USE_StimulusManagement
 					LoadExternalPNG(FileName);
 					break;
 				case ".glb":
-					LoadExternalGITF(FileName);
+					await LoadExternalGITF(FileName);
 					break;
                 case ".gltf":
-                    LoadExternalGITF(FileName);
+                    await LoadExternalGITF(FileName);
                     break;
                 case ".fbx":
                     //LoadModel_Trilib(FileName);
@@ -420,13 +425,27 @@ namespace USE_StimulusManagement
 					break;
 			}
 
-			return StimGameObject;
 		}
 
-		public void LoadExternalGITF(string filePath)
+		public async void Load3DStimFromServer()
 		{
-			StimGameObject = Importer.LoadFromFile(FileName);
+			string filePath = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
+			await LoadExternalGITF(filePath);
 		}
+
+		public async Task LoadExternalGITF(string filePath)
+		{
+            var gltf = new GltfImport();
+            var success = await gltf.Load(filePath);
+            if (success)
+            {
+                StimGameObject = new GameObject();
+				StimGameObject.SetActive(false);
+                await gltf.InstantiateMainSceneAsync(StimGameObject.transform);
+            }
+            else
+				Debug.LogError("FAILED LOADING GLTF FROM PATH: " + filePath);
+        }
 
 		public void LoadExternalPNG(string filePath)
         {

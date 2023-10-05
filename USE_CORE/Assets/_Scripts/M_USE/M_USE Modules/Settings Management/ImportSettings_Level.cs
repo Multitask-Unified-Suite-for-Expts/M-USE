@@ -167,7 +167,7 @@ public class ImportSettings_Level : ControlLevel
                     callback?.Invoke(result);
                 else
 				{
-                    Debug.Log("Server GetFilePath() Result is null for: " + searchString);
+                    Debug.Log("Server GetFilePath() Result is null for: " + searchString + " at folder path: " + currentSettingsDetails.FolderPath);
 					callback?.Invoke(null);
 				}
             }));

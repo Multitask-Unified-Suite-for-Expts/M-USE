@@ -74,6 +74,8 @@ namespace USE_StimulusManagement
 		public State SetActiveOnInitialization;
 		public State SetInactiveOnTermination;
 
+		private bool LoadingAsync;
+
 
 		public StimDef()
 		{
@@ -332,7 +334,7 @@ namespace USE_StimulusManagement
 
 
 			//PROB NEED A BETTER SOLUTION FOR THIS!! HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
-			yield return new WaitUntil(() => StimGameObject != null);
+			yield return new WaitUntil(() => StimGameObject != null && !LoadingAsync);
 
 
 			//For 2D stim, set as child of Canvas:
@@ -435,13 +437,16 @@ namespace USE_StimulusManagement
 
 		public async Task LoadExternalGITF(string filePath)
 		{
-            var gltf = new GltfImport();
+			var gltf = new GltfImport();
+
             var success = await gltf.Load(filePath);
             if (success)
             {
+				LoadingAsync = true;
                 StimGameObject = new GameObject();
 				StimGameObject.SetActive(false);
                 await gltf.InstantiateMainSceneAsync(StimGameObject.transform);
+				LoadingAsync = false;
             }
             else
 				Debug.LogError("FAILED LOADING GLTF FROM PATH: " + filePath);

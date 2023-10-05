@@ -61,7 +61,7 @@ namespace USE_Data
 				}
 				catch (Exception e)
 				{
-                    //Debug.Log("Null error, name: " + name + " variable: " + v); //may want to uncomment
+                    Debug.Log("Null error, name: " + name + " variable: " + v + " | " + "Error: " + e.ToString());
                     //Debug.LogError("Null error, name: " + this.name + " variable: " + v);
 					//throw e;
 				}

@@ -61,7 +61,7 @@ exceed the following hardware specifications:
 
 ### Unity
 
-Install the Unity Hub and the Unity Editor (version 2020.3.40f1) at https://unity3d.com/getunity/download.
+Install the Unity Hub and the Unity Editor (version 2021.3.31f1) at https://unity3d.com/getunity/download.
 
 ### Installing M-USE
 

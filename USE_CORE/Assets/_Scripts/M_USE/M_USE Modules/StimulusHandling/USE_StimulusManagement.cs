@@ -363,7 +363,6 @@ namespace USE_StimulusManagement
             }
         }
 
-
         public IEnumerator Load2DStimFromServer()
 		{
             string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
@@ -378,7 +377,7 @@ namespace USE_StimulusManagement
 					image.texture = textureResult;
 				}
 				else
-					Debug.LogWarning("TRIED TO LOAD 2D STIM FROM SERVER BUT THE RESULTING TEXTURE IS NULL!");
+					Debug.LogError("TRIED TO LOAD 2D STIM FROM SERVER BUT THE RESULTING TEXTURE IS NULL!");
 			}));
 		}
 
@@ -415,10 +414,10 @@ namespace USE_StimulusManagement
 					LoadExternalPNG(FileName);
 					break;
 				case ".glb":
-					await LoadExternalGITF(FileName);
+					await LoadExternalGLTF(FileName);
 					break;
                 case ".gltf":
-                    await LoadExternalGITF(FileName);
+                    await LoadExternalGLTF(FileName);
                     break;
                 case ".fbx":
                     //LoadModel_Trilib(FileName);
@@ -431,25 +430,32 @@ namespace USE_StimulusManagement
 
 		public async void Load3DStimFromServer()
 		{
-			string filePath = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
-			await LoadExternalGITF(filePath);
+            string filePath = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
+			await LoadExternalGLTF(filePath);
 		}
 
-		public async Task LoadExternalGITF(string filePath)
+		public async Task LoadExternalGLTF(string filePath)
 		{
-			var gltf = new GltfImport();
-
-            var success = await gltf.Load(filePath);
-            if (success)
+            try
             {
-				LoadingAsync = true;
-                StimGameObject = new GameObject();
-				StimGameObject.SetActive(false);
-                await gltf.InstantiateMainSceneAsync(StimGameObject.transform);
-				LoadingAsync = false;
-            }
-            else
-				Debug.LogError("FAILED LOADING GLTF FROM PATH: " + filePath);
+				var gltf = new GltfImport();
+
+				var success = await gltf.Load(filePath);
+				if (success)
+				{
+					LoadingAsync = true;
+					StimGameObject = new GameObject();
+					StimGameObject.SetActive(false);
+					await gltf.InstantiateMainSceneAsync(StimGameObject.transform);
+					LoadingAsync = false;
+				}
+				else
+					Debug.LogError("UNSUCCESFUL LOADING GLTF FROM PATH: " + filePath);
+			}
+			catch(Exception e)
+			{
+				Debug.LogError($"FAILED TO LOAD GLTF: {FileName} | Error: " + e.Message.ToString());
+			}
         }
 
 		public void LoadExternalPNG(string filePath)
@@ -465,7 +471,7 @@ namespace USE_StimulusManagement
 				stimGOImage.texture = tex;
             }
             else
-                Debug.LogError("STIM FILE DOES NOT EXIST AT LOCAL PATH: " + filePath);
+                Debug.LogError("FAILED LOADING EXTERNAL PNG FROM LOCAL PATH: " + filePath);
         }
 
 
@@ -562,7 +568,10 @@ namespace USE_StimulusManagement
 			{
 				//DestroyRecursive(StimGameObject);
 				GameObject.Destroy(StimGameObject);
-				Resources.UnloadUnusedAssets();
+
+				//APPARENTLY FIXES THE GLTF WEB BUILD NULL TEXTURE ERROR, but prob need to ensure isn't wasting memory:
+				if(!SessionValues.WebBuild)
+					Resources.UnloadUnusedAssets();
 			}
 
 			StimGameObject = null;

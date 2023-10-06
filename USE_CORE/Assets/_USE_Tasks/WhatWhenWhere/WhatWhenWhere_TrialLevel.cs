@@ -149,7 +149,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(12);
+            HaloFBController.SetHaloSize(14);
             HaloFBController.SetHaloIntensity(5);
             
             if (StartButton == null)

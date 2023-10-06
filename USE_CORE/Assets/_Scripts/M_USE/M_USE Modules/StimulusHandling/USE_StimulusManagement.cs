@@ -316,7 +316,7 @@ namespace USE_StimulusManagement
 							Load3DStimFromServer();
 					}
 					else if(SessionValues.UsingLocalConfigs)
-						LoadExternalStimFromFile();
+						LoadExternalStimFromFile(); //Call should be awaited, but we cant cuz this is coroutine not async. Resolved with "yield return waitUntil" line below
                 }
                 else if (StimDimVals != null)
                 {
@@ -332,10 +332,12 @@ namespace USE_StimulusManagement
                 }
             }
 
+			//HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
+			float startTime = Time.time;
+			yield return new WaitUntil(() => (StimGameObject != null && !LoadingAsync) || Time.time - startTime >= SessionValues.SessionDef.MaxStimLoadingDuration);
 
-			//PROB NEED A BETTER SOLUTION FOR THIS!! HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
-			yield return new WaitUntil(() => StimGameObject != null && !LoadingAsync);
-
+			if (StimGameObject == null)
+				Debug.LogError("STIM GO STILL NULL AFTER YIELDING! MAX STIM LOADING DURATION MUST HAVE SURPASSED!");
 
 			//For 2D stim, set as child of Canvas:
             if (SessionValues.Using2DStim && CanvasGameObject != null)
@@ -425,7 +427,6 @@ namespace USE_StimulusManagement
                 default:
 					break;
 			}
-
 		}
 
 		public async void Load3DStimFromServer()
@@ -439,7 +440,6 @@ namespace USE_StimulusManagement
             try
             {
 				var gltf = new GltfImport();
-
 				var success = await gltf.Load(filePath);
 				if (success)
 				{

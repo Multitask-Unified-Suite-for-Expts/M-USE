@@ -337,7 +337,7 @@ namespace USE_StimulusManagement
 			yield return new WaitUntil(() => (StimGameObject != null && !LoadingAsync) || Time.time - startTime >= SessionValues.SessionDef.MaxStimLoadingDuration);
 
 			if (StimGameObject == null)
-				Debug.LogError("STIM GO STILL NULL AFTER YIELDING! MAX STIM LOADING DURATION MUST HAVE SURPASSED!");
+				Debug.LogError("STIM GO STILL NULL AFTER YIELDING! MAX STIM LOADING DURATION HAS BEEN SURPASSED!");
 
 			//For 2D stim, set as child of Canvas:
             if (SessionValues.Using2DStim && CanvasGameObject != null)

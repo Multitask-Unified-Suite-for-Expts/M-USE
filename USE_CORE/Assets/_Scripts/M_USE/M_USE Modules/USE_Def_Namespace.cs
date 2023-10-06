@@ -252,9 +252,17 @@ namespace USE_Def_Namespace
         public int Camera_TrialPulseMinGap_Sec = 8;
 
         /// <summary>
+        /// Private backing field used to allow MaxStimLoadingDuration to have default value of 2, but also never be less than 1
+        /// </summary>
+        private float maxStimLoadingDuration = 2f;
+        /// <summary>
         /// Max amount of time for Stim to be loaded.
         /// </summary>
-        public float MaxStimLoadingDuration = 2f;
+        public float MaxStimLoadingDuration
+        {
+            get { return maxStimLoadingDuration; }
+            set { maxStimLoadingDuration = MathF.Max(value, 1f); }
+        }
 
     }
 

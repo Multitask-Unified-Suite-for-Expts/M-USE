@@ -251,6 +251,11 @@ namespace USE_Def_Namespace
         /// </summary>
         public int Camera_TrialPulseMinGap_Sec = 8;
 
+        /// <summary>
+        /// Max amount of time for Stim to be loaded.
+        /// </summary>
+        public float MaxStimLoadingDuration = 2f;
+
     }
 
     public class TaskDef

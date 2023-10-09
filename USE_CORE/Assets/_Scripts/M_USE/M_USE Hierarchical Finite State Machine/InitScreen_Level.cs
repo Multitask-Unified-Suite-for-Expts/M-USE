@@ -149,8 +149,7 @@ public class InitScreen_Level : ControlLevel
             MainPanel_GO.SetActive(false);
             InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
 
-            //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = "Loading \n Configs";
-            SessionValues.LoadingCanvas_GO.SetActive(true); //turn on loading canvas/circle so that it immedietely shows its loading!
+            SessionValues.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
     }

@@ -24,51 +24,26 @@ SOFTWARE.
 
 
 
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 
-/*
- USE THIS CLASS BY SETTING SessionValues.LoadingCanvas_GO ACTIVE OR INACTIVE!
-*/
-
+[RequireComponent(typeof(Canvas))] //Class is attached to LoadingCanvas gameobject in scene
 public class LoadingController : MonoBehaviour
 {
-    //For loading circle animation:
-    public GameObject FillCircle_GO;
-    [HideInInspector] public Image FillCircle_Image;
-    private float Progress;
-
-    //For star animation:
-    public GameObject Star_GO;
+    private GameObject Star_GO;
     private readonly float StarRotationSpeed = 125f;
-
-    private TextMeshProUGUI LoadingText;
-
 
     void Start()
     {
-        FillCircle_Image = FillCircle_GO.GetComponent<Image>();
-        if (FillCircle_Image == null)
-            Debug.LogWarning("FILL CIRCLE IMAGE IS NULL!");
-        else
-        {
-            Progress = 0f;
-            FillCircle_Image.fillAmount = Progress;
-        }
-
-        LoadingText = SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>();
-        if (LoadingText == null)
-            Debug.LogWarning("LOADING TEXT IS NULL!");
-        else
-            LoadingText.text = "Loading..";
+        Star_GO = transform.Find("LoadingStar").gameObject;
+        if (Star_GO == null)
+            Debug.LogError("UNABLE TO FIND LoadingStar GAMEOBJECT!");
+        DeactivateLoadingCanvas();
     }
 
     private void Update()
     {
         RotateStar();
-        //LoadingCircleAnimation();
     }
 
     private void RotateStar()
@@ -76,16 +51,18 @@ public class LoadingController : MonoBehaviour
         Star_GO.transform.Rotate(Vector3.back, StarRotationSpeed * Time.deltaTime);
     }
 
-    private void LoadingCircleAnimation()
+    //CALL THESE METHODS TO USE THIS CLASS--------------------------------------
+    public void ActivateLoadingCanvas()
     {
-        if (FillCircle_GO.activeInHierarchy)
-        {
-            Progress += Time.deltaTime;
-            if (Progress >= 1f)
-                Progress -= 1f;
-            FillCircle_Image.fillAmount = Progress;
-        }
+        gameObject.SetActive(true);
     }
+
+    public void DeactivateLoadingCanvas()
+    {
+        gameObject.SetActive(false);
+    }
+    //--------------------------------------------------------------------------
+
 
 
 }

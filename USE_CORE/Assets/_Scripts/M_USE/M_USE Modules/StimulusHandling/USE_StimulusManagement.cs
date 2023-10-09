@@ -358,6 +358,7 @@ namespace USE_StimulusManagement
 			{
 				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
 				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
+				StimGameObject.SetActive(false);
 			}
 			catch(Exception e)
 			{

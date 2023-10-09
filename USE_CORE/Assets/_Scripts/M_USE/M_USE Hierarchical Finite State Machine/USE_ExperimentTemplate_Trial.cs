@@ -272,6 +272,10 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
 
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
+
+                //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
+                DisableTaskMainBackground();
+
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -372,6 +376,14 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+        private void DisableTaskMainBackground()
+        {
+            if (TaskLevel.TaskCam != null)
+            {
+                if (TaskLevel.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
+                    skyboxComponent.enabled = false;
+            }
+        }
 
         private IEnumerator HandleLoadingStims()
         {

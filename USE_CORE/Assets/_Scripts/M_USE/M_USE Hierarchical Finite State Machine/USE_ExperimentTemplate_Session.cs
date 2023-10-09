@@ -56,8 +56,6 @@ namespace USE_ExperimentTemplate_Session
 {
     public class ControlLevel_Session_Template : ControlLevel
     {
-        [HideInInspector] public int SessionId_SQL;
-
         [HideInInspector] public bool TasksFinished;
         
         protected SummaryData SummaryData;
@@ -628,7 +626,7 @@ namespace USE_ExperimentTemplate_Session
                 //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
 
-                SetTasksMainBackground(); 
+                SetTaskMainBackground(); 
 
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
@@ -785,7 +783,7 @@ namespace USE_ExperimentTemplate_Session
         }
 
         //Method is used to have every task set their main background as the MUSE blue background
-        private void SetTasksMainBackground()
+        private void SetTaskMainBackground()
         {
             if (CurrentTask.TaskCam != null)
             {

@@ -1208,19 +1208,23 @@ namespace USE_States
 
         public static Material CreateSkybox(Texture2D tex)
         {
-			if (tex == null)
-				Debug.LogWarning("TEX IS NULL WHEN TRYING TO CREATE SKYBOX!");
+			try
+			{
+				Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
+				materialSkybox.SetTexture("_FrontTex", tex);
+				materialSkybox.SetTexture("_BackTex", tex);
+				materialSkybox.SetTexture("_LeftTex", tex);
+				materialSkybox.SetTexture("_RightTex", tex);
+				materialSkybox.SetTexture("_UpTex", tex);
+				materialSkybox.SetTexture("_DownTex", tex);
+				return materialSkybox;
+			}
+			catch(Exception e)
+			{
+				Debug.LogWarning("FAILED TO CREATE SKYBOX! Error: " + e.Message.ToString());
+				return null;
+			}
 
-			Material materialSkybox = new Material(Shader.Find("Skybox/6 Sided"));
-
-			materialSkybox.SetTexture("_FrontTex", tex);
-            materialSkybox.SetTexture("_BackTex", tex);
-            materialSkybox.SetTexture("_LeftTex", tex);
-            materialSkybox.SetTexture("_RightTex", tex);
-            materialSkybox.SetTexture("_UpTex", tex);
-            materialSkybox.SetTexture("_DownTex", tex);
-
-            return materialSkybox;
         }
 
         public GameObject FindInactiveGameObjectByName(string name)

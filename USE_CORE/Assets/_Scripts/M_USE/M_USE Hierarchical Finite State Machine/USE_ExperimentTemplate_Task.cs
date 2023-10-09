@@ -814,7 +814,7 @@ namespace USE_ExperimentTemplate_Task
             return trialList;
         }
 
-        private void OnApplicationQuit()
+    /*    private void OnApplicationQuit() // moved to USE_DATA 
         {
             if (BlockData != null)
             {
@@ -832,7 +832,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
             }
-        }
+        }*/
         
         
         public T GetCurrentBlockDef<T>() where T : BlockDef

@@ -68,7 +68,6 @@ public class SetupSession_Level : ControlLevel
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
         {
             SetDataPaths();
-
             if (SessionValues.UsingDefaultConfigs)
                 WriteSessionConfigsToPersistantDataPath();
 
@@ -167,7 +166,11 @@ public class SetupSession_Level : ControlLevel
                 SceneManager.UnloadSceneAsync(taskName);
                 iTask++;
             });
-        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, () => null, () => SceneManager.UnloadSceneAsync(taskName));
+        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, () => null, () =>
+        {
+            ParentState.ChildLevel = null;
+            SceneManager.UnloadSceneAsync(taskName);
+        });
     }
 
 
@@ -214,7 +217,6 @@ public class SetupSession_Level : ControlLevel
 
     private void SetupInputManagement(State inputActive, State inputInactive)
     {
-
         SessionValues.EventCodeManager.splitBytes = SessionValues.SessionDef.SplitBytes;
 
         SessionValues.InputManager = new GameObject("InputManager");

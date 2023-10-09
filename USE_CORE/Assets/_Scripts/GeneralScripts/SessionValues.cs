@@ -147,7 +147,6 @@ public static class SessionValues
 
     public static string GetNiceIntegers(int numDigits, int desiredNum)
     {
-
         if (desiredNum >= 999)
             return desiredNum.ToString();
         else if (desiredNum >= 99)

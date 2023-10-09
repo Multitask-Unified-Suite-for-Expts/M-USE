@@ -96,8 +96,7 @@ namespace USE_ExperimentTemplate_Trial
 
   
         // Texture Variables
-        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
-            MovedTooFarTexture, THR_BackdropTexture;
+        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
 
 
         private float Camera_PulseSentTime = 0f;
@@ -689,14 +688,12 @@ namespace USE_ExperimentTemplate_Trial
                 HeldTooLongTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong");
                 HeldTooShortTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooShort");
                 MovedTooFarTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/bg");
-                THR_BackdropTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/THR_Backdrop");
             }
             else if (SessionValues.UsingLocalConfigs)
             {
                 HeldTooLongTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooLong.png"));
                 HeldTooShortTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooShort.png"));
                 MovedTooFarTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "bg.png"));
-                THR_BackdropTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "THR_Backdrop.png"));
             }
             else if (SessionValues.UsingServerConfigs)
             {
@@ -725,18 +722,8 @@ namespace USE_ExperimentTemplate_Trial
                     }
                     else
                         Debug.LogWarning("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
-
-                }));
-
-                yield return StartCoroutine(ServerManager.LoadTextureFromServer($"{ServerManager.ServerContextFolderPath}/THR_Backdrop.png", result =>
-                {
-                    if (result != null)
-                        THR_BackdropTexture = result;
-                    else
-                        Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
                 }));
             }
-
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
             TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;

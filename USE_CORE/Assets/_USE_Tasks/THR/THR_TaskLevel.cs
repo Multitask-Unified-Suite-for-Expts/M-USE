@@ -27,7 +27,9 @@ using System.Text;
 using THR_Namespace;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
-
+using System.Collections;
+using UnityEngine;
+using System;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
@@ -56,11 +58,10 @@ public class THR_TaskLevel : ControlLevel_Task_Template
     public override void DefineControlLevel()
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
-
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
-
         DefineBlockData();
+        LoadBackdropTexture();
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
@@ -69,17 +70,18 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
         });
+    }
 
-        BlockFeedback.AddSpecificInitializationMethod(() =>
+    public void LoadBackdropTexture()
+    {
+        try
         {
-            if(!SessionValues.WebBuild)
-            {/*
-                if (BlockStringsAdded > 0)
-                    CurrentBlockString += "\n";
-                BlockStringsAdded++;
-                PreviousBlocksString.Insert(0, CurrentBlockString);*/
-            }
-        });
+            TrialLevel.THR_BackdropTexture = Resources.Load<Texture2D>("Textures/THR_Backdrop");
+        }
+        catch(Exception e)
+        {
+            Debug.LogError("FAILED TO LOAD THR BACKDROP TEXTURE FROM RESOURCES! Error: " + e.Message.ToString());
+        }       
     }
 
     public override OrderedDictionary GetBlockResultsData()

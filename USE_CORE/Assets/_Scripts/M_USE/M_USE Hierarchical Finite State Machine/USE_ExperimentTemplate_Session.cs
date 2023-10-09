@@ -305,9 +305,9 @@ namespace USE_ExperimentTemplate_Session
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                //Background Music:
                 if (BackgroundMusic_AudioSource == null)
-                    SetupBackgroundMusic(SessionValues.SessionDef.PlayBackgroundMusic);
-
+                    SetupBackgroundMusic();
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
@@ -912,33 +912,31 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");
         }
 
-        private void SetupBackgroundMusic(bool play = false, float audioSpot = 0)
+        private void SetupBackgroundMusic()
         {
             BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
             BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
             BackgroundMusic_AudioSource.loop = true;
             BackgroundMusic_AudioSource.volume = .55f;
-            if (audioSpot != 0)
-                BackgroundMusic_AudioSource.time = audioSpot;
-            if(play)
-            {
-                BackgroundMusic_AudioSource.Play();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
-            }
+
+            if (SessionValues.SessionDef.PlayBackgroundMusic)
+                PlayBackgroundMusic(audioPlaybackSpot);
             else
                 ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+        }
 
+        private void PlayBackgroundMusic(float audioSpot = 0)
+        {
+            if (audioSpot != 0)
+                BackgroundMusic_AudioSource.time = audioSpot;
+
+            BackgroundMusic_AudioSource.Play();
+            ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
         }
 
         public void HandleToggleAudioButtonClick()
         {
             SessionValues.SessionDef.PlayBackgroundMusic = !SessionValues.SessionDef.PlayBackgroundMusic;
-
-            if(BackgroundMusic_AudioSource == null)
-            {
-                Debug.LogError("BACKGROUND MUSIC AUDIO SOURCE IS NULL!");
-                return;
-            }
 
             if (BackgroundMusic_AudioSource.isPlaying)
             {
@@ -948,9 +946,7 @@ namespace USE_ExperimentTemplate_Session
             }
             else
             {
-                BackgroundMusic_AudioSource.time = audioPlaybackSpot;
-                BackgroundMusic_AudioSource.Play();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
+                PlayBackgroundMusic(audioPlaybackSpot);
             }
         }
 
@@ -965,7 +961,7 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
                 {
-                    SetupBackgroundMusic(true, audioPlaybackSpot);
+                    PlayBackgroundMusic(audioPlaybackSpot);
                 }
             }
             else

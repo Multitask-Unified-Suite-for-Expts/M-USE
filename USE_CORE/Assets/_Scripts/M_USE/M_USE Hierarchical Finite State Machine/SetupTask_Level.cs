@@ -104,14 +104,14 @@ public class SetupTask_Level : ControlLevel
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
             BlockData = (BlockData) SessionValues.SessionDataControllers.InstantiateDataController<BlockData>(
-                "BlockData", ConfigFolderName, SessionValues.StoreData, subFolderPath);
+                "BlockData", ConfigFolderName, subFolderPath);
             BlockData.taskLevel = TaskLevel;
             BlockData.sessionLevel = SessionValues.SessionLevel;
             BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
             TrialData = (TrialData) SessionValues.SessionDataControllers.InstantiateDataController<TrialData>(
-                "TrialData", ConfigFolderName, SessionValues.StoreData,
+                "TrialData", ConfigFolderName,
                 TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 
             //TrialLevel = TaskLevel.TrialLevel; //Moved up to verifyTask term method so that it exists before loading shared textures
@@ -125,7 +125,7 @@ public class SetupTask_Level : ControlLevel
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
             FrameData = (FrameData) SessionValues.SessionDataControllers.InstantiateDataController<FrameData>(
-                "FrameData", ConfigFolderName, SessionValues.StoreData,
+                "FrameData", ConfigFolderName,
                 TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
             FrameData.taskLevel = TaskLevel;
             FrameData.trialLevel = TrialLevel;

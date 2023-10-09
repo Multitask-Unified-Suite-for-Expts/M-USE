@@ -142,11 +142,7 @@ namespace USE_Data
 	public abstract class DataController : MonoBehaviour
 	{
 		//basic settings
-		/// <summary>
-		/// Gets or sets a value indicating whether this <see cref="T:USE_Data.DataController"/> will write files to the hard drive.
-		/// </summary>
-		/// <value><c>true</c> if store data; otherwise, <c>false</c>.</value>
-		public bool storeData { get; set; }
+
 		/// <summary>
 		/// Gets or sets the folder path where data files will be written.
 		/// </summary>
@@ -217,7 +213,7 @@ namespace USE_Data
 				Defined = true;
 				InitDataController();
 				DefineDataController();
-				if (storeData)
+				if (SessionValues.StoreData)
 				{
 					StartCoroutine(CreateFile());
 				}
@@ -584,7 +580,7 @@ namespace USE_Data
 		/// </summary>
 		public IEnumerator AppendDataToBuffer()
 		{
-			if (storeData) //&& Time.frameCount > frameChecker)
+			if (SessionValues.StoreData) //&& Time.frameCount > frameChecker)
 			{
 				string[] currentVals = new string[data.Count];
 				for (int i = 0; i < data.Count; i++)
@@ -611,7 +607,7 @@ namespace USE_Data
         /// </summary>
         public IEnumerator CreateFile()
 		{
-			if (storeData && fileName != null)
+			if (SessionValues.StoreData && fileName != null)
 			{
 				fileHeaders = "";
 				for (int i = 0; i < data.Count; i++)
@@ -645,7 +641,7 @@ namespace USE_Data
 		/// </summary>
 		public IEnumerator AppendDataToFile()
 		{
-			if (storeData && fileName != null && dataBuffer.Count > 0)
+			if (SessionValues.StoreData && fileName != null && dataBuffer.Count > 0)
 			{
 				string content = String.Join("\n", dataBuffer.ToArray());
 

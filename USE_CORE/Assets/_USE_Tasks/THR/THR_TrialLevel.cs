@@ -128,10 +128,12 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (MainObjectGO == null)
             {
-                USE_Backdrop = new USE_Backdrop();
+                BackdropGO = new GameObject("BackdropGO");
+                USE_Backdrop = BackdropGO.AddComponent<USE_Backdrop>();
                 BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(6, 10, 17, 255));
 
-                USE_Square = new USE_StartButton();
+                MainObjectGO = new GameObject("SquareGO");
+                USE_Square = MainObjectGO.AddComponent<USE_Square>();
                 USE_Square.StartButtonPrefab = SessionValues.USE_StartButton.StartButtonPrefab;
                 MainObjectGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, false, "SquareGO");
             }
@@ -146,17 +148,19 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.SpecifyTermination(() => true, InitTrial);
+        SetupTrial.AddDefaultTerminationMethod(() =>
+        {
+            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
+                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
+            else
+                StartButton = null;
+        });
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InitTrial);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
-                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
-            else
-                StartButton = null;
-
             ResetGlobalTrialVariables();
             SetTrialSummaryString();
 

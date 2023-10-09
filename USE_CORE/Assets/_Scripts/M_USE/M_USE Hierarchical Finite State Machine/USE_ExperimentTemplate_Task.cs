@@ -435,6 +435,7 @@ namespace USE_ExperimentTemplate_Task
 
             if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block HotKey
             {
+
                 Time.timeScale = 1; //if paused, unpause before ending block
 
                 if (TrialLevel.TokenFBController != null)
@@ -450,7 +451,7 @@ namespace USE_ExperimentTemplate_Task
                     TrialLevel.AudioFBController.audioSource.Stop();
                 TrialLevel.AbortCode = 3;
                 SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
-                TrialLevel.ForceBlockEnd = true; //I THINK THIS IS NOT GETTING SET BACK TO FALSE IN RIGHT SPOT!
+                TrialLevel.ForceBlockEnd = true;
                 TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
             }
         }

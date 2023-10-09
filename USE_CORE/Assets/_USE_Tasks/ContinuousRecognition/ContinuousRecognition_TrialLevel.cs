@@ -630,7 +630,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)
         {
             if (!stim.PreviouslyChosen)
-                stim.StimGameObject.transform.localScale *= 1.35f;
+                stim.StimGameObject.transform.localScale *= 1.25f;
         }
     }
 

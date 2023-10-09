@@ -266,48 +266,48 @@ namespace USE_ExperimentTemplate_Data
             DataContainer = cont;
         }
 
-        public DataController InstantiateDataController<T>(string dataControllerName, bool storeData, string path) where T: DataController
+        public DataController InstantiateDataController<T>(string dataControllerName, string path) where T: DataController
         {
             T dc = AddContainer(dataControllerName).AddComponent<T>();
-            SpecifyParameters(dc, storeData, path);
+            SpecifyParameters(dc, path);
             return dc;
         }
-        public DataController InstantiateDataController<T>(string dataControllerName, string taskName, bool storeData, string path) where T: DataController
+        public DataController InstantiateDataController<T>(string dataControllerName, string taskName, string path) where T: DataController
         {
             T dc = AddContainer(dataControllerName + "_" + taskName).AddComponent<T>();
-            SpecifyParameters(dc, storeData, path);
+            SpecifyParameters(dc, path);
             return dc;
         }
 
-        public SessionData InstantiateSessionData(bool storeData, string path)
+        public SessionData InstantiateSessionData(string path)
         {
             SessionData dc = AddContainer("SessionData").AddComponent<SessionData>();
-            SpecifyParameters(dc, storeData, path);
+            SpecifyParameters(dc, path);
             return dc;
         }
 
-        // public SerialSentData InstantiateSerialSentData(bool storeData, string path)
+        // public SerialSentData InstantiateSerialSentData(string path)
         // {
         // }
 
-        public BlockData InstantiateBlockData(bool storeData, string taskName, string path)
+        public BlockData InstantiateBlockData(string taskName, string path)
         {
             BlockData dc = AddContainer("BlockData_" + taskName).AddComponent<BlockData>();
-            SpecifyParameters(dc, storeData, path);
+            SpecifyParameters(dc, path);
             return dc;
         }
 
-        public TrialData InstantiateTrialData(bool storeData, string taskName, string path)
+        public TrialData InstantiateTrialData(string taskName, string path)
         {
             TrialData dc = AddContainer("TrialData_" + taskName).AddComponent<TrialData>();
-            SpecifyParameters(dc, storeData, path);
+            SpecifyParameters(dc, path);
             return dc;
         }
 
-        public FrameData InstantiateFrameData(bool storeData, string taskName, string path)
+        public FrameData InstantiateFrameData(string taskName, string path)
         {
             FrameData dc = AddContainer("FrameData_" + taskName).AddComponent<FrameData>();
-            SpecifyParameters(dc, storeData, path);
+            SpecifyParameters(dc, path);
             return dc;
         }
 
@@ -329,9 +329,8 @@ namespace USE_ExperimentTemplate_Data
             }
         }
 
-        private void SpecifyParameters(DataController dc, bool storeData, string path, bool sm = true)
+        private void SpecifyParameters(DataController dc, string path, bool sm = true)
         {
-            dc.storeData = storeData;
             dc.folderPath = path;
             dc.DefineManually = sm;
         }

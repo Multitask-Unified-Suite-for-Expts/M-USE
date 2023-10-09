@@ -434,16 +434,18 @@ namespace USE_ExperimentTemplate_Trial
         {
             StartCoroutine(TrialData.AppendDataToBuffer());
             StartCoroutine(TrialData.AppendDataToFile());
-            
+
             StartCoroutine(FrameData.AppendDataToBuffer());
             StartCoroutine(FrameData.AppendDataToFile());
-            
-            if (SessionValues.SessionDef.EyeTrackerActive)
+
+            if (SessionValues.GazeData != null)
                 StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-            
-            StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-            StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
-            
+
+            if(SessionValues.SerialRecvData != null)
+                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+            if(SessionValues.SerialSentData != null)
+                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+         
         }
         
         public bool CheckForcedBlockEnd()

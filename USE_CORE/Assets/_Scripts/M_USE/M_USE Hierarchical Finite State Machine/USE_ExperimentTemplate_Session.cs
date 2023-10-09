@@ -42,14 +42,10 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
-using Tobii.Research.Unity.CodeExamples;
-using USE_Def_Namespace;
-using System.Runtime.InteropServices;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
-using USE_DisplayManagement;
-//using UnityEngine.Windows.WebCam;
+
 
 
 namespace USE_ExperimentTemplate_Session
@@ -92,18 +88,15 @@ namespace USE_ExperimentTemplate_Session
 
         //Already in scene, so find them:
         [HideInInspector] public GameObject Starfield;
-        [HideInInspector] public GameObject HumanVersionToggleButton;
-        [HideInInspector] public GameObject ToggleAudioButton;
+        public GameObject HumanVersionToggleButton;
+        public GameObject ToggleAudioButton;
+
+        public GameObject RedAudioCross;
 
         //Load prefabs from resources:
         [HideInInspector] public GameObject HumanStartPanelPrefab;
         [HideInInspector] public GameObject StartButtonPrefabGO;
-        [HideInInspector] public AudioClip BackgroundMusic_AudioClip;
         [HideInInspector] public AudioClip BlockResults_AudioClip;
-
-
-        [HideInInspector] public float audioPlaybackSpot;
-        [HideInInspector] public AudioSource BackgroundMusic_AudioSource;
 
         [HideInInspector] public GameObject InitCamGO;
         [HideInInspector] public LogWriter LogWriter;
@@ -305,14 +298,20 @@ namespace USE_ExperimentTemplate_Session
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
-                //Background Music:
-                if (BackgroundMusic_AudioSource == null)
-                    SetupBackgroundMusic();
+                if (SessionValues.SessionDef.PlayBackgroundMusic)
+                {
+                    SessionValues.BackgroundMusicController.PlayMusic();
+                    RedAudioCross.SetActive(false);
+                }
+                else
+                    RedAudioCross.SetActive(true);
+
+
+                HumanVersionToggleButton.SetActive(SessionValues.SessionDef.IsHuman);
+
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
-
-                HumanVersionToggleButton.SetActive(SessionValues.SessionDef.IsHuman);
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
 
@@ -515,8 +514,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     HumanVersionToggleButton.SetActive(true);
                     ToggleAudioButton.SetActive(true);
-                    if(!SessionValues.SessionDef.PlayBackgroundMusic)
-                        ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                    if (!SessionValues.SessionDef.PlayBackgroundMusic)
+                        RedAudioCross.SetActive(true);
                 }
             });
 
@@ -785,11 +784,13 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
+                SessionValues.BackgroundMusicController = GameObject.Find("MiscScripts").GetComponent<BackgroundMusicController>();
+                HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
+                ToggleAudioButton = GameObject.Find("AudioButton");
+                RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
                 SessionValues.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 InitCamGO = GameObject.Find("InitCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
-                HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
-                ToggleAudioButton = GameObject.Find("AudioButton");
                 Starfield = GameObject.Find("Starfield");
                 LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
                 SessionValues.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
@@ -812,7 +813,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 HumanStartPanelPrefab = Resources.Load<GameObject>("HumanStartPanel");
                 StartButtonPrefabGO = Resources.Load<GameObject>("StartButton");
-                BackgroundMusic_AudioClip = Resources.Load<AudioClip>("BackgroundMusic");
                 BlockResults_AudioClip = Resources.Load<AudioClip>("BlockResults");
             }
             catch (Exception e)
@@ -912,41 +912,20 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("No successfulSelection from which to get the taskButton GameObject from (so we can reset its size)");
         }
 
-        private void SetupBackgroundMusic()
-        {
-            BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
-            BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
-            BackgroundMusic_AudioSource.loop = true;
-            BackgroundMusic_AudioSource.volume = .55f;
-
-            if (SessionValues.SessionDef.PlayBackgroundMusic)
-                PlayBackgroundMusic(audioPlaybackSpot);
-            else
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
-        }
-
-        private void PlayBackgroundMusic(float audioSpot = 0)
-        {
-            if (audioSpot != 0)
-                BackgroundMusic_AudioSource.time = audioSpot;
-
-            BackgroundMusic_AudioSource.Play();
-            ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(false);
-        }
 
         public void HandleToggleAudioButtonClick()
         {
             SessionValues.SessionDef.PlayBackgroundMusic = !SessionValues.SessionDef.PlayBackgroundMusic;
 
-            if (BackgroundMusic_AudioSource.isPlaying)
+            if (SessionValues.BackgroundMusicController.BackgroundMusic_AudioSource.isPlaying)
             {
-                audioPlaybackSpot = BackgroundMusic_AudioSource.time;
-                BackgroundMusic_AudioSource.Stop();
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(true);
+                SessionValues.BackgroundMusicController.StopMusic();
+                RedAudioCross.SetActive(true);
             }
             else
             {
-                PlayBackgroundMusic(audioPlaybackSpot);
+                SessionValues.BackgroundMusicController.PlayMusic();
+                RedAudioCross.SetActive(false);
             }
         }
 
@@ -957,19 +936,20 @@ namespace USE_ExperimentTemplate_Session
             if(SessionValues.SessionDef.IsHuman)
             {
                 ToggleAudioButton.SetActive(true);
-                ToggleAudioButton.transform.Find("Cross").gameObject.SetActive(!BackgroundMusic_AudioSource.isPlaying);
+                RedAudioCross.SetActive(!SessionValues.BackgroundMusicController.BackgroundMusic_AudioSource.isPlaying);
 
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
                 {
-                    PlayBackgroundMusic(audioPlaybackSpot);
+                    SessionValues.BackgroundMusicController.PlayMusic();
+                    RedAudioCross.SetActive(false);
                 }
             }
             else
             {
-                if(BackgroundMusic_AudioSource != null)
+                if(SessionValues.BackgroundMusicController.BackgroundMusic_AudioSource != null)
                 {
-                    audioPlaybackSpot = BackgroundMusic_AudioSource.time;
-                    BackgroundMusic_AudioSource.Stop();
+                    SessionValues.BackgroundMusicController.StopMusic();
+                    RedAudioCross.SetActive(true);
                 }
                 ToggleAudioButton.SetActive(false);   
             }

@@ -60,6 +60,7 @@ public static class SessionValues
         }
     }
 
+    public static BackgroundMusicController BackgroundMusicController;
     public static LoadingController LoadingController;
 
     //Prefabs passed from SessionLevel;

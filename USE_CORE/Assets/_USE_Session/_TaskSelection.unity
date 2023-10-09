@@ -666,6 +666,7 @@ GameObject:
   - component: {fileID: 1017469093}
   - component: {fileID: 1017469094}
   - component: {fileID: 1017469089}
+  - component: {fileID: 1017469095}
   m_Layer: 0
   m_Name: MiscScripts
   m_TagString: Untagged
@@ -784,6 +785,21 @@ MonoBehaviour:
   initTimeout: 2000
   lastSentTimeStamp: 0
   active: 0
+--- !u!114 &1017469095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017469087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efdd3237007044a788a7679a9d776178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HumanVersionToggleButton: {fileID: 2071187616}
+  ToggleAudioButton: {fileID: 907834252290271150}
+  BackgroundMusic_AudioSource: {fileID: 0}
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -2915,18 +2931,11 @@ MonoBehaviour:
   CameraMirrorTexture: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
   Starfield: {fileID: 1391649313}
-  HumanVersionToggleButton: {fileID: 2071187616}
-  ToggleAudioButton: {fileID: 907834252290271150}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
     type: 3}
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
-  BackgroundMusic_AudioClip: {fileID: 8300000, guid: d0692d04af800462aba5670b8485603c,
-    type: 3}
-  BlockResults_AudioClip: {fileID: 8300000, guid: b073a0c00b101453b806d8f2e5506319,
-    type: 3}
-  audioPlaybackSpot: 0
-  BackgroundMusic_AudioSource: {fileID: 0}
+  BlockResults_AudioClip: {fileID: 0}
   InitCamGO: {fileID: 0}
   LogWriter: {fileID: 0}
   runSessionLevelCalibration: 0

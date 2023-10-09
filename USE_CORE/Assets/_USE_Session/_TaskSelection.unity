@@ -390,11 +390,16 @@ PrefabInstance:
         type: 3}
       propertyPath: FillCircle_GO
       value: 
-      objectReference: {fileID: 1461999936}
+      objectReference: {fileID: 0}
     - target: {fileID: 3540131689277646463, guid: a5169220ce5f54ccb8587d344b0f74c8,
         type: 3}
       propertyPath: m_Name
       value: LoadingCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 4072035161390764077, guid: a5169220ce5f54ccb8587d344b0f74c8,
+        type: 3}
+      propertyPath: m_MatchWidthOrHeight
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 5409759391249050967, guid: a5169220ce5f54ccb8587d344b0f74c8,
         type: 3}
@@ -409,7 +414,7 @@ PrefabInstance:
     - target: {fileID: 5409759391249050967, guid: a5169220ce5f54ccb8587d344b0f74c8,
         type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5409759391249050967, guid: a5169220ce5f54ccb8587d344b0f74c8,
         type: 3}
@@ -612,7 +617,7 @@ RectTransform:
   - {fileID: 1895764641}
   - {fileID: 1280058612}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2897,7 +2902,6 @@ MonoBehaviour:
   quitApplicationAtEnd: 1
   DebugActive: 1
   Paused: 0
-  SessionId_SQL: 0
   TasksFinished: 0
   SessionData: {fileID: 0}
   TaskSelectionSceneName: _TaskSelection
@@ -3176,12 +3180,6 @@ Skybox:
   m_GameObject: {fileID: 1396040246}
   m_Enabled: 1
   m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}
---- !u!1 &1461999936 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3964369341524385752, guid: a5169220ce5f54ccb8587d344b0f74c8,
-    type: 3}
-  m_PrefabInstance: {fileID: 486177196}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1530207056
 GameObject:
   m_ObjectHideFlags: 0
@@ -3373,7 +3371,7 @@ RectTransform:
   - {fileID: 6597742842856500562}
   - {fileID: 2033261645}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

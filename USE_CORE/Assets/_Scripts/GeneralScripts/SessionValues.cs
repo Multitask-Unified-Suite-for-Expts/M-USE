@@ -66,7 +66,6 @@ public static class SessionValues
     public static GameObject BlockResultsPrefab;
     public static GameObject BlockResults_GridElementPrefab;
 
-    public static GameObject LoadingCanvas_GO;
 
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;

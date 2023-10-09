@@ -237,7 +237,7 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.LoadingCanvas_GO.SetActive(false);
+                SessionValues.LoadingController.DeactivateLoadingCanvas();
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;

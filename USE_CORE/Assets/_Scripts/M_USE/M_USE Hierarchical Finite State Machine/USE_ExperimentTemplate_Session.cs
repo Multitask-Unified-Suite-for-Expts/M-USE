@@ -127,10 +127,6 @@ namespace USE_ExperimentTemplate_Session
 
             SessionValues.SessionLevel = this;
 
-            SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
-            SessionValues.LoadingController = SessionValues.LoadingCanvas_GO.GetComponent<LoadingController>();
-            SessionValues.LoadingCanvas_GO.SetActive(false);
-
 
             State initScreen = new State("InitScreen");
             State setupSession = new State("SetupSession");
@@ -356,8 +352,7 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigFolderName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
-
-                SessionValues.LoadingCanvas_GO.SetActive(false); //Turn off loading circle now that about to set taskselection canvas active!
+                SessionValues.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
 
                 SessionCam.gameObject.SetActive(true);
 
@@ -570,8 +565,7 @@ namespace USE_ExperimentTemplate_Session
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
-                //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
-                SessionValues.LoadingCanvas_GO.SetActive(true);
+                SessionValues.LoadingController.ActivateLoadingCanvas();
 
                 TaskButtonsContainer.SetActive(false);
 
@@ -799,6 +793,7 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
+                SessionValues.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 InitCamGO = GameObject.Find("InitCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");

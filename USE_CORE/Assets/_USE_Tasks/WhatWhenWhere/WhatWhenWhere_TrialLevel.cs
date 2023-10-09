@@ -192,12 +192,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WWW_CanvasGO);
 
-        InitTrial.AddSpecificInitializationMethod(() =>
-        {
-            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
-
-            InitializeShotgunHandler();
-        });
+        InitTrial.AddSpecificInitializationMethod(() => InitializeShotgunHandler());
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
             CalculateSliderSteps();

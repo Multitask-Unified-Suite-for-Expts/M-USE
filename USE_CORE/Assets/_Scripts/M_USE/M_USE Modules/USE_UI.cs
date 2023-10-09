@@ -1,4 +1,31 @@
-﻿using System;
+﻿/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
+
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using USE_States;
@@ -34,44 +61,10 @@ namespace USE_UI
 
         [HideInInspector] public Vector3 InitialStartButtonPosition;
 
-        [HideInInspector] public Dictionary<string, string> TaskInstructionsDict = new Dictionary<string, string>()
-        {
-            { "AntiSaccade", "You get a brief glimpse of the target object, and then must select it among the distractor objects!" },
-            { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. If you choose an object you've chosen in a previous trial, you lose!" },
-            { "EffortControl", "Choose a balloon to inflate based on the effort required (number of clicks) and the reward amount (number of tokens). Inflate and pop the balloon by clicking it the required number of times!"},
-            { "FlexLearning", "The maximal token gain is associated with one specific visual feature that defines one of the objects. Learn the visual feature that provides the most reward!"},
-            { "MazeGame", "Navigate your way from the start of the maze to the end of the maze to earn your reward. An incorrect step will require re-touching the last correct step." },
-            { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
-            { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
-            { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
-            { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
-        };
-        [HideInInspector] public Dictionary<string, string> TaskNamesDict = new Dictionary<string, string>()
-        {
-            { "AntiSaccade", "Anti Saccade"},
-            { "ContinuousRecognition", "Continuous Recognition" },
-            { "EffortControl", "Effort Control" },
-            { "FlexLearning", "Flexible Learning" },
-            { "MazeGame", "Maze Game" },
-            { "THR", "Touch Hold Release" },
-            { "VisualSearch", "Visual Search" },
-            { "WhatWhenWhere", "What When Where" },
-            { "WorkingMemory", "Working Memory" },
-        };
 
-        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
-        {
-            { "AntiSaccade", new Vector3(0, 0, 1000f) },
-            { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
-            { "EffortControl", new Vector3(0, 0, 500f) },
-            { "FlexLearning", new Vector3(0, 0, 1000f) },
-            { "MazeGame", new Vector3(0, 0, 500f) },
-            { "THR", new Vector3(0, 0, 1000f) },
-            { "VisualSearch", new Vector3(0, 0, 1000f) },
-            { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-            { "WorkingMemory", new Vector3(0, 0, 1000f) },
-            { "WWW_2D", new Vector3(0, 0, 500f) }
-        };
+        [HideInInspector] public Dictionary<string, string> TaskInstructionsDict;
+        [HideInInspector] public Dictionary<string, string> TaskNamesDict;
+        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict;
 
         [HideInInspector] public string TaskName;
 
@@ -86,6 +79,55 @@ namespace USE_UI
         [HideInInspector] public ControlLevel_Trial_Template TrialLevel;
 
 
+
+        private void Start()
+        {
+            CreateDictionaries();
+        }
+
+        private void CreateDictionaries()
+        {
+            TaskInstructionsDict = new Dictionary<string, string>()
+            {
+                { "AntiSaccade", "You get a brief glimpse of the target object, and then must select it among the distractor objects!" },
+                { "ContinuousRecognition", "Unique objects are displayed each trial and you must select an object you haven't previously chosen. If you choose an object you've chosen in a previous trial, you lose!" },
+                { "EffortControl", "Choose a balloon to inflate based on the effort required (number of clicks) and the reward amount (number of tokens). Inflate and pop the balloon by clicking it the required number of times!"},
+                { "FlexLearning", "The maximal token gain is associated with one specific visual feature that defines one of the objects. Learn the visual feature that provides the most reward!"},
+                { "MazeGame", "Navigate your way from the start of the maze to the end of the maze to earn your reward. An incorrect step will require re-touching the last correct step." },
+                { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
+                { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
+                { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
+                { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
+            };
+
+            TaskNamesDict = new Dictionary<string, string>()
+            {
+                { "AntiSaccade", "Anti Saccade"},
+                { "ContinuousRecognition", "Continuous Recognition" },
+                { "EffortControl", "Effort Control" },
+                { "FlexLearning", "Flexible Learning" },
+                { "MazeGame", "Maze Game" },
+                { "THR", "Touch Hold Release" },
+                { "VisualSearch", "Visual Search" },
+                { "WhatWhenWhere", "What When Where" },
+                { "WorkingMemory", "Working Memory" }
+            };
+
+            Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
+            {
+                { "AntiSaccade", new Vector3(0, 0, 1000f) },
+                { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
+                { "EffortControl", new Vector3(0, 0, 500f) },
+                { "FlexLearning", new Vector3(0, 0, 1000f) },
+                { "MazeGame", new Vector3(0, 0, 500f) },
+                { "THR", new Vector3(0, 0, 1000f) },
+                { "VisualSearch", new Vector3(0, 0, 1000f) },
+                { "WhatWhenWhere", new Vector3(0, 0, 500f) },
+                { "WorkingMemory", new Vector3(0, 0, 1000f) }
+            };
+
+
+        }
 
         //Called by TaskLevel
         public void SetupDataAndCodes(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)

@@ -1,4 +1,31 @@
-﻿using System;
+﻿/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,7 +36,8 @@ using USE_States;
 using Object = UnityEngine.Object;
 using USE_ExperimentTemplate_Classes;
 using System.Collections;
-using Siccity.GLTFUtility;
+using GLTFast;
+using System.Threading.Tasks;
 
 namespace USE_StimulusManagement
 {
@@ -45,6 +73,8 @@ namespace USE_StimulusManagement
 		public bool TriggersSonication;
 		public State SetActiveOnInitialization;
 		public State SetInactiveOnTermination;
+
+		private bool LoadingAsync;
 
 
 		public StimDef()
@@ -273,32 +303,25 @@ namespace USE_StimulusManagement
 			SessionValues.Using2DStim = FileName.ToLower().Contains("png");
 
 			if (SessionValues.UsingDefaultConfigs)
-			{
-                StimGameObject = LoadPrefabFromResources();
-			}
+				LoadPrefabFromResources();
             else
             {
                 if (!string.IsNullOrEmpty(FileName))
                 {
 					if (SessionValues.UsingServerConfigs)
 					{
-						yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer(returnedStimGO =>
-						{
-							if (returnedStimGO != null)
-								StimGameObject = returnedStimGO;
-							else
-								Debug.LogError("TRIED TO LOAD STIM FROM SERVER BUT ITS NULL!");
-						}));
+                        if (SessionValues.Using2DStim)
+							yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
+						else
+							Load3DStimFromServer();
 					}
 					else if(SessionValues.UsingLocalConfigs)
-					{
-						StimGameObject = LoadExternalStimFromFile();
-					}
+						LoadExternalStimFromFile(); //Call should be awaited, but we cant cuz this is coroutine not async. Resolved with "yield return waitUntil" line below
                 }
                 else if (StimDimVals != null)
                 {
                     FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-                    StimGameObject = LoadExternalStimFromFile();
+                    LoadExternalStimFromFile();
                 }
                 else if (!string.IsNullOrEmpty(PrefabPath)) //this one neccessary?
 					StimGameObject = Resources.Load<GameObject>(PrefabPath);
@@ -309,11 +332,18 @@ namespace USE_StimulusManagement
                 }
             }
 
+			//HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
+			float startTime = Time.time;
+			yield return new WaitUntil(() => (StimGameObject != null && !LoadingAsync) || Time.time - startTime >= SessionValues.SessionDef.MaxStimLoadingDuration);
 
+			if (StimGameObject == null)
+				Debug.LogError("STIM GO STILL NULL AFTER YIELDING! MAX STIM LOADING DURATION HAS BEEN SURPASSED!");
+
+			//For 2D stim, set as child of Canvas:
             if (SessionValues.Using2DStim && CanvasGameObject != null)
                 StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
 
-            SetStimName();
+			SetStimName();
             PositionRotationScale();
             AddMesh();
             ToggleVisibility(false);
@@ -322,27 +352,25 @@ namespace USE_StimulusManagement
             callback?.Invoke(StimGameObject);
         }
 		
-		public GameObject LoadPrefabFromResources()
+		public void LoadPrefabFromResources()
 		{
 			try
 			{
 				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
 				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
-				return StimGameObject;
+				StimGameObject.SetActive(false);
 			}
 			catch(Exception e)
 			{
                 Debug.LogError($"ERROR LOADING {FileName} FROM RESOURCES! " + e.Message);
-				return null;
             }
         }
 
-
-        public IEnumerator Load2DStimFromServer(Action<GameObject> callback)
+        public IEnumerator Load2DStimFromServer()
 		{
-			string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
+            string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
 
-			yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
 			{
 				if (textureResult != null)
 				{
@@ -350,14 +378,13 @@ namespace USE_StimulusManagement
 					StimGameObject.SetActive(false);
 					RawImage image = StimGameObject.AddComponent<RawImage>();
 					image.texture = textureResult;
-					callback?.Invoke(StimGameObject);
 				}
 				else
-					Debug.LogWarning("TRIED TO LOAD 2D STIM FROM SERVER BUT THE RESULTING TEXTURE IS NULL!");
+					Debug.LogError("TRIED TO LOAD 2D STIM FROM SERVER BUT THE RESULTING TEXTURE IS NULL!");
 			}));
 		}
 
-		public GameObject LoadExternalStimFromFile(string stimFilePath = "")
+		public async void LoadExternalStimFromFile(string stimFilePath = "")
 		{
 			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension)) //add StimExtesion to file path if it doesn't already contain it
             {
@@ -386,31 +413,53 @@ namespace USE_StimulusManagement
 			
 			switch (StimExtension.ToLower())
 			{
-				case ".fbx":
-                    //StimGameObject = LoadModel_Trilib(FileName);
-					break;
 				case ".png":
-					StimGameObject = LoadExternalPNG(FileName);
+					LoadExternalPNG(FileName);
 					break;
 				case ".glb":
-					LoadExternalGITF();
+					await LoadExternalGLTF(FileName);
 					break;
                 case ".gltf":
-                    LoadExternalGITF();
+                    await LoadExternalGLTF(FileName);
+                    break;
+                case ".fbx":
+                    //LoadModel_Trilib(FileName);
                     break;
                 default:
 					break;
 			}
-
-			return StimGameObject;
 		}
 
-		public GameObject LoadExternalGITF()
+		public async void Load3DStimFromServer()
 		{
-            StimGameObject = Importer.LoadFromFile(FileName);
-			return StimGameObject;
+            string filePath = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
+			await LoadExternalGLTF(filePath);
+		}
+
+		public async Task LoadExternalGLTF(string filePath)
+		{
+            try
+            {
+				var gltf = new GltfImport();
+				var success = await gltf.Load(filePath);
+				if (success)
+				{
+					LoadingAsync = true;
+					StimGameObject = new GameObject();
+					StimGameObject.SetActive(false);
+					await gltf.InstantiateMainSceneAsync(StimGameObject.transform);
+					LoadingAsync = false;
+				}
+				else
+					Debug.LogError("UNSUCCESFUL LOADING GLTF FROM PATH: " + filePath);
+			}
+			catch(Exception e)
+			{
+				Debug.LogError($"FAILED TO LOAD GLTF: {FileName} | Error: " + e.Message.ToString());
+			}
         }
-        public GameObject LoadExternalPNG(string filePath)
+
+		public void LoadExternalPNG(string filePath)
         {
 			StimGameObject = new GameObject();
             RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
@@ -423,32 +472,30 @@ namespace USE_StimulusManagement
 				stimGOImage.texture = tex;
             }
             else
-                Debug.LogError("STIM FILE DOES NOT EXIST AT PATH: " + filePath);
-
-            return StimGameObject;
+                Debug.LogError("FAILED LOADING EXTERNAL PNG FROM LOCAL PATH: " + filePath);
         }
 
-        //   public GameObject LoadModel_Trilib(string filePath)
-        //   {
-        //       using (var assetLoader = new AssetLoader())
-        //       {
-        //           try
-        //           {
-        //               var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
-        //               assetLoaderOptions.AutoPlayAnimations = true;
-        //               assetLoaderOptions.AddAssetUnloader = true;
-        //StimGameObject = assetLoader.LoadFromFile(filePath);
-        //           }
-        //           catch (Exception e)
-        //           {
-        //               Debug.LogError(e.ToString());
-        //               return null;
-        //           }
-        //       }
-        //       return StimGameObject;
-        //   }
 
-        private void PositionRotationScale()
+		//TRILIB METHOD:
+		//public void LoadModel_Trilib(string filePath)
+		//{
+		//	using (var assetLoader = new AssetLoader())
+		//	{
+		//		try
+		//		{
+		//			var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
+		//			assetLoaderOptions.AutoPlayAnimations = true;
+		//			assetLoaderOptions.AddAssetUnloader = true;
+		//			StimGameObject = assetLoader.LoadFromFile(filePath);
+		//		}
+		//		catch (Exception e)
+		//		{
+		//			Debug.LogError(e.ToString());
+		//		}
+		//	}
+		//}
+
+		private void PositionRotationScale()
         {
             StimGameObject.transform.localPosition = StimLocation;
 
@@ -522,7 +569,10 @@ namespace USE_StimulusManagement
 			{
 				//DestroyRecursive(StimGameObject);
 				GameObject.Destroy(StimGameObject);
-				Resources.UnloadUnusedAssets();
+
+				//APPARENTLY FIXES THE GLTF WEB BUILD NULL TEXTURE ERROR, but prob need to ensure isn't wasting memory:
+				if(!SessionValues.WebBuild)
+					Resources.UnloadUnusedAssets();
 			}
 
 			StimGameObject = null;
@@ -849,7 +899,8 @@ namespace USE_StimulusManagement
 		{
 			foreach (StimDef sd in stimDefs)
 			{
-				if (sd.StimGameObject == null){
+				if (sd.StimGameObject == null)
+				{
 					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
 					{
 						if (stimResultGO != null)

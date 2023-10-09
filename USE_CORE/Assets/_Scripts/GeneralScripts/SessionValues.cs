@@ -1,3 +1,29 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,7 +66,6 @@ public static class SessionValues
     public static GameObject BlockResultsPrefab;
     public static GameObject BlockResults_GridElementPrefab;
 
-    public static GameObject LoadingCanvas_GO;
 
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;
@@ -108,7 +133,7 @@ public static class SessionValues
     public static List<GameObject> GetStartButtonChildren()
     {
         if(SessionDef == null)
-            Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
+            Debug.LogWarning("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
         else
         {
             if (SessionDef.IsHuman && HumanStartPanel.StartButtonChildren != null)
@@ -116,7 +141,7 @@ public static class SessionValues
             else if (!SessionDef.IsHuman && USE_StartButton.StartButtonChildren != null)
                 return USE_StartButton.StartButtonChildren;
         }
-        Debug.Log("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
+        Debug.LogWarning("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
         return null;
     }
 

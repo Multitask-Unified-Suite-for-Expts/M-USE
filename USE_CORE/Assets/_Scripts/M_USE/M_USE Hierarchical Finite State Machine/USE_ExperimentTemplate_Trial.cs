@@ -1,3 +1,29 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -211,7 +237,7 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.LoadingCanvas_GO.SetActive(false);
+                SessionValues.LoadingController.DeactivateLoadingCanvas();
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
@@ -246,6 +272,10 @@ namespace USE_ExperimentTemplate_Trial
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
 
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
+
+                //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
+                DisableTaskMainBackground();
+
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -317,7 +347,7 @@ namespace USE_ExperimentTemplate_Trial
                 SessionValues.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             });
 
-           GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
+            GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
            {
                GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas").gameObject.SetActive(false);
                foreach (Canvas canvas in TaskLevel.TaskCanvasses)
@@ -346,6 +376,14 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+        private void DisableTaskMainBackground()
+        {
+            if (TaskLevel.TaskCam != null)
+            {
+                if (TaskLevel.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
+                    skyboxComponent.enabled = false;
+            }
+        }
 
         private IEnumerator HandleLoadingStims()
         {

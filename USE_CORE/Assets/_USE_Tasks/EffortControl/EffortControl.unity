@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657642, g: 0.4964097, b: 0.5748155, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465767, g: 0.49641025, b: 0.57481587, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -608,12 +608,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 833208528}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &833208530 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3751088389616371971, guid: 9741947201c224bcc834c7fb77772b73,
-    type: 3}
-  m_PrefabInstance: {fileID: 833208528}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &897952398
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1099,12 +1093,6 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 897952398}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &897952400 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2681808471607445087, guid: 5262e0d7775f8407cb4eaa0b837a3957,
-    type: 3}
-  m_PrefabInstance: {fileID: 897952398}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &960539200
 GameObject:
   m_ObjectHideFlags: 0
@@ -1195,6 +1183,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 897952399}
   - {fileID: 833208529}
@@ -1277,14 +1266,12 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
-  BackdropStripesTexture: {fileID: 0}
+  MovedTooFarTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
-  GridParentLeft: {fileID: 897952400}
-  GridParentRight: {fileID: 833208530}
-  GridReward: {fileID: 6835231743616843059, guid: 2d4c70965073f47fc962e6d71a1bacdf,
-    type: 3}
+  TrialFilesLoaded: 0
   StimNoMaterialPrefab: {fileID: 3971733981247237095, guid: 48399b3e51fb047ff80a4c57704fcf7f,
     type: 3}
   StimLeftPrefab: {fileID: 7975343082115934864, guid: 807cad8d28a2e48ecb294f7b4351c79d,
@@ -1301,7 +1288,7 @@ MonoBehaviour:
   ScaleTimer: 0
   AvgClickTime: 0
   ChooseDuration: 0
-  RewardPulses_Block: 0
+  InflationDuration: 0
   TotalTouches_Block: 0
   Completions_Block: 0
   NumChosenLeft_Block: 0
@@ -1312,7 +1299,6 @@ MonoBehaviour:
   NumHigherRewardChosen_Block: 0
   NumLowerRewardChosen_Block: 0
   NumSameRewardChosen_Block: 0
-  NumAborted_Block: 0
   minObjectTouchDuration:
     name: 
     hidden: 0
@@ -1412,6 +1398,12 @@ MonoBehaviour:
   TaskName: EffortControl
   TaskProjectFolder: 
   BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
   TrialLevel: {fileID: 1719984667}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -1445,9 +1437,7 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  ContextName: 
   Completions_Task: 0
-  RewardPulses_Task: 0
   Touches_Task: 0
   NumChosenLeft_Task: 0
   NumChosenRight_Task: 0
@@ -1457,7 +1447,6 @@ MonoBehaviour:
   NumHigherEffortChosen_Task: 0
   NumLowerEffortChosen_Task: 0
   NumSameEffortChosen_Task: 0
-  NumAborted_Task: 0
   CurrentBlockString: 
   BlockStringsAdded: 0
 --- !u!4 &1719984669
@@ -1470,6 +1459,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -1563,6 +1553,7 @@ Transform:
   m_LocalRotation: {x: 0.42182997, y: 0.055328738, z: -0.025800213, w: 0.90461737}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -1578,7 +1569,6 @@ GameObject:
   - component: {fileID: 1780667518}
   - component: {fileID: 1780667517}
   - component: {fileID: 1780667516}
-  - component: {fileID: 1780667519}
   m_Layer: 0
   m_Name: EffortControl_Camera
   m_TagString: MainCamera
@@ -1647,16 +1637,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.6, z: -2.18}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!45 &1780667519
-Skybox:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1780667515}
-  m_Enabled: 1
-  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}

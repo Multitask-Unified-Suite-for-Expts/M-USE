@@ -1,3 +1,28 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
 using System.Collections.Generic;
 using UnityEngine;
 using USE_States;
@@ -5,7 +30,9 @@ using TMPro;
 using System.IO;
 using UnityEngine.UI;
 using System.Collections;
-
+using System.Threading.Tasks;
+using GLTFast;
+using USE_StimulusManagement;
 
 public class InitScreen_Level : ControlLevel
 {
@@ -48,9 +75,8 @@ public class InitScreen_Level : ControlLevel
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
 
-    private State SetupInitScreen;
     private State StartScreen;
-    private State CollectInfo;
+    private State CollectInfoScreen;
 
     private FolderDropdown FolderDropdown;
 
@@ -65,51 +91,41 @@ public class InitScreen_Level : ControlLevel
     private Toggle KeyboardToggle;
 
 
-
     public override void DefineControlLevel()
     {
-        SetupInitScreen = new State("SetupInitScreen");
         StartScreen = new State("StartScreen");
-        CollectInfo = new State("CollectInfo");
-        AddActiveStates(new List<State> { SetupInitScreen, StartScreen, CollectInfo});
+        CollectInfoScreen = new State("CollectInfoScreen");
+        AddActiveStates(new List<State> { StartScreen, CollectInfoScreen });
 
         SetGameObjects();
-
-        //Setup InitScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        SetupInitScreen.AddSpecificInitializationMethod(() =>
-        {
-            if (SessionValues.WebBuild)
-                GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-        });
-        SetupInitScreen.SpecifyTermination(() => true, StartScreen);
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddSpecificInitializationMethod(() =>
         {
+            if (SessionValues.WebBuild)
+                GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
+
             StartPanel_GO.SetActive(true);
         });
         StartScreen.AddUpdateMethod(() =>
         {
             if (StartPanel_GO.transform.localPosition != Vector3.zero)
                 StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
-
-            if (InputBroker.GetKeyUp(KeyCode.Escape))
-                Application.Quit();
         });
-        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfo, () =>
+        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen, () =>
         {
             ConfirmButtonPressed = false;
             StartPanel_GO.SetActive(false);
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
-        CollectInfo.AddSpecificInitializationMethod(() =>
+        CollectInfoScreen.AddSpecificInitializationMethod(() =>
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.SetActive(true);
             Settings_GO.SetActive(true);
         });
-        CollectInfo.AddUpdateMethod(() =>
+        CollectInfoScreen.AddUpdateMethod(() =>
         {
             if (MainPanel_GO.transform.localPosition != Vector3.zero)
                 MainPanel_GO.transform.localPosition = Vector3.MoveTowards(MainPanel_GO.transform.localPosition, Vector3.zero, 1000 * Time.deltaTime);
@@ -119,11 +135,8 @@ public class InitScreen_Level : ControlLevel
                 if (ErrorHandled())
                     ErrorHandling_GO.SetActive(false);
             }
-
-            if (InputBroker.GetKeyUp(KeyCode.Escape))
-                Application.Quit();
         });
-        CollectInfo.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
+        CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
 
@@ -136,8 +149,7 @@ public class InitScreen_Level : ControlLevel
             MainPanel_GO.SetActive(false);
             InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
 
-            //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = "Loading \n Configs";
-            SessionValues.LoadingCanvas_GO.SetActive(true); //turn on loading canvas/circle so that it immedietely shows its loading!
+            SessionValues.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
     }
@@ -287,6 +299,8 @@ public class InitScreen_Level : ControlLevel
             List<GameObject> deactivateList = new List<GameObject>() { LocalConfig_GO, GreyOutPanels_Array[0] };
             if (ConnectedToServer)
                 deactivateList.Add(GreyOutPanels_Array[2]);
+            else
+                GreyOutPanels_Array[2].SetActive(true);
             DeactivateObjects(deactivateList);
             if (ConnectedToServer && !FoldersSet)
                 PopulateServerDropdown();
@@ -385,10 +399,10 @@ public class InitScreen_Level : ControlLevel
         ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
         LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
 
-        GreyOutPanels_Array = new GameObject[3];
-        GreyOutPanels_Array[0] = GameObject.Find("GreyOutPanel_ServerURL");
-        GreyOutPanels_Array[1] = GameObject.Find("GreyOutPanel_Data");
-        GreyOutPanels_Array[2] = GameObject.Find("GreyOutPanel_Config");
+        GreyOutPanels_Array = new GameObject[3]
+        {
+            GameObject.Find("GreyOutPanel_ServerURL"), GameObject.Find("GreyOutPanel_Data"), GameObject.Find("GreyOutPanel_Config")
+        };
         foreach (GameObject go in GreyOutPanels_Array)
             go.SetActive(false);
 
@@ -416,9 +430,11 @@ public class InitScreen_Level : ControlLevel
 
 
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
-        FileSpec configFileSpec = new FileSpec();
-        configFileSpec.name = "Config Folder";
-        configFileSpec.isFolder = true;
+        FileSpec configFileSpec = new FileSpec
+        {
+            name = "Config Folder",
+            isFolder = true
+        };
         SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
         TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
@@ -426,9 +442,11 @@ public class InitScreen_Level : ControlLevel
         configFileItem.ManualStart(configFileSpec, configInputField, configText);
         LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
-        FileSpec dataFileSpec = new FileSpec();
-        dataFileSpec.name = "Data Folder";
-        dataFileSpec.isFolder = true;
+        FileSpec dataFileSpec = new FileSpec
+        {
+            name = "Data Folder",
+            isFolder = true
+        };
         SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
         TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();

@@ -1,3 +1,28 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -31,8 +56,6 @@ namespace USE_ExperimentTemplate_Session
 {
     public class ControlLevel_Session_Template : ControlLevel
     {
-        [HideInInspector] public int SessionId_SQL;
-
         [HideInInspector] public bool TasksFinished;
         
         protected SummaryData SummaryData;
@@ -103,10 +126,6 @@ namespace USE_ExperimentTemplate_Session
             #endif
 
             SessionValues.SessionLevel = this;
-
-            SessionValues.LoadingCanvas_GO = GameObject.Find("LoadingCanvas");
-            SessionValues.LoadingController = SessionValues.LoadingCanvas_GO.GetComponent<LoadingController>();
-            SessionValues.LoadingCanvas_GO.SetActive(false);
 
 
             State initScreen = new State("InitScreen");
@@ -333,8 +352,7 @@ namespace USE_ExperimentTemplate_Session
                 selectedConfigFolderName = null;
                 taskAutomaticallySelected = false; // gives another chance to select even if previous task loading was due to timeout
 
-
-                SessionValues.LoadingCanvas_GO.SetActive(false); //Turn off loading circle now that about to set taskselection canvas active!
+                SessionValues.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
 
                 SessionCam.gameObject.SetActive(true);
 
@@ -547,8 +565,7 @@ namespace USE_ExperimentTemplate_Session
                   //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
-                //SessionValues.LoadingCanvas_GO.GetComponentInChildren<TextMeshProUGUI>().text = $"Loading \n Task";
-                SessionValues.LoadingCanvas_GO.SetActive(true);
+                SessionValues.LoadingController.ActivateLoadingCanvas();
 
                 TaskButtonsContainer.SetActive(false);
 
@@ -596,13 +613,15 @@ namespace USE_ExperimentTemplate_Session
             });
 
             loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, setupTask, () =>
-
             {
                 DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
+
+                SetTaskMainBackground(); 
+
                 if (CameraMirrorTexture != null)
                     CameraMirrorTexture.Release();
 
@@ -757,10 +776,24 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
         }
 
+        //Method is used to have every task set their main background as the MUSE blue background
+        private void SetTaskMainBackground()
+        {
+            if (CurrentTask.TaskCam != null)
+            {
+                if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
+                    skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
+                skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
+            }
+            else
+                Debug.LogWarning("TASK CAM IS NULL!");
+        }
+
         private void FindGameObjects()
         {
             try
             {
+                SessionValues.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 InitCamGO = GameObject.Find("InitCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
@@ -820,7 +853,7 @@ namespace USE_ExperimentTemplate_Session
             mirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = mirrorCamGO.AddComponent<Camera>();
             Skybox skybox = mirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("NewBackground!");
+            skybox.material = Resources.Load<Material>("MUSE_MainBackground");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
             mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();

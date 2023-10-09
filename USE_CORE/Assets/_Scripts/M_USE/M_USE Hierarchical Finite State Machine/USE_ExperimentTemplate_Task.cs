@@ -1,3 +1,29 @@
+/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -133,53 +159,53 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-            TaskCam.gameObject.SetActive(true);
+                TaskCam.gameObject.SetActive(true);
 
-            if (TaskCanvasses != null)
-                foreach (Canvas canvas in TaskCanvasses)
-                    canvas.gameObject.SetActive(true);
+                if (TaskCanvasses != null)
+                    foreach (Canvas canvas in TaskCanvasses)
+                        canvas.gameObject.SetActive(true);
 
-            BlockCount = -1;
-            CurrentBlockSummaryString = new StringBuilder();
-            PreviousBlockSummaryString = new StringBuilder();
-            CurrentTaskSummaryString = new StringBuilder();
+                BlockCount = -1;
+                CurrentBlockSummaryString = new StringBuilder();
+                PreviousBlockSummaryString = new StringBuilder();
+                CurrentTaskSummaryString = new StringBuilder();
 
-            NumRewardPulses_InTask = 0;
-            NumAbortedTrials_InTask = 0;
+                NumRewardPulses_InTask = 0;
+                NumAbortedTrials_InTask = 0;
 
-            if (!SessionValues.WebBuild)
-            {
-                if (configUI == null)
-                    configUI = FindObjectOfType<ConfigUI>();
-                configUI.clear();
-                if (ConfigUiVariables != null)
-                    configUI.store = ConfigUiVariables;
-                else
-                    configUI.store = new ConfigVarStore();
-                configUI.GenerateUI();
-
-                if (TaskName == "GazeCalibration")
+                if (!SessionValues.WebBuild)
                 {
-                    BlockDef bd = new BlockDef();
-                    BlockDefs = new BlockDef[] { bd };
-                    bd.GenerateTrialDefsFromBlockDef();
+                    if (configUI == null)
+                        configUI = FindObjectOfType<ConfigUI>();
+                    configUI.clear();
+                    if (ConfigUiVariables != null)
+                        configUI.store = ConfigUiVariables;
+                    else
+                        configUI.store = new ConfigVarStore();
+                    configUI.GenerateUI();
+
+                    if (TaskName == "GazeCalibration")
+                    {
+                        BlockDef bd = new BlockDef();
+                        BlockDefs = new BlockDef[] { bd };
+                        bd.GenerateTrialDefsFromBlockDef();
+                    }
                 }
-            }
 
-            SessionValues.InputManager.SetActive(true);
+                SessionValues.InputManager.SetActive(true);
 
-            if (SessionValues.SessionDef.IsHuman)
-            {
-                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                SessionValues.HumanStartPanel.SetTaskLevel(this);
-                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-            }
+                if (SessionValues.SessionDef.IsHuman)
+                {
+                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
+                    SessionValues.HumanStartPanel.SetTaskLevel(this);
+                    SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+                }
 
 
-            //Send Reward Pulses for Ansen's Camera at Start of Task:
-            if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
-                SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                //Send Reward Pulses for Ansen's Camera at Start of Task:
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
                 if (SessionValues.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
@@ -374,7 +400,6 @@ namespace USE_ExperimentTemplate_Task
             
             TaskLevelDefined = true;
         }
-
 
         public void SetSkyBox(string contextName)
         {

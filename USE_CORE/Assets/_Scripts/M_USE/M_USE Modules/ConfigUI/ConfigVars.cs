@@ -1,4 +1,30 @@
-﻿using System.Collections;
+﻿/*
+MIT License
+
+Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -314,18 +340,18 @@ namespace ConfigDynamicUI
 		public ConfigString SetValue(string value)
 		{
 			this.value = value;
-			this.triggerValueChanged();
+			triggerValueChanged();
 			return this;
 		}
 		
 		public ConfigString setHidden(bool hide)
 		{
-			this.hidden = hide;
+			hidden = hide;
 			return this;
 		}
 
 		public override string ToString(){
-			return "" + this.value;
+			return "" + value;
 		}
 	}
 
@@ -382,7 +408,8 @@ namespace ConfigDynamicUI
 			}
 		}
 
-		IDictionary getStore(ConfigVars variable){
+		IDictionary getStore(ConfigVars variable)
+		{
 			if(variable is ConfigNumber)
 				return varsNumber;
 			else if(variable is ConfigNumberRanged)
@@ -396,7 +423,8 @@ namespace ConfigDynamicUI
 			return null;
 		}
 
-		IDictionary getStore<T>(){
+		IDictionary getStore<T>()
+		{
 			if(typeof(T) == typeof(ConfigNumber))
 				return varsNumber;
 			else if(typeof(T) == typeof(ConfigNumberRanged))
@@ -416,19 +444,21 @@ namespace ConfigDynamicUI
 				getStore(variable).Remove(variable.name);
 		}
 		
-		public T get<T>(string name) where T : ConfigVars{
+		public T get<T>(string name) where T : ConfigVars
+		{
 			var store = getStore<T>();
 			if(store.Contains(name))
 				return (T) store[name];
 			return null;
 		}
 		
-		public void clear(){
-			this.varsNumber.Clear();
-			this.varsNumberRanged.Clear();
-			this.varsNumberRangedInt.Clear();
-			this.varsString.Clear();
-			this.varsBoolean.Clear();
+		public void clear()
+		{
+			varsNumber.Clear();
+			varsNumberRanged.Clear();
+			varsNumberRangedInt.Clear();
+			varsString.Clear();
+			varsBoolean.Clear();
 		}
 	}
 }

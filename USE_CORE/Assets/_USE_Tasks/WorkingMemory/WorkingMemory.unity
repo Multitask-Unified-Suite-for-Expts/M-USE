@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311915, g: 0.3807396, b: 0.35872662, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311924, g: 0.38073963, b: 0.3587269, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -154,7 +154,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: WorkingMemory_TrialLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -195,10 +194,12 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
-  BackdropStripesTexture: {fileID: 0}
+  MovedTooFarTexture: {fileID: 0}
   THR_BackdropTexture: {fileID: 0}
+  TrialFilesLoaded: 0
   WM_CanvasGO: {fileID: 2045950497}
   runningAcc: 
   MinTrials: 0
@@ -219,7 +220,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  gratingSquareDuration:
+  maxSearchDuration:
     name: 
     hidden: 0
     value: 0
@@ -259,39 +260,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  selectionFbDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  displaySampleDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  postSampleDelayDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  displayPostSampleDistractorsDuration:
-    name: 
-    hidden: 0
-    value: 0
-    isRange: 0
-    max: 0
-    min: 0
-    precision: 0
-  preTargetDelayDuration:
+  fbDuration:
     name: 
     hidden: 0
     value: 0
@@ -311,14 +280,10 @@ MonoBehaviour:
   playerViewText: {fileID: 0}
   ContextName: 
   NumCorrect_InBlock: 0
-  SearchDurations_InBlock: []
   NumErrors_InBlock: 0
-  NumRewardPulses_InBlock: 0
   NumTokenBarFull_InBlock: 0
   TotalTokensCollected_InBlock: 0
   Accuracy_InBlock: 0
-  AverageSearchDuration_InBlock: 0
-  NumAborted_InBlock: 0
 --- !u!114 &108587574
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,7 +297,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: WorkingMemory_TaskLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -344,6 +308,12 @@ MonoBehaviour:
   TaskName: WorkingMemory
   TaskProjectFolder: 
   BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
   TrialLevel: {fileID: 108587573}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -378,14 +348,10 @@ MonoBehaviour:
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
   NumCorrect_InTask: 0
-  SearchDurations_InTask: []
   NumErrors_InTask: 0
-  NumRewardPulses_InTask: 0
   NumTokenBarFull_InTask: 0
   TotalTokensCollected_InTask: 0
   Accuracy_InTask: 0
-  AverageSearchDuration_InTask: 0
-  NumAborted_InTask: 0
 --- !u!4 &108587575
 Transform:
   m_ObjectHideFlags: 0
@@ -396,6 +362,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -489,6 +456,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -504,7 +472,6 @@ GameObject:
   - component: {fileID: 1812093642}
   - component: {fileID: 1812093641}
   - component: {fileID: 1812093640}
-  - component: {fileID: 1812093643}
   m_Layer: 0
   m_Name: WorkingMemory_Camera
   m_TagString: MainCamera
@@ -573,19 +540,11 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -60}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!45 &1812093643
-Skybox:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812093639}
-  m_Enabled: 1
-  m_CustomSkybox: {fileID: 2100000, guid: a698497e6beb642b89ddff061b0d25c9, type: 2}
 --- !u!1 &2045950497
 GameObject:
   m_ObjectHideFlags: 0
@@ -676,6 +635,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3

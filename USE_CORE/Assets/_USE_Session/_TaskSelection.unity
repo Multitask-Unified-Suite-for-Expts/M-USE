@@ -797,8 +797,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efdd3237007044a788a7679a9d776178, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HumanVersionToggleButton: {fileID: 2071187616}
-  ToggleAudioButton: {fileID: 907834252290271150}
   BackgroundMusic_AudioSource: {fileID: 0}
 --- !u!1 &1213845836
 GameObject:
@@ -2931,6 +2929,9 @@ MonoBehaviour:
   CameraMirrorTexture: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
   Starfield: {fileID: 1391649313}
+  HumanVersionToggleButton: {fileID: 0}
+  ToggleAudioButton: {fileID: 0}
+  RedAudioCross: {fileID: 0}
   HumanStartPanelPrefab: {fileID: 7569599706748818137, guid: e3a91289f22a4401bbc1f44baba80e22,
     type: 3}
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
@@ -3810,17 +3811,17 @@ PrefabInstance:
     - target: {fileID: 5339080393994989869, guid: ec96d1660b5b342f088e3f823bc5063c,
         type: 3}
       propertyPath: m_Colors.m_HighlightedColor.b
-      value: 0.9490196
+      value: 0.7254902
       objectReference: {fileID: 0}
     - target: {fileID: 5339080393994989869, guid: ec96d1660b5b342f088e3f823bc5063c,
         type: 3}
       propertyPath: m_Colors.m_HighlightedColor.g
-      value: 0.6745098
+      value: 0.69803923
       objectReference: {fileID: 0}
     - target: {fileID: 5339080393994989869, guid: ec96d1660b5b342f088e3f823bc5063c,
         type: 3}
       propertyPath: m_Colors.m_HighlightedColor.r
-      value: 0.03137255
+      value: 0.627451
       objectReference: {fileID: 0}
     - target: {fileID: 5339080393994989869, guid: ec96d1660b5b342f088e3f823bc5063c,
         type: 3}
@@ -3974,31 +3975,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8388462663491615707, guid: ec96d1660b5b342f088e3f823bc5063c,
     type: 3}
   m_PrefabInstance: {fileID: 2071187614}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &2071187616 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5917927797281788601, guid: ec96d1660b5b342f088e3f823bc5063c,
-    type: 3}
-  m_PrefabInstance: {fileID: 2071187614}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2071187617
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2071187616}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 79a9007f67bcb4c8ea23eb62a5449295, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  originalScale: {x: 0, y: 0, z: 0}
---- !u!1 &907834252290271150 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2936223428931228721, guid: 88336f9d81fae4277b308f94b81c27ee,
-    type: 3}
-  m_PrefabInstance: {fileID: 2604991362219750303}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2604991362219750303
 PrefabInstance:

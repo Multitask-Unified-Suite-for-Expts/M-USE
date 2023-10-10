@@ -31,7 +31,7 @@ public class BackgroundMusicController : MonoBehaviour
         BackgroundMusic_AudioSource.Play();
     }
 
-    public void StopBackgroundMusic()
+    public void StopMusic()
     {
         AudioPlaybackSpot = BackgroundMusic_AudioSource.time;
         BackgroundMusic_AudioSource.Stop();

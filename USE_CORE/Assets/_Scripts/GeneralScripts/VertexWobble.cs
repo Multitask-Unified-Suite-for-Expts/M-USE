@@ -30,7 +30,7 @@ using TMPro;
 
 public class VertexWobble : MonoBehaviour
 {
-    TMP_Text textMesh;
+    TMP_Text text;
     Mesh mesh;
     Vector3[] vertices;
 
@@ -40,24 +40,23 @@ public class VertexWobble : MonoBehaviour
 
     void Start()
     {
-        textMesh = GetComponent<TMP_Text>();
+        text = GetComponent<TMP_Text>();
     }
 
     void Update()
     {
-        textMesh.ForceMeshUpdate();
-        mesh = textMesh.mesh;
+        text.ForceMeshUpdate();
+        mesh = text.mesh;
         vertices = mesh.vertices;
 
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector3 offset = Wobble(Time.time + i * offsetMultiplier);
-
             vertices[i] = vertices[i] + offset;
         }
 
         mesh.vertices = vertices;
-        textMesh.canvasRenderer.SetMesh(mesh);
+        text.canvasRenderer.SetMesh(mesh);
     }
 
     Vector2 Wobble(float time)

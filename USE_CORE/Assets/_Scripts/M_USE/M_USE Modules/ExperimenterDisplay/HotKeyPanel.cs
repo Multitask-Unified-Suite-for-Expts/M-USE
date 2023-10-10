@@ -197,7 +197,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Debug.Log("AFTER = " + c.name + " " + c.targetDisplay);
                         }
                     }
-                    //SceneManager.LoadScene(SceneManager.GetActiveScene().name); //Doesn't work. Will load task again but without TaskSelection scene.
                 }
             };
             //HotKeyList.Add(toggleDisplays);

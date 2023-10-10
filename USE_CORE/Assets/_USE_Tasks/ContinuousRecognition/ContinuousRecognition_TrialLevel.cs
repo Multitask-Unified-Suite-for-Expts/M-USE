@@ -320,7 +320,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK OR IF THEY FOUND ALL THE STIM. 
-                    if(PNC_Stim.Count == 0 || TrialCount_InBlock == CurrentTrial.MaxTrials-1)
+                    if(PNC_Stim.Count == 0 || TrialCount_InBlock == CurrentTrial.MaxNumTrials-1)
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
@@ -426,7 +426,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (GotTrialCorrect)
                 score += (TrialCount_InBlock + 1) * 100;
 
-            if (EndBlock)
+            if (EndBlock || CompletedAllTrials)
             {
                 StartCoroutine(GenerateBlockFeedback());
 

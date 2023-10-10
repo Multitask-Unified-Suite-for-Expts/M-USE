@@ -162,13 +162,13 @@ namespace USE_UI
 
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
             if (SessionValues.UsingDefaultConfigs)
-                EndTaskButtonGO.AddComponent<HoverEffect>();
+                EndTaskButtonGO.AddComponent<ButtonHoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
             if(SessionValues.UsingDefaultConfigs)
-                InstructionsButtonGO.AddComponent<HoverEffect>();
+                InstructionsButtonGO.AddComponent<ButtonHoverEffect>();
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
 

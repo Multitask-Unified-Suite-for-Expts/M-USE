@@ -223,7 +223,7 @@ namespace USE_ExperimentTemplate_Task
                 });
             }
             
-            RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
+            //RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
 
             RunBlock.AddLateUpdateMethod(() =>
             {

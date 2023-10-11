@@ -78,14 +78,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool TrialStimsLoaded;
 
         // Texture Variables
-<<<<<<< HEAD
-        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
-            MoveTooFarTexture, THR_BackdropTexture;
-=======
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
->>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
-
-
+        
         private float Camera_PulseSentTime = 0f;
 
         public int CurrentTrialDefIndex;
@@ -241,14 +235,8 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-<<<<<<< HEAD
                 CurrentTrialDefIndex = DetermineCurrentTrialDefIndex();
-                
-                
-                SessionValues.LoadingCanvas_GO.SetActive(false);
-=======
                 SessionValues.LoadingController.DeactivateLoadingCanvas();
->>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
@@ -282,16 +270,12 @@ namespace USE_ExperimentTemplate_Trial
                 Input.ResetInputAxes();
                 if (SessionValues.SessionDef.IsHuman)
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
-
-<<<<<<< HEAD
-                AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial. 
-=======
+                
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
                 //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
                 DisableTaskMainBackground();
-
->>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
+                
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -315,7 +299,7 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
 
-                StartCoroutine(WriteDataFiles());
+                WriteDataFiles();
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
@@ -391,13 +375,9 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
             StartCoroutine(TrialData.CreateFile());
-           // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
-
 
         }
-<<<<<<< HEAD
-=======
-
+        
         private void DisableTaskMainBackground()
         {
             if (TaskLevel.TaskCam != null)
@@ -406,8 +386,7 @@ namespace USE_ExperimentTemplate_Trial
                     skyboxComponent.enabled = false;
             }
         }
-
->>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
+        
         private IEnumerator HandleLoadingStims()
         {
             foreach (StimGroup sg in TrialStims)
@@ -453,21 +432,8 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
-        public IEnumerator WriteDataFiles()
+        public void WriteDataFiles()
         {
-<<<<<<< HEAD
-            yield return StartCoroutine(TrialData.AppendDataToBuffer());
-            yield return StartCoroutine(TrialData.AppendDataToFile());
-            yield return StartCoroutine(FrameData.AppendDataToBuffer());
-            yield return StartCoroutine(FrameData.AppendDataToFile());
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                yield return StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-            if (SessionValues.SessionDef.SerialPortActive)
-            {
-                yield return StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-                yield return StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
-            }
-=======
             StartCoroutine(TrialData.AppendDataToBuffer());
             StartCoroutine(TrialData.AppendDataToFile());
 
@@ -482,7 +448,6 @@ namespace USE_ExperimentTemplate_Trial
             if(SessionValues.SerialSentData != null)
                 StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
          
->>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
         }
         
         public bool CheckForcedBlockEnd()
@@ -776,15 +741,8 @@ namespace USE_ExperimentTemplate_Trial
         //    }));
         //}
 
-        public void LoadTexturesFromResources()
+        public IEnumerator LoadSharedTrialTextures()
         {
-<<<<<<< HEAD
-            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooLong");
-            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooShort");
-            MoveTooFarTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
-            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/THR_Backdrop");
-
-=======
             if (SessionValues.UsingDefaultConfigs)
             {
                 HeldTooLongTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong");
@@ -826,24 +784,10 @@ namespace USE_ExperimentTemplate_Trial
                         Debug.LogWarning("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
                 }));
             }
->>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
+            TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
         }
-
-        //Currently just having all 3 (local, server, default) load from Resources:
-        //public void LoadTextures(string ContextExternalFilePath)
-        //{
-        //    HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooLong.png"));
-        //    HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooShort.png"));
-        //    MoveTooFarTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
-        //    THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "THR_Backdrop.png"));
-
-        //    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
-        //    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-        //    TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
-        //}
 
         public virtual void ResetTrialVariables()
         {

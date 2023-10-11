@@ -1,39 +1,17 @@
-/*
-MIT License
-
-Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Text;
 using EffortControl_Namespace;
 
 
 public class EffortControl_TaskLevel : ControlLevel_Task_Template
 {
+    //[HideInInspector] public string ContextName;
+
     //Task Values used for SummaryData file
     [HideInInspector] public int Completions_Task = 0;
     [HideInInspector] public int Touches_Task = 0;
@@ -51,6 +29,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
     EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
+    private EffortControl_TaskDef currentTaskDef => GetTaskDef<EffortControl_TaskDef>();
     EffortControl_TrialLevel trialLevel;
 
 
@@ -131,6 +110,8 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                         "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
                         "\nChose Same Effort: " + trialLevel.NumSameEffortChosen_Block);
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
+        /*if (PreviousBlocksString.Length > 0)
+            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
 
     void DefineBlockData()

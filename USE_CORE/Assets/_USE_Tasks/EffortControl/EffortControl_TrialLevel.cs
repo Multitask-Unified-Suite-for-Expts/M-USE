@@ -1,28 +1,3 @@
-/*
-MIT License
-
-Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-
 using UnityEngine;
 using System.Collections.Generic;
 using USE_States;
@@ -32,6 +7,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using Random = UnityEngine.Random;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -83,7 +59,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private string EffortChoice; //higher or lower
 
     //To center the balloon they selected:
-    protected float CenteringSpeed = 1.5f;
+    protected float CenteringSpeed;
     private Vector3 CenteredPos;
     [HideInInspector] public bool Flashing;
 
@@ -168,6 +144,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (!ObjectsCreated)
                 CreateObjects();
+
+            CenteringSpeed = 1.5f;
         });
 
         //SETUP TRIAL state ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -538,7 +516,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Feedback.AddUniversalTerminationMethod(() =>
         {
             if(TokenFBController.IsTokenBarFull())
-                GiveReward();
+            {
+                if(SessionValues.SyncBoxController != null)
+                    GiveReward();
+
+            }
+            
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
@@ -604,6 +587,20 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.ResetTokenBarFull();
     }
 
+    public override void DefineCustomTrialDefSelection()
+    {
+        TrialDefSelectionStyle = CurrentTrial.TrialDefSelectionStyle;
+        posStep = CurrentTrial.PosStep;
+        negStep = CurrentTrial.NegStep;
+        maxDiffLevel = CurrentTrial.MaxDiffLevel;
+        avgDiffLevel = CurrentTrial.AvgDiffLevel;
+        diffLevelJitter = CurrentTrial.DiffLevelJitter;
+        BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
+        
+        int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
+        difficultyLevel = randomDouble;
+    }
+
     public void ActivateObjects()
     {
         foreach (GameObject go in ObjectList)
@@ -665,16 +662,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             EffortChoice = CompareValues(CurrentTrial.NumClicksRight, CurrentTrial.NumClicksLeft);
             RewardChoice = CompareValues(CurrentTrial.NumCoinsRight, CurrentTrial.NumCoinsLeft);
         }
-
+        
         if (EffortChoice == "Higher")
         {
             NumHigherEffortChosen_Block++;
             CurrentTaskLevel.NumHigherEffortChosen_Task++;
+            runningPerformance.Add(1);
         }
         else if (EffortChoice == "Lower")
         {
             NumLowerEffortChosen_Block++;
             CurrentTaskLevel.NumLowerEffortChosen_Task++;
+            runningPerformance.Add(0);
         }
         else
         {
@@ -711,7 +710,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void SetTokenVariables()
     {
-        float tokenSize = 106f;
+        float tokenSize = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 212 : 106; //need to test these on mac
         float yOffset = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 45 : 5; //need to test these on mac
 
         //mac is 1920 x 1200, mac fullscreen is 3456x2160, Ipad is 1920x1200
@@ -770,9 +769,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     void GiveReward()
     {
-        if (SessionValues.SyncBoxController == null)
-            return;
-
         if (SideChoice == "Left")
         {
             SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
@@ -809,8 +805,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         choiceToTouchDelay = ConfigUiVariables.get<ConfigNumber>("choiceToTouchDelay");
         sbToBalloonDelay = ConfigUiVariables.get<ConfigNumber>("sbToBalloonDelay");
     }
-
-
+    
     void CreateObjects()
     {
         StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
@@ -895,7 +890,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier.transform.SetParent(EC_CanvasGO.transform, false);
         Image image = MiddleBarrier.AddComponent<Image>();
         image.rectTransform.anchoredPosition = Vector2.zero;
-        image.transform.localScale = new Vector3(.06f, 20f, .001f);
+
+        if (SessionValues.SessionDef.MacMainDisplayBuild)
+            image.transform.localScale = new Vector3(.06f, 15f, .001f);
+        else
+            image.transform.localScale = new Vector3(.06f, 11f, .001f);
+
+
+        #if (UNITY_WEBGL && !UNITY_EDITOR)
+            image.transform.localScale = new Vector3(.06f, 15f, .001f);
+        #endif
+
         MiddleBarrier.SetActive(false);
     }
 

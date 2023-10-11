@@ -1,29 +1,3 @@
-/*
-MIT License
-
-Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-
-
 using System;
 using System.Text;
 using System.Collections.Generic;
@@ -80,6 +54,7 @@ namespace USE_ExperimentTemplate_Task
         public TaskDef TaskDef;
         public BlockDef[] BlockDefs;
         private BlockDef CurrentBlockDef;
+        
         public BlockDef currentBlockDef
         {
             get
@@ -159,53 +134,53 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-                TaskCam.gameObject.SetActive(true);
+            TaskCam.gameObject.SetActive(true);
 
-                if (TaskCanvasses != null)
-                    foreach (Canvas canvas in TaskCanvasses)
-                        canvas.gameObject.SetActive(true);
+            if (TaskCanvasses != null)
+                foreach (Canvas canvas in TaskCanvasses)
+                    canvas.gameObject.SetActive(true);
 
-                BlockCount = -1;
-                CurrentBlockSummaryString = new StringBuilder();
-                PreviousBlockSummaryString = new StringBuilder();
-                CurrentTaskSummaryString = new StringBuilder();
+            BlockCount = -1;
+            CurrentBlockSummaryString = new StringBuilder();
+            PreviousBlockSummaryString = new StringBuilder();
+            CurrentTaskSummaryString = new StringBuilder();
 
-                NumRewardPulses_InTask = 0;
-                NumAbortedTrials_InTask = 0;
+            NumRewardPulses_InTask = 0;
+            NumAbortedTrials_InTask = 0;
 
-                if (!SessionValues.WebBuild)
+            if (!SessionValues.WebBuild)
+            {
+                if (configUI == null)
+                    configUI = FindObjectOfType<ConfigUI>();
+                configUI.clear();
+                if (ConfigUiVariables != null)
+                    configUI.store = ConfigUiVariables;
+                else
+                    configUI.store = new ConfigVarStore();
+                configUI.GenerateUI();
+
+                if (TaskName == "GazeCalibration")
                 {
-                    if (configUI == null)
-                        configUI = FindObjectOfType<ConfigUI>();
-                    configUI.clear();
-                    if (ConfigUiVariables != null)
-                        configUI.store = ConfigUiVariables;
-                    else
-                        configUI.store = new ConfigVarStore();
-                    configUI.GenerateUI();
-
-                    if (TaskName == "GazeCalibration")
-                    {
-                        BlockDef bd = new BlockDef();
-                        BlockDefs = new BlockDef[] { bd };
-                        bd.GenerateTrialDefsFromBlockDef();
-                    }
+                    BlockDef bd = new BlockDef();
+                    BlockDefs = new BlockDef[] { bd };
+                    bd.GenerateTrialDefsFromBlockDef();
                 }
+            }
 
-                SessionValues.InputManager.SetActive(true);
+            SessionValues.InputManager.SetActive(true);
 
-                if (SessionValues.SessionDef.IsHuman)
-                {
-                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                    SessionValues.HumanStartPanel.SetTaskLevel(this);
-                    SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-                }
+            if (SessionValues.SessionDef.IsHuman)
+            {
+                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
+                SessionValues.HumanStartPanel.SetTaskLevel(this);
+                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
+            }
 
 
-                //Send Reward Pulses for Ansen's Camera at Start of Task:
-                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+            //Send Reward Pulses for Ansen's Camera at Start of Task:
+            if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
                 if (SessionValues.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
@@ -216,7 +191,7 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddUniversalInitializationMethod(() =>
             {
                 BlockCount++;
-
+                
                 NumAbortedTrials_InBlock = 0;
                 NumRewardPulses_InBlock = 0;
 
@@ -248,7 +223,7 @@ namespace USE_ExperimentTemplate_Task
                 });
             }
             
-           // RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
+            RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
 
             RunBlock.AddLateUpdateMethod(() =>
             {
@@ -282,8 +257,11 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-               StartCoroutine(FrameData.AppendDataToBuffer());
-               SessionValues.EventCodeManager.EventCodeLateUpdate();
+                if (SessionValues.StoreData)
+                    StartCoroutine(FrameData.AppendDataToBuffer());
+
+                if (SessionValues.SessionDef.EventCodesActive)
+                    SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -297,21 +275,16 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionValues.SessionDef.IsHuman && BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
-                StartCoroutine(BlockData.AppendDataToBuffer()); 
-                StartCoroutine(BlockData.AppendDataToFile());
-
-                StartCoroutine(FrameData.AppendDataToBuffer());
-                StartCoroutine(FrameData.AppendDataToFile());
-
-
+                if (SessionValues.StoreData)
+                {
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
+                }
             });
 
             //FinishTask State-----------------------------------------------------------------------------------------------------
             FinishTask.AddDefaultInitializationMethod(() =>
             {
-                if (TrialLevel.TouchFBController != null && TrialLevel.TouchFBController.TouchFbEnabled)
-                    TrialLevel.TouchFBController.DisableTouchFeedback();
-
                 if (TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 
@@ -400,6 +373,7 @@ namespace USE_ExperimentTemplate_Task
             
             TaskLevelDefined = true;
         }
+
 
         public void SetSkyBox(string contextName)
         {
@@ -775,6 +749,31 @@ namespace USE_ExperimentTemplate_Task
 
 
 
+
+        //DELETE DUPLICATE LATER
+        public bool FileStringContainsTabs(string fileContent)
+        {
+            string[] lines = fileContent.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i].Trim();
+
+                if (line.Contains('\t'))
+                {
+                    int tabCount = line.Split('\t').Length; //check if all lines have same number of tabs 
+                    for (int j = i + 1; j < lines.Length; j++)
+                    {
+                        string nextLine = lines[j].Trim();
+                        if (!string.IsNullOrEmpty(nextLine) && nextLine.Split('\t').Length != tabCount)
+                            return false; //Inconsistent number of tab-separated values
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
         public void AddTaskStimDefsToTaskStimGroup<T>(StimGroup sg, IEnumerable<T> stimDefs) where T : StimDef
         {
             sg.AddStims(stimDefs);
@@ -852,23 +851,43 @@ namespace USE_ExperimentTemplate_Task
                                                 $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}");
 
         }
+        
+//CALCULATE ADPATIVE TRIAL DEF 
+        public int DetermineTrialDefDifficultyLevel(int difficultyLevel, List<int> runningPerformance, int posStep,
+            int negStep, int maxDiffLevel)
+        {
+            if (runningPerformance.Count == 0)
+                return difficultyLevel;
+            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
+            //Debug.LogWarning("runningPerformance size: " + runningPerformance.Count + "/////// last: " + runningPerformance.Last());
+            if (runningPerformance.Last() == 1)
+            {
+                difficultyLevel -= negStep;
+                if (difficultyLevel < 1)
+                {
+                    Debug.LogWarning("DIFFICULTYLEVEL HIT 0");
+                    difficultyLevel = 0;
+                }
+            }
 
+            else if (runningPerformance.Last() == 0)
+            {
+                difficultyLevel += posStep;
+                if (difficultyLevel >= maxDiffLevel)
+                {
+                    Debug.LogWarning("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
+                    difficultyLevel = maxDiffLevel;
+                }
+            }
+
+            return difficultyLevel;
+        }
 
     }
 
 
     public class TaskLevelTemplate_Methods
     {
-        //CALCULATE ADPATIVE TRIAL DEF 
-        public int DetermineTrialDefDifficultyLevel()
-        {
-            int difficultyLevel = 0;
-            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
-            
-            
-            //PASS IN THE DLS, max & min, pos step, # of trials before pos dl switch, neg step, # of trials before neg dl switch
-            return difficultyLevel;
-        }
         public bool CheckBlockEnd(string blockEndType, IEnumerable<float?> runningTrialPerformance, float performanceThreshold = 1,
             int? minTrials = null, int? maxTrials = null)
         {

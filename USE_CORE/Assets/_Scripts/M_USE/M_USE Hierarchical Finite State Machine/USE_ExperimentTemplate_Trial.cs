@@ -1,29 +1,3 @@
-/*
-MIT License
-
-Copyright (c) 2023 Multitask - Unified - Suite -for-Expts
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files(the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,6 +15,7 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
 using USE_Def_Namespace;
+using Random = UnityEngine.Random;
 
 
 namespace USE_ExperimentTemplate_Trial
@@ -49,14 +24,23 @@ namespace USE_ExperimentTemplate_Trial
     {
         [HideInInspector] public TrialData TrialData;
         [HideInInspector] public FrameData FrameData;
-        
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
+        
+        public int difficultyLevel;
+        public int posStep;
+        public int negStep;
+        public string TrialDefSelectionStyle;
+        public int maxDiffLevel;
+        public int avgDiffLevel;
+        public int diffLevelJitter;
+        
         protected int NumTrialsInBlock;
+        public List<int> runningPerformance;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
-        protected State LoadTrialTextures, LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
+        protected State LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
         protected State StateAfterDelay = null;
         protected float DelayDuration = 0;
@@ -92,19 +76,19 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
-        [HideInInspector] public string TrialDefSelectionStyle;
 
-  
         // Texture Variables
+<<<<<<< HEAD
+        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, 
+            MoveTooFarTexture, THR_BackdropTexture;
+=======
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
+>>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
 
 
         private float Camera_PulseSentTime = 0f;
 
-
-        public delegate IEnumerator FileLoadingMethod();
-        public FileLoadingMethod FileLoadingDelegate; //Delegate that tasks can set to their own specific method
-        public bool TrialFilesLoaded;
+        public int CurrentTrialDefIndex;
 
 
 
@@ -120,14 +104,40 @@ namespace USE_ExperimentTemplate_Trial
             return existingList;
         }
 
+        public virtual void DefineCustomTrialDefSelection()
+        {
+        }
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            
+            //Debug.LogWarning("CurrentTrialDefIndex: " + CurrentTrialDefIndex);
+            return (T)TrialDefs[CurrentTrialDefIndex];
+        }
+
+        public int DetermineCurrentTrialDefIndex()
+        {
             switch (TrialDefSelectionStyle)
             {
-                default: 
-                    return (T)TrialDefs[TrialCount_InBlock];
+                case "adaptive":
+                    difficultyLevel = TaskLevel.DetermineTrialDefDifficultyLevel(difficultyLevel, runningPerformance, posStep, negStep, maxDiffLevel);
+                    Debug.LogWarning("cur difficulty level (after determine): " + difficultyLevel);
+                    //Debug.LogWarning("TrialCount_InBlock: " + TrialCount_InBlock + " ------ TrialDefs size: " + TrialDefs.Count);
+                    
+                    List<int> tieIndices = TrialDefs
+                        .Select((trialDef, index) => new { TrialDef = trialDef, Index = index })
+                        .Where(item => 
+                        {
+                            Debug.LogWarning("item.TrialDef.BlockCount: " + item.TrialDef.BlockCount + " /////// BlockCount: " + BlockCount);
+                            return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount);
+                        })
+                        //.Where(item => item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount)
+                        .Select(item => item.Index)
+                        .ToList();
+                    return tieIndices[Random.Range(0, tieIndices.Count)];
+
+                default:
+                    Debug.LogWarning("selection style: " + TrialDefSelectionStyle);
+                    return TrialCount_InBlock;
             }
         }
 
@@ -146,7 +156,6 @@ namespace USE_ExperimentTemplate_Trial
 
         public void DefineTrialLevel()
         {
-            LoadTrialTextures = new State("LoadTrialTextures");
             LoadTrialStims = new State("LoadTrialStims");
             SetupTrial = new State("SetupTrial");
             FinishTrial = new State("FinishTrial");
@@ -173,7 +182,7 @@ namespace USE_ExperimentTemplate_Trial
                 SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
             }
 
-            AddActiveStates(new List<State> { LoadTrialTextures, LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
+            AddActiveStates(new List<State> { LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
             // A state that just waits for some time;
             Delay.AddTimer(() => DelayDuration, () => StateAfterDelay);
 
@@ -192,21 +201,17 @@ namespace USE_ExperimentTemplate_Trial
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TrialCount_InBlock = -1;
+                
+                if (TrialCount_InBlock <= 0)
+                {
+                    DefineCustomTrialDefSelection();
+                }
+                
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
+                
                 //DetermineNumTrialsInBlock();
             });
-
-            LoadTrialTextures.AddUniversalInitializationMethod(() =>
-            {
-                if(FileLoadingDelegate != null)
-                    StartCoroutine(FileLoadingDelegate?.Invoke());
-                else
-                    TrialFilesLoaded = true;
-            });
-            LoadTrialTextures.SpecifyTermination(() => TrialFilesLoaded, LoadTrialStims);
-
-
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
@@ -236,7 +241,14 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+<<<<<<< HEAD
+                CurrentTrialDefIndex = DetermineCurrentTrialDefIndex();
+                
+                
+                SessionValues.LoadingCanvas_GO.SetActive(false);
+=======
                 SessionValues.LoadingController.DeactivateLoadingCanvas();
+>>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
 
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
@@ -251,6 +263,7 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
+
 
                 //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
                 if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
@@ -270,11 +283,15 @@ namespace USE_ExperimentTemplate_Trial
                 if (SessionValues.SessionDef.IsHuman)
                     SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
 
+<<<<<<< HEAD
+                AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial. 
+=======
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
                 //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
                 DisableTaskMainBackground();
 
+>>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -284,7 +301,7 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
-            FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialTextures);
+            FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialStims);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock == TrialDefs.Count - 1, () => null);
 
             FinishTrial.AddUniversalLateTerminationMethod(() =>
@@ -298,10 +315,11 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
 
-                WriteDataFiles();
+                StartCoroutine(WriteDataFiles());
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
+                
                 
                 TouchFBController.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
@@ -330,6 +348,7 @@ namespace USE_ExperimentTemplate_Trial
                 var CalibrationCube = GazeCalibrationCanvas.Find("CalibrationCube");
                 var GazeCalibrationScripts = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Scripts");
                 var CalibrationGazeTrail = GameObject.Find("TobiiEyeTrackerController").transform.Find("GazeTrail(Clone)");
+                //  var CalibrationCube = GameObject.Find("TobiiEyeTrackerController").transform.Find("Cube");
 
                 GazeCalibrationCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
                 GazeCalibrationCanvas.GetComponent<Canvas>().worldCamera = Camera.main;
@@ -372,8 +391,12 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
             StartCoroutine(TrialData.CreateFile());
+           // TrialData.LogDataController(); //USING TO SEE FORMAT OF DATA CONTROLLER
+
 
         }
+<<<<<<< HEAD
+=======
 
         private void DisableTaskMainBackground()
         {
@@ -384,6 +407,7 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
+>>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
         private IEnumerator HandleLoadingStims()
         {
             foreach (StimGroup sg in TrialStims)
@@ -429,8 +453,21 @@ namespace USE_ExperimentTemplate_Trial
             }
         }
 
-        public void WriteDataFiles()
+        public IEnumerator WriteDataFiles()
         {
+<<<<<<< HEAD
+            yield return StartCoroutine(TrialData.AppendDataToBuffer());
+            yield return StartCoroutine(TrialData.AppendDataToFile());
+            yield return StartCoroutine(FrameData.AppendDataToBuffer());
+            yield return StartCoroutine(FrameData.AppendDataToFile());
+            if (SessionValues.SessionDef.EyeTrackerActive)
+                yield return StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+            if (SessionValues.SessionDef.SerialPortActive)
+            {
+                yield return StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
+                yield return StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+            }
+=======
             StartCoroutine(TrialData.AppendDataToBuffer());
             StartCoroutine(TrialData.AppendDataToFile());
 
@@ -445,6 +482,7 @@ namespace USE_ExperimentTemplate_Trial
             if(SessionValues.SerialSentData != null)
                 StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
          
+>>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
         }
         
         public bool CheckForcedBlockEnd()
@@ -466,6 +504,16 @@ namespace USE_ExperimentTemplate_Trial
         {
 
         }
+
+        private void OnApplicationQuit()
+        {
+            if (TrialData != null)
+            {
+                StartCoroutine(TrialData.AppendDataToBuffer());
+                StartCoroutine(TrialData.AppendDataToFile());
+            }
+        }
+
         private void AddAbortCodeKeys()
         {
             AbortCodeDict = new Dictionary<string, int>();
@@ -673,16 +721,70 @@ namespace USE_ExperimentTemplate_Trial
             }
             else
             {
-                Debug.LogWarning($"Context File Path Not Found. Defaulting to {backupContextName}.");
+                Debug.Log($"Context File Path Not Found. Defaulting to {backupContextName}.");
                 contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
             }
 
             return contextPath;
         }
 
+        //Timing is off:
+        //public void LoadTexturesFromServer()
+        //{
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HeldTooLong.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            HeldTooLongTexture = result;
+        //            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+        //        }
+        //        else
+        //            Debug.Log("HELDTOOLONG TEXTURE NULL FROM SERVER!");
+        //    }));
 
-        public IEnumerator LoadSharedTrialTextures()
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/HeldTooShort.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            HeldTooShortTexture = result;
+        //            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+        //        }
+        //        else
+        //            Debug.Log("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
+        //    }));
+
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/bg.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            MoveTooFarTexture = result;
+        //            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
+        //        }
+        //        else
+        //            Debug.Log("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
+
+        //    }));
+
+        //    StartCoroutine(ServerManager.LoadTextureFromServer("Resources/Contexts/THR_Backdrop.png", result =>
+        //    {
+        //        if (result != null)
+        //        {
+        //            THR_BackdropTexture = result;
+        //        }
+        //        else
+        //            Debug.Log("THR BACKDROP TEXTURE NULL FROM SERVER");
+        //    }));
+        //}
+
+        public void LoadTexturesFromResources()
         {
+<<<<<<< HEAD
+            HeldTooLongTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooLong");
+            HeldTooShortTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/HeldTooShort");
+            MoveTooFarTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/bg");
+            THR_BackdropTexture = Resources.Load<Texture2D>("DefaultResources/Contexts/THR_Backdrop");
+
+=======
             if (SessionValues.UsingDefaultConfigs)
             {
                 HeldTooLongTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong");
@@ -724,11 +826,24 @@ namespace USE_ExperimentTemplate_Trial
                         Debug.LogWarning("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
                 }));
             }
+>>>>>>> d7750b18569e0a00e81f39f9a36b362431351bfd
             TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
             TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
+            TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
         }
 
+        //Currently just having all 3 (local, server, default) load from Resources:
+        //public void LoadTextures(string ContextExternalFilePath)
+        //{
+        //    HeldTooLongTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooLong.png"));
+        //    HeldTooShortTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "HeldTooShort.png"));
+        //    MoveTooFarTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "bg.png"));
+        //    THR_BackdropTexture = LoadPNG(GetContextNestedFilePath(ContextExternalFilePath, "THR_Backdrop.png"));
+
+        //    TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+        //    TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+        //    TouchFBController.MovedTooFar_Texture = MoveTooFarTexture;
+        //}
 
         public virtual void ResetTrialVariables()
         {

@@ -339,6 +339,7 @@ namespace USE_Def_Namespace
         
         public string TrialDefSelectionStyle;
 
+        public string TrialDefSelectionStyle;
     }
 
     public class BlockDef
@@ -566,6 +567,10 @@ namespace USE_Def_Namespace
         public int numTrialsBeforePosStep;
         public int negStep;
         public int numTrialsBeforeNegStep;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     }
 
 }

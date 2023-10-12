@@ -21,12 +21,21 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
+<<<<<<< Updated upstream
+=======
+        public bool TokensInMiddleOfOutlines;
+        public int DifficultyLevel;
+>>>>>>> Stashed changes
         public int PosStep;
         public int NegStep;
         public string TrialDefSelectionStyle;
         public int MaxDiffLevel;
         public int AvgDiffLevel;
         public int DiffLevelJitter;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         public override void GenerateTrialDefsFromBlockDef()
         {
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
@@ -46,6 +55,10 @@ namespace EffortControl_Namespace
                 td.PulseSizeLeft = PulseSizeLeft;
                 td.PulseSizeRight = PulseSizeRight;
                 td.ClicksPerOutline = ClicksPerOutline;
+<<<<<<< Updated upstream
+=======
+                td.TokensInMiddleOfOutlines = TokensInMiddleOfOutlines;
+>>>>>>> Stashed changes
                 td.DifficultyLevel = DifficultyLevel;
                 td.PosStep = PosStep;
                 td.NegStep = NegStep;
@@ -58,6 +71,22 @@ namespace EffortControl_Namespace
             }
         }
         
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
+            MaxTrials = TrialDefs.Count;
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            {
+                EffortControl_TrialDef td = (EffortControl_TrialDef)TrialDefs[iTrial];
+                td.ContextName = ContextName;
+                td.TrialDefSelectionStyle = TrialDefSelectionStyle;
+                td.MaxDiffLevel = MaxDiffLevel;
+                td.AvgDiffLevel = AvgDiffLevel;
+                td.DiffLevelJitter = DiffLevelJitter;
+
+                TrialDefs[iTrial] = td;
+            }
+        }
         public override void AddToTrialDefsFromBlockDef()
         {
             // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
@@ -88,6 +117,11 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
+<<<<<<< Updated upstream
+=======
+        public bool TokensInMiddleOfOutlines;
+        public int DifficultyLevel;
+>>>>>>> Stashed changes
         public int PosStep;
         public int NegStep;
         public string TrialDefSelectionStyle;

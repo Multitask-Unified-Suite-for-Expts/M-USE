@@ -858,6 +858,26 @@ namespace USE_ExperimentTemplate_Task
                 }
             }
 
+<<<<<<< Updated upstream
+=======
+        public int DetermineTrialDefDifficultyLevel(int difficultyLevel, List<int> runningPerformance, int posStep,
+            int negStep, int maxDiffLevel)
+        {
+            if (runningPerformance.Count == 0)
+                return difficultyLevel;
+            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
+            //Debug.LogWarning("runningPerformance size: " + runningPerformance.Count + "/////// last: " + runningPerformance.Last());
+            if (runningPerformance.Last() == 1)
+            {
+                difficultyLevel -= negStep;
+                if (difficultyLevel < 1)
+                {
+                    Debug.LogWarning("DIFFICULTYLEVEL HIT 0");
+                    difficultyLevel = 0;
+                }
+            }
+
+>>>>>>> Stashed changes
             else if (runningPerformance.Last() == 0)
             {
                 difficultyLevel += posStep;

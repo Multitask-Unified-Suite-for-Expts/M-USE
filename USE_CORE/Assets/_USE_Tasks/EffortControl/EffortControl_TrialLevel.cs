@@ -599,7 +599,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
         difficultyLevel = randomDouble;
     }
+<<<<<<< Updated upstream
 
+=======
+    
+>>>>>>> Stashed changes
     public void ActivateObjects()
     {
         foreach (GameObject go in ObjectList)

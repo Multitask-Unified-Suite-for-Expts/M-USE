@@ -27,6 +27,10 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         
+<<<<<<< Updated upstream
+=======
+        // Staircase Variables:
+>>>>>>> Stashed changes
         public int difficultyLevel;
         public int posStep;
         public int negStep;
@@ -34,6 +38,11 @@ namespace USE_ExperimentTemplate_Trial
         public int maxDiffLevel;
         public int avgDiffLevel;
         public int diffLevelJitter;
+<<<<<<< Updated upstream
+=======
+        public List<int> runningPerformance;
+        public int CurrentTrialDefIndex;
+>>>>>>> Stashed changes
         
         protected int NumTrialsInBlock;
         public List<int> runningPerformance;
@@ -76,7 +85,11 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
+<<<<<<< Updated upstream
 
+=======
+  
+>>>>>>> Stashed changes
         // Texture Variables
 
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
@@ -101,6 +114,10 @@ namespace USE_ExperimentTemplate_Trial
                 existingList.Add(stim.StimGameObject);
 
             return existingList;
+        }
+
+        public virtual void DefineCustomTrialDefSelection()
+        {
         }
 
         public virtual void DefineCustomTrialDefSelection()
@@ -200,16 +217,24 @@ namespace USE_ExperimentTemplate_Trial
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TrialCount_InBlock = -1;
+<<<<<<< Updated upstream
                 
+=======
+>>>>>>> Stashed changes
                 if (TrialCount_InBlock <= 0)
                 {
                     DefineCustomTrialDefSelection();
                 }
+<<<<<<< Updated upstream
                 
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
                 
                 //DetermineNumTrialsInBlock();
+=======
+                TrialStims = new List<StimGroup>();
+                AudioFBController.UpdateAudioSource();
+>>>>>>> Stashed changes
             });
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>

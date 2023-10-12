@@ -784,6 +784,7 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
+                SessionValues.FullScreenController = GameObject.Find("MiscScripts").GetComponent<FullScreenController>();
                 SessionValues.BackgroundMusicController = GameObject.Find("MiscScripts").GetComponent<BackgroundMusicController>();
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");

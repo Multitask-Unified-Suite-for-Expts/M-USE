@@ -60,6 +60,8 @@ namespace USE_UI
         [HideInInspector] public bool InstructionsOn;
 
         [HideInInspector] public Vector3 InitialStartButtonPosition;
+        [HideInInspector] public Vector3 InitialInstructionsButtonPosition;
+        [HideInInspector] public Vector3 InitialEndTaskButtonPosition;
 
 
         [HideInInspector] public Dictionary<string, string> TaskInstructionsDict;
@@ -70,9 +72,6 @@ namespace USE_UI
 
         private State SetActiveOnInitialization;
         private State SetInactiveOnTermination;
-
-        [HideInInspector] public static EventCodeManager EventCodeManager;
-        [HideInInspector] public static Dictionary<string, EventCode> SessionEventCodes;
 
         [HideInInspector] public ControlLevel_Session_Template SessionLevel;
         [HideInInspector] public ControlLevel_Task_Template TaskLevel;
@@ -130,18 +129,11 @@ namespace USE_UI
         }
 
         //Called by TaskLevel
-        public void SetupDataAndCodes(DataController frameData, EventCodeManager eventCodeManager, Dictionary<string, EventCode> sessionEventCodes)
+        public void CreateHumanStartPanel(DataController frameData, Canvas parent, string taskName)
         {
-            SessionEventCodes = sessionEventCodes;
-            EventCodeManager = eventCodeManager;
-
             frameData.AddDatum("HumanPanelOn", () => HumanPanelOn.ToString());
             frameData.AddDatum("InstructionsOn", () => InstructionsOn.ToString());
-        }
 
-        //Called by TaskLevel
-        public void CreateHumanStartPanel(Canvas parent, string taskName)
-        {
             HumanStartPanelGO = Instantiate(HumanStartPanelPrefab);
             HumanStartPanelGO.name = taskName + "_HumanPanel";
             HumanStartPanelGO.transform.SetParent(parent.transform, false);
@@ -177,24 +169,10 @@ namespace USE_UI
             InstructionsGO.SetActive(false);
             InstructionsOn = false;
 
-            AdjustButtonPositions();
+            InitialInstructionsButtonPosition = InstructionsButtonGO.transform.localPosition;
+            InitialEndTaskButtonPosition = EndTaskButtonGO.transform.localPosition;
+
             SetStartButtonChildren();
-        }
-
-        private void AdjustButtonPositions()
-        {
-            float y = Application.isEditor ? 45f : 0; //windows fullscreen is 1920
-
-            if(Screen.fullScreen)
-            {
-                if (Screen.width == 1920)
-                    y = 45f;
-                else
-                    y = Screen.width > 3000 ? 0f : -90f;
-            }
-
-            InstructionsButtonGO.transform.localPosition += new Vector3(0, y, 0);
-            EndTaskButtonGO.transform.localPosition += new Vector3(0, y, 0);
         }
 
         public void HandleEndTask()
@@ -224,7 +202,7 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
             InstructionsOn = InstructionsGO.activeInHierarchy;
-            EventCodeManager.SendCodeImmediate(SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
         //Called at end of SetupTrial (TrialLevel)
@@ -289,7 +267,7 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
             if(SessionValues.SessionDef.EventCodesActive)
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOn"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
         }
@@ -299,7 +277,7 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
             if (SessionValues.SessionDef.EventCodesActive)
-                EventCodeManager.SendCodeImmediate(SessionEventCodes["HumanStartPanelOff"]);
+                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
         }
 
     }
@@ -425,7 +403,8 @@ namespace USE_UI
         [HideInInspector] public GameObject BackdropGO;
         [HideInInspector] public Image Image;
 
-        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color) //Used as backdrop for THR
+        //Used as backdrop for THR
+        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color) 
         {
             BackdropGO = new GameObject(name);
             Image = BackdropGO.AddComponent<Image>();

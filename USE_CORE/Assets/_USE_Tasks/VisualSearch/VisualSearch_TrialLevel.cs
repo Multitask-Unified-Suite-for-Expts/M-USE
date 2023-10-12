@@ -233,9 +233,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
-            CurrentTaskLevel.NumAbortedTrials_InBlock++;
-            CurrentTaskLevel.NumAbortedTrials_InTask++;
-
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             SearchDurations_InBlock.Add(null);
 

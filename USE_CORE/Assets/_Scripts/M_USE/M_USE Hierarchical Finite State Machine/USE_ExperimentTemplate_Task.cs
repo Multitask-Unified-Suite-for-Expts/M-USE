@@ -64,7 +64,9 @@ namespace USE_ExperimentTemplate_Task
         
         public int MinTrials_InBlock;
         public int MaxTrials_InBlock;
-        
+
+        public bool ForceTaskEnd;
+
         public ControlLevel_Trial_Template TrialLevel;
         public BlockData BlockData;
         public FrameData FrameData;
@@ -315,7 +317,7 @@ namespace USE_ExperimentTemplate_Task
                 if (TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 
-                if (TrialLevel.ForceBlockEnd && SessionValues.StoreData) //If they used end task hotkey, still write the block data!
+                if (CheckForcedTaskEnd() && SessionValues.StoreData) //If they used end task hotkey, still write the block data!
                 {
                     StartCoroutine(BlockData.AppendDataToBuffer());
                     StartCoroutine(BlockData.AppendDataToFile());
@@ -400,7 +402,15 @@ namespace USE_ExperimentTemplate_Task
             
             TaskLevelDefined = true;
         }
-
+        public bool CheckForcedTaskEnd()
+        {
+            if (ForceTaskEnd)
+            {
+                ForceTaskEnd = false;
+                return true;
+            }
+            return false;
+        }
         public void SetSkyBox(string contextName)
         {
             string contextFilePath = "";
@@ -842,6 +852,8 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void SetTaskSummaryString()
         {
+            CurrentTaskSummaryString.Clear();
+
             decimal percentAbortedTrials = 0;
             if (TrialLevel.TrialCount_InTask > 0)
                 percentAbortedTrials = (Math.Round(decimal.Divide(NumAbortedTrials_InTask, (TrialLevel.TrialCount_InTask)), 2)) * 100;

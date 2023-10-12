@@ -81,6 +81,10 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
         
         private float Camera_PulseSentTime = 0f;
+        
+        public delegate IEnumerator FileLoadingMethod();
+        public FileLoadingMethod FileLoadingDelegate; //Delegate that tasks can set to their own specific method
+        public bool TrialFilesLoaded;
 
         public int CurrentTrialDefIndex;
 

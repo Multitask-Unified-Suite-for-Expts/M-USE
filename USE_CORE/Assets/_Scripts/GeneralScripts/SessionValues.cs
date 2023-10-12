@@ -60,6 +60,7 @@ public static class SessionValues
         }
     }
 
+    public static FullScreenController FullScreenController;
     public static BackgroundMusicController BackgroundMusicController;
     public static LoadingController LoadingController;
 

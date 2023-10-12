@@ -308,6 +308,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
 
+                        if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
+                        {
+                            SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+                        }
+
                         HkPanel.TrialLevel.AbortCode = 3;
                         SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndBlock"]);
                         HkPanel.TrialLevel.ForceBlockEnd = true;

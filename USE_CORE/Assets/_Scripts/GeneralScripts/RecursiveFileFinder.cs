@@ -33,46 +33,50 @@ public class RecursiveFileFinder
 {
     private static Dictionary<(string path, string filename), List<string>> Cache;
     private static HashSet<string> CachedPaths;
+    private static HashSet<string> CachedExtensions; //ADDED THIS!
 
-    public static List<string> FindFile(string path, string filename, string extension)
+    public static List<string> FindFile(string folderPath, string filename, string extension)
     {
         if (Cache == null)
         {
             Cache = new Dictionary<(string, string), List<string>>();
             CachedPaths = new HashSet<string>();
+            CachedExtensions = new HashSet<string>();
         }
 
-        if (CachedPaths.Contains(path))
+        if (CachedPaths.Contains(folderPath) && CachedExtensions.Contains(extension)) //ADDED 2nd HALF OF THIS!
         {
-            if (Cache.TryGetValue((path, filename), out List<string> filenames))
+            if (Cache.TryGetValue((folderPath, filename), out List<string> filenames))
             {
                 return filenames;
             }
             return new List<string>();
         }
-        CachedPaths.Add(path);
+        CachedPaths.Add(folderPath);
 
-        Cache.Add((path, filename), new List<string>());
-        PopulateCache(path, extension);
+        CachedExtensions.Add(extension); //ADDED THIS!
 
-        return Cache[(path, filename)];
+        Cache.Add((folderPath, filename), new List<string>());
+        PopulateCache(folderPath, extension);
+
+        return Cache[(folderPath, filename)];
     }
 
-    private static void PopulateCache(string path, string extension)
+    private static void PopulateCache(string folderPath, string extension)
     {
-        List<string> allFilenames = Directory.GetFiles(path, $"*{extension}", SearchOption.AllDirectories).ToList();
+        List<string> allFilenames = Directory.GetFiles(folderPath, $"*{extension}", SearchOption.AllDirectories).ToList();
         allFilenames.RemoveAll(t => Path.GetFileName(t).StartsWith("."));
 
         foreach (string filePath in allFilenames)
         {
             string filename = Path.GetFileName(filePath);
-            if (Cache.TryGetValue((path, filename), out List<string> filenames))
+            if (Cache.TryGetValue((folderPath, filename), out List<string> filenames))
             {
                 filenames.Add(filePath);
             }
             else
             {
-                Cache.Add((path, filename), new List<string>() { filePath });
+                Cache.Add((folderPath, filename), new List<string>() { filePath });
             }
 
         }

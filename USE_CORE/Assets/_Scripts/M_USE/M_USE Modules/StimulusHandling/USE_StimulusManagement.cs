@@ -46,7 +46,6 @@ namespace USE_StimulusManagement
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
 		public string StimPath;
-		public string PrefabPath;
 		public string FileName;
 		public string StimFolderPath;
 		public string StimExtension;
@@ -84,12 +83,12 @@ namespace USE_StimulusManagement
 
 		public StimDef(StimGroup sg, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			if (!(string.IsNullOrEmpty(PrefabPath) | string.IsNullOrWhiteSpace(PrefabPath))  && !(string.IsNullOrEmpty(FileName) | string.IsNullOrWhiteSpace(PrefabPath)))
-				Debug.LogWarning("StimDef for stimulus " + StimName + " is being specified with both an external file path and a prefab path. Only the external filepath will be checked.");
 			sg.stimDefs.Add(this);
-			StimGroups = new Dictionary<string, StimGroup>();
-			StimGroups.Add(sg.stimGroupName, sg);
-			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+            StimGroups = new Dictionary<string, StimGroup>
+            {
+                { sg.stimGroupName, sg }
+            };
+            SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimDef(StimGroup sg, int[] dimVals, State setActiveOnInit = null, State setInactiveOnTerm = null)
@@ -97,18 +96,22 @@ namespace USE_StimulusManagement
 			StimDimVals = dimVals;
 			StimPath = "placeholder";
 			sg.stimDefs.Add(this);
-			StimGroups = new Dictionary<string, StimGroup>();
-			StimGroups.Add(sg.stimGroupName, sg);
-			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+            StimGroups = new Dictionary<string, StimGroup>
+            {
+                { sg.stimGroupName, sg }
+            };
+            SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public StimDef(StimGroup sg, GameObject obj, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
 			StimGameObject = obj;
 			sg.stimDefs.Add(this);
-			StimGroups = new Dictionary<string, StimGroup>();
-			StimGroups.Add(sg.stimGroupName, sg);
-			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
+            StimGroups = new Dictionary<string, StimGroup>
+            {
+                { sg.stimGroupName, sg }
+            };
+            SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
 		public void SetVisibilityOnOffStates(State setActiveOnInit, State setInactiveOnTerm)
@@ -142,14 +145,10 @@ namespace USE_StimulusManagement
 				sd.StimName = StimName;
 			if (StimPath != null)
 				sd.StimPath = StimPath;
-			if (PrefabPath != null)
-				sd.PrefabPath = PrefabPath;
 			if (FileName != null)
 				sd.FileName = FileName;
 			if (StimFolderPath != null)
 				sd.StimFolderPath = StimFolderPath;
-			if (StimExtension != null)
-				sd.StimExtension = StimExtension;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
@@ -193,14 +192,10 @@ namespace USE_StimulusManagement
 				sd.StimName = StimName;
 			if (StimPath != null)
 				sd.StimPath = StimPath;
-			if (PrefabPath != null)
-				sd.PrefabPath = PrefabPath;
 			if (FileName != null)
 				sd.FileName = FileName;
 			if (StimFolderPath != null)
 				sd.StimFolderPath = StimFolderPath;
-			if (StimExtension != null)
-				sd.StimExtension = StimExtension;
 			if (StimID != null)
 				sd.StimID = StimID;
 			if (StimDimVals != null)
@@ -260,7 +255,6 @@ namespace USE_StimulusManagement
 		{
 			if (StimGroups.ContainsValue(sg))
 			{
-				// sg.stimDefs.Remove(this);
 				StimGroups.Remove(sg.stimGroupName);
 			}
 			else
@@ -299,10 +293,12 @@ namespace USE_StimulusManagement
 
 
         public IEnumerator Load(Action<GameObject> callback)
-        {
-			SessionValues.Using2DStim = FileName.ToLower().Contains("png");
+		{
+            FileName = FileName.Trim(); //trim file name because sometimes the stimdefs have extra space.
 
-			if (SessionValues.UsingDefaultConfigs)
+			SessionValues.Using2DStim = FileName.ToLower().Contains(".png") || FileName.ToLower().Contains("_png");
+
+            if (SessionValues.UsingDefaultConfigs)
 				LoadPrefabFromResources();
             else
             {
@@ -323,11 +319,9 @@ namespace USE_StimulusManagement
                     FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
                     LoadExternalStimFromFile();
                 }
-                else if (!string.IsNullOrEmpty(PrefabPath)) //this one neccessary?
-					StimGameObject = Resources.Load<GameObject>(PrefabPath);
                 else
                 {
-                    Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no Unity Resources path, external file path, or dimensional values have been provided.");
+                    Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no FileName or Dimensional Values have been provided!");
 					callback?.Invoke(null);
                 }
             }
@@ -354,15 +348,15 @@ namespace USE_StimulusManagement
 		
 		public void LoadPrefabFromResources()
 		{
+			string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
 			try
 			{
-				string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
 				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
 				StimGameObject.SetActive(false);
 			}
 			catch(Exception e)
 			{
-                Debug.LogError($"ERROR LOADING {FileName} FROM RESOURCES! " + e.Message);
+                Debug.LogError($"ERROR LOADING STIM FROM RESOURCES PATH: " + fullPath + " | Error: "+ e.Message);
             }
         }
 
@@ -384,23 +378,11 @@ namespace USE_StimulusManagement
 			}));
 		}
 
-		public async void LoadExternalStimFromFile(string stimFilePath = "")
+		public async void LoadExternalStimFromFile()
 		{
-			if (!string.IsNullOrEmpty(StimExtension) && !FileName.EndsWith(StimExtension)) //add StimExtesion to file path if it doesn't already contain it
-            {
-				if (!StimExtension.StartsWith("."))
-					FileName += "." + StimExtension;
-				else
-					FileName += StimExtension;
-			}
-			if(string.IsNullOrEmpty(StimExtension))
-				StimExtension = Path.GetExtension(FileName);
-			//by default stimFilePath argument is empty, and files are found using StimFolderPath + ExternalFilePath
-			//so usually this first if statement is never called - used for cases where we might want to find a file in an unusual location
-			if (!string.IsNullOrEmpty(stimFilePath))
-				FileName = stimFilePath;
-			//we will only use StimFolderPath if ExternalFilePath doesn't already contain it
-			else if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
+            StimExtension = "." + FileName.Split(".")[1];
+
+			if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
 			{
 				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, FileName, StimExtension);
 				if (filenames.Count == 1)
@@ -410,7 +392,7 @@ namespace USE_StimulusManagement
 				else
 					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
 			}
-			
+
 			switch (StimExtension.ToLower())
 			{
 				case ".png":

@@ -1520,7 +1520,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_Name
-      value: Starfield
+      value: CR_Starfield
       objectReference: {fileID: 0}
     - target: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82, type: 3}
       propertyPath: m_IsActive

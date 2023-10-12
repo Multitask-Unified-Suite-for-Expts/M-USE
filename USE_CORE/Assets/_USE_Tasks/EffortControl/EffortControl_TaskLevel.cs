@@ -52,6 +52,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
     }
 
+
     private void HandleBlockStrings()
     {
         if (!SessionValues.WebBuild)

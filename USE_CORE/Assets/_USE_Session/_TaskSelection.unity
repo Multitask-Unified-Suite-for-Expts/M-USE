@@ -667,6 +667,7 @@ GameObject:
   - component: {fileID: 1017469094}
   - component: {fileID: 1017469089}
   - component: {fileID: 1017469095}
+  - component: {fileID: 1017469096}
   m_Layer: 0
   m_Name: MiscScripts
   m_TagString: Untagged
@@ -798,6 +799,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BackgroundMusic_AudioSource: {fileID: 0}
+--- !u!114 &1017469096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1017469087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb1dff9be723a47b09616293869ab058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1213845836
 GameObject:
   m_ObjectHideFlags: 0
@@ -1403,7 +1416,7 @@ PrefabInstance:
     - target: {fileID: 2331583561568081756, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 30
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 2331583561568081756, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}

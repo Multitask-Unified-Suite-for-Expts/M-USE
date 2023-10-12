@@ -356,7 +356,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-
             AudioFBController.Play("Negative");
             EndBlock = true;
         });
@@ -426,6 +425,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (GotTrialCorrect)
                 score += (TrialCount_InBlock + 1) * 100;
 
+            if (ChosenStimIndices.Count < 1)
+                return;
+
             if (EndBlock || CompletedAllTrials)
             {
                 StartCoroutine(GenerateBlockFeedback());
@@ -436,6 +438,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
+        DisplayResults.SpecifyTermination(() => ChosenStimIndices.Count < 1, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
             DisplayResultsPanelGO.SetActive(false);

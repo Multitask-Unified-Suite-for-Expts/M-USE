@@ -90,6 +90,10 @@ public class TokenFBController : MonoBehaviour
 
         SetPositiveShowAudioClip(audioFBController.GetClip("Positive"));
         SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
+
+        //Subscribe to FullScreen Events:
+        if(SessionValues.FullScreenController != null)
+            SessionValues.FullScreenController.SubscribeToFullScreenChanged(OnFullScreenChanged);
     }
 
 
@@ -142,7 +146,7 @@ public class TokenFBController : MonoBehaviour
     {
         return tokenBarFull;
     }
-    
+
     public void AdjustTokenBarSizing(int newTokenSize)
     {
         tokenSize = newTokenSize;
@@ -377,4 +381,18 @@ public class TokenFBController : MonoBehaviour
     {
         return scaledTokenSize * numTokens + tokenSpacing * (numTokens - 1);
     }
+
+
+    private void OnFullScreenChanged(bool isFullScreen)
+    {
+        RecalculateTokenBox();
+    }
+
+    private void OnDestroy()
+    {
+        //Unsubscribe from FullScreenChanged Event:
+        if (SessionValues.FullScreenController != null)
+            SessionValues.FullScreenController.UnsubscribeToFullScreenChanged(OnFullScreenChanged);
+    }
+
 }

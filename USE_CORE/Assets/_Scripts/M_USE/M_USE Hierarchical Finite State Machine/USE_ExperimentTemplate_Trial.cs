@@ -278,8 +278,10 @@ namespace USE_ExperimentTemplate_Trial
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
                 //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
-                DisableTaskMainBackground();
-                
+
+                StartCoroutine(DisableTaskMainBackground());
+
+
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -381,9 +383,13 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(TrialData.CreateFile());
 
         }
-        
-        private void DisableTaskMainBackground()
+
+        private IEnumerator DisableTaskMainBackground()
+
         {
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForEndOfFrame();
+
             if (TaskLevel.TaskCam != null)
             {
                 if (TaskLevel.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))

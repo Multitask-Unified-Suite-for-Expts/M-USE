@@ -169,13 +169,13 @@ namespace USE_ExperimentTemplate_Task
 
             SessionValues.InputManager.SetActive(true);
 
-            if (SessionValues.SessionDef.IsHuman)
-            {
-                Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                SessionValues.HumanStartPanel.SetupDataAndCodes(FrameData, SessionValues.EventCodeManager, SessionValues.EventCodeManager.SessionEventCodes);
-                SessionValues.HumanStartPanel.SetTaskLevel(this);
-                SessionValues.HumanStartPanel.CreateHumanStartPanel(taskCanvas, TaskName);
-            }
+
+                if (SessionValues.SessionDef.IsHuman)
+                {
+                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
+                    SessionValues.HumanStartPanel.SetTaskLevel(this);
+                    SessionValues.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
+                }
 
 
             //Send Reward Pulses for Ansen's Camera at Start of Task:
@@ -672,23 +672,17 @@ namespace USE_ExperimentTemplate_Task
             foreach (StimDef sd in ExternalStims.stimDefs)
             {
                 sd.StimFolderPath = TaskDef.ExternalStimFolderPath;
-                sd.StimExtension = TaskDef.ExternalStimExtension;
                 sd.StimScale = TaskDef.ExternalStimScale;
                 sd.CanvasGameObject = taskCanvasGO;
 
-                //add StimExtesion to file path if it doesn't already contain it
-                if (!string.IsNullOrEmpty(sd.StimExtension) && !sd.FileName.EndsWith(sd.StimExtension))
-                {
-                    if (!sd.StimExtension.StartsWith("."))
-                        sd.FileName = sd.FileName + "." + sd.StimExtension;
-                    else
-                        sd.FileName = sd.FileName + sd.StimExtension;
-                }
+                sd.FileName = sd.FileName.Trim();
+                sd.StimExtension = "." + sd.FileName.Split(".")[1];
 
                 //we will only use StimFolderPath if ExternalFilePath doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.FileName.StartsWith(sd.StimFolderPath))
                 {
                     List<string> filenames = RecursiveFileFinder.FindFile(sd.StimFolderPath, sd.FileName, sd.StimExtension);
+
                     if (filenames.Count > 1)
                     {
                         string firstFilename = Path.GetFileName(filenames[0]);
@@ -721,11 +715,7 @@ namespace USE_ExperimentTemplate_Task
                                         " but multiple non-identical files matching this pattern were found in this folder or subdirectories.");
                     }
                 }
-                else
-                {
-                    //if ExternalFilePath already contains the StimFolerPath string, do not change it,
-                    //but should also have method to check this file exists
-                }
+
 
             }
         }
@@ -792,13 +782,11 @@ namespace USE_ExperimentTemplate_Task
         public T TaskStimDefFromPrefabPath<T>(string prefabPath, StimGroup sg = null) where T : StimDef, new()
         {
             StimDef sd = new T();
-            sd.PrefabPath = PrefabPath;
-            
             sd.StimName = Path.GetFileName(prefabPath);
             if (sg != null)
                 sd.AddToStimGroup(sg);
             return (T)sd;
-        } 
+        }
 
         public List<TrialDef> GetTrialDefsInBlock(int BlockNum, TrialDef[] trialDefs)
         {
@@ -1091,8 +1079,8 @@ namespace USE_ExperimentTemplate_Task
         {
             if (!string.IsNullOrEmpty(TaskStimFolderPath) && string.IsNullOrEmpty(sd.StimFolderPath))
                 sd.StimFolderPath = TaskStimFolderPath;
-            if (!string.IsNullOrEmpty(TaskStimExtension) && string.IsNullOrEmpty(sd.StimExtension))
-                sd.StimExtension = TaskStimExtension;
+            //if (!string.IsNullOrEmpty(TaskStimExtension) && string.IsNullOrEmpty(sd.StimExtension))
+            //    sd.StimExtension = TaskStimExtension;
 
             if (!AllTaskStims.stimDefs.Contains(sd))
                 AllTaskStims.AddStims(sd);

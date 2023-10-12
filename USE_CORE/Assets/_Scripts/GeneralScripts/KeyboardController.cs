@@ -37,8 +37,6 @@ public class KeyboardController : MonoBehaviour
     public GameObject GridItemPrefab;
     public GameObject GridParent_GO;
 
-    private List<string> CharacterList;
-    private List<GameObject> gridItems;
     private bool Caps;
     private EventSystem eventSystem;
     private TMP_InputField CurrentInputField;
@@ -47,18 +45,16 @@ public class KeyboardController : MonoBehaviour
 
     InitScreen_Level InitScreen_Level;
 
+    private KeyboardButtons keyboardButtons;
+   
 
     private void Start()
     {
         InitScreen_Level = GameObject.Find("ControlLevels").GetComponent<InitScreen_Level>();
         eventSystem = EventSystem.current;
         if (Keyboard_GO == null)
-        {
             Debug.LogError("KEYBOARD GAMEOBJECT IS NULL!");
-            return;
-        }
-        SetCharacterList();
-        GenerateGridItems();
+        keyboardButtons = new KeyboardButtons(this);
     }
 
     private void Update()
@@ -66,18 +62,17 @@ public class KeyboardController : MonoBehaviour
         if(UsingKeyboard)
         {
             GameObject selectedGO = eventSystem.currentSelectedGameObject;
-            if(selectedGO != null)
+            if (selectedGO != null)
             {
-                TMP_InputField selectedInputField = selectedGO.GetComponent<TMP_InputField>();
-                if (selectedInputField != null)
+                if (selectedGO.TryGetComponent<TMP_InputField>(out var selectedInputField))
                 {
                     if (!Keyboard_GO.activeInHierarchy)
                         Keyboard_GO.SetActive(true);
 
-                    if(CurrentInputField == null || selectedInputField != CurrentInputField)
+                    if (CurrentInputField == null || selectedInputField != CurrentInputField)
                     {
                         CurrentInputField = selectedInputField;
-                        if(selectedInputField.gameObject.name == "SubjectID_InputField" || selectedInputField.gameObject.name == "SubjectAge_InputField")
+                        if (selectedInputField.gameObject.name == "SubjectID_InputField" || selectedInputField.gameObject.name == "SubjectAge_InputField")
                             Keyboard_GO.transform.localPosition = new Vector3(0, -300f, 0);
                         else
                             Keyboard_GO.transform.localPosition = new Vector3(0, 300f, 0);
@@ -92,79 +87,162 @@ public class KeyboardController : MonoBehaviour
         if (CurrentInputField != null)
         {
             InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
-            string selected = eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
-            if(selected != null)
-                CurrentInputField.text += selected;
+            keyboardButtons.HandleGridButtonPress(eventSystem.currentSelectedGameObject);
         }
     }
 
     public void OnNonGridButtonPress()
     {
-        if(CurrentInputField == null)
-        {
-            Debug.LogError("CURRENT INPUT FIELD IS NULL!");
-            return;
-        }
-
-        InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
-
-        GameObject clickedGO = eventSystem.currentSelectedGameObject;
-
-        if (clickedGO.name == "HideButton")
-        {
-            Keyboard_GO.SetActive(false);
-        }
-        else if (clickedGO.name == "BackButton")
+        if(CurrentInputField != null)
         {
             InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
-            string currentText = CurrentInputField.text;
-            CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
+            keyboardButtons.HandleNonGridButtonPress(eventSystem.currentSelectedGameObject);
         }
-        else if (clickedGO.name == "ClearButton")
+    }
+
+    public class KeyboardButtons
+    {
+        public List<NonGridKeyboardButton> nonGridButtonList;
+        public List<GridKeyboardButton> gridButtonList;
+        public KeyboardController keyboardController;
+        public delegate void ActionDelegate();
+
+
+        public KeyboardButtons(KeyboardController kbController)
         {
-            CurrentInputField.text = "";
+            keyboardController = kbController;
+            nonGridButtonList = new List<NonGridKeyboardButton>();
+            gridButtonList = new List<GridKeyboardButton>();
+            CreateNonGridButtons();
+            CreateGridButtons();
         }
-        else if (clickedGO.name == "CapsButton")
+
+
+        public void CreateNonGridButtons()
         {
-            Caps = !Caps;
-            clickedGO.GetComponentInChildren<TextMeshProUGUI>().text = Caps ? "CAPS" : "Caps";
-            foreach (GameObject go in gridItems)
+            NonGridKeyboardButton hideButton = new NonGridKeyboardButton
             {
-                TextMeshProUGUI textComponent = go.transform.GetComponentInChildren<TextMeshProUGUI>();
-                textComponent.text = Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
+                buttonName = "HideButton",
+                buttonAction = () => keyboardController.Keyboard_GO.SetActive(false)
+            };
+            nonGridButtonList.Add(hideButton);
+
+            NonGridKeyboardButton backButton = new NonGridKeyboardButton
+            {
+                buttonName = "BackButton",
+                buttonAction = () =>
+                {
+                    keyboardController.InitScreen_Level.PlayAudio(keyboardController.InitScreen_Level.ToggleChange_AudioClip);
+                    string currentText = keyboardController.CurrentInputField.text;
+                    keyboardController.CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
+                }
+            };
+            nonGridButtonList.Add(backButton);
+
+            NonGridKeyboardButton clearButton = new NonGridKeyboardButton
+            {
+                buttonName = "ClearButton",
+                buttonAction = () => keyboardController.CurrentInputField.text = ""
+            };
+            nonGridButtonList.Add(clearButton);
+
+            NonGridKeyboardButton capsButton = new NonGridKeyboardButton
+            {
+                buttonName = "CapsButton",
+                buttonAction = () =>
+                {
+                    GameObject clickedGO = keyboardController.eventSystem.currentSelectedGameObject;
+                    keyboardController.Caps = !keyboardController.Caps;
+                    clickedGO.GetComponentInChildren<TextMeshProUGUI>().text = keyboardController.Caps ? "CAPS" : "Caps";
+                    foreach (GridKeyboardButton button in gridButtonList)
+                    {
+                        TextMeshProUGUI textComponent = button.buttonGO.transform.GetComponentInChildren<TextMeshProUGUI>();
+                        textComponent.text = keyboardController.Caps ? textComponent.text.ToUpper() : textComponent.text.ToLower();
+                    }
+                }
+            };
+            nonGridButtonList.Add(capsButton);
+
+            NonGridKeyboardButton spaceButton = new NonGridKeyboardButton
+            {
+                buttonName = "SpaceButton",
+                buttonAction = () => keyboardController.CurrentInputField.text += " "
+            };
+            nonGridButtonList.Add(spaceButton);
+
+        }
+
+        public void CreateGridButtons()
+        {
+            List<string> characterList = new List<string>()
+            {
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "=", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", ";", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "+", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/", "!"
+            };
+
+            for (int i = 0; i < characterList.Count; i++)
+            {
+                string currentCharacter = characterList[i].ToLower();
+
+                GameObject gridItem = Instantiate(keyboardController.GridItemPrefab);
+                gridItem.name = "Item_" + currentCharacter;
+                gridItem.transform.SetParent(keyboardController.GridParent_GO.transform);
+                gridItem.transform.localPosition = Vector3.zero;
+                gridItem.transform.localScale = Vector3.one;
+                gridItem.transform.GetComponentInChildren<TextMeshProUGUI>().text = currentCharacter;
+                gridItem.AddComponent<Button>().onClick.AddListener(keyboardController.OnKeyboardGridButtonPressed);
+
+                GridKeyboardButton button = new GridKeyboardButton
+                {
+                    buttonCharacter = currentCharacter,
+                    buttonAction = () =>
+                    {
+                        string selected = keyboardController.eventSystem.currentSelectedGameObject.GetComponentInChildren<TextMeshProUGUI>().text;
+                        if (selected != null)
+                            keyboardController.CurrentInputField.text += selected;
+                    },
+                    buttonGO = gridItem
+                };
+                gridButtonList.Add(button);
             }
         }
-        else if(clickedGO.name == "SpaceButton")
+
+        public void HandleGridButtonPress(GameObject buttonPressed)
         {
-            CurrentInputField.text += " ";
+            foreach(GridKeyboardButton button in gridButtonList)
+            {
+                if (button.buttonGO == buttonPressed)
+                    button.buttonAction();
+            }
         }
-    }
 
-    private void SetCharacterList()
-    {
-        CharacterList = new List<string>()
+        public void HandleNonGridButtonPress(GameObject buttonPressed)
         {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "*", "=", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", ":", ";", "A", "S", "D", "F", "G", "H", "J", "K", "L", "-", "_", "+", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "|", "/", "!"
-        };
-    }
-
-    public void GenerateGridItems()
-    {
-        gridItems = new List<GameObject>();
-
-        for (int i = 0; i < CharacterList.Count; i++)
-        {
-            string current = CharacterList[i].ToString().ToLower();
-            GameObject gridItem = Instantiate(GridItemPrefab);
-            gridItem.name = "Item_" + current;
-            gridItem.transform.SetParent(GridParent_GO.transform);
-            gridItem.transform.localPosition = Vector3.zero;
-            gridItem.transform.localScale = Vector3.one;
-            gridItem.transform.GetComponentInChildren<TextMeshProUGUI>().text = current;
-            gridItem.AddComponent<Button>().onClick.AddListener(OnKeyboardGridButtonPressed);
-            gridItems.Add(gridItem);
+            foreach (NonGridKeyboardButton button in nonGridButtonList)
+            {
+                if (button.buttonName == buttonPressed.name)
+                {
+                    button.buttonAction();
+                    break;
+                }
+            }
         }
+
+        public class NonGridKeyboardButton
+        {
+            public string buttonName;
+            public ActionDelegate buttonAction;
+        }
+
+        public class GridKeyboardButton
+        {
+            public string buttonCharacter;
+            public ActionDelegate buttonAction;
+            public GameObject buttonGO;
+        }
+
+
     }
+
 
 
 }

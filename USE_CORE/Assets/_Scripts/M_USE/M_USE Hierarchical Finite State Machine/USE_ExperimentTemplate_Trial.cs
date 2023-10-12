@@ -78,8 +78,9 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool TrialStimsLoaded;
 
         // Texture Variables
+
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
-        
+
         private float Camera_PulseSentTime = 0f;
         
         public delegate IEnumerator FileLoadingMethod();
@@ -241,7 +242,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 CurrentTrialDefIndex = DetermineCurrentTrialDefIndex();
                 SessionValues.LoadingController.DeactivateLoadingCanvas();
-
+                
                 if (SessionValues.WebBuild)
                     Cursor.visible = true;
 

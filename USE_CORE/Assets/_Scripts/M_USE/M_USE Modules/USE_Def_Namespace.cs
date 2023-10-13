@@ -362,7 +362,8 @@ namespace USE_Def_Namespace
         /// Indicates whether the Inter-Trial Interval (ITI) is set to a neutral state or mode.
         /// </summary>
         public bool NeutralITI;
-
+        
+        public string TrialDefSelectionStyle;
     }
 
     public class BlockDef
@@ -456,6 +457,13 @@ namespace USE_Def_Namespace
         /// Random number generator, used to select random number of max trials in the RandomMinMaxTrials range.
         /// </summary>
         public System.Random RandomNumGenerator;
+        
+        public int DifficultyLevel;
+        public int posStep;
+        public int negStep;
+        public int maxDiffLevel;
+        public int avgDiffLevel;
+        public int diffLevelJitter;
         
         /// <summary>
         /// Generates trial definitions based on block definitions.
@@ -577,6 +585,11 @@ namespace USE_Def_Namespace
         /// </summary>
         public int TokenBarCapacity;
 
+        public int DifficultyLevel;
+        public int posStep;
+        public int numTrialsBeforePosStep;
+        public int negStep;
+        public int numTrialsBeforeNegStep;
     }
 
 }

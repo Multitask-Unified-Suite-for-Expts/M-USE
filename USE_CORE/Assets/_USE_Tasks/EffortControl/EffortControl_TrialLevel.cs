@@ -603,6 +603,20 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.ResetTokenBarFull();
     }
 
+    public override void DefineCustomTrialDefSelection()
+    {
+        TrialDefSelectionStyle = CurrentTrial.TrialDefSelectionStyle;
+        posStep = CurrentTrial.PosStep;
+        negStep = CurrentTrial.NegStep;
+        maxDiffLevel = CurrentTrial.MaxDiffLevel;
+        avgDiffLevel = CurrentTrial.AvgDiffLevel;
+        diffLevelJitter = CurrentTrial.DiffLevelJitter;
+        BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
+        
+        int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
+        difficultyLevel = randomDouble;
+    }
+    
     public void ActivateObjects()
     {
         foreach (GameObject go in ObjectList)
@@ -669,11 +683,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             NumHigherEffortChosen_Block++;
             CurrentTaskLevel.NumHigherEffortChosen_Task++;
+            runningPerformance.Add(1);
+
         }
         else if (EffortChoice == "Lower")
         {
             NumLowerEffortChosen_Block++;
             CurrentTaskLevel.NumLowerEffortChosen_Task++;
+            runningPerformance.Add(0);
+
         }
         else
         {

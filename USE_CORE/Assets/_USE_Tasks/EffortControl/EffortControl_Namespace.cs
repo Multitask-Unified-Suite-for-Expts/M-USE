@@ -46,6 +46,13 @@ namespace EffortControl_Namespace
         public int PulseSizeRight;
         public int ClicksPerOutline;
         public bool TokensInMiddleOfOutlines;
+        public int DifficultyLevel;
+        public int PosStep;
+        public int NegStep;
+        public string TrialDefSelectionStyle;
+        public int MaxDiffLevel;
+        public int AvgDiffLevel;
+        public int DiffLevelJitter;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -66,7 +73,31 @@ namespace EffortControl_Namespace
                 td.PulseSizeLeft = PulseSizeLeft;
                 td.PulseSizeRight = PulseSizeRight;
                 td.ClicksPerOutline = ClicksPerOutline;
+                td.DifficultyLevel = DifficultyLevel;
+                td.PosStep = PosStep;
+                td.NegStep = NegStep;
+                td.TrialDefSelectionStyle = TrialDefSelectionStyle;
+                td.MaxDiffLevel = MaxDiffLevel;
+                td.AvgDiffLevel = AvgDiffLevel;
+                td.DiffLevelJitter = DiffLevelJitter;
                 TrialDefs.Add(td);
+            }
+        }
+        
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
+            MaxTrials = TrialDefs.Count;
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            {
+                EffortControl_TrialDef td = (EffortControl_TrialDef)TrialDefs[iTrial];
+                td.ContextName = ContextName;
+                td.TrialDefSelectionStyle = TrialDefSelectionStyle;
+                td.MaxDiffLevel = MaxDiffLevel;
+                td.AvgDiffLevel = AvgDiffLevel;
+                td.DiffLevelJitter = DiffLevelJitter;
+
+                TrialDefs[iTrial] = td;
             }
         }
     }
@@ -83,6 +114,13 @@ namespace EffortControl_Namespace
         public int PulseSizeRight;
         public int ClicksPerOutline;
         public bool TokensInMiddleOfOutlines;
+        public int DifficultyLevel;
+        public int PosStep;
+        public int NegStep;
+        public string TrialDefSelectionStyle;
+        public int MaxDiffLevel;
+        public int AvgDiffLevel;
+        public int DiffLevelJitter;
     }
 
     public class EffortControl_StimDef : StimDef

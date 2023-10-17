@@ -33,35 +33,27 @@ using System;
 
 public class THR_TaskLevel : ControlLevel_Task_Template
 {
-    public string CurrentBlockString;
-    public StringBuilder PreviousBlocksString;
-
-    public int BlockStringsAdded = 0;
-
     THR_BlockDef CurrentBlock => GetCurrentBlockDef<THR_BlockDef>();
     THR_TrialLevel trialLevel;
 
-    public int TrialsCompleted_Task = 0;
-    public int TrialsCorrect_Task = 0;
-    public int SelectObjectTouches_Task = 0;
-    public int AvoidObjectTouches_Task = 0;
-    public int BackdropTouches_Task = 0;
-    public int ItiTouches_Task = 0;
-    public int TouchRewards_Task = 0;
-    public int ReleaseRewards_Task = 0;
-    public int ReleasedEarly_Task = 0;
-    public int ReleasedLate_Task = 0;
-    public int TouchesMovedOutside_Task = 0;
+    [HideInInspector] public int TrialsCompleted_Task = 0;
+    [HideInInspector] public int TrialsCorrect_Task = 0;
+    [HideInInspector] public int SelectObjectTouches_Task = 0;
+    [HideInInspector] public int AvoidObjectTouches_Task = 0;
+    [HideInInspector] public int BackdropTouches_Task = 0;
+    [HideInInspector] public int ItiTouches_Task = 0;
+    [HideInInspector] public int TouchRewards_Task = 0;
+    [HideInInspector] public int ReleaseRewards_Task = 0;
+    [HideInInspector] public int ReleasedEarly_Task = 0;
+    [HideInInspector] public int ReleasedLate_Task = 0;
+    [HideInInspector] public int TouchesMovedOutside_Task = 0;
 
 
 
     public override void DefineControlLevel()
     {
         trialLevel = (THR_TrialLevel)TrialLevel;
-        CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
         DefineBlockData();
-        LoadBackdropTexture();
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
@@ -70,18 +62,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
         });
-    }
-
-    public void LoadBackdropTexture()
-    {
-        try
-        {
-            TrialLevel.THR_BackdropTexture = Resources.Load<Texture2D>("Textures/THR_Backdrop");
-        }
-        catch(Exception e)
-        {
-            Debug.LogError("FAILED TO LOAD THR BACKDROP TEXTURE FROM RESOURCES! Error: " + e.Message.ToString());
-        }       
     }
 
     public override OrderedDictionary GetBlockResultsData()
@@ -117,9 +97,9 @@ public class THR_TaskLevel : ControlLevel_Task_Template
 
     public void CalculateBlockSummaryString()
     {
-        ClearStrings();
+        CurrentBlockSummaryString.Clear();
 
-        CurrentBlockString = ("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
+        CurrentBlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
                              "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
                                 "<b>\n\nBlock Name: " + CurrentBlock.BlockName + "</b>" +
                         "\nTrials Correct: " + trialLevel.TrialsCorrect_Block + 
@@ -131,10 +111,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nBackdrop Touches: " + trialLevel.BackdropTouches_Block +
                         "\nNum Pulses: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block)
                         );
-
-        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        if (PreviousBlocksString.Length > 0)
-            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());
     }
 
     private void DefineBlockData()
@@ -153,10 +129,5 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumTouchesMovedOutside", () => trialLevel.NumTouchesMovedOutside_Block);
     }
 
-    void ClearStrings()
-    {
-        CurrentBlockString = "";
-        CurrentBlockSummaryString.Clear();
-    }
 
 }

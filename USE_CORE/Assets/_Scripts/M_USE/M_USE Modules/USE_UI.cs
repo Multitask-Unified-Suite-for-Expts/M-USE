@@ -424,9 +424,9 @@ namespace USE_UI
         //*** Inherits StartButtonGO from USE_StartButton ***
         [HideInInspector] public Image Image;
 
-        public GameObject CreateSquareStartButton(Canvas parent, Vector3? localPos, float? scale, Color32? color)
+        public GameObject CreateSquareStartButton(Canvas parent, Vector3? localPos, float? scale, Color32? color, string name = null)
         {
-            StartButtonGO = new GameObject("StartButton");
+            StartButtonGO = new GameObject(name ?? "StartButton");
             Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
@@ -437,12 +437,12 @@ namespace USE_UI
             return StartButtonGO;
         }
 
-        public void SetButtonColor(Color color)
+        public void SetSquareColor(Color color)
         {
             Image.color = color;
         }
 
-        public void SetButtonSize(float size)
+        public void SetSquareSize(float size)
         {
             Image.rectTransform.sizeDelta = new Vector2(size, size);
         }

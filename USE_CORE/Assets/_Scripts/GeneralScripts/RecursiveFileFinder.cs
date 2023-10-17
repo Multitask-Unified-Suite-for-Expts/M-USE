@@ -33,7 +33,7 @@ public class RecursiveFileFinder
 {
     private static Dictionary<(string path, string filename), List<string>> Cache;
     private static HashSet<string> CachedPaths;
-    private static HashSet<string> CachedExtensions; //ADDED THIS!
+    private static HashSet<string> CachedExtensions;
 
     public static List<string> FindFile(string folderPath, string filename, string extension)
     {
@@ -44,7 +44,7 @@ public class RecursiveFileFinder
             CachedExtensions = new HashSet<string>();
         }
 
-        if (CachedPaths.Contains(folderPath) && CachedExtensions.Contains(extension)) //ADDED 2nd HALF OF THIS!
+        if (CachedPaths.Contains(folderPath) && CachedExtensions.Contains(extension))
         {
             if (Cache.TryGetValue((folderPath, filename), out List<string> filenames))
             {
@@ -53,8 +53,7 @@ public class RecursiveFileFinder
             return new List<string>();
         }
         CachedPaths.Add(folderPath);
-
-        CachedExtensions.Add(extension); //ADDED THIS!
+        CachedExtensions.Add(extension);
 
         Cache.Add((folderPath, filename), new List<string>());
         PopulateCache(folderPath, extension);

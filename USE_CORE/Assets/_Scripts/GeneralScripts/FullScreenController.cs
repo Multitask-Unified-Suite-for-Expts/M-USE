@@ -23,8 +23,7 @@ SOFTWARE.
 */
 
 
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 
@@ -37,7 +36,7 @@ public class FullScreenController : MonoBehaviour
     void Start()
     {
         IsFullScreen = Screen.fullScreen;
-        Screen.SetResolution(1920, 1080, false);
+        //Screen.SetResolution(1920, 1080, false);
     }
 
     void Update()
@@ -45,12 +44,13 @@ public class FullScreenController : MonoBehaviour
         if (IsFullScreen != Screen.fullScreen)
         {
             IsFullScreen = Screen.fullScreen;
-            Screen.SetResolution(1920, 1080, IsFullScreen);
+            //Screen.SetResolution(1920, 1080, true);
 
             OnFullScreenChanged(IsFullScreen);
-
         }
     }
+
+
 
     protected virtual void OnFullScreenChanged(bool isFullScreen)
     {

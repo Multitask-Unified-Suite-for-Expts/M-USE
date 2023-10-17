@@ -151,12 +151,20 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         {
             Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
+            SetTrialSummaryString();
+
+            if (CurrentTask.StimFacingCamera)
+            {
+                MakeStimFaceCamera(targetStim);
+                MakeStimFaceCamera(distractorStims);
+            }
+
+            SetShadowType(CurrentTask.ShadowType, "AntiSaccade_DirectionalLight");
+
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
-
-            SetTrialSummaryString();
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
 
@@ -226,10 +234,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.RandomMaskColor)
                 Mask_GO.GetComponent<Image>().color = GetRandomColor();
 
-            Mask_GO.transform.localPosition = new Vector3(CurrentTrial.TargetStim_DisplayPos.x, CurrentTrial.TargetStim_DisplayPos.y + 25f, CurrentTrial.TargetStim_DisplayPos.z); //have to adjust the Y cuz pics have padding
+            Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos;
             Mask_GO.SetActive(true);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MaskOn"]);
 
+            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MaskOn"]);
         });
         Mask.AddTimer(() => CurrentTrial.MaskDuration, PostMaskDelay, () =>
         {
@@ -283,7 +291,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             int? haloDepth = SessionValues.Using2DStim ? 10 : (int?)null;
 
-            float? tokenYAdjustment = -5f; //used to adjust where the tokens appear in relation to GameObject
+            float? tokenYAdjustment = SessionValues.Using2DStim ? -5f : (float?)null; //used to adjust where the tokens appear in relation to GameObject
 
             if (ChosenStim.IsTarget)
             {
@@ -354,6 +362,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
+    private void MakeStimFaceCamera(StimGroup stims)
+    {
+        foreach (var stim in stims.stimDefs)
+            stim.StimGameObject.AddComponent<FaceCamera>();
+    }
+
     public override void AddToStimLists()
     {
         foreach(AntiSaccade_StimDef stim in targetStim.stimDefs)

@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -42,15 +43,13 @@ public class InputBroker
 	static Dictionary<KeyCode, InputState> keyState = new Dictionary<KeyCode, InputState>();
 	static Dictionary<int, InputState> mouseState = new Dictionary<int, InputState>();
 
-	
-	static Vector3 _mousePosition;
+    static Vector3 _mousePosition;
 	static Vector2 _gazePosition;
 
     public static Vector3 mousePosition{
 		get{
-			if(isSimulation){
+			if(isSimulation)
 				return _mousePosition;
-			}
 			return Input.mousePosition;
 		}
 		set{
@@ -92,7 +91,8 @@ public class InputBroker
 		if (!mouseState.ContainsKey(button))
 			mouseState.Add(button, InputState.PRESSED);
 		else
-			mouseState[button] = InputState.PRESSED;	}
+			mouseState[button] = InputState.PRESSED;
+	}
 
 	public static void SetMouseButtonUp(int button)
 	{

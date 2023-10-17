@@ -88,15 +88,15 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public Dictionary<string, int> AbortCodeDict;
 
-        [HideInInspector] public UI_Debugger UI_Debugger;
+        [HideInInspector] public UI_Debugger Debugger;
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
         [HideInInspector] public string TrialDefSelectionStyle;
 
-  
+
         // Texture Variables
-        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, THR_BackdropTexture;
+        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, MovedTooFarSquareTexture, HeldTooShortSquareTexture, HeldTooLongSquareTexture;
 
 
         private float Camera_PulseSentTime = 0f;
@@ -186,7 +186,7 @@ namespace USE_ExperimentTemplate_Trial
             if (SessionValues.SessionDef.IsHuman)
                 SessionValues.HumanStartPanel.SetTrialLevel(this);
 
-            UI_Debugger = new UI_Debugger();
+            Debugger = new UI_Debugger();
 
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
@@ -644,21 +644,30 @@ namespace USE_ExperimentTemplate_Trial
         }
         public void SetShadowType(string ShadowType, string LightName)
         {
-            ShadowType = ShadowType.ToLower();
-            //User options are None, Soft, Hard
+            Light mainLight = GameObject.Find("Directional Light").GetComponent<Light>();
+            Light taskLight = GameObject.Find(LightName).GetComponent<Light>();
+
+            if(mainLight == null || taskLight == null)
+            {
+                Debug.LogWarning("NOT SETTING SHADOW TYPE! COULDNT FIND ONE OF DirectionalLight OR " + LightName + " WHEN TRYING TO SET SHADOW TYPE! ");
+                return;
+            }
+
+            ShadowType = ShadowType.ToLower(); //User options are None, Soft, Hard
+
             switch (ShadowType)
             {
                 case "none":
-                    GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.None;
-                    GameObject.Find(LightName).GetComponent<Light>().shadows = LightShadows.None;
+                    mainLight.shadows = LightShadows.None;
+                    taskLight.shadows = LightShadows.None;
                     break;
                 case "soft":
-                    GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Soft;
-                    GameObject.Find(LightName).GetComponent<Light>().shadows = LightShadows.Soft;
+                    mainLight.shadows = LightShadows.Soft;
+                    taskLight.shadows = LightShadows.Soft;
                     break;
                 case "hard":
-                    GameObject.Find("Directional Light").GetComponent<Light>().shadows = LightShadows.Hard;
-                    GameObject.Find(LightName).GetComponent<Light>().shadows = LightShadows.Hard;
+                    mainLight.shadows = LightShadows.Hard;
+                    taskLight.shadows = LightShadows.Hard;
                     break;
                 default:
                     Debug.Log("User did not Input None, Soft, or Hard for the Shadow Type");
@@ -684,52 +693,24 @@ namespace USE_ExperimentTemplate_Trial
         }
 
 
-        public IEnumerator LoadSharedTrialTextures()
+        public void LoadSharedTrialTextures()
         {
-            if (SessionValues.UsingDefaultConfigs)
+            try
             {
                 HeldTooLongTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong");
                 HeldTooShortTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooShort");
-                MovedTooFarTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/bg");
+                MovedTooFarTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/MovedTooFar");
+                TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
+                TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
+                TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
+                HeldTooLongSquareTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong_Square");
+                HeldTooShortSquareTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooShort_Square");
+                MovedTooFarSquareTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/MovedTooFar_Square");
             }
-            else if (SessionValues.UsingLocalConfigs)
+            catch(Exception e)
             {
-                HeldTooLongTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooLong.png"));
-                HeldTooShortTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "HeldTooShort.png"));
-                MovedTooFarTexture = LoadExternalPNG(GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "bg.png"));
+                Debug.LogError("FAILED LOADING SHARED TRIAL TEXTURES FROM RESOURCES! " + e.Message.ToString());
             }
-            else if (SessionValues.UsingServerConfigs)
-            {
-                yield return StartCoroutine(ServerManager.LoadTextureFromServer($"{ServerManager.ServerContextFolderPath}/HeldTooLong.png", result =>
-                {
-                    if (result != null)
-                        HeldTooLongTexture = result;
-                    else
-                        Debug.LogWarning("HELDTOOLONG TEXTURE NULL FROM SERVER!");
-                }));
-
-                yield return StartCoroutine(ServerManager.LoadTextureFromServer($"{ServerManager.ServerContextFolderPath}/HeldTooShort.png", result =>
-                {
-                    if (result != null)
-                        HeldTooShortTexture = result;
-                    else
-                        Debug.LogWarning("HELDTOOSHORT TEXTURE NULL FROM SERVER!");
-                }));
-
-                yield return StartCoroutine(ServerManager.LoadTextureFromServer($"{ServerManager.ServerContextFolderPath}/bg.png", result =>
-                {
-                    if (result != null)
-                    {
-                        MovedTooFarTexture = result;
-                        TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
-                    }
-                    else
-                        Debug.LogWarning("BACKDROP_STRIPES_TEXTURE NULL FROM SERVER");
-                }));
-            }
-            TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
-            TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
-            TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
         }
 
 

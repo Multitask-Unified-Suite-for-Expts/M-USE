@@ -317,13 +317,16 @@ namespace USE_ExperimentTemplate_Session
 
                 Starfield.SetActive(SessionValues.SessionDef.IsHuman);
 
-                if(!SessionValues.WebBuild)
+                
+                if (!SessionValues.WebBuild)
                 {
                     CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                     CameraMirrorTexture.Create();
                     SessionCam.targetTexture = CameraMirrorTexture;
                     mainCameraCopy_Image.texture = CameraMirrorTexture;
                 }
+
+
 
                 SessionValues.EventCodeManager.SendCodeImmediate("SelectTaskStarts");
 
@@ -657,7 +660,7 @@ namespace USE_ExperimentTemplate_Session
 
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");
 
-                if(!SessionValues.WebBuild)
+                if (!SessionValues.WebBuild)
                 {
                     CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
                     CameraMirrorTexture.Create();

@@ -263,7 +263,6 @@ namespace USE_Def_Namespace
             get { return maxStimLoadingDuration; }
             set { maxStimLoadingDuration = MathF.Max(value, 1f); }
         }
-
     }
 
     public class TaskDef

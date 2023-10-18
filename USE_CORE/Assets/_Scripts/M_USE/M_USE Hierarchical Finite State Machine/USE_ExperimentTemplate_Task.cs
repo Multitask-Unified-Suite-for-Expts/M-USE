@@ -67,6 +67,8 @@ namespace USE_ExperimentTemplate_Task
         public int MinTrials_InBlock;
         public int MaxTrials_InBlock;
 
+
+        public bool ForceTaskEnd;
         public ControlLevel_Trial_Template TrialLevel;
         public BlockData BlockData;
         public FrameData FrameData;
@@ -220,6 +222,7 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;
@@ -323,8 +326,7 @@ namespace USE_ExperimentTemplate_Task
                 if (TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 
-                if (TrialLevel.ForceBlockEnd &&
-                    SessionValues.StoreData) //If they used end task hotkey, still write the block data!
+                if (CheckForcedTaskEnd() && SessionValues.StoreData) //If they used end task hotkey, still write the block data!
                 {
                     StartCoroutine(BlockData.AppendDataToBuffer());
                     StartCoroutine(BlockData.AppendDataToFile());
@@ -394,6 +396,8 @@ namespace USE_ExperimentTemplate_Task
 
                 }
 
+                SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetDisplay = TaskCam.targetDisplay;
+                SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
                 TaskCam.gameObject.SetActive(false);
 
                 NumAbortedTrials_InBlock = 0;
@@ -414,7 +418,15 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevelDefined = true;
         }
-
+        public bool CheckForcedTaskEnd()
+        {
+            if (ForceTaskEnd)
+            {
+                ForceTaskEnd = false;
+                return true;
+            }
+            return false;
+        }
         public void SetSkyBox(string contextName)
         {
             string contextFilePath = "";
@@ -855,6 +867,8 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void SetTaskSummaryString()
         {
+            CurrentTaskSummaryString.Clear();
+
             decimal percentAbortedTrials = 0;
             if (TrialLevel.TrialCount_InTask > 0)
                 percentAbortedTrials =

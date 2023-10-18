@@ -32,6 +32,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using USE_UI;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -135,8 +136,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public TextMeshProUGUI debugText;
 
 
-
-
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -149,6 +148,19 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+
+            //Debugger = new UI_Debugger();
+            //string text = "";
+            //Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), new Vector2(550, 100), new Vector3(-300f, 400f, 0f), text);
+            //Debugger.SetTextColor(Color.cyan);
+            //Debugger.ActivateDebugText();
+            
+
+            //Subscribe to Fullscreen events:
+            if (SessionValues.FullScreenController != null)
+                SessionValues.FullScreenController.SubscribeToFullScreenChanged(OnFullScreenChanged);
+
+
             if (AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
 
@@ -178,8 +190,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (TokenFBController != null)
-                SetTokenVariables();
+            SetCameraPosition();
+            SetTokenVariables();
+
+            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}";
+            //Debugger.SetDebugText(text);
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -298,10 +314,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Wrapper = new GameObject("Wrapper");
 
             float xValue = 1.01f; //was .98, then 1.025
-            //if (Screen.fullScreen && Screen.width > 1920)
-            //    xValue = Screen.width > 3000 ? .96f : .88f; //test the .95 its for mac
+            if (Screen.fullScreen && Screen.width > 1920)
+                xValue = Screen.width > 3000 ? .95f : .8f; //.86 still too much for ipad fullscreen!! (trying .8 tomorrow)
 
             CenteredPos = new Vector3(SideChoice == "Left" ? xValue : -xValue, 0, 0);
+
+            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}\n{CenteredPos}";
+            //Debugger.SetDebugText(text);
 
             MiddleBarrier.SetActive(false);
 
@@ -641,7 +660,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflationDurations_Block.Clear();
     }
 
-    void ScaleToNextInterval()
+    private void ScaleToNextInterval()
     {
         //If close and next increment would go over target scale, recalculate the exact amount:
         if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) 
@@ -651,7 +670,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialStim.transform.localScale += new Vector3(IncrementAmounts.x, IncrementAmounts.y, IncrementAmounts.z);
     }
 
-    void CalculateInflation()
+    private void CalculateInflation()
     {      
         GameObject container = (SideChoice == "Left") ? OutlineContainerLeft : OutlineContainerRight;
         NextScale = container.transform.GetChild(NumInflations-1).transform.localScale;
@@ -662,7 +681,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Inflate = true;
     }
 
-    void RecordChoices()
+    private void RecordChoices()
     {
         if(SideChoice == "Left")
         {
@@ -726,8 +745,29 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             return "Lower";
     }
 
-    void SetTokenVariables()
+
+    private void OnFullScreenChanged(bool isFullScreen)
     {
+        SetCameraPosition();
+        SetTokenVariables();
+    }
+
+    private void OnDestroy()   //Unsubscribe from FullScreenChanged Event:
+    {
+        if (SessionValues.FullScreenController != null)
+            SessionValues.FullScreenController.UnsubscribeToFullScreenChanged(OnFullScreenChanged);
+    }
+
+    private void SetCameraPosition()
+    {
+        Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen && Screen.width != 1920 ? -2.5f : -2.18f);
+    }
+
+    private void SetTokenVariables()
+    {
+        if (TokenFBController == null)
+            return;
+
         float tokenSize = 106f;
         float yOffset = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 45 : 5; //need to test these on mac
 
@@ -744,7 +784,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 yOffset = Screen.width > 3000 ? 75 : 100;
             }
         }
-
         TokenFBController.tokenSize = tokenSize;
         TokenFBController.tokenBoxYOffset = yOffset;
 
@@ -752,7 +791,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.tokenSpacing = -(Screen.width * .009375f);
     }
 
-    void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
+    private void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
     {
         RemoveParentList = new List<GameObject>();
         foreach(GameObject go in objects)
@@ -762,7 +801,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void RemoveParents(GameObject wrapper, List<GameObject> objects)
+    private void RemoveParents(GameObject wrapper, List<GameObject> objects)
     {
         if (objects.Count < 1 || objects == null)
             Debug.Log("There are no objects in the List!");
@@ -774,7 +813,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(wrapper);
     }
 
-    void ResetToOriginalPositions()
+    private void ResetToOriginalPositions()
     {
         OutlineContainerLeft.transform.position = LeftContainerOriginalPosition;
         RewardContainerLeft.transform.position = LeftRewardContainerOriginalPosition;
@@ -785,7 +824,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StimRight.transform.position = RightStimOriginalPosition;
     }
 
-    void GiveReward()
+    private void GiveReward()
     {
         if (SessionValues.SyncBoxController == null)
             return;
@@ -805,7 +844,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void DisableAllGameobjects()
+    private void DisableAllGameobjects()
     {
         if(StimLeft != null)
             StimLeft.SetActive(false);
@@ -815,7 +854,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             BalloonOutline.SetActive(false);
     }
 
-    void LoadConfigUIVariables()
+    private void LoadConfigUIVariables()
     {
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -836,7 +875,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         return instantiated;
     }
 
-    void CreateObjects()
+    private void CreateObjects()
     {
         Vector3 stimLeftViewPos = new Vector3(.25f, .1925f, 2.225f);
         StimLeft = CreateBalloon(StimLeftPrefab, stimLeftViewPos, "StimLeft");
@@ -888,7 +927,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ObjectsCreated = true;
     }
 
-    void CreateMiddleBarrier()
+    private void CreateMiddleBarrier()
     {
         MiddleBarrier = new GameObject("MiddleBarrier");
         MiddleBarrier.transform.SetParent(EC_CanvasGO.transform, false);
@@ -898,7 +937,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier.SetActive(false);
     }
 
-    void CreateTransparentBalloons()
+    private void CreateTransparentBalloons()
     {
         //transparent balloon with size of biggest outline, allows easy detection of clicks within the entire balloon
         MaxOutline_Left = Instantiate(StimNoMaterialPrefab, StimLeft.transform.position, StimLeftPrefab.transform.rotation);
@@ -918,7 +957,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SessionValues.TargetObjects.Add(MaxOutline_Right);
     }
 
-    void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
+    private void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
     {
         for (int i = 1; i <= numBalloons; i ++)
         {
@@ -932,7 +971,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
+    private void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
     {
         int numCoins = Mathf.Max(CurrentTrial.NumCoinsLeft, CurrentTrial.NumCoinsRight);
         float scaler = 1f; //100% for 9 or less
@@ -972,7 +1011,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //}
     }
 
-    void SetTrialSummaryString()
+    private void SetTrialSummaryString()
     {
         TrialSummaryString = "Touches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
@@ -980,12 +1019,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                             "\nEffort Chosen: " + EffortChoice;
     }
 
-    void ClearTrialSummaryString()
+    private void ClearTrialSummaryString()
     {
         TrialSummaryString = "";
     }
 
-    void DefineTrialData()
+    private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("InflationsNeeded", () => InflationsNeeded);
@@ -1003,7 +1042,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TrialTouches", () => TrialTouches);
     }
 
-    void DefineFrameData()
+    private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);

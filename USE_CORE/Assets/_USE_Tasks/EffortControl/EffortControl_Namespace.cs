@@ -46,7 +46,6 @@ namespace EffortControl_Namespace
         public int PulseSizeRight;
         public int ClicksPerOutline;
         public bool TokensInMiddleOfOutlines;
-        public int DifficultyLevel;
         public int PosStep;
         public int NegStep;
         public string TrialDefSelectionStyle;
@@ -114,7 +113,6 @@ namespace EffortControl_Namespace
         public int PulseSizeRight;
         public int ClicksPerOutline;
         public bool TokensInMiddleOfOutlines;
-        public int DifficultyLevel;
         public int PosStep;
         public int NegStep;
         public string TrialDefSelectionStyle;

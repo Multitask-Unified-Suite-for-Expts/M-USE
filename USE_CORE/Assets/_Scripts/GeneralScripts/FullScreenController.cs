@@ -45,11 +45,9 @@ public class FullScreenController : MonoBehaviour
         {
             IsFullScreen = Screen.fullScreen;
             //Screen.SetResolution(1920, 1080, true);
-
             OnFullScreenChanged(IsFullScreen);
         }
     }
-
 
 
     protected virtual void OnFullScreenChanged(bool isFullScreen)

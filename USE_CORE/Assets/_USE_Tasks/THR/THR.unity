@@ -481,7 +481,6 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0
   TrialsCorrect_Task: 0

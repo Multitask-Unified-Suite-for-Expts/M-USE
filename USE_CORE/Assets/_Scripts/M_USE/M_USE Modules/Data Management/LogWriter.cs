@@ -66,7 +66,7 @@ public class LogWriter : MonoBehaviour
                 return null;
             }
             else
-                return SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "LogFile";
+                return $"{SessionValues.SessionDataPath}{Path.DirectorySeparatorChar}LogFile";
         }
     }
 
@@ -94,7 +94,7 @@ public class LogWriter : MonoBehaviour
                 return null;
             }
             else
-                return SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "LogFile" + Path.DirectorySeparatorChar + "Player.log";
+                return $"{SessionValues.SessionDataPath}{Path.DirectorySeparatorChar}LogFile{Path.DirectorySeparatorChar}Player.log";
         }
     }
 

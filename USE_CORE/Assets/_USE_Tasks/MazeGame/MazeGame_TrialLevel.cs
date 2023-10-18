@@ -61,7 +61,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Tile objects
     private Tile tile = new Tile();
-    private GameObject tileGO;
     public StimGroup tiles; // top of trial level with other variable definitions
     public Texture2D tileTex;
     public Texture2D mazeBgTex;

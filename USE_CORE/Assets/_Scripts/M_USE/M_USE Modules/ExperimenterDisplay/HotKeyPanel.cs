@@ -176,30 +176,26 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
                 {
-                    var cams = GameObject.FindObjectsOfType<Camera>();
-                    foreach (Camera c in cams) //MirrorCam (0 to 1), BackgroundCamera (1 to 0), TaskCam (0 to 1), MainCameraCopy(1 DC!!)
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                    
-                    var canvases = GameObject.FindObjectsOfType<Canvas>();
-                    foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
-                    {
-                        if (c.renderMode == RenderMode.ScreenSpaceCamera) //TaskSelectionCanvas (0 to 1 ),
-                        {
-                            Debug.Log("CAM REND BEFORE = " + c.name + " " + c.worldCamera.targetDisplay);
-                            c.worldCamera.targetDisplay = 1 - c.worldCamera.targetDisplay;
-                            Debug.Log("CAM REND AFTER = " + c.name + " " + c.worldCamera.targetDisplay);
-                        }
+                    //Camera[] allCameras = Resources.FindObjectsOfTypeAll<Camera>();
+                    var allCameras = GameObject.FindObjectsOfType<Camera>();
+                    foreach (Camera c in allCameras)
+                        c.targetDisplay = 1 - c.targetDisplay;
 
-                        else //ExperimenterCanvas (1 to 0), InitScreenCanvas (1 to 0),
-                        {
-                            Debug.Log("BEFORE = " + c.name + " " + c.targetDisplay);
-                            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                            Debug.Log("AFTER = " + c.name + " " + c.targetDisplay);
-                        }
+                    //Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
+                    var allCanvases = GameObject.FindObjectsOfType<Canvas>();
+                    foreach (Canvas c in allCanvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+                    {
+                        Debug.Log("BEFORE = " + c.name + " " + c.targetDisplay);
+                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
+                        Debug.Log("AFTER = " + c.name + " " + c.targetDisplay);
+
                     }
+
+                    // Change display of the loading canvas which could be inactive
+                    SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = 1 - SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay;
                 }
             };
-            //HotKeyList.Add(toggleDisplays);
+            HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey

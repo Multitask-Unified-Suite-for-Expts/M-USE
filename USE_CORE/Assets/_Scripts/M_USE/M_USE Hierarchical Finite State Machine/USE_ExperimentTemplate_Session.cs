@@ -619,6 +619,7 @@ namespace USE_ExperimentTemplate_Session
                 runTask.AddChildLevel(CurrentTask);
                 //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
+                CurrentTask.TaskCam.targetDisplay = SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetDisplay;
 
                 SetTaskMainBackground(); 
 

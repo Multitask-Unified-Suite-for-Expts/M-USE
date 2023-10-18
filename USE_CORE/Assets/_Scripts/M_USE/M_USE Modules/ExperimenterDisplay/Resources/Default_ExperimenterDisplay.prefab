@@ -7270,6 +7270,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6415717149310349467, guid: f0a013de1b417d94bb0477ffd8209582,
+        type: 3}
+      propertyPath: m_TargetDisplay
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6415717149310349471, guid: f0a013de1b417d94bb0477ffd8209582,
         type: 3}
       propertyPath: m_Pivot.x

@@ -216,6 +216,7 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;
@@ -381,6 +382,8 @@ namespace USE_ExperimentTemplate_Task
 
                 }
 
+                SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetDisplay = TaskCam.targetDisplay;
+                SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
                 TaskCam.gameObject.SetActive(false);
                 
                 NumAbortedTrials_InBlock = 0;

@@ -215,7 +215,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 10
-  m_TargetDisplay: 0
+  m_TargetDisplay: 1
 --- !u!114 &4072035161390764077
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,8 +268,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f0a72f94b75c46d28d301f43d801828, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LoadingCanvasGO: {fileID: 3540131689277646463}
-  Star_GO: {fileID: 3095998040482622450}
 --- !u!1 &7636625915742604481
 GameObject:
   m_ObjectHideFlags: 0

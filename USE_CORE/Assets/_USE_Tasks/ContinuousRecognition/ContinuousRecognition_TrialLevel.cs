@@ -320,7 +320,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     //SINCE THEY GOT IT RIGHT, CHECK IF LAST TRIAL IN BLOCK OR IF THEY FOUND ALL THE STIM. 
-                    if(PNC_Stim.Count == 0 || TrialCount_InBlock == CurrentTrial.MaxTrials-1)
+                    if(PNC_Stim.Count == 0 || TrialCount_InBlock == CurrentTrial.MaxNumTrials-1)
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
@@ -356,7 +356,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-
             AudioFBController.Play("Negative");
             EndBlock = true;
         });
@@ -426,7 +425,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (GotTrialCorrect)
                 score += (TrialCount_InBlock + 1) * 100;
 
-            if (EndBlock)
+            if (ChosenStimIndices.Count < 1)
+                return;
+
+            if (EndBlock || CompletedAllTrials)
             {
                 StartCoroutine(GenerateBlockFeedback());
 
@@ -436,6 +438,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
         DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
+        DisplayResults.SpecifyTermination(() => ChosenStimIndices.Count < 1, ITI);
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
             DisplayResultsPanelGO.SetActive(false);
@@ -630,7 +633,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach(ContinuousRecognition_StimDef stim in trialStims.stimDefs)
         {
             if (!stim.PreviouslyChosen)
-                stim.StimGameObject.transform.localScale *= 1.35f;
+                stim.StimGameObject.transform.localScale *= 1.25f;
         }
     }
 

@@ -45,14 +45,13 @@ public class SetupTask_Level : ControlLevel
     private FrameData FrameData;
     private TrialData TrialData;
     private string TaskDataPath, ConfigFolderName, TaskName;
-    private bool SharedTexturesLoaded = false;
+
 
     public override void DefineControlLevel()
     {
         State VerifyTask = new State("VerifyTask");
-        State LoadSharedTextures = new State("LoadSharedTextures");
         State OtherSetup = new State("OtherSetup");
-        AddActiveStates(new List<State> {VerifyTask, LoadSharedTextures, OtherSetup });
+        AddActiveStates(new List<State> {VerifyTask, OtherSetup });
         
         verifyTask_Level = GameObject.Find("ControlLevels").GetComponent<VerifyTask_Level>();
         VerifyTask.AddChildLevel(verifyTask_Level);
@@ -60,17 +59,11 @@ public class SetupTask_Level : ControlLevel
         {
             verifyTask_Level.TaskLevel = TaskLevel;
         });
-        VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, LoadSharedTextures, () =>
+        VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup, () =>
         {
             TrialLevel = TaskLevel.TrialLevel;
+            TrialLevel.LoadSharedTrialTextures();
         });
-
-        LoadSharedTextures.AddUniversalInitializationMethod(() =>
-        {
-            SharedTexturesLoaded = false;
-            StartCoroutine(LoadTextures());
-        });
-        LoadSharedTextures.SpecifyTermination(() => SharedTexturesLoaded, OtherSetup, () => SharedTexturesLoaded = false);
 
         OtherSetup.AddSpecificInitializationMethod(() =>
         {  
@@ -253,12 +246,6 @@ public class SetupTask_Level : ControlLevel
         });
         OtherSetup.SpecifyTermination(() => true, () => null);
 
-    }
-
-    public IEnumerator LoadTextures()
-    {
-        yield return StartCoroutine(TrialLevel.LoadSharedTrialTextures());
-        SharedTexturesLoaded = true;
     }
 
     public static IEnumerator HandleCreateExternalFolder(string configName)

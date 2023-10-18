@@ -197,7 +197,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Debug.Log("AFTER = " + c.name + " " + c.targetDisplay);
                         }
                     }
-                    //SceneManager.LoadScene(SceneManager.GetActiveScene().name); //Doesn't work. Will load task again but without TaskSelection scene.
                 }
             };
             //HotKeyList.Add(toggleDisplays);
@@ -308,6 +307,11 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
                         if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
                             HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+
+                        if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
+                        {
+                            SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+                        }
 
                         HkPanel.TrialLevel.AbortCode = 3;
                         SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndBlock"]);

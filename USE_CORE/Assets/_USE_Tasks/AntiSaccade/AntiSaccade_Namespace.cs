@@ -54,6 +54,7 @@ namespace AntiSaccade_Namespace
         public bool RandomMaskColor;
         public int TargetStimIndex;
         public int[] DistractorStimIndices;
+        public Vector3 Mask_Pos;
         public Vector3 SpatialCue_Pos;
         public Vector3 TargetStim_DisplayPos;
         public Vector3 TargetStim_ChoosePos;

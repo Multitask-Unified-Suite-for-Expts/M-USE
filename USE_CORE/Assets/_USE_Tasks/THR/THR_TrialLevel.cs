@@ -40,8 +40,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     public THR_TaskDef CurrentTask => GetTaskDef<THR_TaskDef>();
 
 
-    private USE_StartButton USE_Square;
-    private GameObject MainObjectGO;
+    private USE_Square USE_Square;
+    private GameObject SquareGO;
     private USE_Backdrop USE_Backdrop;
     private GameObject BackdropGO;
 
@@ -95,7 +95,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool MovedOutside;
     private bool ConfigValuesChangedInPrevTrial;
 
-    private Color32 WhiteColor;
+    private Color32 DarkBlueColor;
     private Color32 LightBlueColor;
 
     private float AvoidObjectTimeoutTime;
@@ -125,40 +125,39 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            WhiteColor = new Color32(236, 238, 242, 255);
+            DarkBlueColor = new Color32(0, 0, 166, 255);
             LightBlueColor = new Color32(38, 188, 250, 255);
 
-            if (MainObjectGO == null)
+            if (SquareGO == null)
             {
-                USE_Backdrop = new USE_Backdrop();
+                USE_Backdrop = gameObject.AddComponent<USE_Backdrop>();
                 BackdropGO = USE_Backdrop.CreateBackdrop(THR_CanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(6, 10, 17, 255));
 
-                USE_Square = new USE_StartButton();
-                USE_Square.StartButtonPrefab = SessionValues.USE_StartButton.StartButtonPrefab;
-                MainObjectGO = USE_Square.CreateStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, false, "SquareGO");
+                USE_Square = gameObject.AddComponent<USE_Square>();
+                SquareGO = USE_Square.CreateSquareStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, Color.blue, "StartButtonGO");
             }
 
             if (StartButton == null && SessionValues.SessionDef.IsHuman)
                 StartButton = SessionValues.HumanStartPanel.StartButtonGO;
 
-            USE_Square.SetPlayIconColor(SessionValues.SessionDef.IsHuman ? new Color32(255, 199, 87, 255) : new Color32(38, 188, 250, 255));
-
-            THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
+            //THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
         });
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------
         SetupTrial.SpecifyTermination(() => true, InitTrial);
+        SetupTrial.AddDefaultTerminationMethod(() =>
+        {
+            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
+                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
+            else
+                StartButton = null;
+        });
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InitTrial);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
-                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
-            else
-                StartButton = null;
-
             ResetGlobalTrialVariables();
             SetTrialSummaryString();
 
@@ -175,9 +174,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
-
         });
-        InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton() || StartButton == null, CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
+        InitTrial.SpecifyTermination(() => true && ((SessionValues.SessionDef.IsHuman && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton()) || StartButton == null), CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //AVOID OBJECT state ------------------------------------------------------------------------------------------------------------------------
@@ -186,8 +184,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes();
             if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
                 SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
-            USE_Square.ActivateCoverCircle(WhiteColor);
-            MainObjectGO.SetActive(true);
+            USE_Square.SetSquareColor(Color.white);
+            SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
             AvoidObjectStartTime = Time.time;
             AvoidObjectTimeoutTime = 0;
@@ -202,7 +200,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
                 if(hitGO != null)
                 {
-                    if (hitGO.name == "MainCircle" || hitGO.name == "Border")
+                    if (hitGO.name == "StartButtonGO")
                     {
                         AvoidObjectTouches_Trial++;
                         if (AvoidObjectTimeoutTime == 0)
@@ -220,7 +218,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             BackdropTouchTime = Time.time;
                             AvoidObjectStartTime += CurrentTrial.TimeoutDuration;
                             Input.ResetInputAxes();
-                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, THR_BackdropTexture, CurrentTrial.TimeoutDuration));
+                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, MovedTooFarSquareTexture, CurrentTrial.TimeoutDuration));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -241,8 +239,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes();
             if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
                 SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
-            USE_Square.DeactivateCoverCircle();
-            MainObjectGO.SetActive(true);
+            USE_Square.SetSquareColor(Color.blue);
+            SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
             SelectObjectStartTime = Time.time;
             MainObjectTouched = false;
@@ -259,7 +257,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
                 if(hitGO != null)
                 {
-                    if ((hitGO.name == "MainCircle" || hitGO.name == "Border") && !USE_Square.IsGrating && !USE_Backdrop.IsGrating)
+                    if (hitGO.name == "StartButtonGO" && !USE_Square.IsGrating && !USE_Backdrop.IsGrating)
                     {
                         if (!MainObjectTouched)
                         {
@@ -269,13 +267,13 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
                         if (CurrentTrial.RewardTouch)
                         {
-                            USE_Square.ActivateCoverCircle(LightBlueColor);
+                            USE_Square.SetSquareColor(LightBlueColor);
                             SelectObjectTouches_Trial++;
                             GiveTouchReward = true;
                             RewardEarnedTime = Time.time;
                         }
                         else
-                            USE_Square.ActivateCoverCircle(Color.blue);
+                            USE_Square.SetSquareColor(DarkBlueColor);
                     }
 
                     if (hitGO.name == "BackdropGO" && !MainObjectTouched && !USE_Backdrop.IsGrating && !USE_Square.IsGrating)
@@ -286,7 +284,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                             BackdropTouchTime = Time.time;
                             SelectObjectStartTime += CurrentTrial.TimeoutDuration; //add extra second so it doesn't go straight to white after grating
                             Input.ResetInputAxes();
-                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, THR_BackdropTexture, CurrentTrial.TimeoutDuration));
+                            StartCoroutine(USE_Backdrop.GratedFlash(BackdropGO, MovedTooFarSquareTexture, CurrentTrial.TimeoutDuration));
                             BackdropTouches++;
                             BackdropTouches_Trial++;
                         }
@@ -329,7 +327,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         //The Else (Greater than MaxDuration) is handled below where I auto stop them for holding for max dur. 
                     }
                     else
-                        USE_Square.ActivateCoverCircle(LightBlueColor);
+                        USE_Square.SetSquareColor(LightBlueColor);
                     
                     MainObjectReleased = true;
                 }
@@ -371,7 +369,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 AudioFBController.Play("Positive");
 
                 if (GiveReleaseReward)
-                    USE_Square.ActivateCoverCircle(LightBlueColor);
+                    USE_Square.SetSquareColor(LightBlueColor);
             }
             else //held too long, held too short, moved outside, or timeRanOut
             {
@@ -379,11 +377,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrial.ShowNegFb)
                 {
                     if (HeldTooShort)
-                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, HeldTooShortTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
+                        StartCoroutine(USE_Square.GratedFlash(SquareGO, HeldTooShortSquareTexture, CurrentTrial.TimeoutDuration, SquareGO));
                     else if (HeldTooLong)
-                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, HeldTooLongTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
+                        StartCoroutine(USE_Square.GratedFlash(SquareGO, HeldTooLongSquareTexture, CurrentTrial.TimeoutDuration, SquareGO));
                     else if (MovedOutside)
-                        StartCoroutine(USE_Square.GratedFlash(USE_Square.CoverCircle_Image.gameObject, MovedTooFarTexture, CurrentTrial.TimeoutDuration, MainObjectGO));
+                        StartCoroutine(USE_Square.GratedFlash(SquareGO, MovedTooFarSquareTexture, CurrentTrial.TimeoutDuration, SquareGO));
                 }
             }
             AudioPlayed = true;
@@ -430,7 +428,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
         ITI.AddDefaultTerminationMethod(() =>
         {
-            MainObjectGO.SetActive(false);
+            SquareGO.SetActive(false);
             UpdateData();
             CurrentTaskLevel.CalculateBlockSummaryString();
            // CheckIfBlockShouldEnd();
@@ -443,15 +441,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS ------------------------------------------------------------------------------------------
-
-    //Not used yet:
     //public override void AddToStimLists()
     //{
-    //    SessionValues.TargetObjects.Add(MainObjectGO);
-    //    SessionValues.TargetObjects.Add(MainObjectGO.transform.Find("Border").gameObject);
-    //    SessionValues.TargetObjects.Add(MainObjectGO.transform.Find("MainCircle").gameObject);
-    //    SessionValues.TargetObjects.Add(MainObjectGO.transform.Find("PlayIcon").gameObject);
-    //    //SessionValues.DistractorObjects.Add(MainObjectGO.transform.Find("CoverCircle").gameObject);
+    //    SessionValues.TargetObjects.Add(SquareGO);
+    //    SessionValues.IrrelevantObjects.Add(BackdropGO);
     //}
 
     private void UpdateData()
@@ -611,20 +604,20 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             CurrentTrial.ObjectSize = randomSize;
         }
         else
-            MainObjectGO.transform.localScale = new Vector2(CurrentTrial.ObjectSize, CurrentTrial.ObjectSize);
+            SquareGO.transform.localScale = new Vector2(CurrentTrial.ObjectSize, CurrentTrial.ObjectSize);
 
         if (CurrentTrial.RandomObjectPosition && !ConfigValuesChangedInPrevTrial)
         {
             int x = Random.Range(CurrentTrial.PositionX_Min, CurrentTrial.PositionX_Max);
             int y = Random.Range(CurrentTrial.PositionY_Min, CurrentTrial.PositionY_Max);
-            MainObjectGO.transform.localPosition = new Vector2(x, y);
+            SquareGO.transform.localPosition = new Vector2(x, y);
             ConfigUiVariables.get<ConfigNumber>("positionX").SetValue(x);
             ConfigUiVariables.get<ConfigNumber>("positionY").SetValue(y);
             CurrentTrial.PositionX = x;
             CurrentTrial.PositionY = y;
         }
         else
-            MainObjectGO.transform.localPosition = new Vector2(CurrentTrial.PositionX, CurrentTrial.PositionY);
+            SquareGO.transform.localPosition = new Vector2(CurrentTrial.PositionX, CurrentTrial.PositionY);
     }
 
 
@@ -671,7 +664,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("MainObjectGO", () => MainObjectGO.activeInHierarchy);
+        FrameData.AddDatum("MainObjectGO", () => SquareGO.activeInHierarchy);
     }
 
 }

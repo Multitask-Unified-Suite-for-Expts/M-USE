@@ -32,6 +32,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using USE_UI;
 
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
@@ -51,7 +52,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public GameObject EC_CanvasGO;
 
-    private GameObject StartButton, StimLeft, StimRight, TrialStim, BalloonContainerLeft, BalloonContainerRight,
+    private GameObject StartButton, StimLeft, StimRight, TrialStim, OutlineContainerLeft, OutlineContainerRight,
                         BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
 
     private Color Red;
@@ -147,7 +148,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen && Screen.width != 1920 ? -2.5f : -2.18f);
+
+            //Debugger = new UI_Debugger();
+            //string text = "";
+            //Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), new Vector2(550, 100), new Vector3(-300f, 400f, 0f), text);
+            //Debugger.SetTextColor(Color.cyan);
+            //Debugger.ActivateDebugText();
+            
+
+            //Subscribe to Fullscreen events:
+            if (SessionValues.FullScreenController != null)
+                SessionValues.FullScreenController.SubscribeToFullScreenChanged(OnFullScreenChanged);
+
 
             if (AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
@@ -178,8 +190,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (TokenFBController != null)
-                SetTokenVariables();
+            SetCameraPosition();
+            SetTokenVariables();
+
+            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}";
+            //Debugger.SetDebugText(text);
+
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -213,6 +229,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
+
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
@@ -227,11 +244,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             MiddleBarrier.SetActive(true);
 
-            StimLeft.transform.position += new Vector3(0, .01f, 0);
-            StimRight.transform.position += new Vector3(0, .01f, 0);
-
-            BalloonContainerLeft.transform.localPosition = new Vector3(-1.14f, -1.45f, .5f);
-            BalloonContainerRight.transform.localPosition = new Vector3(1.14f, -1.45f, .5f);
+            OutlineContainerLeft.transform.localPosition = new Vector3(-1.14f, -1.45f, .5f);
+            OutlineContainerRight.transform.localPosition = new Vector3(1.14f, -1.45f, .5f);
 
             float tokensYPos = CurrentTrial.TokensInMiddleOfOutlines ? .54f : 1.5825f;
             RewardContainerLeft.transform.localPosition = new Vector3(StimLeft.transform.position.x, tokensYPos, 0);
@@ -240,11 +254,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             LeftScaleUpAmount = MaxScale / CurrentTrial.NumClicksLeft;
             RightScaleUpAmount = MaxScale / CurrentTrial.NumClicksRight;
 
-            CreateBalloonOutlines(CurrentTrial.NumClicksLeft, LeftScaleUpAmount, StimLeft.transform.position, BalloonContainerLeft);
-            CreateBalloonOutlines(CurrentTrial.NumClicksRight, RightScaleUpAmount, StimRight.transform.position, BalloonContainerRight);
+            CreateBalloonOutlines(CurrentTrial.NumClicksLeft, LeftScaleUpAmount, StimLeft.transform.position, OutlineContainerLeft);
+            CreateBalloonOutlines(CurrentTrial.NumClicksRight, RightScaleUpAmount, StimRight.transform.position, OutlineContainerRight);
             CreateRewards(CurrentTrial.NumCoinsLeft, RewardContainerLeft.transform.position, RewardContainerLeft);
             CreateRewards(CurrentTrial.NumCoinsRight, RewardContainerRight.transform.position, RewardContainerRight);
             CreateTransparentBalloons();
+
             ActivateObjects();
 
             SessionValues.TargetObjects.Add(StimLeft);
@@ -295,27 +310,30 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         CenterSelection.AddSpecificInitializationMethod(() =>
         {
             ChooseDuration = ChooseBalloon.TimingInfo.Duration;
-
+            
             Wrapper = new GameObject("Wrapper");
 
-            float xValue = .98f;
+            float xValue = 1.01f; //was .98, then 1.025
             if (Screen.fullScreen && Screen.width > 1920)
-                xValue = Screen.width > 3000 ? .96f : .88f; //test the .95 its for mac
+                xValue = Screen.width > 3000 ? .95f : .8f; //.86 still too much for ipad fullscreen!! (trying .8 tomorrow)
 
             CenteredPos = new Vector3(SideChoice == "Left" ? xValue : -xValue, 0, 0);
+
+            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}\n{CenteredPos}";
+            //Debugger.SetDebugText(text);
 
             MiddleBarrier.SetActive(false);
 
             if (SideChoice == "Left")
             {
-                SetParents(Wrapper, new List<GameObject>() {BalloonContainerLeft, StimLeft, RewardContainerLeft});
-                DestroyChildren(BalloonContainerRight);
+                SetParents(Wrapper, new List<GameObject>() {OutlineContainerLeft, StimLeft, RewardContainerLeft});
+                DestroyChildren(OutlineContainerRight);
                 StimRight.SetActive(false);
             }
             else
             {
-                SetParents(Wrapper, new List<GameObject>() {BalloonContainerRight, StimRight, RewardContainerRight});
-                DestroyChildren(BalloonContainerLeft);
+                SetParents(Wrapper, new List<GameObject>() {OutlineContainerRight, StimRight, RewardContainerRight});
+                DestroyChildren(OutlineContainerLeft);
                 StimLeft.SetActive(false);
             }
         });
@@ -487,11 +505,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DelayDuration = popToFeedbackDelay.value;
             
             if (SideChoice == "Left")
-                MaxOutline_Left.transform.parent = BalloonContainerLeft.transform;
+                MaxOutline_Left.transform.parent = OutlineContainerLeft.transform;
             else
-                MaxOutline_Right.transform.parent = BalloonContainerRight.transform;
+                MaxOutline_Right.transform.parent = OutlineContainerRight.transform;
 
-            DestroyChildren(SideChoice == "Left" ? BalloonContainerLeft : BalloonContainerRight);
+            DestroyChildren(SideChoice == "Left" ? OutlineContainerLeft : OutlineContainerRight);
             InflateAudioPlayed = false;
             
             if (Response == 1)
@@ -573,10 +591,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (MiddleBarrier.activeInHierarchy)
             MiddleBarrier.SetActive(false);
 
-        if (BalloonContainerLeft != null)
-            DestroyChildren(BalloonContainerLeft);
-        if (BalloonContainerRight != null)
-            DestroyChildren(BalloonContainerRight);
+        if (OutlineContainerLeft != null)
+            DestroyChildren(OutlineContainerLeft);
+        if (OutlineContainerRight != null)
+            DestroyChildren(OutlineContainerRight);
         if (RewardContainerLeft != null)
             DestroyChildren(RewardContainerLeft);
         if (RewardContainerRight != null)
@@ -628,7 +646,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         InflationDurations_Block.Clear();
     }
 
-    void ScaleToNextInterval()
+    private void ScaleToNextInterval()
     {
         //If close and next increment would go over target scale, recalculate the exact amount:
         if (TrialStim.transform.localScale.x + IncrementAmounts.x > NextScale.x) 
@@ -638,9 +656,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialStim.transform.localScale += new Vector3(IncrementAmounts.x, IncrementAmounts.y, IncrementAmounts.z);
     }
 
-    void CalculateInflation()
+    private void CalculateInflation()
     {      
-        GameObject container = (SideChoice == "Left") ? BalloonContainerLeft : BalloonContainerRight;
+        GameObject container = (SideChoice == "Left") ? OutlineContainerLeft : OutlineContainerRight;
         NextScale = container.transform.GetChild(NumInflations-1).transform.localScale;
         NextScale.y = ScalePerInflation_Y + TrialStim.transform.localScale.y;
         Vector3 difference = NextScale - TrialStim.transform.localScale;
@@ -649,7 +667,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Inflate = true;
     }
 
-    void RecordChoices()
+    private void RecordChoices()
     {
         if(SideChoice == "Left")
         {
@@ -709,17 +727,38 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             return "Lower";
     }
 
-    void SetTokenVariables()
+
+    private void OnFullScreenChanged(bool isFullScreen)
     {
+        SetCameraPosition();
+        SetTokenVariables();
+    }
+
+    private void OnDestroy()   //Unsubscribe from FullScreenChanged Event:
+    {
+        if (SessionValues.FullScreenController != null)
+            SessionValues.FullScreenController.UnsubscribeToFullScreenChanged(OnFullScreenChanged);
+    }
+
+    private void SetCameraPosition()
+    {
+        Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen && Screen.width != 1920 ? -2.5f : -2.18f);
+    }
+
+    private void SetTokenVariables()
+    {
+        if (TokenFBController == null)
+            return;
+
         float tokenSize = 106f;
         float yOffset = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 45 : 5; //need to test these on mac
 
         //mac is 1920 x 1200, mac fullscreen is 3456x2160, Ipad is 1920x1200
-            
-        if(SessionValues.WebBuild && !Application.isEditor)
+
+        if (SessionValues.WebBuild && !Application.isEditor)
         {
             tokenSize = 116;
-            yOffset = 5;
+            yOffset = 5; //on mac fullscreen its too far down (was 5)
 
             if (Screen.fullScreen && Screen.width > 1920)
             {
@@ -727,7 +766,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 yOffset = Screen.width > 3000 ? 75 : 100;
             }
         }
-
         TokenFBController.tokenSize = tokenSize;
         TokenFBController.tokenBoxYOffset = yOffset;
 
@@ -735,7 +773,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.tokenSpacing = -(Screen.width * .009375f);
     }
 
-    void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
+    private void SetParents(GameObject wrapper, List<GameObject> objects) // 1) Setting the parent of each GO, and 2) Adding to RemovalList (so can remove easily later)
     {
         RemoveParentList = new List<GameObject>();
         foreach(GameObject go in objects)
@@ -745,7 +783,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void RemoveParents(GameObject wrapper, List<GameObject> objects)
+    private void RemoveParents(GameObject wrapper, List<GameObject> objects)
     {
         if (objects.Count < 1 || objects == null)
             Debug.Log("There are no objects in the List!");
@@ -757,18 +795,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Destroy(wrapper);
     }
 
-    void ResetToOriginalPositions()
+    private void ResetToOriginalPositions()
     {
-        BalloonContainerLeft.transform.position = LeftContainerOriginalPosition;
+        OutlineContainerLeft.transform.position = LeftContainerOriginalPosition;
         RewardContainerLeft.transform.position = LeftRewardContainerOriginalPosition;
         StimLeft.transform.position = LeftStimOriginalPosition;
 
-        BalloonContainerRight.transform.position = RightContainerOriginalPosition;
+        OutlineContainerRight.transform.position = RightContainerOriginalPosition;
         RewardContainerRight.transform.position = RightRewardContainerOriginalPosition;
         StimRight.transform.position = RightStimOriginalPosition;
     }
 
-    void GiveReward()
+    private void GiveReward()
     {
         if (SessionValues.SyncBoxController == null)
             return;
@@ -788,7 +826,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void DisableAllGameobjects()
+    private void DisableAllGameobjects()
     {
         if(StimLeft != null)
             StimLeft.SetActive(false);
@@ -798,7 +836,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             BalloonOutline.SetActive(false);
     }
 
-    void LoadConfigUIVariables()
+    private void LoadConfigUIVariables()
     {
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
@@ -811,25 +849,30 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    void CreateObjects()
+    private GameObject CreateBalloon(GameObject prefab, Vector3 viewPos, string name)
     {
-        StimLeft = Instantiate(StimLeftPrefab, StimLeftPrefab.transform.position, StimLeftPrefab.transform.rotation);
-        StimLeft.name = "StimLeft";
-        StimLeft.transform.localScale *= 1.2f;
-        StimLeft.transform.localPosition = new Vector3(StimLeft.transform.localPosition.x, -.075f, StimLeft.transform.localPosition.z);
+        Vector3 worldPos = Camera.main.ViewportToWorldPoint(viewPos);
+        GameObject instantiated = Instantiate(prefab, worldPos, prefab.transform.rotation);
+        instantiated.name = name;
+        return instantiated;
+    }
+
+    private void CreateObjects()
+    {
+        Vector3 stimLeftViewPos = new Vector3(.25f, .1925f, 2.225f);
+        StimLeft = CreateBalloon(StimLeftPrefab, stimLeftViewPos, "StimLeft");
+        StimLeft.transform.localScale = new Vector3(9f, 1, 9f);
         Red = StimLeft.GetComponent<Renderer>().material.color;
-        StimLeft.GetComponent<Renderer>().material.color = Red;
         TrialStimInitLocalScale = StimLeft.transform.localScale;
         AddRigidBody(StimLeft);
         ObjectList.Add(StimLeft);
 
-        StimRight = Instantiate(StimRightPrefab, StimRightPrefab.transform.position, StimRightPrefab.transform.rotation);
-        StimRight.name = "StimRight";
-        StimRight.transform.localScale *= 1.2f;
-        StimRight.transform.localPosition = new Vector3(StimRight.transform.localPosition.x, -.075f, StimRight.transform.localPosition.z);
-        StimRight.GetComponent<Renderer>().material.color = Red;
+        Vector3 stimRightViewPos = new Vector3(.75f, .1925f, 2.225f);
+        StimRight = CreateBalloon(StimRightPrefab, stimRightViewPos, "StimRight");
+        StimRight.transform.localScale = new Vector3(9f, 1, 9f);
         AddRigidBody(StimRight);
         ObjectList.Add(StimRight);
+
 
         Reward = Instantiate(RewardPrefab, RewardPrefab.transform.position, RewardPrefab.transform.rotation);
         Reward.name = "Reward";
@@ -840,10 +883,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         BalloonOutline.transform.localScale = new Vector3(10, 0.01f, 10);
         BalloonOutline.GetComponent<Renderer>().material.color = OffWhiteOutlineColor;
 
-        BalloonContainerLeft = new GameObject("BalloonContainerLeft");
-        ObjectList.Add(BalloonContainerLeft);
-        BalloonContainerRight = new GameObject("BalloonContainerRight");
-        ObjectList.Add(BalloonContainerRight);
+        OutlineContainerLeft = new GameObject("OutlineContainerLeft");
+        ObjectList.Add(OutlineContainerLeft);
+        OutlineContainerRight = new GameObject("OutlineContainerRight");
+        ObjectList.Add(OutlineContainerRight);
 
         RewardContainerLeft = new GameObject("RewardContainerLeft");
         ObjectList.Add(RewardContainerLeft);
@@ -852,35 +895,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         CreateMiddleBarrier();
 
-        float wrapperXpos = .14f; //for normal 1920 x 1080
-        if(Screen.fullScreen && Screen.width != 1920)
-            wrapperXpos = Screen.width > 3000 ? .125f : .05f; //.05 for ipad fullscreen, .08 for mac fullscreen
-
-        //Wrap Left side objects in container and Center to left side:
-        GameObject leftWrapper = new GameObject();
-        leftWrapper.name = "LeftWrapper";
-        List<GameObject> leftList = new List<GameObject>() { BalloonContainerLeft, RewardContainerLeft, StimLeft };
-        SetParents(leftWrapper, leftList);
-        leftWrapper.transform.position = new Vector3(-wrapperXpos, -.05f, 0); //Centering on left half of screen. 
-
-        //Wrap Right side objects in container and Center to right side:
-        GameObject rightWrapper = new GameObject();
-        rightWrapper.name = "RightWrapper";
-        List<GameObject> rightList = new List<GameObject>() { BalloonContainerRight, RewardContainerRight, StimRight };
-        SetParents(rightWrapper, rightList);
-        rightWrapper.transform.position = new Vector3(wrapperXpos, -.05f, 0); //Centering on right half of screen. 
-
-
-        LeftContainerOriginalPosition = BalloonContainerLeft.transform.position;
-        RightContainerOriginalPosition = BalloonContainerRight.transform.position;
+        LeftContainerOriginalPosition = OutlineContainerLeft.transform.position;
+        RightContainerOriginalPosition = OutlineContainerRight.transform.position;
         LeftRewardContainerOriginalPosition = RewardContainerLeft.transform.position;
         RightRewardContainerOriginalPosition = RewardContainerRight.transform.position;
         LeftStimOriginalPosition = StimLeft.transform.position;
         RightStimOriginalPosition = StimRight.transform.position;
-
-        //now that positions are set, remove parents so the balloon is clickable. 
-        RemoveParents(leftWrapper, leftList);
-        RemoveParents(rightWrapper, rightList);
 
         StartButton.SetActive(false);
         BalloonOutline.SetActive(false);
@@ -889,7 +909,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ObjectsCreated = true;
     }
 
-    void CreateMiddleBarrier()
+    private void CreateMiddleBarrier()
     {
         MiddleBarrier = new GameObject("MiddleBarrier");
         MiddleBarrier.transform.SetParent(EC_CanvasGO.transform, false);
@@ -899,18 +919,18 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         MiddleBarrier.SetActive(false);
     }
 
-    void CreateTransparentBalloons()
+    private void CreateTransparentBalloons()
     {
         //transparent balloon with size of biggest outline, allows easy detection of clicks within the entire balloon
         MaxOutline_Left = Instantiate(StimNoMaterialPrefab, StimLeft.transform.position, StimLeftPrefab.transform.rotation);
         MaxOutline_Left.name = "MaxOutline_Left";
         MaxOutline_Left.transform.localScale = new Vector3(77f, .1f, 77f);
-        MaxOutline_Left.transform.SetParent(BalloonContainerLeft.transform);
+        MaxOutline_Left.transform.SetParent(OutlineContainerLeft.transform);
 
         MaxOutline_Right = Instantiate(StimNoMaterialPrefab, StimRight.transform.position, StimRightPrefab.transform.rotation);
         MaxOutline_Right.name = "MaxOutline_Right";
         MaxOutline_Right.transform.localScale = new Vector3(77f, .1f, 77f);
-        MaxOutline_Right.transform.SetParent(BalloonContainerRight.transform);
+        MaxOutline_Right.transform.SetParent(OutlineContainerRight.transform);
 
         ObjectList.Add(MaxOutline_Left);
         ObjectList.Add(MaxOutline_Right);
@@ -919,7 +939,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SessionValues.TargetObjects.Add(MaxOutline_Right);
     }
 
-    void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
+    private void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
     {
         for (int i = 1; i <= numBalloons; i ++)
         {
@@ -933,7 +953,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
+    private void CreateRewards(int NumRewards, Vector3 pos, GameObject container)
     {
         int numCoins = Mathf.Max(CurrentTrial.NumCoinsLeft, CurrentTrial.NumCoinsRight);
         float scaler = 1f; //100% for 9 or less
@@ -973,7 +993,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //}
     }
 
-    void SetTrialSummaryString()
+    private void SetTrialSummaryString()
     {
         TrialSummaryString = "Touches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
@@ -981,12 +1001,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                             "\nEffort Chosen: " + EffortChoice;
     }
 
-    void ClearTrialSummaryString()
+    private void ClearTrialSummaryString()
     {
         TrialSummaryString = "";
     }
 
-    void DefineTrialData()
+    private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("InflationsNeeded", () => InflationsNeeded);
@@ -1004,7 +1024,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TrialTouches", () => TrialTouches);
     }
 
-    void DefineFrameData()
+    private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);

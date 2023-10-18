@@ -116,8 +116,7 @@ public class SetupSession_Level : ControlLevel
                     dataFolderCreated = true;
                 }));
             else
-                dataFolderCreated = true; //set to true if not storing data so the state ends?
-            //NEED TO MOVE THIS TO WHEREVER NORMAL BUILD CREATES THE TASKSELECTIONDATA FOLDER:
+                dataFolderCreated = true;
         });
 
         CreateDataFolder.SpecifyTermination(() => dataFolderCreated && !setupPaused, LoadTaskScene);

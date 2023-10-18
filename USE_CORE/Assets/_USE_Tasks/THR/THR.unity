@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -395,15 +395,17 @@ MonoBehaviour:
   THR_BackdropTexture: {fileID: 0}
   TrialFilesLoaded: 0
   THR_CanvasGO: {fileID: 186084661}
-  TrialCompletionList: 
+  RunningAcc: 
   TrialsCompleted_Block: 0
   TrialsCorrect_Block: 0
   BackdropTouches_Trial: 0
   SelectObjectTouches_Trial: 0
   AvoidObjectTouches_Trial: 0
-  ItiTouches_Trial: 0
-  TouchRewards_Trial: 0
-  ReleaseRewards_Trial: 0
+  NumItiTouches_Trial: 0
+  NumTouchRewards_Trial: 0
+  NumReleaseRewards_Trial: 0
+  NumReleasedEarly_Trial: 0
+  NumReleasedLate_Trial: 0
   NumTouchesMovedOutside_Trial: 0
   BackdropTouches_Block: 0
   SelectObjectTouches_Block: 0
@@ -445,6 +447,7 @@ MonoBehaviour:
   NumRewardPulses_InBlock: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
+  ForceTaskEnd: 0
   TrialLevel: {fileID: 900455550}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -565,7 +568,7 @@ Camera:
     m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
+  m_TargetDisplay: 1
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1

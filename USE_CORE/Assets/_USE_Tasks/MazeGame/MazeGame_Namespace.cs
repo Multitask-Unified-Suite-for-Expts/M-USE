@@ -43,7 +43,6 @@ namespace MazeGame_Namespace
         public float[] LastCorrectColor;
         public float[] IncorrectRuleAbidingColor;
         public float[] IncorrectRuleBreakingColor;
-        public float[] DefaultTileColor;
         public bool UsingFixedRatioReward;
         public string MazeBackgroundTexture;
         public float SpaceBetweenTiles;
@@ -65,6 +64,8 @@ namespace MazeGame_Namespace
         public int TileFlashingRatio = 1;
         public float MaxMazeDuration;
         public float MaxChoiceDuration;
+        public float[] DefaultTileColor;
+
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -103,6 +104,7 @@ namespace MazeGame_Namespace
                 td.TileFlashingRatio = TileFlashingRatio;
                 td.MaxMazeDuration = MaxMazeDuration;
                 td.MaxChoiceDuration = MaxChoiceDuration;
+                td.DefaultTileColor = DefaultTileColor;
                 TrialDefs.Add(td);
             }
         }
@@ -124,6 +126,8 @@ namespace MazeGame_Namespace
         public int TileFlashingRatio;
         public float MaxMazeDuration;
         public float MaxChoiceDuration;
+        public float[] DefaultTileColor;
+
     }
     public class MazeGame_StimDef : StimDef
     {

@@ -177,18 +177,28 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     //Camera[] allCameras = Resources.FindObjectsOfTypeAll<Camera>();
+
+                    
                     var allCameras = GameObject.FindObjectsOfType<Camera>();
                     foreach (Camera c in allCameras)
+                    {
+                        Debug.Log($"--- CAMERA {c.name} BEFORE: {c.targetDisplay} ---");
                         c.targetDisplay = 1 - c.targetDisplay;
+                        Debug.Log($"--- CAMERA {c.name} AFTER: {c.targetDisplay} ---");
+                    }
 
                     //Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
                     var allCanvases = GameObject.FindObjectsOfType<Canvas>();
                     foreach (Canvas c in allCanvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
                     {
-                        Debug.Log("BEFORE = " + c.name + " " + c.targetDisplay);
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        Debug.Log("AFTER = " + c.name + " " + c.targetDisplay);
-
+                        if(c.renderMode == RenderMode.ScreenSpaceOverlay)
+                        {
+                            Debug.Log($"--- CANVAS {c.name} BEFORE: {c.targetDisplay} ---");
+                            c.targetDisplay = 1 - c.targetDisplay;
+                            Debug.Log($"--- CANVAS {c.name} AFTER: {c.targetDisplay} ---");
+                        }
+                        
+                     
                     }
 
                     // Change display of the loading canvas which could be inactive

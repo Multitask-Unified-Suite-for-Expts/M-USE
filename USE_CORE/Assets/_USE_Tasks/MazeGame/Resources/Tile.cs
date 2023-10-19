@@ -20,13 +20,20 @@ public class Tile : MonoBehaviour
     [HideInInspector] public float sliderValueChange;
     
     // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
-    [HideInInspector]public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
+/*    [HideInInspector]public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
     [HideInInspector] public Color FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
     [HideInInspector] public Color CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
     [HideInInspector] public Color PREV_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
     [HideInInspector] public Color INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
     [HideInInspector] public Color INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
-    [HideInInspector] public Color DEFAULT_TILE_COLOR = new Color(1, 1, 1);
+    [HideInInspector] public Color DEFAULT_TILE_COLOR = new Color(1, 1, 1)*/
+    [HideInInspector]public Color START_COLOR;
+    [HideInInspector] public Color FINISH_COLOR;
+    [HideInInspector] public Color CORRECT_COLOR;
+    [HideInInspector] public Color PREV_CORRECT_COLOR;
+    [HideInInspector] public Color INCORRECT_RULEABIDING_COLOR;
+    [HideInInspector] public Color INCORRECT_RULEBREAKING_COLOR;
+    [HideInInspector] public Color DEFAULT_TILE_COLOR;
     [HideInInspector] public int NUM_BLINKS = 4;
 
     // FEEDBACK LENGTH IN SECONDS
@@ -50,7 +57,6 @@ public class Tile : MonoBehaviour
     [HideInInspector] public bool choiceFeedback;
     [HideInInspector] public GameObject flashingTile;
 
-
     void Start()
     {
         gameObject.GetComponent<Renderer>().material.color = baseColor;
@@ -67,6 +73,7 @@ public class Tile : MonoBehaviour
     }
     public void setColor(Color c)
     {
+        Debug.Log("SETTING COLOR TO: " + c[0] + ", " + c[1] + ", " + c[2]);
         baseColor = c;
     } 
 
@@ -121,6 +128,9 @@ public class Tile : MonoBehaviour
         else
             flashingTile = GameObject.Find(mgTL.CurrentTaskLevel.currMaze.mNextStep);
 
+        Debug.Log("FLASHING TILE: " + flashingTile);
+
+
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
         if (flashingTile == mgTL.startTile)
@@ -134,13 +144,15 @@ public class Tile : MonoBehaviour
 
     void Update()
     {
+        Debug.Log("IS FLASHING TURE; " + isFlashing);
         if (isFlashing)
         {
             fbColor = PREV_CORRECT_COLOR;
             
             float elapsed = Time.unscaledTime - flashStartTime;
             float interval = TILE_BLINKING_DURATION / (2 * NUM_BLINKS);
-        
+
+
             if (elapsed >= numFlashes * interval)
             {
                 if (numFlashes % 2 == 0)

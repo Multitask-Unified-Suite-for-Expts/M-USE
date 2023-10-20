@@ -25,7 +25,6 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -43,17 +42,38 @@ public class InputBroker
 	static Dictionary<KeyCode, InputState> keyState = new Dictionary<KeyCode, InputState>();
 	static Dictionary<int, InputState> mouseState = new Dictionary<int, InputState>();
 
-    static Vector3 _mousePosition;
+	static Vector3 _mousePosition;
 	static Vector2 _gazePosition;
+
+	public static bool ExtendedDisplay //would eventually need to be extended to include which display is which
+	{
+		get
+		{
+			if (!Application.isEditor)
+				return true;
+			return false;
+		}
+	}
 
     public static Vector3 mousePosition{
 		get{
 			if(isSimulation)
+			{
 				return _mousePosition;
+			}
+/*			else if(ExtendedDisplay)
+			{
+*//*				Debug.LogWarning("INSIDE EXTENDED! SCREEN.WIDTH: " + Screen.width + " MOUSE POSITION: " + _mousePosition.x);
+*//*				if(Input.mousePosition.x > Screen.width)
+				{
+					*//**//*Debug.LogWarning("GREATER THAN WIDTH!");
+					return new Vector3(Input.mousePosition.x - Screen.width, Input.mousePosition.y, Input.mousePosition.z);
+				}
+			}*/
 			return Input.mousePosition;
 		}
 		set{
-			if (isSimulation)
+			if (isSimulation) //WHY ARENT WE SETTING NORMALLY?
 			{
 				_mousePosition = value;
 			}

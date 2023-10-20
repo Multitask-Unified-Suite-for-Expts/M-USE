@@ -134,7 +134,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public GameObject debugTextGO;
     [HideInInspector] public TextMeshProUGUI debugText;
-
+    private GameObject cube;
 
     public override void DefineControlLevel()
     {
@@ -148,12 +148,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-
-            //Debugger = new UI_Debugger();
-            //string text = "";
-            //Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), new Vector2(550, 100), new Vector3(-300f, 400f, 0f), text);
-            //Debugger.SetTextColor(Color.cyan);
-            //Debugger.ActivateDebugText();
+            if(Debugger == null)
+                 Debugger = new UI_Debugger();
+            string text = "";
+            Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), new Vector2(550, 100), new Vector3(-450f, 450f, 0f), text);
+            Debugger.SetTextColor(Color.cyan);
+            Debugger.ActivateDebugText();
             
 
             //Subscribe to Fullscreen events:
@@ -193,9 +193,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SetCameraPosition();
             SetTokenVariables();
 
-            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}";
-            //Debugger.SetDebugText(text);
-
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -207,6 +204,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            string text = "SCREEN: " + Screen.width + "x" + Screen.height;
+            Debugger.SetDebugText(text);
+
             //Set handler active in case they ran out of time mid inflation and it was never set back to active
             if (Handler != null)
                 Handler.HandlerActive = true;
@@ -240,6 +240,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
         ChooseBalloon.AddSpecificInitializationMethod(() =>
         {
+            cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "TestCube";
+
             Input.ResetInputAxes(); //reset input in case they holding down
 
             MiddleBarrier.SetActive(true);
@@ -269,18 +272,40 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            
         });
         ChooseBalloon.AddUpdateMethod(() =>
         {
+
+
+
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                Vector3 cubePos = InputBroker.mousePosition;
+                cube.transform.position = cubePos;
+
+                string text = $"\nCUBE POS: {cubePos} \nTOUCH: " + InputBroker.mousePosition;
+                
+                    /*GameObject go = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                    if (go != null)
+                        text = "TOUCH: " + InputBroker.mousePosition + "\nGO: " + go.name;*/
+
+                
+
+
+                Debugger.SetDebugText(text);
+            }
+
             if (Handler.SuccessfulSelections.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (Handler.LastSelection.SelectedGameObject.name.Contains("Left"))
+                if (Handler.LastSuccessfulSelection.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (Handler.LastSelection.SelectedGameObject.name.Contains("Right"))
+                else if (Handler.LastSuccessfulSelection.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;
@@ -318,9 +343,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 xValue = Screen.width > 3000 ? .95f : .8f; //.86 still too much for ipad fullscreen!! (trying .8 tomorrow)
 
             CenteredPos = new Vector3(SideChoice == "Left" ? xValue : -xValue, 0, 0);
-
-            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}\n{CenteredPos}";
-            //Debugger.SetDebugText(text);
 
             MiddleBarrier.SetActive(false);
 

@@ -249,8 +249,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             choiceDuration = Time.unscaledTime - choiceStartTime;
             SetTrialSummaryString(); // called every frame to update duration info
 
+            if (InputBroker.GetMouseButtonDown(0))
+            {
+                GameObject go = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (go != null)
+                {
+                    Debug.Log("@@@ GO: " + go.name + " | POS: " + go.transform.position.ToString());
+                }
+            }
+
             if (SelectionHandler.SuccessfulSelections.Count > 0)
-            { 
+            {
+                Debug.Log("*** LAST SUCCESSFUL SELECTION: " + SelectionHandler.LastSuccessfulSelection.SelectedGameObject.name + " | POS: " + SelectionHandler.LastSuccessfulSelection.SelectedGameObject.transform.position.ToString());
                 if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
                 {
                     choiceMade = true;
@@ -263,7 +273,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
+        /*ChooseTile.SpecifyTermination(() =>  choiceMade, SelectionFeedback, () =>
         {
             SelectionHandler.HandlerActive = false;
 
@@ -284,7 +294,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 if (SessionValues.SessionDef.EventCodesActive)
                     SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MazeFinish"]);
             }
-        });
+        });*/
         ChooseTile.SpecifyTermination(()=> (mazeDuration > CurrentTrialDef.MaxMazeDuration) || (choiceDuration > CurrentTrialDef.MaxChoiceDuration), ()=> FinishTrial, () =>
         {
             // Timeout Termination

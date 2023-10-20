@@ -144,7 +144,6 @@ public class Tile : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("IS FLASHING TURE; " + isFlashing);
         if (isFlashing)
         {
             fbColor = PREV_CORRECT_COLOR;

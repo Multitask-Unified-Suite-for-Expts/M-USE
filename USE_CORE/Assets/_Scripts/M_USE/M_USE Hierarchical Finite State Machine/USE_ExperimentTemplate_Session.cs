@@ -43,6 +43,8 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
 using System.Runtime.InteropServices;
+/*using System.Diagnostics;
+*/
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
@@ -113,6 +115,8 @@ namespace USE_ExperimentTemplate_Session
         public bool runSessionLevelCalibration;
 
         public bool waitForSerialPort;
+
+        public UI_Debugger Debugger;
 
 
         public override void DefineControlLevel()
@@ -301,6 +305,12 @@ namespace USE_ExperimentTemplate_Session
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                Debugger = new UI_Debugger();
+                string text = "";
+                Debugger.InitDebugger(SessionValues.TaskSelectionCanvasGO.GetComponent<Canvas>(), new Vector2(550, 100), new Vector3(-450f, 450f, 0f), text);
+                Debugger.SetTextColor(Color.cyan);
+                Debugger.ActivateDebugText();
+
                 if (SessionValues.SessionDef.PlayBackgroundMusic)
                 {
                     SessionValues.BackgroundMusicController.PlayMusic();
@@ -315,6 +325,7 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
+
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
                 SessionValues.TaskSelectionCameraGO.SetActive(true);
@@ -529,11 +540,39 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
 
+            selectTask.AddUpdateMethod(() =>
+            {
+                if (InputBroker.GetMouseButtonDown(0))
+                {
+                    string text = $"TOUCH: " + InputBroker.mousePosition;
+
+                    GameObject go = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                    if (go != null)
+                        text = "TOUCH: " + InputBroker.mousePosition + "\nGO: " + go.name;
+
+                    Debugger.SetDebugText(text);
+                }
+
+/*                if (InputBroker.GetMouseButtonDown(0))
+                {
+                    GameObject go = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                    if (go != null)
+                    {
+                        Vector3 screenPos = Camera.main.WorldToScreenPoint(go.transform.position);
+                        Debug.Log("@@@ GO: " + go.name + " | Screen POS: " + screenPos);
+                    }
+                }*/
+            });
+
+
             selectTask.AddLateUpdateMethod(() =>
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
+                
+
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
-                {
+                {                    
+                    Debug.Log("*** LAST SUCCESSFUL SELECTION: " + SelectionHandler.LastSuccessfulSelection.SelectedGameObject.name + " | POS: " + SelectionHandler.LastSuccessfulSelection.SelectedGameObject.transform.position.ToString());
                     string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
                     {

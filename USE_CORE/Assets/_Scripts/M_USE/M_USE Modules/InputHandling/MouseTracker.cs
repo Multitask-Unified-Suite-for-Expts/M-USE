@@ -93,15 +93,20 @@ public class MouseTracker : InputTracker
     public override void FindCurrentTarget()
     {
         CurrentInputScreenPosition = InputBroker.mousePosition;
+        //Debug.Log("++++++++ CURRENT INPUT POSITION: " +  CurrentInputScreenPosition);
 
-        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
-            || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        if (/*CurrentInputScreenPosition.Value.x < 0
+            || CurrentInputScreenPosition.Value.y < 0
+            || CurrentInputScreenPosition.Value.x > Screen.width
+            || CurrentInputScreenPosition.Value.y > Screen.height
+            || */float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
         {
             CurrentInputScreenPosition = null;
         }
 
         if (CurrentInputScreenPosition != null && Camera.main != null)
         {
+            //Debug.LogWarning("CURRENT INPUT POS: " + CurrentInputScreenPosition);
             //Find Current Shotgun Target:
             Dictionary<GameObject, float> proportions = ShotgunRaycast.RaycastShotgunProportions(CurrentInputScreenPosition.Value, Camera.main);
             ShotgunGoAboveThreshold.Clear();

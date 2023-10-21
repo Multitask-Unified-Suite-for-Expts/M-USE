@@ -156,7 +156,7 @@ public class TouchFBController : MonoBehaviour
 
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
-        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOn"]);
+        SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOn"]);
 
         Invoke(nameof(DestroyTouchFeedback), FeedbackDuration);            
         
@@ -167,7 +167,7 @@ public class TouchFBController : MonoBehaviour
         if (InstantiatedGO != null)
         {
             Destroy(InstantiatedGO);
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOff"]);
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOff"]);
             DeactivatePrefabs();
             Handler.HandlerActive = true;
             FeedbackOn = false;

@@ -279,7 +279,7 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddSpecificInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("FinishTrialStarts");
             });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
@@ -536,7 +536,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 SessionValues.HumanStartPanel.InstructionsGO.SetActive(false);
                 SessionValues.HumanStartPanel.InstructionsOn = false;
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["InstructionsOff"]);
             }
         }
 

@@ -297,8 +297,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
@@ -520,7 +520,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                SessionValues.EventCodeManager.SendCodeImmediate("NoChoice");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
                 SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
                 AbortCode = 6;
 

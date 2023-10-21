@@ -276,20 +276,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.NumCorrectSelections_InBlock++;
                 NumCorrect_InTrial++;
                 isSliderValueIncrease = true;
-                SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                 
             }
             else
             {
                 
                 isSliderValueIncrease = false;
-                SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 //Repetition Error
                 if (TouchedObjects.Contains(selectedSD.StimIndex))
                 {
                     CurrentTaskLevel.RepetitionErrorCount_InBlock++;
                     selectionClassification = "RepetitionError";
-                    SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
+                    SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RepetitionError"]);
 
                     if (selectedGO == LastCorrectStimGO && consecutiveError == 0)
                     {
@@ -309,14 +309,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     {
                         CurrentTaskLevel.DistractorSlotErrorCount_InBlock++;
                         selectionClassification = "DistractorSlotError";
-                        SessionValues.EventCodeManager.SendCodeImmediate("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
                     {
                         CurrentTaskLevel.SlotErrorCount_InBlock++;
                         selectionClassification = "SlotError";
-                        SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
+                        SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SlotError"]);
                     }
                 }
                 
@@ -511,7 +511,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate("SliderFbController_SliderCompleteFbOff");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
             SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
             
             CurrentTaskLevel.SetBlockSummaryString();

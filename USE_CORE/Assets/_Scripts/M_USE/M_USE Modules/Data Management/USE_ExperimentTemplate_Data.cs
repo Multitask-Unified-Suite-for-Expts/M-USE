@@ -210,9 +210,15 @@ namespace USE_ExperimentTemplate_Data
         }
         public void AddEventCodeColumns()
         {
-            AddDatum("EventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")));
-            AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
-            AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
+            AddDatum("ReferenceEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")));
+            // AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
+            //AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
+            AddDatum("FrameEventCodes", () =>
+            {
+                string dataString = string.Join(",", SessionValues.EventCodeManager.frameEventCodeBufferToStore);
+                SessionValues.EventCodeManager.frameEventCodeBufferToStore.Clear();
+                return dataString; // Return the data string
+            });
         }
     }
 

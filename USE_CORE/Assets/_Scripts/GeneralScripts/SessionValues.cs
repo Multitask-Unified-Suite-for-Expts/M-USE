@@ -72,8 +72,6 @@ public static class SessionValues
     public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
-    public static GameObject MirrorCanvasGO;
-    public static GameObject TaskSelectionCameraGO;
     public static GameObject TaskSelectionCanvasGO;
     public static HumanStartPanel HumanStartPanel;
     public static ExperimenterDisplayController ExperimenterDisplayController;

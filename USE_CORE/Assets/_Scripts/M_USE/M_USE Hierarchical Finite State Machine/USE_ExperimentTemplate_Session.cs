@@ -311,25 +311,19 @@ namespace USE_ExperimentTemplate_Session
 
                 HumanVersionToggleButton.SetActive(SessionValues.SessionDef.IsHuman);
 
+                Starfield.SetActive(SessionValues.SessionDef.IsHuman);
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
-                SessionValues.TaskSelectionCameraGO.SetActive(true);
 
-                Starfield.SetActive(SessionValues.SessionDef.IsHuman);
-
-                
                 if (!SessionValues.WebBuild)
                 {
                     CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
                     CameraRenderTexture.Create();
-                    SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetTexture = CameraRenderTexture;
-                    SessionValues.MirrorCanvasGO.GetComponent<RawImage>().texture = CameraRenderTexture;
+                    SessionCam.targetTexture = CameraRenderTexture;
                     ExpDisplayRenderImage.texture = CameraRenderTexture;
-                    SessionValues.MirrorCanvasGO.SetActive(true);
-                    SessionValues.MirrorCanvasGO.GetComponent<RawImage>().enabled = true;
                 }
 
 
@@ -660,7 +654,6 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.TaskSelectionCameraGO.SetActive(false);
                 SessionValues.TaskSelectionCanvasGO.SetActive(false);
                 SessionCam.gameObject.SetActive(false);
 
@@ -670,9 +663,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
                     CameraRenderTexture.Create();
-                    MirrorCamGO.GetComponent<Camera>().CopyFrom(CurrentTask.TaskCam);
                     CurrentTask.TaskCam.targetTexture = CameraRenderTexture;
-                    SessionValues.MirrorCanvasGO.GetComponent<RawImage>().texture = CameraRenderTexture;
                     ExpDisplayRenderImage.texture = CameraRenderTexture;
                 }
             });
@@ -803,9 +794,6 @@ namespace USE_ExperimentTemplate_Session
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
                 SessionValues.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 InitCamGO = GameObject.Find("InitCamera");
-                SessionValues.MirrorCanvasGO = GameObject.Find("MirrorCanvas");
-                SessionValues.MirrorCanvasGO.SetActive(false);
-                SessionValues.TaskSelectionCameraGO = GameObject.Find("TaskSelectionCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 Starfield = GameObject.Find("Starfield");
                 LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
@@ -862,7 +850,7 @@ namespace USE_ExperimentTemplate_Session
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
             skybox.material = Resources.Load<Material>("MUSE_MainBackground");
-            MirrorCam.CopyFrom(SessionValues.TaskSelectionCameraGO.GetComponent<Camera>());
+            MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
             ExpDisplayRenderImage = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
         }
@@ -1072,8 +1060,8 @@ namespace USE_ExperimentTemplate_Session
 
         public void OnGUI()
         {
-            //if (CameraMirrorTexture == null) return;
-            //GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
+            if (CameraRenderTexture == null) return;
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraRenderTexture);
         }
         
         

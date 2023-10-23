@@ -275,12 +275,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (Handler.SuccessfulSelections.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (Handler.LastSelection.SelectedGameObject.name.Contains("Left"))
+                if (Handler.LastSuccessfulSelection.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (Handler.LastSelection.SelectedGameObject.name.Contains("Right"))
+                else if (Handler.LastSuccessfulSelection.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;

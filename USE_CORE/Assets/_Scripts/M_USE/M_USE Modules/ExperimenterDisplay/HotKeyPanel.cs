@@ -175,10 +175,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 actionName = "Toggle Displays",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
-                {
-                    //Camera[] allCameras = Resources.FindObjectsOfTypeAll<Camera>();
+                {                    
+                    Debug.LogWarning("CLICKED TOGGLE DISPLAY HOTKEY!");
 
-                    
+                    if (SessionValues.WebBuild)
+                        return;
+                                        
                     var allCameras = GameObject.FindObjectsOfType<Camera>();
                     foreach (Camera c in allCameras)
                     {

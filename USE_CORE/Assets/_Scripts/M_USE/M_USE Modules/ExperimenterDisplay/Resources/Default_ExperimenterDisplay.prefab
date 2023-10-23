@@ -4912,7 +4912,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 7
-  m_TargetDisplay: 0
+  m_TargetDisplay: 1
 --- !u!114 &6198781061063233875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7779,7 +7779,7 @@ PrefabInstance:
     - target: {fileID: 6507393581775536982, guid: a671479ffeafa554eb77f8821cd75d61,
         type: 3}
       propertyPath: m_TargetDisplay
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6507393581775536982, guid: a671479ffeafa554eb77f8821cd75d61,
         type: 3}

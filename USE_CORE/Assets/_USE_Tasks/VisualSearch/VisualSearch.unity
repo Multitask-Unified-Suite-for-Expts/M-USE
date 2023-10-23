@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311924, g: 0.38073963, b: 0.3587269, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -392,7 +392,9 @@ MonoBehaviour:
   HeldTooLongTexture: {fileID: 2800000, guid: 47b4a2dd1c0432a469c082a17ab4256a, type: 3}
   HeldTooShortTexture: {fileID: 2800000, guid: 386006c0d81ea3442b946e37d70067af, type: 3}
   MovedTooFarTexture: {fileID: 0}
-  THR_BackdropTexture: {fileID: 0}
+  MovedTooFarSquareTexture: {fileID: 0}
+  HeldTooShortSquareTexture: {fileID: 0}
+  HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
   VS_CanvasGO: {fileID: 37832912}
   minObjectTouchDuration:
@@ -620,7 +622,7 @@ Camera:
     m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 1
+  m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1

@@ -49,7 +49,6 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         fuWMTL = (FeatureUncertaintyWM_TrialLevel)TrialLevel;
         StimCanvas_2D = GameObject.Find("FeatureUncertaintyWM_Canvas");
 
-        SetSettings();
         AssignBlockData();
 
         RunBlock.AddSpecificInitializationMethod(() =>
@@ -61,39 +60,6 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
             fuWMTL.TokenFBController.SetTokenBarValue(fuWMBD.NumInitialTokens);
             SetBlockSummaryString();
         });
-    }
-
-    public void SetSettings()
-    {
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ContextExternalFilePath"))
-            fuWMTL.ContextExternalFilePath = (String)SessionSettings.Get(TaskName + "_TaskSettings", "ContextExternalFilePath");
-        else fuWMTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonPosition"))
-            fuWMTL.StartButtonPosition = (Vector3)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonPosition");
-        else Debug.LogError("Start Button Position settings not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StartButtonScale"))
-            fuWMTL.StartButtonScale = (float)SessionSettings.Get(TaskName + "_TaskSettings", "StartButtonScale");
-        else Debug.LogError("Start Button Scale settings not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "StimFacingCamera"))
-            fuWMTL.StimFacingCamera = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "StimFacingCamera");
-        else Debug.LogError("Stim Facing Camera setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "ShadowType"))
-            fuWMTL.ShadowType = (string)SessionSettings.Get(TaskName + "_TaskSettings", "ShadowType");
-        else Debug.LogError("Shadow Type setting not defined in the TaskDef");
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "NeutralITI"))
-            fuWMTL.NeutralITI = (bool)SessionSettings.Get(TaskName + "_TaskSettings", "NeutralITI");
-        else Debug.LogError("Neutral ITI setting not defined in the TaskDef");
-
-        if (SessionSettings.SettingExists(TaskName + "_TaskSettings", "TouchFeedbackDuration"))
-            fuWMTL.TouchFeedbackDuration = (float)SessionSettings.Get(TaskName + "_TaskSettings", "TouchFeedbackDuration");
-        else
-            fuWMTL.TouchFeedbackDuration = .3f;
-
-        if (SessionSettings.SettingExists("Session", "MacMainDisplayBuild"))
-            fuWMTL.MacMainDisplayBuild = (bool)SessionSettings.Get("Session", "MacMainDisplayBuild");
-        else
-            fuWMTL.MacMainDisplayBuild = false;
     }
 
     public void SetBlockSummaryString()

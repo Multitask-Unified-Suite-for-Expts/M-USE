@@ -44,7 +44,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public ContinuousRecognition_TaskLevel CurrentTaskLevel => GetTaskLevel<ContinuousRecognition_TaskLevel>();
     public ContinuousRecognition_TaskDef CurrentTask => GetTaskDef<ContinuousRecognition_TaskDef>();
 
-    [HideInInspector] public GameObject StartButton;
+    private GameObject StartButton;
 
     public TextMeshProUGUI TimerText;
     public GameObject TimerTextGO;
@@ -59,33 +59,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public GameObject Starfield;
     [HideInInspector] public List<GameObject> BorderList;
 
-    //moving over from trial def
-    [HideInInspector] public List<int> PC_Stim;
-    [HideInInspector] public List<int> PNC_Stim;
-    [HideInInspector] public List<int> New_Stim;
-    [HideInInspector] public List<int> Unseen_Stim;
-    [HideInInspector] public List<int> TrialStimIndices;
+    [HideInInspector] public List<int> PC_Stim, PNC_Stim, New_Stim, Unseen_Stim, TrialStimIndices;
 
     [HideInInspector] public Vector3[] BlockFeedbackLocations;
 
-    [HideInInspector] public bool CompletedAllTrials;
-    [HideInInspector] public bool EndBlock;
-    [HideInInspector] public bool StimIsChosen;
-    [HideInInspector] public bool AdjustedPositionsForMac;
-    [HideInInspector] public bool ContextActive;
-    [HideInInspector] public bool VariablesLoaded;
+    [HideInInspector] public bool CompletedAllTrials, EndBlock, StimIsChosen, AdjustedPositionsForMac, ContextActive, VariablesLoaded;
 
-    private StimGroup trialStims;
     [HideInInspector] public  List<int> ChosenStimIndices;
 
-    [HideInInspector] public int NonStimTouches_Block;
-    [HideInInspector] public int NumCorrect_Block;
-    [HideInInspector] public int NumTbCompletions_Block;
-    [HideInInspector] public float AvgTimeToChoice_Block;
-    [HideInInspector] public float TimeToCompletion_Block;
-    [HideInInspector] public float TimeToCompletion_StartTime;
-    [HideInInspector] public float TokenUpdateStartTime;
-    [HideInInspector] public float TimeRemaining;
+    [HideInInspector] public int NonStimTouches_Block, NumCorrect_Block, NumTbCompletions_Block;
+    [HideInInspector] public float AvgTimeToChoice_Block, TimeToCompletion_Block, TimeToCompletion_StartTime, TokenUpdateStartTime, TimeRemaining;
     [HideInInspector] public List <float> TimeToChoice_Block;
 
     private int score;
@@ -99,39 +82,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private Vector3 OriginalTimerPosition;
 
-    private StimGroup RightGroup;
-    private StimGroup WrongGroup;
+    private StimGroup trialStims, RightGroup, WrongGroup;
 
     [HideInInspector] GameObject ChosenGO;
     [HideInInspector] ContinuousRecognition_StimDef ChosenStim;
 
-    private int NumPC_Trial;
-    private int NumNew_Trial;
-    private int NumPNC_Trial;
-
-    [HideInInspector] public bool MakeStimPopOut;
+    private int NumPC_Trial, NumNew_Trial, NumPNC_Trial;
 
     private PlayerViewPanel playerView;
-    private GameObject playerViewParent;
-    private GameObject playerViewText;
-    public List<GameObject> playerViewTextList;
+    private GameObject playerViewParent, playerViewText;
+    [HideInInspector] public List<GameObject> playerViewTextList;
     
     //Config Variables
     [HideInInspector]
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
 
-    public GameObject DisplayResults2DContainerGO;
-    public GameObject DisplayResultsPanelGO;
+    public GameObject DisplayResults2DContainerGO, DisplayResultsPanelGO;
 
-    public int WrongStimIndex;
-    public bool GotTrialCorrect;
-    public float TimeChosen_Trial;
-    public float TimeToChoice_Trial;
-    public string Locations_String;
-    public string PC_String;
-    public string New_String;
-    public string PNC_String;
-    public string PC_Percentage_String;
+    [HideInInspector] public int WrongStimIndex;
+    [HideInInspector] public bool GotTrialCorrect;
+    [HideInInspector] public float TimeChosen_Trial, TimeToChoice_Trial;
+    [HideInInspector] public string Locations_String, PC_String, New_String, PNC_String, PC_Percentage_String;
 
 
 

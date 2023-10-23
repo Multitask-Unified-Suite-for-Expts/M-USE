@@ -207,7 +207,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = 1 - SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay;
                 }
             };
-            HotKeyList.Add(toggleDisplays);
+            //HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey

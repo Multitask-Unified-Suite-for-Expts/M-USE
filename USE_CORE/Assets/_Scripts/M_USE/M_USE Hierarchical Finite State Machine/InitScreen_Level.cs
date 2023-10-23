@@ -35,9 +35,10 @@ using System.Collections;
 public class InitScreen_Level : ControlLevel
 {
     public GameObject InitScreen_GO;
-    public GameObject InitScreenCanvas_GO;
     public GameObject StartPanel_GO;
     public GameObject MainPanel_GO;
+
+    public GameObject InitScreenCanvas_GO;
 
     public TextMeshProUGUI SubjectID_Text;
     public TextMeshProUGUI SubjectAge_Text;

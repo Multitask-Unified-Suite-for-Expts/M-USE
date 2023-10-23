@@ -396,7 +396,6 @@ namespace USE_ExperimentTemplate_Task
 
                 }
 
-                SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetDisplay = TaskCam.targetDisplay;
                 SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
                 TaskCam.gameObject.SetActive(false);
 

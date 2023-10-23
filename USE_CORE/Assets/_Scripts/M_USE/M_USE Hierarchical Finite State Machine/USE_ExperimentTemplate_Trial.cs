@@ -160,7 +160,6 @@ namespace USE_ExperimentTemplate_Trial
                     return tieIndices[Random.Range(0, tieIndices.Count)];
 
                 default:
-                    Debug.LogWarning("selection style: " + TrialDefSelectionStyle);
                     return TrialCount_InBlock;
             }
         }
@@ -236,7 +235,13 @@ namespace USE_ExperimentTemplate_Trial
 
             LoadTrialTextures.AddUniversalInitializationMethod(() =>
             {
-                if(FileLoadingDelegate != null)
+                AbortCode = 0;
+                TrialCount_InTask++;
+                TrialCount_InBlock++;
+
+                CurrentTrialDefIndex = DetermineCurrentTrialDefIndex();
+
+                if (FileLoadingDelegate != null)
                     StartCoroutine(FileLoadingDelegate?.Invoke());
                 else
                     TrialFilesLoaded = true;
@@ -247,11 +252,6 @@ namespace USE_ExperimentTemplate_Trial
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
-                AbortCode = 0;
-
-                TrialCount_InTask++;
-                TrialCount_InBlock++;
-
                 if(!SessionValues.WebBuild && TrialCount_InTask != 0)
                     SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
@@ -273,7 +273,6 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                CurrentTrialDefIndex = DetermineCurrentTrialDefIndex();
                 SessionValues.LoadingController.DeactivateLoadingCanvas();
 
                 if (SessionValues.WebBuild)

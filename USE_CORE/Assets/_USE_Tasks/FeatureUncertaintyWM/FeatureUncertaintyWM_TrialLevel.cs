@@ -41,6 +41,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     public USE_StartButton USE_FBSquare;
     public FeatureUncertaintyWM_TrialDef CurrentTrialDef => GetCurrentTrialDef<FeatureUncertaintyWM_TrialDef>();
     public FeatureUncertaintyWM_TaskLevel CurrentTaskLevel => GetTaskLevel<FeatureUncertaintyWM_TaskLevel>();
+    public FeatureUncertaintyWM_TaskDef CurrentTask => GetTaskDef<FeatureUncertaintyWM_TaskDef>();
 
     // Each trial in the block should have two variables that only one is selected to build the multicomp stim. A certain prop and objectType, and uncertain prop and objectType
     // whether a trial uses uncertain or certain varibles then is defined by the running accuracy criterion and the min/max number of trials defined
@@ -113,9 +114,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     private float? selectionDuration = null;
     private bool choiceMade = false;
 
-    [HideInInspector] public float TouchFeedbackDuration;
-
-    [HideInInspector] public bool MacMainDisplayBuild;
     [HideInInspector] public bool AdjustedPositionsForMac;
 
 
@@ -214,11 +212,11 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(Handler, TouchFeedbackDuration, StartButtonScale, taskCanvas);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, StartButtonScale, taskCanvas);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            if (MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;

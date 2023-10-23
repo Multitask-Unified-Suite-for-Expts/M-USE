@@ -41,6 +41,7 @@ using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
 using USE_Def_Namespace;
+using Random = UnityEngine.Random;
 
 
 namespace USE_ExperimentTemplate_Trial
@@ -53,6 +54,15 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
+        
+        public List<int> runningPerformance;
+        public int difficultyLevel;
+        public int posStep;
+        public int negStep;
+        public string TrialDefSelectionStyle;
+        public int maxDiffLevel;
+        public int avgDiffLevel;
+        public int diffLevelJitter;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -92,9 +102,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
-        [HideInInspector] public string TrialDefSelectionStyle;
-
-
+        
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, MovedTooFarSquareTexture, HeldTooShortSquareTexture, HeldTooLongSquareTexture;
 
@@ -106,7 +114,7 @@ namespace USE_ExperimentTemplate_Trial
         public FileLoadingMethod FileLoadingDelegate; //Delegate that tasks can set to their own specific method
         public bool TrialFilesLoaded;
 
-
+        public int CurrentTrialDefIndex;
 
         //if anyone uses this test it!
         public List<GameObject> AssignStimToList(StimGroup sg, List<GameObject> existingList = null)
@@ -120,14 +128,40 @@ namespace USE_ExperimentTemplate_Trial
             return existingList;
         }
 
+        public virtual void DefineCustomTrialDefSelection()
+        {
+        }
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            
+            //Debug.LogWarning("CurrentTrialDefIndex: " + CurrentTrialDefIndex);
+            return (T)TrialDefs[CurrentTrialDefIndex];
+        }
+        
+        public int DetermineCurrentTrialDefIndex()
+        {
             switch (TrialDefSelectionStyle)
             {
-                default: 
-                    return (T)TrialDefs[TrialCount_InBlock];
+                case "adaptive":
+                    difficultyLevel = TaskLevel.DetermineTrialDefDifficultyLevel(difficultyLevel, runningPerformance, posStep, negStep, maxDiffLevel);
+                    Debug.LogWarning("cur difficulty level (after determine): " + difficultyLevel);
+                    //Debug.LogWarning("TrialCount_InBlock: " + TrialCount_InBlock + " ------ TrialDefs size: " + TrialDefs.Count);
+                    
+                    List<int> tieIndices = TrialDefs
+                        .Select((trialDef, index) => new { TrialDef = trialDef, Index = index })
+                        .Where(item => 
+                        {
+                            Debug.LogWarning("item.TrialDef.BlockCount: " + item.TrialDef.BlockCount + " /////// BlockCount: " + BlockCount);
+                            return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount);
+                        })
+                        //.Where(item => item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount)
+                        .Select(item => item.Index)
+                        .ToList();
+                    return tieIndices[Random.Range(0, tieIndices.Count)];
+
+                default:
+                    Debug.LogWarning("selection style: " + TrialDefSelectionStyle);
+                    return TrialCount_InBlock;
             }
         }
 
@@ -192,9 +226,12 @@ namespace USE_ExperimentTemplate_Trial
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TrialCount_InBlock = -1;
+                if (TrialCount_InBlock <= 0)
+                {
+                    DefineCustomTrialDefSelection();
+                }
                 TrialStims = new List<StimGroup>();
                 AudioFBController.UpdateAudioSource();
-                //DetermineNumTrialsInBlock();
             });
 
             LoadTrialTextures.AddUniversalInitializationMethod(() =>
@@ -236,6 +273,7 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
+                CurrentTrialDefIndex = DetermineCurrentTrialDefIndex();
                 SessionValues.LoadingController.DeactivateLoadingCanvas();
 
                 if (SessionValues.WebBuild)

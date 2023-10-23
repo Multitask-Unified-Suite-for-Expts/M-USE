@@ -42,6 +42,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
+using System.Runtime.InteropServices;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
@@ -613,6 +614,7 @@ namespace USE_ExperimentTemplate_Session
                 runTask.AddChildLevel(CurrentTask);
                 //SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
+                CurrentTask.TaskCam.targetDisplay = SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetDisplay;
 
                 SetTaskMainBackground(); 
 

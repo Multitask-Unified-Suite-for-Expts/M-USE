@@ -175,29 +175,36 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 actionName = "Toggle Displays",
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
                 hotKeyAction = () =>
-                {
+                {                    
                     Debug.LogWarning("CLICKED TOGGLE DISPLAY HOTKEY!");
 
                     if (SessionValues.WebBuild)
                         return;
-
-                    var cams = FindObjectsOfType<Camera>();
-                    foreach (Camera c in cams) //MirrorCam (0 to 1), BackgroundCamera (1 to 0), TaskCam (0 to 1), MainCameraCopy(1 DC!!)
-                        c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                    
-                    var canvases = FindObjectsOfType<Canvas>();
-                    foreach (Canvas c in canvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+                                        
+                    var allCameras = GameObject.FindObjectsOfType<Camera>();
+                    foreach (Camera c in allCameras)
                     {
-                        if (c.renderMode == RenderMode.ScreenSpaceCamera) //TaskSelectionCanvas (0 to 1 ),
-                        {
-                            c.worldCamera.targetDisplay = 1 - c.worldCamera.targetDisplay;
-                        }
-
-                        else //ExperimenterCanvas (1 to 0), InitScreenCanvas (1 to 0),
-                        {
-                            c.targetDisplay = 1 - c.targetDisplay; // 1 - 0 = 1; 1 - 1 = 0
-                        }
+                        Debug.Log($"--- CAMERA {c.name} BEFORE: {c.targetDisplay} ---");
+                        c.targetDisplay = 1 - c.targetDisplay;
+                        Debug.Log($"--- CAMERA {c.name} AFTER: {c.targetDisplay} ---");
                     }
+
+                    //Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
+                    var allCanvases = GameObject.FindObjectsOfType<Canvas>();
+                    foreach (Canvas c in allCanvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+                    {
+                        if(c.renderMode == RenderMode.ScreenSpaceOverlay)
+                        {
+                            Debug.Log($"--- CANVAS {c.name} BEFORE: {c.targetDisplay} ---");
+                            c.targetDisplay = 1 - c.targetDisplay;
+                            Debug.Log($"--- CANVAS {c.name} AFTER: {c.targetDisplay} ---");
+                        }
+                        
+                     
+                    }
+
+                    // Change display of the loading canvas which could be inactive
+                    SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = 1 - SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay;
                 }
             };
             HotKeyList.Add(toggleDisplays);

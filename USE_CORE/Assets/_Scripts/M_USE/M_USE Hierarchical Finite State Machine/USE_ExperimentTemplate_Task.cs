@@ -54,25 +54,30 @@ namespace USE_ExperimentTemplate_Task
         public string ConfigFolderName;
         public string TaskName;
         public string TaskProjectFolder;
+
         [HideInInspector] public int BlockCount;
+
         // protected int NumBlocksInTask;
         public int NumAbortedTrials_InTask;
         public int NumRewardPulses_InTask;
-        
+
         public int NumAbortedTrials_InBlock;
         public int NumRewardPulses_InBlock;
-        
+
         public int MinTrials_InBlock;
         public int MaxTrials_InBlock;
 
-        public bool ForceTaskEnd;
 
+        public bool ForceTaskEnd;
         public ControlLevel_Trial_Template TrialLevel;
         public BlockData BlockData;
         public FrameData FrameData;
         public TrialData TrialData;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
-        [HideInInspector] public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
+
+        [HideInInspector]
+        public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
+
         private int TaskStringsAdded = 0;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
@@ -82,12 +87,10 @@ namespace USE_ExperimentTemplate_Task
         public TaskDef TaskDef;
         public BlockDef[] BlockDefs;
         private BlockDef CurrentBlockDef;
+
         public BlockDef currentBlockDef
         {
-            get
-            {
-                return CurrentBlockDef;
-            }
+            get { return CurrentBlockDef; }
         }
 
         public TaskStims TaskStims;
@@ -138,7 +141,7 @@ namespace USE_ExperimentTemplate_Task
             StimDefType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].StimDefType;
         }
 
-        public T GetTaskDef<T>() where T: TaskDef
+        public T GetTaskDef<T>() where T : TaskDef
         {
             return (T)TaskDef;
         }
@@ -148,7 +151,7 @@ namespace USE_ExperimentTemplate_Task
             TaskLevelDefined = false;
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
-            
+
             RunBlock = new State("RunBlock");
             BlockFeedback = new State("BlockFeedback");
             FinishTask = new State("FinishTask");
@@ -205,8 +208,11 @@ namespace USE_ExperimentTemplate_Task
 
 
                 //Send Reward Pulses for Ansen's Camera at Start of Task:
-                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null &&
+                    SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(
+                        SessionValues.SessionDef.Camera_TaskStart_NumPulses,
+                        SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
                 if (SessionValues.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
@@ -216,6 +222,7 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;
@@ -226,7 +233,7 @@ namespace USE_ExperimentTemplate_Task
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;
                 TrialLevel.TrialDefs = CurrentBlockDef.TrialDefs;
-                
+
                 TrialLevel.TaskStims = TaskStims;
                 TrialLevel.PreloadedStims = PreloadedStims;
                 TrialLevel.PrefabStims = PrefabStims;
@@ -248,8 +255,8 @@ namespace USE_ExperimentTemplate_Task
                         HandleWebBuildHotKeys();
                 });
             }
-            
-           // RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
+
+            // RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
 
             RunBlock.AddLateUpdateMethod(() =>
             {
@@ -257,9 +264,11 @@ namespace USE_ExperimentTemplate_Task
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-            
+
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
-            float blockFeedbackDuration = 0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
+            float
+                blockFeedbackDuration =
+                    0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
                 blockFeedbackDuration = SessionValues.SessionDef.BlockResultsDuration;
@@ -276,15 +285,16 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
+                if (ContinueButtonClicked ||
+                    (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-               StartCoroutine(FrameData.AppendDataToBuffer());
-               SessionValues.EventCodeManager.EventCodeLateUpdate();
+                StartCoroutine(FrameData.AppendDataToBuffer());
+                SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -298,7 +308,7 @@ namespace USE_ExperimentTemplate_Task
                 if (SessionValues.SessionDef.IsHuman && BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
-                StartCoroutine(BlockData.AppendDataToBuffer()); 
+                StartCoroutine(BlockData.AppendDataToBuffer());
                 StartCoroutine(BlockData.AppendDataToFile());
 
                 StartCoroutine(FrameData.AppendDataToBuffer());
@@ -341,8 +351,11 @@ namespace USE_ExperimentTemplate_Task
             AddDefaultControlLevelTerminationMethod(() =>
             {
                 //Send Reward Pulses for Ansen's Camera at End of Task:
-                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TaskEnd_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null &&
+                    SessionValues.SessionDef.SyncBoxActive)
+                    SessionValues.SyncBoxController.SendCameraSyncPulses(
+                        SessionValues.SessionDef.Camera_TaskEnd_NumPulses,
+                        SessionValues.SessionDef.Camera_PulseSize_Ticks);
 
                 if (SessionValues.SessionDataControllers != null)
                 {
@@ -366,23 +379,27 @@ namespace USE_ExperimentTemplate_Task
                         TaskStims.AllTaskStimGroups.Values.CopyTo(taskSgs, 0);
                         StimGroup sg = taskSgs[0];
 
-                        if(sg.stimDefs != null)
+                        if (sg.stimDefs != null)
                         {
                             while (sg.stimDefs.Count > 0)
                             {
                                 sg.stimDefs[0].DestroyStimGameObject();
                                 sg.stimDefs.RemoveAt(0);
                             }
+
                             sg.DestroyStimGroup();
                         }
 
                     }
+
                     TaskStims.AllTaskStims.DestroyStimGroup();
 
                 }
 
+                SessionValues.TaskSelectionCameraGO.GetComponent<Camera>().targetDisplay = TaskCam.targetDisplay;
+                SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
                 TaskCam.gameObject.SetActive(false);
-                
+
                 NumAbortedTrials_InBlock = 0;
                 NumRewardPulses_InBlock = 0;
 
@@ -398,7 +415,7 @@ namespace USE_ExperimentTemplate_Task
                         Destroy(child.gameObject);
                 }
             });
-            
+
             TaskLevelDefined = true;
         }
         public bool CheckForcedTaskEnd()
@@ -418,7 +435,8 @@ namespace USE_ExperimentTemplate_Task
             else if (SessionValues.UsingServerConfigs)
                 contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{contextName}.png";
             else if (SessionValues.UsingLocalConfigs)
-                contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
+                contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath,
+                    contextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
         }
@@ -501,7 +519,7 @@ namespace USE_ExperimentTemplate_Task
                 GameObject continueButtonGO = BlockResultsGO.transform.Find("ContinueButton").gameObject;
                 if (continueButtonGO != null)
                     continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);
-                    
+
                 Transform gridParent = BlockResultsGO.transform.Find("Grid");
 
                 AudioSource blockResults_AudioSource = gameObject.AddComponent<AudioSource>();
@@ -511,7 +529,7 @@ namespace USE_ExperimentTemplate_Task
 
                 int count = 0;
                 foreach (DictionaryEntry entry in taskBlockResults)
-                {                        
+                {
                     blockResults_AudioSource.Play();
 
                     GameObject gridItem = Instantiate(SessionValues.BlockResults_GridElementPrefab, gridParent);
@@ -545,7 +563,7 @@ namespace USE_ExperimentTemplate_Task
             }
         }
 
-        
+
         public virtual OrderedDictionary GetTaskSummaryData()
         {
             return new OrderedDictionary
@@ -565,24 +583,25 @@ namespace USE_ExperimentTemplate_Task
         {
             return null;
         }
-        
-        
+
+
         //handling of block and trial defs so that each BlockDef contains a TrialDef[] array
         public void HandleTrialAndBlockDefs(bool verifyOnly)
-        {   
+        {
             if (AllTrialDefs == null || AllTrialDefs.Count() == 0) //no trialDefs have been imported from settings files
             {
                 if (BlockDefs == null)
-                    Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName + " folder, no trials generated as a result.");
+                    Debug.LogError("Neither BlockDef nor TrialDef config files provided in " + TaskName +
+                                   " folder, no trials generated as a result.");
                 else
                 {
                     // if (!verifyOnly)
                     // {
-                        for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
-                        {
-                            BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
-                            BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
-                        }
+                    for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
+                    {
+                        BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
+                        BlockDefs[iBlock].GenerateTrialDefsFromBlockDef();
+                    }
                     // }
                 }
             }
@@ -590,7 +609,8 @@ namespace USE_ExperimentTemplate_Task
             {
                 if (BlockDefs == null) //no blockDef file, trialdefs should be complete
                 {
-                    Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName + " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
+                    Debug.Log("TrialDef config file provided without BlockDef config file in " + TaskName +
+                              " folder, BlockDefs will be generated with default values for all fields from TrialDefs.");
                     if (AllTrialDefs[AllTrialDefs.Length - 1].BlockCount != 0)
                     {
                         if (AllTrialDefs[0].BlockCount == 0)
@@ -598,11 +618,13 @@ namespace USE_ExperimentTemplate_Task
                         else if (AllTrialDefs[0].BlockCount == 1)
                             BlockDefs = new BlockDef[AllTrialDefs[AllTrialDefs.Length - 1].BlockCount - 1];
                         else
-                            Debug.LogError("TrialDef config file in " + TaskName + " folder includes BlockCounts that are neither 0- nor 1-indexed.");
+                            Debug.LogError("TrialDef config file in " + TaskName +
+                                           " folder includes BlockCounts that are neither 0- nor 1-indexed.");
                     }
                     else
                     {
-                        Debug.Log("TrialDef config file in " + TaskName + " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
+                        Debug.Log("TrialDef config file in " + TaskName +
+                                  " folder only generates a single block (this is not a problem if you do not intend to use a block structure in your experiment).");
                         BlockDefs = new BlockDef[1];
                     }
 
@@ -619,11 +641,12 @@ namespace USE_ExperimentTemplate_Task
                     for (int iBlock = 0; iBlock < BlockDefs.Length; iBlock++)
                     {
                         BlockDefs[iBlock].TrialDefs = GetTrialDefsInBlock(iBlock + 1, AllTrialDefs);
-                        BlockDefs[iBlock].RandomNumGenerator = new System.Random((int) DateTime.Now.Ticks + iBlock);
+                        BlockDefs[iBlock].RandomNumGenerator = new System.Random((int)DateTime.Now.Ticks + iBlock);
                         BlockDefs[iBlock].AddToTrialDefsFromBlockDef();
                     }
                 }
             }
+
             TrialAndBlockDefsHandled = true;
         }
 
@@ -634,7 +657,7 @@ namespace USE_ExperimentTemplate_Task
 
         public virtual void ProcessCustomSettingsFiles()
         {
-            
+
         }
 
         public virtual Dictionary<string, object> SummarizeTask()
@@ -671,7 +694,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 foreach (GameObject go in PreloadedStimGameObjects)
                     taskStimDefFromGameObject.Invoke(this, new object[] { go, PreloadedStims });
-                
+
                 PreloadedStims.AddStims(PreloadedStimGameObjects);
             }
         }
@@ -716,7 +739,8 @@ namespace USE_ExperimentTemplate_Task
                 //we will only use StimFolderPath if ExternalFilePath doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.FileName.StartsWith(sd.StimFolderPath))
                 {
-                    List<string> filenames = RecursiveFileFinder.FindFile(sd.StimFolderPath, sd.FileName, sd.StimExtension);
+                    List<string> filenames =
+                        RecursiveFileFinder.FindFile(sd.StimFolderPath, sd.FileName, sd.StimExtension);
 
                     if (filenames.Count > 1)
                     {
@@ -726,10 +750,10 @@ namespace USE_ExperimentTemplate_Task
                             if (Path.GetFileName(filenames[iFile]) == firstFilename)
                             {
                                 Debug.LogWarning("During task setup for " + TaskName + " attempted to find stimulus " +
-                                                    sd.FileName + " in folder " + sd.StimFolderPath +
-                                                    ", but files with this name are found at both " + firstFilename +
-                                                    " and "
-                                                    + filenames[iFile] + ".  Only the first will be used.");
+                                                 sd.FileName + " in folder " + sd.StimFolderPath +
+                                                 ", but files with this name are found at both " + firstFilename +
+                                                 " and "
+                                                 + filenames[iFile] + ".  Only the first will be used.");
                                 filenames.RemoveAt(iFile);
                             }
                         }
@@ -739,15 +763,15 @@ namespace USE_ExperimentTemplate_Task
                         sd.FileName = filenames[0];
                     else if (filenames.Count == 0)
                         Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
-                                        sd.FileName + " in folder " +
-                                        sd.StimFolderPath +
-                                        " but no file matching this pattern was found in this folder or subdirectories.");
+                                       sd.FileName + " in folder " +
+                                       sd.StimFolderPath +
+                                       " but no file matching this pattern was found in this folder or subdirectories.");
                     else
                     {
                         Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
-                                        sd.FileName + " in folder " +
-                                        sd.StimFolderPath +
-                                        " but multiple non-identical files matching this pattern were found in this folder or subdirectories.");
+                                       sd.FileName + " in folder " +
+                                       sd.StimFolderPath +
+                                       " but multiple non-identical files matching this pattern were found in this folder or subdirectories.");
                     }
                 }
 
@@ -757,17 +781,20 @@ namespace USE_ExperimentTemplate_Task
 
 
 
-        public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettings
+        public void ReadCustomSingleTypeArray<T>(string filePath, string settingsName, string serverFileString = null)
+            where T : CustomSettings
         {
             SessionSettings.ImportSettings_SingleTypeArray<T>(settingsName, filePath, serverFileString);
         }
 
-        public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettings
+        public void ReadCustomMultipleTypes<T>(string filePath, string settingsName, string serverFileString = null)
+            where T : CustomSettings
         {
             SessionSettings.ImportSettings_MultipleType(settingsName, filePath, serverFileString);
         }
 
-        public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null) where T : CustomSettings
+        public void ReadCustomSingleTypeJson<T>(string filePath, string settingsName, string serverFileString = null)
+            where T : CustomSettings
         {
             SessionSettings.ImportSettings_SingleTypeJSON<T>(settingsName, filePath, serverFileString);
         }
@@ -812,27 +839,27 @@ namespace USE_ExperimentTemplate_Task
             return trialList;
         }
 
-    /*    private void OnApplicationQuit() // moved to USE_DATA 
-        {
-            if (BlockData != null)
+        /*    private void OnApplicationQuit() // moved to USE_DATA
             {
-                StartCoroutine(BlockData.AppendDataToBuffer());
-                StartCoroutine(BlockData.AppendDataToFile());
-            }
+                if (BlockData != null)
+                {
+                    StartCoroutine(BlockData.AppendDataToBuffer());
+                    StartCoroutine(BlockData.AppendDataToFile());
+                }
 
-            if (FrameData != null)
-            {
-                StartCoroutine(FrameData.AppendDataToBuffer());
-                StartCoroutine(FrameData.AppendDataToFile());
-            }
+                if (FrameData != null)
+                {
+                    StartCoroutine(FrameData.AppendDataToBuffer());
+                    StartCoroutine(FrameData.AppendDataToFile());
+                }
 
-            if (SessionValues.GazeData != null)
-            {
-                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-            }
-        }*/
-        
-        
+                if (SessionValues.GazeData != null)
+                {
+                    StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+                }
+            }*/
+
+
         public T GetCurrentBlockDef<T>() where T : BlockDef
         {
             return (T)CurrentBlockDef;
@@ -844,19 +871,49 @@ namespace USE_ExperimentTemplate_Task
 
             decimal percentAbortedTrials = 0;
             if (TrialLevel.TrialCount_InTask > 0)
-                percentAbortedTrials = (Math.Round(decimal.Divide(NumAbortedTrials_InTask, (TrialLevel.TrialCount_InTask)), 2)) * 100;
+                percentAbortedTrials =
+                    (Math.Round(decimal.Divide(NumAbortedTrials_InTask, (TrialLevel.TrialCount_InTask)), 2)) * 100;
             CurrentTaskSummaryString.Append($"\n<b>{ConfigFolderName}</b>" +
-                                                $"\n<b># Trials:</b> {TrialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
-                                                $"\t<b># Blocks:</b> {BlockCount}" +
-                                                $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}");
+                                            $"\n<b># Trials:</b> {TrialLevel.TrialCount_InTask} ({percentAbortedTrials}% aborted)" +
+                                            $"\t<b># Blocks:</b> {BlockCount}" +
+                                            $"\t<b># Reward Pulses:</b> {NumRewardPulses_InTask}");
 
         }
+        
+        public int DetermineTrialDefDifficultyLevel(int difficultyLevel, List<int> runningPerformance, int posStep,
+            int negStep, int maxDiffLevel)
+        {
+            if (runningPerformance.Count == 0)
+                return difficultyLevel;
+            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
+            //Debug.LogWarning("runningPerformance size: " + runningPerformance.Count + "/////// last: " + runningPerformance.Last());
+            if (runningPerformance.Last() == 1)
+            {
+                difficultyLevel -= negStep;
+                if (difficultyLevel < 1)
+                {
+                    Debug.LogWarning("DIFFICULTYLEVEL HIT 0");
+                    difficultyLevel = 0;
+                }
+            }
 
+            else if (runningPerformance.Last() == 0)
+            {
+                difficultyLevel += posStep;
+                if (difficultyLevel >= maxDiffLevel)
+                {
+                    Debug.LogWarning("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
+                    difficultyLevel = maxDiffLevel;
+                }
+            }
 
+            return difficultyLevel;
+        }
     }
+    
+    
 
-
-    public class TaskLevelTemplate_Methods
+public class TaskLevelTemplate_Methods
     {
         //CALCULATE ADPATIVE TRIAL DEF 
         public int DetermineTrialDefDifficultyLevel()

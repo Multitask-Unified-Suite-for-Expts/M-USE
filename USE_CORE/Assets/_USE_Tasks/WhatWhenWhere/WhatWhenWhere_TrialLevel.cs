@@ -201,7 +201,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
             
-            SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
 
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
@@ -334,7 +334,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
@@ -499,7 +499,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
             runningErrorCount.Add(NumErrors_InTrial);
             
-            SessionValues.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOn");
                         
             if (SessionValues.SyncBoxController != null)
             {
@@ -512,7 +512,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
             SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
-            SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             
             CurrentTaskLevel.SetBlockSummaryString();
         });

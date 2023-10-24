@@ -362,7 +362,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.SetTotalTokensNum(SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
         });
 
         //Inflate Balloon state -----------------------------------------------------------------------------------------------------------------------------------------
@@ -485,7 +485,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 Handler.HandlerActive = false;
                                 NumInflations++;
 
-                                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+                                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
 
                                 CalculateInflation(); //Sets Inflate to TRUE at end of func
                                 InflateAudioPlayed = false;

@@ -592,14 +592,15 @@ namespace USE_ExperimentTemplate_Session
 
             bool DefiningTask = false;
             loadTask.AddUpdateMethod(() =>
-            {
+            {                
+                SessionValues.EventCodeManager.CheckFrameEventCodeBuffer();
+
                 if (!SceneLoading && CurrentTask != null && !DefiningTask)
                 {
                     DefiningTask = true;
                     CurrentTask.ConfigFolderName = selectedConfigFolderName;
                     CurrentTask.DefineTaskLevel();
                 }
-                SessionValues.EventCodeManager.CheckFrameEventCodeBuffer();
 
             });
 
@@ -680,6 +681,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
+                SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
@@ -774,6 +776,9 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
             else
                 StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
+
+            if (SessionValues.SessionDef != null && SessionValues.SessionDef.SerialPortActive && SessionValues.SerialPortController != null)
+                SessionValues.SerialPortController.ClosePort();
         }
 
         //Method is used to have every task set their main background as the MUSE blue background
@@ -971,10 +976,12 @@ namespace USE_ExperimentTemplate_Session
         {
             if (SessionValues.SessionDef.SerialPortActive)
             {
+                Debug.LogWarning("----FRAME COUNT: " + Time.frameCount + "----");
                 if (SessionValues.SerialPortController.BufferCount("sent") > 0)
                 {
                     try
                     {
+                        Debug.LogWarning("##FRAME COUNT: " + Time.frameCount + "|| " + "APPENDING THE SERIAL SENT DATA !! " + SessionValues.SerialPortController.BufferCount("sent"));
                         StartCoroutine(SessionValues.SerialSentData.AppendDataToBuffer());
                     }
                     catch (Exception e)
@@ -987,6 +994,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
+                        Debug.LogWarning("##FRAME COUNT: " + Time.frameCount + "|| " + "APPENDING THE SERIAL RECV DATA !! " + SessionValues.SerialPortController.BufferCount("received"));
                         StartCoroutine(SessionValues.SerialRecvData.AppendDataToBuffer());
                     }
                     catch (Exception e)
@@ -1080,7 +1088,7 @@ namespace USE_ExperimentTemplate_Session
         {
             AppendSerialData();
             StartCoroutine(FrameData.AppendDataToBuffer());
-            SessionValues.EventCodeManager.EventCodeLateUpdate();
+         //  SessionValues.EventCodeManager.EventCodeLateUpdate();
         }
     }
 }

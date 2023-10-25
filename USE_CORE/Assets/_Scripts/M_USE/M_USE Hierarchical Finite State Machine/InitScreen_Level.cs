@@ -30,7 +30,7 @@ using TMPro;
 using System.IO;
 using UnityEngine.UI;
 using System.Collections;
-
+using USE_UI;
 
 public class InitScreen_Level : ControlLevel
 {
@@ -80,9 +80,6 @@ public class InitScreen_Level : ControlLevel
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
 
-    private State StartScreen;
-    private State CollectInfoScreen;
-
     public FolderDropdown FolderDropdown;
 
     private bool ValuesLoaded;
@@ -98,18 +95,19 @@ public class InitScreen_Level : ControlLevel
 
     public override void DefineControlLevel()
     {
-        StartScreen = new State("StartScreen");
-        CollectInfoScreen = new State("CollectInfoScreen");
-        AddActiveStates(new List<State> { StartScreen, CollectInfoScreen });
+        State Setup = new State("Setup");
+        State StartScreen = new State("StartScreen");
+        State CollectInfoScreen = new State("CollectInfoScreen");
+        AddActiveStates(new List<State> { Setup, StartScreen, CollectInfoScreen });
 
-        SetupInitScreen();
+
+        //Setup State-----------------------------------------------------------------------------------------------------------------------------------
+        Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
+        Setup.SpecifyTermination(() => true, StartScreen);
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.WebBuild)
-                GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-
             StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
             StartPanel_GO.SetActive(true);
         });
@@ -146,15 +144,11 @@ public class InitScreen_Level : ControlLevel
         CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
-
             SessionValues.SubjectID = GetSubjectID();
             SessionValues.SubjectAge = GetSubjectAge();
-
             SetConfigInfo();
             SetDataInfo();
-
             InitScreenCanvas_GO.SetActive(false);
-            
             SessionValues.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
@@ -423,6 +417,9 @@ public class InitScreen_Level : ControlLevel
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
+
+        if (SessionValues.WebBuild)
+            SessionValues.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
     }
 
     public void HandleSettingButtonClicked()

@@ -101,7 +101,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject StartButtonPrefabGO;
         [HideInInspector] public AudioClip BlockResults_AudioClip;
 
-        [HideInInspector] public GameObject InitCamGO;
         [HideInInspector] public LogWriter LogWriter;
 
         [HideInInspector] public State selectTask, loadTask;
@@ -157,7 +156,7 @@ namespace USE_ExperimentTemplate_Session
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
                 if (SessionValues.WebBuild)
-                    InitCamGO.SetActive(false);
+                    SessionValues.InitCamGO.SetActive(false);
                 else
                 {
                     CreateExperimenterDisplay();
@@ -240,7 +239,7 @@ namespace USE_ExperimentTemplate_Session
                 
                 if (!SessionValues.WebBuild)
                 {
-                    InitCamGO.SetActive(false);
+                    SessionValues.InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
                 SessionValues.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
@@ -794,7 +793,7 @@ namespace USE_ExperimentTemplate_Session
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
                 SessionValues.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
-                InitCamGO = GameObject.Find("InitCamera");
+                SessionValues.InitCamGO = GameObject.Find("InitCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 Starfield = GameObject.Find("Starfield");
                 LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();

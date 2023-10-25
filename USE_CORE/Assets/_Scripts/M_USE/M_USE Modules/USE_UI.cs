@@ -66,7 +66,6 @@ namespace USE_UI
 
         [HideInInspector] public Dictionary<string, string> TaskInstructionsDict;
         [HideInInspector] public Dictionary<string, string> TaskNamesDict;
-        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict;
 
         [HideInInspector] public string TaskName;
 
@@ -111,21 +110,6 @@ namespace USE_UI
                 { "WhatWhenWhere", "What When Where" },
                 { "WorkingMemory", "Working Memory" }
             };
-
-            Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
-            {
-                { "AntiSaccade", new Vector3(0, 0, 1000f) },
-                { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
-                { "EffortControl", new Vector3(0, 0, 500f) },
-                { "FlexLearning", new Vector3(0, 0, 1000f) },
-                { "MazeGame", new Vector3(0, 0, 500f) },
-                { "THR", new Vector3(0, 0, 1000f) },
-                { "VisualSearch", new Vector3(0, 0, 1000f) },
-                { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-                { "WorkingMemory", new Vector3(0, 0, 1000f) }
-            };
-
-
         }
 
         //Called by TaskLevel
@@ -148,7 +132,7 @@ namespace USE_UI
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
+            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, 1000f);
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 

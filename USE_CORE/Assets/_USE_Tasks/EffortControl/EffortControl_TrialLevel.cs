@@ -132,8 +132,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<GameObject> ObjectList;
 
-    [HideInInspector] public GameObject debugTextGO;
-    [HideInInspector] public TextMeshProUGUI debugText;
 
 
     public override void DefineControlLevel()
@@ -148,19 +146,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-
-            //Debugger = new UI_Debugger();
-            //string text = "";
-            //Debugger.InitDebugger(EC_CanvasGO.GetComponent<Canvas>(), new Vector2(550, 100), new Vector3(-300f, 400f, 0f), text);
-            //Debugger.SetTextColor(Color.cyan);
-            //Debugger.ActivateDebugText();
-            
-
-            //Subscribe to Fullscreen events:
-            if (SessionValues.FullScreenController != null)
-                SessionValues.FullScreenController.SubscribeToFullScreenChanged(OnFullScreenChanged);
-
-
             if (AudioFBController != null)
                 InflateClipDuration = AudioFBController.GetClip("EC_Inflate").length;
 
@@ -190,12 +175,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            SetCameraPosition();
             SetTokenVariables();
-
-            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}";
-            //Debugger.SetDebugText(text);
-
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -310,18 +290,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         CenterSelection.AddSpecificInitializationMethod(() =>
         {
             ChooseDuration = ChooseBalloon.TimingInfo.Duration;
-            
             Wrapper = new GameObject("Wrapper");
-
-            float xValue = 1.01f; //was .98, then 1.025
-            if (Screen.fullScreen && Screen.width > 1920)
-                xValue = Screen.width > 3000 ? .95f : .8f; //.86 still too much for ipad fullscreen!! (trying .8 tomorrow)
-
-            CenteredPos = new Vector3(SideChoice == "Left" ? xValue : -xValue, 0, 0);
-
-            //string text = $"FullScreen? {Screen.fullScreen}\n{Screen.width}x{Screen.height}\nTokenSize: {TokenFBController.tokenSize}\nOffset: {TokenFBController.tokenBoxYOffset}\nCam: {Camera.main.transform.position}\n{CenteredPos}";
-            //Debugger.SetDebugText(text);
-
             MiddleBarrier.SetActive(false);
 
             if (SideChoice == "Left")
@@ -336,6 +305,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 DestroyChildren(OutlineContainerLeft);
                 StimLeft.SetActive(false);
             }
+
+            CenteredPos = new Vector3(SideChoice == "Left" ? 1.01f : -1.01f, 0, 0);
         });
         CenterSelection.AddUpdateMethod(() =>
         {
@@ -745,47 +716,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             return "Lower";
     }
 
-
-    private void OnFullScreenChanged(bool isFullScreen)
-    {
-        SetCameraPosition();
-        SetTokenVariables();
-    }
-
-    private void OnDestroy()   //Unsubscribe from FullScreenChanged Event:
-    {
-        if (SessionValues.FullScreenController != null)
-            SessionValues.FullScreenController.UnsubscribeToFullScreenChanged(OnFullScreenChanged);
-    }
-
-    private void SetCameraPosition()
-    {
-        Camera.main.transform.position = new Vector3(0, .6f, Screen.fullScreen && Screen.width != 1920 ? -2.5f : -2.18f);
-    }
-
     private void SetTokenVariables()
     {
         if (TokenFBController == null)
             return;
 
-        float tokenSize = 106f;
-        float yOffset = SessionValues.SessionDef.MacMainDisplayBuild && !Application.isEditor ? 45 : 5; //need to test these on mac
-
-        //mac is 1920 x 1200, mac fullscreen is 3456x2160, Ipad is 1920x1200
-
-        if (SessionValues.WebBuild && !Application.isEditor)
-        {
-            tokenSize = 116;
-            yOffset = 5; //on mac fullscreen its too far down (was 5)
-
-            if (Screen.fullScreen && Screen.width > 1920)
-            {
-                tokenSize = Screen.width > 3000 ? 103 : 121;
-                yOffset = Screen.width > 3000 ? 75 : 100;
-            }
-        }
-        TokenFBController.tokenSize = tokenSize;
-        TokenFBController.tokenBoxYOffset = yOffset;
+        TokenFBController.tokenSize = 106f;
+        TokenFBController.tokenBoxYOffset = 5f;
 
         TokenFBController.SetFlashingTime(1.5f);
         TokenFBController.tokenSpacing = -(Screen.width * .009375f);
@@ -985,7 +922,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
         }
 
-        //NORMAL 3D REWARDS:
+        //3D REWARDS:
         float width = (Reward.GetComponent<Renderer>().bounds.size.x - .035f) * scaler; //Get Reward width! (-.35f cuz need to be closer together)
         pos -= new Vector3((NumRewards - 1) * (width / 2), 0, 0);
         for (int i = 0; i < NumRewards; i++)
@@ -997,18 +934,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             AddRigidBody(RewardClone);
             ObjectList.Add(RewardClone);
         }
-
-        ////GRID REWARDS:
-        //for (int i = 0; i < NumRewards; i++)
-        //{
-        //    GameObject gridItem = Instantiate(GridReward);
-        //    gridItem.name = "Item_" + (i + 1);
-        //    gridItem.transform.SetParent(container.name.ToLower().Contains("left") ? GridParentLeft.transform : GridParentRight.transform);
-        //    gridItem.transform.localPosition = Vector3.zero;
-        //    gridItem.transform.localScale = Vector3.one;
-        //    gridItem.transform.localScale *= scaler;
-        //    ObjectList.Add(gridItem);
-        //}
     }
 
     private void SetTrialSummaryString()

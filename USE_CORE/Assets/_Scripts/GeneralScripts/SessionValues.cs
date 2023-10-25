@@ -73,6 +73,8 @@ public static class SessionValues
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
+    public static GameObject InitCamGO;
+
     public static HumanStartPanel HumanStartPanel;
     public static ExperimenterDisplayController ExperimenterDisplayController;
     public static SessionDataControllers SessionDataControllers;
@@ -105,7 +107,6 @@ public static class SessionValues
 
     //FOR EVENT CODES:
     public static List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
-
 
 
     static SessionValues()

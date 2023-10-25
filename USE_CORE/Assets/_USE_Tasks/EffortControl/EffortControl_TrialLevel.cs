@@ -630,6 +630,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         maxDiffLevel = CurrentTrial.MaxDiffLevel;
         avgDiffLevel = CurrentTrial.AvgDiffLevel;
         diffLevelJitter = CurrentTrial.DiffLevelJitter;
+        NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
+        MinTrialsBeforeTerm = CurrentTrial.MinTrialsBeforeTerm;
+        TerminationWindowSize = CurrentTrial.TerminationWindowSize;
         BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
         
         int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);

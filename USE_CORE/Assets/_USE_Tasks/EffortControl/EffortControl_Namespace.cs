@@ -52,6 +52,10 @@ namespace EffortControl_Namespace
         public int MaxDiffLevel;
         public int AvgDiffLevel;
         public int DiffLevelJitter;
+        public int NumReversalsUntilTerm;
+        public int MinTrialsBeforeTerm;
+        public int TerminationWindowSize;
+        
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -79,6 +83,10 @@ namespace EffortControl_Namespace
                 td.MaxDiffLevel = MaxDiffLevel;
                 td.AvgDiffLevel = AvgDiffLevel;
                 td.DiffLevelJitter = DiffLevelJitter;
+                td.NumReversalsUntilTerm = NumReversalsUntilTerm;
+                td.MinTrialsBeforeTerm = MinTrialsBeforeTerm;
+                td.TerminationWindowSize = TerminationWindowSize;
+                
                 TrialDefs.Add(td);
             }
         }
@@ -95,7 +103,10 @@ namespace EffortControl_Namespace
                 td.MaxDiffLevel = MaxDiffLevel;
                 td.AvgDiffLevel = AvgDiffLevel;
                 td.DiffLevelJitter = DiffLevelJitter;
-
+                td.NumReversalsUntilTerm = NumReversalsUntilTerm;
+                td.MinTrialsBeforeTerm = MinTrialsBeforeTerm;
+                td.TerminationWindowSize = TerminationWindowSize;
+                
                 TrialDefs[iTrial] = td;
             }
         }
@@ -119,6 +130,9 @@ namespace EffortControl_Namespace
         public int MaxDiffLevel;
         public int AvgDiffLevel;
         public int DiffLevelJitter;
+        public int NumReversalsUntilTerm;
+        public int MinTrialsBeforeTerm;
+        public int TerminationWindowSize;
     }
 
     public class EffortControl_StimDef : StimDef

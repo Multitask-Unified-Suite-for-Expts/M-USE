@@ -463,6 +463,9 @@ namespace USE_Def_Namespace
         public int maxDiffLevel;
         public int avgDiffLevel;
         public int diffLevelJitter;
+        public int numReversalsUntilTerm;
+        public int minTrialsBeforeTerm;
+        public int terminationWindowSize;
         
         /// <summary>
         /// Generates trial definitions based on block definitions.

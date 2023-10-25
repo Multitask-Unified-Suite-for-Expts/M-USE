@@ -405,7 +405,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (!tiles.IsActive)
                 tiles.ToggleVisibility(true);
             MazeBackground.SetActive(true);
-            Debug.Log("tile controler num blinks: " + TileController.NUM_BLINKS + " BLINKING DURATION: " + TileController.TILE_BLINKING_DURATION);
             TileController.NextCorrectFlashingFeedback();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
@@ -516,11 +515,18 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     protected override void DefineTrialStims()
     {
-        if (TrialCount_InBlock == 0)
+        if(TileController == null)
         {
             TileController = Instantiate(TilePrefab);
+            TileController.name = "TileController";
             TileController.mgTL = this;
         }
+        else
+        {
+            TileController.GetComponent<MeshRenderer>().enabled = true;
+        }
+
+
         LoadConfigVariables();
         SetGameConfigs(TileController);
 

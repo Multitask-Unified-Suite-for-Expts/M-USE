@@ -49,8 +49,6 @@ namespace USE_ExperimentTemplate_Task
 {
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
-        public string PrefabPath;
-
         public string ConfigFolderName;
         public string TaskName;
         public string TaskProjectFolder;
@@ -58,21 +56,21 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public int BlockCount;
 
         // protected int NumBlocksInTask;
-        public int NumAbortedTrials_InTask;
-        public int NumRewardPulses_InTask;
+        [HideInInspector] public int NumAbortedTrials_InTask;
+        [HideInInspector] public int NumRewardPulses_InTask;
 
-        public int NumAbortedTrials_InBlock;
-        public int NumRewardPulses_InBlock;
+        [HideInInspector] public int NumAbortedTrials_InBlock;
+        [HideInInspector] public int NumRewardPulses_InBlock;
 
-        public int MinTrials_InBlock;
-        public int MaxTrials_InBlock;
+        [HideInInspector] public int MinTrials_InBlock;
+        [HideInInspector] public int MaxTrials_InBlock;
 
 
-        public bool ForceTaskEnd;
+        [HideInInspector] public bool ForceTaskEnd;
         public ControlLevel_Trial_Template TrialLevel;
-        public BlockData BlockData;
-        public FrameData FrameData;
-        public TrialData TrialData;
+        [HideInInspector] public BlockData BlockData;
+        [HideInInspector] public FrameData FrameData;
+        [HideInInspector] public TrialData TrialData;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
 
         [HideInInspector]
@@ -115,8 +113,8 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public List<CustomSettings> customSettings;
 
-        public bool TrialAndBlockDefsHandled;
-        public bool StimsHandled;
+        [HideInInspector] public bool TrialAndBlockDefsHandled;
+        [HideInInspector] public bool StimsHandled;
 
         //Passed by sessionLevel
         [HideInInspector] public GameObject BlockResultsPrefab;
@@ -127,8 +125,8 @@ namespace USE_ExperimentTemplate_Task
         private bool ContinueButtonClicked;
 
         //Passed by session level
-        public ImportSettings_Level importSettings_Level;
-        public VerifyTask_Level verifyTask_Level;
+        [HideInInspector] public ImportSettings_Level importSettings_Level;
+        [HideInInspector] public VerifyTask_Level verifyTask_Level;
 
 
         public virtual void SpecifyTypes()

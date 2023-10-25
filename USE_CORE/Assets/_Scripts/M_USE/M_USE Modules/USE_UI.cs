@@ -33,10 +33,10 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using USE_Data;
-using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Trial;
+
 
 namespace USE_UI
 {
@@ -64,8 +64,8 @@ namespace USE_UI
         [HideInInspector] public Vector3 InitialEndTaskButtonPosition;
 
 
-        [HideInInspector] public Dictionary<string, string> TaskInstructionsDict;
-        [HideInInspector] public Dictionary<string, string> TaskNamesDict;
+        private Dictionary<string, string> TaskInstructionsDict;
+        private Dictionary<string, string> TaskNamesDict;
 
         [HideInInspector] public string TaskName;
 
@@ -97,7 +97,6 @@ namespace USE_UI
                 { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
                 { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
             };
-
             TaskNamesDict = new Dictionary<string, string>()
             {
                 { "AntiSaccade", "Anti Saccade"},
@@ -110,6 +109,25 @@ namespace USE_UI
                 { "WhatWhenWhere", "What When Where" },
                 { "WorkingMemory", "Working Memory" }
             };
+        }
+
+        //New tasks that are built can call this from their TaskLevel
+        public void AddTaskInstructions(string taskNameOneWord, string instructions)
+        {
+            if (TaskInstructionsDict.ContainsKey(taskNameOneWord))  //if already included, update it
+                TaskInstructionsDict[taskNameOneWord] = instructions;
+            else
+                TaskInstructionsDict.Add(taskNameOneWord, instructions);
+        }
+
+        //New tasks that are built can call this from their TaskLevel
+        public void AddTaskDisplayName(string taskNameOneWord, string taskNameWithSpace)
+        {
+            if (TaskNamesDict.ContainsKey(taskNameOneWord)) //if already included, update it
+
+                TaskNamesDict[taskNameOneWord] = taskNameWithSpace;
+            else
+                TaskNamesDict.Add(taskNameOneWord, taskNameWithSpace);
         }
 
         //Called by TaskLevel

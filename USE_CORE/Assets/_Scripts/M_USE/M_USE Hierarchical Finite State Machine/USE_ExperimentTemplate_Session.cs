@@ -326,8 +326,6 @@ namespace USE_ExperimentTemplate_Session
                     ExpDisplayRenderImage.texture = CameraRenderTexture;
                 }
 
-
-
                 SessionValues.EventCodeManager.SendCodeImmediate("SelectTaskStarts");
 
                 if (SessionValues.SessionDef.SerialPortActive)
@@ -608,10 +606,11 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, setupTask, () =>
             {
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
                 DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
-                //SessionCam.gameObject.SetActive(false);
+                SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
 
                 SetTaskMainBackground(); 
@@ -654,9 +653,6 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.TaskSelectionCanvasGO.SetActive(false);
-                SessionCam.gameObject.SetActive(false);
-
                 SessionValues.EventCodeManager.SendCodeImmediate("RunTaskStarts");
 
                 if (!SessionValues.WebBuild)

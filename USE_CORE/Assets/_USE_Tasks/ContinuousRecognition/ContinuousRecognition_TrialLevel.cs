@@ -432,6 +432,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
     public override void FinishTrialCleanup()
     {
+        if (DisplayResultsPanelGO.activeInHierarchy)
+            DisplayResultsPanelGO.SetActive(false);
+
         DeactivateTextObjects();
         if (playerViewTextList != null && playerViewTextList.Count > 0)
             DeactivatePlayerViewText();
@@ -563,7 +566,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1.25f);
+        HaloFBController.SetHaloSize(1.55f);
         HaloFBController.SetHaloIntensity(1.5f);
     }
 

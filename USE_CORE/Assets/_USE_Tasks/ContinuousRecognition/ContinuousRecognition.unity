@@ -266,6 +266,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 321374840}
     m_Modifications:
+    - target: {fileID: 728584217218209500, guid: 9f595b9d778e14884859364756853e88,
+        type: 3}
+      propertyPath: m_Color.a
+      value: 0.27450982
+      objectReference: {fileID: 0}
     - target: {fileID: 3759070482374655749, guid: 9f595b9d778e14884859364756853e88,
         type: 3}
       propertyPath: m_Name
@@ -788,7 +793,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 26.991467
+  field of view: 36
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -1142,7 +1147,6 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  PrefabPath: 
   ConfigFolderName: 
   TaskName: ContinuousRecognition
   TaskProjectFolder: 
@@ -1218,6 +1222,14 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  runningPerformance: 
+  difficultyLevel: 0
+  posStep: 0
+  negStep: 0
+  TrialDefSelectionStyle: 
+  maxDiffLevel: 0
+  avgDiffLevel: 0
+  diffLevelJitter: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -1246,7 +1258,6 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
-  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
@@ -1254,7 +1265,7 @@ MonoBehaviour:
   HeldTooShortSquareTexture: {fileID: 0}
   HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
-  StartButton: {fileID: 0}
+  CurrentTrialDefIndex: 0
   TimerText: {fileID: 0}
   TimerTextGO: {fileID: 368680574}
   CR_CanvasGO: {fileID: 321374836}
@@ -1293,7 +1304,6 @@ MonoBehaviour:
   TokenUpdateStartTime: 0
   TimeRemaining: 0
   TimeToChoice_Block: []
-  MakeStimPopOut: 0
   playerViewTextList: []
   minObjectTouchDuration:
     name: 

@@ -25,8 +25,7 @@ SOFTWARE.
 
 
 using UnityEngine;
-using UnityEngine.UI;
-using USE_UI;
+
 
 public class FullScreenController : MonoBehaviour
 {
@@ -34,7 +33,6 @@ public class FullScreenController : MonoBehaviour
     public event System.Action<bool> FullScreenChangedEvent;
     private readonly int TargetWidth = 1920;
     private readonly int TargetHeight = 1080;
-
 
     void Start()
     {
@@ -52,12 +50,10 @@ public class FullScreenController : MonoBehaviour
         }
     }
 
-
     protected virtual void OnFullScreenChanged(bool isFullScreen)
     {
         FullScreenChangedEvent?.Invoke(IsFullScreen);
     }
-
 
     public void SubscribeToFullScreenChanged(System.Action<bool> delegateMethod)
     {
@@ -68,7 +64,6 @@ public class FullScreenController : MonoBehaviour
     {
         FullScreenChangedEvent -= delegateMethod;
     }
-
 
 }
 

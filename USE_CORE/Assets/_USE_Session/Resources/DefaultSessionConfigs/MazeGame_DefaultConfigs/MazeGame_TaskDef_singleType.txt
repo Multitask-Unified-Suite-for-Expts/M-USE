@@ -11,7 +11,6 @@ float[]	CorrectColor	[0.62, 1, 0.5]
 float[]	LastCorrectColor	[0.2, 0.7, 0.5]
 float[]	IncorrectRuleAbidingColor	[1, 0.5, 0.25]
 float[]	IncorrectRuleBreakingColor	[0,0,0]
-float[]	DefaultTileColor	[1, 1, 1]
 bool	UsingFixedRatioReward	true
 string	MazeBackgroundTexture	"MazeBackgroundImage"
 Vector3	MazePosition	[0, 0.5, 0]

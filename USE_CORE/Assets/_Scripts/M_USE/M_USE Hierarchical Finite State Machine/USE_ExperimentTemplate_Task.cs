@@ -264,12 +264,10 @@ namespace USE_ExperimentTemplate_Task
                 });
             }
 
-            // RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
-
             RunBlock.AddLateUpdateMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                //SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
@@ -289,7 +287,7 @@ namespace USE_ExperimentTemplate_Task
                 else
                     blockFeedbackDuration = 0;
 
-                SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -301,8 +299,8 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-                StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+               StartCoroutine(FrameData.AppendDataToBuffer());
+               //SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -341,7 +339,7 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
+                    SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && CurrentBlockSummaryString != null)

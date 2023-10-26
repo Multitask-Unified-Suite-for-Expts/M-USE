@@ -246,15 +246,15 @@ public class TokenFBController : MonoBehaviour
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
                         audioFBController.Play("TripleCollected");
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
+                        SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
+                    SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
+                    SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
                     break;
             }
         }

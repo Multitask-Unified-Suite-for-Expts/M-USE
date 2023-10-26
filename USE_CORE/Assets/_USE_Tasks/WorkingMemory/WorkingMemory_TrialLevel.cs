@@ -173,7 +173,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
             ShotgunHandler.HandlerActive = false;
            
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
         });
         
         // Show the target/sample by itself for some time
@@ -198,7 +198,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddSpecificInitializationMethod(() =>
         {
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
             
             choiceMade = false;
 
@@ -230,13 +230,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
             }
 
             if (selectedGO != null)
@@ -250,7 +250,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
             SearchDurations_InBlock.Add(null);
@@ -318,7 +318,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "NeutralITI";
                 CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI"));
-                SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             }
         });
         // Wait for some time at the end

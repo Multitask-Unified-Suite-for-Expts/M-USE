@@ -54,7 +54,6 @@ public class EventCodeManager : MonoBehaviour
 
     public string neuralAcquisitionDevice = "Neuralynx", returnedCodePrefix = "Lynx";
 
-	private SerialPortThreaded serialPortController;
 	public SyncBoxController SyncBoxController;
 
 
@@ -72,6 +71,28 @@ public class EventCodeManager : MonoBehaviour
 				}
                 toSendBuffer.Clear();
             }
+        }
+    }
+
+    public List<int> frameEventCodeBuffer = new List<int>();
+    private int referenceEventCodeMin = 100;
+    private int referenceEventCodeMax = 200;
+    private int referenceEventCode = 100; // Same as Min
+    public string data;
+    public List<int> frameEventCodeBufferToStore;
+    public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
+    {
+        if (frameEventCodeBuffer.Count > 0)
+        {
+            SendCodeImmediate(referenceEventCode);
+            referenceEventCode++;
+            if (referenceEventCode > referenceEventCodeMax)
+                referenceEventCode = referenceEventCodeMin;
+
+            // Store the frameEventCodeBuffer data temporarily
+            frameEventCodeBufferToStore.AddRange(frameEventCodeBuffer);
+
+            frameEventCodeBuffer.Clear();
         }
     }
 
@@ -118,7 +139,8 @@ public class EventCodeManager : MonoBehaviour
 				Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
 			else
 			{
-				SendCodeImmediate(computedCode);
+				//SendCodeImmediate(computedCode); 
+				AddToFrameEventCodeBuffer(computedCode);
 			}
 		}
     }
@@ -167,10 +189,40 @@ public class EventCodeManager : MonoBehaviour
 	    }
     }
 
-	private void SendCode(int codeToSend)
+    // ------------------------ Reference Event Code Equivalent Methods ----------------------
+    public void AddToFrameEventCodeBuffer(int code)
+    {
+        if (!frameEventCodeBuffer.Contains(code))
+        {
+            frameEventCodeBuffer.Add(code);
+        }
+        else
+            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
+
+    }
+
+    public void AddToFrameEventCodeBuffer(string codeString)
+    {
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+            AddToFrameEventCodeBuffer(code);
+    }
+
+    public void AddToFrameEventCodeBuffer(EventCode ec)
+    {
+        if (ec.Value != null)
+            AddToFrameEventCodeBuffer(ec.Value.Value);
+        else
+        {
+            SendCodeImmediate(1);
+            Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
+        }
+    }
+    // -------------------------------------------------------------------------------------
+    private void SendCode(int codeToSend)
 	{
-		SyncBoxController.SendCommand("NEU " + codeToSend.ToString(), new List<string> { returnedCodePrefix, codeToSend.ToString("X") });
-		sentBuffer.Add(codeToSend);
+        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());//, new List<string> { returnedCodePrefix, codeToSend.ToString("X") });        
+        sentBuffer.Add(codeToSend);
 	}
 
 	public void SendSplitCode(int code)
@@ -246,7 +298,7 @@ public class EventCodeManager : MonoBehaviour
             eventCodeBuilder.Append(ending);
 
         //Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
-        SessionValues.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
+        SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(eventCodeBuilder.ToString());
     }
 
 

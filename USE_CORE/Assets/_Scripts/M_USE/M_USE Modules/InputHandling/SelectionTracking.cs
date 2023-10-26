@@ -360,7 +360,7 @@ namespace SelectionTracking
                     {
                         if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
                         {
-                            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+                            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("StartButtonSelected");
                             return true;
                         }
                     }
@@ -408,7 +408,7 @@ namespace SelectionTracking
                     {
                         //For EventCodes:
                         //Debug.Log("EVENTCODE: HoverOffObject (manual)");
-                        SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
+                        SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }
 

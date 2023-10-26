@@ -204,7 +204,7 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
             InstructionsOn = InstructionsGO.activeInHierarchy;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
         //Called at end of SetupTrial (TrialLevel)
@@ -269,7 +269,7 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
             if(SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
         }
@@ -279,7 +279,7 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
             if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
         }
 
     }

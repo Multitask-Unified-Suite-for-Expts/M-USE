@@ -973,12 +973,10 @@ namespace USE_ExperimentTemplate_Session
         {
             if (SessionValues.SessionDef.SerialPortActive)
             {
-                Debug.LogWarning("----FRAME COUNT: " + Time.frameCount + "----");
                 if (SessionValues.SerialPortController.BufferCount("sent") > 0)
                 {
                     try
                     {
-                        Debug.LogWarning("##FRAME COUNT: " + Time.frameCount + "|| " + "APPENDING THE SERIAL SENT DATA !! " + SessionValues.SerialPortController.BufferCount("sent"));
                         StartCoroutine(SessionValues.SerialSentData.AppendDataToBuffer());
                     }
                     catch (Exception e)
@@ -991,7 +989,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     try
                     {
-                        Debug.LogWarning("##FRAME COUNT: " + Time.frameCount + "|| " + "APPENDING THE SERIAL RECV DATA !! " + SessionValues.SerialPortController.BufferCount("received"));
                         StartCoroutine(SessionValues.SerialRecvData.AppendDataToBuffer());
                     }
                     catch (Exception e)

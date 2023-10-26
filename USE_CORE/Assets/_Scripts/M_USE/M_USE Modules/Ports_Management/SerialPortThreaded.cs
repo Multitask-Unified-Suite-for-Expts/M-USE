@@ -68,7 +68,7 @@ public class SerialPortThreaded : MonoBehaviour
     private void FinishInit()
 	{
 		Thread.Sleep(initTimeout);
-		sp.ReadTimeout = 10;
+		sp.ReadTimeout = 1;
 		Thread.Sleep(5);
 		sp.WriteTimeout = 3;
 		Thread.Sleep(5);
@@ -146,7 +146,6 @@ public class SerialPortThreaded : MonoBehaviour
 		{
 			if (sp.BytesToRead > 0)
 			{
-				Debug.Log("THERE ARE BYTES TO READ %%%%%");
 				long timestamp = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
 				string rawInput = sp.ReadExisting();
 				if (lastMsgUnfinished)
@@ -164,13 +163,7 @@ public class SerialPortThreaded : MonoBehaviour
 				{
 					lastMsg = "";
 					lastMsgUnfinished = false;
-				}/*
-				if(input?.Length > 1 && input[0].Length > 9 && input[input.Length -1].Length > 9)
-				{
-                    Debug.LogWarning("@@@HEX TO DEC 1: " + Convert.ToInt32(input[0].Substring(1, 8), 16) + " 2: " + Convert.ToInt32(input[input.Length - 1].Substring(1, 8), 16) + 
-						"\nDIFF/10: " + (Convert.ToInt32(input[0].Substring(1, 8), 16) - Convert.ToInt32(input[input.Length - 1].Substring(1, 8), 16))/10);
-
-                }*/
+				}
 
                 for (int lineCount = 0; lineCount < input.Length; lineCount++)
 				{
@@ -182,7 +175,6 @@ public class SerialPortThreaded : MonoBehaviour
 								string myLine = input[lineCount].TrimEnd();
 								if (!string.IsNullOrEmpty(myLine))
 								{
-									//Debug.Log("Serial Port reading message " + input[lineCount]);
 									lock (receivedBuffer)
 									{
                                         receivedBuffer.Add(timestamp.ToString() + "\t" + myLine);

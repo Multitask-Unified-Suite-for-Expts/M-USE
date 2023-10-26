@@ -94,7 +94,7 @@ public class SyncBoxController
             && sonicationSentThisTrial == false)
         {
             serialPortController.AddToSend("RWB " + ultrasoundTriggerDurationTicks);
-            Session.EventCodeManager.SendCodeImmediate(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
             sonicationSentThisFrame = true;
             sonicationSentThisTrial = true;
             numConsecutiveSonicationTrials += 1;

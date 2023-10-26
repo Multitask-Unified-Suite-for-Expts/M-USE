@@ -197,6 +197,7 @@ namespace USE_ExperimentTemplate_Session
                             Session.SyncBoxController.SendCommand((List<string>)Session.SessionDef.SyncBoxInitCommands);
                     }
                 }
+
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
@@ -228,7 +229,8 @@ namespace USE_ExperimentTemplate_Session
                     Session.InitCamGO.SetActive(false);
                     Session.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
-                Session.EventCodeManager.SendCodeImmediate("SetupSessionEnds");
+              
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("SetupSessionEnds");
 
                 if(Session.SessionDef != null && Session.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
                 {
@@ -242,6 +244,7 @@ namespace USE_ExperimentTemplate_Session
 
                 
             });
+
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
             gazeCalibration.AddSpecificInitializationMethod(() =>
@@ -278,6 +281,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.gameObject.SetActive(true);
 
             });
+            gazeCalibration.AddUpdateMethod(() => { SessionValues.EventCodeManager.CheckFrameEventCodeBuffer(); });
 
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
@@ -532,6 +536,7 @@ namespace USE_ExperimentTemplate_Session
                     break;
                 }
             });
+            selectTask.AddUpdateMethod(() => { SessionValues.EventCodeManager.CheckFrameEventCodeBuffer(); });
 
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
@@ -567,7 +572,9 @@ namespace USE_ExperimentTemplate_Session
 
             bool DefiningTask = false;
             loadTask.AddUpdateMethod(() =>
-            {
+            {                
+                SessionValues.EventCodeManager.CheckFrameEventCodeBuffer();
+
                 if (!SceneLoading && CurrentTask != null && !DefiningTask)
                 {
                     DefiningTask = true;
@@ -627,11 +634,13 @@ namespace USE_ExperimentTemplate_Session
                 CurrentTask.TaskConfigPath = Session.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
             });
             setupTask.SpecifyTermination(() => setupTaskLevel.Terminated, runTask);
+            setupTask.AddUpdateMethod(() => { SessionValues.EventCodeManager.CheckFrameEventCodeBuffer(); });
+
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
-                Session.EventCodeManager.SendCodeImmediate("RunTaskStarts");
-
+                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
+              
                 if (!Session.WebBuild)
                 {
                     CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
@@ -641,12 +650,13 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             
-            runTask.AddUpdateMethod(() => { Session.EventCodeManager.SendBufferedEventCodes(); });
+            runTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
             
             runTask.AddLateUpdateMethod(() =>
             {
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
+                //SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
@@ -709,8 +719,9 @@ namespace USE_ExperimentTemplate_Session
             //FinishSession State---------------------------------------------------------------------------------------------------------------
             finishSession.AddSpecificInitializationMethod(() =>
             {
-                Session.EventCodeManager.SendCodeImmediate("FinishSessionStarts");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishSessionStarts");
             });
+            finishSession.AddUpdateMethod(() => { SessionValues.EventCodeManager.CheckFrameEventCodeBuffer(); });
 
             finishSession.SpecifyTermination(() => true, () => null, () =>
             {
@@ -738,6 +749,9 @@ namespace USE_ExperimentTemplate_Session
                 Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
             else
                 StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
+
+            if (SessionValues.SessionDef != null && SessionValues.SessionDef.SerialPortActive && SessionValues.SerialPortController != null)
+                SessionValues.SerialPortController.ClosePort();
         }
 
         //Method is used to have every task set their main background as the MUSE blue background
@@ -1042,7 +1056,7 @@ namespace USE_ExperimentTemplate_Session
         {
             AppendSerialData();
             StartCoroutine(FrameData.AppendDataToBuffer());
-            Session.EventCodeManager.EventCodeLateUpdate();
+         //  Session.EventCodeManager.EventCodeLateUpdate();
         }
     }
 }

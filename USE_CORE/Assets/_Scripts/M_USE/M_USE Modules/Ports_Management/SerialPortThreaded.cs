@@ -51,10 +51,12 @@ public class SerialPortThreaded : MonoBehaviour
 	public object responseCheckLocker = new object();
 	//public EventWaitHandle _waitForRecvCodeDetected = new EventWaitHandle(false, EventResetMode.AutoReset);
 
-	public int minMsBetweenSending = 3, msBetweenReceiving = 1, readTimeout = 1, writeTimeout = 3, initTimeout = 2000;
+	public int minMsBetweenSending = 3, msBetweenReceiving = 2, readTimeout = 1, writeTimeout = 3, initTimeout = 2000;
 	public long lastSentTimeStamp;
 	private EventWaitHandle _waitForSendCode = new AutoResetEvent(false), _waitForRecvCodeDetected = new AutoResetEvent(false);
 	public bool active;
+
+	public List<string> recvBufferCheck = new List<string>();
 
 	public void Initialize()
 	{
@@ -152,18 +154,18 @@ public class SerialPortThreaded : MonoBehaviour
 					lastMsgUnfinished = false;
 				}
 				string[] input = rawInput.Split('\n');
-				if (
-				rawInput[rawInput.Length - 1] != '\n')
+				if (rawInput[rawInput.Length - 1] != '\n')
 				{
 					lastMsgUnfinished = true;
 					lastMsg = input[input.Length - 1];
-				}
-				else
+                }
+                else
 				{
 					lastMsg = "";
 					lastMsgUnfinished = false;
 				}
-				for (int lineCount = 0; lineCount < input.Length; lineCount++)
+
+                for (int lineCount = 0; lineCount < input.Length; lineCount++)
 				{
 					switch (dataVerbosity)
 					{
@@ -173,10 +175,11 @@ public class SerialPortThreaded : MonoBehaviour
 								string myLine = input[lineCount].TrimEnd();
 								if (!string.IsNullOrEmpty(myLine))
 								{
-									//Debug.Log("Serial Port reading message " + input[lineCount]);
 									lock (receivedBuffer)
-										receivedBuffer.Add(timestamp.ToString() + "\t" + myLine);
-									if (checkForResponseCode != null)
+									{
+                                        receivedBuffer.Add(timestamp.ToString() + "\t" + myLine);
+                                    }
+                                    if (checkForResponseCode != null)
 									{
 										lock (responseCheckLocker)
 										{
@@ -291,7 +294,7 @@ public class SerialPortThreaded : MonoBehaviour
 			lock (receivedBuffer)
 			{
 				outputString = ConvertBuffer(receivedBuffer);
-				receivedBuffer.Clear();
+                receivedBuffer.Clear();
 			}
 		else if (bufferType == "sent")
 			lock (sentBuffer)

@@ -61,6 +61,8 @@ namespace USE_Data
 				}
 				catch (Exception e)
 				{
+                    Debug.Log("STRING FUNC: " + stringFunc());
+
                     Debug.Log("Null error, name: " + name + " variable: " + v + " | " + "Error: " + e.ToString());
                     //Debug.LogError("Null error, name: " + this.name + " variable: " + v);
 					//throw e;
@@ -82,6 +84,7 @@ namespace USE_Data
 					string returnString = "";
 					if (v == null)
 					{
+
 						// Debug.LogWarning("Null value returned for Datum, name: " + this.name);
 						returnString = "null";
 					}

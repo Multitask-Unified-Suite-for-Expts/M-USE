@@ -214,7 +214,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.enabled = true;
-            Session.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
 
             if (CurrentTask.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
@@ -440,7 +440,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             DeactivatePlayerViewText();
         DestroyFeedbackBorders();
         ContextActive = false;
-        Session.EventCodeManager.SendCodeNextFrame("ContextOff");
+        Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
 
         if (AbortCode == 0)
         {

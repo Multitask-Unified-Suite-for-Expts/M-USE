@@ -201,7 +201,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
             
-            Session.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderReset");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
 
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
@@ -276,20 +276,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.NumCorrectSelections_InBlock++;
                 NumCorrect_InTrial++;
                 isSliderValueIncrease = true;
-                Session.EventCodeManager.SendCodeImmediate("CorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                 
             }
             else
             {
                 
                 isSliderValueIncrease = false;
-                Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 //Repetition Error
                 if (TouchedObjects.Contains(selectedSD.StimIndex))
                 {
                     CurrentTaskLevel.RepetitionErrorCount_InBlock++;
                     selectionClassification = "RepetitionError";
-                    Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["RepetitionError"]);
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RepetitionError"]);
 
                     if (selectedGO == LastCorrectStimGO && consecutiveError == 0)
                     {
@@ -309,14 +309,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     {
                         CurrentTaskLevel.DistractorSlotErrorCount_InBlock++;
                         selectionClassification = "DistractorSlotError";
-                        Session.EventCodeManager.SendCodeImmediate("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
                     }
                     //Stimuli Slot error
                     else
                     {
                         CurrentTaskLevel.SlotErrorCount_InBlock++;
                         selectionClassification = "SlotError";
-                        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["SlotError"]);
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SlotError"]);
                     }
                 }
                 
@@ -334,7 +334,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.SendCodeNextFrame("NoChoice");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
@@ -499,7 +499,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
             runningErrorCount.Add(NumErrors_InTrial);
             
-            Session.EventCodeManager.SendCodeNextFrame("SliderFbController_SliderCompleteFbOn");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOn");
                         
             if (Session.SyncBoxController != null)
             {
@@ -511,8 +511,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.SendCodeImmediate("SliderFbController_SliderCompleteFbOff");
-            Session.EventCodeManager.SendCodeNextFrame("ContextOff");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             
             CurrentTaskLevel.SetBlockSummaryString();
         });

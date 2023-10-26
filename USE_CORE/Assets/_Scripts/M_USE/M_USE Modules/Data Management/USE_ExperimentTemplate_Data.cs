@@ -202,13 +202,25 @@ namespace USE_ExperimentTemplate_Data
         public void AddFlashPanelColumns()
         {
             AddDatum("FlashPanelLStatus", ()=> Session.FlashPanelController.leftLuminanceFactor);
-            AddDatum("FlashPanelLStatus", ()=> Session.FlashPanelController.rightLuminanceFactor);
+            AddDatum("FlashPanelRStatus", ()=> Session.FlashPanelController.rightLuminanceFactor);
         }
+
         public void AddEventCodeColumns()
         {
-            AddDatum("EventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("sent")));
-            AddDatum("SplitEventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("split")));
-            AddDatum("PreSplitEventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("presplit")));
+            AddDatum("ReferenceEventCodes", () =>
+            {
+                string dataString = string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent"));
+                SessionValues.EventCodeManager.sentBuffer.Clear();
+                return dataString; // Return the data string
+            });
+            // AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
+            //AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
+            AddDatum("FrameEventCodes", () =>
+            {
+                string dataString = string.Join(",", SessionValues.EventCodeManager.frameEventCodeBufferToStore);
+                SessionValues.EventCodeManager.frameEventCodeBufferToStore.Clear();
+                return dataString; // Return the data string
+            });
         }
     }
 

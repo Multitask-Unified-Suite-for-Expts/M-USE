@@ -181,7 +181,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
             
 
-            Session.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -211,13 +211,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             {       
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                Session.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                Session.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
             }
 
             if (selectedGO != null)
@@ -229,7 +229,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.SendCodeNextFrame("NoChoice");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
@@ -306,8 +306,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI"));
-                Session.EventCodeManager.SendCodeNextFrame("ContextOff");
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI"));
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>

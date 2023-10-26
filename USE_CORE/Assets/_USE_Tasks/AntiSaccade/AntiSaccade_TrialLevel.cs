@@ -149,7 +149,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+            //Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
             SetTrialSummaryString();
 

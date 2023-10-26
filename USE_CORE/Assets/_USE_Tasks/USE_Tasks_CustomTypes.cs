@@ -38,6 +38,7 @@ using THR_Namespace;
 using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
 using AntiSaccade_Namespace;
+using TemporalOrderJudgement_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -179,6 +180,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(AntiSaccade_BlockDef),
                 TrialDefType = typeof(AntiSaccade_TrialDef),
                 StimDefType = typeof(AntiSaccade_StimDef)
+            }
+        }
+        ,{
+            "TemporalOrderJudgement", new TaskTypes
+            {
+                TaskLevelType = typeof(TemporalOrderJudgement_TaskLevel),
+                TrialLevelType = typeof(TemporalOrderJudgement_TrialLevel),
+                TaskDefType = typeof(TemporalOrderJudgement_TaskDef),
+                BlockDefType = typeof(TemporalOrderJudgement_BlockDef),
+                TrialDefType = typeof(TemporalOrderJudgement_TrialDef),
+                StimDefType = typeof(TemporalOrderJudgement_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

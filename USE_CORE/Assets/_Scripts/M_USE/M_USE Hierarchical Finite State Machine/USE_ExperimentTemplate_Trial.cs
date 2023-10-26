@@ -179,6 +179,8 @@ namespace USE_ExperimentTemplate_Trial
 
         public void DefineTrialLevel()
         {
+            Session.TrialLevel = this;
+
             LoadTrialTextures = new State("LoadTrialTextures");
             LoadTrialStims = new State("LoadTrialStims");
             SetupTrial = new State("SetupTrial");
@@ -203,7 +205,7 @@ namespace USE_ExperimentTemplate_Trial
                 }
                 
                 // Set the GazeData path back to the current config folder
-                SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
+                Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar +  "GazeData";
             }
 
             AddActiveStates(new List<State> { LoadTrialTextures, LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
@@ -215,9 +217,6 @@ namespace USE_ExperimentTemplate_Trial
                 TokenFBController.enabled = false;
 
             AddAbortCodeKeys();
-
-            if (SessionValues.SessionDef.IsHuman)
-                SessionValues.HumanStartPanel.SetTrialLevel(this);
 
             Debugger = new UI_Debugger();
 
@@ -252,20 +251,20 @@ namespace USE_ExperimentTemplate_Trial
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
-                if(!SessionValues.WebBuild && TrialCount_InTask != 0)
-                    SessionValues.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
+                if(!Session.WebBuild && TrialCount_InTask != 0)
+                    Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
 
-                FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
-                if(SessionValues.SessionDef.EyeTrackerActive)
-                    SessionValues.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
+                FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                if(Session.SessionDef.EyeTrackerActive)
+                    Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
 
-                if (SessionValues.SessionDef.SerialPortActive)
+                if (Session.SessionDef.SerialPortActive)
                 {
-                    SessionValues.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
-                    SessionValues.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, SessionValues.FilePrefix);
+                    Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                    Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
                 }
 
-                SessionValues.ClearStimLists();
+                Session.ClearStimLists();
                 DefineTrialStims();
                 StartCoroutine(HandleLoadingStims());
             });
@@ -273,9 +272,9 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.LoadingController.DeactivateLoadingCanvas();
+                Session.LoadingController.DeactivateLoadingCanvas();
 
-                if (SessionValues.WebBuild)
+                if (Session.WebBuild)
                     Cursor.visible = true;
 
                 //turning off instructions text at start of each trial, in case they left them on during last trial.
@@ -283,18 +282,18 @@ namespace USE_ExperimentTemplate_Trial
 
                 TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
-                SessionValues.EventCodeManager.SendRangeCode("SetupTrialStarts", TrialCount_InTask);
+                Session.EventCodeManager.SendRangeCode("SetupTrialStarts", TrialCount_InTask);
 
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
 
                 //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
-                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null && SessionValues.SessionDef.SyncBoxActive)
+                if (Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null && Session.SessionDef.SyncBoxActive)
                 {
-                    if (Time.time - Camera_PulseSentTime > SessionValues.SessionDef.Camera_TrialPulseMinGap_Sec)
+                    if (Time.time - Camera_PulseSentTime > Session.SessionDef.Camera_TrialPulseMinGap_Sec)
                     {
-                        SessionValues.SyncBoxController.SendCameraSyncPulses(SessionValues.SessionDef.Camera_TrialStart_NumPulses, SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                        Session.SyncBoxController.SendCameraSyncPulses(Session.SessionDef.Camera_TrialStart_NumPulses, Session.SessionDef.Camera_PulseSize_Ticks);
                         Camera_PulseSentTime = Time.time;
                     }
                 }
@@ -304,8 +303,8 @@ namespace USE_ExperimentTemplate_Trial
             SetupTrial.AddDefaultTerminationMethod(() =>
             {
                 Input.ResetInputAxes();
-                if (SessionValues.SessionDef.IsHuman)
-                    SessionValues.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
+                if (Session.SessionDef.IsHuman)
+                    Session.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
 
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
@@ -316,7 +315,7 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddSpecificInitializationMethod(() =>
             {
-                SessionValues.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
+                Session.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
             });
             FinishTrial.SpecifyTermination(() => runCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
@@ -344,7 +343,7 @@ namespace USE_ExperimentTemplate_Trial
                 Resources.UnloadUnusedAssets();
                 TrialSummaryString = "";
 
-                SessionValues.ClearStimLists();
+                Session.ClearStimLists();
             });
             
             GazeCalibration.AddSpecificInitializationMethod(() =>
@@ -380,7 +379,7 @@ namespace USE_ExperimentTemplate_Trial
                 GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(true);
 
                 // Set the GazeDataPath to be inside the GazeCalibration Folder
-                SessionValues.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                Session.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             });
 
             GazeCalibration.SpecifyTermination(() => !runCalibration, () => SetupTrial, () =>
@@ -390,7 +389,7 @@ namespace USE_ExperimentTemplate_Trial
                {
                    canvas.gameObject.SetActive(true);
                }
-               if (SessionValues.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
+               if (Session.SessionDef.EyeTrackerActive && TobiiEyeTrackerController.Instance.isCalibrating)
                {
                    TobiiEyeTrackerController.Instance.isCalibrating = false;
                    TobiiEyeTrackerController.Instance.ScreenBasedCalibration.LeaveCalibrationMode();
@@ -401,7 +400,7 @@ namespace USE_ExperimentTemplate_Trial
                GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
 
                // Set the Gaze Data Path back to the outer level task folder
-               SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+               Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
 
            });
 
@@ -451,21 +450,21 @@ namespace USE_ExperimentTemplate_Trial
 
         public void ClearActiveTrialHandlers()
         {
-            if (SessionValues.SelectionTracker.TrialHandlerNames.Count > 0)
+            if (Session.SelectionTracker.TrialHandlerNames.Count > 0)
             {
                 List<string> toRemove = new List<string>();
 
-                foreach (string handlerName in SessionValues.SelectionTracker.TrialHandlerNames)
+                foreach (string handlerName in Session.SelectionTracker.TrialHandlerNames)
                 {
-                    if (SessionValues.SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    if (Session.SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
                     {
-                        SessionValues.SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        Session.SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
                         toRemove.Add(handlerName);
                     }
                 }
 
                 foreach (string handlerName in toRemove)
-                    SessionValues.SelectionTracker.TrialHandlerNames.Remove(handlerName);
+                    Session.SelectionTracker.TrialHandlerNames.Remove(handlerName);
             }
         }
 
@@ -477,13 +476,13 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(FrameData.AppendDataToBuffer());
             StartCoroutine(FrameData.AppendDataToFile());
 
-            if (SessionValues.GazeData != null)
-                StartCoroutine(SessionValues.GazeData.AppendDataToFile());
+            if (Session.GazeData != null)
+                StartCoroutine(Session.GazeData.AppendDataToFile());
 
-            if(SessionValues.SerialRecvData != null)
-                StartCoroutine(SessionValues.SerialRecvData.AppendDataToFile());
-            if(SessionValues.SerialSentData != null)
-                StartCoroutine(SessionValues.SerialSentData.AppendDataToFile());
+            if(Session.SerialRecvData != null)
+                StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+            if(Session.SerialSentData != null)
+                StartCoroutine(Session.SerialSentData.AppendDataToFile());
          
         }
         
@@ -569,11 +568,11 @@ namespace USE_ExperimentTemplate_Trial
 
         private void TurnOffInstructionsText()
         {
-            if (SessionValues.SessionDef.IsHuman && SessionValues.HumanStartPanel != null && SessionValues.HumanStartPanel.InstructionsOn)
+            if (Session.SessionDef.IsHuman && Session.HumanStartPanel != null && Session.HumanStartPanel.InstructionsOn)
             {
-                SessionValues.HumanStartPanel.InstructionsGO.SetActive(false);
-                SessionValues.HumanStartPanel.InstructionsOn = false;
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+                Session.HumanStartPanel.InstructionsGO.SetActive(false);
+                Session.HumanStartPanel.InstructionsOn = false;
+                Session.EventCodeManager.SendCodeImmediate(Session.EventCodeManager.SessionEventCodes["InstructionsOff"]);
             }
         }
 
@@ -734,15 +733,15 @@ namespace USE_ExperimentTemplate_Trial
         {
             try
             {
-                HeldTooLongTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong");
-                HeldTooShortTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooShort");
-                MovedTooFarTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/MovedTooFar");
+                HeldTooLongTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooLong");
+                HeldTooShortTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooShort");
+                MovedTooFarTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/MovedTooFar");
                 TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
                 TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
                 TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
-                HeldTooLongSquareTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooLong_Square");
-                HeldTooShortSquareTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/HeldTooShort_Square");
-                MovedTooFarSquareTexture = Resources.Load<Texture2D>($"{SessionValues.DefaultContextFolderPath}/MovedTooFar_Square");
+                HeldTooLongSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooLong_Square");
+                HeldTooShortSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooShort_Square");
+                MovedTooFarSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/MovedTooFar_Square");
             }
             catch(Exception e)
             {

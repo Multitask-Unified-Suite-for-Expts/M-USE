@@ -233,11 +233,11 @@ public class EventCodeManager : MonoBehaviour
         if (sdp != null && sdp.StimDef.StimGameObject != null)
             go = sdp.StimDef.StimGameObject;
 
-        if (SessionValues.TargetObjects.Contains(go))
+        if (Session.TargetObjects.Contains(go))
             eventCodeBuilder.Append("TargetObject");
-        else if (SessionValues.DistractorObjects.Contains(go))
+        else if (Session.DistractorObjects.Contains(go))
             eventCodeBuilder.Append("DistractorObject");
-        else if (SessionValues.IrrelevantObjects.Contains(go))
+        else if (Session.IrrelevantObjects.Contains(go))
             eventCodeBuilder.Append("IrrelevantObject");
         else
             eventCodeBuilder.Append("Object");
@@ -246,7 +246,7 @@ public class EventCodeManager : MonoBehaviour
             eventCodeBuilder.Append(ending);
 
         //Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
-        SessionValues.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
+        Session.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
     }
 
 

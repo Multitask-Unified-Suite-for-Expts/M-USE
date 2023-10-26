@@ -68,9 +68,9 @@ public class SetupTask_Level : ControlLevel
         OtherSetup.AddSpecificInitializationMethod(() =>
         {  
             //Setup data management
-            TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "Task" +SessionValues.GetNiceIntegers(4,SessionValues.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
+            TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" +Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
 
-            if (SessionValues.StoringDataOnServer)
+            if (Session.StoringDataOnServer)
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
             }
@@ -78,14 +78,14 @@ public class SetupTask_Level : ControlLevel
             if (TaskName == "GazeCalibration")
             {
                 //Setup data management
-                if (SessionValues.SessionLevel.CurrentState.StateName == "SetupSession")
+                if (Session.SessionLevel.CurrentState.StateName == "SetupSession")
                     // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar +
+                    TaskDataPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar +
                                    "PreTask_GazeCalibration";
 
                 else
                     // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = SessionValues.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName +
+                    TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName +
                                    Path.DirectorySeparatorChar + "InTask_GazeCalibration";
 
                 ConfigFolderName = "GazeCalibration";
@@ -93,51 +93,37 @@ public class SetupTask_Level : ControlLevel
             }
 
 
-            string filePrefix = $"{SessionValues.FilePrefix}_{ConfigFolderName}";
+            string filePrefix = $"{Session.FilePrefix}_{ConfigFolderName}";
 
             string subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "BlockData";
-            BlockData = (BlockData) SessionValues.SessionDataControllers.InstantiateDataController<BlockData>(
+            BlockData = (BlockData) Session.SessionDataControllers.InstantiateDataController<BlockData>(
                 "BlockData", ConfigFolderName, subFolderPath);
-            BlockData.taskLevel = TaskLevel;
-            BlockData.sessionLevel = SessionValues.SessionLevel;
             BlockData.fileName = filePrefix + "__BlockData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "TrialData";
-            TrialData = (TrialData) SessionValues.SessionDataControllers.InstantiateDataController<TrialData>(
+            TrialData = (TrialData) Session.SessionDataControllers.InstantiateDataController<TrialData>(
                 "TrialData", ConfigFolderName,
                 TaskDataPath + Path.DirectorySeparatorChar + "TrialData");
 
             //TrialLevel = TaskLevel.TrialLevel; //Moved up to verifyTask term method so that it exists before loading shared textures
 
-            TrialData.taskLevel = TaskLevel;
-            TrialData.trialLevel = TrialLevel;
-            TrialData.sessionLevel = SessionValues.SessionLevel;
-
             TrialLevel.TrialData = TrialData;
             TrialData.fileName = filePrefix + "__TrialData.txt";
 
             subFolderPath = TaskDataPath + Path.DirectorySeparatorChar + "FrameData";
-            FrameData = (FrameData) SessionValues.SessionDataControllers.InstantiateDataController<FrameData>(
+            FrameData = (FrameData) Session.SessionDataControllers.InstantiateDataController<FrameData>(
                 "FrameData", ConfigFolderName,
                 TaskDataPath + Path.DirectorySeparatorChar + "FrameData");
-            FrameData.taskLevel = TaskLevel;
-            FrameData.trialLevel = TrialLevel;
-            FrameData.sessionLevel = SessionValues.SessionLevel;
 
            // TrialLevel.FrameData = FrameData;
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
-            if (SessionValues.SessionDef.EyeTrackerActive)
+            if (Session.SessionDef.EyeTrackerActive)
             {
-                SessionValues.GazeData.taskLevel = TaskLevel;
-                SessionValues.GazeData.trialLevel = TrialLevel;
-                SessionValues.GazeData.sessionLevel = SessionValues.SessionLevel;
-                SessionValues.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
-                SessionValues.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                Session.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
+                Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
 
-            FrameData.taskLevel = TaskLevel;
-            FrameData.trialLevel = TrialLevel;
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
 
             BlockData.InitDataController();
@@ -147,12 +133,12 @@ public class SetupTask_Level : ControlLevel
             BlockData.ManuallyDefine();
             TrialData.ManuallyDefine();
             FrameData.ManuallyDefine();
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeData.ManuallyDefine();
+            if (Session.SessionDef.EyeTrackerActive)
+                Session.GazeData.ManuallyDefine();
 
-            if (SessionValues.SessionDef.EventCodesActive)
+            if (Session.SessionDef.EventCodesActive)
                 FrameData.AddEventCodeColumns();
-            if (SessionValues.SessionDef.FlashPanelsActive)
+            if (Session.SessionDef.FlashPanelsActive)
                 FrameData.AddFlashPanelColumns();
 
             
@@ -163,7 +149,7 @@ public class SetupTask_Level : ControlLevel
             TaskLevel.TrialLevel = TrialLevel;
 
 
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), SessionValues.InputManager.transform);
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Session.InputManager.transform);
 
             List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
 
@@ -179,9 +165,9 @@ public class SetupTask_Level : ControlLevel
             if (TaskLevel.CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = TaskLevel.CustomTaskEventCodes;
 
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                SessionValues.GazeTracker.Init(FrameData, 0);
-            SessionValues.MouseTracker.Init(FrameData, 0);
+            if (Session.SessionDef.EyeTrackerActive)
+                Session.GazeTracker.Init(FrameData, 0);
+            Session.MouseTracker.Init(FrameData, 0);
 
 
             //Automatically giving TouchFbController;
@@ -229,7 +215,7 @@ public class SetupTask_Level : ControlLevel
                 }
             }
 
-            SessionValues.InputManager.SetActive(false);
+            Session.InputManager.SetActive(false);
 
             TaskLevel.DefineControlLevel();
             TrialLevel.TaskLevel = TaskLevel;
@@ -240,8 +226,8 @@ public class SetupTask_Level : ControlLevel
             BlockData.AddStateTimingData(TaskLevel);
             StartCoroutine(BlockData.CreateFile());
             StartCoroutine(FrameData.CreateFile());
-            if (SessionValues.SessionDef.EyeTrackerActive)
-                StartCoroutine(SessionValues.GazeData.CreateFile());
+            if (Session.SessionDef.EyeTrackerActive)
+                StartCoroutine(Session.GazeData.CreateFile());
 
         });
         OtherSetup.SpecifyTermination(() => true, () => null);

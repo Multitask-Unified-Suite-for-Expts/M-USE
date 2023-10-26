@@ -30,7 +30,7 @@ using TMPro;
 using System.IO;
 using UnityEngine.UI;
 using System.Collections;
-using USE_UI;
+
 
 public class InitScreen_Level : ControlLevel
 {
@@ -144,12 +144,12 @@ public class InitScreen_Level : ControlLevel
         CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
-            SessionValues.SubjectID = GetSubjectID();
-            SessionValues.SubjectAge = GetSubjectAge();
+            Session.SubjectID = GetSubjectID();
+            Session.SubjectAge = GetSubjectAge();
             SetConfigInfo();
             SetDataInfo();
             InitScreenCanvas_GO.SetActive(false);
-            SessionValues.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
+            Session.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
     }
@@ -164,7 +164,7 @@ public class InitScreen_Level : ControlLevel
     {
         yield return new WaitForEndOfFrame(); //Have to wait a frame so that the toggle's can load their IsOn value from PlayerPrefs during their Start() method of ToggleManager.cs
 
-        if(SessionValues.WebBuild)
+        if(Session.WebBuild)
         {
             LocalConfig_Toggle.isOn = false;
             LocalData_Toggle.isOn = false;
@@ -251,12 +251,12 @@ public class InitScreen_Level : ControlLevel
     {
         if (LocalData_Toggle.isOn)
         {
-            SessionValues.StoringDataLocally = true;
-            SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder");
+            Session.StoringDataLocally = true;
+            Session.SessionDataPath = Session.LocateFile.GetPath("Data Folder");
         }
         else if (ServerData_Toggle.isOn)
         {
-            SessionValues.StoringDataOnServer = true;
+            Session.StoringDataOnServer = true;
             ServerManager.RootDataFolder = GetDataValue();
         }
     }
@@ -265,19 +265,19 @@ public class InitScreen_Level : ControlLevel
     {
         if (LocalConfig_Toggle.isOn)
         {
-            SessionValues.UsingLocalConfigs = true;
-            SessionValues.ConfigFolderPath = SessionValues.LocateFile.GetPath("Config Folder");
+            Session.UsingLocalConfigs = true;
+            Session.ConfigFolderPath = Session.LocateFile.GetPath("Config Folder");
         }
         else if (ServerConfig_Toggle.isOn)
         {
-            SessionValues.UsingServerConfigs = true;
+            Session.UsingServerConfigs = true;
             ServerManager.SetSessionConfigFolderName(FolderDropdown.dropdown.options[FolderDropdown.dropdown.value].text);
-            SessionValues.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
+            Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
         }
         else if (DefaultConfig_Toggle.isOn)
         {
-            SessionValues.UsingDefaultConfigs = true;
-            SessionValues.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
+            Session.UsingDefaultConfigs = true;
+            Session.ConfigFolderPath = Application.persistentDataPath + Path.DirectorySeparatorChar + "M_USE_DefaultConfigs";
         }
         else
             Debug.LogWarning("TRYING TO SET CONFIG INFO BUT NO CONFIG TOGGLE IS SELECTED!");
@@ -382,7 +382,7 @@ public class InitScreen_Level : ControlLevel
             name = "Config Folder",
             isFolder = true
         };
-        SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
+        Session.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
         TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
         configFileItem.ManualStart(configFileSpec, configInputField, LocalConfigText);
@@ -393,13 +393,13 @@ public class InitScreen_Level : ControlLevel
             name = "Data Folder",
             isFolder = true
         };
-        SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
+        Session.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
         TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();
         dataFileItem.ManualStart(dataFileSpec, dataInputField, LocalDataText);
         LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
 
-        if (SessionValues.WebBuild)
+        if (Session.WebBuild)
         {
             LocalData_GO.SetActive(false);
             LocalConfig_GO.SetActive(false);
@@ -418,8 +418,8 @@ public class InitScreen_Level : ControlLevel
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
 
-        if (SessionValues.WebBuild)
-            SessionValues.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
+        if (Session.WebBuild)
+            Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
     }
 
     public void HandleSettingButtonClicked()

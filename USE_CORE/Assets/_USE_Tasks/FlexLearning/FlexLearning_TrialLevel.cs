@@ -112,7 +112,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if(!SessionValues.WebBuild)
+            if(!Session.WebBuild)
             {
                 playerView = gameObject.AddComponent<PlayerViewPanel>();
                 playerViewParent = GameObject.Find("MainCameraCopy");     
@@ -132,15 +132,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             
             if (StartButton == null)
             {
-                if (SessionValues.SessionDef.IsHuman)
+                if (Session.SessionDef.IsHuman)
                 {
-                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
-                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = Session.HumanStartPanel.StartButtonGO;
+                    Session.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
-                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = Session.USE_StartButton.CreateStartButton(FL_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
+                    Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
 
@@ -152,11 +152,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", SessionValues.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO);
+        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO, true);
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
+            if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
@@ -179,17 +179,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they holding down
             TokenFBController.enabled = true;
 
-            if (!SessionValues.WebBuild)
+            if (!Session.WebBuild)
                 ActivateChildren(playerViewParent);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            Session.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
 
-            if (!SessionValues.WebBuild)
+            if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
         });
         SearchDisplay.AddUpdateMethod(() =>
@@ -212,14 +212,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+                Session.EventCodeManager.SendCodeNextFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
+                Session.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
             }
 
         if (selectedGO != null)
@@ -233,8 +233,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            Session.EventCodeManager.SendCodeNextFrame("NoChoice");
+            Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
             runningAcc.Add(0);
@@ -253,7 +253,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            int? depth = SessionValues.Using2DStim ? 50 : (int?)null;
+            int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
                 HaloFBController.ShowPositive(selectedGO, depth);
@@ -270,7 +270,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddSpecificInitializationMethod(() =>
         {
-            if (!SessionValues.WebBuild)
+            if (!Session.WebBuild)
                 DestroyTextOnExperimenterDisplay();
 
             if (selectedSD.StimTokenRewardMag > 0)
@@ -293,14 +293,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
 
-                if (SessionValues.SyncBoxController != null)
+                if (Session.SyncBoxController != null)
                 {
                     int NumPulses;
                     if (CurrentTrialDef.ProbablisticNumPulses != null)
                         NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
                     else
                         NumPulses = CurrentTrialDef.NumPulses;
-                    SessionValues.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
+                    Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
                     //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
                     CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
@@ -314,8 +314,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI")));
-                SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI")));
+                Session.EventCodeManager.SendCodeNextFrame("ContextOff");
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
@@ -335,9 +335,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         foreach (FlexLearning_StimDef stim in searchStim.stimDefs)
         {
             if (stim.IsTarget)
-                SessionValues.TargetObjects.Add(stim.StimGameObject);
+                Session.TargetObjects.Add(stim.StimGameObject);
             else
-                SessionValues.DistractorObjects.Add(stim.StimGameObject);   
+                Session.DistractorObjects.Add(stim.StimGameObject);   
         }
     }
 
@@ -352,7 +352,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public override void FinishTrialCleanup()
     {
         // Remove the Stimuli, Context, and Token Bar from the Player View and move to neutral ITI State
-        if (!SessionValues.WebBuild)
+        if (!Session.WebBuild)
             DestroyTextOnExperimenterDisplay();
 
         searchStim.ToggleVisibility(false);
@@ -379,7 +379,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
         //destroyed at TrialLevel_Finish
 
-        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         searchStim = new StimGroup("SearchStimuli", group, CurrentTrialDef.TrialStimIndices);
 
@@ -431,7 +431,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        SessionValues.MouseTracker.ResetClicks();
+        Session.MouseTracker.ResetClicks();
     }
     private void DefineTrialData()
     {
@@ -443,7 +443,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
         TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
-        TrialData.AddDatum("TotalClicks", ()=> SessionValues.MouseTracker.GetClickCount()[0]);
+        TrialData.AddDatum("TotalClicks", ()=> Session.MouseTracker.GetClickCount()[0]);
     }
     private void DefineFrameData()
     {

@@ -323,9 +323,9 @@ public class InputBroker
 	{
         
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
-        if (SessionValues.TobiiEyeTrackerController?.iEyeTracker != null)
+        if (Session.TobiiEyeTrackerController?.iEyeTracker != null)
         { // Get the most recent gaze data point
-            var gazeData = SessionValues.TobiiEyeTrackerController.EyeTracker?.LatestGazeData; // REFER TO TOBII EYETRACKER CONTROLLER
+            var gazeData = Session.TobiiEyeTrackerController.EyeTracker?.LatestGazeData; // REFER TO TOBII EYETRACKER CONTROLLER
 
 			if (gazeData != null)
 			{

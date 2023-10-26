@@ -314,7 +314,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
-                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : SessionValues.SessionDef.ContextExternalFilePath, "NeutralITI")));
+                StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI")));
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             }
         });

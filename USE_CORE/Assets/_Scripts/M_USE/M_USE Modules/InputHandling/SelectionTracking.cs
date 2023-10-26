@@ -408,7 +408,7 @@ namespace SelectionTracking
                     {
                         //For EventCodes:
                         //Debug.Log("EVENTCODE: HoverOffObject (manual)");
-                        SessionV.EventCodeManager.AddToFrameEventCodeBuffer("HoverOffObject");
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }
 

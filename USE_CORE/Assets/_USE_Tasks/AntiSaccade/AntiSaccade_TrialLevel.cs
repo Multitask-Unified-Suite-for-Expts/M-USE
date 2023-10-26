@@ -224,7 +224,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.SpatialCueActiveThroughDisplayTarget)
             {
                 SpatialCue_GO.SetActive(false);
-                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOff"]);
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOff"]);
             }
         });
 

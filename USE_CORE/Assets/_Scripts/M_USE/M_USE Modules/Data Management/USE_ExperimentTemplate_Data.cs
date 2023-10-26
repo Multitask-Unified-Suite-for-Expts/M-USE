@@ -194,7 +194,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => Session.TaskLevel != null ? (Session.TaskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => Session.TrialLevel != null ? (Session.TrialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InBlock", () => Session.TrialLevel != null ? (Session.TrialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
-            AddDatum("CurrentTrialState", () => Session.TrialLevel != null ? Session.TrialLevel.CurrentState.StateName : "NoTaskActive");
+            AddDatum("CurrentTrialState", () => Session.TrialLevel != null ? Session.TrialLevel.CurrentState?.StateName : "NoTaskActive");
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
         }

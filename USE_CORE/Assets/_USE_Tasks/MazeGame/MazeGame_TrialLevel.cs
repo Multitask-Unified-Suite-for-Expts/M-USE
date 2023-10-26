@@ -424,7 +424,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeOff"]);
 
             if (finishedMaze)
-                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
             
             if (currentTaskDef.NeutralITI)
             {

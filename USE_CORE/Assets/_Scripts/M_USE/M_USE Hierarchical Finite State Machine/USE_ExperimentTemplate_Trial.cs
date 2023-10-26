@@ -572,7 +572,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 Session.HumanStartPanel.InstructionsGO.SetActive(false);
                 Session.HumanStartPanel.InstructionsOn = false;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["InstructionsOff"]);
             }
         }
 

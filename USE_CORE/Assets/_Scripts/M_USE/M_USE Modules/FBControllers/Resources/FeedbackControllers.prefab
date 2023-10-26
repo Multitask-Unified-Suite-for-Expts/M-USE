@@ -31,6 +31,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -74,6 +75,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 3cfdc27883853407e878ec6a5ef14208, type: 3}
   - name: ContinueBeep
     clip: {fileID: 8300000, guid: f0d667c5c7d1145a4be073edcde238ee, type: 3}
+  - name: Hammer
+    clip: {fileID: 8300000, guid: 72be07e17450e484692fb88b38f12eff, type: 3}
   audioSource: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:
@@ -154,3 +157,4 @@ MonoBehaviour:
   FeedbackSize: 150
   FeedbackDuration: 0.3
   FeedbackOn: 0
+  TouchFbEnabled: 0

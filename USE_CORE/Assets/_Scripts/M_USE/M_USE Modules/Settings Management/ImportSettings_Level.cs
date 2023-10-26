@@ -159,7 +159,7 @@ public class ImportSettings_Level : ControlLevel
 
     private IEnumerator GetFilePath(string searchString, Action<string> callback)
     {
-        if (SessionValues.UsingServerConfigs)
+        if (Session.UsingServerConfigs)
         {
             yield return StartCoroutine(ServerManager.GetFilePath(currentSettingsDetails.FolderPath, searchString, result =>
             {
@@ -173,7 +173,7 @@ public class ImportSettings_Level : ControlLevel
             }));
         }
         else
-            callback?.Invoke(SessionValues.LocateFile.FindFilePathInExternalFolder(currentSettingsDetails.FolderPath, $"*{searchString}*"));
+            callback?.Invoke(Session.LocateFile.FindFilePathInExternalFolder(currentSettingsDetails.FolderPath, $"*{searchString}*"));
     }
 
     private void ConvertStringToSettings()
@@ -208,7 +208,7 @@ public class ImportSettings_Level : ControlLevel
     {
         string fileContent;
 
-        if (SessionValues.UsingLocalConfigs || SessionValues.UsingDefaultConfigs)
+        if (Session.UsingLocalConfigs || Session.UsingDefaultConfigs)
         {
 			fileContent = File.ReadAllText(filePath);
 			callback(fileContent);

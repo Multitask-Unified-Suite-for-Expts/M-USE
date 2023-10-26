@@ -61,10 +61,10 @@ public class VerifyTask_Level : ControlLevel
         ImportTaskSettings.AddChildLevel(importSettings_Level);
         ImportTaskSettings.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.UsingDefaultConfigs)
+            if (Session.UsingDefaultConfigs)
                 TaskLevel.TaskConfigPath += "_DefaultConfigs";
 
-            if (SessionValues.UsingDefaultConfigs)
+            if (Session.UsingDefaultConfigs)
                 WriteTaskConfigsToPersistantDataPath();
 
             TaskLevel.SpecifyTypes();
@@ -131,10 +131,10 @@ public class VerifyTask_Level : ControlLevel
                         MethodInfo SettingsConverter_methodTask = GetType()
                             .GetMethod(nameof(this.SettingsConverterStim)).MakeGenericMethod(new Type[] {currentType});
                         SettingsConverter_methodTask.Invoke(this, new object[] {parsedResult});
-                        if(SessionValues.UsingLocalConfigs)
+                        if(Session.UsingLocalConfigs)
                             Debug.Log(TaskLevel.TaskName + " " + TaskLevel.ExternalStims.stimDefs.Count +
                                   " External StimDefs imported.");
-                        else if (SessionValues.UsingDefaultConfigs)
+                        else if (Session.UsingDefaultConfigs)
                             Debug.Log(TaskLevel.TaskName + " " + TaskLevel.PrefabStims.stimDefs.Count +
                                       " Prefab StimDefs imported.");
                     }
@@ -213,7 +213,7 @@ public class VerifyTask_Level : ControlLevel
 
     private void WriteTaskConfigsToPersistantDataPath()
     {
-        if (!SessionValues.UsingDefaultConfigs)
+        if (!Session.UsingDefaultConfigs)
             return;
 
         if (Directory.Exists(TaskLevel.TaskConfigPath))
@@ -292,9 +292,9 @@ public class VerifyTask_Level : ControlLevel
 
     public void SettingsConverterStim<T>(object parsedSettings) where T : StimDef
     {
-        if (SessionValues.UsingDefaultConfigs)
+        if (Session.UsingDefaultConfigs)
             TaskLevel.PrefabStims = new StimGroup("PrefabStims", (T[]) parsedSettings);
-        else if (SessionValues.UsingLocalConfigs || SessionValues.UsingServerConfigs)
+        else if (Session.UsingLocalConfigs || Session.UsingServerConfigs)
             TaskLevel.ExternalStims = new StimGroup("ExternalStims", (T[]) parsedSettings);
     }
 

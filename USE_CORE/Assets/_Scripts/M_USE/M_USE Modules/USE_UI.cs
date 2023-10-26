@@ -33,9 +33,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using USE_Data;
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Session;
-using USE_ExperimentTemplate_Trial;
 
 
 namespace USE_UI
@@ -63,7 +60,6 @@ namespace USE_UI
         [HideInInspector] public Vector3 InitialInstructionsButtonPosition;
         [HideInInspector] public Vector3 InitialEndTaskButtonPosition;
 
-
         private Dictionary<string, string> TaskInstructionsDict;
         private Dictionary<string, string> TaskNamesDict;
 
@@ -71,11 +67,6 @@ namespace USE_UI
 
         private State SetActiveOnInitialization;
         private State SetInactiveOnTermination;
-
-        [HideInInspector] public ControlLevel_Session_Template SessionLevel;
-        [HideInInspector] public ControlLevel_Task_Template TaskLevel;
-        [HideInInspector] public ControlLevel_Trial_Template TrialLevel;
-
 
 
         private void Start()
@@ -155,13 +146,13 @@ namespace USE_UI
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
-            if (SessionValues.UsingDefaultConfigs)
+            if (Session.UsingDefaultConfigs)
                 EndTaskButtonGO.AddComponent<ButtonHoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
-            if(SessionValues.UsingDefaultConfigs)
+            if(Session.UsingDefaultConfigs)
                 InstructionsButtonGO.AddComponent<ButtonHoverEffect>();
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
@@ -179,17 +170,17 @@ namespace USE_UI
 
         public void HandleEndTask()
         {
-            if (TrialLevel != null)
+            if (Session.TrialLevel != null)
             {
                 if (Time.timeScale == 0) //if paused, unpause before ending task
                     Time.timeScale = 1;
 
-                TrialLevel.AbortCode = 5;
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
-                TrialLevel.ForceBlockEnd = true;
-                TrialLevel.FinishTrialCleanup();
-                TrialLevel.ClearActiveTrialHandlers();
-                TaskLevel.SpecifyCurrentState(TaskLevel.GetStateFromName("FinishTask"));
+                Session.TrialLevel.AbortCode = 5;
+                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                Session.TrialLevel.ForceBlockEnd = true;
+                Session.TrialLevel.FinishTrialCleanup();
+                Session.TrialLevel.ClearActiveTrialHandlers();
+                Session.TaskLevel.SpecifyCurrentState(Session.TaskLevel.GetStateFromName("FinishTask"));
             }
         }
 
@@ -204,7 +195,7 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
             InstructionsOn = InstructionsGO.activeInHierarchy;
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
         //Called at end of SetupTrial (TrialLevel)
@@ -236,19 +227,6 @@ namespace USE_UI
             }
         }
 
-        public void SetSessionLevel(ControlLevel_Session_Template sessionLevel)
-        {
-            SessionLevel = sessionLevel;
-        }
-        public void SetTaskLevel(ControlLevel_Task_Template taskLevel)
-        {
-            TaskLevel = taskLevel;
-        }
-        public void SetTrialLevel(ControlLevel_Trial_Template trialLevel)
-        {
-            TrialLevel = trialLevel;
-        }
-
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
@@ -268,8 +246,8 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
-            if(SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
+            if(Session.SessionDef.EventCodesActive)
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
         }
@@ -278,8 +256,8 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
+            if (Session.SessionDef.EventCodesActive)
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
         }
 
     }
@@ -512,8 +490,6 @@ namespace USE_UI
         public Image Image;
         public Sprite Sprite;
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        private Color32 originalColor;
-        private Sprite originalSprite;
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 

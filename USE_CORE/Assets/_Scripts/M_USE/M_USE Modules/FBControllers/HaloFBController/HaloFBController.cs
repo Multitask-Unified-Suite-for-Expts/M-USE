@@ -96,8 +96,8 @@ public class HaloFBController : MonoBehaviour
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         instantiated.transform.position = behindPos;
 
-        if(SessionValues.SessionDef.EventCodesActive)
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+        if(Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
     }
 
     public void Show2D(GameObject haloPrefab, GameObject gameObj, float depth = 10)
@@ -112,8 +112,8 @@ public class HaloFBController : MonoBehaviour
         }
         GameObject rootObj = gameObj.transform.root.gameObject;
         instantiated = Instantiate(haloPrefab, null);
-        if (SessionValues.SessionDef.EventCodesActive)
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         Vector3 pos3d = gameObj.transform.position;
         Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
@@ -157,8 +157,8 @@ public class HaloFBController : MonoBehaviour
     public void Destroy()
     {
         Destroy(instantiated);
-        if (SessionValues.SessionDef.EventCodesActive)
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(SessionValues.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
         instantiated = null;
         state = State.None;
     }

@@ -54,7 +54,7 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             fuWMTL.ContextName = fuWMBD.ContextName;
-            StartCoroutine(HandleSkybox(fuWMTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fuWMTL.ContextName)));
+            StartCoroutine(HandleSkybox(fuWMTL.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, fuWMTL.ContextName)));
             fuWMTL.ResetBlockVariables();
             fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.NumTokenBar);
             fuWMTL.TokenFBController.SetTokenBarValue(fuWMBD.NumInitialTokens);

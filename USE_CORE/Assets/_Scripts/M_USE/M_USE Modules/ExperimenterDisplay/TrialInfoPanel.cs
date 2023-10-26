@@ -25,7 +25,6 @@ SOFTWARE.
 
 
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -53,10 +52,10 @@ public class TrialInfoPanel: ExperimenterDisplayPanel
     }
     public override void CustomPanelUpdate()
     {
-        if (TrialLevel != null)
+        if (Session.TrialLevel != null)
         {
             trialInfoText.GetComponent<Text>().supportRichText = true;
-            trialInfoText.GetComponent<Text>().text = "\n<size=23><color=#2d3436ff>" + TrialLevel.TrialSummaryString + "</color></size>";
+            trialInfoText.GetComponent<Text>().text = "\n<size=23><color=#2d3436ff>" + Session.TrialLevel.TrialSummaryString + "</color></size>";
         }
 
     }

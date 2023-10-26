@@ -151,15 +151,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                if (SessionValues.SessionDef.IsHuman)
+                if (Session.SessionDef.IsHuman)
                 {
-                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
-                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = Session.HumanStartPanel.StartButtonGO;
+                    Session.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
-                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = Session.USE_StartButton.CreateStartButton(EC_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
+                    Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
 
@@ -180,9 +180,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //Setup Handler:
-        var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InflateBalloon);
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, InflateBalloon);
         //Enable Touch Feedback:
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO, true);
 
         //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -242,8 +242,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             ActivateObjects();
 
-            SessionValues.TargetObjects.Add(StimLeft);
-            SessionValues.TargetObjects.Add(StimRight);
+            Session.TargetObjects.Add(StimLeft);
+            Session.TargetObjects.Add(StimRight);
 
             SideChoice = null;
 
@@ -277,8 +277,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BalloonChosen"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
@@ -333,7 +333,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.SetTotalTokensNum(SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
         });
 
         //Inflate Balloon state -----------------------------------------------------------------------------------------------------------------------------------------
@@ -351,7 +351,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflateAudioPlayed = false;
             InflationDuration = 0;
             ScaleTimer = 0;
-            SessionValues.MouseTracker.ResetClicks();
+            Session.MouseTracker.ResetClicks();
             clickTimings = new List<float>();
             timeTracker = 0;
 
@@ -456,7 +456,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 Handler.HandlerActive = false;
                                 NumInflations++;
 
-                                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
 
                                 CalculateInflation(); //Sets Inflate to TRUE at end of func
                                 InflateAudioPlayed = false;
@@ -487,12 +487,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 InflationDurations_Block.Add(InflationDuration);
                 CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
-                AudioFBController.Play(SessionValues.SessionDef.IsHuman ? "EC_HarshPop" : "EC_NicePop");
+                AudioFBController.Play(Session.SessionDef.IsHuman ? "EC_HarshPop" : "EC_NicePop");
             }
             else
             {
-                SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
                 AbortCode = 6;
 
                 InflationDurations_Block.Add(null);
@@ -763,19 +763,19 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     private void GiveReward()
     {
-        if (SessionValues.SyncBoxController == null)
+        if (Session.SyncBoxController == null)
             return;
 
         if (SideChoice == "Left")
         {
-            SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
+            Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
 
         }
         else
         {
-            SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
+            Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
         }
@@ -890,8 +890,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         ObjectList.Add(MaxOutline_Left);
         ObjectList.Add(MaxOutline_Right);
 
-        SessionValues.TargetObjects.Add(MaxOutline_Left);
-        SessionValues.TargetObjects.Add(MaxOutline_Right);
+        Session.TargetObjects.Add(MaxOutline_Left);
+        Session.TargetObjects.Add(MaxOutline_Right);
     }
 
     private void CreateBalloonOutlines(int numBalloons, Vector3 ScaleUpAmount, Vector3 pos, GameObject container)
@@ -904,7 +904,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             outline.transform.localScale += i * ScaleUpAmount;
             AddRigidBody(outline);
             ObjectList.Add(outline);
-            SessionValues.TargetObjects.Add(outline);
+            Session.TargetObjects.Add(outline);
         }
     }
 

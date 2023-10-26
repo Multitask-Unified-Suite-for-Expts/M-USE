@@ -216,7 +216,7 @@ namespace USE_Data
 				Defined = true;
 				InitDataController();
 				DefineDataController();
-				if (SessionValues.StoreData)
+				if (Session.StoreData)
 				{
 					StartCoroutine(CreateFile());
 				}
@@ -583,7 +583,7 @@ namespace USE_Data
 		/// </summary>
 		public IEnumerator AppendDataToBuffer()
 		{
-			if (SessionValues.StoreData) //&& Time.frameCount > frameChecker)
+			if (Session.StoreData) //&& Time.frameCount > frameChecker)
 			{
 				string[] currentVals = new string[data.Count];
 				for (int i = 0; i < data.Count; i++)
@@ -610,7 +610,7 @@ namespace USE_Data
         /// </summary>
         public IEnumerator CreateFile()
 		{
-			if (SessionValues.StoreData && fileName != null)
+			if (Session.StoreData && fileName != null)
 			{
 				fileHeaders = "";
 				for (int i = 0; i < data.Count; i++)
@@ -620,7 +620,7 @@ namespace USE_Data
 					fileHeaders += data[i].Name;
 				}
 
-				if (SessionValues.StoringDataOnServer) //Create File With Headers
+				if (Session.StoringDataOnServer) //Create File With Headers
 				{
 					if (!ServerManager.FolderCreated(folderPath))
 						yield return StartCoroutine(CreateServerFolder(folderPath));
@@ -644,11 +644,11 @@ namespace USE_Data
 		/// </summary>
 		public IEnumerator AppendDataToFile()
 		{
-			if (SessionValues.StoreData && fileName != null && dataBuffer.Count > 0)
+			if (Session.StoreData && fileName != null && dataBuffer.Count > 0)
 			{
 				string content = String.Join("\n", dataBuffer.ToArray());
 
-                if (SessionValues.StoringDataOnServer)
+                if (Session.StoringDataOnServer)
 					yield return StartCoroutine(AppendDataToServerFile(content));
 				else
 				{

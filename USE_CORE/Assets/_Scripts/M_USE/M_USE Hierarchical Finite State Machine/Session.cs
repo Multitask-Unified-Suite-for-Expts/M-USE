@@ -24,8 +24,7 @@ SOFTWARE.
 
 
 
-using System;
-using System.Collections;
+
 using System.Collections.Generic;
 using SelectionTracking;
 using UnityEngine;
@@ -33,10 +32,12 @@ using USE_Def_Namespace;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;
+using USE_ExperimentTemplate_Task;
+using USE_ExperimentTemplate_Trial;
 using USE_UI;
 
 
-public static class SessionValues
+public static class Session
 {
     public static bool WebBuild;
     public static bool Using2DStim;
@@ -64,12 +65,10 @@ public static class SessionValues
     public static BackgroundMusicController BackgroundMusicController;
     public static LoadingController LoadingController;
 
-    //Prefabs passed from SessionLevel;
     public static GameObject BlockResultsPrefab;
     public static GameObject BlockResults_GridElementPrefab;
 
 
-    public static ControlLevel_Session_Template SessionLevel;
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
@@ -94,6 +93,8 @@ public static class SessionValues
     public static FlashPanelController FlashPanelController;
 
     public static EventCodeManager EventCodeManager;
+
+    public static LogWriter LogWriter;
     
     public static string ConfigFolderPath;
 
@@ -103,13 +104,16 @@ public static class SessionValues
     public static SelectionTracker SelectionTracker;
     public static SelectionTracker.SelectionHandler SelectionHandler;
 
+    public static ControlLevel_Session_Template SessionLevel;
+    public static ControlLevel_Task_Template TaskLevel;
+    public static ControlLevel_Trial_Template TrialLevel;
     public static SessionDef SessionDef;
 
     //FOR EVENT CODES:
     public static List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
 
 
-    static SessionValues()
+    static Session()
     {
         LoadPrefabs();
 
@@ -148,7 +152,7 @@ public static class SessionValues
         return null;
     }
 
-    public static string GetNiceIntegers(int numDigits, int desiredNum)
+    public static string GetNiceIntegers(int desiredNum)
     {
         if (desiredNum >= 999)
             return desiredNum.ToString();

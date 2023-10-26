@@ -296,22 +296,22 @@ namespace USE_StimulusManagement
 		{
             FileName = FileName.Trim(); //trim file name because sometimes the stimdefs have extra space.
 
-			SessionValues.Using2DStim = FileName.ToLower().Contains(".png") || FileName.ToLower().Contains("_png");
+			Session.Using2DStim = FileName.ToLower().Contains(".png") || FileName.ToLower().Contains("_png");
 
-            if (SessionValues.UsingDefaultConfigs)
+            if (Session.UsingDefaultConfigs)
 				LoadPrefabFromResources();
             else
             {
                 if (!string.IsNullOrEmpty(FileName))
                 {
-					if (SessionValues.UsingServerConfigs)
+					if (Session.UsingServerConfigs)
 					{
-                        if (SessionValues.Using2DStim)
+                        if (Session.Using2DStim)
 							yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
 						else
 							Load3DStimFromServer();
 					}
-					else if(SessionValues.UsingLocalConfigs)
+					else if(Session.UsingLocalConfigs)
 						LoadExternalStimFromFile(); //Call should be awaited, but we cant cuz this is coroutine not async. Resolved with "yield return waitUntil" line below
                 }
                 else if (StimDimVals != null)
@@ -328,13 +328,13 @@ namespace USE_StimulusManagement
 
 			//HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
 			float startTime = Time.time;
-			yield return new WaitUntil(() => (StimGameObject != null && !LoadingAsync) || Time.time - startTime >= SessionValues.SessionDef.MaxStimLoadingDuration);
+			yield return new WaitUntil(() => (StimGameObject != null && !LoadingAsync) || Time.time - startTime >= Session.SessionDef.MaxStimLoadingDuration);
 
 			if (StimGameObject == null)
 				Debug.LogError("STIM GO STILL NULL AFTER YIELDING! MAX STIM LOADING DURATION HAS BEEN SURPASSED!");
 
 			//For 2D stim, set as child of Canvas:
-            if (SessionValues.Using2DStim && CanvasGameObject != null)
+            if (Session.Using2DStim && CanvasGameObject != null)
                 StimGameObject.GetComponent<RectTransform>().SetParent(CanvasGameObject.GetComponent<RectTransform>());
 
 			SetStimName();
@@ -348,7 +348,7 @@ namespace USE_StimulusManagement
 		
 		public void LoadPrefabFromResources()
 		{
-			string fullPath = $"{SessionValues.DefaultStimFolderPath}/{FileName}";
+			string fullPath = $"{Session.DefaultStimFolderPath}/{FileName}";
 			try
 			{
 				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
@@ -553,7 +553,7 @@ namespace USE_StimulusManagement
 				GameObject.Destroy(StimGameObject);
 
 				//APPARENTLY FIXES THE GLTF WEB BUILD NULL TEXTURE ERROR, but prob need to ensure isn't wasting memory:
-				if(!SessionValues.WebBuild)
+				if(!Session.WebBuild)
 					Resources.UnloadUnusedAssets();
 			}
 
@@ -562,7 +562,7 @@ namespace USE_StimulusManagement
 
         public void DestroyRecursive(GameObject go)
         {
-            if (SessionValues.WebBuild) //need to eventually delete when get better solution
+            if (Session.WebBuild) //need to eventually delete when get better solution
             {
                 Object.Destroy(go);
                 return;
@@ -765,7 +765,7 @@ namespace USE_StimulusManagement
             {
                 stim.ToggleVisibility(visibility);
             }
-            SessionValues.EventCodeManager.AddToFrameEventCodeBuffer(visibility ? "StimOn" : "StimOff");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(visibility ? "StimOn" : "StimOff");
             IsActive = visibility;
         }
 

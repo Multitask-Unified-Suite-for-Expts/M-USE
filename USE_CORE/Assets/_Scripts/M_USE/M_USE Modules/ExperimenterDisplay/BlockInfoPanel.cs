@@ -24,13 +24,12 @@ SOFTWARE.
 
 
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.Threading.Tasks;
 using UnityEngine.UI;
 using USE_ExperimenterDisplay;
+
 
 public class BlockInfoPanel : ExperimenterDisplayPanel
 {
@@ -49,25 +48,25 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
 
     public override void CustomPanelUpdate()
     {
-        if (TrialLevel != null)
+        if (Session.TrialLevel != null)
         {
             blockInfoPanelText.GetComponent<Text>().supportRichText = true;
 
-            if (TaskLevel.CurrentBlockSummaryString?.Length > 0)
+            if (Session.TaskLevel.CurrentBlockSummaryString?.Length > 0)
             {
                 blockInfoPanelText.GetComponent<Text>().text = "<size=23><color=#2d3436ff>" + 
-                                                               "<b>\nBlock Count:</b> " + (TaskLevel.BlockCount + 1) +
-                                                               "<b>\nTrial Count in Block:</b> " + (TrialLevel.TrialCount_InBlock + 1) + 
-                                                               "\n" + TaskLevel.CurrentBlockSummaryString + 
-                                                               "\n" + TaskLevel.PreviousBlockSummaryString +
+                                                               "<b>\nBlock Count:</b> " + (Session.TaskLevel.BlockCount + 1) +
+                                                               "<b>\nTrial Count in Block:</b> " + (Session.TrialLevel.TrialCount_InBlock + 1) + 
+                                                               "\n" + Session.TaskLevel.CurrentBlockSummaryString + 
+                                                               "\n" + Session.TaskLevel.PreviousBlockSummaryString +
                                                                "</color></size>";
                                                                
             }
             else
             {
                 blockInfoPanelText.GetComponent<Text>().text = "<size=23><color=#2d3436ff>" +
-                                                               "<b>\nBlock Count:</b> " + (TaskLevel.BlockCount + 1) +
-                                                               "<b>\nTrial Count in Block:</b> " + (TrialLevel.TrialCount_InBlock + 1) +
+                                                               "<b>\nBlock Count:</b> " + (Session.TaskLevel.BlockCount + 1) +
+                                                               "<b>\nTrial Count in Block:</b> " + (Session.TrialLevel.TrialCount_InBlock + 1) +
                                                                "</color></size>";
             }
         }

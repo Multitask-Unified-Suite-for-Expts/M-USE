@@ -76,7 +76,7 @@ public class SerialPortThreaded : MonoBehaviour
 		active = true;
 		StartSendLoop();
 		StartRecvLoop();
-        SessionValues.SessionLevel.waitForSerialPort = false;
+        Session.SessionLevel.waitForSerialPort = false;
         Thread.CurrentThread.Abort();
 		
 	}

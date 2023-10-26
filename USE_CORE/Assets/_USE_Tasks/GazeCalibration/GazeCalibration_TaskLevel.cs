@@ -39,12 +39,12 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod (() =>
         {
             // Set the Background image as defined in the BlockDef
-            StartCoroutine(HandleSkybox(gcTL.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark")));
+            StartCoroutine(HandleSkybox(gcTL.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark")));
         });
     }
     private void SetSettings()
     {   
-        gcTL.ContextExternalFilePath = SessionValues.SessionDef.ContextExternalFilePath;
+        gcTL.ContextExternalFilePath = Session.SessionDef.ContextExternalFilePath;
         gcTL.SpoofGazeWithMouse = false;
         gcTL.CalibPointsInset = new float[] {0.15f, 0.15f};
         gcTL.MaxCircleScale = 0.75f;

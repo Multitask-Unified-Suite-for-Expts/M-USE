@@ -140,9 +140,9 @@ namespace Tobii.Research.Unity.CodeExamples
 
             mostRecentGazeSample.systemTimeStamp = e.SystemTimeStamp;
 
-            SessionValues.TobiiEyeTrackerController.mostRecentGazeSample = mostRecentGazeSample;
+            Session.TobiiEyeTrackerController.mostRecentGazeSample = mostRecentGazeSample;
 
-            StartCoroutine(SessionValues.GazeData.AppendDataToBuffer());
+            StartCoroutine(Session.GazeData.AppendDataToBuffer());
         }
     }
 }

@@ -178,7 +178,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {                    
                     Debug.LogWarning("CLICKED TOGGLE DISPLAY HOTKEY!");
 
-                    if (SessionValues.WebBuild)
+                    if (Session.WebBuild)
                         return;
                                         
                     var allCameras = GameObject.FindObjectsOfType<Camera>();
@@ -204,7 +204,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     }
 
                     // Change display of the loading canvas which could be inactive
-                    SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = 1 - SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay;
+                    Session.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = 1 - Session.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay;
                 }
             };
             //HotKeyList.Add(toggleDisplays);
@@ -233,7 +233,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED PAUSE GAME HOT KEY---");
-                    if(HkPanel.TrialLevel != null)
+                    if(Session.TrialLevel != null)
                         Time.timeScale = Time.timeScale == 1 ? 0 : 1;
                 }
             };
@@ -249,16 +249,16 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED RESTART BLOCK HOTKEY---");
-                    if(HkPanel.TrialLevel != null)
+                    if(Session.TrialLevel != null)
                     {
-                        if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
-                            HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+                        if (Session.TrialLevel.AudioFBController.IsPlaying())
+                            Session.TrialLevel.AudioFBController.audioSource.Stop();
 
-                        HkPanel.TrialLevel.AbortCode = 2;
-                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["RestartBlock"]);
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
-                        HkPanel.TaskLevel.BlockCount--;
+                        Session.TrialLevel.AbortCode = 2;
+                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["RestartBlock"]);
+                        Session.TrialLevel.ForceBlockEnd = true;
+                        Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
+                        Session.TaskLevel.BlockCount--;
                     }
                 }
             };
@@ -273,23 +273,23 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED PREVIOUS BLOCK HOTKEY---");
-                    if(HkPanel.TrialLevel != null)
+                    if(Session.TrialLevel != null)
                     {
-                        if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
-                            HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+                        if (Session.TrialLevel.AudioFBController.IsPlaying())
+                            Session.TrialLevel.AudioFBController.audioSource.Stop();
 
-                        HkPanel.TrialLevel.AbortCode = 4;
-                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["PreviousBlock"]);
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        Session.TrialLevel.AbortCode = 4;
+                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["PreviousBlock"]);
+                        Session.TrialLevel.ForceBlockEnd = true;
+                        Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
                     
-                        if (HkPanel.TrialLevel.BlockCount == 0)
+                        if (Session.TrialLevel.BlockCount == 0)
                         {
                             Debug.Log("Can't go to previous block, because this is the first block! Restarting Current Block instead.");
-                            HkPanel.TaskLevel.BlockCount--;
+                            Session.TaskLevel.BlockCount--;
                         }
                         else
-                            HkPanel.TaskLevel.BlockCount -= 2;
+                            Session.TaskLevel.BlockCount -= 2;
                     }
                 }
             };
@@ -305,26 +305,26 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED END BLOCK HOTKEY---");
-                    if(HkPanel.TrialLevel != null)
+                    if(Session.TrialLevel != null)
                     {
-                        if (HkPanel.TrialLevel.TokenFBController != null)
+                        if (Session.TrialLevel.TokenFBController != null)
                         {
-                            HkPanel.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-                            HkPanel.TrialLevel.TokenFBController.enabled = false;
+                            Session.TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
+                            Session.TrialLevel.TokenFBController.enabled = false;
                         }
 
-                        if (HkPanel.TrialLevel.AudioFBController.IsPlaying())
-                            HkPanel.TrialLevel.AudioFBController.audioSource.Stop();
+                        if (Session.TrialLevel.AudioFBController.IsPlaying())
+                            Session.TrialLevel.AudioFBController.audioSource.Stop();
 
-                        if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
+                        if (Session.HumanStartPanel.HumanStartPanelGO != null)
                         {
-                            SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+                            Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
                         }
 
-                        HkPanel.TrialLevel.AbortCode = 3;
-                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndBlock"]);
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
-                        HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                        Session.TrialLevel.AbortCode = 3;
+                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndBlock"]);
+                        Session.TrialLevel.ForceBlockEnd = true;
+                        Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
                     }
                 }
             };
@@ -339,16 +339,16 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED END TASK HOTKEY---");
-                    if(HkPanel.TrialLevel != null)
+                    if(Session.TrialLevel != null)
                     {
-                        HkPanel.TrialLevel.AbortCode = 5;
-                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndTask"]);
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
-                        HkPanel.TrialLevel.FinishTrialCleanup();
-                        HkPanel.TrialLevel.ClearActiveTrialHandlers();
-                        HkPanel.TrialLevel.WriteDataFiles();
-                        HkPanel.TaskLevel.ForceTaskEnd = true;
-                        HkPanel.TaskLevel.SpecifyCurrentState(HkPanel.TaskLevel.GetStateFromName("FinishTask"));
+                        Session.TrialLevel.AbortCode = 5;
+                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                        Session.TrialLevel.ForceBlockEnd = true;
+                        Session.TrialLevel.FinishTrialCleanup();
+                        Session.TrialLevel.ClearActiveTrialHandlers();
+                        Session.TrialLevel.WriteDataFiles();
+                        Session.TaskLevel.ForceTaskEnd = true;
+                        Session.TaskLevel.SpecifyCurrentState(Session.TaskLevel.GetStateFromName("FinishTask"));
                     }
                 }
             };
@@ -363,16 +363,16 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED QUIT GAME HOT KEY---");
-                    if(HkPanel.TrialLevel != null)
-                        HkPanel.TrialLevel.ForceBlockEnd = true;
+                    if(Session.TrialLevel != null)
+                        Session.TrialLevel.ForceBlockEnd = true;
 
-                    if (HkPanel.TaskLevel != null)
-                        HkPanel.TaskLevel.Terminated = true;
+                    if (Session.TaskLevel != null)
+                        Session.TaskLevel.Terminated = true;
 
-                    if(HkPanel.SessionLevel != null)
+                    if(Session.SessionLevel != null)
                     {
-                        HkPanel.SessionLevel.TasksFinished = true;
-                        HkPanel.SessionLevel.SpecifyCurrentState(HkPanel.SessionLevel.GetStateFromName("FinishSession"));
+                        Session.SessionLevel.TasksFinished = true;
+                        Session.SessionLevel.SpecifyCurrentState(Session.SessionLevel.GetStateFromName("FinishSession"));
                     }
                     Application.Quit();
                 }
@@ -388,12 +388,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyAction = () =>
                 {
                     Debug.Log("---PRESSED GIVE REWARD HOT KEY---");
-                    if(HkPanel.TrialLevel != null)
+                    if(Session.TrialLevel != null)
                     {
-                        if (SessionValues.SyncBoxController != null)
+                        if (Session.SyncBoxController != null)
                         {
-                            HkPanel.TrialLevel.AudioFBController.Play("Positive");
-                            SessionValues.SyncBoxController.SendRewardPulses(SessionValues.SessionDef.RewardHotKeyNumPulses, SessionValues.SessionDef.RewardHotKeyPulseSize);
+                            Session.TrialLevel.AudioFBController.Play("Positive");
+                            Session.SyncBoxController.SendRewardPulses(Session.SessionDef.RewardHotKeyNumPulses, Session.SessionDef.RewardHotKeyPulseSize);
                         }
                         else
                             Debug.Log("Tried to send Reward but SyncBoxController is null!");
@@ -410,40 +410,40 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
-                    GazeCalibrationTaskLevel = HkPanel.SessionLevel.GazeCalibrationTaskLevel;
+                    GazeCalibrationTaskLevel = Session.SessionLevel.GazeCalibrationTaskLevel;
                     GazeCalibrationTrialLevel = (ControlLevel_Trial_Template)GazeCalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
 
                     Debug.Log("---PRESSED CALIBRATION HOT KEY---");
 
-                    if (HkPanel.TrialLevel != null)
+                    if (Session.TrialLevel != null)
                     {
-                        HkPanel.TrialLevel.AbortCode = 5;
-                        SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", HkPanel.TrialLevel.AbortCodeDict["EndTask"]);
-                        HkPanel.TrialLevel.FinishTrialCleanup();
-                        HkPanel.TrialLevel.ResetTrialVariables();
-                        HkPanel.TrialLevel.ClearActiveTrialHandlers();
+                        Session.TrialLevel.AbortCode = 5;
+                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                        Session.TrialLevel.FinishTrialCleanup();
+                        Session.TrialLevel.ResetTrialVariables();
+                        Session.TrialLevel.ClearActiveTrialHandlers();
                     }
 
-                    if (HkPanel.TaskLevel != null)
+                    if (Session.TaskLevel != null)
                     {
                         // The Hot Key is triggered during a task, either calibration or regular task
-                        if (HkPanel.TaskLevel.TaskName.Contains("GazeCalibration"))
+                        if (Session.TaskLevel.TaskName.Contains("GazeCalibration"))
                         {
                             // The Hot Key is triggered during the Calibration Task
-                            HkPanel.TrialLevel.ForceBlockEnd = true;
-                            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                            Session.TrialLevel.ForceBlockEnd = true;
+                            Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
 
                             // Set calibration data controllers off
-                            HkPanel.TaskLevel.FrameData.gameObject.SetActive(false);
-                            HkPanel.TaskLevel.BlockData.gameObject.SetActive(false);
-                            HkPanel.TaskLevel.TrialData.gameObject.SetActive(false);
+                            Session.TaskLevel.FrameData.gameObject.SetActive(false);
+                            Session.TaskLevel.BlockData.gameObject.SetActive(false);
+                            Session.TaskLevel.TrialData.gameObject.SetActive(false);
 
                             // The Hot Key is triggered during the calibration task, exit the calibration task, and return to either task or session
                             if (OriginalTaskLevel != null)
                             {
                                 // Restore the Original Task Level
                                 OriginalTrialLevel.runCalibration = false;
-                                SessionValues.ExperimenterDisplayController.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
+                                //Session.ExperimenterDisplayController.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
                                 OriginalTaskLevel.FrameData.gameObject.SetActive(true);
                                 OriginalTaskLevel.BlockData.gameObject.SetActive(true);
                                 OriginalTaskLevel.TrialData.gameObject.SetActive(true);
@@ -451,26 +451,26 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             else
                             {
                                 // Return to the Session Level
-                                HkPanel.SessionLevel.runSessionLevelCalibration = false;
-                                SessionValues.ExperimenterDisplayController.ResetTask(null, null);
+                                Session.SessionLevel.runSessionLevelCalibration = false;
+                                //Session.ExperimenterDisplayController.ResetTask(null, null);
                             }
                         }
 
                         else
                         {
                             // The Hot Key is triggered during a regular task, prepare the calibration task and store the original task information
-                            HkPanel.TrialLevel.runCalibration = true;
-                            HkPanel.TrialLevel.SpecifyCurrentState(HkPanel.TrialLevel.GetStateFromName("FinishTrial"));
+                            Session.TrialLevel.runCalibration = true;
+                            Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
 
-                            OriginalTaskLevel = HkPanel.TaskLevel;
-                            OriginalTrialLevel = HkPanel.TrialLevel;
+                            OriginalTaskLevel = Session.TaskLevel;
+                            OriginalTrialLevel = Session.TrialLevel;
 
                             OriginalTaskLevel.FrameData.gameObject.SetActive(false);
                             OriginalTaskLevel.BlockData.gameObject.SetActive(false);
                             OriginalTaskLevel.TrialData.gameObject.SetActive(false);
 
                             GazeCalibrationTrialLevel.SpecifyCurrentState(GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                            SessionValues.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
+                            //Session.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
                             GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
                             GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
                             GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
@@ -479,9 +479,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     else
                     {
                         // The Hot Key is triggered at the Session Level, prepare the calibration task
-                        HkPanel.SessionLevel.runSessionLevelCalibration = true;
+                        Session.SessionLevel.runSessionLevelCalibration = true;
                         GazeCalibrationTrialLevel.SpecifyCurrentState(GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                        SessionValues.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
+                        //Session.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
                         GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(true);
                         GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);
                         GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(true);

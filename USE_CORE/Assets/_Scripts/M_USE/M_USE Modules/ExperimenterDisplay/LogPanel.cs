@@ -64,9 +64,6 @@ public class LogPanel: ExperimenterDisplayPanel
 
     public static bool HasError()
     {
-        if (singleton == null)
-            return false;
-        else
-            return singleton.logText.Length > 0;
+        return singleton != null && singleton.logText.Length > 0;
     }
 }

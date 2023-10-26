@@ -77,7 +77,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         });
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
-            if(!SessionValues.WebBuild)
+            if(!Session.WebBuild)
             {/*
                 if (BlockStringsAdded > 0)
                     CurrentBlockString += "\n";

@@ -60,13 +60,13 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
+            if (string.IsNullOrEmpty(Session.SessionDataPath))
             {
                 Debug.LogWarning("Trying to Get LocalLogFolderPath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
             }
             else
-                return $"{SessionValues.SessionDataPath}{Path.DirectorySeparatorChar}LogFile";
+                return $"{Session.SessionDataPath}{Path.DirectorySeparatorChar}LogFile";
         }
     }
 
@@ -88,13 +88,13 @@ public class LogWriter : MonoBehaviour
     {
         get
         {
-            if (string.IsNullOrEmpty(SessionValues.SessionDataPath))
+            if (string.IsNullOrEmpty(Session.SessionDataPath))
             {
                 Debug.Log("Trying to Get LocalLogFilePath but SessionValues.SessionDataPath hasnt been set yet!");
                 return null;
             }
             else
-                return $"{SessionValues.SessionDataPath}{Path.DirectorySeparatorChar}LogFile{Path.DirectorySeparatorChar}Player.log";
+                return $"{Session.SessionDataPath}{Path.DirectorySeparatorChar}LogFile{Path.DirectorySeparatorChar}Player.log";
         }
     }
 
@@ -113,7 +113,7 @@ public class LogWriter : MonoBehaviour
         if (!StoreDataIsSet) //Wait for StoreData to be set
             return;
 
-        if (!SessionValues.StoreData) //if storedata is set, but its False, return:
+        if (!Session.StoreData) //if storedata is set, but its False, return:
         {
             LogMessages.Clear();
             return;
@@ -149,12 +149,12 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator CreateLogFolder()
     {
-        if (SessionValues.StoringDataOnServer)
+        if (Session.StoringDataOnServer)
         {
             if (ServerManager.SessionDataFolderCreated)
                 yield return ServerManager.CreateFolder(ServerLog_FolderPath);
         }
-        else if (SessionValues.StoringDataLocally)
+        else if (Session.StoringDataLocally)
             Directory.CreateDirectory(LocalLog_FolderPath);
         
         CreatingLogFolder = false;
@@ -163,13 +163,13 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator CreateLogFile()
     {
-        if (SessionValues.StoringDataOnServer)
+        if (Session.StoringDataOnServer)
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
             yield return ServerManager.CreateFileAsync(ServerLog_FilePath, content);
         }
-        else if (SessionValues.StoringDataLocally)
+        else if (Session.StoringDataLocally)
         {
             using StreamWriter createFileWriter = File.CreateText(LocalLog_FilePath);
             WriteLogMessagesLocally(createFileWriter);
@@ -179,13 +179,13 @@ public class LogWriter : MonoBehaviour
 
     private IEnumerator AppendDataToLogFile()
     {
-        if (SessionValues.StoringDataOnServer)
+        if (Session.StoringDataOnServer)
         {
             string content = string.Join("\n", LogMessages.ToArray());
             LogMessages.Clear();
             yield return ServerManager.AppendToFileAsync(ServerLog_FilePath, content);
         }
-        else if(SessionValues.StoringDataLocally)
+        else if(Session.StoringDataLocally)
         {
             using StreamWriter appendFileWriter = File.AppendText(LocalLog_FilePath);
             WriteLogMessagesLocally(appendFileWriter);
@@ -195,7 +195,7 @@ public class LogWriter : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-        if (!SessionValues.StoreData)
+        if (!Session.StoreData)
             return;
 
         if (!LogFolderCreated)

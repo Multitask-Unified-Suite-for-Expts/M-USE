@@ -30,6 +30,7 @@ using USE_StimulusManagement;
 using System;
 using System.Collections.Generic;
 
+
 public abstract class InputTracker : MonoBehaviour
 {
     public GameObject TargetedGameObject;

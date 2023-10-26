@@ -33,10 +33,10 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using USE_Data;
-using USE_ExperimentTemplate_Classes;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Session;
 using USE_ExperimentTemplate_Trial;
+
 
 namespace USE_UI
 {
@@ -64,9 +64,8 @@ namespace USE_UI
         [HideInInspector] public Vector3 InitialEndTaskButtonPosition;
 
 
-        [HideInInspector] public Dictionary<string, string> TaskInstructionsDict;
-        [HideInInspector] public Dictionary<string, string> TaskNamesDict;
-        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict;
+        private Dictionary<string, string> TaskInstructionsDict;
+        private Dictionary<string, string> TaskNamesDict;
 
         [HideInInspector] public string TaskName;
 
@@ -98,7 +97,6 @@ namespace USE_UI
                 { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
                 { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
             };
-
             TaskNamesDict = new Dictionary<string, string>()
             {
                 { "AntiSaccade", "Anti Saccade"},
@@ -111,21 +109,25 @@ namespace USE_UI
                 { "WhatWhenWhere", "What When Where" },
                 { "WorkingMemory", "Working Memory" }
             };
+        }
 
-            Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
-            {
-                { "AntiSaccade", new Vector3(0, 0, 1000f) },
-                { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
-                { "EffortControl", new Vector3(0, 0, 500f) },
-                { "FlexLearning", new Vector3(0, 0, 1000f) },
-                { "MazeGame", new Vector3(0, 0, 500f) },
-                { "THR", new Vector3(0, 0, 1000f) },
-                { "VisualSearch", new Vector3(0, 0, 1000f) },
-                { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-                { "WorkingMemory", new Vector3(0, 0, 1000f) }
-            };
+        //New tasks that are built can call this from their TaskLevel
+        public void AddTaskInstructions(string taskNameOneWord, string instructions)
+        {
+            if (TaskInstructionsDict.ContainsKey(taskNameOneWord))  //if already included, update it
+                TaskInstructionsDict[taskNameOneWord] = instructions;
+            else
+                TaskInstructionsDict.Add(taskNameOneWord, instructions);
+        }
 
+        //New tasks that are built can call this from their TaskLevel
+        public void AddTaskDisplayName(string taskNameOneWord, string taskNameWithSpace)
+        {
+            if (TaskNamesDict.ContainsKey(taskNameOneWord)) //if already included, update it
 
+                TaskNamesDict[taskNameOneWord] = taskNameWithSpace;
+            else
+                TaskNamesDict.Add(taskNameOneWord, taskNameWithSpace);
         }
 
         //Called by TaskLevel
@@ -148,7 +150,7 @@ namespace USE_UI
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
+            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, 1000f);
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
@@ -295,7 +297,7 @@ namespace USE_UI
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 
-        public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, bool hover = false, string name = null)
+        public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, string name = null)
         {            
             StartButtonGO = Instantiate(StartButtonPrefab);
             StartButtonGO.name = name ?? "StartButton";

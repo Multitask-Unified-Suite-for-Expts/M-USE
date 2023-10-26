@@ -112,7 +112,19 @@ public class THR_TaskLevel : ControlLevel_Task_Template
                         "\nNum Pulses: " + (trialLevel.NumTouchRewards_Block + trialLevel.NumReleaseRewards_Block)
                         );
     }
+    public override void SetTaskSummaryString()
+    {
+        base.SetTaskSummaryString();
 
+        if (trialLevel.TrialCount_InTask != 0)
+        {
+            CurrentTaskSummaryString.Append($"\nAccuracy: {(Math.Round(decimal.Divide(TrialsCorrect_Task, (trialLevel.TrialCount_InTask)), 2)) * 100}%" +
+                                                    $"\n# Released Early: {ReleasedEarly_Task}" +
+                                                    $"\n# Released Late: {ReleasedLate_Task}" +
+                                                    $"\n# Backdrop Touches: {BackdropTouches_Task}");
+        }
+
+    }
     private void DefineBlockData()
     {
         BlockData.AddDatum("NumTrialsCompleted", () => trialLevel.TrialsCompleted_Block);

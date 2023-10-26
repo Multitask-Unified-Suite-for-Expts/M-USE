@@ -577,7 +577,9 @@ MonoBehaviour:
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
-  THR_BackdropTexture: {fileID: 0}
+  MovedTooFarSquareTexture: {fileID: 0}
+  HeldTooShortSquareTexture: {fileID: 0}
+  HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
   MG_CanvasGO: {fileID: 859525660}
   ContextName: 
@@ -729,6 +731,7 @@ MonoBehaviour:
   NumRewardPulses_InBlock: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
+  ForceTaskEnd: 0
   TrialLevel: {fileID: 1860654110}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}

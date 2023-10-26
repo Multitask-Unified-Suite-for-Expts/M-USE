@@ -392,18 +392,22 @@ MonoBehaviour:
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
-  THR_BackdropTexture: {fileID: 0}
+  MovedTooFarSquareTexture: {fileID: 0}
+  HeldTooShortSquareTexture: {fileID: 0}
+  HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
   THR_CanvasGO: {fileID: 186084661}
-  TrialCompletionList: 
+  RunningAcc: 
   TrialsCompleted_Block: 0
   TrialsCorrect_Block: 0
   BackdropTouches_Trial: 0
   SelectObjectTouches_Trial: 0
   AvoidObjectTouches_Trial: 0
-  ItiTouches_Trial: 0
-  TouchRewards_Trial: 0
-  ReleaseRewards_Trial: 0
+  NumItiTouches_Trial: 0
+  NumTouchRewards_Trial: 0
+  NumReleaseRewards_Trial: 0
+  NumReleasedEarly_Trial: 0
+  NumReleasedLate_Trial: 0
   NumTouchesMovedOutside_Trial: 0
   BackdropTouches_Block: 0
   SelectObjectTouches_Block: 0
@@ -445,6 +449,7 @@ MonoBehaviour:
   NumRewardPulses_InBlock: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
+  ForceTaskEnd: 0
   TrialLevel: {fileID: 900455550}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -478,7 +483,6 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  BlockStringsAdded: 0
   TrialsCompleted_Task: 0
   TrialsCorrect_Task: 0
   SelectObjectTouches_Task: 0

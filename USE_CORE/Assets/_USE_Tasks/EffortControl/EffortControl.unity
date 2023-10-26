@@ -1238,6 +1238,14 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  runningPerformance: 
+  difficultyLevel: 0
+  posStep: 0
+  negStep: 0
+  TrialDefSelectionStyle: 
+  maxDiffLevel: 0
+  avgDiffLevel: 0
+  diffLevelJitter: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -1266,12 +1274,14 @@ MonoBehaviour:
   InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
-  TrialDefSelectionStyle: 
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
-  THR_BackdropTexture: {fileID: 0}
+  MovedTooFarSquareTexture: {fileID: 0}
+  HeldTooShortSquareTexture: {fileID: 0}
+  HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
+  CurrentTrialDefIndex: 0
   StimNoMaterialPrefab: {fileID: 3971733981247237095, guid: 48399b3e51fb047ff80a4c57704fcf7f,
     type: 3}
   StimLeftPrefab: {fileID: 7975343082115934864, guid: 807cad8d28a2e48ecb294f7b4351c79d,
@@ -1372,8 +1382,6 @@ MonoBehaviour:
   StartButtonSelectedTime: 0
   TrialTouches: 0
   ObjectList: []
-  debugTextGO: {fileID: 0}
-  debugText: {fileID: 0}
 --- !u!114 &1719984668
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1404,6 +1412,7 @@ MonoBehaviour:
   NumRewardPulses_InBlock: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
+  ForceTaskEnd: 0
   TrialLevel: {fileID: 1719984667}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -1635,7 +1644,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1780667515}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.6, z: -2.18}
+  m_LocalPosition: {x: 0, y: 0.6, z: -2.175}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

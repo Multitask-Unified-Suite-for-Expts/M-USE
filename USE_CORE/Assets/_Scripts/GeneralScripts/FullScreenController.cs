@@ -31,12 +31,13 @@ public class FullScreenController : MonoBehaviour
 {
     private bool IsFullScreen;
     public event System.Action<bool> FullScreenChangedEvent;
-
+    private readonly int TargetWidth = 1920;
+    private readonly int TargetHeight = 1080;
 
     void Start()
     {
         IsFullScreen = Screen.fullScreen;
-        //Screen.SetResolution(1920, 1080, false);
+        Screen.SetResolution(TargetWidth, TargetHeight, IsFullScreen);
     }
 
     void Update()
@@ -44,19 +45,15 @@ public class FullScreenController : MonoBehaviour
         if (IsFullScreen != Screen.fullScreen)
         {
             IsFullScreen = Screen.fullScreen;
-            //Screen.SetResolution(1920, 1080, true);
-
+            Screen.SetResolution(TargetWidth, TargetHeight, IsFullScreen);
             OnFullScreenChanged(IsFullScreen);
         }
     }
-
-
 
     protected virtual void OnFullScreenChanged(bool isFullScreen)
     {
         FullScreenChangedEvent?.Invoke(IsFullScreen);
     }
-
 
     public void SubscribeToFullScreenChanged(System.Action<bool> delegateMethod)
     {
@@ -68,7 +65,5 @@ public class FullScreenController : MonoBehaviour
         FullScreenChangedEvent -= delegateMethod;
     }
 
-
-
-
 }
+

@@ -114,7 +114,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(6f);
+            HaloFBController.SetHaloSize(1.5f);
             HaloFBController.SetHaloIntensity(5);
         });
         SetupTrial.AddSpecificInitializationMethod(() =>

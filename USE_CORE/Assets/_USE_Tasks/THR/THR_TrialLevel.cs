@@ -31,7 +31,7 @@ using USE_ExperimentTemplate_Trial;
 using USE_States;
 using THR_Namespace;
 using USE_UI;
-
+using USE_ExperimentTemplate_Task;
 
 public class THR_TrialLevel : ControlLevel_Trial_Template
 {
@@ -60,7 +60,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private bool GiveReward;
     private bool TimeRanOut;
 
-    [HideInInspector] public List<int> TrialCompletionList;
+    [HideInInspector] public List<int> RunningAcc;
     [HideInInspector] public int TrialsCompleted_Block;
     [HideInInspector] public int TrialsCorrect_Block;
 
@@ -68,9 +68,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int BackdropTouches_Trial;
     [HideInInspector] public int SelectObjectTouches_Trial;
     [HideInInspector] public int AvoidObjectTouches_Trial;
-    [HideInInspector] public int ItiTouches_Trial;
-    [HideInInspector] public int TouchRewards_Trial;
-    [HideInInspector] public int ReleaseRewards_Trial;
+    [HideInInspector] public int NumItiTouches_Trial;
+    [HideInInspector] public int NumTouchRewards_Trial;
+    [HideInInspector] public int NumReleaseRewards_Trial;
+    [HideInInspector] public int NumReleasedEarly_Trial;
+    [HideInInspector] public int NumReleasedLate_Trial;
     [HideInInspector] public int NumTouchesMovedOutside_Trial;
 
     [HideInInspector] public int BackdropTouches_Block;
@@ -319,7 +321,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                         }
                         else if (HeldDuration < CurrentTrial.MinTouchDuration)
                         {
-                            NumReleasedEarly_Block++;
+                            NumReleasedEarly_Trial++;
                             HeldTooShort = true;
                         }
                         //The Else (Greater than MaxDuration) is handled below where I auto stop them for holding for max dur. 
@@ -333,12 +335,17 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (HeldDuration >= CurrentTrial.MaxTouchDuration && MainObjectTouched)
             {
-                NumReleasedLate_Block++;
+                NumReleasedLate_Trial++;
                 HeldTooLong = true;
             }
 
             if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
+            {
                 TimeRanOut = true;
+                SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
+                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+                AbortCode = 6;
+            }
 
 
             if (BackdropTouchTime != 0 && (Time.time - BackdropTouchTime) > CurrentTrial.TimeoutDuration)
@@ -398,14 +405,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (GiveReleaseReward && SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
-                ReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
+                NumReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumReleasePulses;
             }
             if (GiveTouchReward && SessionValues.SyncBoxController != null)
             {
                 SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
-                TouchRewards_Trial += CurrentTrial.NumTouchPulses;
+                NumTouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumTouchPulses;
             }
@@ -416,7 +423,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         ITI.AddUpdateMethod(() =>
         {
             if(InputBroker.GetMouseButtonUp(0))
-                ItiTouches_Trial++;
+                NumItiTouches_Trial++;
         });
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
         ITI.AddDefaultTerminationMethod(() =>
@@ -424,7 +431,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             SquareGO.SetActive(false);
             UpdateData();
             CurrentTaskLevel.CalculateBlockSummaryString();
-            CheckIfBlockShouldEnd();
+           // CheckIfBlockShouldEnd();
             ConfigValuesChangedInPrevTrial = ConfigValuesChanged();
         });
 
@@ -445,20 +452,22 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SelectObjectTouches_Block += SelectObjectTouches_Trial;
         AvoidObjectTouches_Block += AvoidObjectTouches_Trial;
         BackdropTouches_Block += BackdropTouches_Trial;
-        NumItiTouches_Block += ItiTouches_Trial;
-        NumTouchRewards_Block += TouchRewards_Trial;
-        NumReleaseRewards_Block += ReleaseRewards_Trial;
+        NumItiTouches_Block += NumItiTouches_Trial;
+        NumTouchRewards_Block += NumTouchRewards_Trial;
+        NumReleaseRewards_Block += NumReleaseRewards_Trial;
+        NumReleasedEarly_Block += NumReleasedEarly_Trial;
+        NumReleasedLate_Block += NumReleasedLate_Trial;
         NumTouchesMovedOutside_Block += NumTouchesMovedOutside_Trial;
 
-        CurrentTaskLevel.SelectObjectTouches_Task += SelectObjectTouches_Block;
-        CurrentTaskLevel.AvoidObjectTouches_Task += AvoidObjectTouches_Block;
-        CurrentTaskLevel.BackdropTouches_Task += BackdropTouches_Block;
-        CurrentTaskLevel.ItiTouches_Task += NumItiTouches_Block;
-        CurrentTaskLevel.TouchRewards_Task += NumTouchRewards_Block;
-        CurrentTaskLevel.ReleaseRewards_Task += NumReleaseRewards_Block;
-        CurrentTaskLevel.ReleasedEarly_Task += NumReleasedEarly_Block;
-        CurrentTaskLevel.ReleasedLate_Task += NumReleasedLate_Block;
-        CurrentTaskLevel.TouchesMovedOutside_Task += NumTouchesMovedOutside_Block;
+        CurrentTaskLevel.SelectObjectTouches_Task += SelectObjectTouches_Trial;
+        CurrentTaskLevel.AvoidObjectTouches_Task += AvoidObjectTouches_Trial;
+        CurrentTaskLevel.BackdropTouches_Task += BackdropTouches_Trial;
+        CurrentTaskLevel.ItiTouches_Task += NumItiTouches_Trial;
+        CurrentTaskLevel.TouchRewards_Task += NumTouchRewards_Trial;
+        CurrentTaskLevel.ReleaseRewards_Task += NumReleaseRewards_Trial;
+        CurrentTaskLevel.ReleasedEarly_Task += NumReleasedEarly_Trial;
+        CurrentTaskLevel.ReleasedLate_Task += NumReleasedLate_Trial;
+        CurrentTaskLevel.TouchesMovedOutside_Task += NumTouchesMovedOutside_Trial;
 
         if (GiveReleaseReward || GiveTouchReward)
         {
@@ -467,9 +476,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         }
 
         if (GiveTouchReward || GiveReleaseReward)
-            TrialCompletionList.Insert(0, 1);
+            RunningAcc.Add(1);
         else
-            TrialCompletionList.Insert(0, 0);
+            RunningAcc.Add(0);
 
         TrialsCompleted_Block++;
         CurrentTaskLevel.TrialsCompleted_Task++;
@@ -477,7 +486,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     public void ResetBlockVariables()
     {
-        TrialCompletionList.Clear();
+        RunningAcc.Clear();
         TrialsCompleted_Block = 0;
         TrialsCorrect_Block = 0;
         BackdropTouches_Block = 0;
@@ -502,12 +511,23 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         BackdropTouches_Trial = 0;
         SelectObjectTouches_Trial = 0;
         AvoidObjectTouches_Trial = 0;
+        NumReleasedEarly_Trial = 0;
+        NumReleasedLate_Trial = 0;
         NumTouchesMovedOutside_Trial = 0;
-        ItiTouches_Trial = 0;
+        NumItiTouches_Trial = 0;
         TouchStartTime = 0;
         HeldDuration = 0;
-        TouchRewards_Trial = 0;
-        ReleaseRewards_Trial = 0;
+        NumTouchRewards_Trial = 0;
+        NumReleaseRewards_Trial = 0;
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        if (AbortCode != 0)
+        {
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
+        }
     }
 
     private void SetTrialSummaryString()
@@ -519,21 +539,26 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        return PerfThresholdMet;
-    }
+        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
 
-    private void CheckIfBlockShouldEnd()
-    {
-        if(TrialsCompleted_Block >= CurrentTrial.PerfWindowEndTrials)
-        {
-            float sum = 0;
-            for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
-                sum += TrialCompletionList[i];
-            float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
-            if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
-                PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
-        }
+        // Using Simple Threshold Block End
+            return TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", RunningAcc,
+                 CurrentTrial.PerfThresholdEndTrials, CurrentTrial.PerfWindowEndTrials, CurrentTaskLevel.MinTrials_InBlock,
+                CurrentTrial.MaxTrials);
+
     }
+    /*   private void CheckIfBlockShouldEnd()
+       {
+           if(TrialsCompleted_Block >= CurrentTrial.PerfWindowEndTrials)
+           {
+               float sum = 0;
+               for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
+                   sum += TrialCompletionList[i];
+               float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
+               if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
+                   PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
+           }
+       }*/
 
     private void LoadConfigUIVariables()
     {
@@ -607,11 +632,11 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SelectObjectTouches_Trial = 0;
         AvoidObjectTouches_Trial = 0;
         NumTouchesMovedOutside_Trial = 0;
-        ItiTouches_Trial = 0;
+        NumItiTouches_Trial = 0;
         TouchStartTime = 0;
         HeldDuration = 0;
-        TouchRewards_Trial = 0;
-        ReleaseRewards_Trial = 0;
+        NumTouchRewards_Trial = 0;
+        NumReleaseRewards_Trial = 0;
     }
 
     private void DefineTrialData()
@@ -630,7 +655,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("AvoidObjectTouches_Trial", () => AvoidObjectTouches_Trial);
         TrialData.AddDatum("BackdropTouches_Trial", () => BackdropTouches_Trial);
         TrialData.AddDatum("MovedOutsideObject_Trial", () => NumTouchesMovedOutside_Trial);
-        TrialData.AddDatum("ItiTouches_Trial", () => ItiTouches_Trial);
+        TrialData.AddDatum("ItiTouches_Trial", () => NumItiTouches_Trial);
         TrialData.AddDatum("ReactionTime", () => ReactionTime);
         TrialData.AddDatum("TouchStartTime", () => TouchStartTime);
         TrialData.AddDatum("HeldDuration", () => HeldDuration);

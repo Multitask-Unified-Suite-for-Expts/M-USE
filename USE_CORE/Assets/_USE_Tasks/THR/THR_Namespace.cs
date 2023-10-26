@@ -52,10 +52,10 @@ namespace THR_Namespace
         public float ObjectSize;
         public float ObjectSizeMin;
         public float ObjectSizeMax;
-        public int PositionX;
+        public float PositionX;
         public int PositionX_Min;
         public int PositionX_Max;
-        public int PositionY;
+        public float PositionY;
         public int PositionY_Min;
         public int PositionY_Max;
         public bool RewardTouch;
@@ -64,7 +64,7 @@ namespace THR_Namespace
         public int NumReleasePulses;
         public bool RandomObjectSize;
         public bool RandomObjectPosition;
-        public int TimeToAutoEndTrialSec;
+        public float TimeToAutoEndTrialSec;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -135,10 +135,10 @@ namespace THR_Namespace
         public float ObjectSize;
         public float ObjectSizeMin;
         public float ObjectSizeMax;
-        public int PositionX;
+        public float PositionX;
         public int PositionX_Min;
         public int PositionX_Max;
-        public int PositionY;
+        public float PositionY;
         public int PositionY_Min;
         public int PositionY_Max;
         public bool RewardTouch;
@@ -147,7 +147,7 @@ namespace THR_Namespace
         public int NumReleasePulses;
         public bool RandomObjectSize;
         public bool RandomObjectPosition;
-        public int TimeToAutoEndTrialSec;
+        public float TimeToAutoEndTrialSec;
         public float TimeoutDuration;
     }
 

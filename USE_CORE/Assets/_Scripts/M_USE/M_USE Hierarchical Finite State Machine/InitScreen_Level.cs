@@ -30,56 +30,57 @@ using TMPro;
 using System.IO;
 using UnityEngine.UI;
 using System.Collections;
-using System.Threading.Tasks;
-using GLTFast;
-using USE_StimulusManagement;
 using USE_UI;
 
 public class InitScreen_Level : ControlLevel
 {
-    private GameObject InitScreen_GO;
-    private GameObject InitScreenCanvas_GO;
-    private GameObject StartPanel_GO;
-    private GameObject MainPanel_GO;
+    public GameObject InitScreen_GO;
+    public GameObject StartPanel_GO;
+    public GameObject MainPanel_GO;
 
-    private TextMeshProUGUI SubjectID_Text;
-    private TextMeshProUGUI SubjectAge_Text;
-    private TextMeshProUGUI ServerData_Text;
-    private TextMeshProUGUI LocalData_Text;
+    public GameObject InitScreenCanvas_GO;
 
-    private GameObject LocalData_GO;
-    private GameObject ServerData_GO;
-    private GameObject LocalConfig_GO;
-    private GameObject ServerConfig_GO;
+    public TextMeshProUGUI SubjectID_Text;
+    public TextMeshProUGUI SubjectAge_Text;
+    public TextMeshProUGUI ServerData_Text;
+    public TextMeshProUGUI LocalData_Text;
 
-    private GameObject Settings_GO;
-    private GameObject SettingsButton_GO;
-    private GameObject SettingsPanel_GO;
+    public TextMeshProUGUI LocalConfigText;
+    public TextMeshProUGUI LocalDataText;
 
-    private Toggle LocalConfig_Toggle;
-    private Toggle ServerConfig_Toggle;
-    private Toggle DefaultConfig_Toggle;
-    private Toggle LocalData_Toggle;
-    private Toggle ServerData_Toggle;
-    private Toggle NoData_Toggle;
+    public GameObject LocalData_GO;
+    public GameObject ServerData_GO;
+    public GameObject LocalConfig_GO;
+    public GameObject ServerConfig_GO;
 
-    private GameObject ConnectToServerButton_GO;
+    public GameObject Settings_GO;
+    public GameObject SettingsButton_GO;
+    public GameObject SettingsPanel_GO;
 
-    private GameObject RedX_GO;
-    private GameObject GreenCheckMark_GO;
+    public Toggle LocalConfig_Toggle;
+    public Toggle ServerConfig_Toggle;
+    public Toggle DefaultConfig_Toggle;
+    public Toggle LocalData_Toggle;
+    public Toggle ServerData_Toggle;
+    public Toggle NoData_Toggle;
 
-    private GameObject ErrorHandling_GO;
-    private GameObject[] GreyOutPanels_Array;
+    public GameObject ConnectToServerButton_GO;
+
+    public GameObject RedX_GO;
+    public GameObject GreenCheckMark_GO;
+
+    public GameObject ErrorHandling_GO;
+    public GameObject[] GreyOutPanels_Array;
+
+    public GameObject LocalConfigsToggle_GreyPanel;
+    public GameObject LocalDataToggle_GreyPanel;
 
     private AudioSource AudioSource;
     [HideInInspector] public AudioClip ToggleChange_AudioClip;
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
 
-    private State StartScreen;
-    private State CollectInfoScreen;
-
-    private FolderDropdown FolderDropdown;
+    public FolderDropdown FolderDropdown;
 
     private bool ValuesLoaded;
     private bool ConfirmButtonPressed;
@@ -89,23 +90,25 @@ public class InitScreen_Level : ControlLevel
     private string ErrorType;
 
     private KeyboardController KeyboardController;
-    private Toggle KeyboardToggle;
+    public Toggle KeyboardToggle;
 
 
     public override void DefineControlLevel()
     {
-        StartScreen = new State("StartScreen");
-        CollectInfoScreen = new State("CollectInfoScreen");
-        AddActiveStates(new List<State> { StartScreen, CollectInfoScreen });
+        State Setup = new State("Setup");
+        State StartScreen = new State("StartScreen");
+        State CollectInfoScreen = new State("CollectInfoScreen");
+        AddActiveStates(new List<State> { Setup, StartScreen, CollectInfoScreen });
 
-        SetGameObjects();
+
+        //Setup State-----------------------------------------------------------------------------------------------------------------------------------
+        Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
+        Setup.SpecifyTermination(() => true, StartScreen);
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.WebBuild)
-                GameObject.Find("InitScreenCanvas").GetComponent<Canvas>().targetDisplay = 0; //Move initscreen to main display.
-
+            StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
             StartPanel_GO.SetActive(true);
         });
         StartScreen.AddUpdateMethod(() =>
@@ -123,6 +126,7 @@ public class InitScreen_Level : ControlLevel
         CollectInfoScreen.AddSpecificInitializationMethod(() =>
         {
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
+            MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen  
             MainPanel_GO.SetActive(true);
             Settings_GO.SetActive(true);
         });
@@ -140,16 +144,11 @@ public class InitScreen_Level : ControlLevel
         CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
-
             SessionValues.SubjectID = GetSubjectID();
             SessionValues.SubjectAge = GetSubjectAge();
-
             SetConfigInfo();
             SetDataInfo();
-
-            MainPanel_GO.SetActive(false);
-            InitScreenCanvas_GO.SetActive(false); //turn off init canvas since last state.
-
+            InitScreenCanvas_GO.SetActive(false);
             SessionValues.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
         });
 
@@ -371,64 +370,11 @@ public class InitScreen_Level : ControlLevel
             HandleDataToggle(selectedGO);
     }
 
-    private void SetGameObjects()
+    private void SetupInitScreen()
     {
-        InitScreen_GO = GameObject.Find("InitScreen_GO");
-        InitScreenCanvas_GO = GameObject.Find("InitScreenCanvas");
-
         KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
-        KeyboardToggle = GameObject.Find("Keyboard_Toggle").GetComponent<Toggle>();
 
-        StartPanel_GO = InitScreen_GO.transform.Find("StartPanel").gameObject;
-        StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
-
-        MainPanel_GO = InitScreen_GO.transform.Find("MainPanel").gameObject;
-        MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen  
-
-        LocalConfig_Toggle = GameObject.Find("LocalConfigs_Toggle").GetComponent<Toggle>();
-        ServerConfig_Toggle = GameObject.Find("ServerConfigs_Toggle").GetComponent<Toggle>();
-        DefaultConfig_Toggle = GameObject.Find("DefaultConfigs_Toggle").GetComponent<Toggle>();
-        LocalData_Toggle = GameObject.Find("LocalData_Toggle").GetComponent<Toggle>();
-        ServerData_Toggle = GameObject.Find("ServerData_Toggle").GetComponent<Toggle>();
-        NoData_Toggle = GameObject.Find("NoData_Toggle").GetComponent<Toggle>();
-
-        ErrorHandling_GO = GameObject.Find("ErrorHandling_Panel");
-        ErrorHandling_GO.SetActive(false);
-
-        SubjectID_Text = GameObject.Find("SubjectID_Text").GetComponent<TextMeshProUGUI>();
-        SubjectAge_Text = GameObject.Find("SubjectAge_Text").GetComponent<TextMeshProUGUI>();
-        ServerData_Text = GameObject.Find("ServerData_Text").GetComponent<TextMeshProUGUI>();
-        LocalData_Text = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
-
-        GreyOutPanels_Array = new GameObject[3]
-        {
-            GameObject.Find("GreyOutPanel_ServerURL"), GameObject.Find("GreyOutPanel_Data"), GameObject.Find("GreyOutPanel_Config")
-        };
-        foreach (GameObject go in GreyOutPanels_Array)
-            go.SetActive(false);
-
-        ConnectToServerButton_GO = GameObject.Find("ConnectButton");
-
-        RedX_GO = GameObject.Find("RedX");
-        RedX_GO.SetActive(false);
-        GreenCheckMark_GO = GameObject.Find("GreenCheckMark");
-        GreenCheckMark_GO.SetActive(false);
-
-        LocalData_GO = GameObject.Find("LocalData_GO");
-        ServerData_GO = GameObject.Find("ServerData_GO");
-
-        FolderDropdown = GameObject.Find("Dropdown").GetComponent<FolderDropdown>();
-
-        LocalConfig_GO = GameObject.Find("LocalConfig_GO");
-        ServerConfig_GO = GameObject.Find("ServerConfig_GO");
-
-        Settings_GO = GameObject.Find("InitScreen_Settings");
-        SettingsPanel_GO = GameObject.Find("SettingsPanel");
-        SettingsButton_GO = GameObject.Find("SettingsButton");
         SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
-        SettingsPanel_GO.SetActive(false);
-        Settings_GO.SetActive(false);
-
 
         //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
         FileSpec configFileSpec = new FileSpec
@@ -439,8 +385,7 @@ public class InitScreen_Level : ControlLevel
         SessionValues.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
         TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
-        TextMeshProUGUI configText = GameObject.Find("LocalConfig_Text").GetComponent<TextMeshProUGUI>();
-        configFileItem.ManualStart(configFileSpec, configInputField, configText);
+        configFileItem.ManualStart(configFileSpec, configInputField, LocalConfigText);
         LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
 
         FileSpec dataFileSpec = new FileSpec
@@ -451,10 +396,8 @@ public class InitScreen_Level : ControlLevel
         SessionValues.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
         TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
         FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();
-        TextMeshProUGUI dataText = GameObject.Find("LocalData_Text").GetComponent<TextMeshProUGUI>();
-        dataFileItem.ManualStart(dataFileSpec, dataInputField, dataText);
+        dataFileItem.ManualStart(dataFileSpec, dataInputField, LocalDataText);
         LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
-
 
         if (SessionValues.WebBuild)
         {
@@ -465,18 +408,18 @@ public class InitScreen_Level : ControlLevel
         {
             ServerData_GO.SetActive(false);
             ServerConfig_GO.SetActive(false);
-
             //Un-Block out local toggle options if not web build:
-            GameObject.Find("LocalConfigsToggle_GREYPANEL").SetActive(false);
-            GameObject.Find("LocalDataToggle_GREYPANEL").SetActive(false);
+            LocalConfigsToggle_GreyPanel.SetActive(false);
+            LocalDataToggle_GreyPanel.SetActive(false);
         }
-
-        MainPanel_GO.SetActive(false);
 
         AudioSource = gameObject.AddComponent<AudioSource>();
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
+
+        if (SessionValues.WebBuild)
+            SessionValues.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
     }
 
     public void HandleSettingButtonClicked()

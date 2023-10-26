@@ -60,7 +60,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private bool mazeLoaded = false;
 
     // Tile objects
-    private Tile tile = new Tile();
+   // private Tile tile;
     public StimGroup tiles; // top of trial level with other variable definitions
     public Texture2D tileTex;
     public Texture2D mazeBgTex;
@@ -102,6 +102,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public int NumBlinks;
     public Tile TilePrefab;
+    public Tile TileController;
     public string MazeFilePath;
 
     // Config UI Variables
@@ -162,7 +163,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
-            if(!SessionValues.WebBuild) //player view variables
+            
+
+            if (!SessionValues.WebBuild) //player view variables
             {
                 playerView = gameObject.AddComponent<PlayerViewPanel>();
                 playerViewParent = GameObject.Find("MainCameraCopy");
@@ -186,8 +189,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (!configVariablesLoaded)
-                LoadConfigVariables();
+            
 
             // Load Maze at the start of every trial to keep the mNextStep consistent
             CurrentTaskLevel.SetTaskSummaryString();
@@ -403,7 +405,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (!tiles.IsActive)
                 tiles.ToggleVisibility(true);
             MazeBackground.SetActive(true);
-            tile.NextCorrectFlashingFeedback();
+            TileController.NextCorrectFlashingFeedback();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -513,6 +515,21 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     protected override void DefineTrialStims()
     {
+        if(TileController == null)
+        {
+            TileController = Instantiate(TilePrefab);
+            TileController.name = "TileController";
+            TileController.mgTL = this;
+        }
+        else
+        {
+            TileController.GetComponent<MeshRenderer>().enabled = true;
+        }
+
+
+        LoadConfigVariables();
+        SetGameConfigs(TileController);
+
         // This will Load all tiles within the maze and the background of the maze
         mazeDims = CurrentTaskLevel.currMaze.mDims;
         var mazeCenter = MazeBackground.transform.localPosition;
@@ -531,8 +548,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         for (var y = 1; y <= mazeDims.y; y++)
         {
             // Instantiate the tile
-            tile = Instantiate(TilePrefab, MazeContainer.transform);
-            tile.mgTL = this;
+            Tile tile = Instantiate(TileController, MazeContainer.transform);
 
             StimDef tileStimDef = new StimDef(tiles, tile.gameObject);
             
@@ -577,6 +593,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         AssignFlashingTiles();
         TrialStims.Add(tiles);
+        TileController.GetComponent<MeshRenderer>().enabled = false;
     }
     public bool CheckTileFlash()
     {
@@ -827,11 +844,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
 
-        SetGameConfigs();
         configVariablesLoaded = true;
     }
 
-    private void SetGameConfigs()
+    private void SetGameConfigs(Tile tile)
     {
 
         // Default tile width - edit at the task level def
@@ -842,7 +858,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tile.NUM_BLINKS = currentTaskDef.NumBlinks;
 
         // Default - White
-        tile.DEFAULT_TILE_COLOR = new Color(currentTaskDef.DefaultTileColor[0], currentTaskDef.DefaultTileColor[1], currentTaskDef.DefaultTileColor[2], 1);
+        tile.DEFAULT_TILE_COLOR = new Color(CurrentTrialDef.DefaultTileColor[0], CurrentTrialDef.DefaultTileColor[1], CurrentTrialDef.DefaultTileColor[2], 1);
 
         // Start - Light yellow
         tile.START_COLOR = new Color(currentTaskDef.StartColor[0], currentTaskDef.StartColor[1], currentTaskDef.StartColor[2], 1);
@@ -888,7 +904,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         
         //Trial Def Configs
         viewPath = CurrentTrialDef.ViewPath;
-        
+
     }
 
     private void DefineTrialData()

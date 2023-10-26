@@ -43,7 +43,7 @@ public class SerialPortThreaded : MonoBehaviour
 	[HideInInspector]
 	private List<string> receivedBuffer = new List<string>(), sentBuffer = new List<string>();
 
-	private List<MessageToSend> toSendBuffer = new List<MessageToSend>();
+	public List<MessageToSend> toSendBuffer = new List<MessageToSend>();
 
 	public ExpectedResponseCode checkForResponseCode;
 	private string codePrefixToCheck;

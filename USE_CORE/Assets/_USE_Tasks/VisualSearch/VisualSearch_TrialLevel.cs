@@ -108,7 +108,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(6f);
+            HaloFBController.SetHaloSize(1.5f);
             HaloFBController.SetHaloIntensity(5);
         });
 
@@ -232,9 +232,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-
-            CurrentTaskLevel.NumAbortedTrials_InBlock++;
-            CurrentTaskLevel.NumAbortedTrials_InTask++;
 
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             SearchDurations_InBlock.Add(null);

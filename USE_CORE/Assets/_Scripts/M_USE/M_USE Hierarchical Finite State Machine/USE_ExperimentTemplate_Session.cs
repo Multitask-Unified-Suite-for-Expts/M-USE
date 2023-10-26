@@ -73,13 +73,15 @@ namespace USE_ExperimentTemplate_Session
         public SelectionTracker.SelectionHandler SelectionHandler;
         private GameObject InputTrackers;
         public FrameData FrameData;
-        private Camera SessionCam;
-        private Camera MirrorCam;
-        private GameObject mirrorCamGO;
-        [HideInInspector] public RenderTexture CameraMirrorTexture;
+        [HideInInspector] public RenderTexture CameraRenderTexture;
 
-        private GameObject experimenterDisplay;
-        private RawImage mainCameraCopy_Image;
+        private GameObject ExperimenterDisplay;
+        private RawImage ExpDisplayRenderImage;
+
+        private Camera SessionCam;
+
+        private Camera MirrorCam;
+        private GameObject MirrorCamGO;
 
         private bool TaskSceneLoaded, SceneLoading;
         private List<string> selectedConfigsList = new List<string>();
@@ -99,7 +101,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject StartButtonPrefabGO;
         [HideInInspector] public AudioClip BlockResults_AudioClip;
 
-        [HideInInspector] public GameObject InitCamGO;
         [HideInInspector] public LogWriter LogWriter;
 
         [HideInInspector] public State selectTask, loadTask;
@@ -155,7 +156,7 @@ namespace USE_ExperimentTemplate_Session
             initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
             {
                 if (SessionValues.WebBuild)
-                    InitCamGO.SetActive(false);
+                    SessionValues.InitCamGO.SetActive(false);
                 else
                 {
                     CreateExperimenterDisplay();
@@ -239,7 +240,7 @@ namespace USE_ExperimentTemplate_Session
                 
                 if (!SessionValues.WebBuild)
                 {
-                    InitCamGO.SetActive(false);
+                    SessionValues.InitCamGO.SetActive(false);
                     SessionValues.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
                 SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SetupSessionEnds");
@@ -313,20 +314,19 @@ namespace USE_ExperimentTemplate_Session
 
                 HumanVersionToggleButton.SetActive(SessionValues.SessionDef.IsHuman);
 
+                Starfield.SetActive(SessionValues.SessionDef.IsHuman);
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
 
                 SessionValues.TaskSelectionCanvasGO.SetActive(true);
 
-                Starfield.SetActive(SessionValues.SessionDef.IsHuman);
-
-                if(!SessionValues.WebBuild)
+                if (!SessionValues.WebBuild)
                 {
-                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                    CameraMirrorTexture.Create();
-                    SessionCam.targetTexture = CameraMirrorTexture;
-                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                    CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraRenderTexture.Create();
+                    SessionCam.targetTexture = CameraRenderTexture;
+                    ExpDisplayRenderImage.texture = CameraRenderTexture;
                 }
 
                 SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("SelectTaskStarts");
@@ -612,16 +612,17 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.SpecifyTermination(() => CurrentTask!= null && CurrentTask.TaskLevelDefined, setupTask, () =>
             {
+                SessionValues.TaskSelectionCanvasGO.SetActive(false);
                 DefiningTask = false;
                 Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
-                //SessionCam.gameObject.SetActive(false);
+                SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
 
                 SetTaskMainBackground(); 
 
-                if (CameraMirrorTexture != null)
-                    CameraMirrorTexture.Release();
+                if (CameraRenderTexture != null)
+                    CameraRenderTexture.Release();
 
                 if (CurrentTask.TaskName != "GazeCalibration")
                     SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
@@ -660,18 +661,13 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
-                SessionValues.TaskSelectionCanvasGO.SetActive(false);
-
-                SessionCam.gameObject.SetActive(false);
-
                 SessionValues.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
-
-                if(!SessionValues.WebBuild)
+                if (!SessionValues.WebBuild)
                 {
-                    CameraMirrorTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                    CameraMirrorTexture.Create();
-                    CurrentTask.TaskCam.targetTexture = CameraMirrorTexture;
-                    mainCameraCopy_Image.texture = CameraMirrorTexture;
+                    CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+                    CameraRenderTexture.Create();
+                    CurrentTask.TaskCam.targetTexture = CameraRenderTexture;
+                    ExpDisplayRenderImage.texture = CameraRenderTexture;
                 }
             });
             
@@ -706,8 +702,8 @@ namespace USE_ExperimentTemplate_Session
 
                 ActiveTaskLevels.Remove(CurrentTask);
 
-                if (CameraMirrorTexture != null)
-                    CameraMirrorTexture.Release();
+                if (CameraRenderTexture != null)
+                    CameraRenderTexture.Release();
 
                 if (SessionValues.ExperimenterDisplayController != null)
                     SessionValues.ExperimenterDisplayController.ResetTask(null, null);
@@ -770,6 +766,7 @@ namespace USE_ExperimentTemplate_Session
             });
         }
 
+
         private void OnApplicationQuit()
         {
             if (CurrentTask == null)
@@ -804,7 +801,7 @@ namespace USE_ExperimentTemplate_Session
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
                 SessionValues.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
-                InitCamGO = GameObject.Find("InitCamera");
+                SessionValues.InitCamGO = GameObject.Find("InitCamera");
                 SessionValues.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 Starfield = GameObject.Find("Starfield");
                 LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
@@ -848,22 +845,22 @@ namespace USE_ExperimentTemplate_Session
 
         private void CreateExperimenterDisplay()
         {
-            experimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
-            experimenterDisplay.name = "ExperimenterDisplay";
-            SessionValues.ExperimenterDisplayController = experimenterDisplay.AddComponent<ExperimenterDisplayController>();
-            experimenterDisplay.AddComponent<PreserveObject>();
-            SessionValues.ExperimenterDisplayController.InitializeExperimenterDisplay(this, experimenterDisplay);
+            ExperimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
+            ExperimenterDisplay.name = "ExperimenterDisplay";
+            SessionValues.ExperimenterDisplayController = ExperimenterDisplay.AddComponent<ExperimenterDisplayController>();
+            ExperimenterDisplay.AddComponent<PreserveObject>();
+            SessionValues.ExperimenterDisplayController.InitializeExperimenterDisplay(this, ExperimenterDisplay);
         }
 
         private void CreateMirrorCam()
         {
-            mirrorCamGO = new GameObject("MirrorCamera");
-            MirrorCam = mirrorCamGO.AddComponent<Camera>();
-            Skybox skybox = mirrorCamGO.AddComponent<Skybox>();
+            MirrorCamGO = new GameObject("MirrorCamera");
+            MirrorCam = MirrorCamGO.AddComponent<Camera>();
+            Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
             skybox.material = Resources.Load<Material>("MUSE_MainBackground");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
-            mainCameraCopy_Image = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+            ExpDisplayRenderImage = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
         }
 
         private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder and copy config folder into it
@@ -1074,8 +1071,8 @@ namespace USE_ExperimentTemplate_Session
 
         public void OnGUI()
         {
-            if (CameraMirrorTexture == null) return;
-            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraMirrorTexture);
+            if (CameraRenderTexture == null) return;
+            GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), CameraRenderTexture);
         }
         
         

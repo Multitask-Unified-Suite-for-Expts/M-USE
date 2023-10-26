@@ -1067,7 +1067,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (runningPerformance.Count > 1)
         {
             prevResult = runningPerformance[^2];
-            Debug.LogWarning("prevResult set for the first time to: " + prevResult);
         }
 
         if (runningPerformance.Last() == 1)
@@ -1075,7 +1074,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 0)
             {
                 reversalsCount++;
-                Debug.LogWarning("incrementing reversals count to " + reversalsCount);
             }
         }
         else if (runningPerformance.Last() == 0)
@@ -1083,7 +1081,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 1)
             {
                 reversalsCount++;
-                Debug.LogWarning("incrementing reversals count to " + reversalsCount);
             }
         }
 

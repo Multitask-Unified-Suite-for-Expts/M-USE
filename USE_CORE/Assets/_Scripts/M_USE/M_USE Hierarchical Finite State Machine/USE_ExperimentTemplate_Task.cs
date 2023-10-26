@@ -56,9 +56,7 @@ namespace USE_ExperimentTemplate_Task
         public string TaskProjectFolder;
 
         [HideInInspector] public int BlockCount;
-
-        public int reversalsCount;
-
+        
         // protected int NumBlocksInTask;
         public int NumAbortedTrials_InTask;
         public int NumRewardPulses_InTask;
@@ -266,9 +264,7 @@ namespace USE_ExperimentTemplate_Task
                 SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-            Debug.LogWarning("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + TrialLevel.NumReversalsUntilTerm);
-            RunBlock.SpecifyTermination(() => reversalsCount >= TrialLevel.NumReversalsUntilTerm, BlockFeedback);
-
+            
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             float
                 blockFeedbackDuration =
@@ -886,23 +882,11 @@ namespace USE_ExperimentTemplate_Task
         public int DetermineTrialDefDifficultyLevel(int difficultyLevel, List<int> runningPerformance, int posStep,
             int negStep, int maxDiffLevel)
         {
-            int prevResult = -1;
             if (runningPerformance.Count == 0)
                 return difficultyLevel;
 
-            if (runningPerformance.Count > 1 && runningPerformance.Count >= TrialLevel.MinTrialsBeforeTerm)
-            {
-                prevResult = runningPerformance.Last();
-                Debug.LogWarning("prevResult: " + prevResult);
-            }
-
             if (runningPerformance.Last() == 1)
             {
-                if (prevResult == 0)
-                {
-                    reversalsCount++;
-                    Debug.LogWarning("incrementing reversals count to " + reversalsCount);
-                }
                 difficultyLevel -= negStep;
                 if (difficultyLevel < 1)
                 {
@@ -913,11 +897,6 @@ namespace USE_ExperimentTemplate_Task
 
             else if (runningPerformance.Last() == 0)
             {
-                if (prevResult == 1)
-                {
-                    reversalsCount++;
-                    Debug.LogWarning("incrementing reversals count to " + reversalsCount);
-                }
                 difficultyLevel += posStep;
                 if (difficultyLevel >= maxDiffLevel)
                 {

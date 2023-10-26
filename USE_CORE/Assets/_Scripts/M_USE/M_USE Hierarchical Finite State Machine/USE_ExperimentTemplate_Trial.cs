@@ -66,6 +66,7 @@ namespace USE_ExperimentTemplate_Trial
         public int NumReversalsUntilTerm;
         public int MinTrialsBeforeTerm;
         public int TerminationWindowSize;
+        public int reversalsCount;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -153,14 +154,14 @@ namespace USE_ExperimentTemplate_Trial
                         .Where(item => 
                         {
                             Debug.LogWarning("item.TrialDef.BlockCount: " + item.TrialDef.BlockCount + " /////// BlockCount: " + BlockCount);
-                            return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount);
+                            return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount - 1 == BlockCount);
                         })
                         .Select(item => item.Index)
                         .ToList();
                     return tieIndices[Random.Range(0, tieIndices.Count)];
 
                 default:
-                    Debug.LogWarning("selection style: " + TrialDefSelectionStyle);
+                    //Debug.LogWarning("selection style: " + TrialDefSelectionStyle);
                     return TrialCount_InBlock;
             }
         }

@@ -32,6 +32,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using USE_ExperimentTemplate_Task;
 using USE_UI;
 
 
@@ -624,6 +625,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public override void DefineCustomTrialDefSelection()
     {
+        //Debug.LogWarning("DefineCustomTrialDefSelection called");
         TrialDefSelectionStyle = CurrentTrial.TrialDefSelectionStyle;
         posStep = CurrentTrial.PosStep;
         negStep = CurrentTrial.NegStep;
@@ -633,7 +635,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
         MinTrialsBeforeTerm = CurrentTrial.MinTrialsBeforeTerm;
         TerminationWindowSize = CurrentTrial.TerminationWindowSize;
-        BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
+        //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
         
         int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
         difficultyLevel = randomDouble;
@@ -661,6 +663,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
         InflationDurations_Block.Clear();
+        runningPerformance.Clear();
     }
 
     private void ScaleToNextInterval()
@@ -1051,6 +1054,42 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
         FrameData.AddDatum("StimLeft", () => StimLeft.activeInHierarchy);
         FrameData.AddDatum("StimRight", () => StimRight.activeInHierarchy);
+    }
+
+    protected override bool CheckBlockEnd()
+    {
+        int prevResult = -1;
+
+        Debug.LogWarning("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
+        if (MinTrialsBeforeTerm < 0 || runningPerformance.Count < MinTrialsBeforeTerm + 1)
+            return false;
+
+        if (runningPerformance.Count > 1)
+        {
+            prevResult = runningPerformance[^2];
+            Debug.LogWarning("prevResult set for the first time to: " + prevResult);
+        }
+
+        if (runningPerformance.Last() == 1)
+        {
+            if (prevResult == 0)
+            {
+                reversalsCount++;
+                Debug.LogWarning("incrementing reversals count to " + reversalsCount);
+            }
+        }
+        else if (runningPerformance.Last() == 0)
+        {
+            if (prevResult == 1)
+            {
+                reversalsCount++;
+                Debug.LogWarning("incrementing reversals count to " + reversalsCount);
+            }
+        }
+
+        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        Debug.LogWarning("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+        return NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm;
     }
 
 }

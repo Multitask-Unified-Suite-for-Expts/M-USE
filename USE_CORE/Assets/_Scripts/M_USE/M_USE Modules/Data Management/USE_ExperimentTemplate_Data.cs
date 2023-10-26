@@ -198,7 +198,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("BlockCount", () => taskLevel != null ? (taskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => trialLevel != null ? (trialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InBlock", () => trialLevel != null ? (trialLevel.TrialCount_InBlock + 1).ToString() : "NoTaskActive");
-            AddDatum("CurrentTrialState", () => trialLevel != null ? trialLevel.CurrentState.StateName : "NoTaskActive");
+            AddDatum("CurrentTrialState", () => trialLevel != null ? trialLevel.CurrentState?.StateName : "NoTaskActive");
             AddDatum("Frame", () => Time.frameCount);
             AddDatum("FrameStartUnity", () => Time.time);
         }
@@ -206,11 +206,16 @@ namespace USE_ExperimentTemplate_Data
         public void AddFlashPanelColumns()
         {
             AddDatum("FlashPanelLStatus", ()=> SessionValues.FlashPanelController.leftLuminanceFactor);
-            AddDatum("FlashPanelLStatus", ()=> SessionValues.FlashPanelController.rightLuminanceFactor);
+            AddDatum("FlashPanelRStatus", ()=> SessionValues.FlashPanelController.rightLuminanceFactor);
         }
         public void AddEventCodeColumns()
         {
-            AddDatum("ReferenceEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent")));
+            AddDatum("ReferenceEventCodes", () =>
+            {
+                string dataString = string.Join(",", SessionValues.EventCodeManager.GetBuffer("sent"));
+                SessionValues.EventCodeManager.sentBuffer.Clear();
+                return dataString; // Return the data string
+            });
             // AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
             //AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
             AddDatum("FrameEventCodes", () =>

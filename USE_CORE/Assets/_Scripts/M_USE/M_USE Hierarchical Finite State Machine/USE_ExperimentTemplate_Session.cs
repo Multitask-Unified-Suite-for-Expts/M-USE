@@ -681,7 +681,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 SessionValues.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                //SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>

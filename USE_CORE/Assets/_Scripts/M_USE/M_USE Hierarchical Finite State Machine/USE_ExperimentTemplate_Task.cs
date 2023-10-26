@@ -251,7 +251,7 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.AddLateUpdateMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                //SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
@@ -281,7 +281,7 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                StartCoroutine(FrameData.AppendDataToBuffer());
-               SessionValues.EventCodeManager.EventCodeLateUpdate();
+               //SessionValues.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);

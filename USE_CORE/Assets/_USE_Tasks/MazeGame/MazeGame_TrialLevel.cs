@@ -912,7 +912,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("ChoiceMade", ()=> choiceMade);
-        FrameData.AddDatum("SelectedObject", () => selectedGO.name);
+        FrameData.AddDatum("SelectedObject", () => selectedGO?.name);
         FrameData.AddDatum("StartedMaze", ()=> startedMaze);
     }
     private void DisableSceneElements()

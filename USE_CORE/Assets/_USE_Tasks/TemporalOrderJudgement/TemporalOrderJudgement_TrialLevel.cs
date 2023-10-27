@@ -33,6 +33,8 @@ using USE_ExperimentTemplate_Trial;
 using TemporalOrderJudgement_Namespace;
 using UnityEngine.UI;
 using ConfigDynamicUI;
+using TMPro;
+
 
 public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
 {
@@ -46,21 +48,31 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject StartButton;
 
-    private enum TrialType_Enum { Audio, Visual, Both};
-    private TrialType_Enum CurrentTrialType; //use this to control logic 
-
     private GameObject VisualStimGO;
+    private GameObject CrossGO;
+    private GameObject ResponsePanelGO;
+    private GameObject SimultaneousPanelGO; //Child of ResponsePanelGO;
+    private GameObject AudioPanelGO; //Child of ResponsePanelGO;
+    private GameObject VisualPanelGO; //Child of ResponsePanelGO;
 
+    private string CorrectAnswer;
+
+    private string ResponseString;
+
+    private bool GotTrialCorrect;
+
+    private bool VisualStimDisplayed;
+    private bool AudioPlayed;
 
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
         State FixationCross = new State("FixationCross");
-        State Flash = new State("Flash");
-        State Beep = new State("Beep");
-        State BeepAndFlash = new State("BeepAndFlash");
+        State Display = new State("Display");
+        State PostDisplayDelay = new State("PostDisplayDelay");
         State Response = new State("Response");
         State Feedback = new State("Feedback");
+        AddActiveStates(new List<State> { InitTrial, FixationCross, Display, PostDisplayDelay, Response, Feedback });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -79,16 +91,19 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
+        //SetupTrial state --------------------------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddDefaultInitializationMethod(() =>
         {
-            SetTrialType();
-            CreateVisualStim();
+            GotTrialCorrect = false;
+            DetermineCorrectAnswer();
+            CreateStims();
+            LoadResponsePanel();
+            LoadConfigUIVariables();
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Response); //may need to change which state to end on
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, TOJ_CanvasGO, true); 
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Response);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, TOJ_CanvasGO, true);
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -98,80 +113,156 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), FixationCross); //NOT SURE WHERE IT SHOULD GO NEXT
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), FixationCross);
 
-        //FixationCross state ----------------------------------------------------------------------------------------------------------------------------------------------
-        FixationCross.AddSpecificInitializationMethod(() =>
+        //FixatioCross state -------------------------------------------------------------------------------------------------------------------------------------------
+        FixationCross.AddSpecificInitializationMethod(() => CrossGO.SetActive(true));
+        FixationCross.AddTimer(() => CurrentTrial.CrossDuration, Display, () => CrossGO.SetActive(false));
+
+        //Display state ------------------------------------------------------------------------------------------------------------------------------------------------
+        Display.AddSpecificInitializationMethod(() =>
         {
-            Debug.LogWarning("CROSS STATE!");
+            VisualStimDisplayed = false;
+            AudioPlayed = false;
+            //Start both coroutines at same time. 
+            StartCoroutine(DisplayStimCoroutine());
+            StartCoroutine(AudioCoroutine());
         });
+        Display.SpecifyTermination(() => VisualStimDisplayed && AudioPlayed, PostDisplayDelay);
 
-        //Flash state ----------------------------------------------------------------------------------------------------------------------------------------------
-        Flash.AddSpecificInitializationMethod(() =>
-        {
-            Debug.LogWarning("FLASH STATE!");
-        });
+        //PostDisplayDelay State ----------------------------------------------------------------------------------------------------------------------------------------
+        PostDisplayDelay.AddTimer(() => CurrentTrial.PostDisplayDelayDuration, Response, () => VisualStimGO.SetActive(false));
 
-        //Beep state ----------------------------------------------------------------------------------------------------------------------------------------------
-        Beep.AddSpecificInitializationMethod(() =>
-        {
-            Debug.LogWarning("BEEP STATE!");
-        });
-
-        //BeepAndFlash state ----------------------------------------------------------------------------------------------------------------------------------------------
-        BeepAndFlash.AddSpecificInitializationMethod(() =>
-        {
-            Debug.LogWarning("BeepAndFlash STATE!");
-        });
-
-        //Response state ----------------------------------------------------------------------------------------------------------------------------------------------
+        //Response state ------------------------------------------------------------------------------------------------------------------------------------------------
         Response.AddSpecificInitializationMethod(() =>
         {
-            Debug.LogWarning("Response STATE!");
+            ResponsePanelGO.SetActive(true);
+            ResponseString = null;
         });
+        Response.AddUpdateMethod(() =>
+        {
+            if (InputBroker.GetKeyDown(KeyCode.UpArrow))
+                ResponseString = "Simultaneous";
+            else if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
+                ResponseString = "Visual";
+            else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
+                ResponseString = "Audio";
+        });
+        Response.SpecifyTermination(() => ResponseString != null, Feedback);
+        Response.AddTimer(() => CurrentTrial.ResponseDuration, Feedback);
 
-        //Feedback state ----------------------------------------------------------------------------------------------------------------------------------------------
+        //Feedback state ------------------------------------------------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
-            Debug.LogWarning("Feedback STATE!");
+            if (ResponseString == null)
+                return;
+
+            if (ResponseString.ToLower() == CorrectAnswer.ToLower())
+                GotTrialCorrect = true;
+
+            AudioFBController.Play(GotTrialCorrect ? "Positive" : "Negative");
+
+            switch(ResponseString)
+            {
+                case "Audio":
+                    VisualPanelGO.SetActive(false);
+                    SimultaneousPanelGO.SetActive(false);
+                    AudioPanelGO.GetComponentInChildren<TextMeshProUGUI>().color = GotTrialCorrect ? Color.green : Color.red;
+                    break;
+                case "Visual":
+                    SimultaneousPanelGO.SetActive(false);
+                    AudioPanelGO.SetActive(false);
+                    VisualPanelGO.GetComponentInChildren<TextMeshProUGUI>().color = GotTrialCorrect ? Color.green : Color.red;
+
+                    break;
+                case "Simultaneous":
+                    AudioPanelGO.SetActive(false);
+                    VisualPanelGO.SetActive(false);
+                    SimultaneousPanelGO.GetComponentInChildren<TextMeshProUGUI>().color = GotTrialCorrect ? Color.green : Color.red;
+                    break;
+            }
+
+            //If you want to change the UI's heading text:
+            //ResponsePanelGO.transform.Find("ResponseHeading").gameObject.GetComponentInChildren<TextMeshProUGUI>().text = GotTrialCorrect ? "Correct!" : "Wrong!";
+            //ResponsePanelGO.transform.Find("ResponseHeading").gameObject.GetComponentInChildren<TextMeshProUGUI>().color = GotTrialCorrect ? Color.green : Color.red;
         });
-
-
+        Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, FinishTrial, () => ResponsePanelGO.SetActive(false));
     }
 
-    private void CreateVisualStim()
+    private void DetermineCorrectAnswer()
+    {
+        if (CurrentTrial.AudioStimOnsetDelay == CurrentTrial.VisualStimOnsetDelay)
+            CorrectAnswer = "Simultaneous";
+        else if (CurrentTrial.AudioStimOnsetDelay < CurrentTrial.VisualStimOnsetDelay)
+            CorrectAnswer = "Audio";
+        else
+            CorrectAnswer = "Visual";
+    }
+
+    private IEnumerator DisplayStimCoroutine()
+    {
+        yield return new WaitForSeconds(CurrentTrial.VisualStimOnsetDelay);
+        VisualStimGO.SetActive(true);
+        VisualStimDisplayed = true;
+    }
+
+    private IEnumerator AudioCoroutine()
+    {
+        yield return new WaitForSeconds(CurrentTrial.AudioStimOnsetDelay);
+        AudioFBController.Play("Hammer");
+        AudioPlayed = true;
+    }
+
+    private void CreateStims()
     {
         if (VisualStimGO != null)
             Destroy(VisualStimGO);
 
-        VisualStimGO = new GameObject("SpatialCue");
+        //Create visual stim:
+        VisualStimGO = new GameObject("VisualStim");
         VisualStimGO.SetActive(false);
         VisualStimGO.transform.parent = TOJ_CanvasGO.transform;
-        VisualStimGO.transform.localScale = Vector3.one;
-        RectTransform rect = VisualStimGO.AddComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(CurrentTrial.VisualStimSize, CurrentTrial.VisualStimSize); //set to size specified in trial def
-        Image image = VisualStimGO.AddComponent<Image>();
-        image.sprite = Resources.Load<Sprite>(CurrentTrial.VisualStimIdentity); //Load the stim's image from resources!
+        VisualStimGO.transform.localPosition = CurrentTrial.VisualStimPosition; //set to pos specified in trial def
+        VisualStimGO.transform.localScale = CurrentTrial.VisualStimSize; //set to size specified in trial def
+        Image stimImage = VisualStimGO.AddComponent<Image>();
+        stimImage.sprite = Resources.Load<Sprite>(CurrentTrial.VisualStimIdentity); //Load the stim's image from resources!
+        if (CurrentTrial.VisualStimRandomColor)
+            stimImage.color = GetRandomColor();
+
+        //Create Cross stim:
+        CrossGO = new GameObject("Cross");
+        CrossGO.SetActive(false);
+        CrossGO.transform.parent = TOJ_CanvasGO.transform;
+        CrossGO.transform.localPosition = CurrentTrial.CrossPosition; //set to pos specified in trial def
+        CrossGO.transform.localScale = CurrentTrial.CrossSize; //set to size specified in trial def
+        Image crossImage = CrossGO.AddComponent<Image>();
+        crossImage.sprite = Resources.Load<Sprite>(CurrentTrial.CrossIdentity); //Load the cross image from resources!
+        if (CurrentTrial.CrossRandomColor)
+            crossImage.color = GetRandomColor();
     }
 
-    private void SetTrialType()
+    private void LoadResponsePanel()
     {
-        switch(CurrentTrial.TrialTypeString)
-        {
-            case "Audio":
-                CurrentTrialType = TrialType_Enum.Audio;
-                break;
-            case "Visual":
-                CurrentTrialType = TrialType_Enum.Visual;
-                break;
-            case "Both":
-                CurrentTrialType = TrialType_Enum.Both;
-                break;
-        }
+        if (ResponsePanelGO != null)
+            Destroy(ResponsePanelGO);
+
+        ResponsePanelGO = Instantiate(Resources.Load<GameObject>("ResponsePanel"));
+        ResponsePanelGO.name = "ResponsePanel";
+        ResponsePanelGO.transform.SetParent(TOJ_CanvasGO.transform);
+        ResponsePanelGO.transform.localScale = Vector3.one;
+        ResponsePanelGO.transform.localPosition = Vector3.zero;
+        ResponsePanelGO.SetActive(false);
+
+        //get references to 3 children:
+        SimultaneousPanelGO = ResponsePanelGO.transform.Find("Simultaneous").gameObject;
+        AudioPanelGO = ResponsePanelGO.transform.Find("Audio").gameObject;
+        VisualPanelGO = ResponsePanelGO.transform.Find("Visual").gameObject;
     }
 
-    protected override void DefineTrialStims()
+    private void LoadConfigUIVariables()
     {
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
     }
     
 }

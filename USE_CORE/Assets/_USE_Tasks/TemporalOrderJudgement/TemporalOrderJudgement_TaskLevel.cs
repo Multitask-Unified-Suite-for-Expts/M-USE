@@ -41,10 +41,14 @@ public class TemporalOrderJudgement_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (TemporalOrderJudgement_TrialLevel)TrialLevel;
 
-        if (CurrentBlock == null)
-            Debug.LogError("BLOCK IS NULL!");
+        Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Temporal Judgement");
+        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Marcus put your instructions here!");
 
-        SetSkyBox(CurrentBlock.ContextName);
+        RunBlock.AddSpecificInitializationMethod(() =>
+        {
+            SetSkyBox(CurrentBlock.ContextName);
+        });
+
     }
 
 

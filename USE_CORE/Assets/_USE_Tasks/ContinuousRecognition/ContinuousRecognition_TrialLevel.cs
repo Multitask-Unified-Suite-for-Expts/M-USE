@@ -393,10 +393,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddSpecificInitializationMethod(() =>
         {
-            if (GotTrialCorrect)
-                score += (TrialCount_InBlock + 1) * 100;
-
-            if (ChosenStimIndices.Count < 1)
+            if (displayResultsDuration.value == 0 || ChosenStimIndices.Count < 1) 
                 return;
 
             if (EndBlock || CompletedAllTrials)
@@ -407,9 +404,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     AudioFBController.Play(CompletedAllTrials ? "CR_BlockCompleted" : "CR_BlockFailed");
             }
         });
-        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI);
-        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI);
-        DisplayResults.SpecifyTermination(() => ChosenStimIndices.Count < 1, ITI);
+        DisplayResults.AddTimer(() => displayResultsDuration.value, ITI); //If EndBlock or CompletedAllTrials
+        DisplayResults.SpecifyTermination(() => displayResultsDuration.value == 0 || ChosenStimIndices.Count < 1, ITI); //If want to skip results, or they didnt make a single selection
+        DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI); //Most trials (If not endblock or all trials completed, skip results)
         DisplayResults.AddDefaultTerminationMethod(() =>
         {
             DisplayResultsPanelGO.SetActive(false);
@@ -432,6 +429,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
     public override void FinishTrialCleanup()
     {
+        if (GotTrialCorrect)
+            score += (TrialCount_InBlock + 1) * 100;
+
         if (DisplayResultsPanelGO.activeInHierarchy)
             DisplayResultsPanelGO.SetActive(false);
 

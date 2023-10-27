@@ -50,15 +50,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public GameObject GC_CanvasGO;
     private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
 
-    // Task Def - Defined Variables
-    [HideInInspector] public bool SpoofGazeWithMouse;
-    [HideInInspector] public float[] CalibPointsInset;
-    [HideInInspector] public float MaxCircleScale;
-    [HideInInspector] public float MinCircleScale;
-    [HideInInspector] public float ShrinkDuration;
 
     // Inherited from the Session Level...
-    [HideInInspector] public String ContextExternalFilePath;
     public MonitorDetails MonitorDetails;
 
     // Calibration Point Definition
@@ -132,7 +125,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            AssignCalibPositions();
+            
 
             // Create necessary variables to display text onto the Experimenter Display
             if (!Session.WebBuild)
@@ -149,7 +142,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            if (!SpoofGazeWithMouse)
+            AssignCalibPositions();
+            Debug.LogWarning("IN THE SETUP TRIAL !!!");
+            if (!CurrentTrialDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
 
             InfoString.Append("<b>Info</b>" 
@@ -160,7 +155,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Assign UI Circles for the calib circles if not yet created
             if (GC_CanvasGO.transform.Find("CalibrationCircle") == null)
             {
-                CalibCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), Vector3.zero, MaxCircleScale, "CalibrationCircle");
+                CalibCircle = new USE_Circle(GC_CanvasGO.GetComponent<Canvas>(), Vector3.zero, CurrentTrialDef.MaxCircleScale, "CalibrationCircle");
                 CalibCircle.CircleGO.SetActive(false);
             }
 
@@ -172,12 +167,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         });
 
 
-        SetupTrial.SpecifyTermination(()=> (!SpoofGazeWithMouse? (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null):true), Init);
+        SetupTrial.SpecifyTermination(()=> (!CurrentTrialDef.SpoofGazeWithMouse ? (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null):true), Init);
 
-        if (SpoofGazeWithMouse)
+        /*if (CurrentTrialDef.SpoofGazeWithMouse)
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", Session.MouseTracker, Init, ITI);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Session.GazeTracker, Init, ITI);
+            */
+        SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Session.GazeTracker, Init, ITI);
         
 
         Init.AddUpdateMethod(() =>
@@ -209,7 +205,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Init.SpecifyTermination(() => numCalibPoints != 0, Blink, () =>
         {
             // Only enter Calibration if an eyetracker is being used
-            if (!SpoofGazeWithMouse && !Session.TobiiEyeTrackerController)
+            if (!CurrentTrialDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController)
             {
                 Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
                 Session.TobiiEyeTrackerController.isCalibrating = true;
@@ -263,13 +259,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Shrink.AddUpdateMethod(() =>
         {
-            ShrinkGameObject(CalibCircle.CircleGO, MinCircleScale, ShrinkDuration);
+            ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
         });
 
-        Shrink.SpecifyTermination(() => elapsedShrinkDuration > ShrinkDuration, Check, () =>
+        Shrink.SpecifyTermination(() => elapsedShrinkDuration > CurrentTrialDef.ShrinkDuration, Check, () =>
         {
             // Make sure that the Scale is set to the min scale
-            CalibCircle.SetCircleScale(MinCircleScale);
+            CalibCircle.SetCircleScale(CurrentTrialDef.MinCircleScale);
         });
 
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Blink);
@@ -310,7 +306,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Calibrate.AddUpdateMethod(() =>
         {
             // Determines if the collected point contains valid gaze Data
-            if(!SpoofGazeWithMouse)
+            if(!CurrentTrialDef.SpoofGazeWithMouse)
                 DetermineCollectDataStatus(currentNormPoint);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
@@ -318,7 +314,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Delay, () =>
         {
             // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
-            if (!SpoofGazeWithMouse)
+            if (!CurrentTrialDef.SpoofGazeWithMouse)
             {
                 CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
             }
@@ -327,7 +323,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = Confirm;
 
             // Assign a 3 Second delay following calibration to allow the sample to be properly recorded
-            if (!SpoofGazeWithMouse)
+            if (!CurrentTrialDef.SpoofGazeWithMouse)
                 DelayDuration = 3f;
             else
                 DelayDuration = 0;
@@ -340,7 +336,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Confirm.AddSpecificInitializationMethod(() =>
         {
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.white;
-            if (!SpoofGazeWithMouse)
+            if (!CurrentTrialDef.SpoofGazeWithMouse)
             {
                 InfoString.Append("<b>\n\nInfo</b>"
                                 + string.Format("\nCompute and Apply Returned <b>{0}</b>", CalibrationResult.Status)
@@ -387,7 +383,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             else if (InputBroker.GetKeyDown(KeyCode.Minus))
             {
                 // User selected to recalibrate current point, sample data is discarded and return to Blink
-                if(!SpoofGazeWithMouse)
+                if(!CurrentTrialDef.SpoofGazeWithMouse)
                     Session.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(currentNormPoint);
                 recalibPoint = true;
                 RecalibCount[calibNum] += 1;
@@ -443,7 +439,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             // Leave calibration mode once the user has confirmed all points
             // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
-            if (!SpoofGazeWithMouse)
+            if (!CurrentTrialDef.SpoofGazeWithMouse)
             {
                 CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
                 CollectSamplePoints();
@@ -631,17 +627,18 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void AssignCalibPositions()
     {
+        Debug.Log("is the current trial def ok: " + CurrentTrialDef.CalibPointsInset[0]);
         allCalibPoints = new NormalizedPoint2D[]
         {
-            new NormalizedPoint2D(CalibPointsInset[0], CalibPointsInset[1]),
-            new NormalizedPoint2D(0.5f, CalibPointsInset[1]),
-            new NormalizedPoint2D(1f - CalibPointsInset[0], CalibPointsInset[1]),
-            new NormalizedPoint2D(CalibPointsInset[0], 0.5f),
+            new NormalizedPoint2D(CurrentTrialDef.CalibPointsInset[0], CurrentTrialDef.CalibPointsInset[1]),
+            new NormalizedPoint2D(0.5f, CurrentTrialDef.CalibPointsInset[1]),
+            new NormalizedPoint2D(1f - CurrentTrialDef.CalibPointsInset[0], CurrentTrialDef.CalibPointsInset[1]),
+            new NormalizedPoint2D(CurrentTrialDef.CalibPointsInset[0], 0.5f),
             new NormalizedPoint2D(0.5f, 0.5f),
-            new NormalizedPoint2D(1f - CalibPointsInset[0], 0.5f),
-            new NormalizedPoint2D(CalibPointsInset[0], 1f - CalibPointsInset[1]),
-            new NormalizedPoint2D(0.5f, 1f - CalibPointsInset[1]),
-            new NormalizedPoint2D(1f - CalibPointsInset[0], 1f - CalibPointsInset[1])
+            new NormalizedPoint2D(1f - CurrentTrialDef.CalibPointsInset[0], 0.5f),
+            new NormalizedPoint2D(CurrentTrialDef.CalibPointsInset[0], 1f - CurrentTrialDef.CalibPointsInset[1]),
+            new NormalizedPoint2D(0.5f, 1f - CurrentTrialDef.CalibPointsInset[1]),
+            new NormalizedPoint2D(1f - CurrentTrialDef.CalibPointsInset[0], 1f - CurrentTrialDef.CalibPointsInset[1])
         };
     }
 
@@ -649,7 +646,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private void InitializeCalibPoint()
     {
         CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
-        CalibCircle.SetCircleScale(MaxCircleScale);
+        CalibCircle.SetCircleScale(CurrentTrialDef.MaxCircleScale);
         currentADCSTarget = calibPointsADCS[calibNum]; // get calib coordinates in screen ADCS space
         currentScreenPixelTarget = (Vector2)USE_CoordinateConverter.GetScreenPixel(currentADCSTarget.ToVector2(), "screenadcs", 60); // get calib coordinates in Screen space
         CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenPixelTarget;

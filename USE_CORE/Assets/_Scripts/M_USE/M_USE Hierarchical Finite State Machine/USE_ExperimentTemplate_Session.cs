@@ -41,6 +41,7 @@ using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
+using System.Runtime.InteropServices;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
@@ -107,9 +108,9 @@ namespace USE_ExperimentTemplate_Session
 
         public override void DefineControlLevel()
         {
-            #if (UNITY_WEBGL)
+#if (UNITY_WEBGL)
                 Session.WebBuild = true;
-            #endif
+#endif
 
             Session.SessionLevel = this;
 
@@ -121,8 +122,14 @@ namespace USE_ExperimentTemplate_Session
             State setupTask = new State("SetupTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
+            State loadGazeCalibration = new State("LoadGazeCalibration");
+            State setupGazeCalibration = new State("SetupGazeCalibration");
             State gazeCalibration = new State("GazeCalibration");
-            AddActiveStates(new List<State> { initScreen, setupSession, selectTask, loadTask, setupTask, runTask, finishSession, gazeCalibration });
+            AddActiveStates(new List<State> { initScreen, setupSession, selectTask, loadTask, setupTask, runTask, finishSession, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
+
+            initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
+            SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
+            SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
 
             ActiveTaskLevels = new List<ControlLevel_Task_Template>();
 
@@ -135,16 +142,15 @@ namespace USE_ExperimentTemplate_Session
 
             Session.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();
             Session.FlashPanelController.FindPanels();
-            if(Session.WebBuild)
+            if (Session.WebBuild)
                 Session.FlashPanelController.gameObject.SetActive(false);
 
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
 
             //InitScreen State---------------------------------------------------------------------------------------------------------------
-            initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
             initScreen.AddChildLevel(initScreen_Level);
-            initScreen.SpecifyTermination(()=> initScreen.ChildLevel.Terminated, setupSession, () =>
+            initScreen.SpecifyTermination(() => initScreen.ChildLevel.Terminated, setupSession, () =>
             {
                 if (Session.WebBuild)
                     Session.InitCamGO.SetActive(false);
@@ -157,9 +163,8 @@ namespace USE_ExperimentTemplate_Session
             });
 
             string selectedConfigFolderName = null;
-            
+
             //SetupSession State---------------------------------------------------------------------------------------------------------------
-            SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
             setupSession.AddChildLevel(setupSessionLevel);
 
             SceneLoading = false;
@@ -169,10 +174,10 @@ namespace USE_ExperimentTemplate_Session
                 if (Session.SessionDef == null)
                     return;
 
-                if(Session.SessionDef.SerialPortActive && !waitForSerialPort && (Session.SerialPortController == null))
+                if (Session.SessionDef.SerialPortActive && !waitForSerialPort && (Session.SerialPortController == null))
                 {
                     Session.SerialPortController = GameObject.Find("MiscScripts").GetComponent<SerialPortThreaded>();
-                    
+
                     if (Session.SessionDef.SyncBoxActive)
                     {
                         Session.SyncBoxController = new SyncBoxController();
@@ -188,7 +193,7 @@ namespace USE_ExperimentTemplate_Session
 
                     Session.SerialPortController.SerialPortAddress = Session.SessionDef.SerialPortAddress;
                     Session.SerialPortController.SerialPortSpeed = Session.SessionDef.SerialPortSpeed;
-                    
+
                     Session.SerialPortController.Initialize();
 
                     if (waitForSerialPort && Time.time - StartTimeAbsolute > Session.SerialPortController.initTimeout / 1000f + 0.5f)
@@ -198,18 +203,27 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
 
+                if (Session.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
+                {
+                    CreateGazeGameObjects();
+                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
+                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
+                    gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
+                    runSessionLevelCalibration = true;
+                }
+
             });
 
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, gazeCalibration);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && runSessionLevelCalibration, loadGazeCalibration);
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && !runSessionLevelCalibration, selectTask);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
-                
+
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
 
-                if(Session.StoreData)
+                if (Session.StoreData)
                     CreateSessionSettingsFolder();
 
                 if (Session.SessionDef.SerialPortActive)
@@ -217,42 +231,107 @@ namespace USE_ExperimentTemplate_Session
                     Session.SerialSentData.sc = Session.SerialPortController;
                     Session.SerialRecvData.sc = Session.SerialPortController;
                 }
-               
+
 
                 if (!Session.SessionDef.FlashPanelsActive)
                     Session.FlashPanelController.TurnOffFlashPanels();
                 else
                     Session.FlashPanelController.runPattern = true;
-                
+
+                if (Session.SessionDef.EyeTrackerActive)
+                    Session.GazeTracker.enabled = true;
+
+
                 if (!Session.WebBuild)
                 {
                     Session.InitCamGO.SetActive(false);
                     Session.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
                 }
-              
+
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("SetupSessionEnds");
 
-                if(Session.SessionDef != null && Session.SessionDef.EyeTrackerActive && GazeCalibrationTaskLevel == null)
-                {
-                    //Have to add calibration task level as child of calibration state here, because it isn't available prior
-                    GazeCalibrationTaskLevel = GameObject.Find("GazeCalibration_Scripts").GetComponent<GazeCalibration_TaskLevel>();
-                    gazeCalibration.AddChildLevel(GazeCalibrationTaskLevel);
-                    GazeCalibrationTaskLevel.TaskName = "GazeCalibration";
-                    GazeCalibrationTaskLevel.ConfigFolderName = "GazeCalibration";
-                    runSessionLevelCalibration = true;
-                }
 
-                
+
+            });
+            
+            //LoadGazeCalibration State---------------------------------------------------------------------------------------------------------------
+            loadGazeCalibration.AddSpecificInitializationMethod(() =>
+            {
+                    Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary["GazeCalibration"].TaskLevelType;
+
+                    MethodInfo SetCurrentTaskMethod = GetType().GetMethod(nameof(this.SetCurrentTask)).MakeGenericMethod(new Type[] { taskType });
+                    SetCurrentTaskMethod.Invoke(this, new object[] { "GazeCalibration" });
+
             });
 
+            bool DefiningTask = false;
+            loadGazeCalibration.AddUpdateMethod(() =>
+            {
+                //Session.EventCodeManager.CheckFrameEventCodeBuffer();
 
+                if (!SceneLoading && CurrentTask != null && !DefiningTask)
+                {
+                    DefiningTask = true;
+                    CurrentTask.DefineTaskLevel();
+                }
+
+            });
+
+            loadGazeCalibration.AddLateUpdateMethod(() =>
+            {
+                //Session.SelectionTracker.UpdateActiveSelections();
+                //DataLateUpdate();
+            });
+
+            loadGazeCalibration.SpecifyTermination(() => CurrentTask != null && CurrentTask.TaskLevelDefined, setupGazeCalibration, () =>
+            {
+                Session.TaskSelectionCanvasGO.SetActive(false);
+                DefiningTask = false;
+                Starfield.SetActive(false);
+
+                CurrentTask.TrialLevel.TaskLevel = CurrentTask;
+
+                /*if (Session.SessionDef.SerialPortActive)
+                {
+                    AppendSerialData();
+                    StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+                    StartCoroutine(Session.SerialSentData.AppendDataToFile());
+                    Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialRecvData";
+                    Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialSentData";
+
+                }
+
+                StartCoroutine(FrameData.AppendDataToFile());*/
+            });
+            setupGazeCalibration.AddChildLevel(setupTaskLevel);
+            setupGazeCalibration.AddSpecificInitializationMethod(() =>
+            {
+                CurrentTask = GazeCalibrationTaskLevel;
+                setupTaskLevel.TaskLevel = CurrentTask;
+
+                FrameData.gameObject.SetActive(false);
+                CurrentTask.TaskConfigPath = Session.ConfigFolderPath + "/" +  CurrentTask.ConfigFolderName;
+
+                if (Session.SessionDef.EyeTrackerActive)
+                {
+                    StartCoroutine(Session.GazeData.CreateFile());
+                }
+
+
+            });
+            setupGazeCalibration.SpecifyTermination(() => setupTaskLevel.Terminated, gazeCalibration, () =>
+            {
+                CurrentTask.DefineTaskLevel();
+            }); 
+            
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
             gazeCalibration.AddSpecificInitializationMethod(() =>
             {
-                FrameData.gameObject.SetActive(false);
+                Debug.LogWarning("RUNNING THE CALIBRATION!");
+                Session.LoadingController.DeactivateLoadingCanvas();
+
 
                 GazeCalibrationTaskLevel.TaskCam = Camera.main;
-
                 GazeCalibrationTaskLevel.TrialLevel.runCalibration = true;
 
                 var GazeCalibrationCanvas = GameObject.Find("GazeCalibration(Clone)").transform.Find("GazeCalibration_Canvas");
@@ -321,11 +400,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     StartCoroutine(Session.SerialSentData.CreateFile());
                     StartCoroutine(Session.SerialRecvData.CreateFile());
-                }
-
-                if (Session.SessionDef.EyeTrackerActive)
-                {
-                    StartCoroutine(Session.GazeData.CreateFile());
                 }
 
                 StartCoroutine(FrameData.CreateFile());
@@ -570,7 +644,6 @@ namespace USE_ExperimentTemplate_Session
                 };
             });
 
-            bool DefiningTask = false;
             loadTask.AddUpdateMethod(() =>
             {                
                 Session.EventCodeManager.CheckFrameEventCodeBuffer();
@@ -604,8 +677,7 @@ namespace USE_ExperimentTemplate_Session
                 if (CameraRenderTexture != null)
                     CameraRenderTexture.Release();
 
-                if (CurrentTask.TaskName != "GazeCalibration")
-                    SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
+                SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
 
                 if (Session.SessionDef.SerialPortActive)
@@ -624,7 +696,6 @@ namespace USE_ExperimentTemplate_Session
             //automatically finish tasks after running one - placeholder for proper selection
             //runTask.AddLateUpdateMethod
 
-            SetupTask_Level setupTaskLevel = GameObject.Find("ControlLevels").GetComponent<SetupTask_Level>();
             setupTask.AddChildLevel(setupTaskLevel);
             setupTask.AddSpecificInitializationMethod(() =>
             {
@@ -943,6 +1014,33 @@ namespace USE_ExperimentTemplate_Session
             Starfield.SetActive(!Starfield.activeInHierarchy);
         }
 
+        private void CreateGazeGameObjects()
+        {
+            if (GameObject.Find("TobiiEyeTrackerController") == null)
+                {
+                    // gets called once when finding and creating the tobii eye tracker prefabs
+                    GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
+                    Session.TobiiEyeTrackerController =
+                        TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
+                    GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"),
+                        TobiiEyeTrackerControllerGO.transform);
+                    GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"),
+                        TobiiEyeTrackerControllerGO.transform);
+                    GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
+
+
+                    GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"),
+                        TobiiEyeTrackerControllerGO.transform);
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
+                    // Position and scale the cube as desired
+                    cube.transform.position = new Vector3(0f, 1f, 60f);
+                    cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
+                    cube.SetActive(false);
+
+                }
+            
+        }
         private void AppendSerialData()
         {
             if (Session.SessionDef.SerialPortActive)

@@ -188,13 +188,6 @@ namespace USE_ExperimentTemplate_Task
                     else
                         configUI.store = new ConfigVarStore();
                     configUI.GenerateUI();
-
-                    if (TaskName == "GazeCalibration")
-                    {
-                        BlockDef bd = new BlockDef();
-                        BlockDefs = new BlockDef[] { bd };
-                        bd.GenerateTrialDefsFromBlockDef();
-                    }
                 }
 
                 Session.InputManager.SetActive(true);
@@ -229,6 +222,7 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                Debug.LogWarning("IN THE PARENT METHOD RUN BLOCK!!");
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;

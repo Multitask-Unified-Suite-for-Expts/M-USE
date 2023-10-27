@@ -59,6 +59,8 @@ public class SetupTask_Level : ControlLevel
         {
             verifyTask_Level.TaskLevel = TaskLevel;
         });
+
+        
         VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup, () =>
         {
             TrialLevel = TaskLevel.TrialLevel;
@@ -148,20 +150,6 @@ public class SetupTask_Level : ControlLevel
             TaskName = TaskLevel.TaskName;
             TaskLevel.TrialLevel = TrialLevel;
 
-
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Session.InputManager.transform);
-
-            List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
-
-            fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(TaskLevel.TaskDef.TotalTokensNum);
-
-            TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
-            TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
-            TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
-            TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
-            TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
-            TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
-
             if (TaskLevel.CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = TaskLevel.CustomTaskEventCodes;
 
@@ -169,55 +157,71 @@ public class SetupTask_Level : ControlLevel
                 Session.GazeTracker.Init(FrameData, 0);
             Session.MouseTracker.Init(FrameData, 0);
 
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Session.InputManager.transform);
 
-            //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(TrialData, FrameData);
-
-
-            bool audioInited = false;
-            foreach (string fbController in fbControllersList)
+            if (TaskLevel.TaskDef != null)
             {
-                switch (fbController)
+                List<string> fbControllersList = TaskLevel.TaskDef?.FeedbackControllers;
+                fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(TaskLevel.TaskDef.TotalTokensNum);
+
+                TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
+                TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
+                TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+                TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
+                TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
+                TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
+
+                //Automatically giving TouchFbController;
+                TrialLevel.TouchFBController.Init(TrialData, FrameData);
+
+
+                bool audioInited = false;
+                foreach (string fbController in fbControllersList)
                 {
-                    case "Audio":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData);
-                            audioInited = true;
-                        }
-                        break;
+                    switch (fbController)
+                    {
+                        case "Audio":
+                            if (!audioInited)
+                            {
+                                TrialLevel.AudioFBController.Init(FrameData);
+                                audioInited = true;
+                            }
+                            break;
 
-                    case "Halo":
-                        TrialLevel.HaloFBController.Init(FrameData);
-                        break;
+                        case "Halo":
+                            TrialLevel.HaloFBController.Init(FrameData);
+                            break;
 
-                    case "Token":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData);
-                            audioInited = true;
-                        }
-                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-                        break;
+                        case "Token":
+                            if (!audioInited)
+                            {
+                                TrialLevel.AudioFBController.Init(FrameData);
+                                audioInited = true;
+                            }
+                            TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+                            break;
 
-                    case "Slider":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData);
-                            audioInited = true;
-                        }
-                        TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-                        break;
+                        case "Slider":
+                            if (!audioInited)
+                            {
+                                TrialLevel.AudioFBController.Init(FrameData);
+                                audioInited = true;
+                            }
+                            TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+                            break;
 
-                    default:
-                        Debug.LogWarning(fbController + " is not a valid feedback controller.");
-                        break;
+                        default:
+                            Debug.LogWarning(fbController + " is not a valid feedback controller.");
+                            break;
+                    }
                 }
+
+            
             }
 
             Session.InputManager.SetActive(false);
-
             TaskLevel.DefineControlLevel();
+
             TrialLevel.TaskLevel = TaskLevel;
             TrialLevel.FrameData = FrameData;
             TrialLevel.TrialData = TrialData;

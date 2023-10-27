@@ -243,33 +243,7 @@ public class SetupSession_Level : ControlLevel
         Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
         Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
 
-        if (Session.SessionDef.EyeTrackerActive)
-        {
-            if (GameObject.Find("TobiiEyeTrackerController") == null)
-            {
-                // gets called once when finding and creating the tobii eye tracker prefabs
-                GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
-                Session.TobiiEyeTrackerController =
-                    TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
-                GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"),
-                    TobiiEyeTrackerControllerGO.transform);
-                GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"),
-                    TobiiEyeTrackerControllerGO.transform);
-                GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
-                Session.GazeTracker.enabled = true;
-
-
-                GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"),
-                    TobiiEyeTrackerControllerGO.transform);
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
-                // Position and scale the cube as desired
-                cube.transform.position = new Vector3(0f, 1f, 60f);
-                cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                cube.SetActive(false);
-
-            }
-        }
+        
 
         if (Session.SessionDef.MonitorDetails != null && Session.SessionDef.ScreenDetails != null)
         {

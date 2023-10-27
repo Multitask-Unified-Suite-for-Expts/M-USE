@@ -26,6 +26,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 287273564729370798}
   - {fileID: 2397530818718490760}
@@ -63,6 +64,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2237458097190027729}
   m_Father: {fileID: 287273562805883295}
@@ -201,6 +203,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 287273564729370798}
   m_RootOrder: 0
@@ -229,6 +232,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -300,6 +304,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 287273562805883295}
   m_RootOrder: 1
@@ -317,7 +322,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: GazeCalibration_TrialLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -330,10 +334,18 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  runningPerformance: 
+  difficultyLevel: 0
+  posStep: 0
+  negStep: 0
+  TrialDefSelectionStyle: 
+  maxDiffLevel: 0
+  avgDiffLevel: 0
+  diffLevelJitter: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
-  TaskLevel: {fileID: 0}
+  TaskLevel: {fileID: 4445937192520635212}
   PreloadedStims:
     stimGroupName: 
     IsActive: 0
@@ -360,8 +372,12 @@ MonoBehaviour:
   TrialStimsLoaded: 0
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
-  BackdropStripesTexture: {fileID: 0}
-  THR_BackdropTexture: {fileID: 0}
+  MovedTooFarTexture: {fileID: 0}
+  MovedTooFarSquareTexture: {fileID: 0}
+  HeldTooShortSquareTexture: {fileID: 0}
+  HeldTooLongSquareTexture: {fileID: 0}
+  TrialFilesLoaded: 0
+  CurrentTrialDefIndex: 0
   GC_CanvasGO: {fileID: 0}
   SpoofGazeWithMouse: 0
   CalibPointsInset: []
@@ -387,18 +403,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ControlLevelName: GazeCalibration_TaskLevel
-  initScreen: {fileID: 0}
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  PrefabPath: 
-  ConfigName: GazeCalibration
+  ConfigFolderName: GazeCalibration
   TaskName: GazeCalibration
   TaskProjectFolder: 
   BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumRewardPulses_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
+  ForceTaskEnd: 0
   TrialLevel: {fileID: 4333728071008300758}
   BlockData: {fileID: 0}
   FrameData: {fileID: 0}
@@ -424,7 +445,11 @@ MonoBehaviour:
   PrefabStimPaths: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
+  TrialAndBlockDefsHandled: 0
+  StimsHandled: 0
   BlockResultsPrefab: {fileID: 0}
   BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
+  importSettings_Level: {fileID: 0}
+  verifyTask_Level: {fileID: 0}

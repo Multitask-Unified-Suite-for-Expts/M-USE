@@ -54,15 +54,15 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
-        
-        public List<int> runningPerformance;
-        public int difficultyLevel;
-        public int posStep;
-        public int negStep;
-        public string TrialDefSelectionStyle;
-        public int maxDiffLevel;
-        public int avgDiffLevel;
-        public int diffLevelJitter;
+
+        [HideInInspector] public List<int> runningPerformance;
+        [HideInInspector] public int difficultyLevel;
+        [HideInInspector] public int posStep;
+        [HideInInspector] public int negStep;
+        [HideInInspector] public string TrialDefSelectionStyle;
+        [HideInInspector] public int maxDiffLevel;
+        [HideInInspector] public int avgDiffLevel;
+        [HideInInspector] public int diffLevelJitter;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -229,7 +229,7 @@ namespace USE_ExperimentTemplate_Trial
                     DefineCustomTrialDefSelection();
                 }
                 TrialStims = new List<StimGroup>();
-                AudioFBController.UpdateAudioSource();
+                AudioFBController?.UpdateAudioSource();
             });
 
             LoadTrialTextures.AddUniversalInitializationMethod(() =>
@@ -280,7 +280,7 @@ namespace USE_ExperimentTemplate_Trial
                 //turning off instructions text at start of each trial, in case they left them on during last trial.
                 TurnOffInstructionsText();
 
-                TokenFBController.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
+                TokenFBController?.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
                 Session.EventCodeManager.SendRangeCode("SetupTrialStarts", TrialCount_InTask);
 

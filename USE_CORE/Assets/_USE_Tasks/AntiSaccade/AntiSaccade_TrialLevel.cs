@@ -554,8 +554,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO.activeInHierarchy);
-        FrameData.AddDatum("DistractorStimsActive", () => distractorStims.IsActive);
+        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO?.activeInHierarchy);
+        FrameData.AddDatum("DistractorStimsActive", () => distractorStims?.IsActive);
         FrameData.AddDatum("PreCueActive", () => PreCue_GO.activeInHierarchy);
         FrameData.AddDatum("SpatialCueActive", () => SpatialCue_GO.activeInHierarchy);
         FrameData.AddDatum("MaskActive", () => Mask_GO.activeInHierarchy);

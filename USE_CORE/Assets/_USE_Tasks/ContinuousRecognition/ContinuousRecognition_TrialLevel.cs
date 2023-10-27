@@ -1194,10 +1194,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineFrameData()
     {
-        //FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
         FrameData.AddDatum("ContextActive", () => ContextActive);
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("TrialStimShown", () => trialStims.IsActive);
+        FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
         FrameData.AddDatum("StarfieldActive", () => Starfield.activeInHierarchy);
     }
 
@@ -1211,6 +1210,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Unseen_Stim.Clear();
 
     }
+
 
     private float[] GetStimRatioPercentages(int[] ratioArray)
     {

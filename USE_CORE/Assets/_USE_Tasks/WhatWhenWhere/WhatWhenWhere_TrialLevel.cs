@@ -672,8 +672,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
-        FrameData.AddDatum("SearchStimuliShown", () => searchStims.IsActive);
-        FrameData.AddDatum("DistractorStimuliShown", () => distractorStims.IsActive);
+        FrameData.AddDatum("SearchStimuliShown", () => searchStims?.IsActive);
+        FrameData.AddDatum("DistractorStimuliShown", () => distractorStims?.IsActive);
     }
 
     private void SetTrialSummaryString()

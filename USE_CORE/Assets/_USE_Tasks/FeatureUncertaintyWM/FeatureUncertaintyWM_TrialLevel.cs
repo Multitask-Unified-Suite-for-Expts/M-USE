@@ -844,8 +844,8 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
-        FrameData.AddDatum("SearchStimVisibility", () => multiCompStims.IsActive);
-        FrameData.AddDatum("SampleStimVisibility", () => sampleStims.IsActive);
+        FrameData.AddDatum("SearchStimVisibility", () => multiCompStims?.IsActive);
+        FrameData.AddDatum("SampleStimVisibility", () => sampleStims?.IsActive);
     }
     void SetTrialSummaryString()
     {

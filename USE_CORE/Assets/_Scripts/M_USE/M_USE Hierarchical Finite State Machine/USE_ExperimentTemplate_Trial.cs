@@ -67,6 +67,8 @@ namespace USE_ExperimentTemplate_Trial
         public int MinTrialsBeforeTerm;
         public int TerminationWindowSize;
         public int reversalsCount;
+        public List<int> DiffLevelsAtReversals;
+        public int calculatedThreshold;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -147,13 +149,10 @@ namespace USE_ExperimentTemplate_Trial
                 case "adaptive":
                     difficultyLevel = TaskLevel.DetermineTrialDefDifficultyLevel(difficultyLevel, runningPerformance, posStep, negStep, maxDiffLevel);
                     Debug.LogWarning("cur difficulty level (after determine): " + difficultyLevel);
-                    //Debug.LogWarning("TrialCount_InBlock: " + TrialCount_InBlock + " ------ TrialDefs size: " + TrialDefs.Count);
-                    
                     List<int> tieIndices = TrialDefs
                         .Select((trialDef, index) => new { TrialDef = trialDef, Index = index })
                         .Where(item => 
                         {
-                            Debug.LogWarning("item.TrialDef.BlockCount: " + item.TrialDef.BlockCount + " /////// BlockCount: " + BlockCount);
                             return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount - 1 == BlockCount);
                         })
                         .Select(item => item.Index)
@@ -161,7 +160,6 @@ namespace USE_ExperimentTemplate_Trial
                     return tieIndices[Random.Range(0, tieIndices.Count)];
 
                 default:
-                    //Debug.LogWarning("selection style: " + TrialDefSelectionStyle);
                     return TrialCount_InBlock;
             }
         }

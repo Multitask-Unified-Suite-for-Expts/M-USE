@@ -114,7 +114,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumLowerRewardChosen_Block;
     [HideInInspector] public int NumSameRewardChosen_Block;
     [HideInInspector] public List<float?> InflationDurations_Block = new List<float?>();
-    
 
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
@@ -662,6 +661,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameEffortChosen_Block = 0;
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
+        calculatedThreshold = 0;
+        reversalsCount = 0;
+        DiffLevelsAtReversals.Clear();
         InflationDurations_Block.Clear();
         runningPerformance.Clear();
     }
@@ -1073,6 +1075,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if (prevResult == 0)
             {
+                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
                 reversalsCount++;
             }
         }
@@ -1080,13 +1083,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             if (prevResult == 1)
             {
+                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
                 reversalsCount++;
             }
         }
 
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         Debug.LogWarning("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
-        return NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm;
+        if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
+        {
+            List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
+            calculatedThreshold = (int)lastElements.Average();
+            Debug.LogWarning("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            return true;
+        }
+        return false;
     }
 
 }

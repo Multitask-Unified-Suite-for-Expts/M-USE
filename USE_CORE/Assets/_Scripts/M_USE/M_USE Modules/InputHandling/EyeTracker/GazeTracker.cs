@@ -24,13 +24,10 @@ SOFTWARE.
 
 
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
-using Tobii.Research;
-using Tobii.Research.Unity;
-using System.Linq;
+
 
 public class GazeTracker : InputTracker
 {

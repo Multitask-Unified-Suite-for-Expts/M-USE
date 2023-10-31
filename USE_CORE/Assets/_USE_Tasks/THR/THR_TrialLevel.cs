@@ -137,8 +137,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 SquareGO = USE_Square.CreateSquareStartButton(THR_CanvasGO.GetComponent<Canvas>(), null, null, Color.blue, "StartButtonGO");
             }
 
-            if (StartButton == null && SessionValues.SessionDef.IsHuman)
-                StartButton = SessionValues.HumanStartPanel.StartButtonGO;
+            if (StartButton == null && Session.SessionDef.IsHuman)
+                StartButton = Session.HumanStartPanel.StartButtonGO;
 
             //THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
         });
@@ -147,14 +147,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         SetupTrial.AddDefaultTerminationMethod(() =>
         {
-            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
-                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(true);
+            if (Session.SessionDef.IsHuman && TrialCount_InTask == 0)
+                Session.HumanStartPanel.HumanStartPanelGO.SetActive(true);
             else
                 StartButton = null;
         });
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, InitTrial);
+        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, InitTrial);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
@@ -175,15 +175,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
-        InitTrial.SpecifyTermination(() => true && ((SessionValues.SessionDef.IsHuman && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton()) || StartButton == null), CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
+        InitTrial.SpecifyTermination(() => true && ((Session.SessionDef.IsHuman && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton()) || StartButton == null), CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //AVOID OBJECT state ------------------------------------------------------------------------------------------------------------------------
         AvoidObject.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes();
-            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
-                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+            if (Session.SessionDef.IsHuman && TrialCount_InTask == 0)
+                Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
             USE_Square.SetSquareColor(Color.white);
             SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
@@ -237,8 +237,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         SelectObject.AddSpecificInitializationMethod(() =>
         {
             Input.ResetInputAxes();
-            if (SessionValues.SessionDef.IsHuman && TrialCount_InTask == 0)
-                SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+            if (Session.SessionDef.IsHuman && TrialCount_InTask == 0)
+                Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
             USE_Square.SetSquareColor(Color.blue);
             SquareGO.SetActive(true);
             BackdropGO.SetActive(true);
@@ -342,8 +342,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
             {
                 TimeRanOut = true;
-                SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+                Session.EventCodeManager.SendCodeNextFrame("NoChoice");
+                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
                 AbortCode = 6;
             }
 
@@ -388,7 +388,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         }));
         Feedback.AddUpdateMethod(() =>
         {
-            if((GiveTouchReward || GiveReleaseReward) && SessionValues.SyncBoxController != null)
+            if((GiveTouchReward || GiveReleaseReward) && Session.SyncBoxController != null)
             {
                 if (RewardTimer < (GiveTouchReward ? CurrentTrial.TouchToRewardDelay : CurrentTrial.ReleaseToRewardDelay))
                     RewardTimer += Time.deltaTime;
@@ -397,21 +397,21 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Feedback.SpecifyTermination(() => GiveReward, Reward); //If they got right, syncbox isn't null, and timer is met.
-        Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && SessionValues.SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
+        Feedback.SpecifyTermination(() => (GiveTouchReward || GiveReleaseReward) && Session.SyncBoxController == null, ITI); //If they got right, syncbox IS null, don't make them wait.  
         Feedback.SpecifyTermination(() => !GiveTouchReward && !GiveReleaseReward && AudioPlayed && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, ITI); //if didn't get right, so no pulses. 
 
         Reward.AddSpecificInitializationMethod(() =>
         {
-            if (GiveReleaseReward && SessionValues.SyncBoxController != null)
+            if (GiveReleaseReward && Session.SyncBoxController != null)
             {
-                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
+                Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
                 NumReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumReleasePulses;
             }
-            if (GiveTouchReward && SessionValues.SyncBoxController != null)
+            if (GiveTouchReward && Session.SyncBoxController != null)
             {
-                SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
+                Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
                 NumTouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumTouchPulses;
@@ -547,18 +547,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 CurrentTrial.MaxTrials);
 
     }
-    /*   private void CheckIfBlockShouldEnd()
-       {
-           if(TrialsCompleted_Block >= CurrentTrial.PerfWindowEndTrials)
-           {
-               float sum = 0;
-               for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
-                   sum += TrialCompletionList[i];
-               float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
-               if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
-                   PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
-           }
-       }*/
 
     private void LoadConfigUIVariables()
     {

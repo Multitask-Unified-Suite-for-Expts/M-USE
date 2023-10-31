@@ -76,7 +76,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     private void HandleBlockStrings()
     {
-        if (!SessionValues.WebBuild)
+        if (!Session.WebBuild)
         {
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";

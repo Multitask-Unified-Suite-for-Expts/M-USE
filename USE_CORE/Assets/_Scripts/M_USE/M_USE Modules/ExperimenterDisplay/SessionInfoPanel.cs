@@ -53,17 +53,17 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
 
     public override void CustomPanelUpdate()
     {
-        float currentDuration = Time.time - SessionLevel.StartTimeAbsolute;
+        float currentDuration = Time.time - Session.SessionLevel.StartTimeAbsolute;
         UpdateSessionSummaryValues(("sessionDuration", currentDuration));
-        if (TrialLevel != null && totalTrials > 1)
+        if (Session.TrialLevel != null && totalTrials > 1)
         {
-            float timeOfLastTrialCompletion = Time.time - TrialLevel.TrialCompleteTime;
+            float timeOfLastTrialCompletion = Time.time - Session.TrialLevel.TrialCompleteTime;
             UpdateSessionSummaryValues(("timeFromLastTrialCompletion",timeOfLastTrialCompletion));
         }
         else if (totalTrials > 1)
         {
             // Makes sure that the player has completed atleast one trial in the session
-            float timeOfLastTrialCompletion = Time.time - SessionLevel.GetStateFromName("SelectTask").TimingInfo.StartTimeRelative;
+            float timeOfLastTrialCompletion = Time.time - Session.SessionLevel.GetStateFromName("SelectTask").TimingInfo.StartTimeRelative;
             UpdateSessionSummaryValues(("timeFromLastTrialCompletion", timeOfLastTrialCompletion));  
         }
                   
@@ -87,12 +87,12 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
             "\nTime From Last Trial Completion: " + String.Format("{0:0.0}", timeFromLastTrialCompletion) + " s");
         
         TaskSummaryString.Clear();
-        if (TaskLevel != null)
+        if (Session.TaskLevel != null)
         {
-            TaskSummaryString.Append("<b>\n\nSelected Configs: </b>" + TaskLevel.CurrentTaskSummaryString);
+            TaskSummaryString.Append("<b>\n\nSelected Configs: </b>" + Session.TaskLevel.CurrentTaskSummaryString);
         }
-        if (SessionLevel.PreviousTaskSummaryString.Length > 0)
-            TaskSummaryString.AppendLine(SessionLevel.PreviousTaskSummaryString.ToString());
+        if (Session.SessionLevel.PreviousTaskSummaryString.Length > 0)
+            TaskSummaryString.AppendLine(Session.SessionLevel.PreviousTaskSummaryString.ToString());
 
     }
 

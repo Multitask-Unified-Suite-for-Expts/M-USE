@@ -1,4 +1,4 @@
 bool	StimFacingCamera	TRUE
-float	ExternalStimScale	5.5
+float	ExternalStimScale	1
 string	ShadowType	"None"
 List<string>	FeedbackControllers	["Audio", "Halo", "Token"]

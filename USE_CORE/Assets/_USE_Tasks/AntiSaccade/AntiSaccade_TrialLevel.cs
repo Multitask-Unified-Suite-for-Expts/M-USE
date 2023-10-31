@@ -102,15 +102,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                if (SessionValues.SessionDef.IsHuman)
+                if (Session.SessionDef.IsHuman)
                 {
-                    StartButton = SessionValues.HumanStartPanel.StartButtonGO;
-                    SessionValues.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = Session.HumanStartPanel.StartButtonGO;
+                    Session.HumanStartPanel.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
                 else
                 {
-                    StartButton = SessionValues.USE_StartButton.CreateStartButton(AntiSaccade_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
-                    SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                    StartButton = Session.USE_StartButton.CreateStartButton(AntiSaccade_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
+                    Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
 
@@ -143,13 +143,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true && IconsLoaded, InitTrial);
 
-        var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO); //Enable Touch Feedback:
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
+            //Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
 
             SetTrialSummaryString();
 
@@ -174,13 +174,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.PreCue_Size > 0)
                 PreCue_GO.GetComponent<RectTransform>().sizeDelta = new Vector2(CurrentTrial.PreCue_Size, CurrentTrial.PreCue_Size);
             PreCue_GO.SetActive(true);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["PreCueOn"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["PreCueOn"]);
 
         });
         PreCue.AddTimer(() => CurrentTrial.PreCueDuration, AlertCue, () =>
         {
             PreCue_GO.SetActive(false);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["PreCueOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["PreCueOff"]);
         });
 
         //AlertCue state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -198,14 +198,14 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOn"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOn"]);
         });
         SpatialCue.AddTimer(() => CurrentTrial.SpatialCueDuration, SpatialCueDelay, () =>
         {
             if (!CurrentTrial.SpatialCueActiveThroughDisplayTarget)
             {
                 SpatialCue_GO.SetActive(false);
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOff"]);
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOff"]);
             }
         });
 
@@ -215,16 +215,16 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOn"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOn"]);
         });
         DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, Mask, () =>
         {
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOff"]);
 
             if (CurrentTrial.SpatialCueActiveThroughDisplayTarget)
             {
                 SpatialCue_GO.SetActive(false);
-                SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["SpatialCueOff"]);
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOff"]);
             }
         });
 
@@ -236,13 +236,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos;
             Mask_GO.SetActive(true);
-
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MaskOn"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MaskOn"]);
         });
         Mask.AddTimer(() => CurrentTrial.MaskDuration, PostMaskDelay, () =>
         {
             Mask_GO.SetActive(false);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["MaskOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MaskOff"]);
         });
 
 
@@ -255,7 +254,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         {
             TargetStim_GO.transform.localPosition = CurrentTrial.TargetStim_ChoosePos;
             TargetStim_GO.SetActive(true);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOn"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOn"]);
 
             ChosenGO = null;
             ChosenStim = null;
@@ -289,9 +288,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (ChosenStim == null)
                 return;
 
-            int? haloDepth = SessionValues.Using2DStim ? 10 : (int?)null;
+            int? haloDepth = Session.Using2DStim ? 10 : (int?)null;
 
-            float? tokenYAdjustment = SessionValues.Using2DStim ? -5f : (float?)null; //used to adjust where the tokens appear in relation to GameObject
+            float? tokenYAdjustment = Session.Using2DStim ? -5f : (float?)null; //used to adjust where the tokens appear in relation to GameObject
 
             if (ChosenStim.IsTarget)
             {
@@ -302,13 +301,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
                 HaloFBController.ShowPositive(ChosenGO, haloDepth);
                 TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
-                SessionValues.EventCodeManager.SendCodeImmediate("CorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
             }
             else
             {
                 HaloFBController.ShowNegative(ChosenGO, haloDepth);
                 TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
-                SessionValues.EventCodeManager.SendCodeImmediate("IncorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
             }
         });
         Feedback.AddUpdateMethod(() =>
@@ -339,9 +338,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 TokenBarCompletions_Block++;
                 CurrentTaskLevel.TokenBarsCompleted_Task++;
 
-                if (SessionValues.SyncBoxController != null)
+                if (Session.SyncBoxController != null)
                 {
-                    SessionValues.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+                    Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
                     CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
                 }
@@ -349,11 +348,11 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.enabled = false;
             TargetStim_GO.SetActive(false);
-            SessionValues.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOff"]);
         });
 
 
-        //Feedback state ----------------------------------------------------------------------------------------------------------------------------------------------
+        //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
 
         DefineTrialData();
@@ -371,7 +370,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     public override void AddToStimLists()
     {
         foreach(AntiSaccade_StimDef stim in targetStim.stimDefs)
-            SessionValues.TargetObjects.Add(stim.StimGameObject);
+            Session.TargetObjects.Add(stim.StimGameObject);
     }
 
     private IEnumerator LoadSpacialCueAndMaskIcons()
@@ -401,12 +400,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private string DetermineContextFilePath(string fileName)
     {
         string filePath = "";
-        if (SessionValues.UsingDefaultConfigs)
-            filePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{fileName}";
-        else if (SessionValues.UsingServerConfigs)
-            filePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{fileName}.png";
-        else if (SessionValues.UsingLocalConfigs)
-            filePath = GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath, fileName);
+        if (Session.UsingDefaultConfigs)
+            filePath = $"{Session.SessionDef.ContextExternalFilePath}/{fileName}";
+        else if (Session.UsingServerConfigs)
+            filePath = $"{Session.SessionDef.ContextExternalFilePath}/{fileName}.png";
+        else if (Session.UsingLocalConfigs)
+            filePath = GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, fileName);
 
         return filePath;
     }
@@ -521,7 +520,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     protected override void DefineTrialStims()
     {
-        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         targetStim = new StimGroup("TargetStim", group, new List<int> { CurrentTrial.TargetStimIndex });
         foreach (AntiSaccade_StimDef stim in targetStim.stimDefs)
@@ -555,8 +554,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO.activeInHierarchy);
-        FrameData.AddDatum("DistractorStimsActive", () => distractorStims.IsActive);
+        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO?.activeInHierarchy);
+        FrameData.AddDatum("DistractorStimsActive", () => distractorStims?.IsActive);
         FrameData.AddDatum("PreCueActive", () => PreCue_GO.activeInHierarchy);
         FrameData.AddDatum("SpatialCueActive", () => SpatialCue_GO.activeInHierarchy);
         FrameData.AddDatum("MaskActive", () => Mask_GO.activeInHierarchy);

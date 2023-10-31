@@ -352,7 +352,7 @@ namespace SelectionTracking
             //Main method used by tasks to check if selection matches start button:
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
-                List<GameObject> startButtonChildren = SessionValues.GetStartButtonChildren();
+                List<GameObject> startButtonChildren = Session.GetStartButtonChildren();
 
                 if (startButtonChildren != null && LastSuccessfulSelection?.SelectedGameObject != null)
                 {
@@ -360,7 +360,7 @@ namespace SelectionTracking
                     {
                         if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
                         {
-                            SessionValues.EventCodeManager.SendCodeImmediate("StartButtonSelected");
+                            Session.EventCodeManager.AddToFrameEventCodeBuffer("StartButtonSelected");
                             return true;
                         }
                     }
@@ -408,7 +408,7 @@ namespace SelectionTracking
                     {
                         //For EventCodes:
                         //Debug.Log("EVENTCODE: HoverOffObject (manual)");
-                        SessionValues.EventCodeManager.SendCodeImmediate("HoverOffObject");
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }
 
@@ -417,7 +417,7 @@ namespace SelectionTracking
                         //For EventCodes:
                         if(HoverOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
                         {
-                            SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
+                            Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
                             HoverOnEventCodeSent = false; //reset hover
                         }
 
@@ -429,7 +429,7 @@ namespace SelectionTracking
                 //For EventCodes:
                 if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
-                    SessionValues.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
+                    Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
                     HoverOnEventCodeSent = true;
                 }
 
@@ -519,7 +519,7 @@ namespace SelectionTracking
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:
-                        SessionValues.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
+                        Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
                         HoverOnEventCodeSent = false; //reset hover
                     }
                     else

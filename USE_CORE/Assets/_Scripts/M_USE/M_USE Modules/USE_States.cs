@@ -1177,7 +1177,7 @@ namespace USE_States
 			if (tex != null)
 			{
 				RenderSettings.skybox = CreateSkybox(tex);
-				SessionValues.EventCodeManager.SendCodeNextFrame("ContextOn");
+				Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOn");
 			}
 			else
 				Debug.LogWarning("NOT SETTING SKYBOX BECAUSE TEX IS NULL!");
@@ -1188,9 +1188,9 @@ namespace USE_States
             filePath = filePath.Trim();
 			Texture2D tex = null;
 
-			if (SessionValues.UsingDefaultConfigs)
+			if (Session.UsingDefaultConfigs)
                 tex = Resources.Load<Texture2D>(filePath);
-			else if (SessionValues.UsingServerConfigs)
+			else if (Session.UsingServerConfigs)
 			{
                 yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>
                 {
@@ -1200,7 +1200,7 @@ namespace USE_States
                         Debug.Log("TRIED TO GET TEXTURE FROM SERVER BUT THE RESULT IS NULL!");
                 }));
             }
-			else if (SessionValues.UsingLocalConfigs)
+			else if (Session.UsingLocalConfigs)
                 tex = LoadExternalPNG(filePath);
 
 			callback?.Invoke(tex);

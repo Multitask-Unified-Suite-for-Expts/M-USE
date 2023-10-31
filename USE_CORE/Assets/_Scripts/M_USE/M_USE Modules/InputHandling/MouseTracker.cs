@@ -60,7 +60,7 @@ public class MouseTracker : InputTracker
                 ButtonCompletedClickCount[iButton]++;
 
                 if (target != null)
-                    SessionValues.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}ReleasedFrom", null);
+                    Session.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}ReleasedFrom", null);
             }
 
             if (InputBroker.GetMouseButton(iButton))
@@ -71,7 +71,7 @@ public class MouseTracker : InputTracker
                     ButtonPressDuration[iButton] = 0;
 
                     if (target != null)
-                       SessionValues.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}PressedOn", null);
+                       Session.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}PressedOn", null);
                 }
                 else
                     ButtonPressDuration[iButton] += Time.deltaTime;

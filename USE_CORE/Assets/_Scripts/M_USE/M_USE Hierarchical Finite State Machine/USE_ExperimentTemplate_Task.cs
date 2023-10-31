@@ -49,8 +49,6 @@ namespace USE_ExperimentTemplate_Task
 {
     public abstract class ControlLevel_Task_Template : ControlLevel
     {
-        public string PrefabPath;
-
         public string ConfigFolderName;
         public string TaskName;
         public string TaskProjectFolder;
@@ -58,21 +56,21 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public int BlockCount;
         
         // protected int NumBlocksInTask;
-        public int NumAbortedTrials_InTask;
-        public int NumRewardPulses_InTask;
+        [HideInInspector] public int NumAbortedTrials_InTask;
+        [HideInInspector] public int NumRewardPulses_InTask;
 
-        public int NumAbortedTrials_InBlock;
-        public int NumRewardPulses_InBlock;
+        [HideInInspector] public int NumAbortedTrials_InBlock;
+        [HideInInspector] public int NumRewardPulses_InBlock;
 
-        public int MinTrials_InBlock;
-        public int MaxTrials_InBlock;
+        [HideInInspector] public int MinTrials_InBlock;
+        [HideInInspector] public int MaxTrials_InBlock;
 
 
-        public bool ForceTaskEnd;
+        [HideInInspector] public bool ForceTaskEnd;
         public ControlLevel_Trial_Template TrialLevel;
-        public BlockData BlockData;
-        public FrameData FrameData;
-        public TrialData TrialData;
+        [HideInInspector] public BlockData BlockData;
+        [HideInInspector] public FrameData FrameData;
+        [HideInInspector] public TrialData TrialData;
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
 
         [HideInInspector]
@@ -115,8 +113,8 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public List<CustomSettings> customSettings;
 
-        public bool TrialAndBlockDefsHandled;
-        public bool StimsHandled;
+        [HideInInspector] public bool TrialAndBlockDefsHandled;
+        [HideInInspector] public bool StimsHandled;
 
         //Passed by sessionLevel
         [HideInInspector] public GameObject BlockResultsPrefab;
@@ -127,8 +125,8 @@ namespace USE_ExperimentTemplate_Task
         private bool ContinueButtonClicked;
 
         //Passed by session level
-        public ImportSettings_Level importSettings_Level;
-        public VerifyTask_Level verifyTask_Level;
+        [HideInInspector] public ImportSettings_Level importSettings_Level;
+        [HideInInspector] public VerifyTask_Level verifyTask_Level;
 
 
         public virtual void SpecifyTypes()
@@ -148,6 +146,8 @@ namespace USE_ExperimentTemplate_Task
 
         public void DefineTaskLevel()
         {
+            Session.TaskLevel = this;
+
             TaskLevelDefined = false;
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
@@ -178,7 +178,7 @@ namespace USE_ExperimentTemplate_Task
                 NumRewardPulses_InTask = 0;
                 NumAbortedTrials_InTask = 0;
 
-                if (!SessionValues.WebBuild)
+                if (!Session.WebBuild)
                 {
                     if (configUI == null)
                         configUI = FindObjectOfType<ConfigUI>();
@@ -197,24 +197,31 @@ namespace USE_ExperimentTemplate_Task
                     }
                 }
 
-                SessionValues.InputManager.SetActive(true);
+                Session.InputManager.SetActive(true);
 
-                if (SessionValues.SessionDef.IsHuman)
+                if (Session.SessionDef.IsHuman)
                 {
-                    Canvas taskCanvas = GameObject.Find(TaskName + "_Canvas").GetComponent<Canvas>();
-                    SessionValues.HumanStartPanel.SetTaskLevel(this);
-                    SessionValues.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
+                    GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
+                    if (taskCanvasGO != null)
+                    {
+                        if (taskCanvasGO.TryGetComponent(out Canvas taskCanvas))
+                            Session.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
+                        else
+                            Debug.LogError("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
+                    }
+                    else
+                        Debug.LogError("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
                 }
 
 
                 //Send Reward Pulses for Ansen's Camera at Start of Task:
-                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null &&
-                    SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(
-                        SessionValues.SessionDef.Camera_TaskStart_NumPulses,
-                        SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                if (Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null &&
+                    Session.SessionDef.SyncBoxActive)
+                    Session.SyncBoxController.SendCameraSyncPulses(
+                        Session.SessionDef.Camera_TaskStart_NumPulses,
+                        Session.SessionDef.Camera_PulseSize_Ticks);
 
-                if (SessionValues.SessionDef.FlashPanelsActive)
+                if (Session.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
 
             });
@@ -222,7 +229,6 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;
@@ -243,11 +249,11 @@ namespace USE_ExperimentTemplate_Task
 
                 TrialLevel.ForceBlockEnd = false;
 
-                SessionValues.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
+                Session.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
             });
 
             //Hotkeys for WebGL build so we can end task and go to next block
-            if (SessionValues.WebBuild)
+            if (Session.WebBuild)
             {
                 RunBlock.AddUpdateMethod(() =>
                 {
@@ -256,12 +262,10 @@ namespace USE_ExperimentTemplate_Task
                 });
             }
 
-            // RunBlock.AddUpdateMethod(()=> TrialData.UpdateData());
-
             RunBlock.AddLateUpdateMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+                //Session.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
@@ -271,8 +275,8 @@ namespace USE_ExperimentTemplate_Task
                     0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                blockFeedbackDuration = SessionValues.SessionDef.BlockResultsDuration;
-                if (SessionValues.SessionDef.IsHuman)
+                blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;
+                if (Session.SessionDef.IsHuman)
                 {
                     OrderedDictionary taskBlockResults = GetBlockResultsData();
                     if (taskBlockResults != null && taskBlockResults.Count > 0)
@@ -281,7 +285,7 @@ namespace USE_ExperimentTemplate_Task
                 else
                     blockFeedbackDuration = 0;
 
-                SessionValues.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
@@ -293,8 +297,8 @@ namespace USE_ExperimentTemplate_Task
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
-                StartCoroutine(FrameData.AppendDataToBuffer());
-                SessionValues.EventCodeManager.EventCodeLateUpdate();
+               StartCoroutine(FrameData.AppendDataToBuffer());
+               //Session.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -305,7 +309,7 @@ namespace USE_ExperimentTemplate_Task
                 if (ContinueButtonClicked)
                     ContinueButtonClicked = false;
 
-                if (SessionValues.SessionDef.IsHuman && BlockResultsGO != null)
+                if (Session.SessionDef.IsHuman && BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
                 StartCoroutine(BlockData.AppendDataToBuffer());
@@ -326,14 +330,14 @@ namespace USE_ExperimentTemplate_Task
                 if (TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 
-                if (CheckForcedTaskEnd() && SessionValues.StoreData) //If they used end task hotkey, still write the block data!
+                if (CheckForcedTaskEnd() && Session.StoreData) //If they used end task hotkey, still write the block data!
                 {
                     StartCoroutine(BlockData.AppendDataToBuffer());
                     StartCoroutine(BlockData.AppendDataToFile());
                 }
 
-                if (SessionValues.SessionDef.EventCodesActive)
-                    SessionValues.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
+                if (Session.SessionDef.EventCodesActive)
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && CurrentBlockSummaryString != null)
@@ -351,22 +355,22 @@ namespace USE_ExperimentTemplate_Task
             AddDefaultControlLevelTerminationMethod(() =>
             {
                 //Send Reward Pulses for Ansen's Camera at End of Task:
-                if (SessionValues.SessionDef.SendCameraPulses && SessionValues.SyncBoxController != null &&
-                    SessionValues.SessionDef.SyncBoxActive)
-                    SessionValues.SyncBoxController.SendCameraSyncPulses(
-                        SessionValues.SessionDef.Camera_TaskEnd_NumPulses,
-                        SessionValues.SessionDef.Camera_PulseSize_Ticks);
+                if (Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null &&
+                    Session.SessionDef.SyncBoxActive)
+                    Session.SyncBoxController.SendCameraSyncPulses(
+                        Session.SessionDef.Camera_TaskEnd_NumPulses,
+                        Session.SessionDef.Camera_PulseSize_Ticks);
 
-                if (SessionValues.SessionDataControllers != null)
+                if (Session.SessionDataControllers != null)
                 {
-                    SessionValues.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
-                    SessionValues.SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
-                    SessionValues.SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-                    if (SessionValues.SessionDef.EyeTrackerActive)
+                    Session.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
+                    Session.SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
+                    Session.SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
+                    if (Session.SessionDef.EyeTrackerActive)
                     {
-                        SessionValues.SessionDataControllers.RemoveDataController("BlockData_GazeCalibration");
-                        SessionValues.SessionDataControllers.RemoveDataController("FrameData_GazeCalibration");
-                        SessionValues.SessionDataControllers.RemoveDataController("TrialData_GazeCalibration");
+                        Session.SessionDataControllers.RemoveDataController("BlockData_GazeCalibration");
+                        Session.SessionDataControllers.RemoveDataController("FrameData_GazeCalibration");
+                        Session.SessionDataControllers.RemoveDataController("TrialData_GazeCalibration");
                     }
                 }
 
@@ -396,7 +400,7 @@ namespace USE_ExperimentTemplate_Task
 
                 }
 
-                SessionValues.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
+                Session.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
                 TaskCam.gameObject.SetActive(false);
 
                 NumAbortedTrials_InBlock = 0;
@@ -408,7 +412,7 @@ namespace USE_ExperimentTemplate_Task
 
                 Destroy(GameObject.Find("FeedbackControllers"));
 
-                if (!SessionValues.WebBuild)
+                if (!Session.WebBuild)
                 {
                     foreach (Transform child in GameObject.Find("MainCameraCopy").transform)
                         Destroy(child.gameObject);
@@ -429,12 +433,12 @@ namespace USE_ExperimentTemplate_Task
         public void SetSkyBox(string contextName)
         {
             string contextFilePath = "";
-            if (SessionValues.UsingDefaultConfigs)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{contextName}";
-            else if (SessionValues.UsingServerConfigs)
-                contextFilePath = $"{SessionValues.SessionDef.ContextExternalFilePath}/{contextName}.png";
-            else if (SessionValues.UsingLocalConfigs)
-                contextFilePath = TrialLevel.GetContextNestedFilePath(SessionValues.SessionDef.ContextExternalFilePath,
+            if (Session.UsingDefaultConfigs)
+                contextFilePath = $"{Session.SessionDef.ContextExternalFilePath}/{contextName}";
+            else if (Session.UsingServerConfigs)
+                contextFilePath = $"{Session.SessionDef.ContextExternalFilePath}/{contextName}.png";
+            else if (Session.UsingLocalConfigs)
+                contextFilePath = TrialLevel.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath,
                     contextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
@@ -452,7 +456,7 @@ namespace USE_ExperimentTemplate_Task
                 Time.timeScale = 1; //if paused, unpause before ending task
 
                 TrialLevel.AbortCode = 5;
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
+                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.FinishTrialCleanup();
                 TrialLevel.ClearActiveTrialHandlers();
@@ -470,13 +474,13 @@ namespace USE_ExperimentTemplate_Task
                     TrialLevel.TokenFBController.enabled = false;
                 }
 
-                if (SessionValues.HumanStartPanel.HumanStartPanelGO != null)
-                    SessionValues.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+                if (Session.HumanStartPanel.HumanStartPanelGO != null)
+                    Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
 
                 if (TrialLevel.AudioFBController.IsPlaying())
                     TrialLevel.AudioFBController.audioSource.Stop();
                 TrialLevel.AbortCode = 3;
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
+                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
             }
@@ -509,7 +513,7 @@ namespace USE_ExperimentTemplate_Task
             GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
             if (taskCanvas != null)
             {
-                BlockResultsGO = Instantiate(SessionValues.BlockResultsPrefab);
+                BlockResultsGO = Instantiate(Session.BlockResultsPrefab);
                 BlockResultsGO.name = "BlockResults";
                 BlockResultsGO.transform.SetParent(taskCanvas.transform);
                 BlockResultsGO.transform.localScale = Vector3.one;
@@ -531,7 +535,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     blockResults_AudioSource.Play();
 
-                    GameObject gridItem = Instantiate(SessionValues.BlockResults_GridElementPrefab, gridParent);
+                    GameObject gridItem = Instantiate(Session.BlockResults_GridElementPrefab, gridParent);
                     gridItem.name = "GridElement" + count;
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
                     itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
@@ -544,21 +548,21 @@ namespace USE_ExperimentTemplate_Task
 
         public void ClearActiveTaskHandlers()
         {
-            if (SessionValues.SelectionTracker.TaskHandlerNames.Count > 0)
+            if (Session.SelectionTracker.TaskHandlerNames.Count > 0)
             {
                 List<string> toRemove = new List<string>();
 
-                foreach (string handlerName in SessionValues.SelectionTracker.TaskHandlerNames)
+                foreach (string handlerName in Session.SelectionTracker.TaskHandlerNames)
                 {
-                    if (SessionValues.SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
+                    if (Session.SelectionTracker.ActiveSelectionHandlers.ContainsKey(handlerName))
                     {
-                        SessionValues.SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
+                        Session.SelectionTracker.ActiveSelectionHandlers.Remove(handlerName);
                         toRemove.Add(handlerName);
                     }
                 }
 
                 foreach (string handlerName in toRemove)
-                    SessionValues.SelectionTracker.TaskHandlerNames.Remove(handlerName);
+                    Session.SelectionTracker.TaskHandlerNames.Remove(handlerName);
             }
         }
 

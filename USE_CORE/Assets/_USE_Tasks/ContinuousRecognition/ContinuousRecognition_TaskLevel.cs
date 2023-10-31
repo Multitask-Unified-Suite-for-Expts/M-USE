@@ -70,7 +70,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
-            if(!SessionValues.WebBuild && trialLevel.AbortCode == 0)
+            if(!Session.WebBuild && trialLevel.AbortCode == 0)
             {
                 CurrentBlockString += "\n" + "\n";
                 CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");

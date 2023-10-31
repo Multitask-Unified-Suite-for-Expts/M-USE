@@ -51,7 +51,7 @@ public class SetupSession_Level : ControlLevel
     public ImportSettings_Level importSettings_Level;
     public SessionData SessionData;
     public FrameData FrameData;
-    public ControlLevel_Session_Template SessionLevel;
+    //public ControlLevel_Session_Template SessionLevel;
     private ControlLevel_Task_Template taskLevel;
 
 
@@ -68,13 +68,13 @@ public class SetupSession_Level : ControlLevel
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
         {
             SetDataPaths();
-            if (SessionValues.UsingDefaultConfigs)
+            if (Session.UsingDefaultConfigs)
                 WriteSessionConfigsToPersistantDataPath();
 
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {
-                new SettingsDetails(SessionValues.ConfigFolderPath, "SingleType", "SessionConfig", typeof(SessionDef)),
-                new SettingsDetails(SessionValues.ConfigFolderPath, "JSON", "SessionEventCode", typeof(Dictionary<string, EventCode>))
+                new SettingsDetails(Session.ConfigFolderPath, "SingleType", "SessionConfig", typeof(SessionDef)),
+                new SettingsDetails(Session.ConfigFolderPath, "JSON", "SessionEventCode", typeof(Dictionary<string, EventCode>))
             };
         });
         ImportSessionSettings.AddUpdateMethod(() =>
@@ -85,11 +85,11 @@ public class SetupSession_Level : ControlLevel
 
                 if (importSettings_Level.SettingsDetails[0].SearchString == "SessionConfig")
                 {
-                    SessionValues.SessionDef = (SessionDef)importSettings_Level.parsedResult;  //set sessiondef to the parsed content
+                    Session.SessionDef = (SessionDef)importSettings_Level.parsedResult;  //set sessiondef to the parsed content
                 }
                 else if (importSettings_Level.SettingsDetails[0].SearchString == "SessionEventCode")
                 {
-                    SessionValues.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;  //set event codes to parsed content
+                    Session.EventCodeManager.SessionEventCodes = (Dictionary<string, EventCode>)importSettings_Level.parsedResult;  //set event codes to parsed content
                 }
                 else
                     Debug.LogError($"The {importSettings_Level.SettingsDetails[0].SearchString} has been parsed, but is unable to be set as it is not a SessionConfig or EventCode file.");
@@ -103,14 +103,14 @@ public class SetupSession_Level : ControlLevel
             () =>
             {
                 settingsImported = false;
-                SetupInputManagement(SessionLevel.selectTask, SessionLevel.loadTask);
+                SetupInputManagement(Session.SessionLevel.selectTask, Session.SessionLevel.loadTask);
                 SetupSessionDataControllers();
             });
 
         CreateDataFolder.AddDefaultInitializationMethod(() =>
         {
             dataFolderCreated = false;
-            if (SessionValues.StoreData)
+            if (Session.StoreData)
                 StartCoroutine(CreateSessionDataFolder(result =>
                 {
                     dataFolderCreated = true;
@@ -128,9 +128,9 @@ public class SetupSession_Level : ControlLevel
         LoadTaskScene.AddSpecificInitializationMethod(() =>
         {
             taskSceneLoaded = false;
-            taskName = (string)SessionValues.SessionDef.TaskMappings[iTask];
+            taskName = (string)Session.SessionDef.TaskMappings[iTask];
             loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
-            string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+            string configFolderName = Session.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
             loadScene.completed += (_) =>
             {
                 taskSceneLoaded = true;
@@ -151,21 +151,21 @@ public class SetupSession_Level : ControlLevel
             Type taskType = USE_Tasks_CustomTypes.CustomTaskDictionary[taskName].TaskLevelType;
             MethodInfo GetTaskLevelType = methodInfo.MakeGenericMethod(new Type[] { taskType });
 
-            string configFolderName = SessionValues.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+            string configFolderName = Session.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
 
             GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
 
-            verifyTask_Level.TaskLevel.TaskConfigPath = SessionValues.ConfigFolderPath + "/" + configFolderName;
+            verifyTask_Level.TaskLevel.TaskConfigPath = Session.ConfigFolderPath + "/" + configFolderName;
         });
 
-        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask < SessionValues.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
+        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask < Session.SessionDef.TaskMappings.Count - 1, LoadTaskScene,
         () =>
         {
-            SessionLevel.ActiveTaskLevels.Add(taskLevel);
+            Session.SessionLevel.ActiveTaskLevels.Add(taskLevel);
             SceneManager.UnloadSceneAsync(taskName);
             iTask++;
         });
-        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask == SessionValues.SessionDef.TaskMappings.Count - 1, () => null, () =>
+        VerifyTask.SpecifyTermination(() => verifyTask_Level.Terminated && !setupPaused && iTask == Session.SessionDef.TaskMappings.Count - 1, () => null, () =>
         {
             ParentState.ChildLevel = null;
             SceneManager.UnloadSceneAsync(taskName);
@@ -176,37 +176,37 @@ public class SetupSession_Level : ControlLevel
     public void GetTaskLevelType<T>(string configFolderName, VerifyTask_Level verifyTask_Level) where T : ControlLevel_Task_Template
     {
         //Gets the task level type using reflection which cannot be done outside an invoked method
-        string taskName = (string)SessionValues.SessionDef.TaskMappings[configFolderName];
+        string taskName = (string)Session.SessionDef.TaskMappings[configFolderName];
         verifyTask_Level.TaskLevel = GameObject.Find(taskName + "_Scripts").GetComponent<T>();
     }
 
 
     private void SetDataPaths()
     {
-        SessionValues.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}_{SessionValues.SubjectID}";
-        ServerManager.SetSessionDataFolder("DATA__" + SessionValues.FilePrefix);
+        Session.FilePrefix = $"Session_{DateTime.Now.ToString("MM_dd_yy__HH_mm_ss")}_{Session.SubjectID}";
+        ServerManager.SetSessionDataFolder("DATA__" + Session.FilePrefix);
 
-        if (SessionValues.StoringDataOnServer)
-            SessionValues.SessionDataPath = ServerManager.SessionDataFolderPath;
-        else if (SessionValues.StoringDataLocally)
-            SessionValues.SessionDataPath = SessionValues.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + SessionValues.FilePrefix;
+        if (Session.StoringDataOnServer)
+            Session.SessionDataPath = ServerManager.SessionDataFolderPath;
+        else if (Session.StoringDataLocally)
+            Session.SessionDataPath = Session.LocateFile.GetPath("Data Folder") + Path.DirectorySeparatorChar + Session.FilePrefix;
 
-        SessionValues.TaskSelectionDataPath = SessionValues.UsingLocalConfigs ? SessionValues.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData" : $"{SessionValues.SessionDataPath}/TaskSelectionData";
+        Session.TaskSelectionDataPath = Session.UsingLocalConfigs ? Session.SessionDataPath + Path.DirectorySeparatorChar + "TaskSelectionData" : $"{Session.SessionDataPath}/TaskSelectionData";
     }
 
 
     private IEnumerator CreateSessionDataFolder(Action<bool> callbackBool)
     {
-        yield return StartCoroutine(SessionLevel.SessionData.CreateFile());
+        yield return StartCoroutine(Session.SessionLevel.SessionData.CreateFile());
         ServerManager.SessionDataFolderCreated = true;
-        SessionLevel.LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (waiting until data folder is created)
+        Session.LogWriter.StoreDataIsSet = true; //tell log writer when storeData boolean has been set (waiting until data folder is created)
         callbackBool?.Invoke(true);
     }
 
     private IEnumerator CreateTaskSelectionDataFolder(Action<bool> callbackBool)
     {
-        if (SessionValues.WebBuild)
-            yield return StartCoroutine(ServerManager.CreateFolder(SessionValues.TaskSelectionDataPath));
+        if (Session.WebBuild)
+            yield return StartCoroutine(ServerManager.CreateFolder(Session.TaskSelectionDataPath));
         else
         {
         }
@@ -216,47 +216,47 @@ public class SetupSession_Level : ControlLevel
 
     private void SetupInputManagement(State inputActive, State inputInactive)
     {
-        SessionValues.EventCodeManager.splitBytes = SessionValues.SessionDef.SplitBytes;
+        Session.EventCodeManager.splitBytes = Session.SessionDef.SplitBytes;
 
-        SessionValues.InputManager = new GameObject("InputManager");
-        SessionValues.InputManager.SetActive(true);
+        Session.InputManager = new GameObject("InputManager");
+        Session.InputManager.SetActive(true);
 
-        SessionValues.InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"),
-            SessionValues.InputManager.transform);
-        SessionValues.MouseTracker = SessionValues.InputTrackers.GetComponent<MouseTracker>();
-        SessionValues.GazeTracker = SessionValues.InputTrackers.GetComponent<GazeTracker>();
+        Session.InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"),
+            Session.InputManager.transform);
+        Session.MouseTracker = Session.InputTrackers.GetComponent<MouseTracker>();
+        Session.GazeTracker = Session.InputTrackers.GetComponent<GazeTracker>();
 
-        SessionValues.SelectionTracker = new SelectionTracker();
-        if (SessionValues.SessionDef.SelectionType.ToLower().Equals("gaze"))
+        Session.SelectionTracker = new SelectionTracker();
+        if (Session.SessionDef.SelectionType.ToLower().Equals("gaze"))
         {
-            SessionLevel.SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", SessionValues.GazeTracker, inputActive, inputInactive);
-            SessionLevel.SelectionHandler.MinDuration = 0.7f;
+            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", Session.GazeTracker, inputActive, inputInactive);
+            Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
         }
         else
         {
-            SessionLevel.SelectionHandler = SessionValues.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", SessionValues.MouseTracker, inputActive, inputInactive);
-            SessionValues.MouseTracker.enabled = true;
-            SessionLevel.SelectionHandler.MinDuration = 0.01f;
-            SessionLevel.SelectionHandler.MaxDuration = 2f;
+            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", Session.MouseTracker, inputActive, inputInactive);
+            Session.MouseTracker.enabled = true;
+            Session.SessionLevel.SelectionHandler.MinDuration = 0.01f;
+            Session.SessionLevel.SelectionHandler.MaxDuration = 2f;
         }
 
-        SessionValues.MouseTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
-        SessionValues.GazeTracker.ShotgunRaycast.SetShotgunVariables(SessionValues.SessionDef.ShotgunRayCastCircleSize_DVA, SessionValues.SessionDef.ParticipantDistance_CM, SessionValues.SessionDef.ShotgunRaycastSpacing_DVA);
+        Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
+        Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
 
-        if (SessionValues.SessionDef.EyeTrackerActive)
+        if (Session.SessionDef.EyeTrackerActive)
         {
             if (GameObject.Find("TobiiEyeTrackerController") == null)
             {
                 // gets called once when finding and creating the tobii eye tracker prefabs
                 GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
-                SessionValues.TobiiEyeTrackerController =
+                Session.TobiiEyeTrackerController =
                     TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                 GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"),
                     TobiiEyeTrackerControllerGO.transform);
                 GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"),
                     TobiiEyeTrackerControllerGO.transform);
                 GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
-                SessionValues.GazeTracker.enabled = true;
+                Session.GazeTracker.enabled = true;
 
 
                 GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"),
@@ -271,15 +271,15 @@ public class SetupSession_Level : ControlLevel
             }
         }
 
-        if (SessionValues.SessionDef.MonitorDetails != null && SessionValues.SessionDef.ScreenDetails != null)
+        if (Session.SessionDef.MonitorDetails != null && Session.SessionDef.ScreenDetails != null)
         {
             USE_CoordinateConverter.ScreenDetails = new ScreenDetails(
-                SessionValues.SessionDef.ScreenDetails.LowerLeft_Cm,
-                SessionValues.SessionDef.ScreenDetails.UpperRight_Cm,
-                SessionValues.SessionDef.ScreenDetails.PixelResolution);
+                Session.SessionDef.ScreenDetails.LowerLeft_Cm,
+                Session.SessionDef.ScreenDetails.UpperRight_Cm,
+                Session.SessionDef.ScreenDetails.PixelResolution);
             USE_CoordinateConverter.MonitorDetails = new MonitorDetails(
-                SessionValues.SessionDef.MonitorDetails.PixelResolution,
-                SessionValues.SessionDef.MonitorDetails.CmSize);
+                Session.SessionDef.MonitorDetails.PixelResolution,
+                Session.SessionDef.MonitorDetails.CmSize);
             USE_CoordinateConverter.SetMonitorDetails(USE_CoordinateConverter.MonitorDetails);
             USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
         }
@@ -288,10 +288,10 @@ public class SetupSession_Level : ControlLevel
 
     private void WriteSessionConfigsToPersistantDataPath()
     {
-        if (Directory.Exists(SessionValues.ConfigFolderPath))
-            Directory.Delete(SessionValues.ConfigFolderPath, true);
+        if (Directory.Exists(Session.ConfigFolderPath))
+            Directory.Delete(Session.ConfigFolderPath, true);
             
-        Directory.CreateDirectory(SessionValues.ConfigFolderPath);
+        Directory.CreateDirectory(Session.ConfigFolderPath);
         List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "SessionEventCodeConfig_json", "DisplayConfig_json" };
         foreach (string config in configsToWrite)
         {
@@ -301,62 +301,57 @@ public class SetupSession_Level : ControlLevel
                 configName += ".txt";
             else if (configName.ToLower().Contains("eventcode") || configName.ToLower().Contains("displayconfig"))
                 configName += ".json";
-            File.WriteAllBytes(SessionValues.ConfigFolderPath + Path.DirectorySeparatorChar + configName, textFileBytes);
+            File.WriteAllBytes(Session.ConfigFolderPath + Path.DirectorySeparatorChar + configName, textFileBytes);
         }
     }
 
 
     private void SetupSessionDataControllers()
     {
-        SessionLevel.SessionData = (SessionData)SessionValues.SessionDataControllers.InstantiateDataController<SessionData>
-            ("SessionData", SessionValues.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
-        SessionLevel.SessionData.fileName = SessionValues.FilePrefix + "__SessionData.txt";
-        SessionLevel.SessionData.sessionLevel = SessionLevel;
-        SessionLevel.SessionData.InitDataController();
-        SessionLevel.SessionData.ManuallyDefine();
+        Session.SessionLevel.SessionData = (SessionData)Session.SessionDataControllers.InstantiateDataController<SessionData>
+            ("SessionData", Session.SessionDataPath); //SessionDataControllers.InstantiateSessionData(StoreData, SessionValues.SessionDataPath);
+        Session.SessionLevel.SessionData.fileName = Session.FilePrefix + "__SessionData.txt";
+        Session.SessionLevel.SessionData.InitDataController();
+        Session.SessionLevel.SessionData.ManuallyDefine();
 
-        if (SessionValues.SessionDef.SerialPortActive)
+        if (Session.SessionDef.SerialPortActive)
         {
-            SessionValues.SerialSentData = (SerialSentData)SessionValues.SessionDataControllers.InstantiateDataController<SerialSentData>
-                ("SerialSentData", SessionValues.TaskSelectionDataPath 
+            Session.SerialSentData = (SerialSentData)Session.SessionDataControllers.InstantiateDataController<SerialSentData>
+                ("SerialSentData", Session.TaskSelectionDataPath 
                                                 + Path.DirectorySeparatorChar + "Task0001");
-            SessionValues.SerialSentData.fileName = SessionValues.FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
-            SessionValues.SerialSentData.sessionLevel = SessionLevel;
-            SessionValues.SerialSentData.InitDataController();
-            SessionValues.SerialSentData.ManuallyDefine();
+            Session.SerialSentData.fileName = Session.FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
+            Session.SerialSentData.InitDataController();
+            Session.SerialSentData.ManuallyDefine();
 
-            SessionValues.SerialRecvData = (SerialRecvData)SessionValues.SessionDataControllers.InstantiateDataController<SerialRecvData>
-                ("SerialRecvData", SessionValues.TaskSelectionDataPath
+            Session.SerialRecvData = (SerialRecvData)Session.SessionDataControllers.InstantiateDataController<SerialRecvData>
+                ("SerialRecvData", Session.TaskSelectionDataPath
                                                                        + Path.DirectorySeparatorChar + "Task0001" );
-            SessionValues.SerialRecvData.fileName = SessionValues.FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
-            SessionValues.SerialRecvData.sessionLevel = SessionLevel;
-            SessionValues.SerialRecvData.InitDataController();
-            SessionValues.SerialRecvData.ManuallyDefine();
+            Session.SerialRecvData.fileName = Session.FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
+            Session.SerialRecvData.InitDataController();
+            Session.SerialRecvData.ManuallyDefine();
         }
 
-        SessionLevel.FrameData = (FrameData)SessionValues.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
-        SessionLevel.FrameData.fileName = SessionValues.FilePrefix + "__FrameData_0001_TaskSelection.txt";
-        SessionLevel.FrameData.sessionLevel = SessionLevel;
-        SessionLevel.FrameData.InitDataController();
-        SessionLevel.FrameData.ManuallyDefine();
+        Session.SessionLevel.FrameData = (FrameData)Session.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
+        Session.SessionLevel.FrameData.fileName = Session.FilePrefix + "__FrameData_0001_TaskSelection.txt";
+        Session.SessionLevel.FrameData.InitDataController();
+        Session.SessionLevel.FrameData.ManuallyDefine();
 
-        if (SessionValues.SessionDef.EventCodesActive)
-            SessionLevel.FrameData.AddEventCodeColumns();
-        if (SessionValues.SessionDef.FlashPanelsActive)
-            SessionLevel.FrameData.AddFlashPanelColumns();
+        if (Session.SessionDef.EventCodesActive)
+            Session.SessionLevel.FrameData.AddEventCodeColumns();
+        if (Session.SessionDef.FlashPanelsActive)
+            Session.SessionLevel.FrameData.AddFlashPanelColumns();
 
-        if (SessionValues.SessionDef.EyeTrackerActive)
+        if (Session.SessionDef.EyeTrackerActive)
         {
-            SessionValues.GazeData = (GazeData)SessionValues.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", SessionValues.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
+            Session.GazeData = (GazeData)Session.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
 
-            SessionValues.GazeData.fileName = "TaskSelection__GazeData.txt";
-            SessionValues.GazeData.sessionLevel = SessionLevel;
-            SessionValues.GazeData.InitDataController();
-            SessionValues.GazeData.ManuallyDefine();
+            Session.GazeData.fileName = "TaskSelection__GazeData.txt";
+            Session.GazeData.InitDataController();
+            Session.GazeData.ManuallyDefine();
           //  SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
-            SessionValues.GazeTracker.Init(SessionLevel.FrameData, 0);
+            Session.GazeTracker.Init(Session.SessionLevel.FrameData, 0);
 
         }
-        SessionValues.MouseTracker.Init(SessionLevel.FrameData, 0);
+        Session.MouseTracker.Init(Session.SessionLevel.FrameData, 0);
     }
 }

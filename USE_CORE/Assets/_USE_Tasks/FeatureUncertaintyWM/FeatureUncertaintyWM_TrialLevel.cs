@@ -197,8 +197,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
             {
-                StartButton = SessionValues.USE_StartButton.CreateStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
-                SessionValues.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
+                StartButton = Session.USE_StartButton.CreateStartButton(taskCanvas.GetComponent<Canvas>(), StartButtonPosition, StartButtonScale);
+                Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 // USE_StartButton.SetButtonColor(color: Color.black);
             }
 
@@ -211,12 +211,12 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = SessionValues.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", SessionValues.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, StartButtonScale, taskCanvas);
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, SearchDisplay);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, StartButtonScale, taskCanvas, true);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            if (SessionValues.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
+            if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
                 Vector3 biggerScale = TokenFBController.transform.localScale * 2f;
                 TokenFBController.transform.localScale = biggerScale;
@@ -232,7 +232,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(SessionValues.USE_StartButton.StartButtonChildren), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(Session.USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
@@ -267,7 +267,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CreateTextOnExperimenterDisplay();
             multiCompStims.ToggleVisibility(true);
 
-            SessionValues.EventCodeManager.SendCodeNextFrame("TokenBarVisible");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
             
             choiceMade = false;
             // Handler.HandlerActive = true;
@@ -299,13 +299,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("CorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                SessionValues.EventCodeManager.SendCodeNextFrame("IncorrectResponse");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 
             }
 
@@ -322,8 +322,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
-            SessionValues.EventCodeManager.SendCodeNextFrame("NoChoice");
-            SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+            Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
             aborted = true;
@@ -338,7 +338,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
             SetTrialSummaryString();
 
-            int? depth = SessionValues.Using2DStim ? 10 : (int?)null;
+            int? depth = Session.Using2DStim ? 10 : (int?)null;
 
 
             if (CorrectSelection)
@@ -389,9 +389,9 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 NumTokenBarFull_InBlock++;
                 CurrentTaskLevel.NumTokenBarFull_InTask++;
-                if (SessionValues.SyncBoxController != null)
+                if (Session.SyncBoxController != null)
                 {
-                    SessionValues.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                    Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                    // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", CurrentTrialDef.NumPulses)); moved to syncbox class
                     NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
@@ -407,7 +407,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName)));
-                SessionValues.EventCodeManager.SendCodeNextFrame("ContextOff");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             }
 
             //Setting back the parent to the mcCompHolder for individual components
@@ -727,7 +727,7 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
 
         multiCompStims = new StimGroup("MultiCompStims", GetStateFromName("SearchDisplay"), GetStateFromName("SelectionFeedback")); // can add state control of onset/offset
 
-        StimGroup group = SessionValues.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
         sampleStims = new StimGroup("SampleStims", group, CurrentTrialDef.sampleCompIndices);
         sampleStims.SetVisibilityOnOffStates(GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
@@ -844,8 +844,8 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         // All AddDatum commmands from the Frame Data
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton.activeSelf);
-        FrameData.AddDatum("SearchStimVisibility", () => multiCompStims.IsActive);
-        FrameData.AddDatum("SampleStimVisibility", () => sampleStims.IsActive);
+        FrameData.AddDatum("SearchStimVisibility", () => multiCompStims?.IsActive);
+        FrameData.AddDatum("SampleStimVisibility", () => sampleStims?.IsActive);
     }
     void SetTrialSummaryString()
     {

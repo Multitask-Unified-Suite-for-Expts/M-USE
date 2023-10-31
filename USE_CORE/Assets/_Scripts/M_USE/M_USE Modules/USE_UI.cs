@@ -33,10 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using USE_Data;
-using USE_ExperimentTemplate_Classes;
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Session;
-using USE_ExperimentTemplate_Trial;
+
 
 namespace USE_UI
 {
@@ -63,20 +60,13 @@ namespace USE_UI
         [HideInInspector] public Vector3 InitialInstructionsButtonPosition;
         [HideInInspector] public Vector3 InitialEndTaskButtonPosition;
 
-
-        [HideInInspector] public Dictionary<string, string> TaskInstructionsDict;
-        [HideInInspector] public Dictionary<string, string> TaskNamesDict;
-        [HideInInspector] public Dictionary<string, Vector3> Task_HumanBackgroundPos_Dict;
+        private Dictionary<string, string> TaskInstructionsDict;
+        private Dictionary<string, string> TaskNamesDict;
 
         [HideInInspector] public string TaskName;
 
         private State SetActiveOnInitialization;
         private State SetInactiveOnTermination;
-
-        [HideInInspector] public ControlLevel_Session_Template SessionLevel;
-        [HideInInspector] public ControlLevel_Task_Template TaskLevel;
-        [HideInInspector] public ControlLevel_Trial_Template TrialLevel;
-
 
 
         private void Start()
@@ -98,7 +88,6 @@ namespace USE_UI
                 { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
                 { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
             };
-
             TaskNamesDict = new Dictionary<string, string>()
             {
                 { "AntiSaccade", "Anti Saccade"},
@@ -111,21 +100,25 @@ namespace USE_UI
                 { "WhatWhenWhere", "What When Where" },
                 { "WorkingMemory", "Working Memory" }
             };
+        }
 
-            Task_HumanBackgroundPos_Dict = new Dictionary<string, Vector3>()
-            {
-                { "AntiSaccade", new Vector3(0, 0, 1000f) },
-                { "ContinuousRecognition", new Vector3(0, 0, 1000f) },
-                { "EffortControl", new Vector3(0, 0, 500f) },
-                { "FlexLearning", new Vector3(0, 0, 1000f) },
-                { "MazeGame", new Vector3(0, 0, 500f) },
-                { "THR", new Vector3(0, 0, 1000f) },
-                { "VisualSearch", new Vector3(0, 0, 1000f) },
-                { "WhatWhenWhere", new Vector3(0, 0, 500f) },
-                { "WorkingMemory", new Vector3(0, 0, 1000f) }
-            };
+        //New tasks that are built can call this from their TaskLevel
+        public void AddTaskInstructions(string taskNameOneWord, string instructions)
+        {
+            if (TaskInstructionsDict.ContainsKey(taskNameOneWord))  //if already included, update it
+                TaskInstructionsDict[taskNameOneWord] = instructions;
+            else
+                TaskInstructionsDict.Add(taskNameOneWord, instructions);
+        }
 
+        //New tasks that are built can call this from their TaskLevel
+        public void AddTaskDisplayName(string taskNameOneWord, string taskNameWithSpace)
+        {
+            if (TaskNamesDict.ContainsKey(taskNameOneWord)) //if already included, update it
 
+                TaskNamesDict[taskNameOneWord] = taskNameWithSpace;
+            else
+                TaskNamesDict.Add(taskNameOneWord, taskNameWithSpace);
         }
 
         //Called by TaskLevel
@@ -148,18 +141,18 @@ namespace USE_UI
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
             HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = Task_HumanBackgroundPos_Dict[taskName];
+            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, 1000f);
 
             BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
 
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
-            if (SessionValues.UsingDefaultConfigs)
+            if (Session.UsingDefaultConfigs)
                 EndTaskButtonGO.AddComponent<ButtonHoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
-            if(SessionValues.UsingDefaultConfigs)
+            if(Session.UsingDefaultConfigs)
                 InstructionsButtonGO.AddComponent<ButtonHoverEffect>();
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
@@ -177,17 +170,17 @@ namespace USE_UI
 
         public void HandleEndTask()
         {
-            if (TrialLevel != null)
+            if (Session.TrialLevel != null)
             {
                 if (Time.timeScale == 0) //if paused, unpause before ending task
                     Time.timeScale = 1;
 
-                TrialLevel.AbortCode = 5;
-                SessionValues.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
-                TrialLevel.ForceBlockEnd = true;
-                TrialLevel.FinishTrialCleanup();
-                TrialLevel.ClearActiveTrialHandlers();
-                TaskLevel.SpecifyCurrentState(TaskLevel.GetStateFromName("FinishTask"));
+                Session.TrialLevel.AbortCode = 5;
+                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                Session.TrialLevel.ForceBlockEnd = true;
+                Session.TrialLevel.FinishTrialCleanup();
+                Session.TrialLevel.ClearActiveTrialHandlers();
+                Session.TaskLevel.SpecifyCurrentState(Session.TaskLevel.GetStateFromName("FinishTask"));
             }
         }
 
@@ -202,7 +195,7 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
             InstructionsOn = InstructionsGO.activeInHierarchy;
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
         //Called at end of SetupTrial (TrialLevel)
@@ -234,19 +227,6 @@ namespace USE_UI
             }
         }
 
-        public void SetSessionLevel(ControlLevel_Session_Template sessionLevel)
-        {
-            SessionLevel = sessionLevel;
-        }
-        public void SetTaskLevel(ControlLevel_Task_Template taskLevel)
-        {
-            TaskLevel = taskLevel;
-        }
-        public void SetTrialLevel(ControlLevel_Trial_Template trialLevel)
-        {
-            TrialLevel = trialLevel;
-        }
-
 
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
@@ -266,8 +246,8 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
-            if(SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
+            if(Session.SessionDef.EventCodesActive)
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
         }
@@ -276,8 +256,8 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
-            if (SessionValues.SessionDef.EventCodesActive)
-                SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
+            if (Session.SessionDef.EventCodesActive)
+                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
         }
 
     }
@@ -430,7 +410,7 @@ namespace USE_UI
             Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = scale.HasValue? new Vector2(scale.Value, scale.Value) : new Vector2(10f, 10f);
+            Image.rectTransform.sizeDelta = scale.HasValue? new Vector2(scale.Value, scale.Value) : new Vector2(100f, 100f);
             StartButtonGO.transform.localPosition = localPos.HasValue ? localPos.Value : Vector3.zero;
             Image.color = color.HasValue ? color.Value : new Color32(0, 0, 128, 255);
             StartButtonGO.SetActive(false);
@@ -510,8 +490,6 @@ namespace USE_UI
         public Image Image;
         public Sprite Sprite;
         public Vector3 LocalPosition = new Vector3(0, 0, 0);
-        private Color32 originalColor;
-        private Sprite originalSprite;
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
 

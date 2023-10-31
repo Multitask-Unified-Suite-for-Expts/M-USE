@@ -60,7 +60,8 @@ public class SliderFBController : MonoBehaviour
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
-        trialData.AddDatum("SliderBarValue", () => Slider.value);
+        trialData.AddDatum("SliderBarValue", () => Slider?.value); //OLD (didnt have the question mark)
+        //trialData.AddDatum("SliderBarValue", () => Slider != null ? Slider.value : -1); //NEW
         trialData.AddDatum("SliderBarFilled", ()=> sliderBarFull);
         frameData.AddDatum("SliderAnimationPhase", () => animationPhase.ToString());
         frameData.AddDatum("SliderVisibility", ()=> Slider != null? Slider.enabled : false);
@@ -137,14 +138,14 @@ public class SliderFBController : MonoBehaviour
                         sliderBarFull = true;
                         numSliderBarFull++;
                         audioFBController.Play("TripleCollected");
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
                         animationEndTime += updateTime + flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     animationPhase = AnimationPhase.None;
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
                     break;
             }
         }

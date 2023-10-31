@@ -48,6 +48,7 @@ public class TouchFBController : MonoBehaviour
     public float FeedbackDuration = .3f; //Default is .3
     public bool FeedbackOn;
     public bool TouchFbEnabled;
+    private bool UseRootGoPos;
 
     //Textures are currently set in The Trial Template "LoadTextures" method:
     public static Texture2D HeldTooLong_Texture;
@@ -87,7 +88,7 @@ public class TouchFBController : MonoBehaviour
         };
     }
 
-    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO)
+    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO, bool useRootPosition)
     {
         TouchFbEnabled = true;
         Handler = handler;
@@ -95,6 +96,7 @@ public class TouchFBController : MonoBehaviour
         FeedbackSize = fbSize;
         TaskCanvasGO = taskCanvasGO;
         TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
+        UseRootGoPos = useRootPosition;
 
         if (HeldTooShort_Prefab == null || HeldTooLong_Prefab == null || MovedTooFar_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
@@ -156,10 +158,9 @@ public class TouchFBController : MonoBehaviour
 
         InstantiatedGO.name = "TouchFeedback_GO";
         InstantiatedGO.GetComponent<RectTransform>().anchoredPosition = touchFb.PosOnCanvas;
-        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOn"]);
-
-        Invoke(nameof(DestroyTouchFeedback), FeedbackDuration);            
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOn"]);
         
+        Invoke(nameof(DestroyTouchFeedback), FeedbackDuration);            
     }
 
     public void DestroyTouchFeedback() //Called in ShowTouchFeedback method above ^^
@@ -167,7 +168,7 @@ public class TouchFBController : MonoBehaviour
         if (InstantiatedGO != null)
         {
             Destroy(InstantiatedGO);
-            SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOff"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOff"]);
             DeactivatePrefabs();
             Handler.HandlerActive = true;
             FeedbackOn = false;
@@ -248,10 +249,10 @@ public class TouchFBController : MonoBehaviour
 
         public Vector2 GetPosOnCanvas()
         {
-            Vector2 localPoint;
             RectTransform canvasRect = TouchFeedbackController.TaskCanvas.GetComponent<RectTransform>();
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(Selection.SelectedGameObject.transform.root.position);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out localPoint);
+            Vector3 objPos = TouchFeedbackController.UseRootGoPos ? Selection.SelectedGameObject.transform.root.position : Selection.SelectedGameObject.transform.position;
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(objPos);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPos, Camera.main, out Vector2 localPoint);
             return localPoint;
         }
     }

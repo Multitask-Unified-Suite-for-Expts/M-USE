@@ -92,8 +92,8 @@ public class TokenFBController : MonoBehaviour
         SetNegativeShowAudioClip(audioFBController.GetClip("Negative"));
 
         //Subscribe to FullScreen Events:
-        if(SessionValues.FullScreenController != null)
-            SessionValues.FullScreenController.SubscribeToFullScreenChanged(OnFullScreenChanged);
+        if(Session.FullScreenController != null)
+            Session.FullScreenController.SubscribeToFullScreenChanged(OnFullScreenChanged);
     }
 
 
@@ -246,15 +246,15 @@ public class TokenFBController : MonoBehaviour
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
                         audioFBController.Play("TripleCollected");
-                        SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
                         animationEndTime += flashingTime;
                     }
                     break;
                 case AnimationPhase.Flashing:
                     numCollected = 0;
                     animationPhase = AnimationPhase.None;
-                    SessionValues.EventCodeManager.SendCodeImmediate(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
-                    SessionValues.EventCodeManager.SendCodeNextFrame(SessionValues.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationEnd"]);
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TokenFbController_TbReset"]);
                     break;
             }
         }
@@ -391,8 +391,8 @@ public class TokenFBController : MonoBehaviour
     private void OnDestroy()
     {
         //Unsubscribe from FullScreenChanged Event:
-        if (SessionValues.FullScreenController != null)
-            SessionValues.FullScreenController.UnsubscribeToFullScreenChanged(OnFullScreenChanged);
+        if (Session.FullScreenController != null)
+            Session.FullScreenController.UnsubscribeToFullScreenChanged(OnFullScreenChanged);
     }
 
 }

@@ -136,14 +136,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             GC_CanvasGO = GameObject.Find("GazeCalibration_Canvas");
 
-            if(!Session.TobiiEyeTrackerController.isCalibrating)
+            if (!Session.TobiiEyeTrackerController.isCalibrating)
+            {
                 Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
+                Session.TobiiEyeTrackerController.isCalibrating = true;
+            }
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             AssignCalibPositions();
-            Debug.LogWarning("IN THE SETUP TRIAL !!!");
             if (!CurrentTrialDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
 
@@ -205,12 +207,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Init.SpecifyTermination(() => numCalibPoints != 0, Blink, () =>
         {
             // Only enter Calibration if an eyetracker is being used
-            if (!CurrentTrialDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController)
+            /*if (!CurrentTrialDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController)
             {
                 Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
                 Session.TobiiEyeTrackerController.isCalibrating = true;
-            }
+            }*/
             // Assign the correct calibration points given the User's selection
+
+            Debug.Log("IS IT CALIBRATING ?? " + Session.TobiiEyeTrackerController.isCalibrating);
             DefineCalibPoints(numCalibPoints);
             InfoString.Clear();
         });
@@ -627,7 +631,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void AssignCalibPositions()
     {
-        Debug.Log("is the current trial def ok: " + CurrentTrialDef.CalibPointsInset[0]);
         allCalibPoints = new NormalizedPoint2D[]
         {
             new NormalizedPoint2D(CurrentTrialDef.CalibPointsInset[0], CurrentTrialDef.CalibPointsInset[1]),
@@ -691,14 +694,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         if(GameObject.Find("CalibrationCircle") != null)
             CalibCircle.CircleGO.SetActive(false);
-        DestroyChildren(ResultContainer);
+        if(GameObject.Find("ResultContainer") != null)
+            DestroyChildren(ResultContainer);
     }
     public void InitializeEyeTrackerSettings()
     {
         if (IEyeTracker == null)
-            IEyeTracker = TobiiEyeTrackerController.Instance.iEyeTracker;
+            IEyeTracker = Session.TobiiEyeTrackerController.iEyeTracker;
         if (EyeTracker == null)
-            EyeTracker = TobiiEyeTrackerController.Instance.EyeTracker;/*
+            EyeTracker = Session.TobiiEyeTrackerController.EyeTracker;/*
         if (ScreenBasedCalibration == null)
             ScreenBasedCalibration = TobiiEyeTrackerController.Instance.ScreenBasedCalibration;
         if (DisplayArea == null)

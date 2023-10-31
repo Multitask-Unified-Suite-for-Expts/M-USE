@@ -497,16 +497,26 @@ namespace USE_UI
         {
             CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
             CircleGO.transform.SetParent(parent.transform, false);
-            CircleGO.transform.localScale = new Vector3(size, size, size);
-            UnityEngine.UI.Extensions.UICircle circle = CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>();
+            CircleGO.transform.localScale = Vector3.one * size;
+
+            var circle = CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>();
             circle.Fill = true;
             circle.Thickness = 2f;
-            RectTransform rect = CircleGO.GetComponent<RectTransform>();
+
+            var rect = CircleGO.GetComponent<RectTransform>();
+
+            /*rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 1920);
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 1080)*/;
+            rect.sizeDelta = new Vector2(1920, 1080);
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.zero;
             rect.anchoredPosition = circleLocation;
+            
+            
+
             CircleGO.SetActive(false);
         }
+
         //----------------------------------------------------------------------
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {

@@ -44,7 +44,7 @@ public class SetupTask_Level : ControlLevel
     private BlockData BlockData;
     private FrameData FrameData;
     private TrialData TrialData;
-    private string TaskDataPath, ConfigFolderName, TaskName;
+    public string TaskDataPath, ConfigFolderName, TaskName;
 
 
     public override void DefineControlLevel()
@@ -75,23 +75,6 @@ public class SetupTask_Level : ControlLevel
             if (Session.StoringDataOnServer)
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
-            }
-
-            if (TaskName == "GazeCalibration")
-            {
-                //Setup data management
-                if (Session.SessionLevel.CurrentState.StateName == "SetupSession")
-                    // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar +
-                                   "PreTask_GazeCalibration";
-
-                else
-                    // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName +
-                                   Path.DirectorySeparatorChar + "InTask_GazeCalibration";
-
-                ConfigFolderName = "GazeCalibration";
-
             }
 
 

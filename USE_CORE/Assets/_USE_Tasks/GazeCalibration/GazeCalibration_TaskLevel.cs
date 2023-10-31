@@ -39,7 +39,6 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
-            Debug.LogWarning("MADE IT INTO RUN BLOCK OF THE TASK LEVEL !!!");
             // Set the Background image as defined in the BlockDef
             StartCoroutine(HandleSkybox(gcTL.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, "Gray_1", "LinearDark")));
         });

@@ -165,8 +165,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             List<HotKey> HotKeyList = new List<HotKey>();
             SessionInfoPanel SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-            ControlLevel_Task_Template OriginalTaskLevel = null, GazeCalibrationTaskLevel = null;
-            ControlLevel_Trial_Template OriginalTrialLevel = null, GazeCalibrationTrialLevel = null;
+            ControlLevel_Task_Template OriginalTaskLevel = null;
+            ControlLevel_Trial_Template OriginalTrialLevel = null;
 
             // Toggle Displays HotKey
             HotKey toggleDisplays = new HotKey
@@ -410,9 +410,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
-                    GazeCalibrationTaskLevel = Session.SessionLevel.GazeCalibrationTaskLevel;
-                    GazeCalibrationTrialLevel = (ControlLevel_Trial_Template)GazeCalibrationTaskLevel.GetStateFromName("RunBlock").ChildLevel;
-
                     Debug.Log("---PRESSED CALIBRATION HOT KEY---");
 
                     if (Session.TrialLevel != null)
@@ -433,59 +430,65 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Session.TrialLevel.ForceBlockEnd = true;
                             Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
 
-                            // Set calibration data controllers off
-                            Session.TaskLevel.FrameData.gameObject.SetActive(false);
-                            Session.TaskLevel.BlockData.gameObject.SetActive(false);
-                            Session.TaskLevel.TrialData.gameObject.SetActive(false);
-
+                            
                             // The Hot Key is triggered during the calibration task, exit the calibration task, and return to either task or session
                             if (OriginalTaskLevel != null)
                             {
                                 // Restore the Original Task Level
-                                OriginalTrialLevel.runCalibration = false;
-                                //Session.ExperimenterDisplayController.ResetTask(OriginalTaskLevel, OriginalTrialLevel);
-                                OriginalTaskLevel.FrameData.gameObject.SetActive(true);
-                                OriginalTaskLevel.BlockData.gameObject.SetActive(true);
-                                OriginalTaskLevel.TrialData.gameObject.SetActive(true);
+                                Debug.LogWarning("RETURNING TO PREVIOUS TASK DURING IN_TASK CALIBRATION");
+
+                                OriginalTaskLevel.ActivateAllSceneElements(OriginalTaskLevel);
+                                OriginalTaskLevel.ActivateTaskDataControllers();
+
+                                Session.TaskLevel = OriginalTaskLevel;
+                                Session.TrialLevel = OriginalTaskLevel.TrialLevel;
                             }
                             else
                             {
-                                // Return to the Session Level
-                                Session.SessionLevel.runSessionLevelCalibration = false;
-                                //Session.ExperimenterDisplayController.ResetTask(null, null);
+                                Debug.LogWarning("RETURNING TO SESSION LEVEL AFTER CALIBRATION");
+
+                                Session.SessionLevel.SessionCam.gameObject.SetActive(true);
+                                Session.TaskLevel = null;
+                                Session.TrialLevel = null;
                             }
+                            // Set calibration data controllers off
+                            Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
+                            Session.GazeCalibrationController.GazeCalibrationTaskLevel.DeactivateTaskDataControllers();
+
+                            Session.GazeCalibrationController.RunCalibration = false;
                         }
 
                         else
                         {
                             // The Hot Key is triggered during a regular task, prepare the calibration task and store the original task information
-                            Session.TrialLevel.runCalibration = true;
+                            Debug.LogWarning("INSIDE THE IN TASK CALIBRATION !!");
+
+                            Session.GazeCalibrationController.RunCalibration = true;
                             Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
 
                             OriginalTaskLevel = Session.TaskLevel;
                             OriginalTrialLevel = Session.TrialLevel;
 
-                            OriginalTaskLevel.FrameData.gameObject.SetActive(false);
-                            OriginalTaskLevel.BlockData.gameObject.SetActive(false);
-                            OriginalTaskLevel.TrialData.gameObject.SetActive(false);
+                            Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
+                            Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;
+                            Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                            Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
+                            Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
 
-                            GazeCalibrationTrialLevel.SpecifyCurrentState(GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                            //Session.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
-                            GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(false);
-                            GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(false);
-                            GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(false);
+                            OriginalTaskLevel.DeactivateTaskDataControllers();
+                            OriginalTaskLevel.DeactivateAllSceneElements(OriginalTaskLevel);
+
                         }
                     }
                     else
                     {
-                        // The Hot Key is triggered at the Session Level, prepare the calibration task
-                        Session.SessionLevel.runSessionLevelCalibration = true;
-                        GazeCalibrationTrialLevel.SpecifyCurrentState(GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
-                        //Session.ExperimenterDisplayController.ResetTask(GazeCalibrationTaskLevel, GazeCalibrationTrialLevel);
-                        GazeCalibrationTaskLevel.FrameData.gameObject.SetActive(true);
-                        GazeCalibrationTaskLevel.BlockData.gameObject.SetActive(true);
-                        GazeCalibrationTaskLevel.TrialData.gameObject.SetActive(true);
+                        Debug.LogWarning("RUNNING SESSION LEVEL CALIBRATION !!");
 
+                        // The Hot Key is triggered at the Session Level, prepare the calibration task
+                        Session.GazeCalibrationController.RunCalibration = true;
+                        Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                        Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
+                        Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
                     }
 
                 }

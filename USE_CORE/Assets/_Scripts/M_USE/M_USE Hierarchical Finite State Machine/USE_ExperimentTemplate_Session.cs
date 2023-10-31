@@ -334,7 +334,8 @@ namespace USE_ExperimentTemplate_Session
 
                 Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
                 Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;
-                
+                Session.GazeData.folderPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "GazeData";
+
             });
             gazeCalibration.SpecifyTermination(() => Session.GazeCalibrationController.GazeCalibrationTaskLevel.Terminated, () => selectTask, () =>
             {
@@ -350,8 +351,8 @@ namespace USE_ExperimentTemplate_Session
                     Session.TobiiEyeTrackerController.isCalibrating = false;
                     Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
                 }
-
                 Session.GazeData.folderPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeData";
+
                 FrameData.gameObject.SetActive(true);
                 Starfield.SetActive(true);
                 SessionCam.gameObject.SetActive(true);
@@ -763,6 +764,7 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.fileName = Session.FilePrefix + "__FrameData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
 
                 FrameData.gameObject.SetActive(true);
+                Session.TaskSelectionDataPath = FrameData.folderPath;
 
                 CurrentTask = null;
                 selectedConfigFolderName = null;

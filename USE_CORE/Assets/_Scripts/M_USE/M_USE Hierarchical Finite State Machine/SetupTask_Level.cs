@@ -70,7 +70,16 @@ public class SetupTask_Level : ControlLevel
         OtherSetup.AddSpecificInitializationMethod(() =>
         {  
             //Setup data management
-            TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" +Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
+            if(TaskLevel.TaskName == "GazeCalibration")
+            {
+                if (Session.SessionLevel.CurrentState.StateName == "SetupGazeCalibration")
+                {
+                    TaskDataPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeCalibration";
+                    Debug.Log("SETTING DATA PATH AS SO FOR THE SESSION LEVEL: " + TaskDataPath);
+                }
+            }
+            else
+                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" +Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
 
             if (Session.StoringDataOnServer)
             {
@@ -106,7 +115,7 @@ public class SetupTask_Level : ControlLevel
             if (Session.SessionDef.EyeTrackerActive)
             {
                 Session.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
-                Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
 
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";

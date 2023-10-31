@@ -355,7 +355,8 @@ namespace USE_ExperimentTemplate_Trial
                 TaskLevel.DeactivateAllSceneElements(TaskLevel);
                 Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
                 Session.SessionLevel.AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.GazeCalibrationTaskLevel.TaskCam);
-              
+                Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "GazeData";
+
 
                 // Set the GazeDataPath to be inside the GazeCalibration Folder
                 // Session.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
@@ -371,7 +372,7 @@ namespace USE_ExperimentTemplate_Trial
                }
 
                // Set the Gaze Data Path back to the outer level task folder
-               Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+               Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
 
                if (TokenFBController)
                    TokenFBController.enabled = true; 

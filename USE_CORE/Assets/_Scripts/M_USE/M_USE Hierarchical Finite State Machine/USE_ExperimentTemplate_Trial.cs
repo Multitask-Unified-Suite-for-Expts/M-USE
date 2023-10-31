@@ -63,6 +63,12 @@ namespace USE_ExperimentTemplate_Trial
         public int maxDiffLevel;
         public int avgDiffLevel;
         public int diffLevelJitter;
+        public int NumReversalsUntilTerm;
+        public int MinTrialsBeforeTerm;
+        public int TerminationWindowSize;
+        public int reversalsCount;
+        public List<int> DiffLevelsAtReversals;
+        public int calculatedThreshold;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -93,9 +99,7 @@ namespace USE_ExperimentTemplate_Trial
         private ControlLevel_Task_Template GazeCalibrationTaskLevel;
 
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
-
-        [HideInInspector] public int InitialTokenAmount;
-
+        
         [HideInInspector] public Dictionary<string, int> AbortCodeDict;
 
         [HideInInspector] public UI_Debugger Debugger;
@@ -134,7 +138,6 @@ namespace USE_ExperimentTemplate_Trial
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            //Debug.LogWarning("CurrentTrialDefIndex: " + CurrentTrialDefIndex);
             return (T)TrialDefs[CurrentTrialDefIndex];
         }
         
@@ -144,17 +147,13 @@ namespace USE_ExperimentTemplate_Trial
             {
                 case "adaptive":
                     difficultyLevel = TaskLevel.DetermineTrialDefDifficultyLevel(difficultyLevel, runningPerformance, posStep, negStep, maxDiffLevel);
-                    Debug.LogWarning("cur difficulty level (after determine): " + difficultyLevel);
-                    //Debug.LogWarning("TrialCount_InBlock: " + TrialCount_InBlock + " ------ TrialDefs size: " + TrialDefs.Count);
-                    
+                    Debug.Log("cur difficulty level (after determine): " + difficultyLevel);
                     List<int> tieIndices = TrialDefs
                         .Select((trialDef, index) => new { TrialDef = trialDef, Index = index })
                         .Where(item => 
                         {
-                            Debug.LogWarning("item.TrialDef.BlockCount: " + item.TrialDef.BlockCount + " /////// BlockCount: " + BlockCount);
-                            return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount);
+                            return (item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount - 1 == BlockCount);
                         })
-                        //.Where(item => item.TrialDef.DifficultyLevel == difficultyLevel && item.TrialDef.BlockCount == BlockCount)
                         .Select(item => item.Index)
                         .ToList();
                     return tieIndices[Random.Range(0, tieIndices.Count)];

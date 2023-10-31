@@ -54,7 +54,7 @@ namespace USE_ExperimentTemplate_Task
         public string TaskProjectFolder;
 
         [HideInInspector] public int BlockCount;
-
+        
         // protected int NumBlocksInTask;
         [HideInInspector] public int NumAbortedTrials_InTask;
         [HideInInspector] public int NumRewardPulses_InTask;
@@ -268,7 +268,7 @@ namespace USE_ExperimentTemplate_Task
                 //Session.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-
+            
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             float
                 blockFeedbackDuration =
@@ -888,14 +888,13 @@ namespace USE_ExperimentTemplate_Task
         {
             if (runningPerformance.Count == 0)
                 return difficultyLevel;
-            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
-            //Debug.LogWarning("runningPerformance size: " + runningPerformance.Count + "/////// last: " + runningPerformance.Last());
+
             if (runningPerformance.Last() == 1)
             {
                 difficultyLevel -= negStep;
                 if (difficultyLevel < 1)
                 {
-                    Debug.LogWarning("DIFFICULTYLEVEL HIT 0");
+                    Debug.Log("DIFFICULTYLEVEL HIT 0");
                     difficultyLevel = 0;
                 }
             }
@@ -905,7 +904,7 @@ namespace USE_ExperimentTemplate_Task
                 difficultyLevel += posStep;
                 if (difficultyLevel >= maxDiffLevel)
                 {
-                    Debug.LogWarning("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
+                    Debug.Log("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
                     difficultyLevel = maxDiffLevel;
                 }
             }

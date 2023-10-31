@@ -624,7 +624,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public override void DefineCustomTrialDefSelection()
     {
-        //Debug.LogWarning("DefineCustomTrialDefSelection called");
         TrialDefSelectionStyle = CurrentTrial.TrialDefSelectionStyle;
         posStep = CurrentTrial.PosStep;
         negStep = CurrentTrial.NegStep;
@@ -1062,7 +1061,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         int prevResult = -1;
 
-        Debug.LogWarning("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
+        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
         if (MinTrialsBeforeTerm < 0 || runningPerformance.Count < MinTrialsBeforeTerm + 1)
             return false;
 
@@ -1089,12 +1088,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        Debug.LogWarning("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+        Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
         if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
         {
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
             calculatedThreshold = (int)lastElements.Average();
-            Debug.LogWarning("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
             return true;
         }
         return false;

@@ -138,7 +138,6 @@ namespace USE_ExperimentTemplate_Trial
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            //Debug.LogWarning("CurrentTrialDefIndex: " + CurrentTrialDefIndex);
             return (T)TrialDefs[CurrentTrialDefIndex];
         }
         
@@ -148,7 +147,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 case "adaptive":
                     difficultyLevel = TaskLevel.DetermineTrialDefDifficultyLevel(difficultyLevel, runningPerformance, posStep, negStep, maxDiffLevel);
-                    Debug.LogWarning("cur difficulty level (after determine): " + difficultyLevel);
+                    Debug.Log("cur difficulty level (after determine): " + difficultyLevel);
                     List<int> tieIndices = TrialDefs
                         .Select((trialDef, index) => new { TrialDef = trialDef, Index = index })
                         .Where(item => 

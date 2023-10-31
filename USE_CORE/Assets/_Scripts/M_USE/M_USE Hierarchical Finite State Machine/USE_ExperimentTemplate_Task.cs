@@ -890,7 +890,7 @@ namespace USE_ExperimentTemplate_Task
                 difficultyLevel -= negStep;
                 if (difficultyLevel < 1)
                 {
-                    Debug.LogWarning("DIFFICULTYLEVEL HIT 0");
+                    Debug.Log("DIFFICULTYLEVEL HIT 0");
                     difficultyLevel = 0;
                 }
             }
@@ -900,7 +900,7 @@ namespace USE_ExperimentTemplate_Task
                 difficultyLevel += posStep;
                 if (difficultyLevel >= maxDiffLevel)
                 {
-                    Debug.LogWarning("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
+                    Debug.Log("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
                     difficultyLevel = maxDiffLevel;
                 }
             }

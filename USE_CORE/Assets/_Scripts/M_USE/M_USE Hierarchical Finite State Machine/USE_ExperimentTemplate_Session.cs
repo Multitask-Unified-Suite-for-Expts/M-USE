@@ -847,9 +847,8 @@ namespace USE_ExperimentTemplate_Session
                 {
                     }));
                     StartCoroutine(CopySessionConfigFolderToDataFolder(folderName));
-                }));
-                
             }
+            
             else if (Session.UsingLocalConfigs)
             {
                 string sourceFolderPath = Session.ConfigFolderPath;

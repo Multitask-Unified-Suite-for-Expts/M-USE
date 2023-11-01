@@ -51,7 +51,6 @@ public class SetupSession_Level : ControlLevel
     public ImportSettings_Level importSettings_Level;
     public SessionData SessionData;
     public FrameData FrameData;
-    //public ControlLevel_Session_Template SessionLevel;
     private ControlLevel_Task_Template taskLevel;
 
 
@@ -203,16 +202,6 @@ public class SetupSession_Level : ControlLevel
         callbackBool?.Invoke(true);
     }
 
-    private IEnumerator CreateTaskSelectionDataFolder(Action<bool> callbackBool)
-    {
-        if (Session.WebBuild)
-            yield return StartCoroutine(ServerManager.CreateFolder(Session.TaskSelectionDataPath));
-        else
-        {
-        }
-
-        callbackBool?.Invoke(true);
-    }
 
     private void SetupInputManagement(State inputActive, State inputInactive)
     {

@@ -831,27 +831,6 @@ namespace USE_ExperimentTemplate_Task
             return trialList;
         }
 
-        /*    private void OnApplicationQuit() // moved to USE_DATA
-            {
-                if (BlockData != null)
-                {
-                    StartCoroutine(BlockData.AppendDataToBuffer());
-                    StartCoroutine(BlockData.AppendDataToFile());
-                }
-
-                if (FrameData != null)
-                {
-                    StartCoroutine(FrameData.AppendDataToBuffer());
-                    StartCoroutine(FrameData.AppendDataToFile());
-                }
-
-                if (SessionValues.GazeData != null)
-                {
-                    StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-                }
-            }*/
-
-
         public T GetCurrentBlockDef<T>() where T : BlockDef
         {
             return (T)CurrentBlockDef;

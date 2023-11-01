@@ -485,9 +485,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("ChoiceMade", () => choiceMade);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton?.activeSelf);
-        FrameData.AddDatum("DistractorStimVisibility", () => postSampleDistractorStims.IsActive);
-        FrameData.AddDatum("SearchStimVisibility", ()=> searchStims.IsActive );
-        FrameData.AddDatum("SampleStimVisibility", ()=> sampleStim.IsActive );
+        FrameData.AddDatum("DistractorStimVisibility", () => postSampleDistractorStims?.IsActive);
+        FrameData.AddDatum("SearchStimVisibility", ()=> searchStims?.IsActive );
+        FrameData.AddDatum("SampleStimVisibility", ()=> sampleStim?.IsActive );
     }
     void SetTrialSummaryString()
     {

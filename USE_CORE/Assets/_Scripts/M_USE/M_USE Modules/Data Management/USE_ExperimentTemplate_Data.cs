@@ -233,6 +233,7 @@ namespace USE_ExperimentTemplate_Data
             AddDatum("SubjectID", () => Session.SubjectID);
             AddDatum("SubjectAge", () => Session.SubjectAge);
             AddDatum("SessionTime", () => Session.FilePrefix);
+            AddDatum("ParentLevelName", () => Session.SessionLevel?.GetStateFromName("RunTask").ChildLevel != null ? Session.SessionLevel.GetStateFromName("RunTask").ChildLevel.name : "SessionLevel");
             AddDatum("TaskName", () => Session.TaskLevel != null ? Session.TaskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => Session.TaskLevel != null ? (Session.TaskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => Session.TrialLevel != null ? (Session.TrialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");

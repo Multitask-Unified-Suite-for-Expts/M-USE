@@ -298,6 +298,7 @@ public class SetupSession_Level : ControlLevel
             Session.SerialSentData.InitDataController();
             Session.SerialSentData.ManuallyDefine();
 
+            Debug.LogWarning("THIS IS WHERE THE SERIAL SENT IS BEING DEFINE: " + Session.SerialSentData.folderPath);
             Session.SerialRecvData = (SerialRecvData)Session.SessionDataControllers.InstantiateDataController<SerialRecvData>
                 ("SerialRecvData", Session.TaskSelectionDataPath);
             Session.SerialRecvData.fileName = Session.FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
@@ -317,12 +318,12 @@ public class SetupSession_Level : ControlLevel
 
         if (Session.SessionDef.EyeTrackerActive)
         {
-            Session.GazeData = (GazeData)Session.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", Session.TaskSelectionDataPath);
-
-            Session.GazeData.fileName = "TaskSelection__GazeData.txt";
+            Session.GazeData = (GazeData)Session.SessionDataControllers.InstantiateDataController<GazeData>
+                            ("GazeData", Session.TaskSelectionDataPath);
+            Session.GazeData.fileName = Session.FilePrefix + "__GazeData_0001_TaskSelection.txt";
+            Session.GazeCalibrationController.SessionLevelGazeDataFileName = Session.GazeData.fileName;
             Session.GazeData.InitDataController();
             Session.GazeData.ManuallyDefine();
-          //  SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
             Session.GazeTracker.Init(Session.SessionLevel.FrameData, 0);
 
         }

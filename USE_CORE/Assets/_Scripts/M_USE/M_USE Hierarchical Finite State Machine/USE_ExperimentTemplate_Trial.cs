@@ -185,7 +185,9 @@ namespace USE_ExperimentTemplate_Trial
             FinishTrial = new State("FinishTrial");
             Delay = new State("Delay");
             GazeCalibration = new State("GazeCalibration");
-            GazeCalibration.AddChildLevel(Session.GazeCalibrationController.GazeCalibrationTaskLevel);
+            
+            if(Session.SessionDef.EyeTrackerActive)
+                GazeCalibration.AddChildLevel(Session.GazeCalibrationController.GazeCalibrationTaskLevel);
 
             AddActiveStates(new List<State> { LoadTrialTextures, LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration });
             // A state that just waits for some time;
@@ -317,7 +319,9 @@ namespace USE_ExperimentTemplate_Trial
             {
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishTrialStarts");
             });
-            FinishTrial.SpecifyTermination(() => Session.GazeCalibrationController.RunCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
+            
+            if(Session.SessionDef.EyeTrackerActive)
+                FinishTrial.SpecifyTermination(() => Session.GazeCalibrationController.RunCalibration && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialTextures);
@@ -342,47 +346,55 @@ namespace USE_ExperimentTemplate_Trial
                 TouchFBController?.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
                 TrialSummaryString = "";
+                
 
                 Session.ClearStimLists();
             });
-            
+
             GazeCalibration.AddSpecificInitializationMethod(() =>
             {
                 // Deactivate Task Scene Elements
                 SkyboxMaterial = RenderSettings.skybox;
-                if(TokenFBController)
+                if (TokenFBController)
                     TokenFBController.enabled = false;
                 TaskLevel.DeactivateAllSceneElements(TaskLevel);
+
+                Session.GazeCalibrationController.TaskLevelGazeDataFileName = Session.GazeData.fileName;
+
+                // Activate Gaze Calibration components
                 Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
+
+                // Assign experimenter display render texture to the GazeCalibration_TaskLevel.TaskCam
                 Session.SessionLevel.AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.GazeCalibrationTaskLevel.TaskCam);
-                Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "GazeData";
-
-
-                // Set the GazeDataPath to be inside the GazeCalibration Folder
-                // Session.GazeData.folderPath = GazeCalibrationTaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             });
 
             GazeCalibration.SpecifyTermination(() => !Session.GazeCalibrationController.RunCalibration, () => SetupTrial, () =>
-           {
-               Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
-               if (Session.SessionDef.EyeTrackerActive && Session.TobiiEyeTrackerController.isCalibrating)
-               {
-                   Session.TobiiEyeTrackerController.isCalibrating = false;
-                   Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
-               }
+            {
+                // Check and exit calibration mode for Tobii eye tracker
+                if (Session.SessionDef.EyeTrackerActive && Session.TobiiEyeTrackerController.isCalibrating)
+                {
+                    Session.TobiiEyeTrackerController.isCalibrating = false;
+                    Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
+                }
+               
+                // Deactivate Gaze Calibration components
+                Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
 
-               // Set the Gaze Data Path back to the outer level task folder
-               Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                // Activate all elements in the task scene
+                TaskLevel.ActivateAllSceneElements(TaskLevel);
+                Session.SessionLevel.AssignExperimenterDisplayRenderTexture(TaskLevel.TaskCam);
+                RenderSettings.skybox = SkyboxMaterial; ;
 
-               if (TokenFBController)
-                   TokenFBController.enabled = true; 
-               TaskLevel.ActivateAllSceneElements(TaskLevel);
-               Session.TaskLevel = TaskLevel;
-               Session.TrialLevel = this;
-               Session.SessionLevel.AssignExperimenterDisplayRenderTexture(TaskLevel.TaskCam);
-               RenderSettings.skybox = SkyboxMaterial;
+                // Set the Gaze Data Path back to the outer level task folder
+                Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                Session.GazeData.fileName = Session.GazeCalibrationController.TaskLevelGazeDataFileName;
 
-           });
+
+                // Set the current task and trial levels
+                Session.TaskLevel = TaskLevel;
+                Session.TrialLevel = this;
+            });
+
 
             DefineControlLevel();
             TrialData.ManuallyDefine();

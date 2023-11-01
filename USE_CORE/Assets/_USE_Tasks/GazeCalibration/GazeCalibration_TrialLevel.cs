@@ -461,7 +461,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void OnApplicationQuit()
     {
-        if (Session.TobiiEyeTrackerController.isCalibrating)
+        if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
             Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
     }
 

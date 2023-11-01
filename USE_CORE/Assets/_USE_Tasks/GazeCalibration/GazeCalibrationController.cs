@@ -4,7 +4,7 @@ using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
 
-public class GazeCalibration : MonoBehaviour
+public class GazeCalibrationController : MonoBehaviour
 {
     public GameObject GazeCalibration_CanvasGO;
     public GameObject GazeCalibration_CameraGO;
@@ -13,6 +13,8 @@ public class GazeCalibration : MonoBehaviour
     public ControlLevel_Trial_Template GazeCalibrationTrialLevel;
 
     public bool RunCalibration;
+    public string SessionLevelGazeDataFileName;
+    public string TaskLevelGazeDataFileName;
 
     public void ActivateGazeCalibrationComponents()
     {

@@ -71,13 +71,7 @@ public class SetupTask_Level : ControlLevel
         {  
             //Setup data management
             if(TaskLevel.TaskName == "GazeCalibration")
-            {
-                if (Session.SessionLevel.CurrentState.StateName == "SetupGazeCalibration")
-                {
-                    TaskDataPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "GazeCalibration";
-                    Debug.Log("SETTING DATA PATH AS SO FOR THE SESSION LEVEL: " + TaskDataPath);
-                }
-            }
+                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration";
             else
                 TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" +Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
 

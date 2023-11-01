@@ -412,6 +412,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 {
                     Debug.Log("---PRESSED CALIBRATION HOT KEY---");
 
+                    if (!Session.SessionDef.EyeTrackerActive)
+                    {
+                        Debug.LogWarning("EYETRACKER IS NOT ACTIVE! CANNOT TOGGLE CALIBRATION.");
+                        return;
+                    }
+
                     if (Session.TrialLevel != null)
                     {
                         Session.TrialLevel.AbortCode = 5;
@@ -435,8 +441,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             if (OriginalTaskLevel != null)
                             {
                                 // Restore the Original Task Level
-                                Debug.LogWarning("RETURNING TO PREVIOUS TASK DURING IN_TASK CALIBRATION");
-
                                 OriginalTaskLevel.ActivateAllSceneElements(OriginalTaskLevel);
                                 OriginalTaskLevel.ActivateTaskDataControllers();
 
@@ -445,8 +449,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             }
                             else
                             {
-                                Debug.LogWarning("RETURNING TO SESSION LEVEL AFTER CALIBRATION");
-
                                 Session.SessionLevel.SessionCam.gameObject.SetActive(true);
                                 Session.TaskLevel = null;
                                 Session.TrialLevel = null;
@@ -461,7 +463,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         else
                         {
                             // The Hot Key is triggered during a regular task, prepare the calibration task and store the original task information
-                            Debug.LogWarning("INSIDE THE IN TASK CALIBRATION !!");
 
                             Session.GazeCalibrationController.RunCalibration = true;
                             Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));

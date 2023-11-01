@@ -207,7 +207,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-            Debug.LogWarning("WHAT IS NULLL " + " HANDLER? " + (Handler == null ? "YES" : "no") + " MINOBJECT TOUCH " + (minObjectTouchDuration == null ? "YES" : "no"));
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
 
@@ -802,15 +801,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         popToFeedbackDelay = ConfigUiVariables.get<ConfigNumber>("popToFeedbackDelay");
         choiceToTouchDelay = ConfigUiVariables.get<ConfigNumber>("choiceToTouchDelay");
         sbToBalloonDelay = ConfigUiVariables.get<ConfigNumber>("sbToBalloonDelay");
-
-        foreach (var kvp in ConfigUiVariables.varsNumber)
-        {
-            string elementName = kvp.Key;
-            ConfigNumber element = kvp.Value;
-
-            Debug.LogWarning($"Element Name: {elementName}, Element Value: {element.value}");
-        }
-
     }
 
 
@@ -980,9 +970,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("StimLeft", () => StimLeft.activeInHierarchy);
-        FrameData.AddDatum("StimRight", () => StimRight.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton?.activeInHierarchy);
+        FrameData.AddDatum("StimLeft", () => StimLeft?.activeInHierarchy);
+        FrameData.AddDatum("StimRight", () => StimRight?.activeInHierarchy);
     }
 
 }

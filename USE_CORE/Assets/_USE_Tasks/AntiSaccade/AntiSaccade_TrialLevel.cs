@@ -595,6 +595,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         int prevResult = -1;
+        DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
 
         Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
         if (MinTrialsBeforeTerm < 0 || runningPerformance.Count < MinTrialsBeforeTerm + 1)

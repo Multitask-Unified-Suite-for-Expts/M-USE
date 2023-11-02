@@ -96,6 +96,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
+        BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
     }
 
     public void CalculateBlockSummaryString()

@@ -845,7 +845,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 StartCoroutine(CreateFolderOnServer(Session.SessionDataPath + Path.DirectorySeparatorChar + folderName, () =>
                 {
-                    }));
                     StartCoroutine(CopySessionConfigFolderToDataFolder(folderName));
             }
             

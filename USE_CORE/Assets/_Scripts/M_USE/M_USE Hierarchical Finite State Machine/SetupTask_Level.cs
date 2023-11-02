@@ -68,13 +68,15 @@ public class SetupTask_Level : ControlLevel
         });
 
         OtherSetup.AddSpecificInitializationMethod(() =>
-        {  
+        {
             //Setup data management
-            if(TaskLevel.TaskName == "GazeCalibration")
-                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration";
+            if (TaskLevel.TaskName == "GazeCalibration")
+                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData";            
             else
-                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" +Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
-
+                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
+            
+            TaskLevel.TaskDataPath = TaskDataPath;
+            
             if (Session.StoringDataOnServer)
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
@@ -142,6 +144,7 @@ public class SetupTask_Level : ControlLevel
             if (Session.SessionDef.EyeTrackerActive)
                 Session.GazeTracker.Init(FrameData, 0);
             Session.MouseTracker.Init(FrameData, 0);
+
 
             GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Session.InputManager.transform);
 

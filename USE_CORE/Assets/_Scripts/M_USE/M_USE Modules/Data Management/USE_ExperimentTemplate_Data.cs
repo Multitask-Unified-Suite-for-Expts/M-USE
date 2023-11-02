@@ -106,9 +106,10 @@ namespace USE_ExperimentTemplate_Data
         public void CreateNewTaskIndexedFolder(int taskCount, string sessionDataPath, string parentFolder, string suffix)
         {
             folderPath = sessionDataPath + Path.DirectorySeparatorChar + parentFolder + Path.DirectorySeparatorChar + suffix  + Session.GetNiceIntegers(taskCount);
-                         
+            StartCoroutine(CreateFile());
+
         }
-        
+
     }
 
     public class SessionData : USE_Template_DataController

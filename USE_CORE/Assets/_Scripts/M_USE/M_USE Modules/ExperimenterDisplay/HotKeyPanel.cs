@@ -450,8 +450,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             else
                             {
                                 Session.SessionLevel.SessionCam.gameObject.SetActive(true);
-                                Session.TaskLevel = null;
-                                Session.TrialLevel = null;
+                             //   Session.TaskLevel = null;
+                               // Session.TrialLevel = null;
                             }
                             // Set calibration data controllers off
                             Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
@@ -472,7 +472,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
                             Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
                             Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;
-                            Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                            Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("LoadTrialTextures"));
                             Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
                             Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
 
@@ -487,7 +487,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
                         // The Hot Key is triggered at the Session Level, prepare the calibration task
                         Session.GazeCalibrationController.RunCalibration = true;
-                        Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("SetupTrial"));
+                        Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("LoadTrialTextures"));
                         Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
                         Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
                     }

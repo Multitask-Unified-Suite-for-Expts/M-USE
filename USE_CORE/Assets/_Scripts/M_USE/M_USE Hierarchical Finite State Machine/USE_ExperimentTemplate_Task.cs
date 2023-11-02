@@ -265,9 +265,7 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
 
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
-            float
-                blockFeedbackDuration =
-                    0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
+            float blockFeedbackDuration =  0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
                 blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;

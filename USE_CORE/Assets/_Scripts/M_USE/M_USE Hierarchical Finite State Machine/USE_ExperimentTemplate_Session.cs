@@ -314,8 +314,11 @@ namespace USE_ExperimentTemplate_Session
 
                 //Session.EventCodeManager.EventCodeLateUpdate();
             });
+            string serialRecvDataFileName = "", serialSentDataFileName = "", gazeDataFileName = "";
             gazeCalibration.AddSpecificInitializationMethod(() =>
             {
+                StartCoroutine(FrameData.AppendDataToFile());
+
                 // Deactivate TaskSelection scene elements
                 Session.LoadingController.DeactivateLoadingCanvas();
                 FrameData.gameObject.SetActive(false);
@@ -341,17 +344,17 @@ namespace USE_ExperimentTemplate_Session
                     AppendSerialData();
                     StartCoroutine(Session.SerialRecvData.AppendDataToFile());
                     StartCoroutine(Session.SerialSentData.AppendDataToFile());
-                    Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "SerialRecvData";
-                    Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar  + "SerialSentData";
-
+                    serialRecvDataFileName = Session.SerialRecvData.fileName;
+                    serialSentDataFileName = Session.SerialSentData.fileName;
+                    Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "SerialRecvData";
+                    Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "SerialSentData";
                 }
 
-                StartCoroutine(FrameData.AppendDataToFile());
                 if (Session.SessionDef.EyeTrackerActive)
                 {
                     StartCoroutine(Session.GazeData.AppendDataToFile());
-                    Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "GazeData";
-
+                    gazeDataFileName = Session.GazeData.fileName;
+                    Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "GazeData";
                 }
             });
 
@@ -366,13 +369,18 @@ namespace USE_ExperimentTemplate_Session
 
                 if (Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToFile());
-                
+
 
                 // Reset level and task references
+                Session.GazeData.fileName = gazeDataFileName;
                 Session.GazeData.folderPath = Session.TaskSelectionDataPath;
-                Session.GazeData.fileName = Session.GazeCalibrationController.SessionLevelGazeDataFileName;
+                Debug.LogWarning("GAZE DATA FOLDER PATH: " + Session.TaskSelectionDataPath);
+                Session.SerialRecvData.fileName = serialRecvDataFileName;
+                Session.SerialSentData.fileName = serialSentDataFileName;
+                Session.SerialRecvData.folderPath = Session.TaskSelectionDataPath;
+                Session.SerialSentData.folderPath = Session.TaskSelectionDataPath;
 
-                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
+                StartCoroutine(SummaryData.AddTaskRunData(Session.TaskLevel.ConfigFolderName, Session.TaskLevel, Session.TaskLevel.GetTaskSummaryData()));
 
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
@@ -392,7 +400,6 @@ namespace USE_ExperimentTemplate_Session
 
                 // Activate TaskSelection scene elements
                 FrameData.gameObject.SetActive(true);
-                Starfield.SetActive(true);
                 SessionCam.gameObject.SetActive(true);
                 Session.TaskSelectionCanvasGO.SetActive(true);
 
@@ -401,8 +408,8 @@ namespace USE_ExperimentTemplate_Session
                     CameraRenderTexture.Release();
                 AssignExperimenterDisplayRenderTexture(SessionCam);
 
-                if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
-                    PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
+                if (PreviousTaskSummaryString != null && Session.TaskLevel.CurrentTaskSummaryString != null)
+                    PreviousTaskSummaryString.Insert(0, Session.TaskLevel.CurrentTaskSummaryString);
 
                 Session.TaskLevel = null;
                 Session.TrialLevel = null;
@@ -708,14 +715,12 @@ namespace USE_ExperimentTemplate_Session
                     StartCoroutine(FrameData.AppendDataToFile());
                     if (Session.SessionDef.EyeTrackerActive)
                     {
-                        Debug.LogWarning("APPENDING DATA TO FILE BEFORE SETUP TASK: " + Session.GazeData.fileName + " || FOLDER PATH: " + Session.GazeData.folderPath);
                         StartCoroutine(Session.GazeData.AppendDataToFile());
                         Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "GazeData";
 
                     }
 
                     CurrentTask.DefineTaskLevel();
-                    Debug.LogWarning("I THINK THIS SHOULD BE IN THE EC FOLDER " + Session.SerialRecvData.fileName + " || FOLDER PATH: " + Session.SerialRecvData.folderPath);
 
                 }
 
@@ -831,22 +836,23 @@ namespace USE_ExperimentTemplate_Session
 
                 if (Session.SessionDef.SerialPortActive)
                 {
-
-                    Session.SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
                     Session.SerialRecvData.fileName = Session.FilePrefix + "__SerialRecvData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
-                    Session.SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
+                    Session.SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
                     Session.SerialSentData.fileName = Session.FilePrefix + "__SerialSentData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
+                    Session.SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
                 }
 
                 if (Session.SessionDef.EyeTrackerActive)
                 {
-                    Session.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
                     Session.GazeData.fileName = Session.FilePrefix + "__GazeData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
+                    Session.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
+                    Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData");
                 }
 
-                FrameData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
                 FrameData.fileName = Session.FilePrefix + "__FrameData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
+                FrameData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
 
+                Debug.LogWarning("OK NEW FOLDER PATH: " + Session.SerialRecvData.folderPath + " || file name: " + Session.SerialRecvData.fileName);
                 FrameData.gameObject.SetActive(true);
                 Session.TaskSelectionDataPath = FrameData.folderPath;
 

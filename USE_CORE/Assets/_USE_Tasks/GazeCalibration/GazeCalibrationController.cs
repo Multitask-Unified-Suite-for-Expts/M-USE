@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
 using USE_ExperimentTemplate_Trial;
@@ -13,8 +14,8 @@ public class GazeCalibrationController : MonoBehaviour
     public ControlLevel_Trial_Template GazeCalibrationTrialLevel;
 
     public bool RunCalibration;
-    public string SessionLevelGazeDataFileName;
     public string TaskLevelGazeDataFileName;
+    public string GazeCalibrationDataFolderPath;
 
     public void ActivateGazeCalibrationComponents()
     {
@@ -26,5 +27,10 @@ public class GazeCalibrationController : MonoBehaviour
         GazeCalibration_CanvasGO.SetActive(false);
         GazeCalibration_CameraGO.SetActive(false);
     }  
-    
+    public void ReassignGazeCalibrationDataFolderPath(string newFolderPath)
+    {
+        GazeCalibrationTaskLevel.BlockData.folderPath = newFolderPath + Path.DirectorySeparatorChar + "BlockData";
+        GazeCalibrationTaskLevel.TrialData.folderPath = newFolderPath + Path.DirectorySeparatorChar + "TrialData";
+        GazeCalibrationTaskLevel.FrameData.folderPath = newFolderPath + Path.DirectorySeparatorChar + "FrameData";
+    }
 }

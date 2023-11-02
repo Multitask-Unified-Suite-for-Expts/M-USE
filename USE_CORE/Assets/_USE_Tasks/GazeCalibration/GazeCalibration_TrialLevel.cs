@@ -207,14 +207,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Init.SpecifyTermination(() => numCalibPoints != 0, Blink, () =>
         {
             // Only enter Calibration if an eyetracker is being used
-            /*if (!CurrentTrialDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController)
+            if (!Session.TobiiEyeTrackerController.isCalibrating)
             {
                 Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
                 Session.TobiiEyeTrackerController.isCalibrating = true;
-            }*/
+            }
             // Assign the correct calibration points given the User's selection
 
-            Debug.Log("IS IT CALIBRATING ?? " + Session.TobiiEyeTrackerController.isCalibrating);
             DefineCalibPoints(numCalibPoints);
             InfoString.Clear();
         });

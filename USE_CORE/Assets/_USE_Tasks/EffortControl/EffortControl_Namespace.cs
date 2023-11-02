@@ -104,7 +104,6 @@ namespace EffortControl_Namespace
         
         public override void AddToTrialDefsFromBlockDef()
         {
-            // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
             MaxTrials = TrialDefs.Count;
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {

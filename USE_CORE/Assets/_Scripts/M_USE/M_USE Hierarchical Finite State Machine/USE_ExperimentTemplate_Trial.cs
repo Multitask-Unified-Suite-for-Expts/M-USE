@@ -68,6 +68,7 @@ namespace USE_ExperimentTemplate_Trial
         public int TerminationWindowSize;
         public int reversalsCount;
         public List<int> DiffLevelsAtReversals;
+        public List<int> DiffLevelsSummary;
         public int calculatedThreshold;
 
         [HideInInspector] public bool ForceBlockEnd;

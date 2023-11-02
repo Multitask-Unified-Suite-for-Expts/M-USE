@@ -836,8 +836,8 @@ namespace USE_ExperimentTemplate_Session
             MirrorCam.cullingMask = 0;
             ExpDisplayRenderImage = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
         }
-
-        private void CreateSessionSettingsFolder() //Create Session Settings Folder inside Data Folder and copy config folder into it
+        
+        private void CreateSessionSettingsFolder()
         {
             string folderName = "SessionConfigs";
 
@@ -846,8 +846,8 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(CreateFolderOnServer(Session.SessionDataPath + Path.DirectorySeparatorChar + folderName, () =>
                 {
                     StartCoroutine(CopySessionConfigFolderToDataFolder(folderName));
+                }));
             }
-            
             else if (Session.UsingLocalConfigs)
             {
                 string sourceFolderPath = Session.ConfigFolderPath;
@@ -855,7 +855,9 @@ namespace USE_ExperimentTemplate_Session
                 CopyLocalFolder(sourceFolderPath, destinationFolderPath);
             }
             else if (Session.UsingDefaultConfigs)
+            {
                 Debug.Log("Using Default Configs, so not copying the session config folder to the data folder.");
+            }
         }
 
         public void CopyLocalFolder(string sourceFolderPath, string destinationFolderPath)

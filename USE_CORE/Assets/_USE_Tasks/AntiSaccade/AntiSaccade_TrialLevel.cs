@@ -33,7 +33,8 @@ using USE_StimulusManagement;
 using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
-using System;
+using System.Linq;
+
 
 
 public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
@@ -302,12 +303,16 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(ChosenGO, haloDepth);
                 TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                
+                runningPerformance.Add(0);
             }
             else
             {
                 HaloFBController.ShowNegative(ChosenGO, haloDepth);
                 TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+                
+                runningPerformance.Add(1);
             }
         });
         Feedback.AddUpdateMethod(() =>
@@ -554,8 +559,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO.activeInHierarchy);
-        FrameData.AddDatum("DistractorStimsActive", () => distractorStims.IsActive);
+        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO?.activeInHierarchy);
+        FrameData.AddDatum("DistractorStimsActive", () => distractorStims?.IsActive);
         FrameData.AddDatum("PreCueActive", () => PreCue_GO.activeInHierarchy);
         FrameData.AddDatum("SpatialCueActive", () => SpatialCue_GO.activeInHierarchy);
         FrameData.AddDatum("MaskActive", () => Mask_GO.activeInHierarchy);
@@ -568,6 +573,66 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
         if (CurrentTrial.DistractorStims_ChoosePos.Length > 0)
             DistractorStimsChoosePos_String = $"[{string.Join(", ", CurrentTrial.DistractorStims_ChoosePos)}]";
+    }
+    
+    public override void DefineCustomTrialDefSelection()
+    {
+        TrialDefSelectionStyle = CurrentTrial.TrialDefSelectionStyle;
+        posStep = CurrentTrial.PosStep;
+        negStep = CurrentTrial.NegStep;
+        maxDiffLevel = CurrentTrial.MaxDiffLevel;
+        avgDiffLevel = CurrentTrial.AvgDiffLevel;
+        diffLevelJitter = CurrentTrial.DiffLevelJitter;
+        NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
+        MinTrialsBeforeTerm = CurrentTrial.MinTrialsBeforeTerm;
+        TerminationWindowSize = CurrentTrial.TerminationWindowSize;
+        //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
+        
+        int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
+        difficultyLevel = randomDouble;
+    }
+    
+    protected override bool CheckBlockEnd()
+    {
+        int prevResult = -1;
+        DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
+
+        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
+        if (MinTrialsBeforeTerm < 0 || runningPerformance.Count < MinTrialsBeforeTerm + 1)
+            return false;
+
+        if (runningPerformance.Count > 1)
+        {
+            prevResult = runningPerformance[^2];
+        }
+
+        if (runningPerformance.Last() == 1)
+        {
+            if (prevResult == 0)
+            {
+                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                reversalsCount++;
+            }
+        }
+        else if (runningPerformance.Last() == 0)
+        {
+            if (prevResult == 1)
+            {
+                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                reversalsCount++;
+            }
+        }
+
+        //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+        if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
+        {
+            List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
+            calculatedThreshold = (int)lastElements.Average();
+            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            return true;
+        }
+        return false;
     }
 
 }

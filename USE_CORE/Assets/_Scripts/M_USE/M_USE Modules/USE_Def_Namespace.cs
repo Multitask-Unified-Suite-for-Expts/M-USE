@@ -458,11 +458,6 @@ namespace USE_Def_Namespace
         public System.Random RandomNumGenerator;
         
         public int DifficultyLevel;
-        public int posStep;
-        public int negStep;
-        public int maxDiffLevel;
-        public int avgDiffLevel;
-        public int diffLevelJitter;
         
         /// <summary>
         /// Generates trial definitions based on block definitions.

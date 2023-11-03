@@ -122,15 +122,16 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         CurrentBlockString = ("\nTouches: " + trialLevel.TotalTouches_Block +
-                        "\nReward Pulses: " + NumRewardPulses_InBlock +
-                        "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
-                        "\nChose Right: " + trialLevel.NumChosenRight_Block +
-                        "\n\nChose Higher Reward: " + trialLevel.NumHigherRewardChosen_Block +
-                        "\nChose Lower Reward: " + trialLevel.NumLowerRewardChosen_Block +
-                        "\nChose Same Reward: " + trialLevel.NumSameRewardChosen_Block +
-                        "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
-                        "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
-                        "\nChose Same Effort: " + trialLevel.NumSameEffortChosen_Block);
+                              "\nReward Pulses: " + NumRewardPulses_InBlock +
+                              "\n\nChose Left: " + trialLevel.NumChosenLeft_Block +
+                              "\nChose Right: " + trialLevel.NumChosenRight_Block +
+                              "\n\nChose Higher Reward: " + trialLevel.NumHigherRewardChosen_Block +
+                              "\nChose Lower Reward: " + trialLevel.NumLowerRewardChosen_Block +
+                              "\nChose Same Reward: " + trialLevel.NumSameRewardChosen_Block +
+                              "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
+                              "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
+                              "\nChose Same Effort: " + trialLevel.NumSameEffortChosen_Block) +
+                             "\nDifficulty Level Threshold: " + trialLevel.calculatedThreshold;
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }
 
@@ -145,7 +146,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
         BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
         BlockData.AddDatum("AvgInflationDuration", () => CalculateAverageDuration(trialLevel.InflationDurations_Block));
-        
+        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
+
+
     }
 
     public void ClearStrings()

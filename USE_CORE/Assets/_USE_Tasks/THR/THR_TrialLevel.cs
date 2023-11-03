@@ -547,18 +547,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 CurrentTrial.MaxTrials);
 
     }
-    /*   private void CheckIfBlockShouldEnd()
-       {
-           if(TrialsCompleted_Block >= CurrentTrial.PerfWindowEndTrials)
-           {
-               float sum = 0;
-               for(int i = 0; i < CurrentTrial.PerfWindowEndTrials; i++)
-                   sum += TrialCompletionList[i];
-               float performancePerc = sum / CurrentTrial.PerfWindowEndTrials;
-               if (performancePerc >= CurrentTrial.PerfThresholdEndTrials)
-                   PerfThresholdMet = true; //Will trigger CheckBlockEnd function to terminate block
-           }
-       }*/
 
     private void LoadConfigUIVariables()
     {

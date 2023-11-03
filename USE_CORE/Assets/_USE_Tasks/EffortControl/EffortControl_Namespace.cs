@@ -52,9 +52,24 @@ namespace EffortControl_Namespace
         public int MaxDiffLevel;
         public int AvgDiffLevel;
         public int DiffLevelJitter;
+        public int NumReversalsUntilTerm = -1;
+        public int MinTrialsBeforeTerm = -1;
+        public int TerminationWindowSize = -1;
+        
 
         public override void GenerateTrialDefsFromBlockDef()
         {
+            //pick # of trials from minmax
+            if (RandomMinMaxTrials != null)
+            {
+                MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
+                MinTrials = RandomMinMaxTrials[0];
+            }
+            else
+            {
+                MaxTrials = MinMaxTrials[1];
+                MinTrials = MinMaxTrials[0];
+            }
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
 
             for (int iTrial = 0; iTrial < NumTrials; iTrial++) 
@@ -79,13 +94,16 @@ namespace EffortControl_Namespace
                 td.MaxDiffLevel = MaxDiffLevel;
                 td.AvgDiffLevel = AvgDiffLevel;
                 td.DiffLevelJitter = DiffLevelJitter;
+                td.NumReversalsUntilTerm = NumReversalsUntilTerm;
+                td.MinTrialsBeforeTerm = MinTrialsBeforeTerm;
+                td.TerminationWindowSize = TerminationWindowSize;
+                
                 TrialDefs.Add(td);
             }
         }
         
         public override void AddToTrialDefsFromBlockDef()
         {
-            // Sets maxNum to the number of TrialDefs present, and generate a random max if a range is provided
             MaxTrials = TrialDefs.Count;
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
@@ -95,7 +113,10 @@ namespace EffortControl_Namespace
                 td.MaxDiffLevel = MaxDiffLevel;
                 td.AvgDiffLevel = AvgDiffLevel;
                 td.DiffLevelJitter = DiffLevelJitter;
-
+                td.NumReversalsUntilTerm = NumReversalsUntilTerm;
+                td.MinTrialsBeforeTerm = MinTrialsBeforeTerm;
+                td.TerminationWindowSize = TerminationWindowSize;
+                
                 TrialDefs[iTrial] = td;
             }
         }
@@ -119,6 +140,9 @@ namespace EffortControl_Namespace
         public int MaxDiffLevel;
         public int AvgDiffLevel;
         public int DiffLevelJitter;
+        public int NumReversalsUntilTerm;
+        public int MinTrialsBeforeTerm;
+        public int TerminationWindowSize;
     }
 
     public class EffortControl_StimDef : StimDef

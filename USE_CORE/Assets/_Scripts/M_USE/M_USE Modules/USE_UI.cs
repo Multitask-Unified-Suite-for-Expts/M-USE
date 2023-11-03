@@ -410,7 +410,7 @@ namespace USE_UI
             Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = scale.HasValue? new Vector2(scale.Value, scale.Value) : new Vector2(10f, 10f);
+            Image.rectTransform.sizeDelta = scale.HasValue? new Vector2(scale.Value, scale.Value) : new Vector2(100f, 100f);
             StartButtonGO.transform.localPosition = localPos.HasValue ? localPos.Value : Vector3.zero;
             Image.color = color.HasValue ? color.Value : new Color32(0, 0, 128, 255);
             StartButtonGO.SetActive(false);

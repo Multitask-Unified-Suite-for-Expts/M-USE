@@ -40,10 +40,11 @@ namespace GazeCalibration_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public int NumTrials = 5;
-        public int NumPulses = 2;
-        public int PulseSize = 250;
-
+        public bool SpoofGazeWithMouse;
+        public float[] CalibPointsInset;
+        public float MaxCircleScale;
+        public float MinCircleScale;
+        public float ShrinkDuration;
         public override void GenerateTrialDefsFromBlockDef()
         {
             TrialDefs = new List<GazeCalibration_TrialDef>().ConvertAll(x => (TrialDef)x);
@@ -54,6 +55,11 @@ namespace GazeCalibration_Namespace
                 td.NumTrials = NumTrials;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
+                td.SpoofGazeWithMouse = SpoofGazeWithMouse;
+                td.CalibPointsInset = CalibPointsInset;
+                td.MaxCircleScale = MaxCircleScale;
+                td.MinCircleScale = MinCircleScale;
+                td.ShrinkDuration = ShrinkDuration;
                 TrialDefs.Add(td);
             }
         }
@@ -65,10 +71,12 @@ namespace GazeCalibration_Namespace
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
        // public int BlockID;
-        public string ContextName;
         public int NumTrials;
-        public int NumPulses;
-        public int PulseSize;
+        public bool SpoofGazeWithMouse;
+        public float[] CalibPointsInset = new float[] {0.15f, 0.15f};
+        public float MaxCircleScale = 0.75f;
+        public float MinCircleScale = 0.15f;
+        public float ShrinkDuration = 1.5f;
     }
 
     public class GazeCalibration_StimDef : StimDef

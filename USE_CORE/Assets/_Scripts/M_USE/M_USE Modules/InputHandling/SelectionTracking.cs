@@ -295,6 +295,9 @@ namespace SelectionTracking
 
             public void AddToActiveHandlers(object sender, EventArgs e)
             {
+                if (selectionTracker.ActiveSelectionHandlers.ContainsKey(HandlerName))
+                    return;
+                
                 selectionTracker.ActiveSelectionHandlers.Add(HandlerName, this);
 
                 if (HandlerLevel == "session")

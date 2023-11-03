@@ -370,6 +370,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 // Provide reward during the Confirm state based off values in the BlockDef
                 Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
         });
 

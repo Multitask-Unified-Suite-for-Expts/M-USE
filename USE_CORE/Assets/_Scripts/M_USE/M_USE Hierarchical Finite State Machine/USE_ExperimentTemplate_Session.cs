@@ -852,7 +852,6 @@ namespace USE_ExperimentTemplate_Session
                 FrameData.fileName = Session.FilePrefix + "__FrameData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
                 FrameData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
 
-                Debug.LogWarning("OK NEW FOLDER PATH: " + Session.SerialRecvData.folderPath + " || file name: " + Session.SerialRecvData.fileName);
                 FrameData.gameObject.SetActive(true);
                 Session.TaskSelectionDataPath = FrameData.folderPath;
 

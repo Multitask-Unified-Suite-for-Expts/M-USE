@@ -23,7 +23,7 @@ namespace Tobii.Research.Unity
                     var combinedPoint = (Left.GazePointOnDisplayArea + Right.GazePointOnDisplayArea) / 2f;
                     return Camera.main.ScreenPointToRay(new Vector3(Screen.width * combinedPoint.x, Screen.height * (1 - combinedPoint.y)));
                 }
-
+                
                 return default(Ray);
             }
         }

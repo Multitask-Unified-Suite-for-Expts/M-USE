@@ -27,6 +27,8 @@ SOFTWARE.
 using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
+using System.Collections.Generic;
+
 
 
 namespace AntiSaccade_Namespace
@@ -37,9 +39,56 @@ namespace AntiSaccade_Namespace
 
     public class AntiSaccade_BlockDef : BlockDef
     {
-        //Inherited and Used:
-        //public string ContextName;
-        //public int BlockCount;
+        public int PosStep;
+        public int NegStep;
+        public string TrialDefSelectionStyle;
+        public int MaxDiffLevel;
+        public int AvgDiffLevel;
+        public int DiffLevelJitter;
+        public int NumReversalsUntilTerm = -1;
+        public int MinTrialsBeforeTermProcedure = -1;
+        public int TerminationWindowSize = -1;
+        
+        public override void GenerateTrialDefsFromBlockDef()
+        {
+            TrialDefs = new List<AntiSaccade_TrialDef>().ConvertAll(x => (TrialDef)x);
+            for (int iTrial = 0; iTrial < NumTrials; iTrial++) 
+            {
+                AntiSaccade_TrialDef td = new AntiSaccade_TrialDef();
+                td.BlockName = BlockName;
+                td.ContextName = ContextName;
+                td.DifficultyLevel = DifficultyLevel;
+                td.PosStep = PosStep;
+                td.NegStep = NegStep;
+                td.TrialDefSelectionStyle = TrialDefSelectionStyle;
+                td.MaxDiffLevel = MaxDiffLevel;
+                td.AvgDiffLevel = AvgDiffLevel;
+                td.DiffLevelJitter = DiffLevelJitter;
+                td.NumReversalsUntilTerm = NumReversalsUntilTerm;
+                td.MinTrialsBeforeTermProcedure = MinTrialsBeforeTermProcedure;
+                td.TerminationWindowSize = TerminationWindowSize;
+                
+                TrialDefs.Add(td);
+            }
+        }
+        
+        public override void AddToTrialDefsFromBlockDef()
+        {
+            for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
+            {
+                AntiSaccade_TrialDef td = (AntiSaccade_TrialDef)TrialDefs[iTrial];
+                td.ContextName = ContextName;
+                td.TrialDefSelectionStyle = TrialDefSelectionStyle;
+                td.MaxDiffLevel = MaxDiffLevel;
+                td.AvgDiffLevel = AvgDiffLevel;
+                td.DiffLevelJitter = DiffLevelJitter;
+                td.NumReversalsUntilTerm = NumReversalsUntilTerm;
+                td.MinTrialsBeforeTermProcedure = MinTrialsBeforeTermProcedure;
+                td.TerminationWindowSize = TerminationWindowSize;
+                
+                TrialDefs[iTrial] = td;
+            }
+        }
     }
 
     public class AntiSaccade_TrialDef : TrialDef
@@ -72,6 +121,15 @@ namespace AntiSaccade_Namespace
         public float ChooseStimDuration;
         public float FeedbackDuration;
         public float ItiDuration;
+        public int PosStep;
+        public int NegStep;
+        public string TrialDefSelectionStyle;
+        public int MaxDiffLevel;
+        public int AvgDiffLevel;
+        public int DiffLevelJitter;
+        public int NumReversalsUntilTerm;
+        public int MinTrialsBeforeTermProcedure;
+        public int TerminationWindowSize;
     }
 
     public class AntiSaccade_StimDef : StimDef

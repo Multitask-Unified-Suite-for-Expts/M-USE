@@ -89,6 +89,7 @@ public static class Session
     public static GameObject InputTrackers;
     public static MouseTracker MouseTracker;
     public static GazeTracker GazeTracker;
+    public static GazeCalibrationController GazeCalibrationController;
     public static TobiiEyeTrackerController TobiiEyeTrackerController;
     public static GameObject InputManager;
     public static FlashPanelController FlashPanelController;

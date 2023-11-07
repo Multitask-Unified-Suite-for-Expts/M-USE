@@ -142,7 +142,8 @@ namespace Tobii.Research.Unity.CodeExamples
 
             Session.TobiiEyeTrackerController.mostRecentGazeSample = mostRecentGazeSample;
 
-            StartCoroutine(Session.GazeData.AppendDataToBuffer());
+            if (Session.GazeData != null)
+                StartCoroutine(Session.GazeData.AppendDataToBuffer());
         }
     }
 }

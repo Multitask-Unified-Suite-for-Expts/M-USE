@@ -43,7 +43,7 @@ using System.Collections;
 using USE_Def_Namespace;
 using System.Collections.Specialized;
 using TMPro;
-
+using UnityEngine.SceneManagement;
 
 namespace USE_ExperimentTemplate_Task
 {
@@ -54,7 +54,7 @@ namespace USE_ExperimentTemplate_Task
         public string TaskProjectFolder;
 
         [HideInInspector] public int BlockCount;
-
+        
         // protected int NumBlocksInTask;
         [HideInInspector] public int NumAbortedTrials_InTask;
         [HideInInspector] public int NumRewardPulses_InTask;
@@ -95,7 +95,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public StimGroup PreloadedStims, PrefabStims, ExternalStims, RuntimeStims;
         public List<GameObject> PreloadedStimGameObjects;
         public List<string> PrefabStimPaths;
-        protected ConfigUI configUI;
+        public ConfigUI configUI;
         public ConfigVarStore ConfigUiVariables;
         public Dictionary<string, EventCode> CustomTaskEventCodes;
 
@@ -105,6 +105,7 @@ namespace USE_ExperimentTemplate_Task
         protected bool BlockFbFinished;
         protected float BlockFbSimpleDuration;
         protected TaskLevelTemplate_Methods TaskLevel_Methods;
+        public List<GameObject> ActiveSceneElements;
 
         // protected int? MinTrials, MaxTrials;
         [HideInInspector] public RenderTexture DrawRenderTexture;
@@ -147,7 +148,6 @@ namespace USE_ExperimentTemplate_Task
         public void DefineTaskLevel()
         {
             Session.TaskLevel = this;
-
             TaskLevelDefined = false;
 
             TaskLevel_Methods = new TaskLevelTemplate_Methods();
@@ -178,7 +178,7 @@ namespace USE_ExperimentTemplate_Task
                 NumRewardPulses_InTask = 0;
                 NumAbortedTrials_InTask = 0;
 
-                if (!Session.WebBuild)
+                if (!Session.WebBuild && TaskName != "GazeCalibration")
                 {
                     if (configUI == null)
                         configUI = FindObjectOfType<ConfigUI>();
@@ -188,13 +188,6 @@ namespace USE_ExperimentTemplate_Task
                     else
                         configUI.store = new ConfigVarStore();
                     configUI.GenerateUI();
-
-                    if (TaskName == "GazeCalibration")
-                    {
-                        BlockDef bd = new BlockDef();
-                        BlockDefs = new BlockDef[] { bd };
-                        bd.GenerateTrialDefsFromBlockDef();
-                    }
                 }
 
                 Session.InputManager.SetActive(true);
@@ -256,15 +249,15 @@ namespace USE_ExperimentTemplate_Task
 
             RunBlock.AddLateUpdateMethod(() =>
             {
-                StartCoroutine(FrameData.AppendDataToBuffer());
+                // Check the case that the FrameData is deactivated when InTask_GazeCalibration is running
+                if (FrameData.gameObject.activeSelf)
+                    StartCoroutine(FrameData.AppendDataToBuffer());
                 //Session.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
-
+            
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
-            float
-                blockFeedbackDuration =
-                    0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
+            float blockFeedbackDuration =  0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
                 blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;
@@ -319,7 +312,7 @@ namespace USE_ExperimentTemplate_Task
                 if (TrialLevel.TouchFBController != null && TrialLevel.TouchFBController.TouchFbEnabled)
                     TrialLevel.TouchFBController.DisableTouchFeedback();
 
-                if (TrialLevel.TokenFBController.enabled)
+                if (TrialLevel.TouchFBController != null && TrialLevel.TokenFBController.enabled)
                     TrialLevel.TokenFBController.enabled = false;
 
                 if (CheckForcedTaskEnd() && Session.StoreData) //If they used end task hotkey, still write the block data!
@@ -346,17 +339,11 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
-                if (Session.SessionDataControllers != null)
+                if (Session.SessionDataControllers != null && TaskName != "GazeCalibration")
                 {
                     Session.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     Session.SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     Session.SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
-                    if (Session.SessionDef.EyeTrackerActive)
-                    {
-                        Session.SessionDataControllers.RemoveDataController("BlockData_GazeCalibration");
-                        Session.SessionDataControllers.RemoveDataController("FrameData_GazeCalibration");
-                        Session.SessionDataControllers.RemoveDataController("TrialData_GazeCalibration");
-                    }
                 }
 
                 if (TaskStims != null)
@@ -827,27 +814,6 @@ namespace USE_ExperimentTemplate_Task
             return trialList;
         }
 
-        /*    private void OnApplicationQuit() // moved to USE_DATA
-            {
-                if (BlockData != null)
-                {
-                    StartCoroutine(BlockData.AppendDataToBuffer());
-                    StartCoroutine(BlockData.AppendDataToFile());
-                }
-
-                if (FrameData != null)
-                {
-                    StartCoroutine(FrameData.AppendDataToBuffer());
-                    StartCoroutine(FrameData.AppendDataToFile());
-                }
-
-                if (SessionValues.GazeData != null)
-                {
-                    StartCoroutine(SessionValues.GazeData.AppendDataToFile());
-                }
-            }*/
-
-
         public T GetCurrentBlockDef<T>() where T : BlockDef
         {
             return (T)CurrentBlockDef;
@@ -873,14 +839,13 @@ namespace USE_ExperimentTemplate_Task
         {
             if (runningPerformance.Count == 0)
                 return difficultyLevel;
-            // DETERMINE DIFFICULTY BASED ON PERFORMANCE OF LAST TRIAL
-            //Debug.LogWarning("runningPerformance size: " + runningPerformance.Count + "/////// last: " + runningPerformance.Last());
+
             if (runningPerformance.Last() == 1)
             {
                 difficultyLevel -= negStep;
                 if (difficultyLevel < 1)
                 {
-                    Debug.LogWarning("DIFFICULTYLEVEL HIT 0");
+                    Debug.Log("DIFFICULTYLEVEL HIT 0");
                     difficultyLevel = 0;
                 }
             }
@@ -890,12 +855,53 @@ namespace USE_ExperimentTemplate_Task
                 difficultyLevel += posStep;
                 if (difficultyLevel >= maxDiffLevel)
                 {
-                    Debug.LogWarning("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
+                    Debug.Log("DIFFICULTYLEVEL HIT MAX AT " + maxDiffLevel);
                     difficultyLevel = maxDiffLevel;
                 }
             }
 
             return difficultyLevel;
+        }
+
+        public void ActivateTaskDataControllers()
+        {
+            BlockData.gameObject.SetActive(true);
+            TrialData.gameObject.SetActive(true);
+            FrameData.gameObject.SetActive(true);
+        }
+        public void DeactivateTaskDataControllers()
+        {
+            BlockData.gameObject.SetActive(false);
+            TrialData.gameObject.SetActive(false);
+            FrameData.gameObject.SetActive(false);
+        }
+
+        public void DeactivateAllSceneElements(ControlLevel_Task_Template taskLevel)
+        {
+            Scene targetScene = SceneManager.GetSceneByName(taskLevel.TaskName);
+            if (targetScene.IsValid())
+            {
+                GameObject[] allObjects = targetScene.GetRootGameObjects();
+                foreach (GameObject obj in allObjects)
+                {
+                    if (obj.name == $"{taskLevel.TaskName}_Scripts")
+                    {
+                        // Skip the task level script
+                        continue;
+                    }
+
+                    obj.SetActive(false);
+                }
+            }
+        }
+
+        public void ActivateAllSceneElements(ControlLevel_Task_Template taskLevel)
+        {
+            foreach (GameObject obj in ActiveSceneElements)
+            {
+                obj.SetActive(true);
+            }
+            ActiveSceneElements.Clear();
         }
     }
     

@@ -231,33 +231,7 @@ public class SetupSession_Level : ControlLevel
         Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
         Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
 
-        if (Session.SessionDef.EyeTrackerActive)
-        {
-            if (GameObject.Find("TobiiEyeTrackerController") == null)
-            {
-                // gets called once when finding and creating the tobii eye tracker prefabs
-                GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
-                Session.TobiiEyeTrackerController =
-                    TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
-                GameObject TrackBoxGO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"),
-                    TobiiEyeTrackerControllerGO.transform);
-                GameObject EyeTrackerGO = Instantiate(Resources.Load<GameObject>("EyeTracker"),
-                    TobiiEyeTrackerControllerGO.transform);
-                GameObject CalibrationGO = Instantiate(Resources.Load<GameObject>("GazeCalibration"));
-                Session.GazeTracker.enabled = true;
-
-
-                GameObject GazeTrail = Instantiate(Resources.Load<GameObject>("GazeTrail"),
-                    TobiiEyeTrackerControllerGO.transform);
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.SetParent(TobiiEyeTrackerControllerGO.transform, true);
-                // Position and scale the cube as desired
-                cube.transform.position = new Vector3(0f, 1f, 60f);
-                cube.transform.localScale = new Vector3(106f, 62f, 0.1f);
-                cube.SetActive(false);
-
-            }
-        }
+        
 
         if (Session.SessionDef.MonitorDetails != null && Session.SessionDef.ScreenDetails != null)
         {
@@ -302,24 +276,24 @@ public class SetupSession_Level : ControlLevel
         Session.SessionLevel.SessionData.InitDataController();
         Session.SessionLevel.SessionData.ManuallyDefine();
 
+        Session.TaskSelectionDataPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001";
+
         if (Session.SessionDef.SerialPortActive)
         {
             Session.SerialSentData = (SerialSentData)Session.SessionDataControllers.InstantiateDataController<SerialSentData>
-                ("SerialSentData", Session.TaskSelectionDataPath 
-                                                + Path.DirectorySeparatorChar + "Task0001");
+                ("SerialSentData", Session.TaskSelectionDataPath);
             Session.SerialSentData.fileName = Session.FilePrefix + "__SerialSentData_0001_TaskSelection.txt";
             Session.SerialSentData.InitDataController();
             Session.SerialSentData.ManuallyDefine();
 
             Session.SerialRecvData = (SerialRecvData)Session.SessionDataControllers.InstantiateDataController<SerialRecvData>
-                ("SerialRecvData", Session.TaskSelectionDataPath
-                                                                       + Path.DirectorySeparatorChar + "Task0001" );
+                ("SerialRecvData", Session.TaskSelectionDataPath);
             Session.SerialRecvData.fileName = Session.FilePrefix + "__SerialRecvData_0001_TaskSelection.txt";
             Session.SerialRecvData.InitDataController();
             Session.SerialRecvData.ManuallyDefine();
         }
 
-        Session.SessionLevel.FrameData = (FrameData)Session.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
+        Session.SessionLevel.FrameData = (FrameData)Session.SessionDataControllers.InstantiateDataController<FrameData>("FrameData", "TaskSelection", Session.TaskSelectionDataPath);
         Session.SessionLevel.FrameData.fileName = Session.FilePrefix + "__FrameData_0001_TaskSelection.txt";
         Session.SessionLevel.FrameData.InitDataController();
         Session.SessionLevel.FrameData.ManuallyDefine();
@@ -331,15 +305,15 @@ public class SetupSession_Level : ControlLevel
 
         if (Session.SessionDef.EyeTrackerActive)
         {
-            Session.GazeData = (GazeData)Session.SessionDataControllers.InstantiateDataController<GazeData>("GazeData", "TaskSelection", Session.TaskSelectionDataPath + Path.DirectorySeparatorChar + "Task0001");
-
-            Session.GazeData.fileName = "TaskSelection__GazeData.txt";
+            Session.GazeData = (GazeData)Session.SessionDataControllers.InstantiateDataController<GazeData>
+                            ("GazeData", Session.TaskSelectionDataPath);
+            Session.GazeData.fileName = Session.FilePrefix + "__GazeData_0001_TaskSelection.txt";
             Session.GazeData.InitDataController();
             Session.GazeData.ManuallyDefine();
-          //  SessionValues.TobiiEyeTrackerController.GazeData = SessionValues.GazeData;
             Session.GazeTracker.Init(Session.SessionLevel.FrameData, 0);
 
         }
+
         Session.MouseTracker.Init(Session.SessionLevel.FrameData, 0);
     }
 }

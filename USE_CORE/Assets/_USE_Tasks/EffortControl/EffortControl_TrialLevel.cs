@@ -32,6 +32,7 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
+using USE_ExperimentTemplate_Task;
 using USE_UI;
 
 
@@ -113,7 +114,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumLowerRewardChosen_Block;
     [HideInInspector] public int NumSameRewardChosen_Block;
     [HideInInspector] public List<float?> InflationDurations_Block = new List<float?>();
-    
 
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
@@ -601,7 +601,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         maxDiffLevel = CurrentTrial.MaxDiffLevel;
         avgDiffLevel = CurrentTrial.AvgDiffLevel;
         diffLevelJitter = CurrentTrial.DiffLevelJitter;
-        BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
+        NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
+        MinTrialsBeforeTermProcedure = CurrentTrial.MinTrialsBeforeTermProcedure;
+        TerminationWindowSize = CurrentTrial.TerminationWindowSize;
+        //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
         
         int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
         difficultyLevel = randomDouble;
@@ -628,7 +631,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameEffortChosen_Block = 0;
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
+        calculatedThreshold = 0;
+        reversalsCount = 0;
+        DiffLevelsAtReversals.Clear();
         InflationDurations_Block.Clear();
+        runningPerformance.Clear();
     }
 
     private void ScaleToNextInterval()
@@ -970,9 +977,51 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("StimLeft", () => StimLeft.activeInHierarchy);
-        FrameData.AddDatum("StimRight", () => StimRight.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton?.activeInHierarchy);
+        FrameData.AddDatum("StimLeft", () => StimLeft?.activeInHierarchy);
+        FrameData.AddDatum("StimRight", () => StimRight?.activeInHierarchy);
+    }
+
+    protected override bool CheckBlockEnd()
+    {
+        int prevResult = -1;
+
+        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
+        if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
+            return false;
+
+        if (runningPerformance.Count > 1)
+        {
+            prevResult = runningPerformance[^2];
+        }
+
+        if (runningPerformance.Last() == 1)
+        {
+            if (prevResult == 0)
+            {
+                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                reversalsCount++;
+            }
+        }
+        else if (runningPerformance.Last() == 0)
+        {
+            if (prevResult == 1)
+            {
+                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                reversalsCount++;
+            }
+        }
+
+        //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+        Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+        if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
+        {
+            List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
+            calculatedThreshold = (int)lastElements.Average();
+            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            return true;
+        }
+        return false;
     }
 
 }

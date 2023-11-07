@@ -45,7 +45,7 @@ public class GenerateConfigTemplates
         }
     }
 
-    [MenuItem("USE/Create Config File Templates")]
+    //[MenuItem("USE/Create Config File Templates")]
     static void OpenTaskSelectionDialog()
     {
         // TaskSelectionDialog.GetWindow<TaskSelectionDialog>();

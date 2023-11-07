@@ -652,7 +652,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("MainObjectGO", () => SquareGO.activeInHierarchy);
+        FrameData.AddDatum("MainObjectGO", () => SquareGO?.activeInHierarchy);
     }
 
 }

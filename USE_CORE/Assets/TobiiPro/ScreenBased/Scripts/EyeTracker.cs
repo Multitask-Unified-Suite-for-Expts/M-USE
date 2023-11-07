@@ -153,7 +153,7 @@ namespace Tobii.Research.Unity
             var queueCount = UnprocessedGazeDataCount;
             if (queueCount > 0)
             {
-                Debug.LogWarning("We didn't manage to empty the queue: " + queueCount + " items left...");
+               // Debug.LogWarning("We didn't manage to empty the queue: " + queueCount + " items left...");
             }
 
             _latestGazeData = gazeData;

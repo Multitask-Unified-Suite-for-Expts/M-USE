@@ -977,9 +977,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("StimLeft", () => StimLeft.activeInHierarchy);
-        FrameData.AddDatum("StimRight", () => StimRight.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton?.activeInHierarchy);
+        FrameData.AddDatum("StimLeft", () => StimLeft?.activeInHierarchy);
+        FrameData.AddDatum("StimRight", () => StimRight?.activeInHierarchy);
     }
 
     protected override bool CheckBlockEnd()

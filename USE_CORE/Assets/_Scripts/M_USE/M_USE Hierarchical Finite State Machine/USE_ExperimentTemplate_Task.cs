@@ -213,14 +213,6 @@ namespace USE_ExperimentTemplate_Task
                         Debug.LogError("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
                 }
 
-
-                //Send Reward Pulses for Ansen's Camera at Start of Task:
-                if (Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null &&
-                    Session.SessionDef.SyncBoxActive)
-                    Session.SyncBoxController.SendCameraSyncPulses(
-                        Session.SessionDef.Camera_TaskStart_NumPulses,
-                        Session.SessionDef.Camera_PulseSize_Ticks);
-
                 if (Session.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
 
@@ -354,13 +346,6 @@ namespace USE_ExperimentTemplate_Task
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
-                //Send Reward Pulses for Ansen's Camera at End of Task:
-                if (Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null &&
-                    Session.SessionDef.SyncBoxActive)
-                    Session.SyncBoxController.SendCameraSyncPulses(
-                        Session.SessionDef.Camera_TaskEnd_NumPulses,
-                        Session.SessionDef.Camera_PulseSize_Ticks);
-
                 if (Session.SessionDataControllers != null)
                 {
                     Session.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);

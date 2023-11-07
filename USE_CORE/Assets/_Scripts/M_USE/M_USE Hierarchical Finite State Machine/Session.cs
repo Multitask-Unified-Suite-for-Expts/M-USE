@@ -61,6 +61,7 @@ public static class Session
         }
     }
 
+    public static CameraSyncController CameraSyncController;
     public static FullScreenController FullScreenController;
     public static BackgroundMusicController BackgroundMusicController;
     public static LoadingController LoadingController;

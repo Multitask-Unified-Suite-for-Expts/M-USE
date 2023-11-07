@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3225,7 +3225,6 @@ MonoBehaviour:
   GazeCalibrationTaskLevel: {fileID: 0}
   taskCount: 0
   SessionDetails: {fileID: 0}
-  LocateFile: {fileID: 0}
   FrameData: {fileID: 0}
   CameraRenderTexture: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
@@ -3238,7 +3237,6 @@ MonoBehaviour:
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
   BlockResults_AudioClip: {fileID: 0}
-  LogWriter: {fileID: 0}
   runSessionLevelCalibration: 0
   waitForSerialPort: 0
 --- !u!4 &1375570696
@@ -3331,7 +3329,6 @@ MonoBehaviour:
   importSettings_Level: {fileID: 0}
   SessionData: {fileID: 0}
   FrameData: {fileID: 0}
-  SessionLevel: {fileID: 0}
 --- !u!114 &1375570700
 MonoBehaviour:
   m_ObjectHideFlags: 0

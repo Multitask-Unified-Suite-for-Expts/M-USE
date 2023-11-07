@@ -1279,7 +1279,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     PNC_Num--;
             }
         }
-
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 

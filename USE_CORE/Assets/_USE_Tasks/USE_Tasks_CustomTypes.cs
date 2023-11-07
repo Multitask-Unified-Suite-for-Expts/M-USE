@@ -39,6 +39,7 @@ using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
 using AntiSaccade_Namespace;
 using TemporalOrderJudgement_Namespace;
+using SustainedAttention_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -191,6 +192,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(TemporalOrderJudgement_BlockDef),
                 TrialDefType = typeof(TemporalOrderJudgement_TrialDef),
                 StimDefType = typeof(TemporalOrderJudgement_StimDef)
+            }
+        }
+        ,{
+            "SustainedAttention", new TaskTypes
+            {
+                TaskLevelType = typeof(SustainedAttention_TaskLevel),
+                TrialLevelType = typeof(SustainedAttention_TrialLevel),
+                TaskDefType = typeof(SustainedAttention_TaskDef),
+                BlockDefType = typeof(SustainedAttention_BlockDef),
+                TrialDefType = typeof(SustainedAttention_TrialDef),
+                StimDefType = typeof(SustainedAttention_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

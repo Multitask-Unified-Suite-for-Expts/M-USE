@@ -153,7 +153,6 @@ public class SetupSession_Level : ControlLevel
             string configFolderName = Session.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
 
             GetTaskLevelType.Invoke(this, new object[] { configFolderName, verifyTask_Level });
-
             verifyTask_Level.TaskLevel.TaskConfigPath = Session.ConfigFolderPath + "/" + configFolderName;
         });
 

@@ -222,7 +222,7 @@ namespace USE_Def_Namespace
         public int NumGridSpots = 20;
 
         /// <summary>
-        /// Pulse size for the Camera. Default is 250. 
+        /// Whether to send Camera Sync Pulses. 
         /// </summary>
         public bool SendCameraPulses;
 
@@ -232,24 +232,9 @@ namespace USE_Def_Namespace
         public int Camera_PulseSize_Ticks = 250;
 
         /// <summary>
-        /// Camera's Num Pulses to be sent at start of Task. Default is 3. 
+        /// Number of Camera's Pulses to be sent. Default is 3. 
         /// </summary>
-        public int Camera_TaskStart_NumPulses = 3;
-
-        /// <summary>
-        /// Camera's Num Pulses to be sent at end of Task. Default is 2. 
-        /// </summary>
-        public int Camera_TaskEnd_NumPulses = 2;
-
-        /// <summary>
-        /// Camera's Num Pulses to be sent during SetupTrial. Default is 1. 
-        /// </summary>
-        public int Camera_TrialStart_NumPulses = 1;
-
-        /// <summary>
-        /// Camera's Min amount of time between sending pulses during SetupTrial. Default is 8. 
-        /// </summary>
-        public int Camera_TrialPulseMinGap_Sec = 8;
+        public int Camera_NumPulses = 3;
 
         /// <summary>
         /// Private backing field used to allow MaxStimLoadingDuration to have default value of 2, but also never be less than 1

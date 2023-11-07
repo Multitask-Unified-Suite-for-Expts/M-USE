@@ -113,6 +113,7 @@ namespace USE_ExperimentTemplate_Session
             Session.SessionLevel = this;
 
 
+
             State initScreen = new State("InitScreen");
             State setupSession = new State("SetupSession");
             selectTask = new State("SelectTask");
@@ -135,6 +136,8 @@ namespace USE_ExperimentTemplate_Session
 
             FindGameObjects();
             LoadPrefabs();
+
+            Session.CameraSyncController = gameObject.AddComponent<CameraSyncController>();
 
             Session.LocateFile = gameObject.AddComponent<LocateFile>();
 
@@ -919,16 +922,16 @@ namespace USE_ExperimentTemplate_Session
             {
                 Session.FullScreenController = GameObject.Find("MiscScripts").GetComponent<FullScreenController>();
                 Session.BackgroundMusicController = GameObject.Find("MiscScripts").GetComponent<BackgroundMusicController>();
-                HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
-                ToggleAudioButton = GameObject.Find("AudioButton");
-                RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
                 Session.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 Session.InitCamGO = GameObject.Find("InitCamera");
                 Session.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
-                Starfield = GameObject.Find("Starfield");
                 Session.LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
                 Session.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
                 Session.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
+                Starfield = GameObject.Find("Starfield");
+                HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
+                ToggleAudioButton = GameObject.Find("AudioButton");
+                RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
 
                 HumanVersionToggleButton.SetActive(false);
                 ToggleAudioButton.SetActive(false);

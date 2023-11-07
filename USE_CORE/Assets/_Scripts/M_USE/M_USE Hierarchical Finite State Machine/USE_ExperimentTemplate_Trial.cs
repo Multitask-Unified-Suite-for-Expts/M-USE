@@ -111,9 +111,6 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, MovedTooFarSquareTexture, HeldTooShortSquareTexture, HeldTooLongSquareTexture;
 
 
-        private float Camera_PulseSentTime = 0f;
-
-
         public delegate IEnumerator FileLoadingMethod();
         public FileLoadingMethod FileLoadingDelegate; //Delegate that tasks can set to their own specific method
         public bool TrialFilesLoaded;
@@ -281,16 +278,6 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
-
-                //Send Trial Reward Pulses for Ansen's Camera (if min time between pulses has been elapsed):
-                if (Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null && Session.SessionDef.SyncBoxActive)
-                {
-                    if (Time.time - Camera_PulseSentTime > Session.SessionDef.Camera_TrialPulseMinGap_Sec)
-                    {
-                        Session.SyncBoxController.SendCameraSyncPulses(Session.SessionDef.Camera_TrialStart_NumPulses, Session.SessionDef.Camera_PulseSize_Ticks);
-                        Camera_PulseSentTime = Time.time;
-                    }
-                }
 
             });
 

@@ -40,6 +40,7 @@ using USE_UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
+using UnityEngine.Serialization;
 using USE_Def_Namespace;
 using Random = UnityEngine.Random;
 
@@ -64,7 +65,7 @@ namespace USE_ExperimentTemplate_Trial
         public int avgDiffLevel;
         public int diffLevelJitter;
         public int NumReversalsUntilTerm;
-        public int MinTrialsBeforeTerm;
+        public int MinTrialsBeforeTermProcedure;
         public int TerminationWindowSize;
         public int reversalsCount;
         public List<int> DiffLevelsAtReversals;

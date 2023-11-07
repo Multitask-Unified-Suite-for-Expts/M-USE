@@ -584,7 +584,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         avgDiffLevel = CurrentTrial.AvgDiffLevel;
         diffLevelJitter = CurrentTrial.DiffLevelJitter;
         NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
-        MinTrialsBeforeTerm = CurrentTrial.MinTrialsBeforeTerm;
+        MinTrialsBeforeTermProcedure = CurrentTrial.MinTrialsBeforeTermProcedure;
         TerminationWindowSize = CurrentTrial.TerminationWindowSize;
         //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
         
@@ -597,8 +597,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         int prevResult = -1;
         DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
 
-        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
-        if (MinTrialsBeforeTerm < 0 || runningPerformance.Count < MinTrialsBeforeTerm + 1)
+        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
+        if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
             return false;
 
         if (runningPerformance.Count > 1)

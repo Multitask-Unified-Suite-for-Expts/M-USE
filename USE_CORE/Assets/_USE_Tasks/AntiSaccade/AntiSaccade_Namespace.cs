@@ -46,7 +46,7 @@ namespace AntiSaccade_Namespace
         public int AvgDiffLevel;
         public int DiffLevelJitter;
         public int NumReversalsUntilTerm = -1;
-        public int MinTrialsBeforeTerm = -1;
+        public int MinTrialsBeforeTermProcedure = -1;
         public int TerminationWindowSize = -1;
         
         public override void GenerateTrialDefsFromBlockDef()
@@ -65,7 +65,7 @@ namespace AntiSaccade_Namespace
                 td.AvgDiffLevel = AvgDiffLevel;
                 td.DiffLevelJitter = DiffLevelJitter;
                 td.NumReversalsUntilTerm = NumReversalsUntilTerm;
-                td.MinTrialsBeforeTerm = MinTrialsBeforeTerm;
+                td.MinTrialsBeforeTermProcedure = MinTrialsBeforeTermProcedure;
                 td.TerminationWindowSize = TerminationWindowSize;
                 
                 TrialDefs.Add(td);
@@ -83,7 +83,7 @@ namespace AntiSaccade_Namespace
                 td.AvgDiffLevel = AvgDiffLevel;
                 td.DiffLevelJitter = DiffLevelJitter;
                 td.NumReversalsUntilTerm = NumReversalsUntilTerm;
-                td.MinTrialsBeforeTerm = MinTrialsBeforeTerm;
+                td.MinTrialsBeforeTermProcedure = MinTrialsBeforeTermProcedure;
                 td.TerminationWindowSize = TerminationWindowSize;
                 
                 TrialDefs[iTrial] = td;
@@ -128,7 +128,7 @@ namespace AntiSaccade_Namespace
         public int AvgDiffLevel;
         public int DiffLevelJitter;
         public int NumReversalsUntilTerm;
-        public int MinTrialsBeforeTerm;
+        public int MinTrialsBeforeTermProcedure;
         public int TerminationWindowSize;
     }
 

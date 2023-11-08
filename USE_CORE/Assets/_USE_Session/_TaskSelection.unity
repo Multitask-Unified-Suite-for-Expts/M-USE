@@ -3222,11 +3222,12 @@ MonoBehaviour:
   TaskSelectionSceneName: _TaskSelection
   ActiveTaskLevels: []
   CurrentTask: {fileID: 0}
-  GazeCalibrationTaskLevel: {fileID: 0}
   taskCount: 0
   SessionDetails: {fileID: 0}
   FrameData: {fileID: 0}
   CameraRenderTexture: {fileID: 0}
+  ExpDisplayRenderImage: {fileID: 0}
+  SessionCam: {fileID: 0}
   TaskButtonsContainer: {fileID: 0}
   Starfield: {fileID: 1391649313}
   HumanVersionToggleButton: {fileID: 0}
@@ -3237,7 +3238,6 @@ MonoBehaviour:
   StartButtonPrefabGO: {fileID: 6810560367943004968, guid: 2e385ec78c77a46cc91c52da9fce59b9,
     type: 3}
   BlockResults_AudioClip: {fileID: 0}
-  runSessionLevelCalibration: 0
   waitForSerialPort: 0
 --- !u!4 &1375570696
 Transform:
@@ -3409,6 +3409,9 @@ MonoBehaviour:
   verifyTask_Level: {fileID: 0}
   TaskLevel: {fileID: 0}
   TrialLevel: {fileID: 0}
+  TaskDataPath: 
+  ConfigFolderName: 
+  TaskName: 
 --- !u!1 &1391649313 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5576539015048150, guid: 810531c98dad74048995093927772f82,

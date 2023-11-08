@@ -1,9 +1,4 @@
-BlockName	TokensInMiddleOfOutlines	NumTrials	NumClicksLeft	NumClicksRight	NumCoinsLeft	NumCoinsRight	ClicksPerOutline	NumPulsesLeft	NumPulsesRight	PulseSizeLeft	PulseSizeRight	ContextName
-EC1-EC13	FALSE	1	3	11	2	6	1	1	3	250	250	011_058_004_001_3
-EC30-EC6	FALSE	1	23	7	8	2	1	5	1	250	250	011_058_004_001_3
-EC12-EC24	FALSE	1	11	19	4	8	1	2	4	250	250	011_058_004_001_3
-EC19-EC7	FALSE	1	15	7	8	4	1	4	2	250	250	011_058_004_001_3
-EC11-EC3	FALSE	1	11	3	2	6	1	1	3	250	250	011_058_004_001_3
-EC9-EC17	FALSE	1	7	15	8	4	1	4	2	250	250	011_058_004_001_3
-EC1-EC13	FALSE	1	3	11	2	6	1	1	3	250	250	011_058_004_001_3
-EC30-EC6	FALSE	1	23	7	8	2	1	5	1	250	250	011_058_004_001_3
+BlockName	BlockCount	ContextName	TrialDefSelectionStyle	MaxDiffLevel	AvgDiffLevel	DiffLevelJitter	NumReversalsUntilTerm	MinTrialsBeforeTermProcedure
+EC_NonAdaptive	1	011_058_004_001_3	default	-1	-1	-1	-1	-1
+EC_NonAdaptive	2	011_058_004_001_3	default	-1	-1	-1	-1	-1
+EC_NonAdaptive	3	011_058_004_001_3	default	-1	-1	-1	-1	-1

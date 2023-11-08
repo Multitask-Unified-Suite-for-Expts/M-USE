@@ -103,11 +103,12 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         Play.AddSpecificInitializationMethod(() =>
         {
-            ObjectManager.MoveObjects();
-            AudioFBController.Play("EC_BalloonChosen");
-
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            AudioFBController.Play("EC_BalloonChosen");
+
+            ObjectManager.MoveObjects();
         });
         Play.AddUpdateMethod(() =>
         {

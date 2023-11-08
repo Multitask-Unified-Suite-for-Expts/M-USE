@@ -26,13 +26,13 @@ namespace SustainedAttention_Namespace
         public float ItiDuration;
 
         //Target:
-        public Vector2 TargetSize;
+        public float TargetSize;
         public float TargetSpeed;
         public float TargetAnimationInterval;
         public int TargetReward;
 
         //Distractor:
-        public Vector2 DistractorSize;
+        public float DistractorSize;
         public float DistractorSpeed;
         public float DistractorAnimationInterval;
         public int DistractorReward;

@@ -35,11 +35,11 @@ public class ObjectManager : MonoBehaviour
             {
                 if(target.Move)
                 {
-                    if(target.IsColliding)
+                    if(target.NeedsNewDestination)
                     {
                         CurrentDestinations.Remove(target.CurrentDestination);
                         SetNewDestination(target);
-                        target.IsColliding = false;
+                        target.NeedsNewDestination = false;
                     }
                     if (target.AtDestination())
                     {
@@ -57,12 +57,12 @@ public class ObjectManager : MonoBehaviour
             {
                 if(distractor.Move)
                 {
-                    //if (distractor.IsColliding)
-                    //{
-                    //    CurrentDestinations.Remove(distractor.CurrentDestination);
-                    //    SetNewDestination(distractor);
-                    //    distractor.IsColliding = false;
-                    //}
+                    if (distractor.NeedsNewDestination)
+                    {
+                        CurrentDestinations.Remove(distractor.CurrentDestination);
+                        SetNewDestination(distractor);
+                        distractor.NeedsNewDestination = false;
+                    }
                     if (distractor.AtDestination())
                     {
                         CurrentDestinations.Remove(distractor.CurrentDestination);
@@ -95,7 +95,7 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObject(Transform parent, bool isTarget, Vector2 size, float speed, float interval, int reward, Color? color = null)
+    public void CreateObject(Transform parent, bool isTarget, float size, float speed, float interval, int reward, Color? color = null)
     {
         GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
         go.name = isTarget ? "Target" : "Distractor";
@@ -103,12 +103,12 @@ public class ObjectManager : MonoBehaviour
         go.transform.SetParent(parent);
         go.transform.localPosition = Vector3.zero;
         go.transform.localScale = Vector3.one;
-        go.GetComponent<RectTransform>().sizeDelta = size;
+        go.GetComponent<RectTransform>().sizeDelta = new Vector2(size, size);
         if (color != null)
             go.GetComponent<Image>().color = color.Value;
 
         SA_Object obj = go.AddComponent<SA_Object>();
-        obj.Setup(isTarget, speed, interval, reward);
+        obj.Setup(isTarget, speed, size, interval, reward);
         SetRandomStartingPosition(obj);
         SetRandomDestination(obj);
 
@@ -152,42 +152,45 @@ public class ObjectManager : MonoBehaviour
 
     private void SetNewDestination(SA_Object obj)
     {
-        float destinationDistance = 100f;
+        float distance = .572f * obj.Size;
         float random = Random.Range(0, 2);
         float newY = random == 0 ? obj.Direction.y : -obj.Direction.y;
         Vector3 perpendicularDirection = new Vector3(newY, obj.Direction.x, 0);
-        Vector3 newDestination = obj.transform.localPosition + perpendicularDirection.normalized * destinationDistance;
+        Vector3 newDestination = obj.transform.localPosition + perpendicularDirection.normalized * distance;
 
-        //check if CurrentDestinations list includes newDestination (+/- a range i can specify)
-        //if it is within the range, calculate a new destination
+        //float minDistance = 100f;
+        //List<Vector3> destinations = new List<Vector3>(CurrentDestinations);
 
-        float minDistance = 100f;
-        bool destinationValid = true;
-        List<Vector3> destinations = new List<Vector3>(CurrentDestinations);
-        foreach(Vector3 existingDestination in destinations)
-        {
-            if (Vector3.Distance(newDestination, existingDestination) < minDistance)
-            {
-                destinationValid = false;
-                break;
-            }
-        }
+        //int count = 0;
+        //bool destinationValid;
+        //do
+        //{
+        //    count++;
+        //    Debug.LogWarning("COUNT: " + count);
+        //    destinationValid = true;
+        //    foreach (Vector3 existingDestination in destinations)
+        //    {
+        //        if (Vector3.Distance(newDestination, existingDestination) < minDistance)
+        //        {
+        //            Debug.LogWarning("***GAP: " + Vector3.Distance(newDestination, existingDestination));
+        //            destinationValid = false;
+        //            break;
+        //        }
+        //    }
 
-        if (destinationValid)
-        {
-            CurrentDestinations.Add(newDestination);
-            obj.CurrentDestination = newDestination;
-        }
-        else
-        {
-            Debug.LogWarning("TOO CLOSE! GONNA RECURSE!");
-            SetNewDestination(obj);
-        }
+        //    if (!destinationValid)
+        //    {
+        //        Debug.LogWarning("TOO CLOSE! RETRYING...");
+        //        random = Random.Range(0, 2);
+        //        newY = random == 0 ? obj.Direction.y : -obj.Direction.y;
+        //        perpendicularDirection = new Vector3(newY, obj.Direction.x, 0);
+        //        newDestination = obj.transform.localPosition + perpendicularDirection.normalized * distance;
+        //    }
+        //}
+        //while (!destinationValid);
 
-
-        //CurrentDestinations.Add(newDestination);
-        //obj.CurrentDestination = newDestination;
-
+        CurrentDestinations.Add(newDestination);
+        obj.CurrentDestination = newDestination;
     }
 
     private void CalculateDestinations()
@@ -249,6 +252,7 @@ public class SA_Object : MonoBehaviour
 {
     public bool IsTarget;
     public float Speed;
+    public float Size;
     public float Interval;
     public int Reward;
     public Vector2 StartingPosition;
@@ -256,7 +260,6 @@ public class SA_Object : MonoBehaviour
     public List<Vector3> Visited;
     public bool Move;
     public bool NeedsNewDestination;
-    public bool IsColliding;
     public GameObject Marker;
     public Vector3 Direction;
 
@@ -266,10 +269,11 @@ public class SA_Object : MonoBehaviour
         Visited = new List<Vector3>();
     }
 
-    public void Setup(bool isTarget, float speed, float interval, int reward)
+    public void Setup(bool isTarget, float speed, float size, float interval, int reward)
     {
         IsTarget = isTarget;
         Speed = speed;
+        Size = size;
         Interval = interval;
         Reward = reward;
 
@@ -297,12 +301,12 @@ public class SA_Object : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        IsColliding = true;
+        NeedsNewDestination = true;
     }
 
     //private void OnCollisionExit2D(Collision2D collision)
     //{
-    //    IsColliding = false;
+    //    NeedsNewDestination = false;
     //}
 
     public bool AtDestination()

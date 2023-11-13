@@ -20,6 +20,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
         });
 

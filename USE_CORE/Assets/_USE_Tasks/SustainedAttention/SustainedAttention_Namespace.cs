@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
 
@@ -25,17 +22,21 @@ namespace SustainedAttention_Namespace
         public float PlayDuration;
         public float ItiDuration;
 
-        //Target:
-        public float TargetSize;
-        public float TargetSpeed;
-        public float TargetAnimationInterval;
-        public int TargetReward;
+        public bool RotateTowardsDest;
 
-        //Distractor:
-        public float DistractorSize;
-        public float DistractorSpeed;
-        public float DistractorAnimationInterval;
-        public int DistractorReward;
+        //Targets:
+        public int[] TargetSizes;
+        public int[] TargetSpeeds;
+        public float[] TargetNextDestDist;
+        public float[] TargetAnimationIntervals;
+        public int[] TargetRewards;
+
+        //Distractors:
+        public int[] DistractorSizes;
+        public int[] DistractorSpeeds;
+        public float[] DistractorNextDestDist;
+        public float[] DistractorAnimationIntervals;
+        public int[] DistractorRewards;
 
     }
 

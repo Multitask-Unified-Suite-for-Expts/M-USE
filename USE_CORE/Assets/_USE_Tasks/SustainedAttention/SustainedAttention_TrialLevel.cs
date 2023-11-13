@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using USE_States;
 using USE_Settings;
 using USE_ExperimentTemplate_Trial;
-using USE_StimulusManagement;
 using SustainedAttention_Namespace;
 using UnityEngine.UI;
 using ConfigDynamicUI;
@@ -40,9 +39,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if (ObjectManager == null)
-                ObjectManager = gameObject.AddComponent<ObjectManager>();
-
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -64,9 +60,17 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             BordersGO.SetActive(false);
             LoadConfigUIVariables();
 
-            ObjectManager.CreateObject(SustainedAttention_CanvasGO.transform, true, CurrentTrial.TargetSize, CurrentTrial.TargetSpeed, CurrentTrial.TargetAnimationInterval, CurrentTrial.TargetReward); //Create Target
-            ObjectManager.CreateObject(SustainedAttention_CanvasGO.transform, false, CurrentTrial.DistractorSize, CurrentTrial.DistractorSpeed, CurrentTrial.DistractorAnimationInterval, CurrentTrial.DistractorReward, Color.magenta); //Create Distractor
 
+            if (ObjectManager != null)
+                Destroy(ObjectManager);
+
+            ObjectManager = gameObject.AddComponent<ObjectManager>();
+            ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
+
+            //Create Targets:
+            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetAnimationIntervals, CurrentTrial.TargetRewards, Color.yellow);
+            //Create Distractors:
+            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorAnimationIntervals, CurrentTrial.DistractorRewards, Color.magenta);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -108,7 +112,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
             AudioFBController.Play("EC_BalloonChosen");
 
-            ObjectManager.MoveObjects();
+            ObjectManager.ActivateObjectMovement();
         });
         Play.AddUpdateMethod(() =>
         {
@@ -126,6 +130,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         });
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
     }
+
 
     void HandleFeedback()
     {

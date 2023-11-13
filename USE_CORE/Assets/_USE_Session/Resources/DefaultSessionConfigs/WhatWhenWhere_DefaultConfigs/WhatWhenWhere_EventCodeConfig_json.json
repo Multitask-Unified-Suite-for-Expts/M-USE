@@ -1,10 +1,10 @@
 {
-	"SlotError": {
-		"Value": 14164,
-		"Description": "selected an object in the incorrect sequence"
-	},
-	"RepetitionError": {
-		"Value": 14165,
-		"Description": "selected an object that has previously been selected within the trial"
-	}
+  "SlotError": {
+    "Value": 14164,
+    "Description": "selected an object in the incorrect sequence"
+  },
+  "RepetitionError": {
+    "Value": 14165,
+    "Description": "selected an object that has previously been selected within the trial"
+  }
 }

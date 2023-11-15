@@ -42,6 +42,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
 
+            HaloFBController.SetHaloIntensity(1f);
+
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -71,9 +73,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
 
             //Create Targets:
-            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetAnimationIntervals, CurrentTrial.TargetRewards, Color.yellow);
+            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetAnimationIntervals, CurrentTrial.TargetRewards, Color.yellow);
             //Create Distractors:
-            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorAnimationIntervals, CurrentTrial.DistractorRewards, Color.magenta);
+            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorAnimationIntervals, CurrentTrial.DistractorRewards, Color.magenta);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -132,9 +134,34 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         });
         Play.AddUpdateMethod(() =>
         {
-            ChosenGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+            ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
-                HandleFeedback();
+            {
+                SA_Object obj = ChosenGO.GetComponent<SA_Object>();
+                if(obj != null && obj.IsTarget)
+                {
+                    float depth = 10f; //make configurable later
+                    float haloDuration = .15f; //make configurable later
+
+                    if(obj.WithinDuration)
+                    {
+                        Debug.LogWarning("WITHIN DURATION!");
+                        AudioFBController.Play("Positive");
+                        HaloFBController.ShowPositive(ChosenGO, depth, haloDuration);
+                        //increment slider:
+                        //check if slider full, if it is: GiveReward():
+                    }
+                    else
+                    {
+                        AudioFBController.Play("Negative");
+                        HaloFBController.ShowNegative(ChosenGO, depth, haloDuration);
+                        Debug.LogWarning("NOT WITHIN DURATION!");
+                        //do whatever we want for when they select target but NOT within duration
+                    }
+
+                    Handler.LastSuccessfulSelection = null;
+                }
+            }
         });
         Play.AddTimer(() => CurrentTrial.PlayDuration, ITI);
 
@@ -172,28 +199,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         SliderLossSteps += CurrentTrial.SliderInitialValue;
     }
 
-
-    void HandleFeedback()
-    {
-        //if (ChosenGO == Target) //Chose Target
-        //{
-        //    AudioFBController.Play("Positive");
-        //    HaloFBController.ShowPositive(ChosenGO);
-        //    //increment slider:
-        //    //check if slider full, if it is: GiveReward():
-
-        //}
-        ////else if (Distractors.Contains(ChosenGO)) //Chose A distractor
-        //else if (ChosenGO == Distractor) //Chose A distractor
-        //{
-        //    AudioFBController.Play("Negative");
-        //    HaloFBController.ShowNegative(ChosenGO);
-        //    //decrement slider:
-
-        //}
-        //else
-        //    Debug.LogWarning("SELECTED NEITHER A TARGET NOR DISTRACTOR!");
-    }
 
 
     void GiveReward()

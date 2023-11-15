@@ -2,10 +2,8 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using USE_States;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using SustainedAttention_Namespace;
-using UnityEngine.UI;
 using ConfigDynamicUI;
 
 
@@ -25,7 +23,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject ChosenGO = null;
 
-    [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration;
+    [HideInInspector] public ConfigNumber itiDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize, minObjectTouchDuration, maxObjectTouchDuration;
+
+    private int SliderGainSteps, SliderLossSteps;
+
 
 
     public override void DefineControlLevel()
@@ -39,6 +40,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            SliderFBController.InitializeSlider();
+
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -86,7 +89,20 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget, () => BordersGO.SetActive(true));
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget, () =>
+        {
+            BordersGO.SetActive(true);
+
+            CalculateSliderSteps();
+            Vector3 sliderPosAdj = new Vector3(0f, -43f, 0f);
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), sliderPosAdj);
+            SliderFBController.SetSliderRectSize(new Vector2(400f, 23f));
+            SliderFBController.SliderGO.SetActive(true);
+            SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
+            SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
+
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
+        });
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() =>
@@ -123,12 +139,37 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         Play.AddTimer(() => CurrentTrial.PlayDuration, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
-        ITI.AddDefaultInitializationMethod(() =>
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        ObjectManager.DestroyExistingObjects();
+
+        SliderFBController.SliderGO.SetActive(false);
+        SliderFBController.SliderHaloGO.SetActive(false);
+    }
+
+    public override void ResetTrialVariables()
+    {
+        SliderGainSteps = 0;
+        SliderLossSteps = 0;
+        SliderFBController.ResetSliderBarFull();
+    }
+
+    private void CalculateSliderSteps()
+    {
+        foreach (int sliderGain in CurrentTrial.SliderGain)
         {
-            ObjectManager.DeactivateTargets();
-            ObjectManager.DeactivateDistractors();
-        });
-        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
+            SliderGainSteps += sliderGain;
+        }
+        SliderGainSteps += CurrentTrial.SliderInitialValue;
+        foreach (int sliderLoss in CurrentTrial.SliderLoss)
+        {
+            SliderLossSteps += sliderLoss;
+        }
+        SliderLossSteps += CurrentTrial.SliderInitialValue;
     }
 
 
@@ -167,6 +208,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     {
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
+        sliderFlashingDuration = ConfigUiVariables.get<ConfigNumber>("sliderFlashingDuration");
+        sliderUpdateDuration = ConfigUiVariables.get<ConfigNumber>("sliderUpdateDuration");
     }
 
 

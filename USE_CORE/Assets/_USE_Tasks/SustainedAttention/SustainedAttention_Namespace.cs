@@ -15,14 +15,12 @@ namespace SustainedAttention_Namespace
 
     public class SustainedAttention_TrialDef : TrialDef
     {
-
         public float ResponseWindow; //used to control how much time they have to make selection after object animates (closes mouth)
+        public bool RotateTowardsDest;
+
         public float DisplayTargetDuration;
         public float DisplayDistractorsDuration;
         public float PlayDuration;
-        public float ItiDuration;
-
-        public bool RotateTowardsDest;
 
         //Targets:
         public int[] TargetSizes;
@@ -37,7 +35,6 @@ namespace SustainedAttention_Namespace
         public float[] DistractorNextDestDist;
         public float[] DistractorAnimationIntervals;
         public int[] DistractorRewards;
-
     }
 
     public class SustainedAttention_StimDef : StimDef

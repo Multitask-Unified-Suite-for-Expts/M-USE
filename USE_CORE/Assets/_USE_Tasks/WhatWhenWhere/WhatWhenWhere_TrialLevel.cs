@@ -196,7 +196,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitialValue*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
@@ -807,12 +807,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             sliderGainSteps += sliderGain;
         }
-        sliderGainSteps += CurrentTrialDef.SliderInitial;
+        sliderGainSteps += CurrentTrialDef.SliderInitialValue;
         foreach (int sliderLoss in CurrentTrialDef.SliderLoss)
         {
             sliderLossSteps += sliderLoss;
         }
-        sliderLossSteps += CurrentTrialDef.SliderInitial;
+        sliderLossSteps += CurrentTrialDef.SliderInitialValue;
     }
 
     private void InitializeStartButton(State visOnState, State visOffState)

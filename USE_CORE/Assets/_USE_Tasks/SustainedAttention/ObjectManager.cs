@@ -15,6 +15,10 @@ public class ObjectManager : MonoBehaviour
 
     private Transform ObjectParent;
 
+    public static readonly Vector2 xRange = new Vector2(-800f, 800f);
+    public static readonly Vector2 yRange = new Vector2(-400f, 325f);
+
+
     private void Awake()
     {
         TargetList = new List<SA_Object>();
@@ -28,19 +32,6 @@ public class ObjectManager : MonoBehaviour
         ObjectParent = parentTransform;
     }
 
-    public void DestroyExistingObjects()
-    {
-        if (TargetList.Count > 0)
-        {
-            foreach (SA_Object obj in TargetList)
-                Destroy(obj);
-        }
-        if (DistractorList.Count > 0)
-        {
-            foreach (SA_Object obj in DistractorList)
-                Destroy(obj);
-        }
-    }
 
     public void ActivateObjectMovement()
     {
@@ -91,10 +82,9 @@ public class ObjectManager : MonoBehaviour
     private void CalculateDestinations()
     {
         Destinations = new List<Vector3>();
-        //int[] xValues = new int[] { -300, -150, 0, 150, 300};
-        //int[] yValues = new int[] { 150, 0, -150};
-        int[] xValues = new int[] { -750, -600, -450, -300, -150, 0, 150, 300, 450, 600, 750 };
-        int[] yValues = new int[] { 300, 150, 0, -150, -300};
+
+        int[] xValues = new int[] { -800, -600, -400, -200, 0, 200, 400, 600, 800 };
+        int[] yValues = new int[] { 325, 180, 35, -110, -255, -400};
 
         for (int i = 0; i < yValues.Length; i++)
         {
@@ -114,6 +104,26 @@ public class ObjectManager : MonoBehaviour
         else
             DistractorList.Add(obj);
 
+    }
+
+    public void DestroyExistingObjects()
+    {
+        if (TargetList.Count > 0)
+        {
+            foreach (SA_Object obj in TargetList)
+            {
+                Destroy(obj.gameObject);
+                Destroy(obj);
+            }
+        }
+        if (DistractorList.Count > 0)
+        {
+            foreach (SA_Object obj in DistractorList)
+            {
+                Destroy(obj.gameObject);
+                Destroy(obj);
+            }
+        }
     }
 
     public void ActivateTargets()
@@ -151,7 +161,7 @@ public class SA_Object : MonoBehaviour
     public float Size;
     public float NextDestDist;
 
-    public float AnimInterval; //not used yet
+    public float AnimInterval;
     public int Reward; //not used yet
     public List<Vector3> Visited;
     public Vector2 StartingPosition;
@@ -163,12 +173,11 @@ public class SA_Object : MonoBehaviour
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
 
-    private static Vector2 xRange = new Vector2(-750f, 750f);
-    private static Vector2 yRange = new Vector2(-350f, 350f);
-
     private float AnimStartTime;
 
     private int ImageCount = 0;
+
+    private List<float> PreviousAngleOffsets = new List<float>();
 
 
     public SA_Object()
@@ -192,7 +201,7 @@ public class SA_Object : MonoBehaviour
         SetupMarker(); //Marker for debugging purposes
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if(Move)
         {
@@ -232,7 +241,7 @@ public class SA_Object : MonoBehaviour
 
     private void MoveTowardsDestination()
     {
-        if(CurrentDestination != null)
+        if (CurrentDestination != null)
         {
             Direction = (CurrentDestination - transform.localPosition).normalized;
             Vector3 nextPos = transform.localPosition + Speed * Time.deltaTime * Direction;
@@ -248,43 +257,54 @@ public class SA_Object : MonoBehaviour
 
     public void SetNewDestination()
     {
-        float chanceSmall = 0.25f;
-        float chanceMedium = 0.6f;
+        float chanceSmall = 0.4f;
+        float chanceMedium = 0.5f;
 
         float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg; //Extract angle from current Direction
 
         float randomChance = Random.value; //Get randomNum between 0 and 1
-        float newDirection;
+        float angleOffset;
 
         if (randomChance < chanceSmall)
-            newDirection = Random.Range(0, 16f);
+            angleOffset = Random.Range(0, 16f);
         else if (randomChance < chanceSmall + chanceMedium)
-            newDirection = Random.Range(16f, 46f);
+            angleOffset = Random.Range(16f, 46f);
         else
-            newDirection = Random.Range(46f, 181f);
+            angleOffset = Random.Range(46f, 181f);
 
-        float randomNum = Random.value;
+        if (PreviousAngleOffsets.Count > 4)
+            PreviousAngleOffsets.RemoveAt(0);
+
+        if(angleOffset > 90f)
+        {
+           foreach(float offset in PreviousAngleOffsets)
+            {
+                if(Mathf.Abs(offset) > 90f)
+                {
+                    angleOffset = Random.Range(0, 46);
+                    break;
+                }
+            }
+        }
+
+        float randomNum = Random.value; //Randomize whether to make it negative
         if (randomNum < .5f)
-            newDirection = -newDirection;
+            angleOffset = -angleOffset;
+
+        PreviousAngleOffsets.Add(angleOffset);
         
-        currentAngle += newDirection;
-
+        currentAngle += angleOffset;
         float radianAngle = Mathf.Deg2Rad * currentAngle;
-
         float newX = Mathf.Cos(radianAngle);
         float newY = Mathf.Sin(radianAngle);
-
         Vector3 change = new Vector3(newX, newY, 0);
         Vector3 destination = transform.localPosition + change * NextDestDist;
-
-        float xDiff = Mathf.Clamp(destination.x, xRange.x, xRange.y) - destination.x;
-        float yDiff = Mathf.Clamp(destination.y, yRange.x, yRange.y) - destination.y;
-
+        float xDiff = Mathf.Clamp(destination.x, ObjectManager.xRange.x, ObjectManager.xRange.y) - destination.x;
+        float yDiff = Mathf.Clamp(destination.y, ObjectManager.yRange.x, ObjectManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
-
         CurrentDestination = destination;
-
         NewDestStartTime = Time.time;
+
     }
 
 
@@ -308,17 +328,19 @@ public class SA_Object : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Direction = -Direction;
-        SetNewDestination();
+        if(!IsTarget)
+        {
+            Direction = -Direction;
+            SetNewDestination();
+        }
     }
 
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (Time.time - NewDestStartTime >= MaxCollisionTime)
         {
-            Debug.LogWarning("BEEN COLLIIDING FOR TOO LONG, SETTING NEW DESTINATION!");
             Direction = -Direction;
-            SetNewDestination();
+            SetNewDestination();   
         }
     }
 
@@ -340,7 +362,7 @@ public class SA_Object : MonoBehaviour
         if (Marker != null)
             Destroy(Marker);
         Marker = Instantiate(Resources.Load<GameObject>("DestinationMarker"));
-        Marker.name = gameObject.name + "Clone";
+        Marker.name = gameObject.name + "_Marker";
         Marker.transform.SetParent(GameObject.Find("SustainedAttention_Canvas").transform);
         Marker.transform.localScale = new Vector3(.3f, .3f, .3f);
         Marker.transform.localPosition = CurrentDestination;

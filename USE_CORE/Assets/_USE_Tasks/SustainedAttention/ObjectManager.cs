@@ -33,7 +33,6 @@ public class ObjectManager : MonoBehaviour
         ObjectParent = parentTransform;
     }
 
-
     public void ActivateObjectMovement()
     {
         if (TargetList.Count > 0)
@@ -49,9 +48,9 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, int[] sizes, int[] speeds, float[] nextDestDistances, float[] animIntervals, int[] rewards, Color color)
+    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, int[] sizes, int[] speeds, float[] nextDestDistances, float[] animIntervals, Color color)
     {
-        if(sizes.Length != speeds.Length || sizes.Length != animIntervals.Length || sizes.Length != rewards.Length)
+        if(sizes.Length != speeds.Length || sizes.Length != animIntervals.Length)
         {
             Debug.LogError("ERROR CREATING SA OBJECTS. NOT ALL ARRAYS CONTAIN SAME NUMBER OF VALUES!");
             return;
@@ -71,7 +70,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(isTarget, rotateTowardsDest, responseWindow, speeds[i], sizes[i], nextDestDistances[i], animIntervals[i], rewards[i]);
+            obj.SetupObject(isTarget, rotateTowardsDest, responseWindow, speeds[i], sizes[i], nextDestDistances[i], animIntervals[i]);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -162,7 +161,6 @@ public class SA_Object : MonoBehaviour
     public float ResponseWindow;
 
     public float AnimInterval;
-    public int Reward; //not used yet
     public List<Vector3> Visited;
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
@@ -189,7 +187,7 @@ public class SA_Object : MonoBehaviour
         MouthClosed = false;
     }
 
-    public void SetupObject(bool isTarget, bool rotateTowardsDest, float responseWindow, float speed, float size, float nextDestDist, float interval, int reward)
+    public void SetupObject(bool isTarget, bool rotateTowardsDest, float responseWindow, float speed, float size, float nextDestDist, float interval)
     {
         IsTarget = isTarget;
         RotateTowardsDest = rotateTowardsDest;
@@ -198,7 +196,6 @@ public class SA_Object : MonoBehaviour
         Size = size;
         NextDestDist = nextDestDist;
         AnimInterval = interval;
-        Reward = reward;
 
         SetRandomStartingPosition();
         SetNewDestination();
@@ -212,14 +209,10 @@ public class SA_Object : MonoBehaviour
         {
             RunAnimationInterval();
             HandleResponseWindow();
-            if(IsTarget)
-                HandlePausingDuringSelection();
+            HandlePausingDuringSelection();
 
             if (InputBroker.GetKeyDown(KeyCode.M))
                 ToggleMarker();
-
-            //if (InputBroker.GetKeyDown(KeyCode.R))
-            //    RotateTowardsDest = !RotateTowardsDest;
         }
     }
 

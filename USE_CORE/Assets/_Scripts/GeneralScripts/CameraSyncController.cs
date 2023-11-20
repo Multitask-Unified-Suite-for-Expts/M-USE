@@ -8,7 +8,7 @@ public class CameraSyncController : MonoBehaviour
     private readonly float PulseInterval = 1f / 30f;
 
 
-    void Update()
+    void FixedUpdate()
     {
         if (Session.SessionDef != null && Session.SessionDef.SendCameraPulses && Session.SyncBoxController != null && Session.SessionDef.SyncBoxActive)
         {

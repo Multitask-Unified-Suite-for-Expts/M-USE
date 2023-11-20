@@ -95,12 +95,14 @@ public class SliderFBController : MonoBehaviour
         {
             Vector3 newPos = InitialPosition + posAdj.Value;
             SliderGO.transform.localPosition = newPos;
+            SliderHaloGO.transform.localPosition = newPos;
         }
     }
 
     public void SetSliderRectSize(Vector2 size)
     {
         SliderGO.GetComponent<RectTransform>().sizeDelta = size;
+        SliderHaloGO.GetComponent<RectTransform>().sizeDelta = size;
     }
 
     public void SetUpdateDuration(float sliderUpdateDuration)

@@ -27,14 +27,12 @@ namespace SustainedAttention_Namespace
         public int[] TargetSpeeds;
         public float[] TargetNextDestDist;
         public float[] TargetAnimationIntervals;
-        public int[] TargetRewards;
 
         //Distractors:
         public int[] DistractorSizes;
         public int[] DistractorSpeeds;
         public float[] DistractorNextDestDist;
         public float[] DistractorAnimationIntervals;
-        public int[] DistractorRewards;
     }
 
     public class SustainedAttention_StimDef : StimDef

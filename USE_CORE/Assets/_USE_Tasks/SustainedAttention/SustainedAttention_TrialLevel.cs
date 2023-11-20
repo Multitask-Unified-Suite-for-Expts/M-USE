@@ -27,6 +27,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private int SliderGainSteps, SliderLossSteps;
 
+    private bool GiveRewardIfSliderFull = false;
+
+    private readonly float HaloDepth = 10f;
+    private float HaloDuration = .15f; //make configurable later
 
 
     public override void DefineControlLevel()
@@ -73,9 +77,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
 
             //Create Targets:
-            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetAnimationIntervals, CurrentTrial.TargetRewards, Color.yellow);
+            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetAnimationIntervals, Color.yellow);
             //Create Distractors:
-            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorAnimationIntervals, CurrentTrial.DistractorRewards, Color.magenta);
+            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorAnimationIntervals, Color.magenta);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -125,6 +129,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         Play.AddSpecificInitializationMethod(() =>
         {
+            GiveRewardIfSliderFull = false;
+
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
@@ -134,29 +140,27 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         });
         Play.AddUpdateMethod(() =>
         {
+            HandleSlider();
+
             ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
             {
                 SA_Object obj = ChosenGO.GetComponent<SA_Object>();
-                if(obj != null && obj.IsTarget)
+                if(obj != null)
                 {
-                    float depth = 10f; //make configurable later
-                    float haloDuration = .15f; //make configurable later
+                    HaloFBController.SetHaloSize(.01f * obj.Size);
 
-                    if(obj.WithinDuration)
+                    if(obj.IsTarget && obj.WithinDuration)
                     {
-                        Debug.LogWarning("WITHIN DURATION!");
-                        AudioFBController.Play("Positive");
-                        HaloFBController.ShowPositive(ChosenGO, depth, haloDuration);
-                        //increment slider:
-                        //check if slider full, if it is: GiveReward():
+                        GiveRewardIfSliderFull = true;
+                        HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
+                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps));
                     }
                     else
                     {
-                        AudioFBController.Play("Negative");
-                        HaloFBController.ShowNegative(ChosenGO, depth, haloDuration);
+                        HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
+                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
                     }
-
                     Handler.LastSuccessfulSelection = null;
                 }
             }
@@ -166,6 +170,20 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
+    }
+
+    private void HandleSlider()
+    {
+        if (GiveRewardIfSliderFull)
+        {
+            if (SliderFBController.isSliderBarFull() && !AudioFBController.IsPlaying())
+            {
+                GiveRewardIfSliderFull = false;
+                GiveReward();
+                SliderFBController.ResetSliderBarFull();
+                SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
+            }
+        }
     }
 
     public override void FinishTrialCleanup()

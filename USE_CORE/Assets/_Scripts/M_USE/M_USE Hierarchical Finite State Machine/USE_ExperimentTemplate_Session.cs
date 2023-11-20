@@ -377,7 +377,6 @@ namespace USE_ExperimentTemplate_Session
                 // Reset level and task references
                 Session.GazeData.fileName = gazeDataFileName;
                 Session.GazeData.folderPath = Session.TaskSelectionDataPath;
-                Debug.LogWarning("GAZE DATA FOLDER PATH: " + Session.TaskSelectionDataPath);
                 Session.SerialRecvData.fileName = serialRecvDataFileName;
                 Session.SerialSentData.fileName = serialSentDataFileName;
                 Session.SerialRecvData.folderPath = Session.TaskSelectionDataPath;

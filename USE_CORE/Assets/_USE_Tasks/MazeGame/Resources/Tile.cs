@@ -126,7 +126,7 @@ public class Tile : MonoBehaviour
         if (mgTL.pathProgressGO.Count == 0) // haven't selected the start yet
             flashingTile = mgTL.startTile;
         else
-            flashingTile = GameObject.Find(mgTL.CurrentTaskLevel.currMaze.mNextStep);
+            flashingTile = GameObject.Find(mgTL.CurrentTaskLevel.currentMaze.mNextStep);
 
         Debug.Log("FLASHING TILE: " + flashingTile);
 

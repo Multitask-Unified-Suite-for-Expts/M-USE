@@ -10,7 +10,7 @@ public class ObjectManager : MonoBehaviour
     public List<SA_Object> TargetList;
     public List<SA_Object> DistractorList;
 
-    public static List<Vector3> Destinations;
+    public static List<Vector3> StartingPositions;
     public static List<Vector3> StartingPositionsUsed;
 
     private Transform ObjectParent;
@@ -23,8 +23,9 @@ public class ObjectManager : MonoBehaviour
     {
         TargetList = new List<SA_Object>();
         DistractorList = new List<SA_Object>();
+        StartingPositions = new List<Vector3>();
         StartingPositionsUsed = new List<Vector3>();
-        CalculateDestinations();
+        CalculateStartingPositions();
     }
 
     public void SetObjectParent(Transform parentTransform)
@@ -79,10 +80,8 @@ public class ObjectManager : MonoBehaviour
         }
     }
     
-    private void CalculateDestinations()
+    private void CalculateStartingPositions()
     {
-        Destinations = new List<Vector3>();
-
         int[] xValues = new int[] { -800, -600, -400, -200, 0, 200, 400, 600, 800 };
         int[] yValues = new int[] { 325, 180, 35, -110, -255, -400};
 
@@ -92,7 +91,7 @@ public class ObjectManager : MonoBehaviour
             for (int j = 0; j < xValues.Length; j++)
             {
                 float x = xValues[j];
-                Destinations.Add(new Vector3(x, y, 0));
+                StartingPositions.Add(new Vector3(x, y, 0));
             }
         }
     }
@@ -110,19 +109,20 @@ public class ObjectManager : MonoBehaviour
         if (TargetList.Count > 0)
         {
             foreach (SA_Object obj in TargetList)
-            {
-                Destroy(obj.gameObject);
-                Destroy(obj);
-            }
+                DestroyObj(obj);
         }
         if (DistractorList.Count > 0)
         {
             foreach (SA_Object obj in DistractorList)
-            {
-                Destroy(obj.gameObject);
-                Destroy(obj);
-            }
+                DestroyObj(obj);
         }
+    }
+
+    public void DestroyObj(SA_Object obj)
+    {
+        Destroy(obj.gameObject);
+        Destroy(obj.Marker);
+        Destroy(obj);
     }
 
     public void ActivateTargets()
@@ -214,6 +214,12 @@ public class SA_Object : MonoBehaviour
             HandleResponseWindow();
             if(IsTarget)
                 HandlePausingDuringSelection();
+
+            if (InputBroker.GetKeyDown(KeyCode.M))
+                ToggleMarker();
+
+            //if (InputBroker.GetKeyDown(KeyCode.R))
+            //    RotateTowardsDest = !RotateTowardsDest;
         }
     }
 
@@ -231,6 +237,11 @@ public class SA_Object : MonoBehaviour
 
             Marker.transform.localPosition = CurrentDestination;
         }
+    }
+
+    private void ToggleMarker()
+    {
+        Marker.SetActive(!Marker.activeInHierarchy);
     }
 
     public void HandleResponseWindow()
@@ -314,7 +325,7 @@ public class SA_Object : MonoBehaviour
         else
             angleOffset = Random.Range(46f, 181f);
 
-        if (PreviousAngleOffsets.Count > 4)
+        if (PreviousAngleOffsets.Count > 3) //Could make a variable "NumMovesWithoutTurningAround"
             PreviousAngleOffsets.RemoveAt(0);
 
         if(angleOffset > 90f)
@@ -357,8 +368,8 @@ public class SA_Object : MonoBehaviour
 
         do
         {
-            randomIndex = Random.Range(0, ObjectManager.Destinations.Count);
-            randomPos = ObjectManager.Destinations[randomIndex];
+            randomIndex = Random.Range(0, ObjectManager.StartingPositions.Count);
+            randomPos = ObjectManager.StartingPositions[randomIndex];
         }
         while (ObjectManager.StartingPositionsUsed.Contains(randomPos));
 

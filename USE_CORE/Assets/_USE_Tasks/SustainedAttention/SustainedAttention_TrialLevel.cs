@@ -155,8 +155,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     {
                         AudioFBController.Play("Negative");
                         HaloFBController.ShowNegative(ChosenGO, depth, haloDuration);
-                        Debug.LogWarning("NOT WITHIN DURATION!");
-                        //do whatever we want for when they select target but NOT within duration
                     }
 
                     Handler.LastSuccessfulSelection = null;

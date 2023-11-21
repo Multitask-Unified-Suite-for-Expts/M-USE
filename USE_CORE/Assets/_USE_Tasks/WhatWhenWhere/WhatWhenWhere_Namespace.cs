@@ -80,7 +80,7 @@ namespace WhatWhenWhere_Namespace
                 td.RandomizedLocations = RandomizedLocations;
                 td.SliderGain = SliderGain;
                 td.SliderLoss = SliderLoss;
-                td.SliderInitial = SliderInitialValue;
+                td.SliderInitialValue = SliderInitialValue;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
@@ -110,11 +110,6 @@ namespace WhatWhenWhere_Namespace
         // Configuration of Stimuli
         public bool RandomizedLocations;
         public bool LeaveFeedbackOn;
-
-        // Slider Variables
-        public int[] SliderGain;
-        public int[] SliderLoss;
-        public int SliderInitial;
 
         public bool GuidedSequenceLearning;
         public int MaxCorrectTrials;

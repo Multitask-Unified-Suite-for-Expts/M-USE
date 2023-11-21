@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace SustainedAttention_Namespace
 {
@@ -18,24 +17,30 @@ namespace SustainedAttention_Namespace
 
     public class SustainedAttention_TrialDef : TrialDef
     {
-
         public float ResponseWindow; //used to control how much time they have to make selection after object animates (closes mouth)
+        public bool RotateTowardsDest;
+
         public float DisplayTargetDuration;
         public float DisplayDistractorsDuration;
         public float PlayDuration;
-        public float ItiDuration;
 
-        //Target:
-        public Vector2 TargetSize;
-        public float TargetSpeed;
-        public float TargetAnimationInterval;
-        public int TargetReward;
+        //Targets:
+        public float TargetCloseDuration;
+        public int[] TargetSizes;
+        public int[] TargetSpeeds;
+        public float[] TargetNextDestDist;
+        public float[] TargetAnimIntervals;
+        public float[] TargetAnimDurations;
+        public Vector2[] TargetIntervalsAndDurations;
 
-        //Distractor:
-        public Vector2 DistractorSize;
-        public float DistractorSpeed;
-        public float DistractorAnimationInterval;
-        public int DistractorReward;
+        //Distractors:
+        public float DistractorCloseDuration;
+        public int[] DistractorSizes;
+        public int[] DistractorSpeeds;
+        public float[] DistractorNextDestDist;
+        public float[] DistractorAnimIntervals;
+        public float[] DistractorAnimDurations;
+        public Vector2[] DistractorIntervalsAndDurations;
 
     }
 

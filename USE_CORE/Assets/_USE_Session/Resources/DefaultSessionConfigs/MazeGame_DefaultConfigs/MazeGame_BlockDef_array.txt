@@ -1,4 +1,3 @@
-BlockName	BlockCount	RandomMinMaxTrials	ViewPath	NumPulses	PulseSize	ContextName	MazeName	RewardRatio	BlockEndType	BlockEndThreshold	ErrorPenalty	MaxMazeDuration	MaxChoiceDuration	DefaultTileColor
- NNNew.4	1	[4, 4]	TRUE	3	250	004_015_010_001_4	M6X6_T0_L6_A2_F2_00000000	5	CurrentTrialPercentError	0.5	FALSE	120	30	[1, 1, 1]
- IDSame.1	2	[4, 4]	TRUE	3	250	004_015_010_001_3	M6X6_T1_L6_E1_A2_00000001	5	CurrentTrialPercentError	0.5	FALSE	120	30	[1, 1, 1]
- EDSame.2	3	[4, 4]	TRUE	3	250	004_015_010_001_4	M6X6_T1_L6_D1_A3_00000000	5	CurrentTrialPercentError	0.5	FALSE	120	30	[1, 1, 1]
+BlockName	BlockCount	RandomMinMaxTrials	ViewPath	NumPulses	PulseSize	ContextName	MazeName	RewardRatio	BlockEndType	BlockEndThreshold	ErrorPenalty	GuidedMazeSelection	DarkenNonPathTiles	TileFlashingRatio	MaxMazeDuration	MaxChoiceDuration	DefaultTileColor
+ Block1a	1	[5,10]	TRUE	3	250	007_033_072_001_3	M6X6_T4_L12_A5_D1_00000002	5	CurrentTrialPercentError	0.5	FALSE	FALSE	FALSE	1	260	60	[1, 1, 1]
+ Block2a	2	[5,10]	TRUE	3	250	007_033_072_001_4	M6X6_T4_L10_C1_D1_00000000	5	CurrentTrialPercentError	0.5	FALSE	FALSE	FALSE	1	260	60	[1, 1, 1]

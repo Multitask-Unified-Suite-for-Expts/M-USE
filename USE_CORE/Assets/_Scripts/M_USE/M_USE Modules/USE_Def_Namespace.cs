@@ -553,7 +553,17 @@ namespace USE_Def_Namespace
         /// The initial amount of progress displayed in the slider at the start of the block.
         /// </summary>
         public int SliderInitialValue;
-        
+
+        /// <summary>
+        /// The slider gains
+        /// </summary>
+        public int[] SliderGain;
+
+        /// <summary>
+        /// The slider losses
+        /// </summary>
+        public int[] SliderLoss;
+
         /// <summary>
         /// The number of tokens displayed in the token bar at the start of the trial.
         /// </summary>

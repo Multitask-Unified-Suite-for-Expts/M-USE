@@ -42,7 +42,7 @@ using Random = UnityEngine.Random;
 public class MazeGame_TaskLevel : ControlLevel_Task_Template
 {
     // Config Loading Variables
-    public MazeDef[] MazeDefs;
+    //public MazeDef[] MazeDefs;
 
     // Maze Loading Variables
     [HideInInspector] public int[] MazeNumSquares;
@@ -52,7 +52,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public string[] MazeFinish;
     [HideInInspector] public string[] MazeName;
     [HideInInspector] public string[] MazeString;
-    [HideInInspector] public Maze currMaze;
+    [HideInInspector] public Maze currentMaze;
     private string mazeKeyFilePath;
     private MazeGame_TrialLevel mgTL;
     private int mIndex;
@@ -116,15 +116,15 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
-            MazeDefs = customSettings[0].AssignCustomSetting<MazeDef[]>();
+            //MazeDefs = customSettings[0].AssignCustomSetting<MazeDef[]>();
+            //InitializeMazeSearchingArrays();
+
             SetSkyBox(mgBD.ContextName);
-            InitializeMazeSearchingArrays();
 
             mgTL.ContextName = mgBD.ContextName;
             MinTrials_InBlock = mgBD.MinTrials;
             MaxTrials_InBlock = mgBD.MaxTrials;
-
-            FindMaze();
+            //FindMaze();
             LoadTextMaze();
             //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
@@ -139,13 +139,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     private void InitializeBlockArrays()
     {
-        RuleAbidingErrors_InBlock = new int[currMaze.mNumSquares];
-        RuleBreakingErrors_InBlock = new int[currMaze.mNumSquares];
-        BacktrackErrors_InBlock = new int[currMaze.mNumSquares];
-        PerseverativeErrors_InBlock = new int[currMaze.mNumSquares];
-        RetouchCorrect_InBlock = new int[currMaze.mNumSquares];
-        RetouchErroneous_InBlock = new int[currMaze.mNumSquares];
-        TotalErrors_InBlock = new int[currMaze.mNumSquares];
+        RuleAbidingErrors_InBlock = new int[currentMaze.mNumSquares];
+        RuleBreakingErrors_InBlock = new int[currentMaze.mNumSquares];
+        BacktrackErrors_InBlock = new int[currentMaze.mNumSquares];
+        PerseverativeErrors_InBlock = new int[currentMaze.mNumSquares];
+        RetouchCorrect_InBlock = new int[currentMaze.mNumSquares];
+        RetouchErroneous_InBlock = new int[currentMaze.mNumSquares];
+        TotalErrors_InBlock = new int[currentMaze.mNumSquares];
     }
 
     public void DefineBlockData()
@@ -261,7 +261,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     }
 
 
-    private void FindMaze()
+/*    private void FindMaze()
     {
         //for given block MazeDims, MazeNumSquares, MazeNumTurns, get all indices of that value, find intersect
         //then choose random member of intersect and assign to this block's trials
@@ -293,17 +293,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         }
 
         mgTL.mazeDefName = MazeName[mIndex];
-    }
+    }*/
 
     public void LoadTextMaze()
     {
-        currMaze = new Maze(MazeString[mIndex]);
+        currentMaze = new Maze(mgBD.MazeDef);
         mgTL.InitializeTrialArrays();
         InitializeBlockArrays();
     }
 
 
-    public override List<CustomSettings> DefineCustomSettings()
+    /*public override List<CustomSettings> DefineCustomSettings()
     {
        // customSettings.Add(new CustomSettings("MazeDef", typeof(MazeDef), "array", parsed => MazeDefs = (MazeDef[])parsed));
         customSettings.Add(new CustomSettings("MazeDef", typeof(MazeDef), "array", MazeDefs));
@@ -329,7 +329,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeName[iMaze] = MazeDefs[iMaze].mName;
             MazeString[iMaze] = MazeDefs[iMaze].mString;
         }
-    }
+    }*/
 
     
 }

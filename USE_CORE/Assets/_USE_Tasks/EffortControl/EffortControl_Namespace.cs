@@ -65,11 +65,12 @@ namespace EffortControl_Namespace
                 MaxTrials = RandomNumGenerator.Next(RandomMinMaxTrials[0], RandomMinMaxTrials[1]);
                 MinTrials = RandomMinMaxTrials[0];
             }
-            else
+            else if (MinMaxTrials != null)
             {
                 MaxTrials = MinMaxTrials[1];
                 MinTrials = MinMaxTrials[0];
             }
+
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
 
             for (int iTrial = 0; iTrial < NumTrials; iTrial++) 

@@ -65,6 +65,7 @@ namespace MazeGame_Namespace
         public float MaxMazeDuration;
         public float MaxChoiceDuration;
         public float[] DefaultTileColor;
+        public string MazeDef;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -105,6 +106,7 @@ namespace MazeGame_Namespace
                 td.MaxMazeDuration = MaxMazeDuration;
                 td.MaxChoiceDuration = MaxChoiceDuration;
                 td.DefaultTileColor = DefaultTileColor;
+                td.MazeDef = MazeDef;
                 TrialDefs.Add(td);
             }
         }
@@ -127,6 +129,7 @@ namespace MazeGame_Namespace
         public float MaxMazeDuration;
         public float MaxChoiceDuration;
         public float[] DefaultTileColor;
+        public string MazeDef;
 
     }
     public class MazeGame_StimDef : StimDef
@@ -143,6 +146,6 @@ namespace MazeGame_Namespace
         public int mNumSquares;
         public int mNumTurns;
         public string mString;
-        
+
     }
 }

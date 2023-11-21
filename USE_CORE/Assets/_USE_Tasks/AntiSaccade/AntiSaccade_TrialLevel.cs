@@ -506,7 +506,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nSaccade Type: " + CurrentTrial.SaccadeType +
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length;
     }
 
@@ -539,7 +538,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("GotTrialCorrect", () => GotTrialCorrect);
-        TrialData.AddDatum("SaccadeType", () => CurrentTrial.SaccadeType);
         TrialData.AddDatum("RandomSpatialCue", () => CurrentTrial.RandomSpatialCueColor);
         TrialData.AddDatum("TargetStimIndex", () => CurrentTrial.TargetStimIndex);
         TrialData.AddDatum("DistractorStimIndices", () => DistractorStimIndices_String);

@@ -90,7 +90,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     private void DefineBlockData()
     {
         BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
-        BlockData.AddDatum("SaccadeType", () => trialLevel.SaccadeType);
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
         BlockData.AddDatum("TrialsCorrect", () => trialLevel.TrialsCorrect_Block);
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
@@ -103,8 +102,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = "\nSaccadeType: " + trialLevel.SaccadeType +
-                        "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
+        CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
                         "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
                         "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
                         "\nReward Pulses: " + NumRewardPulses_InBlock;

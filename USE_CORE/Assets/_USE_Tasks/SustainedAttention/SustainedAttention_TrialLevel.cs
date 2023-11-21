@@ -76,9 +76,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
 
             //Create Targets:
-            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetIntervalsAndDurations, Color.yellow);
+            ObjectManager.CreateObjects(true, CurrentTrial.RotateTargets, CurrentTrial.ResponseWindow, CurrentTrial.TargetCloseDuration, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetIntervalsAndDurations, Color.yellow);
             //Create Distractors:
-            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorIntervalsAndDurations, Color.magenta);
+            ObjectManager.CreateObjects(false, CurrentTrial.RotateDistractors, CurrentTrial.ResponseWindow, CurrentTrial.DistractorCloseDuration, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorIntervalsAndDurations, Color.magenta);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -163,7 +163,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Play.AddTimer(() => CurrentTrial.PlayDuration, ITI);
-
+        Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 

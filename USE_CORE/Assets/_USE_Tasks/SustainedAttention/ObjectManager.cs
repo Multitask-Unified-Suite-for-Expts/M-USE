@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,7 +49,7 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
+    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
     {
         if(sizes.Length != speeds.Length)
         {
@@ -70,7 +71,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(isTarget, rotateTowardsDest, responseWindow, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(this, isTarget, rotateTowardsDest, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -108,20 +109,13 @@ public class ObjectManager : MonoBehaviour
         if (TargetList.Count > 0)
         {
             foreach (SA_Object obj in TargetList)
-                DestroyObj(obj);
+                obj.DestroyObj();
         }
         if (DistractorList.Count > 0)
         {
             foreach (SA_Object obj in DistractorList)
-                DestroyObj(obj);
+                obj.DestroyObj();
         }
-    }
-
-    public void DestroyObj(SA_Object obj)
-    {
-        Destroy(obj.gameObject);
-        Destroy(obj.Marker);
-        Destroy(obj);
     }
 
     public void ActivateTargets()
@@ -153,20 +147,20 @@ public class ObjectManager : MonoBehaviour
 
 public class SA_Object : MonoBehaviour
 {
+    public ObjectManager objManager;
     public bool IsTarget;
     public bool RotateTowardsDest;
     public float Speed;
     public float Size;
     public float NextDestDist;
     public float ResponseWindow;
+    public float CloseDuration;
 
     public Vector2[] IntervalsAndDurations;
     public int CurrentIndex;
 
     private float CurrentAnimInterval;
     private float CurrentAnimDuration;
-
-
 
     public List<Vector3> Visited;
     public Vector2 StartingPosition;
@@ -182,8 +176,9 @@ public class SA_Object : MonoBehaviour
 
     private float AnimStartTime;
 
+    private float IntervalStartTime;
+
     public bool WithinDuration;
-    private bool MouthClosed;
 
     private List<float> PreviousAngleOffsets = new List<float>();
 
@@ -191,18 +186,31 @@ public class SA_Object : MonoBehaviour
     public SA_Object()
     {
         Visited = new List<Vector3>();
-        MouthClosed = false;
         CurrentIndex = 0;
     }
 
-    public void SetupObject(bool isTarget, bool rotateTowardsDest, float responseWindow, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
+    public void DestroyObj()
     {
+        if (IsTarget)
+            objManager.TargetList.Remove(this);
+        else
+            objManager.DistractorList.Remove(this);
+
+        Destroy(gameObject);
+        Destroy(Marker);
+        Destroy(this);
+    }
+
+    public void SetupObject(ObjectManager manager, bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
+    {
+        objManager = manager;
         IsTarget = isTarget;
         RotateTowardsDest = rotateTowardsDest;
         ResponseWindow = responseWindow;
         Speed = speed;
         Size = size;
         NextDestDist = nextDestDist;
+        CloseDuration = closeDuration;
         IntervalsAndDurations = intervalsAndDurations;
 
         CurrentAnimInterval = intervalsAndDurations[CurrentIndex].x;
@@ -216,7 +224,16 @@ public class SA_Object : MonoBehaviour
 
     public void NextInterval()
     {
+        IntervalStartTime = Time.time;
+
         CurrentIndex++;
+
+        if (CurrentIndex > IntervalsAndDurations.Length-1)
+        {
+            DestroyObj();
+            return;
+        }
+
         CurrentAnimInterval = IntervalsAndDurations[CurrentIndex].x;
         CurrentAnimDuration = IntervalsAndDurations[CurrentIndex].y;
     }
@@ -225,7 +242,16 @@ public class SA_Object : MonoBehaviour
     {
         if(Move)
         {
-            RunAnimationInterval();
+            if (Time.time - AnimStartTime >= CurrentAnimInterval)
+            {
+                StartCoroutine(AnimationCoroutine());
+            }
+
+            if(Time.time - IntervalStartTime >= CurrentAnimDuration)
+            {
+                NextInterval();
+            }
+
             HandleResponseWindow();
             HandlePausingDuringSelection();
 
@@ -259,18 +285,13 @@ public class SA_Object : MonoBehaviour
         }
     }
 
-    private void RunAnimationInterval()
+    private IEnumerator AnimationCoroutine()
     {
-        if (Time.time - AnimStartTime >= CurrentAnimInterval)
-        {
-            MouthClosed = !MouthClosed;
-            gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(MouthClosed ? "closed_Transparent" : "open_Transparent");
-
-            if (MouthClosed)
-                WithinDuration = true;
-
-            AnimStartTime = Time.time;
-        }
+        AnimStartTime = Time.time;
+        WithinDuration = true;
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("closed_Transparent");
+        yield return new WaitForSeconds(CloseDuration);
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("open_Transparent");
     }
 
     private void HandlePausingDuringSelection()
@@ -294,6 +315,7 @@ public class SA_Object : MonoBehaviour
     {
         Move = true;
         AnimStartTime = Time.time;
+        IntervalStartTime = Time.time;
     }
 
     private void MoveTowardsDestination()

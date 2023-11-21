@@ -93,7 +93,6 @@ namespace AntiSaccade_Namespace
 
     public class AntiSaccade_TrialDef : TrialDef
     {
-        public string SaccadeType;
         public int PreCue_Size;
         public string SpatialCue_Icon;
         public string Mask_Icon;

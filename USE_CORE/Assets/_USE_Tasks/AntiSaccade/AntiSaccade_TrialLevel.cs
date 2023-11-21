@@ -60,7 +60,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private AntiSaccade_StimDef ChosenStim = null;
 
     //DATA:
-    [HideInInspector] public string SaccadeType;
     [HideInInspector] public int TrialCompletions_Block;
     [HideInInspector] public int TrialsCorrect_Block;
     [HideInInspector] public int TokenBarCompletions_Block;
@@ -127,9 +126,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             LoadConfigUIVariables();
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
-
-            //Set string of Whether its AntiSaccade or ProSaccade by checking if X values are the same. 
-            SaccadeType = CurrentTrial.TargetStim_DisplayPos.x == CurrentTrial.SpatialCue_Pos.x ? "Pro" : "Anti";
 
             SetDataStrings();
 
@@ -510,7 +506,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nSaccade Type: " + SaccadeType +
+                             "\nSaccade Type: " + CurrentTrial.SaccadeType +
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length;
     }
 
@@ -543,7 +539,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("GotTrialCorrect", () => GotTrialCorrect);
-        TrialData.AddDatum("SaccadeType", () => SaccadeType);
+        TrialData.AddDatum("SaccadeType", () => CurrentTrial.SaccadeType);
         TrialData.AddDatum("RandomSpatialCue", () => CurrentTrial.RandomSpatialCueColor);
         TrialData.AddDatum("TargetStimIndex", () => CurrentTrial.TargetStimIndex);
         TrialData.AddDatum("DistractorStimIndices", () => DistractorStimIndices_String);

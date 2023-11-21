@@ -405,7 +405,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private string DetermineContextFilePath(string fileName)
     {
         string filePath = "";
-        Debug.Log("FILE NAME: " + fileName);
         if (Session.UsingDefaultConfigs)
             filePath = $"{Session.SessionDef.ContextExternalFilePath}/{fileName}";
         else if (Session.UsingServerConfigs)

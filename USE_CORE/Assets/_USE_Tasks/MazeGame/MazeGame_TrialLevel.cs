@@ -628,7 +628,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         // RULE - BREAKING ERROR : NOT PRESSING START
 
-        Debug.Log($"TOUCHED COORD: {touchedCoord.chessCoord}, NEXT COORD: {CurrentTaskLevel.currentMaze.mNextStep}, END TILE: {CurrentTaskLevel.currentMaze.mFinish}");
         if (!startedMaze)
         {
             if (Session.SessionDef.EventCodesActive)

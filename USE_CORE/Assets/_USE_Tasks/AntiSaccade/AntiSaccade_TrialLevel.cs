@@ -115,9 +115,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            HaloFBController.SetHaloSize(3.5f);
+            HaloFBController.SetHaloSize(2f);
             HaloFBController.SetHaloIntensity(.75f);
-            TokenFBController.AdjustTokenBarSizing(145);
         });
 
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,8 +149,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            //Camera.main.gameObject.GetComponent<Skybox>().enabled = false; //Disable cam's skybox so the RenderSettings.Skybox can show the Context background
-
             SetTrialSummaryString();
 
             if (CurrentTask.StimFacingCamera)
@@ -438,7 +435,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SpatialCue_GO.transform.parent = AntiSaccade_CanvasGO.transform;
             SpatialCue_GO.transform.localScale = Vector3.one;
             RectTransform spatialCueRect = SpatialCue_GO.AddComponent<RectTransform>();
-            spatialCueRect.sizeDelta = new Vector2(300, 300);
+            spatialCueRect.sizeDelta = new Vector2(200, 200);
             Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
             spatialCueImage.sprite = Resources.Load<Sprite>("Star"); //initially using Star as default
         }
@@ -450,7 +447,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             Mask_GO.transform.parent = AntiSaccade_CanvasGO.transform;
             Mask_GO.transform.localScale = Vector3.one;
             RectTransform maskRect = Mask_GO.AddComponent<RectTransform>();
-            maskRect.sizeDelta = new Vector2(300, 300);
+            maskRect.sizeDelta = new Vector2(200, 200);
             Image maskImage = Mask_GO.AddComponent<Image>();
             maskImage.sprite = Resources.Load<Sprite>("QuestionMark");
             maskImage.color = Color.black;
@@ -558,12 +555,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineFrameData()
     {
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO?.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("TargetStimActive", () => TargetStim_GO != null && TargetStim_GO.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("DistractorStimsActive", () => distractorStims?.IsActive);
-        FrameData.AddDatum("PreCueActive", () => PreCue_GO.activeInHierarchy);
-        FrameData.AddDatum("SpatialCueActive", () => SpatialCue_GO.activeInHierarchy);
-        FrameData.AddDatum("MaskActive", () => Mask_GO.activeInHierarchy);
+        FrameData.AddDatum("PreCueActive", () => PreCue_GO != null && PreCue_GO.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("SpatialCueActive", () => SpatialCue_GO != null && SpatialCue_GO.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("MaskActive", () => Mask_GO != null && Mask_GO.activeInHierarchy ? "Active" : "NotActive");
     }
 
     private void SetDataStrings()

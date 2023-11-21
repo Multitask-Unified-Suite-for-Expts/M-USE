@@ -1,5 +1,7 @@
 using USE_StimulusManagement;
 using USE_Def_Namespace;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace SustainedAttention_Namespace
 {
@@ -23,16 +25,23 @@ namespace SustainedAttention_Namespace
         public float PlayDuration;
 
         //Targets:
+        public float TargetCloseDuration;
         public int[] TargetSizes;
         public int[] TargetSpeeds;
         public float[] TargetNextDestDist;
-        public float[] TargetAnimationIntervals;
+        public float[] TargetAnimIntervals;
+        public float[] TargetAnimDurations;
+        public Vector2[] TargetIntervalsAndDurations;
 
         //Distractors:
+        public float DistractorCloseDuration;
         public int[] DistractorSizes;
         public int[] DistractorSpeeds;
         public float[] DistractorNextDestDist;
-        public float[] DistractorAnimationIntervals;
+        public float[] DistractorAnimIntervals;
+        public float[] DistractorAnimDurations;
+        public Vector2[] DistractorIntervalsAndDurations;
+
     }
 
     public class SustainedAttention_StimDef : StimDef

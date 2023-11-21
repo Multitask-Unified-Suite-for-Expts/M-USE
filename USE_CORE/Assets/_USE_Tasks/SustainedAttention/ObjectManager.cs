@@ -48,9 +48,9 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, int[] sizes, int[] speeds, float[] nextDestDistances, float[] animIntervals, Color color)
+    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
     {
-        if(sizes.Length != speeds.Length || sizes.Length != animIntervals.Length)
+        if(sizes.Length != speeds.Length)
         {
             Debug.LogError("ERROR CREATING SA OBJECTS. NOT ALL ARRAYS CONTAIN SAME NUMBER OF VALUES!");
             return;
@@ -70,7 +70,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(isTarget, rotateTowardsDest, responseWindow, speeds[i], sizes[i], nextDestDistances[i], animIntervals[i]);
+            obj.SetupObject(isTarget, rotateTowardsDest, responseWindow, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -160,7 +160,14 @@ public class SA_Object : MonoBehaviour
     public float NextDestDist;
     public float ResponseWindow;
 
-    public float AnimInterval;
+    public Vector2[] IntervalsAndDurations;
+    public int CurrentIndex;
+
+    private float CurrentAnimInterval;
+    private float CurrentAnimDuration;
+
+
+
     public List<Vector3> Visited;
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
@@ -185,9 +192,10 @@ public class SA_Object : MonoBehaviour
     {
         Visited = new List<Vector3>();
         MouthClosed = false;
+        CurrentIndex = 0;
     }
 
-    public void SetupObject(bool isTarget, bool rotateTowardsDest, float responseWindow, float speed, float size, float nextDestDist, float interval)
+    public void SetupObject(bool isTarget, bool rotateTowardsDest, float responseWindow, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
     {
         IsTarget = isTarget;
         RotateTowardsDest = rotateTowardsDest;
@@ -195,12 +203,22 @@ public class SA_Object : MonoBehaviour
         Speed = speed;
         Size = size;
         NextDestDist = nextDestDist;
-        AnimInterval = interval;
+        IntervalsAndDurations = intervalsAndDurations;
+
+        CurrentAnimInterval = intervalsAndDurations[CurrentIndex].x;
+        CurrentAnimDuration = intervalsAndDurations[CurrentIndex].y;
 
         SetRandomStartingPosition();
         SetNewDestination();
 
         SetupMarker(); //Marker for debugging purposes
+    }
+
+    public void NextInterval()
+    {
+        CurrentIndex++;
+        CurrentAnimInterval = IntervalsAndDurations[CurrentIndex].x;
+        CurrentAnimDuration = IntervalsAndDurations[CurrentIndex].y;
     }
 
     private void Update()
@@ -232,11 +250,6 @@ public class SA_Object : MonoBehaviour
         }
     }
 
-    private void ToggleMarker()
-    {
-        Marker.SetActive(!Marker.activeInHierarchy);
-    }
-
     public void HandleResponseWindow()
     {
         if (WithinDuration)
@@ -248,7 +261,7 @@ public class SA_Object : MonoBehaviour
 
     private void RunAnimationInterval()
     {
-        if (Time.time - AnimStartTime >= AnimInterval)
+        if (Time.time - AnimStartTime >= CurrentAnimInterval)
         {
             MouthClosed = !MouthClosed;
             gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(MouthClosed ? "closed_Transparent" : "open_Transparent");
@@ -277,11 +290,9 @@ public class SA_Object : MonoBehaviour
         }
     }
 
-
     public void ActivateMovement()
     {
         Move = true;
-        //Marker.SetActive(true);
         AnimStartTime = Time.time;
     }
 
@@ -353,7 +364,6 @@ public class SA_Object : MonoBehaviour
 
     }
 
-
     private void SetRandomStartingPosition()
     {
         int randomIndex;
@@ -417,5 +427,10 @@ public class SA_Object : MonoBehaviour
         else
             Marker.GetComponent<Image>().color = Color.yellow;
         Marker.SetActive(false);
+    }
+
+    private void ToggleMarker()
+    {
+        Marker.SetActive(!Marker.activeInHierarchy);
     }
 }

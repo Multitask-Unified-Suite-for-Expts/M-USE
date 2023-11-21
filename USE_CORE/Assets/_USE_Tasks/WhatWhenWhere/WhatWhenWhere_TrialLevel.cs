@@ -671,7 +671,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
         FrameData.AddDatum("ContextName", () => ContextName);
-        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
+        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeSelf ? "Active" : "NotActive");
         FrameData.AddDatum("SearchStimuliShown", () => searchStims?.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims?.IsActive);
     }

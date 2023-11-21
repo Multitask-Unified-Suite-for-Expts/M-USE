@@ -368,7 +368,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 58
+  field of view: 36
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -444,6 +444,21 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  runningPerformance: 
+  difficultyLevel: 0
+  posStep: 0
+  negStep: 0
+  TrialDefSelectionStyle: 
+  maxDiffLevel: 0
+  avgDiffLevel: 0
+  diffLevelJitter: 0
+  NumReversalsUntilTerm: 0
+  MinTrialsBeforeTermProcedure: 0
+  TerminationWindowSize: 0
+  reversalsCount: 0
+  DiffLevelsAtReversals: 
+  DiffLevelsSummary: 
+  calculatedThreshold: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -468,11 +483,9 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  runCalibration: 0
-  InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
-  TrialDefSelectionStyle: 
+  SkyboxMaterial: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
@@ -480,6 +493,7 @@ MonoBehaviour:
   HeldTooShortSquareTexture: {fileID: 0}
   HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
+  CurrentTrialDefIndex: 0
   AntiSaccade_CanvasGO: {fileID: 1452712387}
   minObjectTouchDuration:
     name: 
@@ -520,7 +534,6 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  PrefabPath: 
   ConfigFolderName: 
   TaskName: AntiSaccade
   TaskProjectFolder: 
@@ -555,6 +568,8 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  configUI: {fileID: 0}
+  ActiveSceneElements: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
   TrialAndBlockDefsHandled: 0

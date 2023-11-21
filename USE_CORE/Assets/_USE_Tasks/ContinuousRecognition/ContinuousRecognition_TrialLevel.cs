@@ -1195,9 +1195,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("ContextActive", () => ContextActive);
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
-        FrameData.AddDatum("StarfieldActive", () => Starfield.activeInHierarchy);
+        FrameData.AddDatum("StarfieldActive", () => Starfield != null && Starfield.activeInHierarchy ? "Active" : "NotActive");
     }
 
     private void ClearCurrentTrialStimLists()

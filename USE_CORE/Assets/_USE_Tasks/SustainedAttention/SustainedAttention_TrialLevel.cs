@@ -69,7 +69,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             BordersGO.SetActive(false);
             LoadConfigUIVariables();
 
-
             if (ObjectManager != null)
                 Destroy(ObjectManager);
 
@@ -77,9 +76,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
 
             //Create Targets:
-            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetAnimationIntervals, Color.yellow);
+            ObjectManager.CreateObjects(true, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetIntervalsAndDurations, Color.yellow);
             //Create Distractors:
-            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorAnimationIntervals, Color.magenta);
+            ObjectManager.CreateObjects(false, CurrentTrial.RotateTowardsDest, CurrentTrial.ResponseWindow, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorIntervalsAndDurations, Color.magenta);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -100,13 +99,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             BordersGO.SetActive(true);
 
             CalculateSliderSteps();
-            Vector3 sliderPosAdj = new Vector3(0f, -43f, 0f);
-            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), sliderPosAdj);
-            SliderFBController.SetSliderRectSize(new Vector2(400f, 23f));
-            SliderFBController.SliderGO.SetActive(true);
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
+            SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
-
+            SliderFBController.SliderGO.SetActive(true);
             Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
         });
 
@@ -154,7 +151,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     {
                         GiveRewardIfSliderFull = true;
                         HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
-                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps));
+                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
                     }
                     else
                     {

@@ -351,7 +351,7 @@ public class SA_Object : MonoBehaviour
         else
             angleOffset = Random.Range(46f, 181f);
 
-        if (PreviousAngleOffsets.Count > 3) //Could make a variable "NumMovesWithoutTurningAround"
+        if (PreviousAngleOffsets.Count > 4) //Could make a variable "NumMovesWithoutTurningAround"
             PreviousAngleOffsets.RemoveAt(0);
 
         if(angleOffset > 90f)

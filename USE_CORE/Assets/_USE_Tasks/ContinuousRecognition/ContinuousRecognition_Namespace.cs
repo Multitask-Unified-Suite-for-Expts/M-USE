@@ -49,7 +49,8 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_Locations;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int RewardMag;
+        public int TokenGain;
+        public int TokenLoss;
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
 
@@ -118,7 +119,9 @@ namespace ContinuousRecognition_Namespace
                 trial.MaxNumTrials = MaxNumTrials;
                 trial.ContextName = ContextName;
                 trial.NumPulses = NumPulses;
-                trial.RewardMag = RewardMag;
+                trial.TokenGain = TokenGain;
+                trial.TokenLoss = TokenLoss;
+
                 trial.PulseSize = PulseSize;
                 trial.TokenBarCapacity = TokenBarCapacity;
                 trial.FindAllStim = FindAllStim;
@@ -221,7 +224,8 @@ namespace ContinuousRecognition_Namespace
         public int[] InitialStimRatio;
         public float[] X_FbLocations;
         public float[] Y_FbLocations;
-        public int RewardMag;
+        public int TokenGain;
+        public int TokenLoss;
         public bool ShakeStim, FindAllStim, UseStarfield;
 
         //Not in block config BUT STILL PASSED DOWN:

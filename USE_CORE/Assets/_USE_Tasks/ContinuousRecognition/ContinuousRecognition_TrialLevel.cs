@@ -364,11 +364,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     TokenFBController.AddTokens(ChosenGO, numToFillBar);
                 }
                 else
-                    TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag);
+                    TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.RewardMag);
+                TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
                 EndBlock = true;
             }
         });

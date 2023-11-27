@@ -71,7 +71,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(this, isTarget, rotateTowardsDest, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(isTarget, rotateTowardsDest, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -110,11 +110,13 @@ public class ObjectManager : MonoBehaviour
         {
             foreach (SA_Object obj in TargetList)
                 obj.DestroyObj();
+            TargetList.Clear();
         }
         if (DistractorList.Count > 0)
         {
             foreach (SA_Object obj in DistractorList)
                 obj.DestroyObj();
+            DistractorList.Clear();
         }
     }
 
@@ -147,7 +149,6 @@ public class ObjectManager : MonoBehaviour
 
 public class SA_Object : MonoBehaviour
 {
-    public ObjectManager objManager;
     public bool IsTarget;
     public bool RotateTowardsDest;
     public float Speed;
@@ -191,19 +192,13 @@ public class SA_Object : MonoBehaviour
 
     public void DestroyObj()
     {
-        if (IsTarget)
-            objManager.TargetList.Remove(this);
-        else
-            objManager.DistractorList.Remove(this);
-
         Destroy(gameObject);
         Destroy(Marker);
         Destroy(this);
     }
 
-    public void SetupObject(ObjectManager manager, bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
+    public void SetupObject(bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
     {
-        objManager = manager;
         IsTarget = isTarget;
         RotateTowardsDest = rotateTowardsDest;
         ResponseWindow = responseWindow;

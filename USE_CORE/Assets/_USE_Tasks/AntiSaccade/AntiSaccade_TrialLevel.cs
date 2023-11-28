@@ -478,6 +478,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialsCorrect_Block = 0;
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;
+        calculatedThreshold = 0;
+        reversalsCount = 0;
+        DiffLevelsAtReversals.Clear();
+        runningPerformance.Clear();
     }
 
     public override void FinishTrialCleanup()

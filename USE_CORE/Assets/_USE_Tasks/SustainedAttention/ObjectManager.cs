@@ -49,7 +49,7 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
+    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
     {
         if(sizes.Length != speeds.Length)
         {
@@ -59,19 +59,21 @@ public class ObjectManager : MonoBehaviour
 
         for(int i = 0; i < sizes.Length; i++)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
+            GameObject go = Instantiate(Resources.Load<GameObject>(isTarget ? "Target_Open" : "MonsterOpen"));
             go.name = isTarget ? $"Target{i+1}" : $"Distractor{i+1}";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
             go.GetComponent<RectTransform>().sizeDelta = new Vector2(sizes[i], sizes[i]);
-            go.GetComponent<Image>().color = color;
+
+            if(isTarget) //can remove this istarget later, trying out the monsters
+                go.GetComponent<Image>().color = color;
 
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(this, isTarget, rotateTowardsDest, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(isTarget, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -110,11 +112,13 @@ public class ObjectManager : MonoBehaviour
         {
             foreach (SA_Object obj in TargetList)
                 obj.DestroyObj();
+            TargetList.Clear();
         }
         if (DistractorList.Count > 0)
         {
             foreach (SA_Object obj in DistractorList)
                 obj.DestroyObj();
+            DistractorList.Clear();
         }
     }
 
@@ -147,20 +151,16 @@ public class ObjectManager : MonoBehaviour
 
 public class SA_Object : MonoBehaviour
 {
-    public ObjectManager objManager;
+    public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
     public float Speed;
     public float Size;
     public float NextDestDist;
-    public float ResponseWindow;
+    public Vector2 ResponseWindow;
     public float CloseDuration;
 
-    public Vector2[] IntervalsAndDurations;
-    public int CurrentIndex;
-
-    private float CurrentAnimInterval;
-    private float CurrentAnimDuration;
+    public Vector2[] RateAndDurations;
 
     public List<Vector3> Visited;
     public Vector2 StartingPosition;
@@ -174,9 +174,11 @@ public class SA_Object : MonoBehaviour
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
 
-    private float AnimStartTime;
+    public int CurrentIndex = 0;
+    private int AnimationsCompleted = 0;
+    private float NextAnimationTime;
 
-    private float IntervalStartTime;
+    public float AnimStartTime;
 
     public bool WithinDuration;
 
@@ -191,30 +193,21 @@ public class SA_Object : MonoBehaviour
 
     public void DestroyObj()
     {
-        if (IsTarget)
-            objManager.TargetList.Remove(this);
-        else
-            objManager.DistractorList.Remove(this);
-
         Destroy(gameObject);
         Destroy(Marker);
-        Destroy(this);
     }
 
-    public void SetupObject(ObjectManager manager, bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
+    public void SetupObject(bool isTarget, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
     {
-        objManager = manager;
         IsTarget = isTarget;
         RotateTowardsDest = rotateTowardsDest;
+        MinAnimGap = minAnimGap;
         ResponseWindow = responseWindow;
         Speed = speed;
         Size = size;
         NextDestDist = nextDestDist;
         CloseDuration = closeDuration;
-        IntervalsAndDurations = intervalsAndDurations;
-
-        CurrentAnimInterval = intervalsAndDurations[CurrentIndex].x;
-        CurrentAnimDuration = intervalsAndDurations[CurrentIndex].y;
+        RateAndDurations = intervalsAndDurations;
 
         SetRandomStartingPosition();
         SetNewDestination();
@@ -222,41 +215,59 @@ public class SA_Object : MonoBehaviour
         SetupMarker(); //Marker for debugging purposes
     }
 
-    public void NextInterval()
+    private void SetNextAnimationTime()
     {
-        IntervalStartTime = Time.time;
+        float rate = RateAndDurations[CurrentIndex].x;
+        NextAnimationTime = Time.time + Random.Range(MinAnimGap, rate);
+    }
 
-        CurrentIndex++;
-
-        if (CurrentIndex > IntervalsAndDurations.Length-1)
-        {
-            DestroyObj();
-            return;
-        }
-
-        CurrentAnimInterval = IntervalsAndDurations[CurrentIndex].x;
-        CurrentAnimDuration = IntervalsAndDurations[CurrentIndex].y;
+    int CalcTotalAnimationsPerDuration()
+    {
+        float rate = RateAndDurations[CurrentIndex].x;
+        float duration = RateAndDurations[CurrentIndex].y;
+        return (int) MathF.Round(duration / rate);
     }
 
     private void Update()
     {
         if(Move)
         {
-            if (Time.time - AnimStartTime >= CurrentAnimInterval)
+            if (Time.time >= NextAnimationTime)
             {
                 StartCoroutine(AnimationCoroutine());
+
+                AnimationsCompleted++;
+
+                if (AnimationsCompleted >= CalcTotalAnimationsPerDuration())
+                {
+                    AnimationsCompleted = 0;
+                    CurrentIndex++;
+
+                    if (CurrentIndex >= RateAndDurations.Length)
+                    {
+                        DestroyObj();
+                        return;
+                    }
+                }
+                SetNextAnimationTime();
             }
 
-            if(Time.time - IntervalStartTime >= CurrentAnimDuration)
-            {
-                NextInterval();
-            }
+            if (Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
+                WithinDuration = true;
+            else
+                WithinDuration = false;
 
-            HandleResponseWindow();
             HandlePausingDuringSelection();
 
             if (InputBroker.GetKeyDown(KeyCode.M))
                 ToggleMarker();
+
+            if (InputBroker.GetKeyDown(KeyCode.U))
+            {
+                RotateTowardsDest = !RotateTowardsDest;
+                if (!RotateTowardsDest)
+                    transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            }
         }
     }
 
@@ -276,22 +287,12 @@ public class SA_Object : MonoBehaviour
         }
     }
 
-    public void HandleResponseWindow()
-    {
-        if (WithinDuration)
-        {
-            if (Time.time - AnimStartTime > ResponseWindow)
-                WithinDuration = false;
-        }
-    }
-
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        WithinDuration = true;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("closed_Transparent");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(IsTarget ? "PacmanClosed" : "MonsterClosedImage");
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("open_Transparent");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(IsTarget ? "PacmanOpen" : "MonsterOpenImage");
     }
 
     private void HandlePausingDuringSelection()
@@ -314,8 +315,8 @@ public class SA_Object : MonoBehaviour
     public void ActivateMovement()
     {
         Move = true;
+        SetNextAnimationTime();
         AnimStartTime = Time.time;
-        IntervalStartTime = Time.time;
     }
 
     private void MoveTowardsDestination()
@@ -381,6 +382,7 @@ public class SA_Object : MonoBehaviour
         float xDiff = Mathf.Clamp(destination.x, ObjectManager.xRange.x, ObjectManager.xRange.y) - destination.x;
         float yDiff = Mathf.Clamp(destination.y, ObjectManager.yRange.x, ObjectManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
+
         CurrentDestination = destination;
         NewDestStartTime = Time.time;
 

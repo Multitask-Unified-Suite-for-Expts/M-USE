@@ -376,6 +376,7 @@ public class SA_Object : MonoBehaviour
         float xDiff = Mathf.Clamp(destination.x, ObjectManager.xRange.x, ObjectManager.xRange.y) - destination.x;
         float yDiff = Mathf.Clamp(destination.y, ObjectManager.yRange.x, ObjectManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
+
         CurrentDestination = destination;
         NewDestStartTime = Time.time;
 

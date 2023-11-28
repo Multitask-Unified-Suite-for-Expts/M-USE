@@ -47,8 +47,6 @@ namespace ContinuousRecognition_Namespace
         public int[] InitialStimRatio;
         public float[] X_Locations;
         public float[] Y_Locations;
-        public float[] X_FbLocations;
-        public float[] Y_FbLocations;
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
 
@@ -108,8 +106,6 @@ namespace ContinuousRecognition_Namespace
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
                 trial.BlockStimIndices = BlockStimIndices;
-                trial.X_FbLocations = X_FbLocations;
-                trial.Y_FbLocations = Y_FbLocations;
                 trial.TrialStimLocations = trialStimLocations;
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
@@ -220,8 +216,8 @@ namespace ContinuousRecognition_Namespace
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
-        public float[] X_FbLocations;
-        public float[] Y_FbLocations;
+        public float[] X_FbLocations = new float[] {-3f, -1.8f, -.6f, .6f, 1.8f, 3f};
+        public float[] Y_FbLocations = new float[] {2.1f, 1.05f, 0f, -1.05f, -2.1f};
         public bool ShakeStim, FindAllStim, UseStarfield;
 
         //Not in block config BUT STILL PASSED DOWN:

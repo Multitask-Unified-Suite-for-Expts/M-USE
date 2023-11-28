@@ -72,9 +72,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
 
             //Create Targets:
-            ObjectManager.CreateObjects(true, CurrentTrial.RotateTargets, CurrentTrial.ResponseWindow, CurrentTrial.TargetCloseDuration, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetIntervalsAndDurations, Color.yellow);
+            ObjectManager.CreateObjects(true, CurrentTrial.RotateTargets, CurrentTrial.TargetMinAnimGap, CurrentTrial.ResponseWindow, CurrentTrial.TargetCloseDuration, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetRatesAndDurations, Color.yellow);
             //Create Distractors:
-            ObjectManager.CreateObjects(false, CurrentTrial.RotateDistractors, CurrentTrial.ResponseWindow, CurrentTrial.DistractorCloseDuration, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorIntervalsAndDurations, Color.magenta);
+            ObjectManager.CreateObjects(false, CurrentTrial.RotateDistractors, CurrentTrial.DistractorMinAnimGap, CurrentTrial.ResponseWindow, CurrentTrial.DistractorCloseDuration, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorRatesAndDurations, Color.magenta);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -144,12 +144,16 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
                     if(obj.IsTarget && obj.WithinDuration)
                     {
+                        Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
                         GiveRewardIfTokenBarFull = true;
                         HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
                         TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
                     }
                     else
                     {
+                        if(obj.IsTarget)
+                            Debug.LogWarning("FAILED DURATION: " + (Time.time - obj.AnimStartTime));
+
                         HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
                         TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.TokenLoss);
                     }
@@ -203,9 +207,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        //sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
-        //sliderFlashingDuration = ConfigUiVariables.get<ConfigNumber>("sliderFlashingDuration");
-        //sliderUpdateDuration = ConfigUiVariables.get<ConfigNumber>("sliderUpdateDuration");
     }
 
 

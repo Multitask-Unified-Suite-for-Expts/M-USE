@@ -15,7 +15,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
     //DATA
     [HideInInspector] public int TrialsCompleted_Task = 0;
-    [HideInInspector] public int TokenBarsCompleted_Task = 0;
 
 
     public override void DefineControlLevel()
@@ -50,7 +49,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = new OrderedDictionary
         {
             ["Trials Completed"] = trialLevel.TrialCompletions_Block,
-            ["TokenBar Completions"] = trialLevel.TokenBarCompletions_Block,
         };
         return data;
     }
@@ -59,7 +57,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
-        BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
@@ -71,7 +68,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
-                        "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
                         "\nReward Pulses: " + NumRewardPulses_InBlock;
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();

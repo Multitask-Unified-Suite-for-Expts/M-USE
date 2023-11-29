@@ -154,18 +154,24 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                         return;
                     }
                     else
+                    {
+                        obj.PausingWhenBeingSelected = false;
                         obj.SelectedDuringCurrentInterval = true;
+                    }
 
                     HaloFBController.SetHaloSize(.01f * obj.Size);
 
                     if(obj.IsTarget && obj.WithinDuration)
                     {
+                        Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
                         GiveRewardIfSliderFull = true;
                         HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
                         SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
                     }
                     else
                     {
+                        if(obj.IsTarget)
+                            Debug.LogWarning("FAILING DURATION: " + (Time.time - obj.AnimStartTime));
                         HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
                         SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
                     }

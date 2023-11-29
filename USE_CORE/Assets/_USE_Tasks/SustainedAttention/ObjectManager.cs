@@ -181,6 +181,8 @@ public class SA_Object : MonoBehaviour
     public bool WithinDuration;
     public bool SelectedDuringCurrentInterval;
 
+    public bool PausingWhenBeingSelected;
+
     private readonly List<float> PreviousAngleOffsets = new List<float>();
 
 
@@ -210,6 +212,7 @@ public class SA_Object : MonoBehaviour
 
     private void SetNextAnimationTime()
     {
+        PausingWhenBeingSelected = true;
         SelectedDuringCurrentInterval = false;
         float rate = RateAndDurations[CurrentIndex].x;
         NextAnimationTime = Time.time + Random.Range(MinAnimGap, rate);
@@ -251,7 +254,8 @@ public class SA_Object : MonoBehaviour
             else
                 WithinDuration = false;
 
-            HandlePausingDuringSelection();
+            if(PausingWhenBeingSelected)
+                HandlePausingWhileBeingSelected();
 
             HandleMarkerToggle();
             HandleRotationToggle();
@@ -282,7 +286,7 @@ public class SA_Object : MonoBehaviour
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanOpen");
     }
 
-    private void HandlePausingDuringSelection()
+    private void HandlePausingWhileBeingSelected()
     {
         if (InputBroker.GetMouseButtonDown(0))
         {
@@ -320,6 +324,7 @@ public class SA_Object : MonoBehaviour
         Move = true;
         SetNextAnimationTime();
         AnimStartTime = Time.time;
+        PausingWhenBeingSelected = true;
     }
 
     private void MoveTowardsDestination()

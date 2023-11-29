@@ -13,6 +13,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     public SustainedAttention_TaskLevel CurrentTaskLevel => GetTaskLevel<SustainedAttention_TaskLevel>();
     public SustainedAttention_TaskDef CurrentTask => GetTaskDef<SustainedAttention_TaskDef>();
 
+    //DATA:
+    [HideInInspector] public int TrialCompletions_Block;
+    [HideInInspector] public int TokenBarCompletions_Block;
+
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
     public GameObject BordersGO;
@@ -85,6 +89,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            SetTrialSummaryString();
+
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
 
@@ -175,9 +181,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             if (TokenFBController.IsTokenBarFull() && !AudioFBController.IsPlaying())
             {
-                GiveRewardIfTokenBarFull = false;
                 GiveReward();
+                TokenBarCompletions_Block++;
+                CurrentTaskLevel.TokenBarsCompleted_Task++;
                 TokenFBController.ResetTokenBarFull();
+                GiveRewardIfTokenBarFull = false;
             }
         }
     }
@@ -186,11 +194,30 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     {
         ObjectManager.DestroyExistingObjects();
         TokenFBController.enabled = false;
+
+        if (AbortCode == 0)
+        {
+            TrialCompletions_Block++;
+            CurrentTaskLevel.TrialsCompleted_Task++;
+
+            CurrentTaskLevel.CalculateBlockSummaryString();
+        }
+        else
+        {
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
+        }
     }
 
     public override void ResetTrialVariables()
     {
         TokenFBController.ResetTokenBarFull();
+    }
+
+    public void ResetBlockVariables()
+    {
+        TrialCompletions_Block = 0;
+        TokenBarCompletions_Block = 0;
     }
 
 
@@ -201,6 +228,13 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
     }
 
+    private void SetTrialSummaryString()
+    {
+        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+                             "\nNum Targets: " + CurrentTrial.TargetSizes.Length +
+                             "\nNum Distractors: " + CurrentTrial.DistractorSizes.Length;
+
+    }
 
     private void LoadConfigUIVariables()
     {

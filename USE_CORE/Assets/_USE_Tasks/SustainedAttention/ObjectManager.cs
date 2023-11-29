@@ -164,7 +164,7 @@ public class SA_Object : MonoBehaviour
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool Move; //Controls whether or not they're moving around the screen
-    public bool Paused;
+    public bool ObjectPaused;
 
     public GameObject Marker;
     public Vector3 Direction;
@@ -179,6 +179,7 @@ public class SA_Object : MonoBehaviour
     public float AnimStartTime;
 
     public bool WithinDuration;
+    public bool SelectedDuringCurrentInterval;
 
     private readonly List<float> PreviousAngleOffsets = new List<float>();
 
@@ -187,12 +188,6 @@ public class SA_Object : MonoBehaviour
     {
         Visited = new List<Vector3>();
         CurrentIndex = 0;
-    }
-
-    public void DestroyObj()
-    {
-        Destroy(gameObject);
-        Destroy(Marker);
     }
 
     public void SetupObject(bool isTarget, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
@@ -215,6 +210,7 @@ public class SA_Object : MonoBehaviour
 
     private void SetNextAnimationTime()
     {
+        SelectedDuringCurrentInterval = false;
         float rate = RateAndDurations[CurrentIndex].x;
         NextAnimationTime = Time.time + Random.Range(MinAnimGap, rate);
     }
@@ -264,7 +260,7 @@ public class SA_Object : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(Move && !Paused)
+        if(Move && !ObjectPaused)
         {
             if (AtDestination())
                 SetNewDestination();            
@@ -292,14 +288,14 @@ public class SA_Object : MonoBehaviour
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
-                Paused = true;
+                ObjectPaused = true;
         }
 
         if (InputBroker.GetMouseButtonUp(0))
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
-                Paused = false;
+                ObjectPaused = false;
         }
     }
 
@@ -442,6 +438,12 @@ public class SA_Object : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void DestroyObj()
+    {
+        Destroy(gameObject);
+        Destroy(Marker);
     }
 
     private void SetupMarker()

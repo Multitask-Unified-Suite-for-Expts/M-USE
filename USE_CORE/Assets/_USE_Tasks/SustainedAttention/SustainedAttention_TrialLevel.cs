@@ -15,7 +15,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     //DATA:
     [HideInInspector] public int TrialCompletions_Block;
-    [HideInInspector] public int TokenBarCompletions_Block;
 
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
@@ -27,9 +26,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject ChosenGO = null;
 
-    [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration;
+    private int SliderGainSteps, SliderLossSteps;
 
-    private bool GiveRewardIfTokenBarFull = false;
+    [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
+
+    private bool GiveRewardIfSliderFull = false;
 
     private readonly float HaloDepth = 10f;
     private float HaloDuration = .15f; //make configurable later
@@ -46,6 +47,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            SliderFBController.InitializeSlider();
+
             HaloFBController.SetHaloIntensity(1f);
 
             if (StartButton == null)
@@ -91,12 +94,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString();
 
-            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
-            TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
-
-            TokenFBController.tokenBoxYOffset = 22f;
-            TokenFBController.RecalculateTokenBox();
-
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
             Handler.MinDuration = minObjectTouchDuration.value;
@@ -105,7 +102,14 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget, () =>
         {
             BordersGO.SetActive(true);
-            TokenFBController.enabled = true;
+
+            CalculateSliderSteps();
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
+            SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
+            SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
+            SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
+            SliderFBController.SliderGO.SetActive(true);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
         });
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -127,7 +131,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         Play.AddSpecificInitializationMethod(() =>
         {
-            GiveRewardIfTokenBarFull = false;
+            GiveRewardIfSliderFull = false;
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
@@ -138,34 +142,38 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         });
         Play.AddUpdateMethod(() =>
         {
-            HandleTokenBar();
-
             ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
             {
                 SA_Object obj = ChosenGO.GetComponent<SA_Object>();
                 if(obj != null)
                 {
+                    if (obj.SelectedDuringCurrentInterval)
+                    {
+                        Handler.LastSuccessfulSelection = null;
+                        return;
+                    }
+                    else
+                        obj.SelectedDuringCurrentInterval = true;
+
                     HaloFBController.SetHaloSize(.01f * obj.Size);
 
                     if(obj.IsTarget && obj.WithinDuration)
                     {
-                        Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
-                        GiveRewardIfTokenBarFull = true;
+                        GiveRewardIfSliderFull = true;
                         HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
-                        TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
+                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
                     }
                     else
                     {
-                        if(obj.IsTarget)
-                            Debug.LogWarning("FAILED DURATION: " + (Time.time - obj.AnimStartTime));
-
                         HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
-                        TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.TokenLoss);
+                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
                     }
                     Handler.LastSuccessfulSelection = null;
                 }
             }
+
+            HandleSlider();
         });
         Play.AddTimer(() => CurrentTrial.PlayDuration, ITI);
         Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
@@ -175,31 +183,31 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    private void HandleTokenBar()
+    private void HandleSlider()
     {
-        if (GiveRewardIfTokenBarFull)
+        if (GiveRewardIfSliderFull)
         {
-            if (TokenFBController.IsTokenBarFull() && !AudioFBController.IsPlaying())
+            if (SliderFBController.isSliderBarFull() && !AudioFBController.IsPlaying())
             {
                 GiveReward();
-                TokenBarCompletions_Block++;
-                CurrentTaskLevel.TokenBarsCompleted_Task++;
-                TokenFBController.ResetTokenBarFull();
-                GiveRewardIfTokenBarFull = false;
+                SliderFBController.ResetSliderBarFull();
+                SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
+                GiveRewardIfSliderFull = false;
+                //increment slider completions data??
             }
         }
-    }
+    } //muse paper online at bioarchive. 
 
     public override void FinishTrialCleanup()
     {
         ObjectManager.DestroyExistingObjects();
-        TokenFBController.enabled = false;
+        SliderFBController.SliderGO.SetActive(false);
+        SliderFBController.SliderHaloGO.SetActive(false);
 
         if (AbortCode == 0)
         {
             TrialCompletions_Block++;
             CurrentTaskLevel.TrialsCompleted_Task++;
-
             CurrentTaskLevel.CalculateBlockSummaryString();
         }
         else
@@ -211,13 +219,28 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
-        TokenFBController.ResetTokenBarFull();
+        SliderGainSteps = 0;
+        SliderLossSteps = 0;
+        SliderFBController.ResetSliderBarFull();
     }
 
     public void ResetBlockVariables()
     {
         TrialCompletions_Block = 0;
-        TokenBarCompletions_Block = 0;
+    }
+
+    private void CalculateSliderSteps()
+    {
+        foreach (int sliderGain in CurrentTrial.SliderGain)
+        {
+            SliderGainSteps += sliderGain;
+        }
+        SliderGainSteps += CurrentTrial.SliderInitialValue;
+        foreach (int sliderLoss in CurrentTrial.SliderLoss)
+        {
+            SliderLossSteps += sliderLoss;
+        }
+        SliderLossSteps += CurrentTrial.SliderInitialValue;
     }
 
 
@@ -241,6 +264,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
+        sliderFlashingDuration = ConfigUiVariables.get<ConfigNumber>("sliderFlashingDuration");
+        sliderUpdateDuration = ConfigUiVariables.get<ConfigNumber>("sliderUpdateDuration");
     }
 
 

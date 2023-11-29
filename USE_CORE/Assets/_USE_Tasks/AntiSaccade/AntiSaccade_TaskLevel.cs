@@ -36,7 +36,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     AntiSaccade_TrialLevel trialLevel;
 
     [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
 
     //Task Values used for SummaryData file
@@ -50,7 +49,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         trialLevel = (AntiSaccade_TrialLevel)TrialLevel;
 
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
 
         DefineBlockData();
 
@@ -71,7 +69,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         {
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0, CurrentBlockString);
             BlockStringsAdded++;
         }
     }

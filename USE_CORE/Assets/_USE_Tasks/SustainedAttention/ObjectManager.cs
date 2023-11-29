@@ -59,16 +59,14 @@ public class ObjectManager : MonoBehaviour
 
         for(int i = 0; i < sizes.Length; i++)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>(isTarget ? "Target_Open" : "MonsterOpen"));
+            GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
             go.name = isTarget ? $"Target{i+1}" : $"Distractor{i+1}";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
             go.GetComponent<RectTransform>().sizeDelta = new Vector2(sizes[i], sizes[i]);
-
-            if(isTarget) //can remove this istarget later, trying out the monsters
-                go.GetComponent<Image>().color = color;
+            go.GetComponent<Image>().color = color;
 
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
@@ -182,7 +180,7 @@ public class SA_Object : MonoBehaviour
 
     public bool WithinDuration;
 
-    private List<float> PreviousAngleOffsets = new List<float>();
+    private readonly List<float> PreviousAngleOffsets = new List<float>();
 
 
     public SA_Object()
@@ -259,15 +257,8 @@ public class SA_Object : MonoBehaviour
 
             HandlePausingDuringSelection();
 
-            if (InputBroker.GetKeyDown(KeyCode.M))
-                ToggleMarker();
-
-            if (InputBroker.GetKeyDown(KeyCode.U))
-            {
-                RotateTowardsDest = !RotateTowardsDest;
-                if (!RotateTowardsDest)
-                    transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-            }
+            HandleMarkerToggle();
+            HandleRotationToggle();
         }
     }
 
@@ -290,9 +281,9 @@ public class SA_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(IsTarget ? "PacmanClosed" : "MonsterClosedImage");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(IsTarget ? "PacmanOpen" : "MonsterOpenImage");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanOpen");
     }
 
     private void HandlePausingDuringSelection()
@@ -309,6 +300,22 @@ public class SA_Object : MonoBehaviour
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
                 Paused = false;
+        }
+    }
+
+    private void HandleMarkerToggle()
+    {
+        if (InputBroker.GetKeyDown(KeyCode.M))
+            ToggleMarker();
+    }
+
+    private void HandleRotationToggle()
+    {
+        if (InputBroker.GetKeyDown(KeyCode.U))
+        {
+            RotateTowardsDest = !RotateTowardsDest;
+            if (!RotateTowardsDest)
+                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
         }
     }
 

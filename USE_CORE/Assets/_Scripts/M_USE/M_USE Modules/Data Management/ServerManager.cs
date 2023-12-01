@@ -190,7 +190,7 @@ public static class ServerManager //Used with the PHP scripts
         if (request.result == UnityWebRequest.Result.Success)
         {
             string result = request.downloadHandler.text;
-            Debug.LogWarning(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
 
             if (result == "File not found")
                 callback?.Invoke(null);

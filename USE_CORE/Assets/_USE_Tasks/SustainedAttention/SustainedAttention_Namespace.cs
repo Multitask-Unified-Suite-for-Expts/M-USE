@@ -19,6 +19,8 @@ namespace SustainedAttention_Namespace
     {
         public Vector2 ResponseWindow; //used to control how much time they have to make selection after object animates (closes mouth)
 
+        public Vector3 AngleProbs;
+
         public float DisplayTargetDuration;
         public float DisplayDistractorsDuration;
         public float PlayDuration;

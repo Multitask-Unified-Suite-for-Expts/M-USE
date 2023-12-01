@@ -49,7 +49,7 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
+    public void CreateObjects(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
     {
         if(sizes.Length != speeds.Length)
         {
@@ -71,7 +71,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(isTarget, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(isTarget, angleProbs, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -149,6 +149,7 @@ public class ObjectManager : MonoBehaviour
 
 public class SA_Object : MonoBehaviour
 {
+    public Vector3 AngleProbs;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -172,7 +173,7 @@ public class SA_Object : MonoBehaviour
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
 
-    public int CurrentIndex = 0;
+    public int CurrentAnimIndex = 0;
     private int AnimationsCompleted = 0;
     private float NextAnimationTime;
 
@@ -189,12 +190,13 @@ public class SA_Object : MonoBehaviour
     public SA_Object()
     {
         Visited = new List<Vector3>();
-        CurrentIndex = 0;
+        CurrentAnimIndex = 0;
     }
 
-    public void SetupObject(bool isTarget, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
+    public void SetupObject(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
     {
         IsTarget = isTarget;
+        AngleProbs = angleProbs;
         RotateTowardsDest = rotateTowardsDest;
         MinAnimGap = minAnimGap;
         ResponseWindow = responseWindow;
@@ -214,14 +216,19 @@ public class SA_Object : MonoBehaviour
     {
         PausingWhenBeingSelected = true;
         SelectedDuringCurrentInterval = false;
-        float rate = RateAndDurations[CurrentIndex].x;
-        NextAnimationTime = Time.time + Random.Range(MinAnimGap, rate);
+        float rate = RateAndDurations[CurrentAnimIndex].x;
+        float addedTime = Random.Range(MinAnimGap, rate);
+        NextAnimationTime = Time.time + addedTime;
+
+        //Can delete this later. just using for debug purposes
+        if (IsTarget)
+            Debug.LogWarning("NEXT INTERVAL: " + addedTime);
     }
 
-    int CalcTotalAnimationsPerDuration()
+    int GetTotalAnimsPerDuration()
     {
-        float rate = RateAndDurations[CurrentIndex].x;
-        float duration = RateAndDurations[CurrentIndex].y;
+        float rate = RateAndDurations[CurrentAnimIndex].x;
+        float duration = RateAndDurations[CurrentAnimIndex].y;
         return (int) MathF.Round(duration / rate);
     }
 
@@ -235,12 +242,12 @@ public class SA_Object : MonoBehaviour
 
                 AnimationsCompleted++;
 
-                if (AnimationsCompleted >= CalcTotalAnimationsPerDuration())
+                if (AnimationsCompleted >= GetTotalAnimsPerDuration())
                 {
                     AnimationsCompleted = 0;
-                    CurrentIndex++;
+                    CurrentAnimIndex++;
 
-                    if (CurrentIndex >= RateAndDurations.Length)
+                    if (CurrentAnimIndex >= RateAndDurations.Length)
                     {
                         DestroyObj();
                         return;
@@ -345,17 +352,14 @@ public class SA_Object : MonoBehaviour
 
     public void SetNewDestination()
     {
-        float chanceSmall = 0.4f;
-        float chanceMedium = 0.5f;
-
         float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg; //Extract angle from current Direction
 
         float randomChance = Random.value; //Get randomNum between 0 and 1
         float angleOffset;
 
-        if (randomChance < chanceSmall)
+        if (randomChance < AngleProbs.x) //AngleProbs.x is the "Chance of a small angle"
             angleOffset = Random.Range(0, 16f);
-        else if (randomChance < chanceSmall + chanceMedium)
+        else if (randomChance < AngleProbs.x + AngleProbs.y) //AngleProbs.y is the "Chance of a medium angle"
             angleOffset = Random.Range(16f, 46f);
         else
             angleOffset = Random.Range(46f, 181f);
@@ -399,19 +403,19 @@ public class SA_Object : MonoBehaviour
     private void SetRandomStartingPosition()
     {
         int randomIndex;
-        Vector3 randomPos;
+        Vector3 newRandomPos;
 
         do
         {
             randomIndex = Random.Range(0, ObjectManager.StartingPositions.Count);
-            randomPos = ObjectManager.StartingPositions[randomIndex];
+            newRandomPos = ObjectManager.StartingPositions[randomIndex];
         }
-        while (ObjectManager.StartingPositionsUsed.Contains(randomPos));
+        while (ObjectManager.StartingPositionsUsed.Contains(newRandomPos));
 
-        ObjectManager.StartingPositionsUsed.Add(randomPos);
+        ObjectManager.StartingPositionsUsed.Add(newRandomPos);
 
-        StartingPosition = randomPos;
-        transform.localPosition = randomPos;
+        StartingPosition = newRandomPos;
+        transform.localPosition = newRandomPos;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

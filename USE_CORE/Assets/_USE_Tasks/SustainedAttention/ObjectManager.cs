@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -173,27 +174,23 @@ public class SA_Object : MonoBehaviour
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
 
-    public int CurrentAnimIndex = 0;
-    private int AnimationsCompleted = 0;
-    private float NextAnimationTime;
-
     public float AnimStartTime;
 
     public bool WithinDuration;
-    public bool SelectedDuringCurrentInterval;
-
-    public bool PausingWhenBeingSelected;
 
     private readonly List<float> PreviousAngleOffsets = new List<float>();
+
+    public List<Cycle> Cycles;
+    public Cycle CurrentCycle;
 
 
     public SA_Object()
     {
         Visited = new List<Vector3>();
-        CurrentAnimIndex = 0;
+        Cycles = new List<Cycle>();
     }
 
-    public void SetupObject(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
+    public void SetupObject(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
     {
         IsTarget = isTarget;
         AngleProbs = angleProbs;
@@ -204,7 +201,20 @@ public class SA_Object : MonoBehaviour
         Size = size;
         NextDestDist = nextDestDist;
         CloseDuration = closeDuration;
-        RateAndDurations = intervalsAndDurations;
+        RateAndDurations = ratesAndDurations;
+
+        foreach(var rateAndDur in RateAndDurations)
+        {
+            Cycle cycle = new Cycle();
+            cycle.duration = rateAndDur.y;
+            cycle.intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y);
+            //if (IsTarget)
+            //{
+            //    foreach (var interval in cycle.intervals)
+            //        Debug.LogWarning("INTERVAL: " + interval);
+            //}
+            Cycles.Add(cycle);
+        }
 
         SetRandomStartingPosition();
         SetNewDestination();
@@ -212,56 +222,67 @@ public class SA_Object : MonoBehaviour
         SetupMarker(); //Marker for debugging purposes
     }
 
-    private void SetNextAnimationTime()
+    List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        PausingWhenBeingSelected = true;
-        SelectedDuringCurrentInterval = false;
-        float rate = RateAndDurations[CurrentAnimIndex].x;
-        float addedTime = Random.Range(MinAnimGap, rate);
-        NextAnimationTime = Time.time + addedTime;
+        List<float> randomFloats = new List<float>();
 
-        //Can delete this later. just using for debug purposes
-        if (IsTarget)
-            Debug.LogWarning("NEXT INTERVAL: " + addedTime);
+        for (int i = 0; i < numIntervals; i++)
+        {
+            float randomValue;
+            do
+            {
+                randomValue = Random.Range(0f, duration);
+
+            } while (randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap));
+
+            randomFloats.Add(randomValue);
+        }
+        randomFloats.Sort();
+        return randomFloats;
     }
 
-    int GetTotalAnimsPerDuration()
+    private void NextCycle()
     {
-        float rate = RateAndDurations[CurrentAnimIndex].x;
-        float duration = RateAndDurations[CurrentAnimIndex].y;
-        return (int) MathF.Round(duration / rate);
+        Cycles.RemoveAt(0);
+
+        if (Cycles.Count >= 1)
+        {
+            //if (IsTarget)
+            //    Debug.LogWarning("NEXT CYCLE!");
+
+            CurrentCycle = Cycles[0];
+            CurrentCycle.StartCycle();
+        }
+        else
+        {
+            //if(IsTarget)
+            //    Debug.LogWarning("NO CYCLES LEFT!");
+
+            DestroyObj();
+        }
     }
+
 
     private void Update()
     {
         if(Move)
         {
-            if (Time.time >= NextAnimationTime)
+            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+            {
+                NextCycle();
+            }
+            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
                 StartCoroutine(AnimationCoroutine());
-
-                AnimationsCompleted++;
-
-                if (AnimationsCompleted >= GetTotalAnimsPerDuration())
-                {
-                    AnimationsCompleted = 0;
-                    CurrentAnimIndex++;
-
-                    if (CurrentAnimIndex >= RateAndDurations.Length)
-                    {
-                        DestroyObj();
-                        return;
-                    }
-                }
-                SetNextAnimationTime();
+                CurrentCycle.NextInterval();
             }
-
-            if (Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
+            
+            if (AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
                 WithinDuration = true;
             else
                 WithinDuration = false;
 
-            if(PausingWhenBeingSelected)
+            if(CurrentCycle.pauseDuringSelection)
                 HandlePausingWhileBeingSelected();
 
             HandleMarkerToggle();
@@ -287,6 +308,8 @@ public class SA_Object : MonoBehaviour
 
     private IEnumerator AnimationCoroutine()
     {
+        //if (IsTarget)
+        //    Debug.LogWarning("ANIMATING at " + (Time.time - CurrentCycle.cycleStartTime));
         AnimStartTime = Time.time;
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
         yield return new WaitForSeconds(CloseDuration);
@@ -329,9 +352,11 @@ public class SA_Object : MonoBehaviour
     public void ActivateMovement()
     {
         Move = true;
-        SetNextAnimationTime();
-        AnimStartTime = Time.time;
-        PausingWhenBeingSelected = true;
+
+        AnimStartTime = 0; //used to be Time.time 
+
+        CurrentCycle = Cycles[0];
+        CurrentCycle.StartCycle();
     }
 
     private void MoveTowardsDestination()
@@ -475,4 +500,34 @@ public class SA_Object : MonoBehaviour
     {
         Marker.SetActive(!Marker.activeInHierarchy);
     }
+}
+
+public class Cycle
+{
+    public float duration;
+    public List<float> intervals;
+    public float currentInterval;
+
+    public float cycleStartTime;
+
+    public bool selectedDuringCurrentInterval;
+    public bool pauseDuringSelection;
+
+    public void StartCycle()
+    {
+        currentInterval = intervals[0];
+        cycleStartTime = Time.time;
+        //selectedDuringCurrentInterval = false;
+        pauseDuringSelection = true;
+    }
+
+    public void NextInterval()
+    {
+        intervals.RemoveAt(0);
+        if (intervals.Count > 0)
+            currentInterval = intervals[0];
+        selectedDuringCurrentInterval = false;
+        pauseDuringSelection = true;
+    }
+
 }

@@ -148,15 +148,15 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 SA_Object obj = ChosenGO.GetComponent<SA_Object>();
                 if(obj != null)
                 {
-                    if (obj.SelectedDuringCurrentInterval)
+                    if (obj.CurrentCycle.selectedDuringCurrentInterval)
                     {
                         Handler.LastSuccessfulSelection = null;
                         return;
                     }
                     else
                     {
-                        obj.PausingWhenBeingSelected = false;
-                        obj.SelectedDuringCurrentInterval = true;
+                        obj.CurrentCycle.selectedDuringCurrentInterval = true;
+                        obj.CurrentCycle.pauseDuringSelection = false; //dont pause movement for subsequent selectio attempts
                     }
 
                     HaloFBController.SetHaloSize(.01f * obj.Size);
@@ -182,7 +182,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             HandleSlider();
         });
         Play.AddTimer(() => CurrentTrial.PlayDuration, ITI);
-        Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
+        //Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -202,7 +202,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 //increment slider completions data??
             }
         }
-    } //muse paper online at bioarchive. 
+    }
 
     public override void FinishTrialCleanup()
     {

@@ -15,6 +15,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     //DATA:
     [HideInInspector] public int TrialCompletions_Block;
+    [HideInInspector] public int SuccessfulTargetSelections_Block = 0;
+    [HideInInspector] public int UnsuccessfulTargetSelections_Block = 0;
+    [HideInInspector] public int DistractorSelections_Block = 0;
+    [HideInInspector] public int IntervalsWithoutSelection_Block = 0;
 
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
@@ -156,25 +160,39 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     else
                     {
                         obj.CurrentCycle.selectedDuringCurrentInterval = true;
-                        obj.CurrentCycle.pauseDuringSelection = false; //dont pause movement for subsequent selectio attempts
+                        obj.CurrentCycle.pauseDuringFirstSelection = false; //dont pause movement for subsequent selection attempts
                     }
 
                     HaloFBController.SetHaloSize(.01f * obj.Size);
 
-                    if(obj.IsTarget && obj.WithinDuration)
+                    if (obj.IsTarget)
                     {
-                        Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
-                        GiveRewardIfSliderFull = true;
-                        HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
-                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
+                        if(obj.WithinDuration)
+                        {
+                            Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
+                            GiveRewardIfSliderFull = true;
+                            HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
+                            SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
+                            SuccessfulTargetSelections_Block++;
+                            CurrentTaskLevel.SuccessfulTargetSelections_Task++;
+                        }
+                        else
+                        {
+                            Debug.LogWarning("FAILED DURATION: " + (Time.time - obj.AnimStartTime));
+                            HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
+                            SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
+                            UnsuccessfulTargetSelections_Block++;
+                            CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
+                        }
                     }
-                    else
+                    else //Selected a Distractor
                     {
-                        if(obj.IsTarget)
-                            Debug.LogWarning("FAILING DURATION: " + (Time.time - obj.AnimStartTime));
                         HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
                         SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
+                        DistractorSelections_Block++;
+                        CurrentTaskLevel.DistractorSelections_Task++;
                     }
+
                     Handler.LastSuccessfulSelection = null;
                 }
             }
@@ -233,6 +251,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     public void ResetBlockVariables()
     {
         TrialCompletions_Block = 0;
+
+        SuccessfulTargetSelections_Block = 0;
+        UnsuccessfulTargetSelections_Block = 0;
+        DistractorSelections_Block = 0;
+        IntervalsWithoutSelection_Block = 0;
     }
 
     private void CalculateSliderSteps()
@@ -264,6 +287,32 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                              "\nNum Distractors: " + CurrentTrial.DistractorSizes.Length;
 
     }
+
+    //private void DefineTrialData()
+    //{
+    //    TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
+    //    TrialData.AddDatum("InflationsNeeded", () => InflationsNeeded);
+    //    TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
+    //    TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);
+    //    TrialData.AddDatum("NumCoinsLeft", () => CurrentTrial.NumCoinsLeft);
+    //    TrialData.AddDatum("NumCoinsRight", () => CurrentTrial.NumCoinsRight);
+    //    TrialData.AddDatum("ChosenSide", () => SideChoice);
+    //    TrialData.AddDatum("ChosenEffort", () => EffortChoice);
+    //    TrialData.AddDatum("ChosenReward", () => RewardChoice);
+    //    TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
+    //    TrialData.AddDatum("TimeTakenToInflateBaloon", () => InflationDuration);
+    //    TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
+    //    TrialData.AddDatum("ClicksPerOutline", () => CurrentTrial.ClicksPerOutline);
+    //    TrialData.AddDatum("TrialTouches", () => TrialTouches);
+    //}
+
+    //private void DefineFrameData()
+    //{
+    //    FrameData.AddDatum("ContextActive", () => ContextActive);
+    //    FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+    //    FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
+    //    FrameData.AddDatum("StarfieldActive", () => Starfield != null && Starfield.activeInHierarchy ? "Active" : "NotActive");
+    //}
 
     private void LoadConfigUIVariables()
     {

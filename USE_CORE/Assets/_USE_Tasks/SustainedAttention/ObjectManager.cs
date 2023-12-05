@@ -205,14 +205,11 @@ public class SA_Object : MonoBehaviour
 
         foreach(var rateAndDur in RateAndDurations)
         {
-            Cycle cycle = new Cycle();
-            cycle.duration = rateAndDur.y;
-            cycle.intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y);
-            //if (IsTarget)
-            //{
-            //    foreach (var interval in cycle.intervals)
-            //        Debug.LogWarning("INTERVAL: " + interval);
-            //}
+            Cycle cycle = new()
+            {
+                duration = rateAndDur.y,
+                intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y)
+            };
             Cycles.Add(cycle);
         }
 
@@ -247,17 +244,11 @@ public class SA_Object : MonoBehaviour
 
         if (Cycles.Count >= 1)
         {
-            //if (IsTarget)
-            //    Debug.LogWarning("NEXT CYCLE!");
-
             CurrentCycle = Cycles[0];
             CurrentCycle.StartCycle();
         }
         else
         {
-            //if(IsTarget)
-            //    Debug.LogWarning("NO CYCLES LEFT!");
-
             DestroyObj();
         }
     }
@@ -282,11 +273,18 @@ public class SA_Object : MonoBehaviour
             else
                 WithinDuration = false;
 
-            if(CurrentCycle.pauseDuringSelection)
+            if(CurrentCycle.pauseDuringFirstSelection)
                 HandlePausingWhileBeingSelected();
 
             HandleMarkerToggle();
             HandleRotationToggle();
+
+            if (InputBroker.GetKeyDown(KeyCode.UpArrow))
+                NextDestDist *= 1.5f;
+
+            if (InputBroker.GetKeyDown(KeyCode.DownArrow))
+                NextDestDist /= 1.5f;
+
         }
     }
 
@@ -511,14 +509,13 @@ public class Cycle
     public float cycleStartTime;
 
     public bool selectedDuringCurrentInterval;
-    public bool pauseDuringSelection;
+    public bool pauseDuringFirstSelection;
 
     public void StartCycle()
     {
         currentInterval = intervals[0];
         cycleStartTime = Time.time;
-        //selectedDuringCurrentInterval = false;
-        pauseDuringSelection = true;
+        pauseDuringFirstSelection = true;
     }
 
     public void NextInterval()
@@ -527,7 +524,7 @@ public class Cycle
         if (intervals.Count > 0)
             currentInterval = intervals[0];
         selectedDuringCurrentInterval = false;
-        pauseDuringSelection = true;
+        pauseDuringFirstSelection = true;
     }
 
 }

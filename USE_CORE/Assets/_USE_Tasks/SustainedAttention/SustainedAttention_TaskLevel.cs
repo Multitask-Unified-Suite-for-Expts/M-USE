@@ -16,6 +16,11 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     //DATA
     [HideInInspector] public int TrialsCompleted_Task = 0;
 
+    [HideInInspector] public int SuccessfulTargetSelections_Task = 0;
+    [HideInInspector] public int UnsuccessfulTargetSelections_Task = 0;
+    [HideInInspector] public int DistractorSelections_Task = 0;
+    [HideInInspector] public int IntervalsWithoutSelection_Task = 0;
+
 
     public override void DefineControlLevel()
     {
@@ -29,9 +34,71 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         {
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
+            trialLevel.ResetBlockVariables();
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
+    }
+
+    public override void SetTaskSummaryString()
+    {
+        CurrentTaskSummaryString.Clear();
+        base.SetTaskSummaryString();
+        CurrentTaskSummaryString.Append($"\t<b># Successful Target Selections:</b> {SuccessfulTargetSelections_Task}");
+    }
+
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = base.GetTaskSummaryData();
+
+        data["Trials Completed"] = TrialsCompleted_Task;
+        data["Successful Target Selections"] = SuccessfulTargetSelections_Task;
+        data["Unsuccessful Target Selections"] = UnsuccessfulTargetSelections_Task;
+        data["Distractor Selections"] = DistractorSelections_Task;
+        data["Intervals Without Selections"] = IntervalsWithoutSelection_Task;
+        return data;
+    }
+
+    public override OrderedDictionary GetBlockResultsData()
+    {
+        OrderedDictionary data = new OrderedDictionary
+        {
+            ["Trials Completed"] = trialLevel.TrialCompletions_Block,
+            ["Successful Target Selections"] = trialLevel.SuccessfulTargetSelections_Block,
+            ["Unsuccessful Target Selections"] = trialLevel.UnsuccessfulTargetSelections_Block,
+            ["Distractor Selections"] = trialLevel.DistractorSelections_Block,
+            ["Intervals Without A Selection"] = trialLevel.IntervalsWithoutSelection_Block,
+        };
+        return data;
+    }
+
+    private void DefineBlockData()
+    {
+        BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
+        BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
+
+        BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
+        BlockData.AddDatum("SuccessfulTargetSelections", () => trialLevel.SuccessfulTargetSelections_Block);
+        BlockData.AddDatum("UnsuccessfulTargetSelections", () => trialLevel.UnsuccessfulTargetSelections_Block);
+        BlockData.AddDatum("DistractorSelections", () => trialLevel.DistractorSelections_Block);
+        BlockData.AddDatum("IntervalsWithoutASelection", () => trialLevel.IntervalsWithoutSelection_Block);
+
+        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
+        BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
+    }
+
+    public void CalculateBlockSummaryString()
+    {
+        ClearStrings();
+
+        CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
+                             "\nSuccessful Target Selections: " + trialLevel.SuccessfulTargetSelections_Block +
+                             "\nUnsuccessful Target Selections: " + trialLevel.UnsuccessfulTargetSelections_Block +
+                             "\nDistractor Selections: " + trialLevel.DistractorSelections_Block +
+                             "\nIntervals Without A Selection: " + trialLevel.DistractorSelections_Block +
+                             "\nReward Pulses: " + NumRewardPulses_InBlock;
+
+        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }
 
     private void HandleBlockStrings()
@@ -42,35 +109,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
                 CurrentBlockString += "\n";
             BlockStringsAdded++;
         }
-    }
-
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = trialLevel.TrialCompletions_Block,
-        };
-        return data;
-    }
-
-    private void DefineBlockData()
-    {
-        BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
-        BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
-        BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
-        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
-        BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
-        //MORE TO ADD:
-    }
-
-    public void CalculateBlockSummaryString()
-    {
-        ClearStrings();
-
-        CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
-                        "\nReward Pulses: " + NumRewardPulses_InBlock;
-
-        CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }
 
     public void ClearStrings()

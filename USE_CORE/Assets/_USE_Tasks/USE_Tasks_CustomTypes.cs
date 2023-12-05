@@ -40,6 +40,7 @@ using FeatureUncertaintyWM_Namespace;
 using AntiSaccade_Namespace;
 using TemporalOrderJudgement_Namespace;
 using SustainedAttention_Namespace;
+using FruitRunner_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -203,6 +204,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(SustainedAttention_BlockDef),
                 TrialDefType = typeof(SustainedAttention_TrialDef),
                 StimDefType = typeof(SustainedAttention_StimDef)
+            }
+        }
+        ,{
+            "FruitRunner", new TaskTypes
+            {
+                TaskLevelType = typeof(FruitRunner_TaskLevel),
+                TrialLevelType = typeof(FruitRunner_TrialLevel),
+                TaskDefType = typeof(FruitRunner_TaskDef),
+                BlockDefType = typeof(FruitRunner_BlockDef),
+                TrialDefType = typeof(FruitRunner_TrialDef),
+                StimDefType = typeof(FruitRunner_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

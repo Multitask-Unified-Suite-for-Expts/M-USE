@@ -455,6 +455,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TokenBarCompletions_Block = 0;
         calculatedThreshold = 0;
         reversalsCount = 0;
+        DiffLevelsSummary.Clear();
         DiffLevelsAtReversals.Clear();
         runningPerformance.Clear();
     }

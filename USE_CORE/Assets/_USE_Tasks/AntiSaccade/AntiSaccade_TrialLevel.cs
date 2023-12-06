@@ -75,9 +75,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     //MAIN TARGET:
     private GameObject TargetStim_GO;
-
-    private bool IconsLoaded;
-
+    
 
     public override void DefineControlLevel()
     {
@@ -97,9 +95,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if (PreCue_GO == null || Mask_GO == null || SpatialCue_GO == null)
-                CreateGameObjects();
-
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -121,23 +116,20 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            IconsLoaded = false;
             TokenFBController.enabled = false;
             LoadConfigUIVariables();
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
 
             SetDataStrings();
+            
+            CreateIcons();
 
-            if (SpatialCue_GO != null && Mask_GO != null)
-                StartCoroutine(LoadSpacialCueAndMaskIcons());
-            else
-                Debug.LogError("CANT SET THE SPATIAL CUE AND MASK ICONS BECAUSE ATLEAST ONE OF THEM IS NULL!");
 
             //***** SET TARGET STIM *****
             TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
         });
-        SetupTrial.SpecifyTermination(() => true && IconsLoaded, InitTrial);
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
@@ -187,8 +179,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //SpatialCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         SpatialCue.AddSpecificInitializationMethod(() =>
         {
-            if (CurrentTrial.RandomSpatialCueColor)
-                SpatialCue_GO.GetComponent<Image>().color = GetRandomColor();
+            //if (CurrentTrial.RandomSpatialCueColor)
+            //    SpatialCue_GO.GetComponent<Image>().color = GetRandomColor();
 
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
@@ -225,8 +217,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Mask state ----------------------------------------------------------------------------------------------------------------------------------------------
         Mask.AddSpecificInitializationMethod(() =>
         {
-            if (CurrentTrial.RandomMaskColor)
-                Mask_GO.GetComponent<Image>().color = GetRandomColor();
+            //if (CurrentTrial.RandomMaskColor)
+            //    Mask_GO.GetComponent<Image>().color = GetRandomColor();
 
             Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos;
             Mask_GO.SetActive(true);
@@ -371,44 +363,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             Session.TargetObjects.Add(stim.StimGameObject);
     }
 
-    private IEnumerator LoadSpacialCueAndMaskIcons()
-    {
-        Dictionary<string, GameObject> iconDict = new Dictionary<string, GameObject>()
-        {
-            { DetermineContextFilePath(CurrentTrial.SpatialCue_Icon), SpatialCue_GO },
-            { DetermineContextFilePath(CurrentTrial.Mask_Icon), Mask_GO }
-        };
-        foreach(var entry in iconDict)
-        {
-            yield return LoadTexture(entry.Key, texResult =>
-            {
-                if (texResult != null)
-                {
-                    Sprite sprite = Sprite.Create(texResult, new Rect(0, 0, texResult.width, texResult.height), Vector2.zero);
-                    entry.Value.GetComponent<Image>().sprite = sprite;
-                }
-                else
-                    Debug.Log($"{entry.Value.name} TEX RESULT IS NULL!");
-            });
-        }
-        IconsLoaded = true;
-    }
-
-    //WILL NEED TO TEST THIS METHOD FOR LOCAL AND SERVER CONFIGS!!!
-    private string DetermineContextFilePath(string fileName)
-    {
-        string filePath = "";
-        if (Session.UsingDefaultConfigs)
-            filePath = $"{Session.SessionDef.ContextExternalFilePath}/{fileName}";
-        else if (Session.UsingServerConfigs)
-            filePath = $"{Session.SessionDef.ContextExternalFilePath}/{fileName}.png";
-        else if (Session.UsingLocalConfigs)
-            filePath = GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, fileName);
-
-        return filePath;
-    }
-
-    private void CreateGameObjects()
+    private void CreateIcons()
     {
         if (PreCue_GO == null)
         {
@@ -423,6 +378,26 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
             preCueImage.color = new Color32(24, 255, 0, 255);
         }
+        
+        SpatialCue_GO = Instantiate(Resources.Load<GameObject>("asterisk_black"));
+        SpatialCue_GO.name = "SpatialCue";
+        SpatialCue_GO.SetActive(false);
+        SpatialCue_GO.transform.localPosition = Vector3.zero;
+        SpatialCue_GO.AddComponent<FaceCamera>();
+        
+        if (SpatialCue_GO == null)
+            Debug.LogError(("NULL!"));
+        
+        Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black"));
+        Mask_GO.name = "Mask";
+        Mask_GO.SetActive(false);
+        Mask_GO.transform.localPosition = Vector3.zero;
+        Mask_GO.transform.localRotation = Quaternion.Euler(85f, 0f, 90f); // fixing hashtag_black's rotation
+    }
+
+    private void CreateGameObjects()
+    {
+
 
         if (SpatialCue_GO == null)
         {
@@ -480,6 +455,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TokenBarCompletions_Block = 0;
         calculatedThreshold = 0;
         reversalsCount = 0;
+        DiffLevelsSummary.Clear();
         DiffLevelsAtReversals.Clear();
         runningPerformance.Clear();
     }

@@ -20,6 +20,7 @@ public class ObjectManager : MonoBehaviour
     public static readonly Vector2 xRange = new Vector2(-800f, 800f);
     public static readonly Vector2 yRange = new Vector2(-400f, 325f);
 
+    public int TargetIntervalsWithoutSelection = 0;
 
     private void Awake()
     {
@@ -72,7 +73,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(isTarget, angleProbs, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(this, isTarget, angleProbs, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -110,13 +111,19 @@ public class ObjectManager : MonoBehaviour
         if (TargetList.Count > 0)
         {
             foreach (SA_Object obj in TargetList)
-                obj.DestroyObj();
+            {
+                if(obj != null)
+                    obj.DestroyObj();
+            }
             TargetList.Clear();
         }
         if (DistractorList.Count > 0)
         {
             foreach (SA_Object obj in DistractorList)
-                obj.DestroyObj();
+            {
+                if(obj != null)
+                    obj.DestroyObj();
+            }
             DistractorList.Clear();
         }
     }
@@ -150,6 +157,7 @@ public class ObjectManager : MonoBehaviour
 
 public class SA_Object : MonoBehaviour
 {
+    public ObjectManager ObjManager;
     public Vector3 AngleProbs;
     public float MinAnimGap;
     public bool IsTarget;
@@ -183,15 +191,20 @@ public class SA_Object : MonoBehaviour
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
 
+    public int IntervalsWithoutSelection;
+
+
 
     public SA_Object()
     {
         Visited = new List<Vector3>();
         Cycles = new List<Cycle>();
+        IntervalsWithoutSelection = 0;
     }
 
-    public void SetupObject(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
+    public void SetupObject(ObjectManager objManager, bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
     {
+        ObjManager = objManager;
         IsTarget = isTarget;
         AngleProbs = angleProbs;
         RotateTowardsDest = rotateTowardsDest;
@@ -207,6 +220,7 @@ public class SA_Object : MonoBehaviour
         {
             Cycle cycle = new()
             {
+                sa_Object = this,
                 duration = rateAndDur.y,
                 intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y)
             };
@@ -219,9 +233,12 @@ public class SA_Object : MonoBehaviour
         SetupMarker(); //Marker for debugging purposes
     }
 
+
+
+
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        List<float> randomFloats = new List<float>();
+        List<float> randomFloats = new List<float>() { duration }; //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
 
         for (int i = 0; i < numIntervals; i++)
         {
@@ -229,12 +246,15 @@ public class SA_Object : MonoBehaviour
             do
             {
                 randomValue = Random.Range(0f, duration);
-
             } while (randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap));
-
             randomFloats.Add(randomValue);
         }
         randomFloats.Sort();
+
+        if (IsTarget)
+            foreach (var num in randomFloats)
+                Debug.LogWarning("INTERVAL: " + num);
+
         return randomFloats;
     }
 
@@ -258,15 +278,18 @@ public class SA_Object : MonoBehaviour
     {
         if(Move)
         {
+
             if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
             {
                 NextCycle();
             }
+
             if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
                 StartCoroutine(AnimationCoroutine());
                 CurrentCycle.NextInterval();
             }
+
             
             if (AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
                 WithinDuration = true;
@@ -276,15 +299,7 @@ public class SA_Object : MonoBehaviour
             if(CurrentCycle.pauseDuringFirstSelection)
                 HandlePausingWhileBeingSelected();
 
-            HandleMarkerToggle();
-            HandleRotationToggle();
-
-            if (InputBroker.GetKeyDown(KeyCode.UpArrow))
-                NextDestDist *= 1.5f;
-
-            if (InputBroker.GetKeyDown(KeyCode.DownArrow))
-                NextDestDist /= 1.5f;
-
+            HandleInput();
         }
     }
 
@@ -306,8 +321,6 @@ public class SA_Object : MonoBehaviour
 
     private IEnumerator AnimationCoroutine()
     {
-        //if (IsTarget)
-        //    Debug.LogWarning("ANIMATING at " + (Time.time - CurrentCycle.cycleStartTime));
         AnimStartTime = Time.time;
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
         yield return new WaitForSeconds(CloseDuration);
@@ -331,21 +344,27 @@ public class SA_Object : MonoBehaviour
         }
     }
 
-    private void HandleMarkerToggle()
+    private void HandleInput()
     {
+        //Marker Toggle:
         if (InputBroker.GetKeyDown(KeyCode.M))
             ToggleMarker();
-    }
 
-    private void HandleRotationToggle()
-    {
+        //Rotation Toggle:
         if (InputBroker.GetKeyDown(KeyCode.U))
         {
             RotateTowardsDest = !RotateTowardsDest;
             if (!RotateTowardsDest)
                 transform.rotation = Quaternion.Euler(0f, 0f, 0f);
         }
+
+        //Increase/Decrease NextDestDist:
+        if (InputBroker.GetKeyDown(KeyCode.UpArrow))
+            NextDestDist *= 1.5f;
+        if (InputBroker.GetKeyDown(KeyCode.DownArrow))
+            NextDestDist /= 1.5f;
     }
+
 
     public void ActivateMovement()
     {
@@ -474,8 +493,10 @@ public class SA_Object : MonoBehaviour
 
     public void DestroyObj()
     {
-        Destroy(gameObject);
-        Destroy(Marker);
+        if(gameObject != null)
+            Destroy(gameObject);
+        if(Marker != null)
+            Destroy(Marker);
     }
 
     private void SetupMarker()
@@ -502,6 +523,8 @@ public class SA_Object : MonoBehaviour
 
 public class Cycle
 {
+    public SA_Object sa_Object;
+
     public float duration;
     public List<float> intervals;
     public float currentInterval;
@@ -511,20 +534,32 @@ public class Cycle
     public bool selectedDuringCurrentInterval;
     public bool pauseDuringFirstSelection;
 
+    public int intervalCount;
+
+
     public void StartCycle()
     {
         currentInterval = intervals[0];
         cycleStartTime = Time.time;
         pauseDuringFirstSelection = true;
+        intervalCount = 0;
     }
 
     public void NextInterval()
     {
+        if(intervalCount > 0 && !selectedDuringCurrentInterval && sa_Object.IsTarget) //Skip first interval cuz hasn't animated yet. 
+        {
+            Debug.LogWarning("MISSED AN INTERVAL!");
+            sa_Object.ObjManager.TargetIntervalsWithoutSelection++; //Increment Data
+        }
+
         intervals.RemoveAt(0);
         if (intervals.Count > 0)
             currentInterval = intervals[0];
         selectedDuringCurrentInterval = false;
         pauseDuringFirstSelection = true;
+
+        intervalCount++;
     }
 
 }

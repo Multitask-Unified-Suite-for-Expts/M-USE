@@ -516,7 +516,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     protected override void DefineTrialStims()
     {
-        if(TileController == null)
+        if (TileController == null)
         {
             TileController = Instantiate(TilePrefab);
             TileController.name = "TileController";
@@ -525,15 +525,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         else
         {
             TileController.GetComponent<MeshRenderer>().enabled = true;
+            TileController.GetComponent<BoxCollider>().enabled = true;
         }
-
 
         LoadConfigVariables();
         SetGameConfigs(TileController);
 
         // This will Load all tiles within the maze and the background of the maze
         mazeDims = CurrentTaskLevel.currentMaze.mDims;
-        Debug.Log("CURRENT MAZE M DIMS: " + CurrentTaskLevel.currentMaze.mDims);
         var mazeCenter = MazeBackground.transform.localPosition;
 
         mazeLength = mazeDims.x * currentTaskDef.TileSize + (mazeDims.x - 1) * currentTaskDef.SpaceBetweenTiles;
@@ -596,6 +595,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         AssignFlashingTiles();
         TrialStims.Add(tiles);
         TileController.GetComponent<MeshRenderer>().enabled = false;
+        TileController.GetComponent<BoxCollider>().enabled = false;
     }
     public bool CheckTileFlash()
     {
@@ -711,30 +711,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 if (Session.SessionDef.EventCodesActive)
                     Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleBreakingError"]);
-                
-                totalErrors_InTrial[pathProgressIndex + 1] += 1;
-                CurrentTaskLevel.TotalErrors_InBlock[pathProgressIndex + 1] += 1;
-                CurrentTaskLevel.TotalErrors_InTask++;
 
-                ruleBreakingErrors_InTrial[pathProgressIndex + 1] += 1;
-                CurrentTaskLevel.RuleBreakingErrors_InBlock[pathProgressIndex + 1] += 1;
-                CurrentTaskLevel.RuleBreakingErrors_InTask++;
-            
-                consecutiveErrors++;
+                IncrementRuleBreakingErrorCounters();
+
                 return 20;
             }
             if (Session.SessionDef.EventCodesActive)
                 Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
 
-            totalErrors_InTrial[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.TotalErrors_InBlock[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.TotalErrors_InTask++;
-
-            ruleAbidingErrors_InTrial[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.RuleAbidingErrors_InBlock[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.RuleAbidingErrors_InTask++;
-            
-            consecutiveErrors++;
+            IncrementRuleAbidingErrorCounters();
             
             // Set the correct next step to the last correct tile touch, only when this is the first time off path
             if (consecutiveErrors == 1)
@@ -775,16 +760,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.BacktrackErrors_InBlock[pathProgressIndex + 1] += 1;
             CurrentTaskLevel.BacktrackErrors_InTask++;
 
-            ruleBreakingErrors_InTrial[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.RuleBreakingErrors_InBlock[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.RuleBreakingErrors_InTask++;
-            
-            totalErrors_InTrial[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.TotalErrors_InBlock[pathProgressIndex + 1] += 1;
-            CurrentTaskLevel.TotalErrors_InTask++;
-            
-            consecutiveErrors++;
-            
+            IncrementRuleBreakingErrorCounters();
+
             // Set the correct next step to the last correct tile touch
             if (consecutiveErrors == 1)
             {
@@ -804,17 +781,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
       
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleBreakingError"]);
-            
-        totalErrors_InTrial[pathProgressIndex + 1] += 1;
-        CurrentTaskLevel.TotalErrors_InBlock[pathProgressIndex + 1] += 1;
-        CurrentTaskLevel.TotalErrors_InTask++;
 
-        ruleBreakingErrors_InTrial[pathProgressIndex + 1] += 1;
-        CurrentTaskLevel.RuleBreakingErrors_InBlock[pathProgressIndex + 1] += 1;
-        CurrentTaskLevel.RuleBreakingErrors_InTask++;
-           
-        consecutiveErrors++;
-            
+        IncrementRuleBreakingErrorCounters();
+
         // Set the correct next step to the last correct tile touch
         if (consecutiveErrors == 1)
         {
@@ -829,6 +798,32 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         return 20;
     }
     
+    private void IncrementRuleBreakingErrorCounters()
+    {
+        ruleBreakingErrors_InTrial[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.RuleBreakingErrors_InBlock[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.RuleBreakingErrors_InTask++;
+
+        totalErrors_InTrial[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.TotalErrors_InBlock[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.TotalErrors_InTask++;
+
+        consecutiveErrors++;
+
+    }
+
+    private void IncrementRuleAbidingErrorCounters()
+    {
+        totalErrors_InTrial[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.TotalErrors_InBlock[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.TotalErrors_InTask++;
+
+        ruleAbidingErrors_InTrial[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.RuleAbidingErrors_InBlock[pathProgressIndex + 1] += 1;
+        CurrentTaskLevel.RuleAbidingErrors_InTask++;
+
+        consecutiveErrors++;
+    }
     private void LoadConfigVariables()
     {
         //config UI variables

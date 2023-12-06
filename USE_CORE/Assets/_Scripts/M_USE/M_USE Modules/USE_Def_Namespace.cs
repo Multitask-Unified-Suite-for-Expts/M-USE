@@ -423,6 +423,16 @@ namespace USE_Def_Namespace
         public int SliderInitialValue;
 
         /// <summary>
+        /// The number of tokens earned per correct response.
+        /// </summary>
+        public int TokenGain;
+
+        /// <summary>
+        /// The number of tokens removed per incorrect response.
+        /// </summary>
+        public int TokenLoss;
+
+        /// <summary>
         /// The number of tokens displayed in the token bar at the start of the block.
         /// </summary>
         public int NumInitialTokens = 0;
@@ -563,6 +573,16 @@ namespace USE_Def_Namespace
         /// The slider losses
         /// </summary>
         public int[] SliderLoss;
+
+        /// <summary>
+        /// The number of tokens earned per correct response.
+        /// </summary>
+        public int TokenGain;
+
+        /// <summary>
+        /// The number of tokens removed per incorrect response.
+        /// </summary>
+        public int TokenLoss;
 
         /// <summary>
         /// The number of tokens displayed in the token bar at the start of the trial.

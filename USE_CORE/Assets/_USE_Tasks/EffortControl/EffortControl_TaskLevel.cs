@@ -48,7 +48,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public List<float?> InflationDurations_Task = new List<float?>();
 
     [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
     EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
@@ -59,7 +58,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         trialLevel = (EffortControl_TrialLevel)TrialLevel;
 
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
         
         DefineBlockData();
 
@@ -80,7 +78,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         {
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0, CurrentBlockString);
             BlockStringsAdded++;
         }
     }

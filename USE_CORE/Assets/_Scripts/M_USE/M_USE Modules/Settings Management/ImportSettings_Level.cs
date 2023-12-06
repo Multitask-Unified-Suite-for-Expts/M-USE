@@ -164,7 +164,9 @@ public class ImportSettings_Level : ControlLevel
             yield return StartCoroutine(ServerManager.GetFilePath(currentSettingsDetails.FolderPath, searchString, result =>
             {
                 if (!string.IsNullOrEmpty(result))
+				{
                     callback?.Invoke(result);
+				}
                 else
 				{
                     Debug.Log("Server GetFilePath() Result is null for: " + searchString + " at folder path: " + currentSettingsDetails.FolderPath);

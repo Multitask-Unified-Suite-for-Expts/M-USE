@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -19,6 +20,7 @@ public class ObjectManager : MonoBehaviour
     public static readonly Vector2 xRange = new Vector2(-800f, 800f);
     public static readonly Vector2 yRange = new Vector2(-400f, 325f);
 
+    public int TargetIntervalsWithoutSelection = 0;
 
     private void Awake()
     {
@@ -49,7 +51,7 @@ public class ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
+    public void CreateObjects(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
     {
         if(sizes.Length != speeds.Length)
         {
@@ -71,7 +73,7 @@ public class ObjectManager : MonoBehaviour
             go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(this, isTarget, rotateTowardsDest, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(this, isTarget, angleProbs, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
 
             if (isTarget)
                 TargetList.Add(obj);
@@ -109,12 +111,20 @@ public class ObjectManager : MonoBehaviour
         if (TargetList.Count > 0)
         {
             foreach (SA_Object obj in TargetList)
-                obj.DestroyObj();
+            {
+                if(obj != null)
+                    obj.DestroyObj();
+            }
+            TargetList.Clear();
         }
         if (DistractorList.Count > 0)
         {
             foreach (SA_Object obj in DistractorList)
-                obj.DestroyObj();
+            {
+                if(obj != null)
+                    obj.DestroyObj();
+            }
+            DistractorList.Clear();
         }
     }
 
@@ -147,26 +157,24 @@ public class ObjectManager : MonoBehaviour
 
 public class SA_Object : MonoBehaviour
 {
-    public ObjectManager objManager;
+    public ObjectManager ObjManager;
+    public Vector3 AngleProbs;
+    public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
     public float Speed;
     public float Size;
     public float NextDestDist;
-    public float ResponseWindow;
+    public Vector2 ResponseWindow;
     public float CloseDuration;
 
-    public Vector2[] IntervalsAndDurations;
-    public int CurrentIndex;
-
-    private float CurrentAnimInterval;
-    private float CurrentAnimDuration;
+    public Vector2[] RateAndDurations;
 
     public List<Vector3> Visited;
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool Move; //Controls whether or not they're moving around the screen
-    public bool Paused;
+    public bool ObjectPaused;
 
     public GameObject Marker;
     public Vector3 Direction;
@@ -174,47 +182,50 @@ public class SA_Object : MonoBehaviour
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
 
-    private float AnimStartTime;
-
-    private float IntervalStartTime;
+    public float AnimStartTime;
 
     public bool WithinDuration;
 
-    private List<float> PreviousAngleOffsets = new List<float>();
+    private readonly List<float> PreviousAngleOffsets = new List<float>();
+
+    public List<Cycle> Cycles;
+    public Cycle CurrentCycle;
+
+    public int IntervalsWithoutSelection;
+
 
 
     public SA_Object()
     {
         Visited = new List<Vector3>();
-        CurrentIndex = 0;
+        Cycles = new List<Cycle>();
+        IntervalsWithoutSelection = 0;
     }
 
-    public void DestroyObj()
+    public void SetupObject(ObjectManager objManager, bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
     {
-        if (IsTarget)
-            objManager.TargetList.Remove(this);
-        else
-            objManager.DistractorList.Remove(this);
-
-        Destroy(gameObject);
-        Destroy(Marker);
-        Destroy(this);
-    }
-
-    public void SetupObject(ObjectManager manager, bool isTarget, bool rotateTowardsDest, float responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] intervalsAndDurations)
-    {
-        objManager = manager;
+        ObjManager = objManager;
         IsTarget = isTarget;
+        AngleProbs = angleProbs;
         RotateTowardsDest = rotateTowardsDest;
+        MinAnimGap = minAnimGap;
         ResponseWindow = responseWindow;
         Speed = speed;
         Size = size;
         NextDestDist = nextDestDist;
         CloseDuration = closeDuration;
-        IntervalsAndDurations = intervalsAndDurations;
+        RateAndDurations = ratesAndDurations;
 
-        CurrentAnimInterval = intervalsAndDurations[CurrentIndex].x;
-        CurrentAnimDuration = intervalsAndDurations[CurrentIndex].y;
+        foreach(var rateAndDur in RateAndDurations)
+        {
+            Cycle cycle = new()
+            {
+                sa_Object = this,
+                duration = rateAndDur.y,
+                intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y)
+            };
+            Cycles.Add(cycle);
+        }
 
         SetRandomStartingPosition();
         SetNewDestination();
@@ -222,47 +233,79 @@ public class SA_Object : MonoBehaviour
         SetupMarker(); //Marker for debugging purposes
     }
 
-    public void NextInterval()
+
+
+
+    List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        IntervalStartTime = Time.time;
+        List<float> randomFloats = new List<float>() { duration }; //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
 
-        CurrentIndex++;
+        for (int i = 0; i < numIntervals; i++)
+        {
+            float randomValue;
+            do
+            {
+                randomValue = Random.Range(0f, duration);
+            } while (randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap));
+            randomFloats.Add(randomValue);
+        }
+        randomFloats.Sort();
 
-        if (CurrentIndex > IntervalsAndDurations.Length-1)
+        if (IsTarget)
+            foreach (var num in randomFloats)
+                Debug.LogWarning("INTERVAL: " + num);
+
+        return randomFloats;
+    }
+
+    private void NextCycle()
+    {
+        Cycles.RemoveAt(0);
+
+        if (Cycles.Count >= 1)
+        {
+            CurrentCycle = Cycles[0];
+            CurrentCycle.StartCycle();
+        }
+        else
         {
             DestroyObj();
-            return;
         }
-
-        CurrentAnimInterval = IntervalsAndDurations[CurrentIndex].x;
-        CurrentAnimDuration = IntervalsAndDurations[CurrentIndex].y;
     }
+
 
     private void Update()
     {
         if(Move)
         {
-            if (Time.time - AnimStartTime >= CurrentAnimInterval)
+
+            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+            {
+                NextCycle();
+            }
+
+            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
                 StartCoroutine(AnimationCoroutine());
+                CurrentCycle.NextInterval();
             }
 
-            if(Time.time - IntervalStartTime >= CurrentAnimDuration)
-            {
-                NextInterval();
-            }
+            
+            if (AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
+                WithinDuration = true;
+            else
+                WithinDuration = false;
 
-            HandleResponseWindow();
-            HandlePausingDuringSelection();
+            if(CurrentCycle.pauseDuringFirstSelection)
+                HandlePausingWhileBeingSelected();
 
-            if (InputBroker.GetKeyDown(KeyCode.M))
-                ToggleMarker();
+            HandleInput();
         }
     }
 
     private void FixedUpdate()
     {
-        if(Move && !Paused)
+        if(Move && !ObjectPaused)
         {
             if (AtDestination())
                 SetNewDestination();            
@@ -276,46 +319,61 @@ public class SA_Object : MonoBehaviour
         }
     }
 
-    public void HandleResponseWindow()
-    {
-        if (WithinDuration)
-        {
-            if (Time.time - AnimStartTime > ResponseWindow)
-                WithinDuration = false;
-        }
-    }
-
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        WithinDuration = true;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("closed_Transparent");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("open_Transparent");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanOpen");
     }
 
-    private void HandlePausingDuringSelection()
+    private void HandlePausingWhileBeingSelected()
     {
         if (InputBroker.GetMouseButtonDown(0))
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
-                Paused = true;
+                ObjectPaused = true;
         }
 
         if (InputBroker.GetMouseButtonUp(0))
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
-                Paused = false;
+                ObjectPaused = false;
         }
     }
+
+    private void HandleInput()
+    {
+        //Marker Toggle:
+        if (InputBroker.GetKeyDown(KeyCode.M))
+            ToggleMarker();
+
+        //Rotation Toggle:
+        if (InputBroker.GetKeyDown(KeyCode.U))
+        {
+            RotateTowardsDest = !RotateTowardsDest;
+            if (!RotateTowardsDest)
+                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+
+        //Increase/Decrease NextDestDist:
+        if (InputBroker.GetKeyDown(KeyCode.UpArrow))
+            NextDestDist *= 1.5f;
+        if (InputBroker.GetKeyDown(KeyCode.DownArrow))
+            NextDestDist /= 1.5f;
+    }
+
 
     public void ActivateMovement()
     {
         Move = true;
-        AnimStartTime = Time.time;
-        IntervalStartTime = Time.time;
+
+        AnimStartTime = 0; //used to be Time.time 
+
+        CurrentCycle = Cycles[0];
+        CurrentCycle.StartCycle();
     }
 
     private void MoveTowardsDestination()
@@ -336,17 +394,14 @@ public class SA_Object : MonoBehaviour
 
     public void SetNewDestination()
     {
-        float chanceSmall = 0.4f;
-        float chanceMedium = 0.5f;
-
         float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg; //Extract angle from current Direction
 
         float randomChance = Random.value; //Get randomNum between 0 and 1
         float angleOffset;
 
-        if (randomChance < chanceSmall)
+        if (randomChance < AngleProbs.x) //AngleProbs.x is the "Chance of a small angle"
             angleOffset = Random.Range(0, 16f);
-        else if (randomChance < chanceSmall + chanceMedium)
+        else if (randomChance < AngleProbs.x + AngleProbs.y) //AngleProbs.y is the "Chance of a medium angle"
             angleOffset = Random.Range(16f, 46f);
         else
             angleOffset = Random.Range(46f, 181f);
@@ -381,6 +436,7 @@ public class SA_Object : MonoBehaviour
         float xDiff = Mathf.Clamp(destination.x, ObjectManager.xRange.x, ObjectManager.xRange.y) - destination.x;
         float yDiff = Mathf.Clamp(destination.y, ObjectManager.yRange.x, ObjectManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
+
         CurrentDestination = destination;
         NewDestStartTime = Time.time;
 
@@ -389,19 +445,19 @@ public class SA_Object : MonoBehaviour
     private void SetRandomStartingPosition()
     {
         int randomIndex;
-        Vector3 randomPos;
+        Vector3 newRandomPos;
 
         do
         {
             randomIndex = Random.Range(0, ObjectManager.StartingPositions.Count);
-            randomPos = ObjectManager.StartingPositions[randomIndex];
+            newRandomPos = ObjectManager.StartingPositions[randomIndex];
         }
-        while (ObjectManager.StartingPositionsUsed.Contains(randomPos));
+        while (ObjectManager.StartingPositionsUsed.Contains(newRandomPos));
 
-        ObjectManager.StartingPositionsUsed.Add(randomPos);
+        ObjectManager.StartingPositionsUsed.Add(newRandomPos);
 
-        StartingPosition = randomPos;
-        transform.localPosition = randomPos;
+        StartingPosition = newRandomPos;
+        transform.localPosition = newRandomPos;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -435,6 +491,14 @@ public class SA_Object : MonoBehaviour
         return false;
     }
 
+    public void DestroyObj()
+    {
+        if(gameObject != null)
+            Destroy(gameObject);
+        if(Marker != null)
+            Destroy(Marker);
+    }
+
     private void SetupMarker()
     {
         if (Marker != null)
@@ -455,4 +519,47 @@ public class SA_Object : MonoBehaviour
     {
         Marker.SetActive(!Marker.activeInHierarchy);
     }
+}
+
+public class Cycle
+{
+    public SA_Object sa_Object;
+
+    public float duration;
+    public List<float> intervals;
+    public float currentInterval;
+
+    public float cycleStartTime;
+
+    public bool selectedDuringCurrentInterval;
+    public bool pauseDuringFirstSelection;
+
+    public int intervalCount;
+
+
+    public void StartCycle()
+    {
+        currentInterval = intervals[0];
+        cycleStartTime = Time.time;
+        pauseDuringFirstSelection = true;
+        intervalCount = 0;
+    }
+
+    public void NextInterval()
+    {
+        if(intervalCount > 0 && !selectedDuringCurrentInterval && sa_Object.IsTarget) //Skip first interval cuz hasn't animated yet. 
+        {
+            Debug.LogWarning("MISSED AN INTERVAL!");
+            sa_Object.ObjManager.TargetIntervalsWithoutSelection++; //Increment Data
+        }
+
+        intervals.RemoveAt(0);
+        if (intervals.Count > 0)
+            currentInterval = intervals[0];
+        selectedDuringCurrentInterval = false;
+        pauseDuringFirstSelection = true;
+
+        intervalCount++;
+    }
+
 }

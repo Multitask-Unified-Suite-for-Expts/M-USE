@@ -18,7 +18,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int SuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int DistractorSelections_Block = 0;
-    [HideInInspector] public int IntervalsWithoutSelection_Block = 0;
+    [HideInInspector] public int IntervalsWithoutTargetSelection_Block = 0;
 
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
@@ -224,6 +224,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        IntervalsWithoutTargetSelection_Block += ObjectManager.TargetIntervalsWithoutSelection;
+
         ObjectManager.DestroyExistingObjects();
         SliderFBController.SliderGO.SetActive(false);
         SliderFBController.SliderHaloGO.SetActive(false);
@@ -255,7 +257,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         SuccessfulTargetSelections_Block = 0;
         UnsuccessfulTargetSelections_Block = 0;
         DistractorSelections_Block = 0;
-        IntervalsWithoutSelection_Block = 0;
+        IntervalsWithoutTargetSelection_Block = 0;
     }
 
     private void CalculateSliderSteps()

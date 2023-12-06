@@ -19,7 +19,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int SuccessfulTargetSelections_Task = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Task = 0;
     [HideInInspector] public int DistractorSelections_Task = 0;
-    [HideInInspector] public int IntervalsWithoutSelection_Task = 0;
+    [HideInInspector] public int IntervalsWithoutTargetSelection_Task = 0;
 
 
     public override void DefineControlLevel()
@@ -55,7 +55,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         data["Successful Target Selections"] = SuccessfulTargetSelections_Task;
         data["Unsuccessful Target Selections"] = UnsuccessfulTargetSelections_Task;
         data["Distractor Selections"] = DistractorSelections_Task;
-        data["Intervals Without Selections"] = IntervalsWithoutSelection_Task;
+        data["Intervals Without Selections"] = IntervalsWithoutTargetSelection_Task;
         return data;
     }
 
@@ -67,7 +67,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
             ["Successful Target Selections"] = trialLevel.SuccessfulTargetSelections_Block,
             ["Unsuccessful Target Selections"] = trialLevel.UnsuccessfulTargetSelections_Block,
             ["Distractor Selections"] = trialLevel.DistractorSelections_Block,
-            ["Intervals Without A Selection"] = trialLevel.IntervalsWithoutSelection_Block,
+            ["Intervals Without A Selection"] = trialLevel.IntervalsWithoutTargetSelection_Block,
         };
         return data;
     }
@@ -81,7 +81,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("SuccessfulTargetSelections", () => trialLevel.SuccessfulTargetSelections_Block);
         BlockData.AddDatum("UnsuccessfulTargetSelections", () => trialLevel.UnsuccessfulTargetSelections_Block);
         BlockData.AddDatum("DistractorSelections", () => trialLevel.DistractorSelections_Block);
-        BlockData.AddDatum("IntervalsWithoutASelection", () => trialLevel.IntervalsWithoutSelection_Block);
+        BlockData.AddDatum("IntervalsWithoutASelection", () => trialLevel.IntervalsWithoutTargetSelection_Block);
 
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);

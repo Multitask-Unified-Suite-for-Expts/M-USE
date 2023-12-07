@@ -21,13 +21,17 @@ public class ObjectManager : MonoBehaviour
     public static readonly Vector2 yRange = new Vector2(-400f, 325f);
 
     public delegate void CycleEventHandler();
-    public event CycleEventHandler OnIntervalMissed;
+    public event CycleEventHandler OnTargetIntervalMissed;
+    public event CycleEventHandler OnDistractorAvoided;
 
-    public void MissedTargetInterval()
+
+    public void NoSelectionDuringInterval(SA_Object obj)
     {
-        OnIntervalMissed?.Invoke();
+        if (obj.IsTarget)
+            OnTargetIntervalMissed?.Invoke();
+        else
+            OnDistractorAvoided?.Invoke();
     }
-
 
     private void Awake()
     {
@@ -35,6 +39,7 @@ public class ObjectManager : MonoBehaviour
         DistractorList = new List<SA_Object>();
         StartingPositions = new List<Vector3>();
         StartingPositionsUsed = new List<Vector3>();
+
         CalculateStartingPositions();
     }
 
@@ -253,6 +258,11 @@ public class SA_Object : MonoBehaviour
             randomFloats.Add(randomValue);
         }
         randomFloats.Sort();
+
+        //if (IsTarget)
+        //    foreach (var num in randomFloats)
+        //        Debug.LogWarning("INTERVAL: " + num);
+
         return randomFloats;
     }
 
@@ -285,12 +295,9 @@ public class SA_Object : MonoBehaviour
                 NextCycle();
             }
 
-            if (AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
-                WithinDuration = true;
-            else
-                WithinDuration = false;
+            WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
 
-            if(CurrentCycle.pauseDuringFirstSelection)
+            if(IsTarget)
                 HandlePausingWhileBeingSelected();
 
             HandleInput();
@@ -519,39 +526,34 @@ public class Cycle
     public float duration;
     public List<float> intervals;
     public float currentInterval;
-
     public float cycleStartTime;
 
     public bool selectedDuringCurrentInterval;
-    public bool pauseDuringFirstSelection;
-
-    public int intervalCount;
+    public bool firstIntervalStarted;
 
 
     public void StartCycle()
     {
         currentInterval = intervals[0];
         cycleStartTime = Time.time;
-
-        if(sa_Object.IsTarget)
-            selectedDuringCurrentInterval = true; //set first interval to true for targets since hasnt animated yet?
-
-        intervalCount = 0;
+        firstIntervalStarted = false;
     }
 
     public void NextInterval()
     {
-        if(intervalCount > 0 && !selectedDuringCurrentInterval && sa_Object.IsTarget) //Skip first interval cuz hasn't animated yet. 
-            sa_Object.ObjManager.MissedTargetInterval();
+        if(firstIntervalStarted && !selectedDuringCurrentInterval) //Skip first interval cuz hasn't animated yet.
+        {
+            sa_Object.ObjManager.NoSelectionDuringInterval(sa_Object);
+        }
         
         intervals.RemoveAt(0);
         if (intervals.Count > 0)
             currentInterval = intervals[0];
 
         selectedDuringCurrentInterval = false;
-        pauseDuringFirstSelection = true;
 
-        intervalCount++;
+        if (!firstIntervalStarted)
+            firstIntervalStarted = true;
     }
 
 }

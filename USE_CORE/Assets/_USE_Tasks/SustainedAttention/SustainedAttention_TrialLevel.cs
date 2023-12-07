@@ -17,8 +17,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int TrialCompletions_Block;
     [HideInInspector] public int SuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Block = 0;
-    [HideInInspector] public int DistractorSelections_Block = 0;
+    [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Block = 0;
     [HideInInspector] public int TargetAnimsWithoutSelection_Block = 0;
+    [HideInInspector] public int DistractorSelections_Block = 0;
+    [HideInInspector] public int DistractorRejections_Block = 0;
+    [HideInInspector] public int AdditionalTargetSelections_Block = 0;
 
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
@@ -81,7 +84,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
             ObjectManager = gameObject.AddComponent<ObjectManager>();
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
-            ObjectManager.OnIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
+            ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
+            ObjectManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
 
             //Create Targets:
             ObjectManager.CreateObjects(true, CurrentTrial.AngleProbs, CurrentTrial.RotateTargets, CurrentTrial.TargetMinAnimGap, CurrentTrial.ResponseWindow, CurrentTrial.TargetCloseDuration, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetRatesAndDurations, Color.yellow);
@@ -153,22 +157,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 SA_Object obj = ChosenGO.GetComponent<SA_Object>();
                 if(obj != null)
                 {
-                    if (obj.CurrentCycle.selectedDuringCurrentInterval)
-                    {
-                        Handler.LastSuccessfulSelection = null;
-                        return;
-                    }
-                    else
-                    {
-                        obj.CurrentCycle.selectedDuringCurrentInterval = true;
-                        obj.CurrentCycle.pauseDuringFirstSelection = false; //dont pause movement for subsequent selection attempts
-                    }
-
                     HaloFBController.SetHaloSize(.01f * obj.Size);
 
                     if (obj.IsTarget)
                     {
-                        if(obj.WithinDuration)
+                        if(obj.WithinDuration && !obj.CurrentCycle.selectedDuringCurrentInterval)
                         {
                             Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
                             GiveRewardIfSliderFull = true;
@@ -179,11 +172,30 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                         }
                         else
                         {
-                            Debug.LogWarning("FAILED DURATION: " + (Time.time - obj.AnimStartTime));
                             HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
                             SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
-                            UnsuccessfulTargetSelections_Block++;
-                            CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
+
+                            if(obj.CurrentCycle.selectedDuringCurrentInterval)
+                            {
+                                Debug.LogWarning("SELECTED TARGET AGAIN AFTER ALREADY SELECTING ONCE!");
+                                AdditionalTargetSelections_Block++;
+                                CurrentTaskLevel.AdditionalTargetSelections_Task++;
+                            }
+                            else
+                            {
+                                if (obj.CurrentCycle.firstIntervalStarted)
+                                {
+                                    Debug.LogWarning("FAILED DURATION: " + (Time.time - obj.AnimStartTime));
+                                    UnsuccessfulTargetSelections_Block++;
+                                    CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
+                                }
+                                else
+                                {
+                                    Debug.LogWarning("SELECTED BEFORE FIRST INTERVAL STARTS!");
+                                    TargetSelectionsBeforeFirstAnim_Block++;
+                                    CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
+                                }
+                            }
                         }
                     }
                     else //Selected a Distractor
@@ -195,6 +207,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
+
+                    if(obj.CurrentCycle.firstIntervalStarted)
+                        obj.CurrentCycle.selectedDuringCurrentInterval = true;
 
                     Handler.LastSuccessfulSelection = null;
                 }
@@ -212,9 +227,17 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private void TargetIntervalMissed()
     {
-        Debug.LogWarning("INCREMENTING DATA FOR MISSED INTERVAL!");
+        Debug.LogWarning("INCREMENTING DATA FOR MISSED ANIM INTERVAL!");
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
+        CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
+    }
+
+    private void DistractorAvoided()
+    {
+        Debug.LogWarning("DISTRACTOR AVOIDED!");
+        DistractorRejections_Block++;
+        CurrentTaskLevel.DistractorRejections_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
     }
 
@@ -235,10 +258,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        //IntervalsWithoutTargetSelection_Block += ObjectManager.TargetIntervalsWithoutSelection;
-        //CurrentTaskLevel.IntervalsWithoutTargetSelection_Task += ObjectManager.TargetIntervalsWithoutSelection;
+        ObjectManager.OnTargetIntervalMissed -= TargetIntervalMissed; //Unsubscribe from MissedInterval Event
 
         ObjectManager.DestroyExistingObjects();
+
         SliderFBController.SliderGO.SetActive(false);
         SliderFBController.SliderHaloGO.SetActive(false);
 
@@ -268,8 +291,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
         SuccessfulTargetSelections_Block = 0;
         UnsuccessfulTargetSelections_Block = 0;
+        TargetSelectionsBeforeFirstAnim_Block = 0;
         DistractorSelections_Block = 0;
+        DistractorRejections_Block = 0;
         TargetAnimsWithoutSelection_Block = 0;
+        AdditionalTargetSelections_Block = 0;
     }
 
     private void CalculateSliderSteps()

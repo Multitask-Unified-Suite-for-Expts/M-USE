@@ -20,7 +20,14 @@ public class ObjectManager : MonoBehaviour
     public static readonly Vector2 xRange = new Vector2(-800f, 800f);
     public static readonly Vector2 yRange = new Vector2(-400f, 325f);
 
-    public int TargetIntervalsWithoutSelection = 0;
+    public delegate void CycleEventHandler();
+    public event CycleEventHandler OnIntervalMissed;
+
+    public void MissedTargetInterval()
+    {
+        OnIntervalMissed?.Invoke();
+    }
+
 
     private void Awake()
     {
@@ -158,6 +165,7 @@ public class ObjectManager : MonoBehaviour
 public class SA_Object : MonoBehaviour
 {
     public ObjectManager ObjManager;
+
     public Vector3 AngleProbs;
     public float MinAnimGap;
     public bool IsTarget;
@@ -170,7 +178,6 @@ public class SA_Object : MonoBehaviour
 
     public Vector2[] RateAndDurations;
 
-    public List<Vector3> Visited;
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool Move; //Controls whether or not they're moving around the screen
@@ -191,15 +198,11 @@ public class SA_Object : MonoBehaviour
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
 
-    public int IntervalsWithoutSelection;
-
 
 
     public SA_Object()
     {
-        Visited = new List<Vector3>();
         Cycles = new List<Cycle>();
-        IntervalsWithoutSelection = 0;
     }
 
     public void SetupObject(ObjectManager objManager, bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
@@ -250,11 +253,6 @@ public class SA_Object : MonoBehaviour
             randomFloats.Add(randomValue);
         }
         randomFloats.Sort();
-
-        if (IsTarget)
-            foreach (var num in randomFloats)
-                Debug.LogWarning("INTERVAL: " + num);
-
         return randomFloats;
     }
 
@@ -268,9 +266,7 @@ public class SA_Object : MonoBehaviour
             CurrentCycle.StartCycle();
         }
         else
-        {
             DestroyObj();
-        }
     }
 
 
@@ -278,19 +274,17 @@ public class SA_Object : MonoBehaviour
     {
         if(Move)
         {
-
-            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
-            {
-                NextCycle();
-            }
-
             if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
                 StartCoroutine(AnimationCoroutine());
                 CurrentCycle.NextInterval();
             }
 
-            
+            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+            {
+                NextCycle();
+            }
+
             if (AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y)
                 WithinDuration = true;
             else
@@ -364,7 +358,6 @@ public class SA_Object : MonoBehaviour
         if (InputBroker.GetKeyDown(KeyCode.DownArrow))
             NextDestDist /= 1.5f;
     }
-
 
     public void ActivateMovement()
     {
@@ -484,10 +477,8 @@ public class SA_Object : MonoBehaviour
         float distanceToDestination = Vector3.Distance(transform.localPosition, CurrentDestination);
 
         if(distanceToDestination <= distanceThreshold)
-        {
-            Visited.Add(transform.localPosition);
             return true;
-        }
+        
         return false;
     }
 
@@ -541,21 +532,22 @@ public class Cycle
     {
         currentInterval = intervals[0];
         cycleStartTime = Time.time;
-        pauseDuringFirstSelection = true;
+
+        if(sa_Object.IsTarget)
+            selectedDuringCurrentInterval = true; //set first interval to true for targets since hasnt animated yet?
+
         intervalCount = 0;
     }
 
     public void NextInterval()
     {
         if(intervalCount > 0 && !selectedDuringCurrentInterval && sa_Object.IsTarget) //Skip first interval cuz hasn't animated yet. 
-        {
-            Debug.LogWarning("MISSED AN INTERVAL!");
-            sa_Object.ObjManager.TargetIntervalsWithoutSelection++; //Increment Data
-        }
-
+            sa_Object.ObjManager.MissedTargetInterval();
+        
         intervals.RemoveAt(0);
         if (intervals.Count > 0)
             currentInterval = intervals[0];
+
         selectedDuringCurrentInterval = false;
         pauseDuringFirstSelection = true;
 

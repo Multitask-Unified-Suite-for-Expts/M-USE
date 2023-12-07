@@ -18,7 +18,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int SuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int DistractorSelections_Block = 0;
-    [HideInInspector] public int IntervalsWithoutTargetSelection_Block = 0;
+    [HideInInspector] public int TargetAnimsWithoutSelection_Block = 0;
 
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
@@ -81,6 +81,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
             ObjectManager = gameObject.AddComponent<ObjectManager>();
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
+            ObjectManager.OnIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
 
             //Create Targets:
             ObjectManager.CreateObjects(true, CurrentTrial.AngleProbs, CurrentTrial.RotateTargets, CurrentTrial.TargetMinAnimGap, CurrentTrial.ResponseWindow, CurrentTrial.TargetCloseDuration, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetRatesAndDurations, Color.yellow);
@@ -193,6 +194,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                         CurrentTaskLevel.DistractorSelections_Task++;
                     }
 
+                    CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
+
                     Handler.LastSuccessfulSelection = null;
                 }
             }
@@ -205,6 +208,14 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
+    }
+
+    private void TargetIntervalMissed()
+    {
+        Debug.LogWarning("INCREMENTING DATA FOR MISSED INTERVAL!");
+        TargetAnimsWithoutSelection_Block++;
+        CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
+        CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
     }
 
     private void HandleSlider()
@@ -224,7 +235,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        IntervalsWithoutTargetSelection_Block += ObjectManager.TargetIntervalsWithoutSelection;
+        //IntervalsWithoutTargetSelection_Block += ObjectManager.TargetIntervalsWithoutSelection;
+        //CurrentTaskLevel.IntervalsWithoutTargetSelection_Task += ObjectManager.TargetIntervalsWithoutSelection;
 
         ObjectManager.DestroyExistingObjects();
         SliderFBController.SliderGO.SetActive(false);
@@ -257,7 +269,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         SuccessfulTargetSelections_Block = 0;
         UnsuccessfulTargetSelections_Block = 0;
         DistractorSelections_Block = 0;
-        IntervalsWithoutTargetSelection_Block = 0;
+        TargetAnimsWithoutSelection_Block = 0;
     }
 
     private void CalculateSliderSteps()

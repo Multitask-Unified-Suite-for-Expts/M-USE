@@ -27,7 +27,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     public GameObject SustainedAttention_CanvasGO;
     public GameObject BordersGO;
 
-    private ObjectManager ObjectManager;
+    private SA_ObjectManager ObjectManager;
 
     private GameObject StartButton;
 
@@ -82,7 +82,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             if (ObjectManager != null)
                 Destroy(ObjectManager);
 
-            ObjectManager = gameObject.AddComponent<ObjectManager>();
+            ObjectManager = gameObject.AddComponent<SA_ObjectManager>();
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
             ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
             ObjectManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
@@ -217,12 +217,14 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
             HandleSlider();
         });
-        Play.AddTimer(() => CurrentTrial.PlayDuration, ITI);
-        //Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
+        Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
+
+        DefineTrialData();
+        DefineFrameData();
     }
 
     private void TargetIntervalMissed()
@@ -328,31 +330,28 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    //private void DefineTrialData()
-    //{
-    //    TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
-    //    TrialData.AddDatum("InflationsNeeded", () => InflationsNeeded);
-    //    TrialData.AddDatum("ClicksNeededLeft", () => CurrentTrial.NumClicksLeft);
-    //    TrialData.AddDatum("ClicksNeededRight", () => CurrentTrial.NumClicksRight);
-    //    TrialData.AddDatum("NumCoinsLeft", () => CurrentTrial.NumCoinsLeft);
-    //    TrialData.AddDatum("NumCoinsRight", () => CurrentTrial.NumCoinsRight);
-    //    TrialData.AddDatum("ChosenSide", () => SideChoice);
-    //    TrialData.AddDatum("ChosenEffort", () => EffortChoice);
-    //    TrialData.AddDatum("ChosenReward", () => RewardChoice);
-    //    TrialData.AddDatum("TimeTakenToChoose", () => ChooseDuration);
-    //    TrialData.AddDatum("TimeTakenToInflateBaloon", () => InflationDuration);
-    //    TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
-    //    TrialData.AddDatum("ClicksPerOutline", () => CurrentTrial.ClicksPerOutline);
-    //    TrialData.AddDatum("TrialTouches", () => TrialTouches);
-    //}
+    private void DefineTrialData()
+    {
+        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
+        TrialData.AddDatum("RotateTargets", () => CurrentTrial.RotateTargets);
+        TrialData.AddDatum("RotateDistractors", () => CurrentTrial.RotateDistractors);
+        TrialData.AddDatum("ResponseWindow", () => CurrentTrial.ResponseWindow);
+        TrialData.AddDatum("NumTargets", () => CurrentTrial.TargetSizes.Length);
+        TrialData.AddDatum("NumDistractors", () => CurrentTrial.DistractorSizes.Length);
+        TrialData.AddDatum("TargetCloseDuration", () => CurrentTrial.TargetCloseDuration);
+        TrialData.AddDatum("DistractorCloseDuration", () => CurrentTrial.DistractorCloseDuration);
+        TrialData.AddDatum("TargetMinAnimGap", () => CurrentTrial.TargetMinAnimGap);
+        TrialData.AddDatum("DistractorMinAnimGap", () => CurrentTrial.DistractorMinAnimGap);
+        TrialData.AddDatum("DisplayTargetDuration", () => CurrentTrial.DisplayTargetDuration);
+        TrialData.AddDatum("DisplayDistractorsDuration", () => CurrentTrial.DisplayDistractorsDuration);
+        TrialData.AddDatum("AngleProbabilities", () => CurrentTrial.AngleProbs);
+    }
 
-    //private void DefineFrameData()
-    //{
-    //    FrameData.AddDatum("ContextActive", () => ContextActive);
-    //    FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
-    //    FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
-    //    FrameData.AddDatum("StarfieldActive", () => Starfield != null && Starfield.activeInHierarchy ? "Active" : "NotActive");
-    //}
+    private void DefineFrameData()
+    {
+        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+        //what else to track?
+    }
 
     private void LoadConfigUIVariables()
     {

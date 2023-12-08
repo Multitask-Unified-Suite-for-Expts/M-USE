@@ -14,15 +14,11 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
     //DATA
     [HideInInspector] public int TrialsCompleted_Task = 0;
-
     [HideInInspector] public int SuccessfulTargetSelections_Task = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Task = 0;
     [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Task = 0;
     [HideInInspector] public int TargetAnimsWithoutSelection_Task = 0;
-
     [HideInInspector] public int AdditionalTargetSelections_Task = 0;
-
-
     [HideInInspector] public int DistractorSelections_Task = 0;
     [HideInInspector] public int DistractorRejections_Task = 0;
 
@@ -108,15 +104,16 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
 
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
+
         BlockData.AddDatum("SuccessfulTargetSelections", () => trialLevel.SuccessfulTargetSelections_Block);
         BlockData.AddDatum("UnsuccessfulTargetSelections", () => trialLevel.UnsuccessfulTargetSelections_Block);
+        BlockData.AddDatum("AdditionalTargetSelections", () => trialLevel.AdditionalTargetSelections_Block);
+        BlockData.AddDatum("TargetSelectionsBeforeFirstAnim", () => trialLevel.TargetSelectionsBeforeFirstAnim_Block);
+        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
+
         BlockData.AddDatum("DistractorSelections", () => trialLevel.DistractorSelections_Block);
         BlockData.AddDatum("DistractorRejections", () => trialLevel.DistractorRejections_Block);
 
-        BlockData.AddDatum("AdditionalTargetSelections", () => trialLevel.AdditionalTargetSelections_Block);
-
-        BlockData.AddDatum("IntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
-        BlockData.AddDatum("TargetSelectionsBeforeFirstAnim", () => trialLevel.TargetSelectionsBeforeFirstAnim_Block);
 
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);

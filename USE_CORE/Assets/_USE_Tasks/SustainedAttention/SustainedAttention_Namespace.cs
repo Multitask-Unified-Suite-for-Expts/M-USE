@@ -23,7 +23,6 @@ namespace SustainedAttention_Namespace
 
         public float DisplayTargetDuration;
         public float DisplayDistractorsDuration;
-        public float PlayDuration;
 
         //Targets:
         public float TargetMinAnimGap;

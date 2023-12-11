@@ -96,7 +96,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Play); //Setup Handler
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, SustainedAttention_CanvasGO, true); //Enable Touch Feedback
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, SustainedAttention_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -141,12 +141,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         Play.AddSpecificInitializationMethod(() =>
         {
             GiveRewardIfSliderFull = false;
-
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
             AudioFBController.Play("EC_BalloonChosen");
-
             ObjectManager.ActivateObjectMovement();
         });
         Play.AddUpdateMethod(() =>
@@ -225,6 +223,16 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
         DefineTrialData();
         DefineFrameData();
+    }
+
+    private void OnDestroy()
+    {
+        if(ObjectManager != null)
+        {
+            ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //UNsubscribe to MissedInterval Event
+            ObjectManager.OnDistractorAvoided += DistractorAvoided; //UNsubscribe to DistractorAvoided Event
+        }
+
     }
 
     private void TargetIntervalMissed()

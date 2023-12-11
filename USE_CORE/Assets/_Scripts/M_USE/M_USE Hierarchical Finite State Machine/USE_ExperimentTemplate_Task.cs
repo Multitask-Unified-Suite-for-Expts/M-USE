@@ -117,10 +117,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool TrialAndBlockDefsHandled;
         [HideInInspector] public bool StimsHandled;
 
-        //Passed by sessionLevel
-        [HideInInspector] public GameObject BlockResultsPrefab;
-        [HideInInspector] public GameObject BlockResults_GridElementPrefab;
-        [HideInInspector] public AudioClip BlockResults_AudioClip;
+        [HideInInspector] public AudioClip BlockResults_AudioClip; //Passed by SessionLevel
         [HideInInspector] public GameObject BlockResultsGO;
 
         private bool ContinueButtonClicked;
@@ -252,7 +249,6 @@ namespace USE_ExperimentTemplate_Task
                 // Check the case that the FrameData is deactivated when InTask_GazeCalibration is running
                 if (FrameData.gameObject.activeSelf)
                     StartCoroutine(FrameData.AppendDataToBuffer());
-                //Session.EventCodeManager.EventCodeLateUpdate();
             });
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
@@ -261,7 +257,7 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
                 blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;
-                if (Session.SessionDef.IsHuman)
+                if (blockFeedbackDuration > 0)
                 {
                     OrderedDictionary taskBlockResults = GetBlockResultsData();
                     if (taskBlockResults != null && taskBlockResults.Count > 0)
@@ -283,7 +279,6 @@ namespace USE_ExperimentTemplate_Task
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                StartCoroutine(FrameData.AppendDataToBuffer());
-               //Session.EventCodeManager.EventCodeLateUpdate();
             });
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
             BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
@@ -506,7 +501,6 @@ namespace USE_ExperimentTemplate_Task
                 foreach (DictionaryEntry entry in taskBlockResults)
                 {
                     blockResults_AudioSource.Play();
-
                     GameObject gridItem = Instantiate(Session.BlockResults_GridElementPrefab, gridParent);
                     gridItem.name = "GridElement" + count;
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();

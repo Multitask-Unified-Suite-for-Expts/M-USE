@@ -229,7 +229,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private void TargetIntervalMissed()
     {
-        Debug.LogWarning("INCREMENTING DATA FOR MISSED ANIM INTERVAL!");
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
@@ -237,7 +236,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private void DistractorAvoided()
     {
-        Debug.LogWarning("DISTRACTOR AVOIDED!");
         DistractorRejections_Block++;
         CurrentTaskLevel.DistractorRejections_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display

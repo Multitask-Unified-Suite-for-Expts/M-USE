@@ -90,10 +90,9 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
             ["Unsuccessful Target Selections"] = trialLevel.UnsuccessfulTargetSelections_Block,
             ["Distractor Selections"] = trialLevel.DistractorSelections_Block,
             ["Distractor Rejections"] = trialLevel.DistractorRejections_Block,
-            ["Target Selections Before First Anim"] = trialLevel.TargetSelectionsBeforeFirstAnim_Block,
+            ["Premature Target Selections"] = trialLevel.TargetSelectionsBeforeFirstAnim_Block,
             ["Intervals Without A Selection"] = trialLevel.TargetAnimsWithoutSelection_Block,
             ["Additional Target Selections"] = trialLevel.AdditionalTargetSelections_Block,
-
         };
         return data;
     }

@@ -68,10 +68,11 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     //for data:
     private string DistractorStimIndices_String;
     private string DistractorStimsChoosePos_String;
-
     private bool SpinCorrectSelection;
-
     private bool GotTrialCorrect;
+    private float ReactionTime;
+    [HideInInspector] public List<float?> ReactionTimes_InBlock = new List<float?>();
+
 
     //MAIN TARGET:
     private GameObject TargetStim_GO;
@@ -268,6 +269,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         float totalRotation = 0f;
         Feedback.AddSpecificInitializationMethod(() =>
         {
+            ReactionTime = ChooseStim.TimingInfo.Duration;
+            ReactionTimes_InBlock.Add(ReactionTime);
+            
             SpinCorrectSelection = false;
             totalRotation = 0f;
 
@@ -446,6 +450,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     public override void ResetTrialVariables()
     {
         GotTrialCorrect = false;
+        ReactionTime = 0;
     }
 
     public void ResetBlockVariables()
@@ -455,9 +460,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TokenBarCompletions_Block = 0;
         calculatedThreshold = 0;
         reversalsCount = 0;
+        blockAccuracy = 0;
+        
         DiffLevelsSummary.Clear();
         DiffLevelsAtReversals.Clear();
         runningPerformance.Clear();
+        ReactionTimes_InBlock.Clear();
     }
 
     public override void FinishTrialCleanup()
@@ -525,6 +533,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TargetStimDisplayPos", () => CurrentTrial.TargetStim_DisplayPos.ToString());
         TrialData.AddDatum("TargetStimChoosePos", () => CurrentTrial.TargetStim_ChoosePos.ToString());
         TrialData.AddDatum("DistractorStimsChoosePos", () => DistractorStimsChoosePos_String);
+        TrialData.AddDatum("ReactionTime", ()=> ReactionTime);
+
     }
 
     private void DefineFrameData()

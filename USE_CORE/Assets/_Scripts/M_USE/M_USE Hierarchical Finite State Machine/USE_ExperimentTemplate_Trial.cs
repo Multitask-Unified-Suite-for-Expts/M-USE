@@ -68,6 +68,7 @@ namespace USE_ExperimentTemplate_Trial
         public int MinTrialsBeforeTermProcedure;
         public int TerminationWindowSize;
         public int reversalsCount;
+        public float blockAccuracy;
         public List<int> DiffLevelsAtReversals;
         public List<int> DiffLevelsSummary;
         public int calculatedThreshold;

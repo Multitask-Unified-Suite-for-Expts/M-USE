@@ -29,6 +29,9 @@ using AntiSaccade_Namespace;
 using UnityEngine;
 using System.Text;
 using System.Collections.Specialized;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 {
@@ -93,6 +96,10 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
+        BlockData.AddDatum("BlockAccuracy", () => (float)trialLevel.TrialsCorrect_Block / trialLevel.TrialCompletions_Block);
+        BlockData.AddDatum("AvgReactionTime", () => CalculateAverageDuration(trialLevel.ReactionTimes_InBlock));
+        BlockData.AddDatum("StdDevReactionTime", () => CalculateStdDevDuration(trialLevel.ReactionTimes_InBlock));
+
     }
 
     public void CalculateBlockSummaryString()

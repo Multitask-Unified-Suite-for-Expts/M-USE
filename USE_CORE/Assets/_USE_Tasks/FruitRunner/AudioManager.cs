@@ -21,14 +21,14 @@ public class AudioManager : MonoBehaviour
         Slide_AudioClip = Resources.Load<AudioClip>("AudioClips/Slide");
     }
 
-    public void PlayPositiveItemCollected()
+    public void PlayPositiveItemClip()
     {
         ItemAudioSource.clip = PositiveCollected_AudioClip;
         ItemAudioSource.volume = 1f;
         ItemAudioSource.Play();
     }
 
-    public void PlayNegativeItemCollected()
+    public void PlayNegativeItemClip()
     {
         ItemAudioSource.clip = NegativeCollected_AudioClip;
         ItemAudioSource.volume = .2f;

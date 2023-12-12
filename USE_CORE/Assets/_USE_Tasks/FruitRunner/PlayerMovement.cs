@@ -15,11 +15,14 @@ public class PlayerMovement : MonoBehaviour
 
     private Vector3 MovementAmount = new Vector3(1.25f, 0, 0);
 
+    private AudioManager audioManager;
+
 
     void Start()
     {
         Rb = GetComponent<Rigidbody>();
         transform.position = Vector3.zero;
+        audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
     }
 
     void Update()
@@ -72,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
     {
         TargetPos = new Vector3(newPos.x, 0f, 0f);
         IsShifting = true;
+        audioManager.PlaySlideClip();
     }
 
 }

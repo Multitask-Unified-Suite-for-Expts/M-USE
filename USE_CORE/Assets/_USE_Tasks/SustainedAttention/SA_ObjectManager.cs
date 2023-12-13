@@ -84,7 +84,7 @@ public class SA_ObjectManager : MonoBehaviour
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
             go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
-            go.GetComponent<Image>().color = configValues.IsTarget ? Color.green : Color.red;
+            go.GetComponent<Image>().color = new Color(configValues.ObjectColor[0], configValues.ObjectColor[1], configValues.ObjectColor[2]);
             go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
@@ -194,6 +194,8 @@ public class SA_Object : MonoBehaviour
     public Vector2 ResponseWindow;
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
+    public float[] ObjectColor;
+
 
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
@@ -230,6 +232,7 @@ public class SA_Object : MonoBehaviour
         NextDestDist = configValue.NextDestDist;
         CloseDuration = configValue.CloseDuration;
         RatesAndDurations = configValue.RatesAndDurations;
+        ObjectColor = configValue.ObjectColor;
 
         foreach (var rateAndDur in RatesAndDurations)
         {
@@ -521,10 +524,7 @@ public class SA_Object : MonoBehaviour
         Marker.transform.SetParent(GameObject.Find("SustainedAttention_Canvas").transform);
         Marker.transform.localScale = new Vector3(.3f, .3f, .3f);
         Marker.transform.localPosition = CurrentDestination;
-        if (!IsTarget)
-            Marker.GetComponent<Image>().color = Color.magenta;
-        else
-            Marker.GetComponent<Image>().color = Color.yellow;
+        Marker.GetComponent<Image>().color = new Color(ObjectColor[0], ObjectColor[1], ObjectColor[2]);
         Marker.SetActive(false);
     }
 
@@ -548,6 +548,8 @@ public class SA_Object_ConfigValues
     public Vector2 ResponseWindow;
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
+    public float[] ObjectColor;
+
 }
 
 public class Cycle

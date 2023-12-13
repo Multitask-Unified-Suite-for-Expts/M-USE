@@ -289,7 +289,7 @@ namespace USE_ExperimentTemplate_Task
                 if (ContinueButtonClicked)
                     ContinueButtonClicked = false;
 
-                if (Session.SessionDef.IsHuman && BlockResultsGO != null)
+                if (BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
                 StartCoroutine(BlockData.AppendDataToBuffer());

@@ -5,14 +5,10 @@ using UnityEngine;
 public class FloorManager : MonoBehaviour
 {
     private readonly float MovementSpeed = 15f;
-
     public GameObject floorTilePrefab;
-    private int tilesOnScreen = 15;
-
+    private int tilesOnScreen = 20;
     private List<GameObject> activeTiles;
-
     private ItemSpawner itemSpawner;
-
     private int NumTilesSpawned;
 
     void Start()
@@ -30,7 +26,7 @@ public class FloorManager : MonoBehaviour
     {
         MoveTiles();
 
-        if (activeTiles.Count > 0 && activeTiles[0].transform.position.z <= -8f)
+        if (activeTiles.Count > 0 && activeTiles[0].transform.position.z <= -10f)
         {
             SpawnTile();
             DeleteTile();
@@ -51,16 +47,16 @@ public class FloorManager : MonoBehaviour
 
         if(activeTiles.Count > 0)
         {
-            BoxCollider lastTileCollider = activeTiles[activeTiles.Count-1].GetComponent<BoxCollider>();
-            spawnPos = new Vector3(0, -.5f, (activeTiles[activeTiles.Count - 1].transform.position.z + (lastTileCollider.bounds.size.z + .2f)));
+            GameObject lastTile = activeTiles[activeTiles.Count - 1];
+            BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
+            spawnPos = new Vector3(0, -.5f, lastTile.transform.position.z + (lastTileCollider.bounds.size.z + .2f));
         }
         
-
         GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile";
         tile.gameObject.transform.parent = gameObject.transform;
 
-        if(NumTilesSpawned > 4) //Dont spawn items on the first 4
+        if(NumTilesSpawned > 6) //Dont spawn items on the first 6
             itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);

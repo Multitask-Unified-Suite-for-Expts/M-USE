@@ -71,35 +71,34 @@ public class SA_ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
+    public List<SA_Object> CreateObjects(List<SA_Object_ConfigValues> objects)
     {
-        if(sizes.Length != speeds.Length)
-        {
-            Debug.LogError("ERROR CREATING SA OBJECTS. NOT ALL ARRAYS CONTAIN SAME NUMBER OF VALUES!");
-            return;
-        }
+        List<SA_Object> trialObjects = new List<SA_Object>();
 
-        for(int i = 0; i < sizes.Length; i++)
+        foreach(SA_Object_ConfigValues configValues in objects)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
-            go.name = isTarget ? $"Target{i+1}" : $"Distractor{i+1}";
+            go.name = configValues.IsTarget ? $"Target" : $"Distractor";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
-            go.GetComponent<RectTransform>().sizeDelta = new Vector2(sizes[i], sizes[i]);
-            go.GetComponent<Image>().color = color;
-
-            go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
+            go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
+            go.GetComponent<Image>().color = configValues.IsTarget ? Color.green : Color.red;
+            go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(this, isTarget, angleProbs, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(this, configValues);
 
-            if (isTarget)
+            if (obj.IsTarget)
                 TargetList.Add(obj);
             else
                 DistractorList.Add(obj);
+
+            trialObjects.Add(obj);
         }
+
+        return trialObjects;
     }
     
     private void CalculateStartingPositions()
@@ -151,7 +150,9 @@ public class SA_ObjectManager : MonoBehaviour
     public void ActivateTargets()
     {
         foreach (var target in TargetList)
+        {
             target.gameObject.SetActive(true);
+        }
     }
 
     public void DeactivateTargets()
@@ -163,7 +164,9 @@ public class SA_ObjectManager : MonoBehaviour
     public void ActivateDistractors()
     {
         foreach (var distractor in DistractorList)
+        {
             distractor.gameObject.SetActive(true);
+        }
     }
 
     public void DeactivateDistractors()
@@ -179,6 +182,8 @@ public class SA_Object : MonoBehaviour
 {
     public SA_ObjectManager ObjManager;
 
+    //From Object Config:
+    public int Index;
     public Vector3 AngleProbs;
     public float MinAnimGap;
     public bool IsTarget;
@@ -188,26 +193,19 @@ public class SA_Object : MonoBehaviour
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;
-
-    public Vector2[] RateAndDurations;
+    public Vector2[] RatesAndDurations;
 
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
-    public bool Move; //Controls whether or not they're moving around the screen
+    public bool MoveAroundScreen;
     public bool ObjectPaused;
-
     public GameObject Marker;
     public Vector3 Direction;
-
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
-
     public float AnimStartTime;
-
     public bool WithinDuration;
-
     private readonly List<float> PreviousAngleOffsets = new List<float>();
-
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
 
@@ -219,21 +217,21 @@ public class SA_Object : MonoBehaviour
     }
 
 
-    public void SetupObject(SA_ObjectManager objManager, bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
+    public void SetupObject(SA_ObjectManager objManager, SA_Object_ConfigValues configValue)
     {
         ObjManager = objManager;
-        IsTarget = isTarget;
-        AngleProbs = angleProbs;
-        RotateTowardsDest = rotateTowardsDest;
-        MinAnimGap = minAnimGap;
-        ResponseWindow = responseWindow;
-        Speed = speed;
-        Size = size;
-        NextDestDist = nextDestDist;
-        CloseDuration = closeDuration;
-        RateAndDurations = ratesAndDurations;
+        IsTarget = configValue.IsTarget;
+        AngleProbs = configValue.AngleProbs;
+        RotateTowardsDest = configValue.RotateTowardsDest;
+        MinAnimGap = configValue.MinAnimGap;
+        ResponseWindow = configValue.ResponseWindow;
+        Speed = configValue.Speed;
+        Size = configValue.Size;
+        NextDestDist = configValue.NextDestDist;
+        CloseDuration = configValue.CloseDuration;
+        RatesAndDurations = configValue.RatesAndDurations;
 
-        foreach(var rateAndDur in RateAndDurations)
+        foreach (var rateAndDur in RatesAndDurations)
         {
             Cycle cycle = new()
             {
@@ -291,7 +289,7 @@ public class SA_Object : MonoBehaviour
 
     private void Update()
     {
-        if(Move)
+        if(MoveAroundScreen)
         {
             if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
@@ -313,7 +311,7 @@ public class SA_Object : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(Move && !ObjectPaused)
+        if(MoveAroundScreen && !ObjectPaused)
         {
             if (AtDestination())
                 SetNewDestination();            
@@ -375,7 +373,7 @@ public class SA_Object : MonoBehaviour
 
     public void ActivateMovement()
     {
-        Move = true;
+        MoveAroundScreen = true;
 
         AnimStartTime = 0; //used to be Time.time 
 
@@ -464,6 +462,13 @@ public class SA_Object : MonoBehaviour
         SA_ObjectManager.StartingPositionsUsed.Add(newRandomPos);
 
         StartingPosition = newRandomPos;
+
+        if (gameObject == null)
+            Debug.LogError("GO IS NULL!");
+
+        if (gameObject.transform == null)
+            Debug.LogError("TRANSFORM NULL!?!?!");
+
         transform.localPosition = newRandomPos;
     }
 
@@ -527,6 +532,22 @@ public class SA_Object : MonoBehaviour
     {
         Marker.SetActive(!Marker.activeInHierarchy);
     }
+}
+
+public class SA_Object_ConfigValues
+{
+    //From Object Config:
+    public int Index;
+    public Vector3 AngleProbs;
+    public float MinAnimGap;
+    public bool IsTarget;
+    public bool RotateTowardsDest;
+    public float Speed;
+    public float Size;
+    public float NextDestDist;
+    public Vector2 ResponseWindow;
+    public float CloseDuration;
+    public Vector2[] RatesAndDurations;
 }
 
 public class Cycle

@@ -5,6 +5,7 @@ using USE_States;
 using USE_ExperimentTemplate_Trial;
 using SustainedAttention_Namespace;
 using ConfigDynamicUI;
+using System.Linq;
 
 
 public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
@@ -42,6 +43,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private readonly float HaloDepth = 10f;
     private float HaloDuration = .15f; //make configurable later
 
+    List<SA_Object> TrialObjects;
 
     public override void DefineControlLevel()
     {
@@ -87,10 +89,12 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
             ObjectManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
 
-            //Create Targets:
-            ObjectManager.CreateObjects(true, CurrentTrial.AngleProbs, CurrentTrial.RotateTargets, CurrentTrial.TargetMinAnimGap, CurrentTrial.ResponseWindow, CurrentTrial.TargetCloseDuration, CurrentTrial.TargetSizes, CurrentTrial.TargetSpeeds, CurrentTrial.TargetNextDestDist, CurrentTrial.TargetRatesAndDurations, Color.yellow);
-            //Create Distractors:
-            ObjectManager.CreateObjects(false, CurrentTrial.AngleProbs, CurrentTrial.RotateDistractors, CurrentTrial.DistractorMinAnimGap, CurrentTrial.ResponseWindow, CurrentTrial.DistractorCloseDuration, CurrentTrial.DistractorSizes, CurrentTrial.DistractorSpeeds, CurrentTrial.DistractorNextDestDist, CurrentTrial.DistractorRatesAndDurations, Color.magenta);
+            List<SA_Object_ConfigValues> trialObjectsConfigValues = new List<SA_Object_ConfigValues>();
+
+            foreach (int objIndex in CurrentTrial.TrialObjectIndices)
+                trialObjectsConfigValues.Add(CurrentTaskLevel.SA_Objects_ConfigValues[objIndex]);
+            
+            TrialObjects = ObjectManager.CreateObjects(trialObjectsConfigValues);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -209,6 +213,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     if(obj.CurrentCycle.firstIntervalStarted)
                         obj.CurrentCycle.selectedDuringCurrentInterval = true;
 
+                    Input.ResetInputAxes(); //Reset input?
+
                     Handler.LastSuccessfulSelection = null;
                 }
             }
@@ -232,16 +238,13 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //UNsubscribe to MissedInterval Event
             ObjectManager.OnDistractorAvoided += DistractorAvoided; //UNsubscribe to DistractorAvoided Event
         }
-
     }
-
     private void TargetIntervalMissed()
     {
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
     }
-
     private void DistractorAvoided()
     {
         DistractorRejections_Block++;
@@ -331,26 +334,28 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nNum Targets: " + CurrentTrial.TargetSizes.Length +
-                             "\nNum Distractors: " + CurrentTrial.DistractorSizes.Length;
+                             "\nNum Targets: " + TrialObjects.Where(obj => obj.IsTarget).Count() +
+                             "\nNum Distractors: " + TrialObjects.Where(obj => !obj.IsTarget).Count();
 
     }
 
     private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
-        TrialData.AddDatum("RotateTargets", () => CurrentTrial.RotateTargets);
-        TrialData.AddDatum("RotateDistractors", () => CurrentTrial.RotateDistractors);
-        TrialData.AddDatum("ResponseWindow", () => CurrentTrial.ResponseWindow);
-        TrialData.AddDatum("NumTargets", () => CurrentTrial.TargetSizes.Length);
-        TrialData.AddDatum("NumDistractors", () => CurrentTrial.DistractorSizes.Length);
-        TrialData.AddDatum("TargetCloseDuration", () => CurrentTrial.TargetCloseDuration);
-        TrialData.AddDatum("DistractorCloseDuration", () => CurrentTrial.DistractorCloseDuration);
-        TrialData.AddDatum("TargetMinAnimGap", () => CurrentTrial.TargetMinAnimGap);
-        TrialData.AddDatum("DistractorMinAnimGap", () => CurrentTrial.DistractorMinAnimGap);
+        TrialData.AddDatum("Objects", () => CurrentTrial.TrialObjectIndices);
         TrialData.AddDatum("DisplayTargetDuration", () => CurrentTrial.DisplayTargetDuration);
         TrialData.AddDatum("DisplayDistractorsDuration", () => CurrentTrial.DisplayDistractorsDuration);
-        TrialData.AddDatum("AngleProbabilities", () => CurrentTrial.AngleProbs);
+
+        //TrialData.AddDatum("RotateTargets", () => CurrentTrial.RotateTargets);
+        //TrialData.AddDatum("RotateDistractors", () => CurrentTrial.RotateDistractors);
+        //TrialData.AddDatum("ResponseWindow", () => CurrentTrial.ResponseWindow);
+        //TrialData.AddDatum("NumTargets", () => CurrentTrial.TargetSizes.Length);
+        //TrialData.AddDatum("NumDistractors", () => CurrentTrial.DistractorSizes.Length);
+        //TrialData.AddDatum("TargetCloseDuration", () => CurrentTrial.TargetCloseDuration);
+        //TrialData.AddDatum("DistractorCloseDuration", () => CurrentTrial.DistractorCloseDuration);
+        //TrialData.AddDatum("TargetMinAnimGap", () => CurrentTrial.TargetMinAnimGap);
+        //TrialData.AddDatum("DistractorMinAnimGap", () => CurrentTrial.DistractorMinAnimGap);
+        //TrialData.AddDatum("AngleProbabilities", () => CurrentTrial.AngleProbs);
     }
 
     private void DefineFrameData()

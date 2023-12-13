@@ -2,7 +2,7 @@ using USE_ExperimentTemplate_Task;
 using SustainedAttention_Namespace;
 using UnityEngine;
 using System.Collections.Specialized;
-
+using System.Collections.Generic;
 
 public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 {
@@ -22,6 +22,8 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int DistractorSelections_Task = 0;
     [HideInInspector] public int DistractorRejections_Task = 0;
 
+    //OBJECTS LOADED FROM OBJECT CONFIG:
+    public SA_Object_ConfigValues[] SA_Objects_ConfigValues;
 
 
     public override void DefineControlLevel()
@@ -34,6 +36,9 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            //TRYING CUSTOM SETTINGS:
+            SA_Objects_ConfigValues = customSettings[0].AssignCustomSetting<SA_Object_ConfigValues[]>();
+
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
             trialLevel.ResetBlockVariables();
@@ -41,6 +46,13 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
+    }
+
+
+    public override List<CustomSettings> DefineCustomSettings()
+    {
+        customSettings.Add(new CustomSettings("ObjectsDef", typeof(SA_Object_ConfigValues), "array", SA_Objects_ConfigValues));
+        return customSettings;
     }
 
     public void CalculateBlockSummaryString()

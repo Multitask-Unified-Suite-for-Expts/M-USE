@@ -127,24 +127,23 @@ public class SA_ObjectManager : MonoBehaviour
 
     public void DestroyExistingObjects()
     {
-        if (TargetList.Count > 0)
+        List<SA_Object> targetListCopy = new List<SA_Object>(TargetList);
+        List<SA_Object> distractorListCopy = new List<SA_Object>(DistractorList);
+
+        foreach(SA_Object obj in targetListCopy)
         {
-            foreach (SA_Object obj in TargetList)
-            {
-                if(obj != null)
-                    obj.DestroyObj();
-            }
-            TargetList.Clear();
+            if (obj != null)
+                obj.DestroyObj();
         }
-        if (DistractorList.Count > 0)
+
+        foreach (SA_Object obj in distractorListCopy)
         {
-            foreach (SA_Object obj in DistractorList)
-            {
-                if(obj != null)
-                    obj.DestroyObj();
-            }
-            DistractorList.Clear();
+            if (obj != null)
+                obj.DestroyObj();
         }
+
+        TargetList.Clear();
+        DistractorList.Clear();
     }
 
     public void ActivateTargets()
@@ -195,6 +194,7 @@ public class SA_Object : MonoBehaviour
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
     public float[] ObjectColor;
+    public int SliderChange;
 
 
     public Vector2 StartingPosition;
@@ -233,6 +233,7 @@ public class SA_Object : MonoBehaviour
         CloseDuration = configValue.CloseDuration;
         RatesAndDurations = configValue.RatesAndDurations;
         ObjectColor = configValue.ObjectColor;
+        SliderChange = configValue.SliderChange;
 
         foreach (var rateAndDur in RatesAndDurations)
         {
@@ -465,13 +466,6 @@ public class SA_Object : MonoBehaviour
         SA_ObjectManager.StartingPositionsUsed.Add(newRandomPos);
 
         StartingPosition = newRandomPos;
-
-        if (gameObject == null)
-            Debug.LogError("GO IS NULL!");
-
-        if (gameObject.transform == null)
-            Debug.LogError("TRANSFORM NULL!?!?!");
-
         transform.localPosition = newRandomPos;
     }
 
@@ -549,6 +543,7 @@ public class SA_Object_ConfigValues
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
     public float[] ObjectColor;
+    public int SliderChange;
 
 }
 

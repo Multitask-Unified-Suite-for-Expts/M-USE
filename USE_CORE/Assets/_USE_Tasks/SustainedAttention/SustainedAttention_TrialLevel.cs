@@ -33,8 +33,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     private GameObject ChosenGO = null;
+    private SA_Object ChosenObject = null;
 
-    private int SliderGainSteps, SliderLossSteps;
+    private int SliderGainSteps;
 
     [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
@@ -156,28 +157,28 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
             {
-                SA_Object obj = ChosenGO.GetComponent<SA_Object>();
-                if(obj != null)
+                ChosenObject = ChosenGO.GetComponent<SA_Object>();
+                if(ChosenObject != null)
                 {
-                    HaloFBController.SetHaloSize(.01f * obj.Size);
+                    HaloFBController.SetHaloSize(.01f * ChosenObject.Size);
 
-                    if (obj.IsTarget)
+                    if (ChosenObject.IsTarget)
                     {
-                        if(obj.WithinDuration && !obj.CurrentCycle.selectedDuringCurrentInterval)
+                        if(ChosenObject.WithinDuration && !ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
                         {
-                            Debug.LogWarning("CORRECT DURATION: " + (Time.time - obj.AnimStartTime));
+                            Debug.LogWarning("CORRECT DURATION: " + (Time.time - ChosenObject.AnimStartTime));
                             GiveRewardIfSliderFull = true;
                             HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
-                            SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[0] * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
+                            SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
                             SuccessfulTargetSelections_Block++;
                             CurrentTaskLevel.SuccessfulTargetSelections_Task++;
                         }
                         else
                         {
                             HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
-                            SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
+                            SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
 
-                            if(obj.CurrentCycle.selectedDuringCurrentInterval)
+                            if(ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
                             {
                                 Debug.LogWarning("SELECTED TARGET AGAIN AFTER ALREADY SELECTING ONCE!");
                                 AdditionalTargetSelections_Block++;
@@ -185,9 +186,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                             }
                             else
                             {
-                                if (obj.CurrentCycle.firstIntervalStarted)
+                                if (ChosenObject.CurrentCycle.firstIntervalStarted)
                                 {
-                                    Debug.LogWarning("FAILED DURATION: " + (Time.time - obj.AnimStartTime));
+                                    Debug.LogWarning("FAILED DURATION: " + (Time.time - ChosenObject.AnimStartTime));
                                     UnsuccessfulTargetSelections_Block++;
                                     CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
                                 }
@@ -203,15 +204,15 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     else //Selected a Distractor
                     {
                         HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
-                        SliderFBController.UpdateSliderValue(CurrentTrial.SliderLoss[0] * (1f / SliderGainSteps));
+                        SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;
                     }
 
                     CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
 
-                    if(obj.CurrentCycle.firstIntervalStarted)
-                        obj.CurrentCycle.selectedDuringCurrentInterval = true;
+                    if(ChosenObject.CurrentCycle.firstIntervalStarted)
+                        ChosenObject.CurrentCycle.selectedDuringCurrentInterval = true;
 
                     Input.ResetInputAxes(); //Reset input?
 
@@ -258,6 +259,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             if (SliderFBController.isSliderBarFull() && !AudioFBController.IsPlaying())
             {
+                Debug.LogWarning("WOULD BE GIVING REWARD FOR OBJECT: " + ChosenObject.gameObject.name);
+
                 GiveReward();
                 SliderFBController.ResetSliderBarFull();
                 SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
@@ -269,9 +272,11 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        ObjectManager.OnTargetIntervalMissed -= TargetIntervalMissed; //Unsubscribe from MissedInterval Event
-
-        ObjectManager.DestroyExistingObjects();
+        if(ObjectManager != null)
+        {
+            ObjectManager.OnTargetIntervalMissed -= TargetIntervalMissed; //Unsubscribe from MissedInterval Event
+            ObjectManager.DestroyExistingObjects();
+        }
 
         SliderFBController.SliderGO.SetActive(false);
         SliderFBController.SliderHaloGO.SetActive(false);
@@ -292,7 +297,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     public override void ResetTrialVariables()
     {
         SliderGainSteps = 0;
-        SliderLossSteps = 0;
         SliderFBController.ResetSliderBarFull();
     }
 
@@ -316,11 +320,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             SliderGainSteps += sliderGain;
         }
         SliderGainSteps += CurrentTrial.SliderInitialValue;
-        foreach (int sliderLoss in CurrentTrial.SliderLoss)
-        {
-            SliderLossSteps += sliderLoss;
-        }
-        SliderLossSteps += CurrentTrial.SliderInitialValue;
     }
 
 

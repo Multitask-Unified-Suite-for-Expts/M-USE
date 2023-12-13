@@ -174,7 +174,7 @@ public class VerifyTask_Level : ControlLevel
                             }
 
                             Debug.Log(TaskLevel.TaskName + " " + cs.SearchString + " file imported.");
-                            Debug.Log(((MazeGame_Namespace.MazeDef[])cs.ParsedResult)[0].mDims);
+                            //Debug.Log(((MazeGame_Namespace.MazeDef[])cs.ParsedResult)[0].mDims);
 
                         }
                         

@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody Rb;
     private Vector3 TargetPos;
     private bool IsShifting = false;
-    private float SideShiftSpeed = 12f;
+    private float SideShiftSpeed = 15f;
 
     private Vector3 MovementAmount = new Vector3(1.25f, 0, 0);
 
@@ -47,13 +47,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
         {
             if(transform.position.x > -1)
                 MoveToPosition(transform.position - MovementAmount);
         }
 
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
         {
             if(transform.position.x < 1)
                 MoveToPosition(transform.position + MovementAmount);

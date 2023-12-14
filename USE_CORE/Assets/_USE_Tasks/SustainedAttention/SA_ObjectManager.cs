@@ -183,7 +183,6 @@ public class SA_Object : MonoBehaviour
 
     //From Object Config:
     public int Index;
-    public Vector3 AngleProbs;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -193,6 +192,9 @@ public class SA_Object : MonoBehaviour
     public Vector2 ResponseWindow;
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
+    public Vector3 AngleProbs;
+    public Vector2[] AngleRanges;
+    public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
 
@@ -210,7 +212,6 @@ public class SA_Object : MonoBehaviour
     private readonly List<float> PreviousAngleOffsets = new List<float>();
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
-
 
 
     public SA_Object()
@@ -234,6 +235,8 @@ public class SA_Object : MonoBehaviour
         RatesAndDurations = configValue.RatesAndDurations;
         ObjectColor = configValue.ObjectColor;
         SliderChange = configValue.SliderChange;
+        AngleRanges = configValue.AngleRanges;
+        NumDestWithoutBigTurn = configValue.NumDestWithoutBigTurn;
 
         foreach (var rateAndDur in RatesAndDurations)
         {
@@ -244,6 +247,13 @@ public class SA_Object : MonoBehaviour
                 intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y)
             };
             Cycles.Add(cycle);
+
+            //if(IsTarget)
+            //{
+            //    var floats = GetIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y);
+            //    foreach (var num in floats)
+            //        Debug.LogWarning("NUM: " + num);
+            //}
         }
 
         SetRandomStartingPosition();
@@ -275,6 +285,27 @@ public class SA_Object : MonoBehaviour
         //        Debug.LogWarning("INTERVAL: " + num);
 
         return randomFloats;
+    }
+
+    //Chris alternative method:
+    public List<float> GetIntervals(int numIntervals, float duration)
+    {
+        //float maxNum = duration;
+
+        List<float> intervalList = new List<float>();
+        for (int i = 0; i < numIntervals; i++)
+        {
+            intervalList.Add(Random.Range(0.0f, 1.01f));
+        }
+
+        duration -= numIntervals * MinAnimGap;
+
+        float sum = intervalList.Sum();
+        intervalList = intervalList.Select(num => num * duration / sum).ToList();
+        intervalList = intervalList.Select(num => num + MinAnimGap).ToList();
+        //intervalList.Add(maxNum); //manually add final interval
+        intervalList.Sort();
+        return intervalList;
     }
 
     private void NextCycle()
@@ -405,24 +436,26 @@ public class SA_Object : MonoBehaviour
     {
         float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg; //Extract angle from current Direction
 
-        float randomChance = Random.value; //Get randomNum between 0 and 1
+        float randomChance = Random.value; //Get randomNum between 0 and .99
         float angleOffset;
 
         if (randomChance < AngleProbs.x) //AngleProbs.x is the "Chance of a small angle"
-            angleOffset = Random.Range(0, 16f);
+            angleOffset = Random.Range(AngleRanges[0].x, AngleRanges[0].y); //Small Angle Range
         else if (randomChance < AngleProbs.x + AngleProbs.y) //AngleProbs.y is the "Chance of a medium angle"
-            angleOffset = Random.Range(16f, 46f);
+            angleOffset = Random.Range(AngleRanges[1].x, AngleRanges[1].y); //Medium Angle Range
         else
-            angleOffset = Random.Range(46f, 181f);
+            angleOffset = Random.Range(AngleRanges[2].x, AngleRanges[2].y); //Large Angle Range
 
-        if (PreviousAngleOffsets.Count > 4) //Could make a variable "NumMovesWithoutTurningAround"
+
+       
+        if (PreviousAngleOffsets.Count > NumDestWithoutBigTurn)
             PreviousAngleOffsets.RemoveAt(0);
 
-        if(angleOffset > 90f)
+        if (angleOffset > 90f)
         {
-           foreach(float offset in PreviousAngleOffsets)
+            foreach (float offset in PreviousAngleOffsets)
             {
-                if(Mathf.Abs(offset) > 90f)
+                if (Mathf.Abs(offset) > 90f)
                 {
                     angleOffset = Random.Range(0, 46);
                     break;
@@ -532,7 +565,6 @@ public class SA_Object_ConfigValues
 {
     //From Object Config:
     public int Index;
-    public Vector3 AngleProbs;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -542,6 +574,9 @@ public class SA_Object_ConfigValues
     public Vector2 ResponseWindow;
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
+    public Vector3 AngleProbs;
+    public Vector2[] AngleRanges;
+    public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
 

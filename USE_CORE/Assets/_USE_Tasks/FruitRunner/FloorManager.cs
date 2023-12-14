@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 15f;
+    private readonly float MovementSpeed = 18f;
     public GameObject floorTilePrefab;
-    private int tilesOnScreen = 20;
+    private int tilesOnScreen = 15;
     private List<GameObject> activeTiles;
     private ItemSpawner itemSpawner;
     private int NumTilesSpawned;
@@ -56,7 +56,7 @@ public class FloorManager : MonoBehaviour
         tile.name = "Tile";
         tile.gameObject.transform.parent = gameObject.transform;
 
-        if(NumTilesSpawned > 6) //Dont spawn items on the first 6
+        if(NumTilesSpawned > 3) //Dont spawn items on the first 3
             itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);

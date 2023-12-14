@@ -48,9 +48,11 @@ namespace HiddenMaze
         public string mNextStep;
         public int mNumSquares;
         public int mNumTurns;
-        public List<int> mDims; 
+        public List<int> mDims;
+        public List<int> customDims;
         public string mName;
         public bool sideRestricted;
+        public string gridStyle;
     }
 
     public class Maze
@@ -62,27 +64,39 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public Vector2 mDims;
+        public List<int> customDims;
         public string mName;
         public bool sideRestricted;
+        public string gridStyle;
 
-        public Maze(string jsonString)
+
+        public Maze(string jsonString, string styleString)
         {
             MazeJson jsonMaze = JsonUtility.FromJson<MazeJson>(jsonString);
 
-            // Assign values manually to the Maze class
+            if(styleString.ToLower() == "square")
+            {
+                // Assign values manually to the Maze class
+                mDims = new Vector2(jsonMaze.mDims[0], jsonMaze.mDims[1]);
+                mNumTurns = jsonMaze.mNumTurns;
+            }
+            else
+                customDims = jsonMaze.customDims;
+
             mNextStep = jsonMaze.mStart;
+
+            mNumSquares = jsonMaze.mNumSquares;
             mName = jsonMaze.mName;
-            mDims = new Vector2(jsonMaze.mDims[0], jsonMaze.mDims[1]);
-            sideRestricted = jsonMaze.sideRestricted;
             mPath = jsonMaze.mPath;
             mStart = jsonMaze.mStart;
             mFinish = jsonMaze.mFinish;
-            mNumSquares = jsonMaze.mNumSquares;
-            mNumTurns = jsonMaze.mNumTurns;
+            sideRestricted = jsonMaze.sideRestricted;
+
         }
 
+
         // Create Maze object from JSON representation
-    public static Maze CreateFromJSON(string jsonString)
+        public static Maze CreateFromJSON(string jsonString)
         {
             Maze jsonMaze = JsonUtility.FromJson<Maze>(jsonString);
 

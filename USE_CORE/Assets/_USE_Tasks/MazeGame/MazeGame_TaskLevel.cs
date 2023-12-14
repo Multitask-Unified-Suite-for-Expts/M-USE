@@ -133,6 +133,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeManager.LoadTextMaze(mgBD);
             mgTL.InitializeTrialArrays();
             InitializeBlockArrays();
+            MazeManager.tileConnectorsLoaded = false;
             //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             
@@ -140,6 +141,10 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             CalculateBlockSummaryString();
             ResetBlockVariables();
 
+        });
+        RunBlock.AddDefaultTerminationMethod(() =>
+        {
+            mgTL.DestroyChildren(mgTL.MazeContainer);
         });
     }
 

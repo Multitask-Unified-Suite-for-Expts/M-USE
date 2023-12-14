@@ -19,6 +19,7 @@ public class MazeManager:MonoBehaviour
 
     public bool startedMaze;
     public bool finishedMaze;
+    public bool tileConnectorsLoaded;
     public Maze currentMaze;
 
     public float mazeDuration;
@@ -43,10 +44,7 @@ public class MazeManager:MonoBehaviour
     
     
     public MazeGame_TrialLevel mgTL;
-    private int mIndex;
-    
-    
-    
+        
     // Start is called before the first frame update
     void Start()
     {
@@ -77,7 +75,7 @@ public class MazeManager:MonoBehaviour
     }
     public void ResetMazeVariables()
     {
-        currentPathIndex = 0;
+        currentPathIndex = -1;
         consecutiveErrors = 0;
 
         selectedTilesInPathGO.Clear();
@@ -96,7 +94,7 @@ public class MazeManager:MonoBehaviour
     }
     public void LoadTextMaze(MazeGame_BlockDef mgBD)
     {
-        currentMaze = new Maze(mgBD.MazeDef);
+        currentMaze = new Maze(mgBD.MazeDef, "hexagon");
         
     }
 
@@ -104,21 +102,16 @@ public class MazeManager:MonoBehaviour
     {
         if (consecutiveErrors == 1)
         {
-            Debug.LogWarning("CURRENT POS: " + currentTilePositionGO.name + " mnextstep: " + currentMaze.mNextStep);
-            currentMaze.mNextStep = currentMaze.mPath[currentPathIndex];
+            currentMaze.mNextStep = currentTilePositionGO.name;
             currentTilePositionGO.GetComponent<Tile>().setColor(currentTilePositionGO.GetComponent<Tile>().InitialTileColor);
-            selectedTilesInPathGO.RemoveAt(selectedTilesInPathGO.Count - 1);
-            if (selectedTilesInPathGO.Count > 0)
-                currentTilePositionGO = selectedTilesInPathGO.Count > 0 ? selectedTilesInPathGO[selectedTilesInPathGO.Count - 1] : null;
-            
-            Debug.LogWarning("CURRENT POS: " + currentTilePositionGO.name + " mnextstep: " + currentMaze.mNextStep);
-
         }
     }
     public int ManageTileTouch(Tile tile)
     {
         GameObject TileGO = tile.gameObject;
-        
+        Debug.LogWarning("===BEFORE===");
+        Debug.LogWarning("PATH PROGRESS IDX: " + currentPathIndex + " || MNEXT STEP : " + currentMaze.mNextStep);
+        Debug.LogWarning( " CURRENT TIL POS: " + (currentTilePositionGO == null? "N/A":currentTilePositionGO.name));
         //var touchedCoord = tile.mCoord;
         // ManageTileTouch - Returns correctness code
         // Return values:
@@ -143,6 +136,7 @@ public class MazeManager:MonoBehaviour
             {
                // currentMaze.mNextStep = currentMaze.mPath[currentMaze.mPath.FindIndex(pathCoord => pathCoord == tile.mCoord.chessCoord) + 1];
                 mgTL.HandleRetouchCorrect(currentPathIndex);
+                currentMaze.mNextStep = currentMaze.mPath[currentPathIndex+1];
                 return 2;
             }
 
@@ -155,7 +149,7 @@ public class MazeManager:MonoBehaviour
             
             // Sets the NextStep if the maze isn't finished
             if (!tile.isFinishTile)
-                currentMaze.mNextStep = currentMaze.mPath[currentPathIndex];
+                currentMaze.mNextStep = currentMaze.mPath[currentPathIndex+1];
             else
                 finishedMaze = true; // Finished the Maze
 
@@ -163,7 +157,6 @@ public class MazeManager:MonoBehaviour
             
         }
         // RULE-ABIDING ERROR ( and RULE ABIDING, BUT PERSEVERATIVE)
-        Debug.Log("CURRENT PATH INDEX BEFORE RULE ABIDING: " + currentPathIndex);
         if ( currentTilePositionGO.GetComponent<Tile>().AdjacentTiles.Contains(TileGO) && !selectedTilesInPathGO.Contains(TileGO))
         {
             if (consecutiveErrors > 0) //Perseverative Error
@@ -180,7 +173,7 @@ public class MazeManager:MonoBehaviour
         // RULE BREAKING BACKTRACK ERROR OR ERRONEOUS RETOUCH OF LAST CORRECT TILE
         if (selectedTilesInPathGO.Contains(TileGO))
         {
-            if (tile.gameObject.Equals(selectedTilesInPathGO[currentPathIndex]))
+            if (TileGO.Equals(currentTilePositionGO))
             {
                 mgTL.HandleRetouchErroneous(currentPathIndex);
                 return 2;

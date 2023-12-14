@@ -63,7 +63,6 @@ public class SliderFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("SliderBarValue", () => Slider?.value); //OLD (didnt have the question mark)
-        //trialData.AddDatum("SliderBarValue", () => Slider != null ? Slider.value : -1); //NEW
         trialData.AddDatum("SliderBarFilled", ()=> sliderBarFull);
         frameData.AddDatum("SliderAnimationPhase", () => animationPhase.ToString());
         frameData.AddDatum("SliderVisibility", ()=> Slider != null? Slider.enabled : false);

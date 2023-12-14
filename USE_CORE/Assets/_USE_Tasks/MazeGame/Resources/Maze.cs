@@ -80,10 +80,8 @@ namespace HiddenMaze
             mNumSquares = jsonMaze.mNumSquares;
             mNumTurns = jsonMaze.mNumTurns;
         }
-    
 
-
-    // Create Maze object from JSON representation
+        // Create Maze object from JSON representation
     public static Maze CreateFromJSON(string jsonString)
         {
             Maze jsonMaze = JsonUtility.FromJson<Maze>(jsonString);

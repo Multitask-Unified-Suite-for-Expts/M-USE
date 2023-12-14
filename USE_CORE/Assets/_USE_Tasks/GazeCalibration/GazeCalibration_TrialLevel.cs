@@ -617,14 +617,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         for (int i = 0; i < leftSamples.Count; i++)
         {
-            USE_Line leftSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(leftSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.blue, $"L{i + 1}");
+            USE_Line leftSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(leftSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.blue, $"L{i + 1}", true);
             LeftSampleDistances.Add(leftSampleLine.LineLength);
             leftSampleLine.LineGO.SetActive(true);
         }
 
         for (int i = 0; i < rightSamples.Count; i++)
         {
-            USE_Line rightSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(rightSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.red, $"R{i + 1}");
+            USE_Line rightSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(rightSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.red, $"R{i + 1}", true);
             RightSampleDistances.Add(rightSampleLine.LineLength);
             rightSampleLine.LineGO.SetActive(true);
         }

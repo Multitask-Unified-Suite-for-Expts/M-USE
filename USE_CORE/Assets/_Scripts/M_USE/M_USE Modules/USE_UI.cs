@@ -512,8 +512,6 @@ namespace USE_UI
             rect.anchorMax = Vector2.zero;
             rect.anchoredPosition = circleLocation;
             
-            
-
             CircleGO.SetActive(false);
         }
 
@@ -544,7 +542,7 @@ namespace USE_UI
             this.CircleGO.transform.localScale = new Vector3(size, size, size);
         }
     }
-    public class USE_Line : MonoBehaviour
+    public class USE_Line
     {
         public GameObject LineGO;
         public float LineSize = 1f;
@@ -555,13 +553,17 @@ namespace USE_UI
         private Sprite originalSprite;
         public State SetActiveOnInitialization;
         public State SetInactiveOnTermination;
-        public USE_Line(Canvas parent, Vector2 start, Vector2 end, Color col, string name)
+        public USE_Line(Canvas parent, Vector2 start, Vector2 end, Color col, string name, bool adjustAnchor = false)
         {
             LineGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
             LineGO.transform.SetParent(parent.transform, false);
-            LineGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
-            LineGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-            LineGO.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+            if (adjustAnchor)
+            {
+                LineGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+                LineGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+                LineGO.GetComponent<RectTransform>().anchoredPosition = Vector2.zero; 
+            }
+            
             LineGO.GetComponent<RectTransform>().sizeDelta = new Vector2(LineSize, LineSize);
             UnityEngine.UI.Extensions.UILineRenderer LineRenderer = LineGO.GetComponent<UnityEngine.UI.Extensions.UILineRenderer>();
             LineLength = Vector2.Distance(start, end);
@@ -570,6 +572,9 @@ namespace USE_UI
             LineRenderer.RelativeSize = false;
             LineRenderer.SetAllDirty();
         }
+        
+        
+        
         //----------------------------------------------------------------------
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {

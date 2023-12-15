@@ -67,7 +67,8 @@ public class Tile : MonoBehaviour
     {
         if (!isFlashing)
         {
-            CorrectnessCode = mgTL.mazeManager.ManageTileTouch(this);
+            CorrectnessCode = mgTL.mazeManager.freePlay ? mgTL.mazeManager.ManageFreePlayTileTouch(this) : mgTL.mazeManager.ManageHiddenPathTileTouch(this);
+           
             ColorFeedback(CorrectnessCode);
         }
     }

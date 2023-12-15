@@ -79,6 +79,8 @@ namespace HiddenMaze
                 // Assign values manually to the Maze class
                 mDims = new Vector2(jsonMaze.mDims[0], jsonMaze.mDims[1]);
                 mNumTurns = jsonMaze.mNumTurns;
+                mPath = jsonMaze.mPath;
+
             }
             else
                 customDims = jsonMaze.customDims;
@@ -87,7 +89,7 @@ namespace HiddenMaze
 
             mNumSquares = jsonMaze.mNumSquares;
             mName = jsonMaze.mName;
-            mPath = jsonMaze.mPath;
+           // mPath = jsonMaze.mPath; // figure out how to filter based on free play or provide the shortest path
             mStart = jsonMaze.mStart;
             mFinish = jsonMaze.mFinish;
             sideRestricted = jsonMaze.sideRestricted;

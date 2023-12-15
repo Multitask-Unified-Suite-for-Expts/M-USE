@@ -49,13 +49,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     
     // Block Data Tracking Variables
     [HideInInspector]
-    public int[] TotalErrors_InBlock;
-    public int[] PerseverativeErrors_InBlock;
-    public int[] BacktrackErrors_InBlock;
-    public int[] RuleAbidingErrors_InBlock;
-    public int[] RuleBreakingErrors_InBlock;
-    public int[] RetouchCorrect_InBlock;
-    public int[] RetouchErroneous_InBlock;
+    public List<int> TotalErrors_InBlock;
+    public List<int> PerseverativeErrors_InBlock;
+    public List<int> BacktrackErrors_InBlock;
+    public List<int> RuleAbidingErrors_InBlock;
+    public List<int> RuleBreakingErrors_InBlock;
+    public List<int> RetouchCorrect_InBlock;
+    public List<int> RetouchErroneous_InBlock;
     public int CorrectTouches_InBlock; 
     public int NumSliderBarFull_InBlock;
     public List<float?> MazeDurations_InBlock = new List<float?>();
@@ -92,18 +92,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         ChoiceDurations_InTask = new List<float?>();
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
-        if (mgTL.MazeContainer == null)
-        {
-            mgTL.MazeContainer = new GameObject("MazeContainer");
-            MazeManager = mgTL.MazeContainer.AddComponent<MazeManager>();
-            MazeManager.mgTL = mgTL;
-            mgTL.mazeManager = MazeManager;
-
-            mgTL.MazeContainer.transform.SetParent(mgTL.MG_CanvasGO.transform);
-            mgTL.MazeContainer.transform.localPosition = Vector3.zero;
-            mgTL.MazeContainer.transform.localScale = new Vector3(1, 1, 1);
-
-        }
+        
         
         //SetMazePaths();
 
@@ -136,8 +125,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeManager.tileConnectorsLoaded = false;
             //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
-            
-            
             CalculateBlockSummaryString();
             ResetBlockVariables();
 
@@ -151,13 +138,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
     private void InitializeBlockArrays()
     {
-        RuleAbidingErrors_InBlock = new int[MazeManager.currentMaze.mNumSquares];
-        RuleBreakingErrors_InBlock = new int[MazeManager.currentMaze.mNumSquares];
-        BacktrackErrors_InBlock = new int[MazeManager.currentMaze.mNumSquares];
-        PerseverativeErrors_InBlock = new int[MazeManager.currentMaze.mNumSquares];
-        RetouchCorrect_InBlock = new int[MazeManager.currentMaze.mNumSquares];
-        RetouchErroneous_InBlock = new int[MazeManager.currentMaze.mNumSquares];
-        TotalErrors_InBlock = new int[MazeManager.currentMaze.mNumSquares];
+        RuleAbidingErrors_InBlock = new List<int>();
+        RuleBreakingErrors_InBlock = new List<int>();
+        BacktrackErrors_InBlock = new List<int>();
+        PerseverativeErrors_InBlock = new List<int>();
+        RetouchCorrect_InBlock = new List<int>();
+        RetouchErroneous_InBlock = new List<int>();
+        TotalErrors_InBlock = new List<int>();
     }
     
 
@@ -213,13 +200,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private void ResetBlockVariables()
     {
         CorrectTouches_InBlock = 0;
-        Array.Clear(PerseverativeErrors_InBlock, 0, PerseverativeErrors_InBlock.Length);
-        Array.Clear(BacktrackErrors_InBlock, 0, BacktrackErrors_InBlock.Length);
-        Array.Clear(RuleAbidingErrors_InBlock, 0, RuleAbidingErrors_InBlock.Length);
-        Array.Clear(RuleBreakingErrors_InBlock, 0, RuleBreakingErrors_InBlock.Length);
-        Array.Clear(TotalErrors_InBlock, 0, TotalErrors_InBlock.Length);
-        Array.Clear(RetouchCorrect_InBlock, 0, RetouchCorrect_InBlock.Length);
-        Array.Clear(RetouchErroneous_InBlock, 0, RetouchErroneous_InBlock.Length);
+        RuleAbidingErrors_InBlock.Clear();
+        RuleBreakingErrors_InBlock.Clear();
+        BacktrackErrors_InBlock.Clear();
+        PerseverativeErrors_InBlock.Clear();
+        RetouchCorrect_InBlock.Clear();
+        RetouchErroneous_InBlock.Clear();
+        TotalErrors_InBlock.Clear();
         NumSliderBarFull_InBlock = 0;
         MazeDurations_InBlock.Clear();
         ChoiceDurations_InBlock.Clear();

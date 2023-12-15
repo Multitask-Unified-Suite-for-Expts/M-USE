@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
@@ -16,7 +17,8 @@ public class MazeManager:MonoBehaviour
     public bool returnToLast;
     public bool erroneousReturnToLast;
     public bool correctSelection;
-
+    public bool freePlay = true;
+    public bool outOfMoves;
     public bool startedMaze;
     public bool finishedMaze;
     public bool tileConnectorsLoaded;
@@ -39,7 +41,6 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] public string[] MazeName;
     [HideInInspector] public string[] MazeString;
 
-    //
     
     
     
@@ -83,6 +84,7 @@ public class MazeManager:MonoBehaviour
         
         startedMaze = false;
         finishedMaze = false;
+        outOfMoves = false;
 
         mazeDuration = 0;
         choiceDuration = 0;
@@ -94,7 +96,7 @@ public class MazeManager:MonoBehaviour
     }
     public void LoadTextMaze(MazeGame_BlockDef mgBD)
     {
-        currentMaze = new Maze(mgBD.MazeDef, "hexagon");
+        currentMaze = new Maze(mgBD.MazeDef, "square");
         
     }
 
@@ -106,12 +108,9 @@ public class MazeManager:MonoBehaviour
             currentTilePositionGO.GetComponent<Tile>().setColor(currentTilePositionGO.GetComponent<Tile>().InitialTileColor);
         }
     }
-    public int ManageTileTouch(Tile tile)
+    public int ManageHiddenPathTileTouch(Tile tile)
     {
         GameObject TileGO = tile.gameObject;
-        Debug.LogWarning("===BEFORE===");
-        Debug.LogWarning("PATH PROGRESS IDX: " + currentPathIndex + " || MNEXT STEP : " + currentMaze.mNextStep);
-        Debug.LogWarning( " CURRENT TIL POS: " + (currentTilePositionGO == null? "N/A":currentTilePositionGO.name));
         //var touchedCoord = tile.mCoord;
         // ManageTileTouch - Returns correctness code
         // Return values:
@@ -192,7 +191,77 @@ public class MazeManager:MonoBehaviour
         RemovePathProgressFollowingError();
         return 20;
     }
-    
-    
-    
+
+    public int ManageFreePlayTileTouch(Tile tile)
+    {
+        GameObject TileGO = tile.gameObject;
+        //var touchedCoord = tile.mCoord;
+        // ManageTileTouch - Returns correctness code
+        // Return values:
+        // 1 - correct tile touch
+        // 2 - last correct retouch
+        // 10 - rule-abiding incorrect
+        // 20 - rule-breaking incorrect (failed to start on start tile, failed to return to last correct after error, diagonal/skips)
+
+        // RULE - BREAKING ERROR : NOT PRESSING START
+
+        if (!startedMaze)
+        {
+            Debug.LogWarning("**RULE-BREAK NOT PRESSING START ERROR**");
+
+            mgTL.HandleRuleBreakingError(currentPathIndex);
+
+            return 20;
+        }
+
+
+        if (currentTilePositionGO == null || (consecutiveErrors == 0 ? (currentTilePositionGO.GetComponent<Tile>().AdjacentTiles.Contains(TileGO) && !selectedTilesInPathGO.Contains(TileGO)) : (TileGO.name == currentMaze.mNextStep)))
+        {
+            Debug.LogWarning("**CORRECT TOUCH**");
+
+            mgTL.HandleCorrectTouch();
+
+            // Helps set progress on the experimenter display
+            selectedTilesInPathGO.Add(TileGO);
+            currentTilePositionGO = TileGO;
+            currentPathIndex++;
+
+            mgTL.AddEmptyElementToDataTrackingLists();
+
+            // Sets the NextStep if the maze isn't finished
+            if (tile.isFinishTile)
+                finishedMaze = true; // Finished the Maze
+            if (tile.AdjacentTiles.All(adjTile => selectedTilesInPathGO.Contains(adjTile)))
+                outOfMoves = true;
+            return 1;
+
+        }
+
+        // RULE BREAKING BACKTRACK ERROR OR ERRONEOUS RETOUCH OF LAST CORRECT TILE
+        if (selectedTilesInPathGO.Contains(TileGO))
+        {
+            if (TileGO.Equals(currentTilePositionGO))
+            {
+                mgTL.HandleRetouchErroneous(currentPathIndex);
+                Debug.LogWarning("**RETOUCH ERRONEOUS**");
+
+                return 2;
+            }
+
+            mgTL.HandleBackTrackError(currentPathIndex);
+            mgTL.HandleRuleBreakingError(currentPathIndex);
+
+            // Set the correct next step to the last correct tile touch
+            Debug.LogWarning("**BACKTRACK ERROR**");
+            RemovePathProgressFollowingError();
+            return 20;
+        }
+
+        // Set the correct next step to the last correct tile touch
+        Debug.LogWarning("**RULE-BREAK NON-CONNECTING TILE ERROR**");
+        mgTL.HandleRuleBreakingError(currentPathIndex);
+        RemovePathProgressFollowingError();
+        return 20;
+    }
+
 }

@@ -567,6 +567,7 @@ namespace USE_UI
             LineGO.GetComponent<RectTransform>().sizeDelta = new Vector2(LineSize, LineSize);
             UnityEngine.UI.Extensions.UILineRenderer LineRenderer = LineGO.GetComponent<UnityEngine.UI.Extensions.UILineRenderer>();
             LineLength = Vector2.Distance(start, end);
+            LineRenderer.LineThickness = 10f;
             LineRenderer.Points = new Vector2[] { start, end };
             LineRenderer.color = col;
             LineRenderer.RelativeSize = false;

@@ -402,6 +402,80 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1 &665075548
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 665075549}
+  - component: {fileID: 665075550}
+  m_Layer: 5
+  m_Name: MazeContainer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &665075549
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 665075548}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 859525664}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &665075550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 665075548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b784f645be64c4b8d9c52c435fa47d03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentPathIndex: 0
+  consecutiveErrors: 0
+  selectedTilesInPathGO: []
+  selectedTilesGO: []
+  returnToLast: 0
+  erroneousReturnToLast: 0
+  correctSelection: 0
+  freePlay: 1
+  outOfMoves: 0
+  startedMaze: 0
+  finishedMaze: 0
+  tileConnectorsLoaded: 0
+  mazeDuration: 0
+  choiceDuration: 0
+  mazeStartTime: 0
+  choiceStartTime: 0
+  currentTilePositionGO: {fileID: 0}
+  MazeNumSquares: 
+  MazeNumTurns: 
+  MazeDims: []
+  MazeStart: []
+  MazeFinish: []
+  MazeName: []
+  MazeString: []
+  mgTL: {fileID: 1860654110}
 --- !u!1 &859525660
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,7 +567,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 665075549}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -600,18 +675,14 @@ MonoBehaviour:
   MinTrials: 0
   mazeDefName: 
   MazeBackground: {fileID: 0}
+  MazeContainer: {fileID: 665075548}
   tiles:
     stimGroupName: 
     IsActive: 0
   tileTex: {fileID: 0}
   mazeBgTex: {fileID: 0}
-  consecutiveErrors: 0
-  pathProgressGO: []
   viewPath: 0
   tileFbDuration: 0
-  startTile: {fileID: 0}
-  finishTile: {fileID: 0}
-  mazeDuration: 0
   choiceDurationsList: []
   NumBlinks: 0
   TilePrefab: {fileID: 925009272087881901, guid: 5796f049ef3372046b3edd4795fcdc39,
@@ -718,6 +789,7 @@ MonoBehaviour:
     precision: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
+  mazeManager: {fileID: 665075550}
 --- !u!114 &1860654111
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -781,13 +853,6 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  MazeNumSquares: 
-  MazeNumTurns: 
-  MazeDims: []
-  MazeStart: []
-  MazeFinish: []
-  MazeName: []
-  MazeString: []
   TotalErrors_InBlock: 
   PerseverativeErrors_InBlock: 
   BacktrackErrors_InBlock: 
@@ -808,6 +873,7 @@ MonoBehaviour:
   NumSliderBarFull_InTask: 0
   BlockAveragesString: 
   CurrentBlockString: 
+  MazeManager: {fileID: 665075550}
 --- !u!4 &1860654112
 Transform:
   m_ObjectHideFlags: 0

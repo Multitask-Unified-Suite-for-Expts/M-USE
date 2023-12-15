@@ -229,7 +229,8 @@ public class VerifyTask_Level : ControlLevel
             {"_StimDef_array", "_StimDef_array.txt"},
             {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
             {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
-            {"MazeDef_array", "MazeDef_array.txt"}
+            {"MazeDef_array", "MazeDef_array.txt"},
+            {"ObjectsDef_array", "ObjectsDef_Array.txt"}
         };
         TextAsset configTextAsset;
         foreach (var entry in configDict)

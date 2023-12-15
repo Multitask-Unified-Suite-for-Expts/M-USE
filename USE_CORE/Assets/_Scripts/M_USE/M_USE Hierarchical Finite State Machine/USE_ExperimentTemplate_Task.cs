@@ -1148,7 +1148,6 @@ public class TaskLevelTemplate_Methods
         public object ParsedResult;
         public Action<object> UpdateAction;
         
-        //public CustomSettings(string searchString, Type settingsType, string settingsParsingStyle, Action<object> updateAction)
         public CustomSettings(string searchString, Type settingsType, string settingsParsingStyle, object parsedResult)
         {
             SearchString = searchString;

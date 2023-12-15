@@ -23,6 +23,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int DistractorSelections_Block = 0;
     [HideInInspector] public int DistractorRejections_Block = 0;
     [HideInInspector] public int AdditionalTargetSelections_Block = 0;
+    [HideInInspector] public int SliderBarCompletions_Block = 0;
 
     //Set in Inspector:
     public GameObject SustainedAttention_CanvasGO;
@@ -123,7 +124,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
             SliderFBController.SliderGO.SetActive(true);
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
         });
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -172,6 +172,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                             SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
                             SuccessfulTargetSelections_Block++;
                             CurrentTaskLevel.SuccessfulTargetSelections_Task++;
+                            Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                         }
                         else
                         {
@@ -191,6 +192,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                                     Debug.LogWarning("FAILED DURATION: " + (Time.time - ChosenObject.AnimStartTime));
                                     UnsuccessfulTargetSelections_Block++;
                                     CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
+                                    Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+
                                 }
                                 else
                                 {
@@ -245,6 +248,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
+        Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+
     }
     private void DistractorAvoided()
     {
@@ -259,13 +264,12 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             if (SliderFBController.isSliderBarFull() && !AudioFBController.IsPlaying())
             {
-                Debug.LogWarning("WOULD BE GIVING REWARD FOR OBJECT: " + ChosenObject.gameObject.name);
-
                 GiveReward();
                 SliderFBController.ResetSliderBarFull();
                 SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
                 GiveRewardIfSliderFull = false;
-                //increment slider completions data??
+                SliderBarCompletions_Block++;
+                CurrentTaskLevel.SliderBarCompletions_Task++;
             }
         }
     }
@@ -311,6 +315,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         DistractorRejections_Block = 0;
         TargetAnimsWithoutSelection_Block = 0;
         AdditionalTargetSelections_Block = 0;
+        SliderBarCompletions_Block = 0;
     }
 
     private void CalculateSliderSteps()
@@ -344,17 +349,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("Objects", () => CurrentTrial.TrialObjectIndices);
         TrialData.AddDatum("DisplayTargetDuration", () => CurrentTrial.DisplayTargetDuration);
         TrialData.AddDatum("DisplayDistractorsDuration", () => CurrentTrial.DisplayDistractorsDuration);
-
-        //TrialData.AddDatum("RotateTargets", () => CurrentTrial.RotateTargets);
-        //TrialData.AddDatum("RotateDistractors", () => CurrentTrial.RotateDistractors);
-        //TrialData.AddDatum("ResponseWindow", () => CurrentTrial.ResponseWindow);
-        //TrialData.AddDatum("NumTargets", () => CurrentTrial.TargetSizes.Length);
-        //TrialData.AddDatum("NumDistractors", () => CurrentTrial.DistractorSizes.Length);
-        //TrialData.AddDatum("TargetCloseDuration", () => CurrentTrial.TargetCloseDuration);
-        //TrialData.AddDatum("DistractorCloseDuration", () => CurrentTrial.DistractorCloseDuration);
-        //TrialData.AddDatum("TargetMinAnimGap", () => CurrentTrial.TargetMinAnimGap);
-        //TrialData.AddDatum("DistractorMinAnimGap", () => CurrentTrial.DistractorMinAnimGap);
-        //TrialData.AddDatum("AngleProbabilities", () => CurrentTrial.AngleProbs);
+        TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
+        TrialData.AddDatum("SliderGain", () => CurrentTrial.SliderGain);
+        TrialData.AddDatum("SliderLoss", () => CurrentTrial.SliderLoss);
     }
 
     private void DefineFrameData()

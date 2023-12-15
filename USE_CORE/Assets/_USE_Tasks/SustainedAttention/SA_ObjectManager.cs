@@ -247,13 +247,6 @@ public class SA_Object : MonoBehaviour
                 intervals = GenerateRandomIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y)
             };
             Cycles.Add(cycle);
-
-            //if(IsTarget)
-            //{
-            //    var floats = GetIntervals((int)(rateAndDur.y * rateAndDur.x), rateAndDur.y);
-            //    foreach (var num in floats)
-            //        Debug.LogWarning("NUM: " + num);
-            //}
         }
 
         SetRandomStartingPosition();
@@ -261,9 +254,6 @@ public class SA_Object : MonoBehaviour
 
         SetupMarker(); //Marker for debugging purposes
     }
-
-
-
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
@@ -287,27 +277,6 @@ public class SA_Object : MonoBehaviour
         return randomFloats;
     }
 
-    //Chris alternative method:
-    public List<float> GetIntervals(int numIntervals, float duration)
-    {
-        //float maxNum = duration;
-
-        List<float> intervalList = new List<float>();
-        for (int i = 0; i < numIntervals; i++)
-        {
-            intervalList.Add(Random.Range(0.0f, 1.01f));
-        }
-
-        duration -= numIntervals * MinAnimGap;
-
-        float sum = intervalList.Sum();
-        intervalList = intervalList.Select(num => num * duration / sum).ToList();
-        intervalList = intervalList.Select(num => num + MinAnimGap).ToList();
-        //intervalList.Add(maxNum); //manually add final interval
-        intervalList.Sort();
-        return intervalList;
-    }
-
     private void NextCycle()
     {
         Cycles.RemoveAt(0);
@@ -320,7 +289,6 @@ public class SA_Object : MonoBehaviour
         else
             DestroyObj();
     }
-
 
     private void Update()
     {

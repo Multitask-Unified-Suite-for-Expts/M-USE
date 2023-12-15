@@ -21,6 +21,8 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int AdditionalTargetSelections_Task = 0;
     [HideInInspector] public int DistractorSelections_Task = 0;
     [HideInInspector] public int DistractorRejections_Task = 0;
+    [HideInInspector] public int SliderBarCompletions_Task = 0;
+
 
     //OBJECTS LOADED FROM OBJECT CONFIG:
     public SA_Object_ConfigValues[] SA_Objects_ConfigValues;
@@ -90,6 +92,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         data["Additional Target Selections"] = AdditionalTargetSelections_Task;
         data["Target Selections Before First Anim"] = TargetSelectionsBeforeFirstAnim_Task;
         data["Intervals Without Selections"] = TargetAnimsWithoutSelection_Task;
+        data["SliderBar Completions"] = SliderBarCompletions_Task;
         return data;
     }
 
@@ -105,6 +108,8 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
             ["Premature Target Selections"] = trialLevel.TargetSelectionsBeforeFirstAnim_Block,
             ["Intervals Without A Selection"] = trialLevel.TargetAnimsWithoutSelection_Block,
             ["Additional Target Selections"] = trialLevel.AdditionalTargetSelections_Block,
+            ["SliderBar Completions"] = trialLevel.SliderBarCompletions_Block,
+
         };
         return data;
     }
@@ -118,16 +123,18 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
         BlockData.AddDatum("SuccessfulTargetSelections", () => trialLevel.SuccessfulTargetSelections_Block);
         BlockData.AddDatum("UnsuccessfulTargetSelections", () => trialLevel.UnsuccessfulTargetSelections_Block);
+        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
+
         BlockData.AddDatum("AdditionalTargetSelections", () => trialLevel.AdditionalTargetSelections_Block);
         BlockData.AddDatum("TargetSelectionsBeforeFirstAnim", () => trialLevel.TargetSelectionsBeforeFirstAnim_Block);
-        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
 
         BlockData.AddDatum("DistractorSelections", () => trialLevel.DistractorSelections_Block);
         BlockData.AddDatum("DistractorRejections", () => trialLevel.DistractorRejections_Block);
 
-
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
+
+        BlockData.AddDatum("SliderBarCompletions", () => trialLevel.SliderBarCompletions_Block);
     }
 
     private void HandleBlockStrings()

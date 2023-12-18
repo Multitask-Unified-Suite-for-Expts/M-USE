@@ -8,7 +8,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody Rb;
     private Vector3 TargetPos;
     private bool IsShifting = false;
-    private float SideShiftSpeed = 15f;
+    private float SideShiftSpeed = 20f;
 
     private Vector3 MovementAmount = new Vector3(1.25f, 0, 0);
 

@@ -2,31 +2,52 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class ItemSpawner : MonoBehaviour
 {
     List<GameObject> items = new List<GameObject>();
 
     public List<GameObject> ItemPrefabs;
+    public List<GameObject> DoorPrefabs;
+
+    public int NumItemsBetweenDoor = 4;
+    public int ItemsBetweenDoorCount = 0;
 
 
     public void SpawnItem(Transform parentTransform)
     {
-        GameObject item = Instantiate(ItemPrefabs[Random.Range(0, ItemPrefabs.Count)]);
-        item.transform.localScale = new Vector3(.3f, .3f, .3f);
-        SetItemColor(item);
+        GameObject item;
+
+        if(ItemsBetweenDoorCount < NumItemsBetweenDoor)
+        {
+            item = Instantiate(ItemPrefabs[Random.Range(0, ItemPrefabs.Count)]);
+            item.name = "Item";
+            item.transform.localScale = new Vector3(.3f, .3f, .3f);
+            SetItemColor(item);
+            ItemsBetweenDoorCount++;
+        }
+        else
+        {
+            ItemsBetweenDoorCount = 0;
+            item = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
+            item.name = "Door";
+        }
+
         SetItemPosition(item, parentTransform);
         items.Add(item);
     }
 
+
     void SetItemPosition(GameObject item, Transform parentTransform)
     {
+        bool isDoor = item.name == "Door";
+
         List<Transform> spawnPoints = new List<Transform>();
         foreach (Transform child in parentTransform)
             spawnPoints.Add(child);
 
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
-
-        item.transform.position = new Vector3(randomSpawnPoint.position.x, 1f, randomSpawnPoint.position.z);
+        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .5f, randomSpawnPoint.position.z);
         item.transform.parent = parentTransform;
     }
 

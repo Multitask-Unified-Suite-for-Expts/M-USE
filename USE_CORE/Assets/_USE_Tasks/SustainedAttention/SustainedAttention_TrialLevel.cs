@@ -181,7 +181,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
                             if(ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
                             {
-                                Debug.LogWarning("SELECTED TARGET AGAIN AFTER ALREADY SELECTING ONCE!");
                                 AdditionalTargetSelections_Block++;
                                 CurrentTaskLevel.AdditionalTargetSelections_Task++;
                             }
@@ -197,7 +196,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                                 }
                                 else
                                 {
-                                    Debug.LogWarning("SELECTED BEFORE FIRST INTERVAL STARTS!");
                                     TargetSelectionsBeforeFirstAnim_Block++;
                                     CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
                                 }

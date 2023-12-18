@@ -3,6 +3,8 @@ using SustainedAttention_Namespace;
 using UnityEngine;
 using System.Collections.Specialized;
 using System.Collections.Generic;
+using System.Linq;
+
 
 public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 {
@@ -34,12 +36,12 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         DefineBlockData();
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Sustained Attention");
-        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object, and when it closes its mouth, select it quickly!");
+        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object. When it animates (closes its mouth), select it as quickly as you can!");
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
-            //TRYING CUSTOM SETTINGS:
-            SA_Objects_ConfigValues = customSettings[0].AssignCustomSetting<SA_Object_ConfigValues[]>();
+            //Grab custom settings from Object Config that are read in:
+            SA_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "ObjectsDef").AssignCustomSetting<SA_Object_ConfigValues[]>();
 
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);

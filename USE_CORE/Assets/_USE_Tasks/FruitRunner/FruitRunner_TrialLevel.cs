@@ -20,6 +20,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public GameObject FruitRunner_CanvasGO;
     public GameObject FloorManagerGO;
     public GameObject ItemSpawnerGO;
+    public List<Material> SkyboxMaterials;
 
     private GameObject StartButton;
 
@@ -81,18 +82,22 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Play, () =>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
+            SliderFBController.ConfigureSlider(20f, 1 * (1f / 4), new Vector3(0f, -2f, 0f));
+            //SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
             SliderFBController.SliderGO.SetActive(true);
 
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
+
+            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
+            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
-            CurrentTaskLevel.TaskCam.fieldOfView = 50;
+            CurrentTaskLevel.TaskCam.fieldOfView = 60;
         });
 
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
+        float startTime = 0f;
         Play.AddSpecificInitializationMethod(() =>
         {
             if (Player != null)
@@ -105,12 +110,20 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
+
+            startTime = Time.time;
         });
         Play.AddUpdateMethod(() =>
         {
+            if(Time.time - startTime >= 10f)
+            {
+                CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
+                startTime = Time.time;
+            }
+
 
         });
-        Play.AddTimer(() => 30f, ITI);
+        Play.AddTimer(() => 500f, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => .01f, FinishTrial);

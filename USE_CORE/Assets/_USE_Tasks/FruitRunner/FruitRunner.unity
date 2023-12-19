@@ -176,7 +176,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 50
+  field of view: 55
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -407,6 +407,17 @@ MonoBehaviour:
   FruitRunner_CanvasGO: {fileID: 338904158}
   FloorManagerGO: {fileID: 811021794}
   ItemSpawnerGO: {fileID: 1341566244}
+  SkyboxMaterials:
+  - {fileID: 2100000, guid: 9ca22510633fbfd4399f1704cd9d5c72, type: 2}
+  - {fileID: 2100000, guid: 7b0f2096b49ccfb4f8b47c8084d650fa, type: 2}
+  - {fileID: 2100000, guid: 44d0573bf6d91e447b62f3aff840f2ae, type: 2}
+  - {fileID: 2100000, guid: c051fe5a20f72814f9643eb10ebbd2fc, type: 2}
+  - {fileID: 2100000, guid: 80fa4f34db87aad4d93c45188b19bfd6, type: 2}
+  - {fileID: 2100000, guid: e0a21ebc98cee4e46bbae873ec0be703, type: 2}
+  - {fileID: 2100000, guid: 6e00f8b39315691449f256740a5cb862, type: 2}
+  - {fileID: 2100000, guid: 6eecb3bb77b3f7a43a504fceda3b0b5f, type: 2}
+  - {fileID: 2100000, guid: de1d750fefeeac642bf9b11a3978ccf5, type: 2}
+  - {fileID: 2100000, guid: 0d5771081eb9abb43b1792b52260d914, type: 2}
   itiDuration:
     name: 
     hidden: 0
@@ -665,7 +676,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &811021795
 Transform:
   m_ObjectHideFlags: 0
@@ -695,6 +706,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floorTilePrefab: {fileID: 4210985762272324028, guid: 98deb6b0bdc184c55a672aae4b79af74,
     type: 3}
+  doorPrefab: {fileID: 3311961847115578471, guid: a0c811ba9ef6b4049b331103f92b703f,
+    type: 3}
 --- !u!1 &1341566244
 GameObject:
   m_ObjectHideFlags: 0
@@ -711,7 +724,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1341566245
 Transform:
   m_ObjectHideFlags: 0
@@ -743,14 +756,12 @@ MonoBehaviour:
   - {fileID: 1000013931470818, guid: 09092ad6d4eb8414c8fbf566a443b674, type: 3}
   - {fileID: 1000010694622314, guid: 65772f4e9107841e4b2eadbb0c1312a3, type: 3}
   - {fileID: 1000010714891294, guid: ef6431f1f1a774b27a85c0da7a6a392e, type: 3}
-  - {fileID: 1000013356204050, guid: e1a1a1f96cc2747d7bb89f9588b90e8f, type: 3}
-  - {fileID: 1000011841440206, guid: 4cebc50bc25fc45ef88e3d75da6c509f, type: 3}
   - {fileID: 1000012510692222, guid: 8822f1d17860b41f6880b936534df180, type: 3}
-  - {fileID: 1000013765287000, guid: b0ea6428bf6504d92940febf67ee14e6, type: 3}
-  - {fileID: 1000013656696560, guid: 9f9f9b76040c04a7ebfbf248692d2207, type: 3}
-  - {fileID: 1000010646675420, guid: c004783bff2bd447c84b5f6e6fc693d5, type: 3}
-  - {fileID: 1000010986879176, guid: 2f9ebb15be5414434bcc3601c28a1620, type: 3}
-  - {fileID: 1000010728489230, guid: 30c94c05d51a9493cbb9344813cf5100, type: 3}
+  DoorPrefabs:
+  - {fileID: 2857151697680853970, guid: a77376374fe204cd2bf955a42331ee28, type: 3}
+  - {fileID: 3311961847115578471, guid: a0c811ba9ef6b4049b331103f92b703f, type: 3}
+  NumItemsBetweenDoor: 4
+  ItemsBetweenDoorCount: 0
 --- !u!1 &1734548525
 GameObject:
   m_ObjectHideFlags: 0
@@ -953,7 +964,7 @@ PrefabInstance:
     - target: {fileID: 3038106576207996005, guid: 77cb21dc0c7904c0bbea253884ce666b,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 77cb21dc0c7904c0bbea253884ce666b, type: 3}

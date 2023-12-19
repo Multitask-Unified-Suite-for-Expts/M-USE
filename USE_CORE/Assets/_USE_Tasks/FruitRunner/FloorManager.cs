@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 18f;
+    private readonly float MovementSpeed = 25f;
     public GameObject floorTilePrefab;
-    private int tilesOnScreen = 15;
+    public GameObject doorPrefab;
+    private int tilesOnScreen = 20;
     private List<GameObject> activeTiles;
     private ItemSpawner itemSpawner;
     private int NumTilesSpawned;
+
 
     void Start()
     {
@@ -22,14 +24,20 @@ public class FloorManager : MonoBehaviour
         }
     }
 
+
     void Update()
     {
         MoveTiles();
 
-        if (activeTiles.Count > 0 && activeTiles[0].transform.position.z <= -10f)
+        if (activeTiles.Count > 0)
         {
-            SpawnTile();
-            DeleteTile();
+            BoxCollider collider = activeTiles[0].GetComponent<BoxCollider>();
+
+            if(collider.bounds.max.z < transform.position.z - collider.bounds.size.z)
+            {
+                SpawnTile();
+                DeleteTile();
+            }
         }
     }
 
@@ -49,14 +57,14 @@ public class FloorManager : MonoBehaviour
         {
             GameObject lastTile = activeTiles[activeTiles.Count - 1];
             BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
-            spawnPos = new Vector3(0, -.5f, lastTile.transform.position.z + (lastTileCollider.bounds.size.z + .2f));
+            spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z + .15f;
         }
-        
+
         GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile";
         tile.gameObject.transform.parent = gameObject.transform;
 
-        if(NumTilesSpawned > 3) //Dont spawn items on the first 3
+        if (NumTilesSpawned > 3) //Dont spawn items on the first 3
             itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);

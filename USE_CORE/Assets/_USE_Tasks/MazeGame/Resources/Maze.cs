@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Serialization;
 using USE_Utilities;
@@ -49,7 +50,7 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public List<int> mDims;
-        public List<int> customDims;
+        [CanBeNull] public List<int> customDims;
         public string mName;
         public bool sideRestricted;
         public string gridStyle;
@@ -64,23 +65,25 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public Vector2 mDims;
-        public List<int> customDims;
+        [CanBeNull] public List<int> customDims;
         public string mName;
         public bool sideRestricted;
         public string gridStyle;
+        public bool loadingSquareMaze;
 
 
-        public Maze(string jsonString, string styleString)
+        public Maze(string jsonString)
         {
             MazeJson jsonMaze = JsonUtility.FromJson<MazeJson>(jsonString);
+            Debug.LogWarning("IS CUSTOM DMS NULL? " + (jsonMaze.customDims == null? "yes": "no"));
 
-            if(styleString.ToLower() == "square")
+            if(jsonMaze.mDims?.Count == 2)
             {
                 // Assign values manually to the Maze class
+                loadingSquareMaze = true;
                 mDims = new Vector2(jsonMaze.mDims[0], jsonMaze.mDims[1]);
                 mNumTurns = jsonMaze.mNumTurns;
                 mPath = jsonMaze.mPath;
-
             }
             else
                 customDims = jsonMaze.customDims;

@@ -84,7 +84,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     private MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
     private MazeGame_TrialLevel mgTL;
-    public MazeManager MazeManager;
 
     public override void DefineControlLevel()
     {
@@ -119,10 +118,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
             
             //FindMaze();
-            MazeManager.LoadTextMaze(mgBD);
+            mgTL.MazeManager.LoadTextMaze(mgBD);
             mgTL.InitializeTrialArrays();
             InitializeBlockArrays();
-            MazeManager.tileConnectorsLoaded = false;
             //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             CalculateBlockSummaryString();
@@ -131,7 +129,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddDefaultTerminationMethod(() =>
         {
-            mgTL.DestroyChildren(mgTL.MazeContainer);
+            mgTL.DestroyChildren(mgTL.MazeManager.gameObject);
         });
     }
 
@@ -164,13 +162,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumSliderBarFull", ()=>NumSliderBarFull_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",MazeDurations_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", ChoiceDurations_InBlock));
-       // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
+       // BlockData.AddDatum("NumNonStimSelections", () => mgTrialLevel.NonStimTouches_InBlock);
     }
     public override OrderedDictionary GetBlockResultsData()
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Maze Duration"] = MazeManager.mazeDuration.ToString("0.0") + "s",
+            ["Maze Duration"] = mgTL.MazeManager.mazeDuration.ToString("0.0") + "s",
             ["Correct Touches"] = CorrectTouches_InBlock,
             ["Total Errors"] = TotalErrors_InBlock.Sum(),
             ["Retouched Correct"] = RetouchCorrect_InBlock.Sum(),
@@ -292,7 +290,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeName = MazeName.Where((source, index) => index != mIndex).ToArray();
         }
 
-        mgTL.mazeDefName = MazeName[mIndex];
+        mgTrialLevel.mazeDefName = MazeName[mIndex];
     }*/
 
     

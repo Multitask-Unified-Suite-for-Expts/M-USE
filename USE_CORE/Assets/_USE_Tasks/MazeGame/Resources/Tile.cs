@@ -15,39 +15,42 @@ using USE_ExperimentTemplate_Trial;
 
 public class Tile : MonoBehaviour
 {
-    // SET IN THE INSPECTOR
-    public MazeGame_TrialLevel mgTL;
-    
-    [HideInInspector] public Coords mCoord;
-    [HideInInspector] public float sliderValueChange;
+    [HideInInspector] public MazeManager MazeManager;
+    public TileSettings TileSettings;
 
     public List<GameObject> AdjacentTiles = new List<GameObject>();
-    // DEFAULT MAZE CONFIGS - CONFIGURABLE IN TASK DEF/ TRIAL LEVEL
-    [HideInInspector]public Color START_COLOR = new Color(0.94f, 0.93f, 0.48f);
-    [HideInInspector] public Color FINISH_COLOR = new Color(0.37f, 0.59f, 0.94f);
-    [HideInInspector] public Color CORRECT_COLOR = new Color(0.62f, 1f, 0.5f);
-    [HideInInspector] public Color PREV_CORRECT_COLOR = new Color(0.2f, 0.7f, 0.5f);
-    [HideInInspector] public Color INCORRECT_RULEABIDING_COLOR = new Color(1f, 0.5f, 0.25f);
-    [HideInInspector] public Color INCORRECT_RULEBREAKING_COLOR = new Color(0f, 0f, 0f);
-    [HideInInspector] public Color DEFAULT_TILE_COLOR = new Color(1, 1, 1);
-    [HideInInspector] public int NUM_BLINKS = 4;
 
-    // FEEDBACK LENGTH IN SECONDS
-    [HideInInspector] public float CORRECT_FEEDBACK_SECONDS = 0.5f;
-    [HideInInspector] public float PREV_CORRECT_FEEDBACK_SECONDS = 0.5f;
-    [HideInInspector] public float INCORRECT_RULEABIDING_SECONDS = 0.5f;
-    [HideInInspector] public float INCORRECT_RULEBREAKING_SECONDS = 1;
-    [HideInInspector] public float TILE_BLINKING_DURATION = 2;
-    [HideInInspector] public float TIMEOUT_SECONDS = 10.0f;
+    public Coords mCoord;
+
+    public float sliderValueChange;
+// Reference to the ScriptableObject holding the settings
+
+    // Access settings through this instance
+    public Color startColor => TileSettings.startColor;
+    public Color finishColor => TileSettings.finishColor;
+    public Color correctColor => TileSettings.correctColor;
+    public Color prevCorrectColor => TileSettings.prevCorrectColor;
+    public Color incorrectRuleAbidingColor => TileSettings.incorrectRuleAbidingColor;
+    public Color incorrectRuleBreakingColor => TileSettings.incorrectRuleBreakingColor;
+    public Color defaultTileColor => TileSettings.defaultTileColor;
+    public int numBlinks => TileSettings.numBlinks;
+
+    // Access feedback length settings
+    public float correctFeedbackSeconds => TileSettings.correctFeedbackSeconds;
+    public float prevCorrectFeedbackSeconds => TileSettings.prevCorrectFeedbackSeconds;
+    public float incorrectRuleAbidingSeconds => TileSettings.incorrectRuleAbidingSeconds;
+    public float incorrectRuleBreakingSeconds => TileSettings.incorrectRuleBreakingSeconds;
+    public float tileBlinkingDuration => TileSettings.tileBlinkingDuration;
+    public float timeoutSeconds => TileSettings.timeoutSeconds;
 
     private Color FBColor;
-    private float FlashStartTime;
+    private float flashStartTime;
     private float FBStartTime;
     private int CorrectnessCode;
-    private int NumFlashes;
+    private int iFlashes;
     
 
-    [HideInInspector] public Color InitialTileColor;
+    [HideInInspector] public Color initialTileColor;
     [HideInInspector] public Color baseColor;
     [HideInInspector] public bool isFlashing = false;
     [HideInInspector] public bool assignedTileFlash;
@@ -62,19 +65,23 @@ public class Tile : MonoBehaviour
         //gameObject.GetComponent<Image>().color = baseColor;
     }
 
-
+    public void Initialize(TileSettings tileSettings, MazeManager mazeManager)
+    {
+        TileSettings = tileSettings;
+        MazeManager = mazeManager;
+    }
     public void SelectionFeedback()
     {
         if (!isFlashing)
         {
-            CorrectnessCode = mgTL.mazeManager.freePlay ? mgTL.mazeManager.ManageFreePlayTileTouch(this) : mgTL.mazeManager.ManageHiddenPathTileTouch(this);
+            CorrectnessCode = MazeManager.freePlay ? MazeManager.ManageFreePlayTileTouch(this) : MazeManager.ManageHiddenPathTileTouch(this);
            
             ColorFeedback(CorrectnessCode);
         }
     }
     public void setColor(Color c)
     {
-        gameObject.GetComponent<Image>().color = c;
+        GetComponent<Image>().color = c;
     } 
 
     public void ColorFeedback(int code)
@@ -83,70 +90,71 @@ public class Tile : MonoBehaviour
         {
             case 1:
                 // CORRECT
-                FBColor =  CORRECT_COLOR;
+                FBColor =  correctColor;
                 break;
             case 2:
                 // PREVIOUSLY CORRECT
-                FBColor =  PREV_CORRECT_COLOR;
+                FBColor =  prevCorrectColor;
                 break;
             case 10:
                 // RULE-ABIDING INCORRECT
-                FBColor =  INCORRECT_RULEABIDING_COLOR;
+                FBColor =  incorrectRuleAbidingColor;
                 break;
             case 20:
                 // RULE-BREAKING INCORRECT
-                FBColor = INCORRECT_RULEBREAKING_COLOR;
+                FBColor = incorrectRuleBreakingColor;
                 break;
         }
 
-        InitialTileColor = gameObject.GetComponent<Image>().color;
+        initialTileColor = gameObject.GetComponent<Image>().color;
         gameObject.GetComponent<Image>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
     }
 
-    public void NextCorrectFlashingFeedback()
-    {
-        if (!mgTL.mazeManager.startedMaze) // haven't selected the start yet
-            flashingTileGO = GameObject.Find(mgTL.mazeManager.currentMaze.mStart);
-        else
-            flashingTileGO = GameObject.Find(mgTL.mazeManager.currentMaze.mNextStep);
+    public void FlashTile()
+     {
+    //     if (!mgTrialLevel.MazeManager.startedMaze) // haven't selected the start yet
+    //         flashingTileGO = GameObject.Find(mgTrialLevel.MazeManager.currentMaze.mStart);
+    //     else
+    //         flashingTileGO = GameObject.Find(mgTrialLevel.MazeManager.currentMaze.mNextStep);
 
-        Tile flashingTile = flashingTileGO.GetComponent<Tile>();
+        iFlashes = 0;
+
+        Tile flashingTile = this;
         isFlashing = true;
-        FlashStartTime = Time.unscaledTime;
+        flashStartTime = Time.unscaledTime;
         if (flashingTile.isStartTile)
-            InitialTileColor = START_COLOR;
+            initialTileColor = startColor;
         else if (flashingTile.isFinishTile)
-            InitialTileColor = FINISH_COLOR;
+            initialTileColor = finishColor;
         else
-            InitialTileColor = DEFAULT_TILE_COLOR;// before it starts flashing set color
-        NumFlashes = 0;
-    }
+            initialTileColor = defaultTileColor;// before it starts flashing set color
+     }
 
     void Update()
     {
         if (isFlashing)
         {
-            FBColor = PREV_CORRECT_COLOR;
+            FBColor = prevCorrectColor;
             
-            float elapsed = Time.unscaledTime - FlashStartTime;
-            float interval = TILE_BLINKING_DURATION / (2 * NUM_BLINKS);
+            float elapsed = Time.unscaledTime - flashStartTime;
+            float interval = tileBlinkingDuration / (2 * numBlinks);
 
 
-            if (elapsed >= NumFlashes * interval)
+            if (elapsed >= iFlashes * interval)
             {
-                if (NumFlashes % 2 == 0)
+                if (iFlashes % 2 == 0)
                     flashingTileGO.GetComponent<Image>().color = FBColor;
                 else
-                    flashingTileGO.GetComponent<Image>().color = InitialTileColor;
+                    flashingTileGO.GetComponent<Image>().color = initialTileColor;
 
-                NumFlashes++;
+                iFlashes++;
             }
         
-            if (NumFlashes >= 2 * NUM_BLINKS)
+            if (iFlashes >= 2 * numBlinks)
             { 
-                flashingTileGO.GetComponent<Image>().color = InitialTileColor; // confirm it stops on original tile color
+                flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
                 isFlashing = false;
             }
         }
@@ -155,16 +163,16 @@ public class Tile : MonoBehaviour
         {
 
             float elapsed = Time.unscaledTime - FBStartTime;
-            float interval = mgTL.tileFbDuration;
+            float interval = MazeManager.mgTrialLevel.tileFbDuration;
         
             if (elapsed >=  interval)
             {
-                if (!mgTL.viewPath || CorrectnessCode != 1 && CorrectnessCode != 2)
+                if (!MazeManager.viewPath || CorrectnessCode != 1 && CorrectnessCode != 2)
                 {
-                    gameObject.GetComponent<Image>().color = InitialTileColor;
+                    gameObject.GetComponent<Image>().color = initialTileColor;
                 }
-                 else if(mgTL.viewPath && CorrectnessCode == 2)
-                     gameObject.GetComponent<Image>().color= CORRECT_COLOR;
+                else if(MazeManager.viewPath && CorrectnessCode == 2)
+                    gameObject.GetComponent<Image>().color= correctColor;
                
 
                 choiceFeedback = false;

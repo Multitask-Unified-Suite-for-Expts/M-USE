@@ -414,7 +414,6 @@ public class SA_Object : MonoBehaviour
         else
             angleOffset = Random.Range(AngleRanges[2].x, AngleRanges[2].y); //Large Angle Range
 
-
        
         if (PreviousAngleOffsets.Count > NumDestWithoutBigTurn)
             PreviousAngleOffsets.RemoveAt(0);
@@ -529,6 +528,7 @@ public class SA_Object : MonoBehaviour
     }
 }
 
+//Class is used to read in SA Object Config values. Can't read in directly to SA_Object because that creates the gameobject. We need to create the gameobject after getting the object values.
 public class SA_Object_ConfigValues
 {
     //From Object Config:

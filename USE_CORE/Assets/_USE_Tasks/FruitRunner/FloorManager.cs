@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 20f; //was 20
+    private readonly float MovementSpeed = 25f;
     public GameObject floorTilePrefab;
     public GameObject doorPrefab;
-    private int tilesOnScreen = 15; //was 20
+    private int tilesOnScreen = 20;
     private List<GameObject> activeTiles;
     private ItemSpawner itemSpawner;
     private int NumTilesSpawned;

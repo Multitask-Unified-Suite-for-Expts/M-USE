@@ -10,8 +10,8 @@ public class ItemSpawner : MonoBehaviour
     public List<GameObject> ItemPrefabs;
     public List<GameObject> DoorPrefabs;
 
-    public int NumItemsBetweenDoor = 4;
-    public int ItemsBetweenDoorCount = 0;
+    private int NumItemsBetweenDoor = 10;
+    private int ItemsBetweenDoorCount = 0;
 
 
     public void SpawnItem(Transform parentTransform)

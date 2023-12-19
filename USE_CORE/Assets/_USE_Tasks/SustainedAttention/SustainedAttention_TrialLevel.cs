@@ -6,7 +6,7 @@ using USE_ExperimentTemplate_Trial;
 using SustainedAttention_Namespace;
 using ConfigDynamicUI;
 using System.Linq;
-
+using System;
 
 public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 {
@@ -344,12 +344,12 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
-        TrialData.AddDatum("Objects", () => CurrentTrial.TrialObjectIndices);
+        TrialData.AddDatum("ObjectIndices", () => String.Join(", ", CurrentTrial.TrialObjectIndices));
         TrialData.AddDatum("DisplayTargetDuration", () => CurrentTrial.DisplayTargetDuration);
         TrialData.AddDatum("DisplayDistractorsDuration", () => CurrentTrial.DisplayDistractorsDuration);
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
-        TrialData.AddDatum("SliderGain", () => CurrentTrial.SliderGain);
-        TrialData.AddDatum("SliderLoss", () => CurrentTrial.SliderLoss);
+        TrialData.AddDatum("SliderGain", () => String.Join(", ", CurrentTrial.SliderGain));
+        TrialData.AddDatum("SliderLoss", () => String.Join(", ", CurrentTrial.SliderLoss));
     }
 
     private void DefineFrameData()

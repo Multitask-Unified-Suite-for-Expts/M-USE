@@ -41,7 +41,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             //Grab custom settings from Object Config that are read in:
-            SA_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "ObjectsDef").AssignCustomSetting<SA_Object_ConfigValues[]>();
+            SA_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "SustainedAttention_ObjectsDef").AssignCustomSetting<SA_Object_ConfigValues[]>();
 
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
@@ -55,7 +55,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
     public override List<CustomSettings> DefineCustomSettings()
     {
-        customSettings.Add(new CustomSettings("ObjectsDef", typeof(SA_Object_ConfigValues), "array", SA_Objects_ConfigValues));
+        customSettings.Add(new CustomSettings("SustainedAttention_ObjectsDef", typeof(SA_Object_ConfigValues), "array", SA_Objects_ConfigValues));
         return customSettings;
     }
 

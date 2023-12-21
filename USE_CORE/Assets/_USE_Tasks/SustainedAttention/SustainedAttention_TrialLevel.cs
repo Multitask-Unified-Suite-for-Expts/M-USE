@@ -20,9 +20,9 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int UnsuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Block = 0;
     [HideInInspector] public int TargetAnimsWithoutSelection_Block = 0;
+    [HideInInspector] public int AdditionalTargetSelections_Block = 0;
     [HideInInspector] public int DistractorSelections_Block = 0;
     [HideInInspector] public int DistractorRejections_Block = 0;
-    [HideInInspector] public int AdditionalTargetSelections_Block = 0;
     [HideInInspector] public int SliderBarCompletions_Block = 0;
 
     //Set in Inspector:
@@ -87,6 +87,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 Destroy(ObjectManager);
 
             ObjectManager = gameObject.AddComponent<SA_ObjectManager>();
+            ObjectManager.trialLevel_FrameData = FrameData;
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
             ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
             ObjectManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
@@ -149,7 +150,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            AudioFBController.Play("EC_BalloonChosen");
+            //AudioFBController.Play("EC_BalloonChosen");
             ObjectManager.ActivateObjectMovement();
         });
         Play.AddUpdateMethod(() =>
@@ -172,6 +173,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                             SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
                             SuccessfulTargetSelections_Block++;
                             CurrentTaskLevel.SuccessfulTargetSelections_Task++;
+                            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SuccessfulTargetSelection"]);
                             Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                         }
                         else
@@ -183,6 +185,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                             {
                                 AdditionalTargetSelections_Block++;
                                 CurrentTaskLevel.AdditionalTargetSelections_Task++;
+                                Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["AdditionalTargetSelection"]);
                             }
                             else
                             {
@@ -191,6 +194,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                                     Debug.LogWarning("FAILED DURATION: " + (Time.time - ChosenObject.AnimStartTime));
                                     UnsuccessfulTargetSelections_Block++;
                                     CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
+                                    Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["UnsuccessfulTargetSelection"]);
                                     Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
 
                                 }
@@ -198,6 +202,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                                 {
                                     TargetSelectionsBeforeFirstAnim_Block++;
                                     CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
+                                    Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
+
                                 }
                             }
                         }
@@ -208,6 +214,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                         SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorSelection"]);
                     }
 
                     CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
@@ -237,8 +244,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     {
         if(ObjectManager != null)
         {
-            ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //UNsubscribe to MissedInterval Event
-            ObjectManager.OnDistractorAvoided += DistractorAvoided; //UNsubscribe to DistractorAvoided Event
+            ObjectManager.OnTargetIntervalMissed -= TargetIntervalMissed; //UNsubscribe to MissedInterval Event
+            ObjectManager.OnDistractorAvoided -= DistractorAvoided; //UNsubscribe to DistractorAvoided Event
         }
     }
     private void TargetIntervalMissed()
@@ -246,6 +253,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetAnimWithoutSelection"]);
         Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
 
     }
@@ -254,6 +262,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         DistractorRejections_Block++;
         CurrentTaskLevel.DistractorRejections_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRejection"]);
+
     }
 
     private void HandleSlider()
@@ -349,7 +359,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("DisplayDistractorsDuration", () => CurrentTrial.DisplayDistractorsDuration);
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
         TrialData.AddDatum("SliderGain", () => String.Join(", ", CurrentTrial.SliderGain));
-        TrialData.AddDatum("SliderLoss", () => String.Join(", ", CurrentTrial.SliderLoss));
     }
 
     private void DefineFrameData()

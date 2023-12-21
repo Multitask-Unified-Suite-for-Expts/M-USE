@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using USE_Data;
+using USE_ExperimentTemplate_Data;
 using Random = UnityEngine.Random;
 
 
@@ -23,6 +25,8 @@ public class SA_ObjectManager : MonoBehaviour
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;
     public event CycleEventHandler OnDistractorAvoided;
+
+    public FrameData trialLevel_FrameData;
 
 
     public void NoSelectionDuringInterval(SA_Object obj)
@@ -89,6 +93,9 @@ public class SA_ObjectManager : MonoBehaviour
 
             SA_Object obj = go.AddComponent<SA_Object>();
             obj.SetupObject(this, configValues);
+
+            trialLevel_FrameData.AddDatum(obj.ObjectName, () => obj != null && obj.gameObject.activeInHierarchy ? obj.gameObject.transform.position.ToString() : "NotActive");
+
 
             if (obj.IsTarget)
                 TargetList.Add(obj);
@@ -183,6 +190,7 @@ public class SA_Object : MonoBehaviour
 
     //From Object Config:
     public int Index;
+    public string ObjectName;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -223,6 +231,8 @@ public class SA_Object : MonoBehaviour
     public void SetupObject(SA_ObjectManager objManager, SA_Object_ConfigValues configValue)
     {
         ObjManager = objManager;
+        Index = configValue.Index;
+        ObjectName = configValue.ObjectName;
         IsTarget = configValue.IsTarget;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
@@ -431,7 +441,7 @@ public class SA_Object : MonoBehaviour
         }
 
         float randomNum = Random.value; //Randomize whether to make it negative
-        if (randomNum < .5f)
+        if (randomNum < .5f) //50% chance to be negative
             angleOffset = -angleOffset;
 
         PreviousAngleOffsets.Add(angleOffset);
@@ -500,6 +510,8 @@ public class SA_Object : MonoBehaviour
 
     public void DestroyObj()
     {
+        ObjManager.trialLevel_FrameData.data.Remove(ObjManager.trialLevel_FrameData.data.FirstOrDefault(d => d.Name == ObjectName));
+
         ObjManager.RemoveFromObjectList(this);
 
         if(gameObject != null)
@@ -533,6 +545,7 @@ public class SA_Object_ConfigValues
 {
     //From Object Config:
     public int Index;
+    public string ObjectName;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;

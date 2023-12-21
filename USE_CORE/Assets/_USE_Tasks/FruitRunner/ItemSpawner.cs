@@ -10,6 +10,8 @@ public class ItemSpawner : MonoBehaviour
     public List<GameObject> ItemPrefabs;
     public List<GameObject> DoorPrefabs;
 
+    public List<GameObject> Quaddles;
+
     private int NumItemsBetweenDoor = 10;
     private int ItemsBetweenDoorCount = 0;
 
@@ -20,10 +22,12 @@ public class ItemSpawner : MonoBehaviour
 
         if(ItemsBetweenDoorCount < NumItemsBetweenDoor)
         {
-            item = Instantiate(ItemPrefabs[Random.Range(0, ItemPrefabs.Count)]);
+            item = Instantiate(Quaddles[Random.Range(0, Quaddles.Count)]);
+            //item = Instantiate(ItemPrefabs[Random.Range(0, ItemPrefabs.Count)]);
             item.name = "Item";
-            item.transform.localScale = new Vector3(.3f, .3f, .3f);
-            SetItemColor(item);
+            item.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+            //item.transform.localScale = new Vector3(.3f, .3f, .3f);
+            //SetItemColor(item);
             ItemsBetweenDoorCount++;
         }
         else
@@ -32,6 +36,9 @@ public class ItemSpawner : MonoBehaviour
             item = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
             item.name = "Door";
         }
+
+        if (item.GetComponent<Item>() == null)
+            item.AddComponent<Item>();
 
         SetItemPosition(item, parentTransform);
         items.Add(item);
@@ -47,7 +54,7 @@ public class ItemSpawner : MonoBehaviour
             spawnPoints.Add(child);
 
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
-        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .5f, randomSpawnPoint.position.z);
+        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .4f, randomSpawnPoint.position.z); //.5 for items. .4 for quaddles
         item.transform.parent = parentTransform;
     }
 

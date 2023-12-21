@@ -562,19 +562,6 @@ namespace USE_Data
 		public event Action OnLogChanged;
 
 
-        public void CreateSQLTable(string databaseAddress)
-        {
-            //connect to database
-            //create empty table with DataController name
-            //loop through DataController.Data, add column to table for each datum
-        }
-
-        public void CreateSQLTableIfNecessary(string databaseAddess)
-        {
-            //check if table exists in database
-            //if not, CreateSQLTable()
-        }
-
 
 
 

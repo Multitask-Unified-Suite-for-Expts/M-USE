@@ -30,7 +30,13 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     GameObject Player;
 
- 
+    public FloorManager FloorManager;
+    public ItemSpawner ItemSpawner;
+
+
+    private StimGroup trialStims;
+
+
 
     public override void DefineControlLevel()
     {
@@ -41,6 +47,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            ItemSpawner = gameObject.AddComponent<ItemSpawner>();
+
             SliderFBController.InitializeSlider();
 
             if (StartButton == null)
@@ -82,7 +90,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Play, () =>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(20f, 1 * (1f / 4), new Vector3(0f, -2f, 0f));
+            SliderFBController.ConfigureSlider(20f, 1 * (1f / 4), new Vector3(0f, -7f, 0f));
             //SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
@@ -112,6 +120,11 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
 
             startTime = Time.time;
+
+
+            if (FloorManager != null)
+                Destroy(FloorManager);
+            FloorManager = gameObject.AddComponent<FloorManager>();
         });
         Play.AddUpdateMethod(() =>
         {
@@ -120,8 +133,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
                 startTime = Time.time;
             }
-
-
         });
         Play.AddTimer(() => 500f, ITI);
 
@@ -133,6 +144,21 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    protected override void DefineTrialStims()
+    {
+        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+
+        trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
+        foreach (FruitRunner_StimDef stim in trialStims.stimDefs)
+        {
+            //add each to list of 
+            ItemSpawner.Quaddles.Add(stim.StimGameObject);
+        }
+        trialStims.SetVisibilityOnOffStates(GetStateFromName("Play"), GetStateFromName("Play"));
+        TrialStims.Add(trialStims);
+
+    }
 
     private void CalculateSliderSteps()
     {
@@ -206,9 +232,4 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         //sliderUpdateDuration = ConfigUiVariables.get<ConfigNumber>("sliderUpdateDuration");
     }
 
-    protected override void DefineTrialStims()
-    {
-
-    }
-    
 }

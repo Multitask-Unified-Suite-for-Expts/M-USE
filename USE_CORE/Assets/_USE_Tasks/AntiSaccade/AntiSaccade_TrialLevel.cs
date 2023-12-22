@@ -385,9 +385,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SpatialCue_GO.transform.localPosition = Vector3.zero;
         SpatialCue_GO.AddComponent<FaceCamera>();
         
-        if (SpatialCue_GO == null)
-            Debug.LogError(("NULL!"));
-        
         Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black"));
         Mask_GO.name = "Mask";
         Mask_GO.SetActive(false);

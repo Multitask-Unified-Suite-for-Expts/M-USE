@@ -12,7 +12,7 @@ public class ItemSpawner : MonoBehaviour
 
     public List<GameObject> Quaddles;
 
-    private int NumItemsBetweenDoor = 10;
+    private int NumItemsBetweenDoor = 5;
     private int ItemsBetweenDoorCount = 0;
 
 
@@ -36,9 +36,6 @@ public class ItemSpawner : MonoBehaviour
             item = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
             item.name = "Door";
         }
-
-        if (item.GetComponent<Item>() == null)
-            item.AddComponent<Item>();
 
         SetItemPosition(item, parentTransform);
         items.Add(item);

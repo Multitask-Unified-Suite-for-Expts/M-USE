@@ -4,6 +4,7 @@ using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
 
+
 namespace FruitRunner_Namespace
 {
     public class FruitRunner_TaskDef : TaskDef
@@ -16,6 +17,7 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_TrialDef : TrialDef
     {
+        public List<int> TrialStimIndices;
     }
 
     public class FruitRunner_StimDef : StimDef

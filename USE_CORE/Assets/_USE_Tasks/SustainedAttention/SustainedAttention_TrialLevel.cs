@@ -364,6 +364,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+
         //what else to track?
     }
 

@@ -94,6 +94,7 @@ public class SA_ObjectManager : MonoBehaviour
             SA_Object obj = go.AddComponent<SA_Object>();
             obj.SetupObject(this, configValues);
 
+
             trialLevel_FrameData.AddDatum(obj.ObjectName, () => obj != null && obj.gameObject.activeInHierarchy ? obj.gameObject.transform.position.ToString() : "NotActive");
 
 

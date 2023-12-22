@@ -841,10 +841,10 @@ MonoBehaviour:
   - {fileID: 2857151697680853970, guid: a77376374fe204cd2bf955a42331ee28, type: 3}
   - {fileID: 3311961847115578471, guid: a0c811ba9ef6b4049b331103f92b703f, type: 3}
   Quaddles:
-  - {fileID: 9056860213046552424, guid: a8719a44ce8e9430fa749879f2dcba43, type: 3}
-  - {fileID: 3624177570346594424, guid: 793ce1f8d82cb4dd3b8281c716d3c840, type: 3}
-  - {fileID: 5962916102852536534, guid: 5c586bd7d542a48a0a2db8ddbfb1c8fd, type: 3}
-  - {fileID: 3139684621698817102, guid: 0fbc29c8c0c24401b84fa1a3ac21c035, type: 3}
+  - {fileID: 9056860213046552424, guid: bd83913764a8c49ffb7161af52d4112b, type: 3}
+  - {fileID: 3624177570346594424, guid: 589373c244d0a4d73b72859cded2707d, type: 3}
+  - {fileID: 5962916102852536534, guid: 11d547dade15646879ccd3297daf4d16, type: 3}
+  - {fileID: 3139684621698817102, guid: 9a8fe61eff5f04bc4a0d0af1a1942cff, type: 3}
 --- !u!1 &1734548525
 GameObject:
   m_ObjectHideFlags: 0
@@ -1042,7 +1042,7 @@ PrefabInstance:
     - target: {fileID: 3038106576207996005, guid: 77cb21dc0c7904c0bbea253884ce666b,
         type: 3}
       propertyPath: m_Name
-      value: Player
+      value: Player_Test
       objectReference: {fileID: 0}
     - target: {fileID: 3038106576207996005, guid: 77cb21dc0c7904c0bbea253884ce666b,
         type: 3}

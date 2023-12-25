@@ -109,7 +109,9 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
                         "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
                         "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
-                        "\nReward Pulses: " + NumRewardPulses_InBlock;
+                        "\nReward Pulses: " + NumRewardPulses_InBlock +
+                        "\nReversal Count: " + trialLevel.reversalsCount +
+                        "\nReversals Necessary for Termination: " + trialLevel.NumReversalsUntilTerm;
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }

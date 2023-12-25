@@ -369,7 +369,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 runningPercentError.Add(percentError);
                 CurrentTaskLevel.NumSliderBarFull_InBlock++;
                 CurrentTaskLevel.NumSliderBarFull_InTask++;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOn");
 
                 if (Session.SyncBoxController != null)
                 {
@@ -422,9 +421,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             tiles.ToggleVisibility(false);
 
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeOff"]);
-
-            if (finishedMaze)
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
             
             if (currentTaskDef.NeutralITI)
             {

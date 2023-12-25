@@ -254,14 +254,14 @@ public class SetupSession_Level : ControlLevel
             Directory.Delete(Session.ConfigFolderPath, true);
             
         Directory.CreateDirectory(Session.ConfigFolderPath);
-        List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "SessionEventCodeConfig_json", "DisplayConfig_json" };
+        List<string> configsToWrite = new List<string>() { "SessionConfig_singleType", "SessionEventCodeConfig_json" };
         foreach (string config in configsToWrite)
         {
             byte[] textFileBytes = Resources.Load<TextAsset>("DefaultSessionConfigs/" + config).bytes;
             string configName = config;
             if (configName.ToLower().Contains("sessionconfig"))
                 configName += ".txt";
-            else if (configName.ToLower().Contains("eventcode") || configName.ToLower().Contains("displayconfig"))
+            else if (configName.ToLower().Contains("eventcode"))
                 configName += ".json";
             File.WriteAllBytes(Session.ConfigFolderPath + Path.DirectorySeparatorChar + configName, textFileBytes);
         }

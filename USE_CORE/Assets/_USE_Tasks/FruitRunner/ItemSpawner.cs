@@ -2,54 +2,63 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class ItemSpawner : MonoBehaviour
 {
     List<GameObject> items = new List<GameObject>();
-    List<float> xPositions = new List<float>() {-1.25f, 0f, 1.25f};
 
-    float SpawnStartTime;
-    float SpawnGap = .65f;
+    public List<GameObject> ItemPrefabs;
+    public List<GameObject> DoorPrefabs;
+
+    public List<GameObject> Quaddles;
+
+    private int NumItemsBetweenDoor = 5;
+    private int ItemsBetweenDoorCount = 0;
 
 
-    void Start()
+    public void SpawnItem(Transform parentTransform)
     {
-        SpawnItem();
-    }
+        GameObject item;
 
-    private void Update()
-    {
-        if (Time.time - SpawnStartTime >= SpawnGap)
-            SpawnItem();
-    }
+        if(ItemsBetweenDoorCount < NumItemsBetweenDoor)
+        {
+            item = Instantiate(Quaddles[Random.Range(0, Quaddles.Count)]);
+            //item = Instantiate(ItemPrefabs[Random.Range(0, ItemPrefabs.Count)]);
+            item.name = "Item";
+            item.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+            //item.transform.localScale = new Vector3(.3f, .3f, .3f);
+            //SetItemColor(item);
+            ItemsBetweenDoorCount++;
+        }
+        else
+        {
+            ItemsBetweenDoorCount = 0;
+            item = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
+            item.name = "Door";
+        }
 
-    void SpawnItem()
-    {
-        SpawnStartTime = Time.time;
-
-        GameObject item = Instantiate(Resources.Load<GameObject>("Prefabs/Item"));
-        int randomNum = Mathf.FloorToInt(Random.Range(0, 3));
-        bool positiveItem = randomNum != 0; //two thirds chance for positive item, one third chance for neg item
-        item.name = (positiveItem ? "Positive" : "Negative") + "_Item_" + items.Count;
-        item.GetComponent<Item>().PositiveItem = positiveItem;
-        SetItemColor(item, positiveItem);
-        SetItemPosition(item);
+        SetItemPosition(item, parentTransform);
         items.Add(item);
     }
 
-    void SetItemPosition(GameObject item)
+
+    void SetItemPosition(GameObject item, Transform parentTransform)
     {
-        int randomX = Mathf.RoundToInt(Random.Range(0, 2.01f));
-        float newXPos = xPositions[randomX];
-        Vector3 spawnPos = new Vector3(newXPos, 1f, 60);
-        item.transform.position = spawnPos;
-        item.transform.parent = GameObject.Find("Floor").transform;
+        bool isDoor = item.name == "Door";
+
+        List<Transform> spawnPoints = new List<Transform>();
+        foreach (Transform child in parentTransform)
+            spawnPoints.Add(child);
+
+        Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .4f, randomSpawnPoint.position.z); //.5 for items. .4 for quaddles
+        item.transform.parent = parentTransform;
     }
 
-    public void SetItemColor(GameObject item, bool isPositive)
+    public void SetItemColor(GameObject item)
     {
         Material material = item.GetComponent<MeshRenderer>().material;
-        material.color = isPositive? Color.green : Color.red;
-        //material.color = new Color32((byte)Random.Range(0, 256), (byte)Random.Range(0, 256), (byte)Random.Range(0, 256), 255);
+        material.color = item.GetComponent<Item>().NegativeItem ? Color.red : new Color32((byte)Random.Range(0, 256), (byte)Random.Range(0, 256), (byte)Random.Range(0, 256), 255);
     }
 
 }

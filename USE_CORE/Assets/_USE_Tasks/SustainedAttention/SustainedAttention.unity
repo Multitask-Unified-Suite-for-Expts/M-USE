@@ -461,6 +461,13 @@ MonoBehaviour:
   CurrentBlockString: 
   BlockStringsAdded: 0
   TrialsCompleted_Task: 0
+  SuccessfulTargetSelections_Task: 0
+  UnsuccessfulTargetSelections_Task: 0
+  TargetSelectionsBeforeFirstAnim_Task: 0
+  TargetAnimsWithoutSelection_Task: 0
+  AdditionalTargetSelections_Task: 0
+  DistractorSelections_Task: 0
+  DistractorRejections_Task: 0
 --- !u!114 &1671599253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -537,6 +544,13 @@ MonoBehaviour:
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
   TrialCompletions_Block: 0
+  SuccessfulTargetSelections_Block: 0
+  UnsuccessfulTargetSelections_Block: 0
+  TargetSelectionsBeforeFirstAnim_Block: 0
+  TargetAnimsWithoutSelection_Block: 0
+  DistractorSelections_Block: 0
+  DistractorRejections_Block: 0
+  AdditionalTargetSelections_Block: 0
   SustainedAttention_CanvasGO: {fileID: 542748419}
   BordersGO: {fileID: 1051536200}
   itiDuration:

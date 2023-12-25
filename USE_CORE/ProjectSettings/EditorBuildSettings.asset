@@ -50,4 +50,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/SustainedAttention/SustainedAttention.unity
     guid: 427b1ab2cb41d48949dfc89044dfd785
+  - enabled: 1
+    path: Assets/_USE_Tasks/FruitRunner/FruitRunner.unity
+    guid: a6d59961be9454de68fa0e7f7a39f217
   m_configObjects: {}

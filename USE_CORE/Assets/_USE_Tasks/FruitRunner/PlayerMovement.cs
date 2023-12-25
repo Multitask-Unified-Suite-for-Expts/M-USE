@@ -6,20 +6,21 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private Rigidbody Rb;
-    private float leftXPos = -1.25f;
-    private float rightXPos = 1.25f;
-
     private Vector3 TargetPos;
     private bool IsShifting = false;
-    private float SideShiftSpeed = 6f;
+    private float SideShiftSpeed = 20f;
 
     private Vector3 MovementAmount = new Vector3(1.25f, 0, 0);
+
+    private AudioManager audioManager;
 
 
     void Start()
     {
         Rb = GetComponent<Rigidbody>();
         transform.position = Vector3.zero;
+        audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
+
     }
 
     void Update()
@@ -46,11 +47,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && transform.position.x > leftXPos)
-            MoveToPosition(transform.position - MovementAmount);
+        if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
+        {
+            if(transform.position.x > -1)
+                MoveToPosition(transform.position - MovementAmount);
+        }
 
-        else if (Input.GetKeyDown(KeyCode.RightArrow) && transform.position.x < rightXPos)
-            MoveToPosition(transform.position + MovementAmount);
+        else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
+        {
+            if(transform.position.x < 1)
+                MoveToPosition(transform.position + MovementAmount);
+        }
 
         //else if (Input.GetMouseButtonDown(0))
         //{
@@ -72,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
     {
         TargetPos = new Vector3(newPos.x, 0f, 0f);
         IsShifting = true;
+        audioManager.PlaySlideClip();
     }
 
 }

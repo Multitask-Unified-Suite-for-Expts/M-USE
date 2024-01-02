@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Classes;
 using Random = UnityEngine.Random;
 
 
@@ -23,6 +24,8 @@ public class SA_ObjectManager : MonoBehaviour
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;
     public event CycleEventHandler OnDistractorAvoided;
+
+    public Dictionary<string, EventCode> TaskEventCodes; //task event codes passed in so can trigger "Object Animation Occured" event code
 
 
     public void NoSelectionDuringInterval(SA_Object obj)
@@ -103,8 +106,8 @@ public class SA_ObjectManager : MonoBehaviour
     
     private void CalculateStartingPositions()
     {
-        int[] xValues = new int[] { -800, -600, -400, -200, 0, 200, 400, 600, 800 };
-        int[] yValues = new int[] { 325, 180, 35, -110, -255, -400};
+        int[] xValues = new int[] { -800, -400, 0, 400, 800 };
+        int[] yValues = new int[] { 325, 84, -158, -400};
 
         for (int i = 0; i < yValues.Length; i++)
         {
@@ -339,6 +342,7 @@ public class SA_Object : MonoBehaviour
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Closed_Texture");
         yield return new WaitForSeconds(CloseDuration);
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(ObjectOpenAngle + "_Degree_Texture");
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
     }
 
     private void HandlePausingWhileBeingSelected()

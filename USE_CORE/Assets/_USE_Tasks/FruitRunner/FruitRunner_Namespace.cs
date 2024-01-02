@@ -17,7 +17,7 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_TrialDef : TrialDef
     {
-        public List<int> TrialStimIndices;
+        public int[] TrialStimIndices;
     }
 
     public class FruitRunner_StimDef : StimDef

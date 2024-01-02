@@ -26,8 +26,6 @@ public class SA_ObjectManager : MonoBehaviour
     public event CycleEventHandler OnTargetIntervalMissed;
     public event CycleEventHandler OnDistractorAvoided;
 
-    public FrameData trialLevel_FrameData;
-
 
     public void NoSelectionDuringInterval(SA_Object obj)
     {
@@ -93,10 +91,6 @@ public class SA_ObjectManager : MonoBehaviour
 
             SA_Object obj = go.AddComponent<SA_Object>();
             obj.SetupObject(this, configValues);
-
-
-            trialLevel_FrameData.AddDatum(obj.ObjectName, () => obj != null && obj.gameObject.activeInHierarchy ? obj.gameObject.transform.position.ToString() : "NotActive");
-
 
             if (obj.IsTarget)
                 TargetList.Add(obj);
@@ -511,8 +505,6 @@ public class SA_Object : MonoBehaviour
 
     public void DestroyObj()
     {
-        ObjManager.trialLevel_FrameData.data.Remove(ObjManager.trialLevel_FrameData.data.FirstOrDefault(d => d.Name == ObjectName));
-
         ObjManager.RemoveFromObjectList(this);
 
         if(gameObject != null)

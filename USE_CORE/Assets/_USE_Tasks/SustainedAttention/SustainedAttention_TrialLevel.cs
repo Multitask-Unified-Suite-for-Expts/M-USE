@@ -7,6 +7,8 @@ using SustainedAttention_Namespace;
 using ConfigDynamicUI;
 using System.Linq;
 using System;
+using UnityEditor;
+using UnityEngine.UIElements;
 
 public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 {
@@ -46,6 +48,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private float HaloDuration = .15f; //make configurable later
 
     List<SA_Object> TrialObjects;
+
+
 
     public override void DefineControlLevel()
     {
@@ -87,7 +91,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 Destroy(ObjectManager);
 
             ObjectManager = gameObject.AddComponent<SA_ObjectManager>();
-            ObjectManager.trialLevel_FrameData = FrameData;
             ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
             ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
             ObjectManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
@@ -365,8 +368,45 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
 
-        //what else to track?
+        FrameData.AddDatum("ObjectNames", () => GetObjNamesString());
+        FrameData.AddDatum("ObjectPositions", () => GetObjPositionsString());
     }
+
+    private string GetObjNamesString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+
+        List<string> names = new List<string>();
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (obj.gameObject.activeInHierarchy)
+                    names.Add(obj.ObjectName);
+            }
+        }
+        return names.Count < 1 ? "[]" : $"[{string.Join(", ", names)}]";
+    }
+    private string GetObjPositionsString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+
+        List<string> positions = new List<string>();
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (obj.gameObject.activeInHierarchy)
+                    positions.Add(obj.transform.position.ToString());
+            }
+        }
+        return positions.Count < 1 ? "[]" : $"[{string.Join(", ", positions)}]";
+    }
+
 
     private void LoadConfigUIVariables()
     {

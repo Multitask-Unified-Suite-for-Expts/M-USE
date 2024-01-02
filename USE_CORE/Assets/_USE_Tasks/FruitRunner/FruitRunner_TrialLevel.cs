@@ -147,16 +147,16 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     protected override void DefineTrialStims()
     {
-        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+        //StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
-        trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
-        foreach (FruitRunner_StimDef stim in trialStims.stimDefs)
-        {
-            //add each to list of 
-            ItemSpawner.Quaddles.Add(stim.StimGameObject);
-        }
-        trialStims.SetVisibilityOnOffStates(GetStateFromName("Play"), GetStateFromName("Play"));
-        TrialStims.Add(trialStims);
+        //trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
+        //foreach (FruitRunner_StimDef stim in trialStims.stimDefs)
+        //{
+        //    //add each to list of 
+        //    ItemSpawner.Quaddles.Add(stim.StimGameObject);
+        //}
+        //trialStims.SetVisibilityOnOffStates(GetStateFromName("Play"), GetStateFromName("Play"));
+        //TrialStims.Add(trialStims);
 
     }
 

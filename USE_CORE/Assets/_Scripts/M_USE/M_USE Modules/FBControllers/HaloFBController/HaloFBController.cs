@@ -113,7 +113,6 @@ public class HaloFBController : MonoBehaviour
         {
             if (!LeaveFBOn)
             {
-                Debug.LogWarning("Trying to show HaloFB but one is already being shown");
                 Destroy(instantiated);
             }
         }

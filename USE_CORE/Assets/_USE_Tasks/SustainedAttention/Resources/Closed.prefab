@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3767054880184099836}
   - component: {fileID: 5301199250352623446}
   m_Layer: 5
-  m_Name: Target_Closed
+  m_Name: Closed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

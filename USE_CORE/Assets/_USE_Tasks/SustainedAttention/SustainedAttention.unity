@@ -452,8 +452,6 @@ MonoBehaviour:
   TaskLevelDefined: 0
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
-  BlockResultsPrefab: {fileID: 0}
-  BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
@@ -468,6 +466,7 @@ MonoBehaviour:
   AdditionalTargetSelections_Task: 0
   DistractorSelections_Task: 0
   DistractorRejections_Task: 0
+  SliderBarCompletions_Task: 0
 --- !u!114 &1671599253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -548,9 +547,10 @@ MonoBehaviour:
   UnsuccessfulTargetSelections_Block: 0
   TargetSelectionsBeforeFirstAnim_Block: 0
   TargetAnimsWithoutSelection_Block: 0
+  AdditionalTargetSelections_Block: 0
   DistractorSelections_Block: 0
   DistractorRejections_Block: 0
-  AdditionalTargetSelections_Block: 0
+  SliderBarCompletions_Block: 0
   SustainedAttention_CanvasGO: {fileID: 542748419}
   BordersGO: {fileID: 1051536200}
   itiDuration:

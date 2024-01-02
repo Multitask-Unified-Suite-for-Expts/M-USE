@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using USE_Data;
-using USE_ExperimentTemplate_Data;
 using Random = UnityEngine.Random;
 
 
@@ -79,7 +77,7 @@ public class SA_ObjectManager : MonoBehaviour
 
         foreach(SA_Object_ConfigValues configValues in objects)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
+            GameObject go = Instantiate(Resources.Load<GameObject>("Open_" + configValues.ObjectOpenAngle));
             go.name = configValues.IsTarget ? $"Target" : $"Distractor";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
@@ -186,6 +184,7 @@ public class SA_Object : MonoBehaviour
     //From Object Config:
     public int Index;
     public string ObjectName;
+    public string ObjectOpenAngle; //90 or 75 as of now
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -228,6 +227,7 @@ public class SA_Object : MonoBehaviour
         ObjManager = objManager;
         Index = configValue.Index;
         ObjectName = configValue.ObjectName;
+        ObjectOpenAngle = configValue.ObjectOpenAngle;
         IsTarget = configValue.IsTarget;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
@@ -336,9 +336,9 @@ public class SA_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Closed_Texture");
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanOpen");
+        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(ObjectOpenAngle + "_Degree_Texture");
     }
 
     private void HandlePausingWhileBeingSelected()
@@ -539,6 +539,7 @@ public class SA_Object_ConfigValues
     //From Object Config:
     public int Index;
     public string ObjectName;
+    public string ObjectOpenAngle; //90 or 75 as of now
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;

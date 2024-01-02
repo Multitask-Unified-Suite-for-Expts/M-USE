@@ -43,7 +43,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
             //Grab custom settings from Object Config that are read in:
             SA_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "SustainedAttention_ObjectsDef").AssignCustomSetting<SA_Object_ConfigValues[]>();
 
-
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
             trialLevel.ResetBlockVariables();

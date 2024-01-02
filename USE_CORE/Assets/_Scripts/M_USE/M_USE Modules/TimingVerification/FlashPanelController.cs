@@ -41,8 +41,8 @@ public class FlashPanelController : MonoBehaviour
 	private int leftSequenceCount = 0;
 	private int rightSequenceCount = 0;
 
-	public int leftLuminanceFactor = 0;
-	public int rightLuminanceFactor = 0;
+	public float leftLuminanceFactor = 0;
+	public float rightLuminanceFactor = 0;
 
 	private int leftSegmentLength = 1;
 	private int rightSegmentLength = 3;
@@ -129,15 +129,20 @@ public class FlashPanelController : MonoBehaviour
 	}
 
 
-	public void SetSquareColours(float leftLum, float rightLum){
-		Vector4 leftColour = new Vector4 (leftLum * 1, leftLum * 1, leftLum * 1, 1);
-		Vector4 rightColour = new Vector4 (rightLum * 1, rightLum * 1, rightLum * 1, 1);
+    public void SetSquareColours(float leftLum, float rightLum)
+    {
+		leftLum = Mathf.Clamp(leftLum, 0.2f, 0.8f);
+		rightLum = Mathf.Clamp(rightLum, 0.2f, 0.8f);
 
-		panelImageL.color = leftColour;
-		panelImageR.color = rightColour;
-	}
+		Vector4 leftColour = new Vector4(leftLum, leftLum, leftLum, 1);
+        Vector4 rightColour = new Vector4(rightLum, rightLum, rightLum, 1);
 
-	public void CalibratePhotodiodes() {
+        panelImageL.color = leftColour;
+        panelImageR.color = rightColour;
+    }
+
+
+    public void CalibratePhotodiodes() {
 		leftLuminanceFactor = Mathf.Abs (leftLuminanceFactor - 1);
 		Vector4 squareColour = new Vector4 (leftLuminanceFactor * 1, leftLuminanceFactor * 1, leftLuminanceFactor * 1, 1);
 		panelImageL.color = squareColour;

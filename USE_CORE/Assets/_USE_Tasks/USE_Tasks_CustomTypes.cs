@@ -39,6 +39,8 @@ using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
 using AntiSaccade_Namespace;
 using TemporalOrderJudgement_Namespace;
+using SustainedAttention_Namespace;
+using FruitRunner_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -191,6 +193,28 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(TemporalOrderJudgement_BlockDef),
                 TrialDefType = typeof(TemporalOrderJudgement_TrialDef),
                 StimDefType = typeof(TemporalOrderJudgement_StimDef)
+            }
+        }
+        ,{
+            "SustainedAttention", new TaskTypes
+            {
+                TaskLevelType = typeof(SustainedAttention_TaskLevel),
+                TrialLevelType = typeof(SustainedAttention_TrialLevel),
+                TaskDefType = typeof(SustainedAttention_TaskDef),
+                BlockDefType = typeof(SustainedAttention_BlockDef),
+                TrialDefType = typeof(SustainedAttention_TrialDef),
+                StimDefType = typeof(SustainedAttention_StimDef)
+            }
+        }
+        ,{
+            "FruitRunner", new TaskTypes
+            {
+                TaskLevelType = typeof(FruitRunner_TaskLevel),
+                TrialLevelType = typeof(FruitRunner_TrialLevel),
+                TaskDefType = typeof(FruitRunner_TaskDef),
+                BlockDefType = typeof(FruitRunner_BlockDef),
+                TrialDefType = typeof(FruitRunner_TrialDef),
+                StimDefType = typeof(FruitRunner_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

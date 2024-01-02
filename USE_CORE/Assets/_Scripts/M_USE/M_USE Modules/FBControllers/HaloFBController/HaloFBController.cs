@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
@@ -62,22 +63,28 @@ public class HaloFBController : MonoBehaviour
     {
         LeaveFBOn = true;
     }
-    public void ShowPositive(GameObject gameObj, float? depth = null)
+    public void ShowPositive(GameObject gameObj, float? depth = null, float? destroyTime = null)
     {
         state = State.Positive;
         if (depth == null)
             Show(PositiveHaloPrefab, gameObj);
         else
             Show2D(PositiveHaloPrefab, gameObj, depth.Value);
+
+        if (destroyTime != null)
+            StartCoroutine(DestroyAfterTime(destroyTime.Value));
     }
     
-    public void ShowNegative(GameObject gameObj, float? depth = null)
+    public void ShowNegative(GameObject gameObj, float? depth = null, float? destroyTime = null)
     {
         state = State.Negative;
         if(depth == null)
             Show(NegativeHaloPrefab, gameObj);
         else
             Show2D(NegativeHaloPrefab, gameObj, depth.Value);
+
+        if(destroyTime != null)
+            StartCoroutine(DestroyAfterTime(destroyTime.Value));
     }
     private void Show(GameObject haloPrefab, GameObject gameObj)
     {
@@ -152,6 +159,12 @@ public class HaloFBController : MonoBehaviour
     public void StartFlashingHalo(float flashingDuration, int numFlashes, GameObject go)
     {
         StartCoroutine(FlashHalo(flashingDuration, numFlashes, go));
+    }
+
+    public IEnumerator DestroyAfterTime(float time)
+    {
+        yield return new WaitForSeconds(time);
+        Destroy();
     }
 
     public void Destroy()

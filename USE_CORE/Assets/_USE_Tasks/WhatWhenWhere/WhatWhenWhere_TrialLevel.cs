@@ -196,13 +196,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitial*(1f/sliderGainSteps));
+            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitialValue*(1f/sliderGainSteps));
             SliderFBController.SliderGO.SetActive(true);
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
             
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
-
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
                 StateAfterDelay = FlashNextCorrectStim;
@@ -498,9 +496,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
             runningErrorCount.Add(NumErrors_InTrial);
-            
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOn");
-                        
+                                    
             if (Session.SyncBoxController != null)
             {
                 Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
@@ -511,7 +507,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
             Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             
             CurrentTaskLevel.SetBlockSummaryString();
@@ -671,7 +666,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
         FrameData.AddDatum("ContextName", () => ContextName);
-        FrameData.AddDatum("StartButton", () => StartButton.activeSelf);
+        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeSelf ? "Active" : "NotActive");
         FrameData.AddDatum("SearchStimuliShown", () => searchStims?.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims?.IsActive);
     }
@@ -807,12 +802,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             sliderGainSteps += sliderGain;
         }
-        sliderGainSteps += CurrentTrialDef.SliderInitial;
+        sliderGainSteps += CurrentTrialDef.SliderInitialValue;
         foreach (int sliderLoss in CurrentTrialDef.SliderLoss)
         {
             sliderLossSteps += sliderLoss;
         }
-        sliderLossSteps += CurrentTrialDef.SliderInitial;
+        sliderLossSteps += CurrentTrialDef.SliderInitialValue;
     }
 
     private void InitializeStartButton(State visOnState, State visOffState)

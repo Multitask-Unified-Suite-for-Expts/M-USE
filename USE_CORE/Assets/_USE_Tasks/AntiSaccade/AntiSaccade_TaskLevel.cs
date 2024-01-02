@@ -29,6 +29,9 @@ using AntiSaccade_Namespace;
 using UnityEngine;
 using System.Text;
 using System.Collections.Specialized;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 {
@@ -36,7 +39,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     AntiSaccade_TrialLevel trialLevel;
 
     [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded = 0;
 
     //Task Values used for SummaryData file
@@ -50,7 +52,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         trialLevel = (AntiSaccade_TrialLevel)TrialLevel;
 
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
 
         DefineBlockData();
 
@@ -71,7 +72,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         {
             if (BlockStringsAdded > 0)
                 CurrentBlockString += "\n";
-            PreviousBlocksString.Insert(0, CurrentBlockString);
             BlockStringsAdded++;
         }
     }
@@ -90,24 +90,28 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     private void DefineBlockData()
     {
         BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
-        BlockData.AddDatum("SaccadeType", () => trialLevel.SaccadeType);
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
         BlockData.AddDatum("TrialsCorrect", () => trialLevel.TrialsCorrect_Block);
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
+        BlockData.AddDatum("BlockAccuracy", () => (float)trialLevel.TrialsCorrect_Block / trialLevel.TrialCompletions_Block);
+        BlockData.AddDatum("AvgReactionTime", () => CalculateAverageDuration(trialLevel.ReactionTimes_InBlock));
+        BlockData.AddDatum("StdDevReactionTime", () => CalculateStdDevDuration(trialLevel.ReactionTimes_InBlock));
+
     }
 
     public void CalculateBlockSummaryString()
     {
         ClearStrings();
 
-        CurrentBlockString = "\nSaccadeType: " + trialLevel.SaccadeType +
-                        "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
+        CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
                         "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
                         "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
-                        "\nReward Pulses: " + NumRewardPulses_InBlock;
+                        "\nReward Pulses: " + NumRewardPulses_InBlock +
+                        "\nReversal Count: " + trialLevel.reversalsCount +
+                        "\nReversals Necessary for Termination: " + trialLevel.NumReversalsUntilTerm;
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }

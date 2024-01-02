@@ -602,7 +602,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         avgDiffLevel = CurrentTrial.AvgDiffLevel;
         diffLevelJitter = CurrentTrial.DiffLevelJitter;
         NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
-        MinTrialsBeforeTerm = CurrentTrial.MinTrialsBeforeTerm;
+        MinTrialsBeforeTermProcedure = CurrentTrial.MinTrialsBeforeTermProcedure;
         TerminationWindowSize = CurrentTrial.TerminationWindowSize;
         //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
         
@@ -977,17 +977,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("TouchPosition", () => InputBroker.mousePosition);
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
-        FrameData.AddDatum("StimLeft", () => StimLeft.activeInHierarchy);
-        FrameData.AddDatum("StimRight", () => StimRight.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton?.activeInHierarchy);
+        FrameData.AddDatum("StimLeft", () => StimLeft?.activeInHierarchy);
+        FrameData.AddDatum("StimRight", () => StimRight?.activeInHierarchy);
     }
 
     protected override bool CheckBlockEnd()
     {
         int prevResult = -1;
 
-        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTerm);
-        if (MinTrialsBeforeTerm < 0 || runningPerformance.Count < MinTrialsBeforeTerm + 1)
+        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
+        if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
             return false;
 
         if (runningPerformance.Count > 1)

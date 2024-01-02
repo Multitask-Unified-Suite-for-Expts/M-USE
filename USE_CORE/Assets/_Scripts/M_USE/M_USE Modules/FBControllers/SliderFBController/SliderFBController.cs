@@ -54,6 +54,8 @@ public class SliderFBController : MonoBehaviour
 
     private float targetValue;
     private float sliderValueChange;
+
+    private Vector3 InitialPosition;
     
     // Audio
     AudioFBController audioFBController;
@@ -61,7 +63,6 @@ public class SliderFBController : MonoBehaviour
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
     {
         trialData.AddDatum("SliderBarValue", () => Slider?.value); //OLD (didnt have the question mark)
-        //trialData.AddDatum("SliderBarValue", () => Slider != null ? Slider.value : -1); //NEW
         trialData.AddDatum("SliderBarFilled", ()=> sliderBarFull);
         frameData.AddDatum("SliderAnimationPhase", () => animationPhase.ToString());
         frameData.AddDatum("SliderVisibility", ()=> Slider != null? Slider.enabled : false);
@@ -71,13 +72,16 @@ public class SliderFBController : MonoBehaviour
     {
         Transform sliderCanvas = GameObject.Find("SliderCanvas").transform;
         SliderGO = Instantiate(SliderPrefab, sliderCanvas);
+        SliderGO.name = "Slider";
+        InitialPosition = SliderGO.transform.localPosition;
         SliderHaloGO = Instantiate(SliderHaloPrefab, sliderCanvas);
+        SliderHaloGO.name = "SliderHalo";
         SliderGO.SetActive(false);
         SliderHaloGO.SetActive(false);
         numSliderBarFull = 0; // Initialize at the Add_Control_Level_Initialization so this can be reset every block/ new task
     }
 
-    public void ConfigureSlider(float sliderSize, float sliderInitialValue = 0)
+    public void ConfigureSlider(float sliderSize, float sliderInitialValue = 0, Vector3? posAdj = null)
     {
         SliderHaloImage = SliderHaloGO.GetComponent<Image>();
         Slider = SliderGO.GetComponent<Slider>();
@@ -86,6 +90,18 @@ public class SliderFBController : MonoBehaviour
         Slider.transform.localScale = new Vector3(sliderSize / 10f, sliderSize / 10f, 1f);
         SliderHaloGO.transform.localScale = new Vector3(sliderSize/ 10f, sliderSize / 10f, 1f);
 
+        if(posAdj != null)
+        {
+            Vector3 newPos = InitialPosition + posAdj.Value;
+            SliderGO.transform.localPosition = newPos;
+            SliderHaloGO.transform.localPosition = newPos;
+        }
+    }
+
+    public void SetSliderRectSize(Vector2 size)
+    {
+        SliderGO.GetComponent<RectTransform>().sizeDelta = size;
+        SliderHaloGO.GetComponent<RectTransform>().sizeDelta = size;
     }
 
     public void SetUpdateDuration(float sliderUpdateDuration)
@@ -144,7 +160,7 @@ public class SliderFBController : MonoBehaviour
                     break;
                 case AnimationPhase.Flashing:
                     animationPhase = AnimationPhase.None;
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOn"]);
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SliderFbController_SliderCompleteFbOff"]);
                     Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SliderFbController_SliderReset"]);
                     break;
             }

@@ -77,6 +77,8 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: f0d667c5c7d1145a4be073edcde238ee, type: 3}
   - name: Hammer
     clip: {fileID: 8300000, guid: 72be07e17450e484692fb88b38f12eff, type: 3}
+  - name: Vanish
+    clip: {fileID: 8300000, guid: 655e170ede4c346eb913c03fefe2a9ea, type: 3}
   audioSource: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:

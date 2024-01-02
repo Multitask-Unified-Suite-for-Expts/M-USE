@@ -552,9 +552,7 @@ namespace USE_StimulusManagement
 				//DestroyRecursive(StimGameObject);
 				GameObject.Destroy(StimGameObject);
 
-				//APPARENTLY FIXES THE GLTF WEB BUILD NULL TEXTURE ERROR, but prob need to ensure isn't wasting memory:
-				if(!Session.WebBuild)
-					Resources.UnloadUnusedAssets();
+				//Resources.UnloadUnusedAssets();
 			}
 
 			StimGameObject = null;

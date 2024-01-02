@@ -44,7 +44,7 @@ public class SetupTask_Level : ControlLevel
     private BlockData BlockData;
     private FrameData FrameData;
     private TrialData TrialData;
-    private string TaskDataPath, ConfigFolderName, TaskName;
+    public string TaskDataPath, ConfigFolderName, TaskName;
 
 
     public override void DefineControlLevel()
@@ -59,6 +59,8 @@ public class SetupTask_Level : ControlLevel
         {
             verifyTask_Level.TaskLevel = TaskLevel;
         });
+
+        
         VerifyTask.SpecifyTermination(() => VerifyTask.ChildLevel.Terminated, OtherSetup, () =>
         {
             TrialLevel = TaskLevel.TrialLevel;
@@ -66,30 +68,18 @@ public class SetupTask_Level : ControlLevel
         });
 
         OtherSetup.AddSpecificInitializationMethod(() =>
-        {  
+        {
             //Setup data management
-            TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" +Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
-
+            if (TaskLevel.TaskName == "GazeCalibration")
+                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData";            
+            else
+                TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(Session.SessionLevel.taskCount + 1) + "_" + TaskLevel.ConfigFolderName;
+            
+            TaskLevel.TaskDataPath = TaskDataPath;
+            
             if (Session.StoringDataOnServer)
             {
                 StartCoroutine(HandleCreateExternalFolder(TaskDataPath)); //Create Task Data folder on External Server
-            }
-
-            if (TaskName == "GazeCalibration")
-            {
-                //Setup data management
-                if (Session.SessionLevel.CurrentState.StateName == "SetupSession")
-                    // Store Data in the Session Level / Gaze Calibration folder if running at the session level
-                    TaskDataPath = Session.TaskSelectionDataPath + Path.DirectorySeparatorChar +
-                                   "PreTask_GazeCalibration";
-
-                else
-                    // Store Data in the Task / Gaze Calibration folder if not running at the session level
-                    TaskDataPath = Session.SessionDataPath + Path.DirectorySeparatorChar + ConfigFolderName +
-                                   Path.DirectorySeparatorChar + "InTask_GazeCalibration";
-
-                ConfigFolderName = "GazeCalibration";
-
             }
 
 
@@ -121,7 +111,7 @@ public class SetupTask_Level : ControlLevel
             if (Session.SessionDef.EyeTrackerActive)
             {
                 Session.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
-                Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+                Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
             }
 
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
@@ -148,20 +138,6 @@ public class SetupTask_Level : ControlLevel
             TaskName = TaskLevel.TaskName;
             TaskLevel.TrialLevel = TrialLevel;
 
-
-            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Session.InputManager.transform);
-
-            List<string> fbControllersList = TaskLevel.TaskDef.FeedbackControllers;
-
-            fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(TaskLevel.TaskDef.TotalTokensNum);
-
-            TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
-            TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
-            TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
-            TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
-            TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
-            TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
-
             if (TaskLevel.CustomTaskEventCodes != null)
                 TrialLevel.TaskEventCodes = TaskLevel.CustomTaskEventCodes;
 
@@ -170,54 +146,71 @@ public class SetupTask_Level : ControlLevel
             Session.MouseTracker.Init(FrameData, 0);
 
 
-            //Automatically giving TouchFbController;
-            TrialLevel.TouchFBController.Init(TrialData, FrameData);
+            GameObject fbControllers = Instantiate(Resources.Load<GameObject>("FeedbackControllers"), Session.InputManager.transform);
 
-
-            bool audioInited = false;
-            foreach (string fbController in fbControllersList)
+            if (TaskLevel.TaskDef != null)
             {
-                switch (fbController)
+                List<string> fbControllersList = TaskLevel.TaskDef?.FeedbackControllers;
+                fbControllers.GetComponent<TokenFBController>().SetTotalTokensNum(TaskLevel.TaskDef.TotalTokensNum);
+
+                TrialLevel.AudioFBController = fbControllers.GetComponent<AudioFBController>();
+                TrialLevel.HaloFBController = fbControllers.GetComponent<HaloFBController>();
+                TrialLevel.TokenFBController = fbControllers.GetComponent<TokenFBController>();
+                TrialLevel.SliderFBController = fbControllers.GetComponent<SliderFBController>();
+                TrialLevel.TouchFBController = fbControllers.GetComponent<TouchFBController>();
+                TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
+
+                //Automatically giving TouchFbController;
+                TrialLevel.TouchFBController.Init(TrialData, FrameData);
+
+
+                bool audioInited = false;
+                foreach (string fbController in fbControllersList)
                 {
-                    case "Audio":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData);
-                            audioInited = true;
-                        }
-                        break;
+                    switch (fbController)
+                    {
+                        case "Audio":
+                            if (!audioInited)
+                            {
+                                TrialLevel.AudioFBController.Init(FrameData);
+                                audioInited = true;
+                            }
+                            break;
 
-                    case "Halo":
-                        TrialLevel.HaloFBController.Init(FrameData);
-                        break;
+                        case "Halo":
+                            TrialLevel.HaloFBController.Init(FrameData);
+                            break;
 
-                    case "Token":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData);
-                            audioInited = true;
-                        }
-                        TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-                        break;
+                        case "Token":
+                            if (!audioInited)
+                            {
+                                TrialLevel.AudioFBController.Init(FrameData);
+                                audioInited = true;
+                            }
+                            TrialLevel.TokenFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+                            break;
 
-                    case "Slider":
-                        if (!audioInited)
-                        {
-                            TrialLevel.AudioFBController.Init(FrameData);
-                            audioInited = true;
-                        }
-                        TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
-                        break;
+                        case "Slider":
+                            if (!audioInited)
+                            {
+                                TrialLevel.AudioFBController.Init(FrameData);
+                                audioInited = true;
+                            }
+                            TrialLevel.SliderFBController.Init(TrialData, FrameData, TrialLevel.AudioFBController);
+                            break;
 
-                    default:
-                        Debug.LogWarning(fbController + " is not a valid feedback controller.");
-                        break;
+                        default:
+                            Debug.LogWarning(fbController + " is not a valid feedback controller.");
+                            break;
+                    }
                 }
+
+            
             }
 
             Session.InputManager.SetActive(false);
-
             TaskLevel.DefineControlLevel();
+
             TrialLevel.TaskLevel = TaskLevel;
             TrialLevel.FrameData = FrameData;
             TrialLevel.TrialData = TrialData;

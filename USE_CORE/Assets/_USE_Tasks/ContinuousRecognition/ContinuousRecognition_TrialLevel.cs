@@ -364,11 +364,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     TokenFBController.AddTokens(ChosenGO, numToFillBar);
                 }
                 else
-                    TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag);
+                    TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.RewardMag);
+                TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
                 EndBlock = true;
             }
         });
@@ -1195,9 +1195,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("ContextActive", () => ContextActive);
-        FrameData.AddDatum("StartButton", () => StartButton.activeInHierarchy);
+        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
-        FrameData.AddDatum("StarfieldActive", () => Starfield.activeInHierarchy);
+        FrameData.AddDatum("StarfieldActive", () => Starfield != null && Starfield.activeInHierarchy ? "Active" : "NotActive");
     }
 
     private void ClearCurrentTrialStimLists()
@@ -1279,7 +1279,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     PNC_Num--;
             }
         }
-
         return new[] { PC_Num, New_Num, PNC_Num };
     }
 

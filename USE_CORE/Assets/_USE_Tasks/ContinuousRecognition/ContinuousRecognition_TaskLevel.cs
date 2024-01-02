@@ -44,7 +44,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public float NonStimTouches_Task;
 
     [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
 
     public int blocksAdded;
 
@@ -54,7 +53,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (ContinuousRecognition_TrialLevel) TrialLevel;
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
         DefineBlockData();
         blocksAdded = 0;
 
@@ -74,7 +72,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             {
                 CurrentBlockString += "\n" + "\n";
                 CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                PreviousBlocksString.Insert(0, CurrentBlockString); //Add current block string to full list of previous blocks. 
                 blocksAdded++;     
             }
         });        

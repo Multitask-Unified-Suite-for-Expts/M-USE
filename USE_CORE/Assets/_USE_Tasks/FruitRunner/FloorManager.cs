@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 25f;
-    public GameObject floorTilePrefab;
-    public GameObject doorPrefab;
+    private readonly float MovementSpeed = 20f;
+    private GameObject floorTilePrefab;
+    private GameObject doorPrefab;
     private int tilesOnScreen = 20;
     private List<GameObject> activeTiles;
     private ItemSpawner itemSpawner;
@@ -15,6 +15,9 @@ public class FloorManager : MonoBehaviour
 
     void Start()
     {
+        floorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile");
+        doorPrefab = Resources.Load<GameObject>("Prefabs/LeftDoor");
+
         activeTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
 
@@ -23,7 +26,6 @@ public class FloorManager : MonoBehaviour
             SpawnTile();
         }
     }
-
 
     void Update()
     {
@@ -64,8 +66,8 @@ public class FloorManager : MonoBehaviour
         tile.name = "Tile";
         tile.gameObject.transform.parent = gameObject.transform;
 
-        if (NumTilesSpawned > 3) //Dont spawn items on the first 3
-            itemSpawner.SpawnItem(tile.transform);
+        //if (NumTilesSpawned > 3) //Dont spawn items on the first 3
+        //    itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);
 

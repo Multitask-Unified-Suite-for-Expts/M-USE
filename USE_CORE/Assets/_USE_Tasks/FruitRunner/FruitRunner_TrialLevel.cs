@@ -30,6 +30,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     GameObject Player;
 
+    public PlayerSlider PlayerSlider;
+
     public FloorManager FloorManager;
     public ItemSpawner ItemSpawner;
 
@@ -90,7 +92,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Play, () =>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(20f, 1 * (1f / 4), new Vector3(0f, -7f, 0f));
+            SliderFBController.ConfigureSlider(25f, 1 * (1f / 4), new Vector3(0f, -10f, 0f));
             //SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
@@ -125,6 +127,12 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             if (FloorManager != null)
                 Destroy(FloorManager);
             FloorManager = gameObject.AddComponent<FloorManager>();
+
+            if (PlayerSlider != null)
+                Destroy(PlayerSlider);
+
+            PlayerSlider = gameObject.AddComponent<PlayerSlider>();
+            PlayerSlider.ManualStart(FruitRunner_CanvasGO.GetComponent<Canvas>());
         });
         Play.AddUpdateMethod(() =>
         {
@@ -134,7 +142,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 startTime = Time.time;
             }
         });
-        Play.AddTimer(() => 500f, ITI);
+        Play.AddTimer(() => 5000f, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => .01f, FinishTrial);

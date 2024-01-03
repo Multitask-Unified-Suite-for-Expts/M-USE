@@ -342,7 +342,7 @@ public class SA_Object : MonoBehaviour
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Closed_Texture");
         yield return new WaitForSeconds(CloseDuration);
         gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(ObjectOpenAngle + "_Degree_Texture");
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
     }
 
     private void HandlePausingWhileBeingSelected()

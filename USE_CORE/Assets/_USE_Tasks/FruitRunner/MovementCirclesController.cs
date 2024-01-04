@@ -18,13 +18,14 @@ public class MovementCirclesController : MonoBehaviour
     public Color OriginalCircleColor;
 
     public List<GameObject> Circles;
-
+    
 
 
     public void ManualStart(Canvas parentCanvas, GameObject player)
     {
         ParentCanvas = parentCanvas;
         PlayerMovement = player.GetComponent<PlayerMovement>();
+        PlayerMovement.CirclesController = this;
 
         Instantiated = Instantiate(Resources.Load<GameObject>("Prefabs/MovementCircles"));
         Instantiated.name = "MovementCirclesParent";
@@ -73,7 +74,7 @@ public class MovementCirclesController : MonoBehaviour
         }
     }
 
-    void HighlightActiveCircle(GameObject clickedGO)
+    public void HighlightActiveCircle(GameObject clickedGO)
     {
         foreach(GameObject go in Circles)
         {

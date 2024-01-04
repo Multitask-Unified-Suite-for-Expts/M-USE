@@ -8,14 +8,14 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody Rb;
     private Vector3 TargetPos;
     private bool IsShifting = false;
-    private float SideShiftSpeed = 18f;
+    private float SideShiftSpeed = 19f;
 
     [HideInInspector] public Vector3 LeftPos = new Vector3(-2.25f, 0f, 0f);
     [HideInInspector] public Vector3 MiddlePos = Vector3.zero;
     [HideInInspector] public Vector3 RightPos = new Vector3(2.25f, 0f, 0f);
 
     private AudioManager audioManager;
-
+    public MovementCirclesController CirclesController;
 
     void Start()
     {
@@ -67,17 +67,31 @@ public class PlayerMovement : MonoBehaviour
         if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
         {
             if(transform.position == MiddlePos)
+            {
                 MoveToPosition(LeftPos);
+                CirclesController.HighlightActiveCircle(CirclesController.LeftCircleGO);
+            }
             else if(transform.position == RightPos)
+            {
                 MoveToPosition(MiddlePos);
+                CirclesController.HighlightActiveCircle(CirclesController.MiddleCircleGO);
+            }
         }
 
         else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
         {
             if (transform.position == MiddlePos)
+            {
                 MoveToPosition(RightPos);
+                CirclesController.HighlightActiveCircle(CirclesController.RightCircleGO);
+
+            }
             else if (transform.position == LeftPos)
+            {
                 MoveToPosition(MiddlePos);
+                CirclesController.HighlightActiveCircle(CirclesController.MiddleCircleGO);
+
+            }
         }
 
 

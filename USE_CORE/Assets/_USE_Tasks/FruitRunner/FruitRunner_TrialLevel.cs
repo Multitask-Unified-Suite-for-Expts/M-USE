@@ -97,7 +97,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
-            //SliderFBController.SliderGO.SetActive(true);
+            SliderFBController.SliderGO.SetActive(true);
 
 
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
@@ -165,12 +165,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
-
         trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
-
-        //trialStims.SetVisibilityOnOffStates(GetStateFromName("Play"), GetStateFromName("Play"));
         TrialStims.Add(trialStims);
-
     }
 
     private void CalculateSliderSteps()

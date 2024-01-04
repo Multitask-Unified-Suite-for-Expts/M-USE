@@ -18,8 +18,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     //Set in Inspector:
     public GameObject FruitRunner_CanvasGO;
-    public GameObject FloorManagerGO;
-    public GameObject ItemSpawnerGO;
     public List<Material> SkyboxMaterials;
 
     private GameObject StartButton;
@@ -28,9 +26,15 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
-    GameObject Player;
+    GameObject PlayerGO;
 
+    public GameObject MovementCirclesControllerGO;
+    public MovementCirclesController MovementCirclesController;
+
+    public GameObject FloorManagerGO;
     public FloorManager FloorManager;
+
+    public GameObject ItemSpawnerGO;
     public ItemSpawner ItemSpawner;
 
 
@@ -47,8 +51,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            ItemSpawner = gameObject.AddComponent<ItemSpawner>();
-
             SliderFBController.InitializeSlider();
 
             if (StartButton == null)
@@ -90,12 +92,12 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Play, () =>
         {
             CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(20f, 1 * (1f / 4), new Vector3(0f, -7f, 0f));
-            //SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
+            SliderFBController.ConfigureSlider(25f, 1 * (1f / 4), new Vector3(0f, -10f, 0f));
+            //////SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
-            SliderFBController.SliderGO.SetActive(true);
+            //SliderFBController.SliderGO.SetActive(true);
 
 
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
@@ -108,23 +110,38 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         float startTime = 0f;
         Play.AddSpecificInitializationMethod(() =>
         {
-            if (Player != null)
-                Destroy(Player);
+            if (PlayerGO == null)
+            {
+                PlayerGO = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+                PlayerGO.name = "Player";
+            }
 
-            Player = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
+            if (ItemSpawner == null)
+            {
+                ItemSpawnerGO = new GameObject("ItemSpawner");
+                ItemSpawner = ItemSpawnerGO.AddComponent<ItemSpawner>();
+            }
 
-            ItemSpawnerGO.SetActive(true);
-            FloorManagerGO.SetActive(true);
+            if (FloorManager == null)
+            {
+                FloorManagerGO = new GameObject("FloorManager");
+                FloorManager = FloorManagerGO.AddComponent<FloorManager>();
+            }
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (MovementCirclesController == null)
+            {
+                MovementCirclesControllerGO = new GameObject("MovementCirclesController");
+                MovementCirclesController = MovementCirclesControllerGO.AddComponent<MovementCirclesController>();
+                MovementCirclesController.ManualStart(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
+            }
+
+
+            ItemSpawner.AddToQuaddleList(trialStims.stimDefs);
+
+            ItemSpawner.gameObject.SetActive(true);
+            FloorManager.gameObject.SetActive(true);
 
             startTime = Time.time;
-
-
-            if (FloorManager != null)
-                Destroy(FloorManager);
-            FloorManager = gameObject.AddComponent<FloorManager>();
         });
         Play.AddUpdateMethod(() =>
         {
@@ -134,7 +151,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 startTime = Time.time;
             }
         });
-        Play.AddTimer(() => 500f, ITI);
+        Play.AddTimer(() => 5000f, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => .01f, FinishTrial);
@@ -147,16 +164,12 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     protected override void DefineTrialStims()
     {
-        //StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
-        //trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
-        //foreach (FruitRunner_StimDef stim in trialStims.stimDefs)
-        //{
-        //    //add each to list of 
-        //    ItemSpawner.Quaddles.Add(stim.StimGameObject);
-        //}
+        trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
+
         //trialStims.SetVisibilityOnOffStates(GetStateFromName("Play"), GetStateFromName("Play"));
-        //TrialStims.Add(trialStims);
+        TrialStims.Add(trialStims);
 
     }
 

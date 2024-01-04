@@ -27,9 +27,9 @@
         "Value": 15082,
         "Description": "Avoided selecting a distractor object"
     },
-    "AnimationOccured": {
+    "ObjectAnimationBegins": {
         "Value": 15083,
-        "Description": "Object animation occured"
+        "Description": "Object animation begins"
     }
 
 }

@@ -80,7 +80,10 @@ public class SA_ObjectManager : MonoBehaviour
 
         foreach(SA_Object_ConfigValues configValues in objects)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("Open_" + configValues.ObjectOpenAngle));
+            GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
+
+            go.GetComponent<PacmanDrawer>().ManualStart();
+
             go.name = configValues.IsTarget ? $"Target" : $"Distractor";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
@@ -184,10 +187,13 @@ public class SA_Object : MonoBehaviour
 {
     public SA_ObjectManager ObjManager;
 
+    public PacmanDrawer PacmanDrawer;
+
     //From Object Config:
     public int Index;
     public string ObjectName;
-    public string ObjectOpenAngle; //90 or 75 as of now
+    public float OpenAngle; //90 or 75 as of now
+    public int ClosedLineThickness;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -202,7 +208,6 @@ public class SA_Object : MonoBehaviour
     public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
-
 
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
@@ -230,7 +235,8 @@ public class SA_Object : MonoBehaviour
         ObjManager = objManager;
         Index = configValue.Index;
         ObjectName = configValue.ObjectName;
-        ObjectOpenAngle = configValue.ObjectOpenAngle;
+        OpenAngle = configValue.OpenAngle;
+        ClosedLineThickness = configValue.ClosedLineThickness;
         IsTarget = configValue.IsTarget;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
@@ -261,6 +267,11 @@ public class SA_Object : MonoBehaviour
         SetNewDestination();
 
         SetupMarker(); //Marker for debugging purposes
+
+        PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
+        PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
+        PacmanDrawer.DrawMouth(OpenAngle);
+
     }
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
@@ -339,10 +350,10 @@ public class SA_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("Closed_Texture");
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
+        gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>(ObjectOpenAngle + "_Degree_Texture");
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
+        gameObject.GetComponent<PacmanDrawer>().DrawMouth(OpenAngle);
     }
 
     private void HandlePausingWhileBeingSelected()
@@ -543,7 +554,8 @@ public class SA_Object_ConfigValues
     //From Object Config:
     public int Index;
     public string ObjectName;
-    public string ObjectOpenAngle; //90 or 75 as of now
+    public float OpenAngle;
+    public int ClosedLineThickness;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;

@@ -1,4 +1,4 @@
-Index	ObjectName	ObjectOpenAngle	IsTarget	RotateTowardsDest	Size	Speed	NextDestDist	CloseDuration	ResponseWindow	MinAnimGap	RatesAndDurations	AngleProbs	AngleRanges	NumDestWithoutBigTurn	ObjectColor	SliderChange
-0	T1	70	TRUE	FALSE	150	250	90	0.5	[.01, .9]	1	[[.2, 5]]	[.4, .5, .1]	[[0, 16], [16, 46], [46, 181]]	4	[0, 255, 0]	1
-1	D1	70	FALSE	FALSE	125	200	72	0.4	[.01, .9]	1	[[.2, 5]]	[.4, .5, .1]	[[0, 16], [16, 46], [46, 181]]	4	[255, 0, 255]	1
-2	D2	70	FALSE	FALSE	125	150	54	0.4	[.01, .9]	1	[[.2, 5]]	[.4, .5, .1]	[[0, 16], [16, 46], [46, 181]]	4	[255, 0, 255]	1
+Index	ObjectName	OpenAngle	ClosedLineThickness	IsTarget	RotateTowardsDest	Speed	Size	NextDestDist	CloseDuration	ResponseWindow	MinAnimGap	RatesAndDurations	AngleProbs	AngleRanges	NumDestWithoutBigTurn	ObjectColor	SliderChange
+0	T1	75	4	TRUE	FALSE	250	175	105	0.5	[.01, .9]	1	[[.2, 15]]	[.4, .5, .1]	[[0, 16], [16, 46], [46, 181]]	4	[0, 255, 0]	1
+1	D1	75	4	FALSE	FALSE	200	150	90	0.4	[.01, .9]	1	[[.2, 15]]	[.4, .5, .1]	[[0, 16], [16, 46], [46, 181]]	4	[255, 0, 255]	1
+2	D2	75	4	FALSE	FALSE	150	150	90	0.4	[.01, .9]	1	[[.2, 10]]	[.4, .5, .1]	[[0, 16], [16, 46], [46, 181]]	4	[255, 0, 255]	1

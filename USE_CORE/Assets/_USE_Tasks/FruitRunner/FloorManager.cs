@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 20f;
+    private readonly float MovementSpeed = 15;
     private GameObject floorTilePrefab;
-    private GameObject doorPrefab;
-    private int tilesOnScreen = 20;
+    private int tilesOnScreen = 8;
     private List<GameObject> activeTiles;
     private ItemSpawner itemSpawner;
     private int NumTilesSpawned;
@@ -16,7 +15,7 @@ public class FloorManager : MonoBehaviour
     void Start()
     {
         floorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile");
-        doorPrefab = Resources.Load<GameObject>("Prefabs/LeftDoor");
+        //floorTilePrefab = Resources.Load<GameObject>("Prefabs/Elipsoid");
 
         activeTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
@@ -37,8 +36,8 @@ public class FloorManager : MonoBehaviour
 
             if(collider.bounds.max.z < transform.position.z - collider.bounds.size.z)
             {
-                SpawnTile();
                 DeleteTile();
+                SpawnTile();
             }
         }
     }
@@ -59,15 +58,20 @@ public class FloorManager : MonoBehaviour
         {
             GameObject lastTile = activeTiles[activeTiles.Count - 1];
             BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
-            spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z + .15f;
+            spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z; //removed .25f
         }
 
+        //GameObject tile = new GameObject("Tile" + (NumTilesSpawned + 1));
+        //Elipsoid elipsoid = tile.AddComponent<Elipsoid>();
+        //elipsoid.CreateEllipsoid();
+
         GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
-        tile.name = "Tile";
+        tile.name = "Tile " + (NumTilesSpawned + 1);
+
         tile.gameObject.transform.parent = gameObject.transform;
 
-        //if (NumTilesSpawned > 3) //Dont spawn items on the first 3
-        //    itemSpawner.SpawnItem(tile.transform);
+        if (NumTilesSpawned > 1) //Dont spawn items on the first 1
+            itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);
 

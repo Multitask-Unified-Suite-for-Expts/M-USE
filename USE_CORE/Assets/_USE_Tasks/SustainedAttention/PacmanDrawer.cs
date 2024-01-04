@@ -13,7 +13,7 @@ public class PacmanDrawer : MonoBehaviour
     private int OriginalTextureWidth;
     private int OriginalTextureHeight;
 
-    public int ClosedLineThickness = 4; //a good default is 4;
+    public int ClosedLineThickness = 4; //default is 4, but they specify in the object config. 
 
     public void ManualStart()
     {
@@ -28,17 +28,14 @@ public class PacmanDrawer : MonoBehaviour
         MouthAngle = mouthAngle;
 
         Texture2D texture = new Texture2D(OriginalTextureWidth, OriginalTextureHeight);
-
-        // Reset to the full circle
-        texture.SetPixels(CircleTexture.GetPixels());
-        texture.Apply();
+        ResetToFullCircle(texture);
 
         Color[] pixels = texture.GetPixels();
         for (int x = 0; x < OriginalTextureWidth; x++)
         {
             for (int y = 0; y < OriginalTextureHeight; y++)
             {
-                if (IsInsideWedge(x, y, OriginalTextureWidth, OriginalTextureHeight) && IsInsideCircle(x, y, OriginalTextureWidth, OriginalTextureHeight))
+                if (IsInsideWedge(x, y) && IsInsideCircle(x, y))
                 {
                     pixels[x + y * OriginalTextureWidth] = Color.clear; // Make the pixels in the wedge transparent
                 }
@@ -55,14 +52,10 @@ public class PacmanDrawer : MonoBehaviour
     public void DrawClosedMouth()
     {
         Texture2D texture = new Texture2D(OriginalTextureWidth, OriginalTextureHeight);
-
-        // Reset to the full circle
-        texture.SetPixels(CircleTexture.GetPixels());
-        texture.Apply();
+        ResetToFullCircle(texture);
 
         Color[] pixels = texture.GetPixels();
 
-        // Draw a horizontal line with the specified thickness from middle center to middle right
         int middleX = OriginalTextureWidth / 2;
         int middleY = OriginalTextureHeight / 2;
         int middleRightX = OriginalTextureWidth - 1;
@@ -87,21 +80,27 @@ public class PacmanDrawer : MonoBehaviour
         image.sprite = newSprite;
     }
 
-    bool IsInsideWedge(int x, int y, int width, int height)
+    private void ResetToFullCircle(Texture2D texture)
     {
-        Vector2 pacmanCenter = new Vector2(width / 2, height / 2);
+        texture.SetPixels(CircleTexture.GetPixels());
+        texture.Apply();
+    }
+
+    bool IsInsideWedge(int x, int y)
+    {
         Vector2 pixelPos = new Vector2(x, y);
+        Vector2 pacmanCenter = new Vector2(OriginalTextureWidth / 2, OriginalTextureHeight / 2);
         Vector2 dirToPixel = pixelPos - pacmanCenter;
 
         float angleToPixel = Vector2.Angle(Vector2.right, dirToPixel);
         return angleToPixel <= MouthAngle * 0.5f;
     }
 
-    bool IsInsideCircle(int x, int y, int width, int height)
+    bool IsInsideCircle(int x, int y)
     {
-        Vector2 pacmanCenter = new Vector2(width / 2, height / 2);
+        Vector2 pacmanCenter = new Vector2(OriginalTextureWidth / 2, OriginalTextureHeight / 2);
         Vector2 pixelPos = new Vector2(x, y);
 
-        return Vector2.Distance(pixelPos, pacmanCenter) <= width / 2;
+        return Vector2.Distance(pixelPos, pacmanCenter) <= OriginalTextureWidth / 2;
     }
 }

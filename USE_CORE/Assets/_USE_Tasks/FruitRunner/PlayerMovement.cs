@@ -8,9 +8,11 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody Rb;
     private Vector3 TargetPos;
     private bool IsShifting = false;
-    private float SideShiftSpeed = 20f;
+    private float SideShiftSpeed = 18f;
 
-    private Vector3 MovementAmount = new Vector3(1.25f, 0, 0);
+    [HideInInspector] public Vector3 LeftPos = new Vector3(-2.25f, 0f, 0f);
+    [HideInInspector] public Vector3 MiddlePos = Vector3.zero;
+    [HideInInspector] public Vector3 RightPos = new Vector3(2.25f, 0f, 0f);
 
     private AudioManager audioManager;
 
@@ -21,13 +23,15 @@ public class PlayerMovement : MonoBehaviour
         transform.position = Vector3.zero;
         audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
 
+        TargetPos = MiddlePos;
     }
 
-    void Update()
+    private void Update()
     {
-        if (!IsShifting)
+        if(!IsShifting)
         {
-            HandleMovement();
+            transform.position = TargetPos; //keep it in place if not shifting
+            HandleInput();
         }
     }
 
@@ -40,46 +44,53 @@ public class PlayerMovement : MonoBehaviour
             float movementAmount = Mathf.Min(SideShiftSpeed * Time.fixedDeltaTime, distance);
             Rb.MovePosition(transform.position + direction * movementAmount);
 
-            if (distance < 0.01f)
+            if (distance < 0.025f)
+            {
+                transform.position = TargetPos;
                 IsShifting = false;
+            }
         }
     }
 
-    private void HandleMovement()
+    public void MoveToPosition(Vector3 newPos)
     {
-        if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
-        {
-            if(transform.position.x > -1)
-                MoveToPosition(transform.position - MovementAmount);
-        }
-
-        else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
-        {
-            if(transform.position.x < 1)
-                MoveToPosition(transform.position + MovementAmount);
-        }
-
-        //else if (Input.GetMouseButtonDown(0))
-        //{
-        //    float touchX = Input.mousePosition.x / Screen.width;
-        //    Debug.LogWarning("TOUCH X = " + touchX);
-
-        //    if (touchX < 0.5f && transform.position.x > leftXPos)
-        //    {
-        //        MoveToPosition(transform.position - MovementAmount);
-        //    }
-        //    else if (touchX >= 0.5f && transform.position.x < rightXPos)
-        //    {
-        //        MoveToPosition(transform.position + MovementAmount);
-        //    }
-        //}
-    }
-
-    private void MoveToPosition(Vector3 newPos)
-    {
-        TargetPos = new Vector3(newPos.x, 0f, 0f);
+        if(newPos == transform.position)
+            return;
+        
+        TargetPos = newPos;
         IsShifting = true;
         audioManager.PlaySlideClip();
     }
 
+    private void HandleInput()
+    {
+        if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
+        {
+            if(transform.position == MiddlePos)
+                MoveToPosition(LeftPos);
+            else if(transform.position == RightPos)
+                MoveToPosition(MiddlePos);
+        }
+
+        else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
+        {
+            if (transform.position == MiddlePos)
+                MoveToPosition(RightPos);
+            else if (transform.position == LeftPos)
+                MoveToPosition(MiddlePos);
+        }
+
+
+    }
+
 }
+
+
+
+
+
+
+
+
+
+

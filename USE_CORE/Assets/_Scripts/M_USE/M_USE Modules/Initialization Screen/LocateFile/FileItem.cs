@@ -83,7 +83,6 @@ public class FileItem_TMP : MonoBehaviour
 
     void UpdatePath(string path)
     {
-        Debug.LogWarning("updated path of file:" + File.name + " to:" + path);
         PlayerPrefs.SetString("filepath-" + File.name, path);
         File.path = path;
     }

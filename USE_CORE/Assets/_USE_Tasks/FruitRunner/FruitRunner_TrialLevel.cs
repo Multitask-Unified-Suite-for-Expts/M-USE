@@ -76,7 +76,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Play); //Setup Handler
-        //TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, FruitRunner_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -145,7 +144,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         });
         Play.AddUpdateMethod(() =>
         {
-            if(Time.time - startTime >= 10f)
+            if(Time.time - startTime >= 15f)
             {
                 CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
                 startTime = Time.time;

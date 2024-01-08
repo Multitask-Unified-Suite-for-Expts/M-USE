@@ -36,14 +36,14 @@ using UnityEngine.UI;
 public class FileItem_TMP : MonoBehaviour
 {
     public FileSpec File;
-    public TMP_InputField InputField_FilePath;
+    public TMP_InputField FilePath_InputField;
     public TextMeshProUGUI Text;
 
 
     public void ManualStart(FileSpec file, TMP_InputField inputField, TextMeshProUGUI text)  
     {
         File = file;
-        InputField_FilePath = inputField;
+        FilePath_InputField = inputField;
         Text = text;
 
         if (File != null)
@@ -53,7 +53,8 @@ public class FileItem_TMP : MonoBehaviour
             Text.text = Text.text.Replace("%20", " ");
             File.path = Text.text;
         }
-        InputField_FilePath.onEndEdit.AddListener((text) => {
+
+        FilePath_InputField.onEndEdit.AddListener((text) => {
             UpdatePath(text);
         });
     }
@@ -82,7 +83,7 @@ public class FileItem_TMP : MonoBehaviour
 
     void UpdatePath(string path)
     {
-        Debug.Log("updated path of file:" + File.name + " to:" + path);
+        Debug.LogWarning("updated path of file:" + File.name + " to:" + path);
         PlayerPrefs.SetString("filepath-" + File.name, path);
         File.path = path;
     }

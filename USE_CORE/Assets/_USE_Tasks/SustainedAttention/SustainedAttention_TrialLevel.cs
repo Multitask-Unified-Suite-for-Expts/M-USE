@@ -91,6 +91,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 Destroy(ObjManager);
 
             ObjManager = gameObject.AddComponent<SA_ObjectManager>();
+            ObjManager.MaxTouchDuration = maxObjectTouchDuration.value;
             ObjManager.TaskEventCodes = TaskEventCodes;
             ObjManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
             ObjManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
@@ -106,7 +107,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Play); //Setup Handler
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play); //Setup Handler
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, SustainedAttention_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------

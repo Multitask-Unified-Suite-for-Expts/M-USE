@@ -372,6 +372,9 @@ public class SA_Object : MonoBehaviour
         }
         else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration))
             ObjectPaused = false;
+
+        if(ObjectPaused && InputBroker.GetMouseButton(0))
+            CurrentCycle.cycleStartTime += Time.deltaTime; //Push the cycle start time back while they're selecting.
     }
 
     private void HandleInput()

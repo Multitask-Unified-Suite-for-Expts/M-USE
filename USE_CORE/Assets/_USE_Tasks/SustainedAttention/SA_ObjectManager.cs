@@ -27,6 +27,8 @@ public class SA_ObjectManager : MonoBehaviour
 
     public Dictionary<string, EventCode> TaskEventCodes; //task event codes passed in so can trigger "Object Animation Occured" event code
 
+    public float MaxTouchDuration;
+
 
     public void NoSelectionDuringInterval(SA_Object obj)
     {
@@ -213,6 +215,7 @@ public class SA_Object : MonoBehaviour
     public Vector3 CurrentDestination;
     public bool MoveAroundScreen;
     public bool ObjectPaused;
+    public float TimeOfPause;
     public GameObject Marker;
     public Vector3 Direction;
     private float NewDestStartTime;
@@ -362,15 +365,13 @@ public class SA_Object : MonoBehaviour
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
+            {
                 ObjectPaused = true;
+                TimeOfPause = Time.time;
+            }
         }
-
-        if (InputBroker.GetMouseButtonUp(0))
-        {
-            GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
-            if (hit != null && hit == gameObject)
-                ObjectPaused = false;
-        }
+        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration))
+            ObjectPaused = false;
     }
 
     private void HandleInput()

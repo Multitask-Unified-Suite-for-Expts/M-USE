@@ -7,7 +7,7 @@ public class Elipsoid : MonoBehaviour
     private float radiusX = 2.0f;
     private float radiusY = 1.5f;
     private float radiusZ = 2.0f;
-    private int segments = 128;
+    private int segments = 256;
 
     public Transform middleSpawnPoint;
     public Transform leftSpawnPoint;
@@ -70,21 +70,19 @@ public class Elipsoid : MonoBehaviour
         mesh.triangles = triangles;
         meshFilter.mesh = mesh;
 
+
         transform.position = new Vector3(0f, -1f, 0f);
         transform.localScale = new Vector3(4, 1, 4);
 
 
-        // Create spawn points
         middleSpawnPoint = new GameObject("MiddleSpawnPoint").transform;
         leftSpawnPoint = new GameObject("LeftSpawnPoint").transform;
         rightSpawnPoint = new GameObject("RightSpawnPoint").transform;
 
-        // Position spawn points
         middleSpawnPoint.position = transform.position;
         leftSpawnPoint.position = transform.position - transform.right * radiusX;
         rightSpawnPoint.position = transform.position + transform.right * radiusX;
 
-        // Optionally, you can parent the spawn points to the ellipsoid
         middleSpawnPoint.parent = transform;
         leftSpawnPoint.parent = transform;
         rightSpawnPoint.parent = transform;

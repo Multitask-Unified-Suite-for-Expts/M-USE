@@ -41,6 +41,7 @@ public class ItemSpawner : MonoBehaviour
         {
             stim = Instantiate(TrialQuaddles[Random.Range(0, TrialQuaddles.Count)]);
             stim.transform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
+            stim.AddComponent<FaceCamera>();
             stim.AddComponent<Item>();
             stim.AddComponent<CapsuleCollider>().isTrigger = true;
             ItemsBetweenDoorCount++;

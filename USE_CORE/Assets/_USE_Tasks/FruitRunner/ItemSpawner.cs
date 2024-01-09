@@ -32,17 +32,11 @@ public class ItemSpawner : MonoBehaviour
     {
         GameObject stim;
 
-        //stim = Instantiate(TrialQuaddles[Random.Range(0, TrialQuaddles.Count)]);
-        //stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
-        //stim.AddComponent<Item>();
-        //stim.AddComponent<CapsuleCollider>().isTrigger = true;
-
         if (ItemsBetweenDoorCount < TrialQuaddles.Count)
         {
             stim = Instantiate(TrialQuaddles[Random.Range(0, TrialQuaddles.Count)]);
-            stim.transform.localScale = new Vector3(1.25f, 1.25f, 1.25f);
-            stim.AddComponent<FaceCamera>();
-            stim.AddComponent<Item>();
+            stim.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+            stim.AddComponent<Item_Quaddle>();
             stim.AddComponent<CapsuleCollider>().isTrigger = true;
             ItemsBetweenDoorCount++;
         }
@@ -51,6 +45,7 @@ public class ItemSpawner : MonoBehaviour
             ItemsBetweenDoorCount = 0;
             stim = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
             stim.name = "Door";
+            stim.AddComponent<Item_Door>();
         }
 
         SetItemPosition(stim, parentTransform);
@@ -67,7 +62,7 @@ public class ItemSpawner : MonoBehaviour
             spawnPoints.Add(child);
 
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
-        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .8f, randomSpawnPoint.position.z); //.5 for items. .4 for quaddles
+        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? 1f : .8f, randomSpawnPoint.position.z); 
         item.transform.parent = parentTransform;
     }
 

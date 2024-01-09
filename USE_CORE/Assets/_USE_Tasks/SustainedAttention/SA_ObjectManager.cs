@@ -370,7 +370,7 @@ public class SA_Object : MonoBehaviour
                 TimeOfPause = Time.time;
             }
         }
-        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration))
+        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration + .2f)) //add .2 so the touch fb dissapears before object starts moving again
             ObjectPaused = false;
 
         if(ObjectPaused && InputBroker.GetMouseButton(0))

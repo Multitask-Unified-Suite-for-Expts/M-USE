@@ -64,7 +64,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
 
-            HaloFBController.SetHaloIntensity(1f);
+            HaloFBController.SetHaloIntensity(3f);
 
             if (StartButton == null)
             {

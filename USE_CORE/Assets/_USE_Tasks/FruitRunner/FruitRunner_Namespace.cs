@@ -22,6 +22,5 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_StimDef : StimDef
     {
-    
     }
 }

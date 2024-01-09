@@ -15,6 +15,7 @@ public class PacmanDrawer : MonoBehaviour
 
     public int ClosedLineThickness = 4; //default is 4, but they specify in the object config. 
 
+
     public void ManualStart()
     {
         image = GetComponent<Image>();

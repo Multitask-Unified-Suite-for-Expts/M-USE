@@ -27,6 +27,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
     GameObject PlayerGO;
+    private PlayerMovement PlayerMovement;
 
     public GameObject MovementCirclesControllerGO;
     public MovementCirclesController MovementCirclesController;
@@ -45,9 +46,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         State InitTrial = new State("IniTrial");
+        State Setup = new State("Setup");
         State Play = new State("Play");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, Play, ITI });
+        AddActiveStates(new List<State> { InitTrial, Setup, Play, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -75,7 +77,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Play); //Setup Handler
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Setup); //Setup Handler
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -88,7 +90,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             //Handler.MaxDuration = maxObjectTouchDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Play, () =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
         {
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(25f, 1 * (1f / 4), new Vector3(0f, -10f, 0f));
@@ -105,14 +107,14 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
         });
 
-        //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
-        float startTime = 0f;
-        Play.AddSpecificInitializationMethod(() =>
+        //Setup state ----------------------------------------------------------------------------------------------------------------------------------------------
+        Setup.AddSpecificInitializationMethod(() =>
         {
             if (PlayerGO == null)
             {
                 PlayerGO = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
                 PlayerGO.name = "Player";
+                PlayerMovement = PlayerGO.GetComponent<PlayerMovement>();
             }
 
             if (ItemSpawner == null)
@@ -127,6 +129,20 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 FloorManager = FloorManagerGO.AddComponent<FloorManager>();
             }
 
+            ItemSpawner.AddToQuaddleList(trialStims.stimDefs);
+
+            ItemSpawner.gameObject.SetActive(true);
+            FloorManager.gameObject.SetActive(true);
+
+            PlayerMovement.StartAnimation("idle");
+            PlayerMovement.DisableUserInput();
+        });
+        Setup.AddTimer(() => 1f, Play);
+
+        //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
+        float startTime = 0f;
+        Play.AddSpecificInitializationMethod(() =>
+        {
             if (MovementCirclesController == null)
             {
                 MovementCirclesControllerGO = new GameObject("MovementCirclesController");
@@ -134,23 +150,24 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 MovementCirclesController.ManualStart(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
             }
 
+            PlayerMovement.StartAnimation("Run");
+            PlayerMovement.AllowUserInput();
 
-            ItemSpawner.AddToQuaddleList(trialStims.stimDefs);
+            FloorManager.ActivateMovement();
 
-            ItemSpawner.gameObject.SetActive(true);
-            FloorManager.gameObject.SetActive(true);
+            AudioFBController.Play("EC_BalloonChosen");
 
             startTime = Time.time;
         });
         Play.AddUpdateMethod(() =>
         {
-            if(Time.time - startTime >= 15f)
+            if (Time.time - startTime >= 15f)
             {
                 CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
                 startTime = Time.time;
             }
         });
-        Play.AddTimer(() => 5000f, ITI);
+        Play.AddTimer(() => 5000, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => .01f, FinishTrial);

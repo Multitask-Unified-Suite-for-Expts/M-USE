@@ -101,7 +101,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SliderGO.SetActive(true);
 
 
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
+            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
+            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Day");
             //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
@@ -159,14 +160,14 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             startTime = Time.time;
         });
-        Play.AddUpdateMethod(() =>
-        {
-            if (Time.time - startTime >= 15f)
-            {
-                CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-                startTime = Time.time;
-            }
-        });
+        //Play.AddUpdateMethod(() =>
+        //{
+        //    if (Time.time - startTime >= 15f)
+        //    {
+        //        CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
+        //        startTime = Time.time;
+        //    }
+        //});
         Play.AddTimer(() => 5000, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------

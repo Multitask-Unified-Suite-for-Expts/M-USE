@@ -35,7 +35,7 @@ public class ItemSpawner : MonoBehaviour
         if (ItemsBetweenDoorCount < TrialQuaddles.Count)
         {
             stim = Instantiate(TrialQuaddles[Random.Range(0, TrialQuaddles.Count)]);
-            stim.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+            stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
             stim.AddComponent<Item_Quaddle>();
             stim.AddComponent<CapsuleCollider>().isTrigger = true;
             ItemsBetweenDoorCount++;
@@ -57,12 +57,10 @@ public class ItemSpawner : MonoBehaviour
     {
         bool isDoor = item.name == "Door";
 
-        List<Transform> spawnPoints = new List<Transform>();
-        foreach (Transform child in parentTransform)
-            spawnPoints.Add(child);
-
+        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
-        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? 1f : .8f, randomSpawnPoint.position.z); 
+
+        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .7f, randomSpawnPoint.position.z); 
         item.transform.parent = parentTransform;
     }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Item : MonoBehaviour
@@ -8,15 +9,12 @@ public class Item : MonoBehaviour
     protected FloorManager floorManager;
     protected PlayerMovement playerMovement;
 
-    private bool isHandlingCollision = false;
-
 
     private void Start()
     {
         audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
         floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
         playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
-
     }
 }
 
@@ -54,4 +52,23 @@ public class Item_Door : Item
         }
     }
 
+}
+
+public class Item_Floor : Item
+{
+    public List<Transform> spawnPoints;
+
+
+    private void Awake()
+    {
+        spawnPoints = new List<Transform>();
+
+        Transform child = transform.Find("Row4");
+
+        foreach(Transform grandChild in child)
+        {
+            if (grandChild.name.ToLower().Contains("spawnpoint"))
+                spawnPoints.Add(grandChild);
+        }
+    }
 }

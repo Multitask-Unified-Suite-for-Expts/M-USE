@@ -7,23 +7,14 @@ public class FloorManager : MonoBehaviour
 {
     private readonly float MovementSpeed = 15;
     private GameObject floorTilePrefab;
-    private int tilesOnScreen = 8;
+    private int tilesOnScreen = 6;
+
     private List<GameObject> activeTiles;
+
     private ItemSpawner itemSpawner;
     private int NumTilesSpawned;
 
     private bool Move;
-
-
-    public void ActivateMovement()
-    {
-        Move = true;
-    }
-
-    public void DeactivateMovement()
-    {
-        Move = false;
-    }
 
 
 
@@ -73,7 +64,7 @@ public class FloorManager : MonoBehaviour
 
     void SpawnTile()
     {
-        Vector3 spawnPos = new Vector3(0f, -.5f, 0f); //for first one
+        Vector3 spawnPos = new Vector3(0f, -.5f, -.5f); //for first one
 
         if(activeTiles.Count > 0)
         {
@@ -84,10 +75,10 @@ public class FloorManager : MonoBehaviour
 
         GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile " + (NumTilesSpawned + 1);
-
         tile.gameObject.transform.parent = gameObject.transform;
+        tile.AddComponent<Item_Floor>();
 
-        if (NumTilesSpawned > 0) //Dont spawn items on the first 1
+        if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
             itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);
@@ -95,10 +86,25 @@ public class FloorManager : MonoBehaviour
         NumTilesSpawned++;
     }
 
+
+
+    public void ActivateMovement()
+    {
+        Move = true;
+    }
+
+    public void DeactivateMovement()
+    {
+        Move = false;
+    }
+
+
+
     void DeleteTile()
     {
         Destroy(activeTiles[0]);
         activeTiles.RemoveAt(0);
     }
+
 
 }

@@ -725,7 +725,6 @@ namespace USE_ExperimentTemplate_Trial
         }
         public string GetContextNestedFilePath(string MaterialFilePath, string contextName, [CanBeNull] string backupContextName = null)
         {
-            Debug.Log("CONTEXT NAME: " + contextName);
             string contextPath = "";
             string[] filePaths = Directory.GetFiles(MaterialFilePath, $"{contextName}*", SearchOption.AllDirectories);
 

@@ -11,9 +11,9 @@ public class PlayerMovement : MonoBehaviour
     private bool IsShifting = false;
     private float SideShiftSpeed = 19f;
 
-    public readonly Vector3 LeftPos = new Vector3(-1.75f, 0f, 0f);
+    public readonly Vector3 LeftPos = new Vector3(-1.9f, 0f, 0f);
     public readonly Vector3 MiddlePos = Vector3.zero;
-    public readonly Vector3 RightPos = new Vector3(1.75f, 0f, 0f);
+    public readonly Vector3 RightPos = new Vector3(1.9f, 0f, 0f);
 
     private AudioManager audioManager;
     public MovementCirclesController CirclesController;
@@ -22,58 +22,6 @@ public class PlayerMovement : MonoBehaviour
     private enum AnimationState { Idle, Run, Injured};
     private AnimationState CurrentAnimationState;
 
-
-    public void StartAnimation(string animationName)
-    {
-        if(Animator == null)
-            Animator = GetComponent<Animator>();
-
-        switch (animationName.ToLower())
-        {
-            case "idle":
-                SwitchAnimationState(AnimationState.Idle);
-                break;
-            case "run":
-                SwitchAnimationState(AnimationState.Run);
-                break;
-            case "injured":
-                SwitchAnimationState(AnimationState.Injured);
-                break;
-            default:
-                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured");
-                break;
-        }
-    }
-
-    void SwitchAnimationState(AnimationState newState)
-    {
-        if (CurrentAnimationState == newState)
-            return;
-
-        CurrentAnimationState = newState;
-        switch (newState)
-        {
-            case AnimationState.Idle:
-                Debug.LogWarning("IDLE ANIMATION!");
-                SetAnimatorParameters(isIdle: true, isRunning: false, isInjured: false);
-                break;
-            case AnimationState.Run:
-                Debug.LogWarning("RUN ANIMATION!");
-                SetAnimatorParameters(isIdle: false, isRunning: true, isInjured: false);
-                break;
-            case AnimationState.Injured:
-                Debug.LogWarning("INJURED ANIMATION!");
-                SetAnimatorParameters(isIdle: false, isRunning: false, isInjured: true);
-                break;
-        }
-    }
-
-    void SetAnimatorParameters(bool isIdle, bool isRunning, bool isInjured)
-    {
-        Animator.SetBool("IsIdle", isIdle);
-        Animator.SetBool("IsRunning", isRunning);
-        Animator.SetBool("IsInjured", isInjured);
-    }
 
     void Start()
     {
@@ -107,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
             float movementAmount = Mathf.Min(SideShiftSpeed * Time.fixedDeltaTime, distance);
             Rb.MovePosition(transform.position + direction * movementAmount);
 
-            if (distance <= 0.025f)
+            if (distance <= 0.05f)
             {
                 transform.position = TargetPos;
                 IsShifting = false;
@@ -173,6 +121,57 @@ public class PlayerMovement : MonoBehaviour
 
 
     }
+
+
+    public void StartAnimation(string animationName)
+    {
+        if (Animator == null)
+            Animator = GetComponent<Animator>();
+
+        switch (animationName.ToLower())
+        {
+            case "idle":
+                SwitchAnimationState(AnimationState.Idle);
+                break;
+            case "run":
+                SwitchAnimationState(AnimationState.Run);
+                break;
+            case "injured":
+                SwitchAnimationState(AnimationState.Injured);
+                break;
+            default:
+                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured");
+                break;
+        }
+    }
+
+    void SwitchAnimationState(AnimationState newState)
+    {
+        if (CurrentAnimationState == newState)
+            return;
+
+        CurrentAnimationState = newState;
+        switch (newState)
+        {
+            case AnimationState.Idle:
+                SetAnimatorParameters(isIdle: true, isRunning: false, isInjured: false);
+                break;
+            case AnimationState.Run:
+                SetAnimatorParameters(isIdle: false, isRunning: true, isInjured: false);
+                break;
+            case AnimationState.Injured:
+                SetAnimatorParameters(isIdle: false, isRunning: false, isInjured: true);
+                break;
+        }
+    }
+
+    void SetAnimatorParameters(bool isIdle, bool isRunning, bool isInjured)
+    {
+        Animator.SetBool("IsIdle", isIdle);
+        Animator.SetBool("IsRunning", isRunning);
+        Animator.SetBool("IsInjured", isInjured);
+    }
+
 
 
 }

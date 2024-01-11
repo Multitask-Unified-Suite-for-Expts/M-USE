@@ -70,8 +70,10 @@ namespace USE_ExperimentTemplate_Trial
         public int reversalsCount;
         public float blockAccuracy;
         public List<int> DiffLevelsAtReversals;
+        public List<float> TimingValuesAtReversals;
         public List<int> DiffLevelsSummary;
         public int calculatedThreshold;
+        public float calculatedThreshold_timing;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;

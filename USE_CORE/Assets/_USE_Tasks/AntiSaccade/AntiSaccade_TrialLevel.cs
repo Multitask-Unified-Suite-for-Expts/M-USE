@@ -456,11 +456,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;
         calculatedThreshold = 0;
+        calculatedThreshold_timing = 0;
         reversalsCount = 0;
         blockAccuracy = 0;
         
         DiffLevelsSummary.Clear();
         DiffLevelsAtReversals.Clear();
+        TimingValuesAtReversals.Clear();
         runningPerformance.Clear();
         ReactionTimes_InBlock.Clear();
     }
@@ -591,6 +593,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 0)
             {
                 DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                TimingValuesAtReversals.Add(CurrentTrial.DisplayTargetDuration);
+                
                 reversalsCount++;
             }
         }
@@ -599,6 +603,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 1)
             {
                 DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                TimingValuesAtReversals.Add(CurrentTrial.DisplayTargetDuration);
                 reversalsCount++;
             }
         }
@@ -610,6 +615,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
             calculatedThreshold = (int)lastElements.Average();
             Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            
+            List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
+            Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));
+            
+            calculatedThreshold_timing = lastElements_timing.Average();
+            Debug.Log("calculatedThreshold_timing: " + calculatedThreshold_timing);
+            
             return true;
         }
         return false;

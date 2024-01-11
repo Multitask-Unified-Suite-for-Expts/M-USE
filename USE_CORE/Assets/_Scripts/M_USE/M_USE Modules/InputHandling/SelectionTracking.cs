@@ -568,6 +568,7 @@ namespace SelectionTracking
                 {
                     foreach (var pair in TerminationErrorTriggers)
                     {
+                        Debug.LogWarning("SELECTION HANDLER MIN TOUCH DURATION: " + MinDuration + " RECORDED duration: " + OngoingSelection.Duration);
                         if (pair.Value() == true)
                             return pair.Key;
                     }

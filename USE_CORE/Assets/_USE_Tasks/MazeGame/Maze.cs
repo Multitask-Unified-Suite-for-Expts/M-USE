@@ -53,7 +53,8 @@ namespace HiddenMaze
         [CanBeNull] public List<int> customDims;
         public string mName;
         public bool sideRestricted;
-        public string gridStyle;
+        public bool freePlay;
+        
     }
 
     public class Maze
@@ -68,14 +69,13 @@ namespace HiddenMaze
         [CanBeNull] public List<int> customDims;
         public string mName;
         public bool sideRestricted;
-        public string gridStyle;
         public bool loadingSquareMaze;
+        public bool freePlay;
 
 
         public Maze(string jsonString)
         {
             MazeJson jsonMaze = JsonUtility.FromJson<MazeJson>(jsonString);
-            Debug.LogWarning("IS CUSTOM DMS NULL? " + (jsonMaze.customDims == null? "yes": "no"));
 
             if(jsonMaze.mDims?.Count == 2)
             {
@@ -86,17 +86,22 @@ namespace HiddenMaze
                 mPath = jsonMaze.mPath;
             }
             else
+            {
                 customDims = jsonMaze.customDims;
+            }
 
+            if (jsonMaze.mPath?.Count == 0)
+            {
+                freePlay = true;
+            }
             mNextStep = jsonMaze.mStart;
 
             mNumSquares = jsonMaze.mNumSquares;
             mName = jsonMaze.mName;
-           // mPath = jsonMaze.mPath; // figure out how to filter based on free play or provide the shortest path
+            mPath = jsonMaze.mPath; 
             mStart = jsonMaze.mStart;
             mFinish = jsonMaze.mFinish;
             sideRestricted = jsonMaze.sideRestricted;
-
         }
 
 

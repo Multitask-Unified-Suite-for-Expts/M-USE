@@ -557,6 +557,7 @@ MonoBehaviour:
   mazeStartTime: 0
   choiceStartTime: 0
   currentTilePositionGO: {fileID: 0}
+  tileContainerGridLayoutGroup: {fileID: 1026519224}
 --- !u!1 &859525660
 GameObject:
   m_ObjectHideFlags: 0

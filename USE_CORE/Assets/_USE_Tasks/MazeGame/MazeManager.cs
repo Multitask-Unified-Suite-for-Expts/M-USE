@@ -44,7 +44,7 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] public bool returnToLast;
     [HideInInspector] public bool erroneousReturnToLast;
     [HideInInspector] public bool correctSelection;
-    [HideInInspector] public bool freePlay = true;
+    [HideInInspector] public bool freePlay;
     [HideInInspector] public bool outOfMoves;
     [HideInInspector] public bool startedMaze;
     [HideInInspector] public bool finishedMaze;
@@ -57,6 +57,8 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] public float choiceStartTime;
 
     [HideInInspector] public GameObject currentTilePositionGO;
+    public GridLayoutGroup tileContainerGridLayoutGroup; 
+
 
     // Update is called once per frame
     void Update()
@@ -77,16 +79,17 @@ public class MazeManager:MonoBehaviour
     {
         StimGroup tiles = new StimGroup("Tiles");
 
-        GridLayoutGroup tileContainerGridLayoutGroup; 
-        tileContainerGridLayoutGroup = tileContainerGO.GetComponent<GridLayoutGroup>();
         
         if(tileSettings == null) // Instantiate a single instance of tile Settings that is applied to every tile
             tileSettings = ScriptableObject.CreateInstance<TileSettings>();
         
         SetTileSettings();
+        freePlay = currentMaze.freePlay;
+
         
         if (creatingSquareMaze)
         {
+            tileContainerGridLayoutGroup.enabled = true;
             tileContainerGridLayoutGroup.constraintCount = (int)currentMaze.mDims.x; // Restrict the grid layout by number of columns
             for (var x = 0; x <= currentMaze.mDims.x -1 ; x++)
             for (var y = 0; y <= currentMaze.mDims.y - 1; y++)
@@ -98,7 +101,7 @@ public class MazeManager:MonoBehaviour
             float mazeHeight = ((tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y) * currentMaze.mDims.y) + tileContainerGridLayoutGroup.spacing.y;
             
             InitializeMazeBackground(mazeBgTex, mazeWidth, mazeHeight);
-            AssignAdjacentTiles(tiles, tileContainerGridLayoutGroup.spacing.x, tileContainerGridLayoutGroup.spacing.y);
+            AssignAdjacentTiles(tiles, tileContainerGridLayoutGroup.cellSize.x + tileContainerGridLayoutGroup.spacing.x, tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y);
 
         }
         else
@@ -107,10 +110,10 @@ public class MazeManager:MonoBehaviour
             List<int> customMazeDims = currentMaze.customDims;
             tileContainerGO.SetActive(true);
             tileContainerGO.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+            
             float xOffset = tileContainerGO.GetComponent<RectTransform>().rect.width/(customMazeDims.Max()+1);
             float yOffset = tileContainerGO.GetComponent<RectTransform>().rect.height/(customMazeDims.Count+1);
             
-            Debug.LogWarning("XOFFSET: " + xOffset + " YOFFSET: " + yOffset);
             for (int row = 0; row < customMazeDims.Count; row++)
             {
                 int numCircles = customMazeDims[row]; // Adjust number of circles per row
@@ -127,8 +130,6 @@ public class MazeManager:MonoBehaviour
                     else
                          y = (-yOffset * (customMazeDims.Count / 2)) + (row * yOffset);
 
-
-                    
                     GameObject tileGO = InitializeTile(tileTex, col, row, tiles);
                     tileGO.transform.localPosition = new Vector2(x, y);
                 }
@@ -139,7 +140,7 @@ public class MazeManager:MonoBehaviour
 
         }
         
-        currentMaze.mName = currentMaze.mStart;
+        currentMaze.mName = $"{currentMaze.mStart}_{currentMaze.mFinish}";
         AssignFlashingTiles(currentMaze, tiles);
         return tiles;
     }
@@ -163,7 +164,7 @@ public class MazeManager:MonoBehaviour
         tileMaterial.mainTexture = tileTex;
         tileGO.GetComponent<Image>().material = tileMaterial;
         tileGO.name = GetChessCoordName(col, row);
-
+        tileGO.transform.localScale = 0.8f * tileGO.transform.localScale;
         Tile tile = tileGO.AddComponent<Tile>();
         tile.Initialize(tileSettings, this);
 
@@ -171,7 +172,7 @@ public class MazeManager:MonoBehaviour
         tile.mCoord = new Coords(tileGO.name);
         
         AssignInitialTileColor(tile, currentMaze);
-        AssignSliderValue(tile, currentMaze);
+        AssignSliderValue(tile);
 
         tileGO.SetActive(false);
         return tileGO;
@@ -180,7 +181,6 @@ public class MazeManager:MonoBehaviour
     {
         if (tileConnectorsContainerGO.transform.Find($"{otherTile.name}{tile.name}") == null)
         {
-            Debug.LogWarning($"SEARCHING FOR THIS LINE: {otherTile.name}{tile.name} + Current Line: {tile.name}{otherTile.name}");
             USE_Line line = new USE_Line(mgTrialLevel.MG_CanvasGO.GetComponent<Canvas>(), tilePos, otherTilePos, Color.black, $"{tile.name}{otherTile.name}");
             line.LineGO.transform.SetParent(tileConnectorsContainerGO.transform);
             line.LineGO.SetActive(true);
@@ -188,8 +188,6 @@ public class MazeManager:MonoBehaviour
             // Set the new game object as the first sibling
             line.LineGO.transform.SetAsFirstSibling();
         }
-        
-
     }
 
     
@@ -257,9 +255,18 @@ public class MazeManager:MonoBehaviour
             GameObject tileGO = tileStimDef.StimGameObject;
             Tile tile = tileGO.GetComponent<Tile>();
             Vector2 tilePos = tileGO.transform.localPosition;
-
+            
+            if (creatingSquareMaze)
+            {
+                tile.AdjacentTiles = tiles.stimDefs
+                    .Where(otherStimDef => otherStimDef != tileStimDef && otherStimDef.StimGameObject.GetComponent<Tile>().mCoord.IsAdjacent(tile.mCoord))
+                    .Select(otherStimDef => otherStimDef.StimGameObject)
+                    .ToList();
+            }
             //Find adjacent tiles within the radius of the current tile
-            tile.AdjacentTiles = tiles.stimDefs
+            else
+            { 
+                tile.AdjacentTiles = tiles.stimDefs
                 .Where(otherStimDef => otherStimDef != tileStimDef &&
                                        (Vector2.Distance(tilePos,
                                                otherStimDef.StimGameObject.transform.localPosition) <=
@@ -268,14 +275,15 @@ public class MazeManager:MonoBehaviour
                                            yOffset))
                 .Select(otherStimDef => otherStimDef.StimGameObject)
                 .ToList();
+                
+            }
 
-            if (tileConnectorsLoaded || creatingSquareMaze)
-                return;
+            if (creatingSquareMaze)
+                continue;
+
             foreach (GameObject adjTile in tile.AdjacentTiles)
                 GenerateTileConnectors(adjTile, tileGO, adjTile.transform.localPosition,
                     tileGO.transform.localPosition);
-
-
         }
 
         tileConnectorsLoaded = true;
@@ -284,7 +292,6 @@ public class MazeManager:MonoBehaviour
     {
         if (tile.mCoord.chessCoord == maze.mStart)
         {
-            Debug.Log("TILE START COLOR: " + tile.startColor.ToString());
             tile.setColor(tile.startColor);
             tile.isStartTile = true;
         }
@@ -313,12 +320,12 @@ public class MazeManager:MonoBehaviour
                     .StimGameObject.GetComponent<Tile>().assignedTileFlash = true;
         }
     }
-    private void AssignSliderValue(Tile tile, Maze maze)
+    private void AssignSliderValue(Tile tile)
     {
         if (freePlay)
-            tile.sliderValueChange = 1f / (maze.mDims.x * maze.mDims.y);
+            tile.sliderValueChange = 1f / (currentMaze.mDims.x * currentMaze.mDims.y);
         else
-            tile.sliderValueChange = 1f / maze.mNumSquares; //FIX THE REWARD MAG BELOW USING STIM DEF ???
+            tile.sliderValueChange = 1f / currentMaze.mNumSquares; 
     }
 
     // Methods that handles the feedback for a given tile selection
@@ -438,8 +445,6 @@ public class MazeManager:MonoBehaviour
             selectedTilesInPathGO.Add(TileGO);
             currentTilePositionGO = TileGO;
             currentPathIndex++;
-
-            mgTrialLevel.AddEmptyElementToDataTrackingLists();
 
             // Sets the NextStep if the maze isn't finished
             if (tile.isFinishTile)

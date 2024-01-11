@@ -49,13 +49,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     
     // Block Data Tracking Variables
     [HideInInspector]
-    public List<int> TotalErrors_InBlock;
-    public List<int> PerseverativeErrors_InBlock;
-    public List<int> BacktrackErrors_InBlock;
-    public List<int> RuleAbidingErrors_InBlock;
-    public List<int> RuleBreakingErrors_InBlock;
-    public List<int> RetouchCorrect_InBlock;
-    public List<int> RetouchErroneous_InBlock;
+    public int TotalErrors_InBlock;
+    public int PerseverativeErrors_InBlock;
+    public int BacktrackErrors_InBlock;
+    public int RuleAbidingErrors_InBlock;
+    public int RuleBreakingErrors_InBlock;
+    public int RetouchCorrect_InBlock;
+    public int RetouchErroneous_InBlock;
     public int CorrectTouches_InBlock; 
     public int NumSliderBarFull_InBlock;
     public List<float?> MazeDurations_InBlock = new List<float?>();
@@ -119,8 +119,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             
             //FindMaze();
             mgTL.MazeManager.LoadTextMaze(mgBD);
-            mgTL.InitializeTrialArrays();
-            InitializeBlockArrays();
             //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             CalculateBlockSummaryString();
@@ -129,22 +127,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddDefaultTerminationMethod(() =>
         {
-            mgTL.DestroyChildren(mgTL.MazeManager.gameObject);
+            mgTL.DestroyChildren(mgTL.MazeManager.tileContainerGO);
+            mgTL.DestroyChildren(mgTL.MazeManager.tileConnectorsContainerGO);
         });
     }
 
-
-    private void InitializeBlockArrays()
-    {
-        RuleAbidingErrors_InBlock = new List<int>();
-        RuleBreakingErrors_InBlock = new List<int>();
-        BacktrackErrors_InBlock = new List<int>();
-        PerseverativeErrors_InBlock = new List<int>();
-        RetouchCorrect_InBlock = new List<int>();
-        RetouchErroneous_InBlock = new List<int>();
-        TotalErrors_InBlock = new List<int>();
-    }
-    
 
     public void DefineBlockData()
     {
@@ -170,9 +157,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             ["Maze Duration"] = mgTL.MazeManager.mazeDuration.ToString("0.0") + "s",
             ["Correct Touches"] = CorrectTouches_InBlock,
-            ["Total Errors"] = TotalErrors_InBlock.Sum(),
-            ["Retouched Correct"] = RetouchCorrect_InBlock.Sum(),
-            ["Retouched Erroneous"] = RetouchErroneous_InBlock.Sum(),
+            ["Total Errors"] = TotalErrors_InBlock,
+            ["Retouched Correct"] = RetouchCorrect_InBlock,
+            ["Retouched Erroneous"] = RetouchErroneous_InBlock,
         };
         return data;
     }
@@ -198,13 +185,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private void ResetBlockVariables()
     {
         CorrectTouches_InBlock = 0;
-        RuleAbidingErrors_InBlock.Clear();
-        RuleBreakingErrors_InBlock.Clear();
-        BacktrackErrors_InBlock.Clear();
-        PerseverativeErrors_InBlock.Clear();
-        RetouchCorrect_InBlock.Clear();
-        RetouchErroneous_InBlock.Clear();
-        TotalErrors_InBlock.Clear();
+        RuleAbidingErrors_InBlock = 0;
+        RuleBreakingErrors_InBlock = 0;
+        BacktrackErrors_InBlock = 0;
+        PerseverativeErrors_InBlock = 0;
+        RetouchCorrect_InBlock = 0;
+        RetouchErroneous_InBlock = 0;
+        TotalErrors_InBlock = 0;
         NumSliderBarFull_InBlock = 0;
         MazeDurations_InBlock.Clear();
         ChoiceDurations_InBlock.Clear();
@@ -223,13 +210,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", mgBD.BlockEndThreshold*100) +
                              "\n\nLast Trial's Percent Error: " + (latestPercentError == null ?
                                  ("N/A"):String.Format("{0:0.00}%", latestPercentError)) +
-                             "\nTotal Errors: " + TotalErrors_InBlock.Sum() +
-                             "\nRule-Abiding Errors: " + RuleAbidingErrors_InBlock.Sum() +
-                             "\nRule-Breaking Errors: " + RuleBreakingErrors_InBlock.Sum() +
-                             "\nPerseverative Errors: " + PerseverativeErrors_InBlock.Sum() +
-                             "\nBacktrack Errors: " + BacktrackErrors_InBlock.Sum() +
-                             "\nRetouch Correct: " + RetouchCorrect_InBlock.Sum() +
-                             "\nRetouch Erroneous: " + RetouchErroneous_InBlock.Sum() +
+                             "\nTotal Errors: " + TotalErrors_InBlock +
+                             "\nRule-Abiding Errors: " + RuleAbidingErrors_InBlock +
+                             "\nRule-Breaking Errors: " + RuleBreakingErrors_InBlock +
+                             "\nPerseverative Errors: " + PerseverativeErrors_InBlock+
+                             "\nBacktrack Errors: " + BacktrackErrors_InBlock +
+                             "\nRetouch Correct: " + RetouchCorrect_InBlock +
+                             "\nRetouch Erroneous: " + RetouchErroneous_InBlock +
                              "\n\nRewards: " + NumRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", CalculateAverageDuration(ChoiceDurations_InBlock)) +

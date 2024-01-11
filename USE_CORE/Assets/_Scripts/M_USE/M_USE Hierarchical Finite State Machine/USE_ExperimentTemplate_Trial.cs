@@ -56,21 +56,21 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
         
-        public List<int> runningPerformance;
-        public int difficultyLevel;
-        public int posStep;
-        public int negStep;
-        public string TrialDefSelectionStyle;
-        public int maxDiffLevel;
-        public int avgDiffLevel;
-        public int diffLevelJitter;
-        public int NumReversalsUntilTerm;
-        public int MinTrialsBeforeTermProcedure;
-        public int TerminationWindowSize;
-        public int reversalsCount;
-        public List<int> DiffLevelsAtReversals;
-        public List<int> DiffLevelsSummary;
-        public int calculatedThreshold;
+        [HideInInspector] public List<int> runningPerformance;
+        [HideInInspector] public int difficultyLevel;
+        [HideInInspector] public int posStep;
+        [HideInInspector] public int negStep;
+        [HideInInspector] public string TrialDefSelectionStyle;
+        [HideInInspector] public int maxDiffLevel;
+        [HideInInspector] public int avgDiffLevel;
+        [HideInInspector] public int diffLevelJitter;
+        [HideInInspector] public int NumReversalsUntilTerm;
+        [HideInInspector] public int MinTrialsBeforeTermProcedure;
+        [HideInInspector] public int TerminationWindowSize;
+        [HideInInspector] public int reversalsCount;
+        [HideInInspector] public List<int> DiffLevelsAtReversals;
+        [HideInInspector] public List<int> DiffLevelsSummary;
+        [HideInInspector] public int calculatedThreshold;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;

@@ -60,11 +60,6 @@ public class Tile : MonoBehaviour
 
     [FormerlySerializedAs("flashingTile")] [HideInInspector] public GameObject flashingTileGO;
 
-    void Start()
-    {
-        //gameObject.GetComponent<Image>().color = baseColor;
-    }
-
     public void Initialize(TileSettings tileSettings, MazeManager mazeManager)
     {
         TileSettings = tileSettings;
@@ -122,6 +117,7 @@ public class Tile : MonoBehaviour
         iFlashes = 0;
 
         Tile flashingTile = this;
+        flashingTileGO = this.gameObject;
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
         if (flashingTile.isStartTile)

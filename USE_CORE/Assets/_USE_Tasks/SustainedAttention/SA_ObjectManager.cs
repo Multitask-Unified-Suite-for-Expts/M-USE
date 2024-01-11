@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using USE_Data;
-using USE_ExperimentTemplate_Data;
+using USE_ExperimentTemplate_Classes;
 using Random = UnityEngine.Random;
 
 
@@ -26,7 +25,9 @@ public class SA_ObjectManager : MonoBehaviour
     public event CycleEventHandler OnTargetIntervalMissed;
     public event CycleEventHandler OnDistractorAvoided;
 
-    public FrameData trialLevel_FrameData;
+    public Dictionary<string, EventCode> TaskEventCodes; //task event codes passed in so can trigger "Object Animation Occured" event code
+
+    public float MaxTouchDuration;
 
 
     public void NoSelectionDuringInterval(SA_Object obj)
@@ -81,7 +82,10 @@ public class SA_ObjectManager : MonoBehaviour
 
         foreach(SA_Object_ConfigValues configValues in objects)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
+            GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
+
+            go.GetComponent<PacmanDrawer>().ManualStart();
+
             go.name = configValues.IsTarget ? $"Target" : $"Distractor";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
@@ -93,10 +97,6 @@ public class SA_ObjectManager : MonoBehaviour
 
             SA_Object obj = go.AddComponent<SA_Object>();
             obj.SetupObject(this, configValues);
-
-
-            trialLevel_FrameData.AddDatum(obj.ObjectName, () => obj != null && obj.gameObject.activeInHierarchy ? obj.gameObject.transform.position.ToString() : "NotActive");
-
 
             if (obj.IsTarget)
                 TargetList.Add(obj);
@@ -111,8 +111,8 @@ public class SA_ObjectManager : MonoBehaviour
     
     private void CalculateStartingPositions()
     {
-        int[] xValues = new int[] { -800, -600, -400, -200, 0, 200, 400, 600, 800 };
-        int[] yValues = new int[] { 325, 180, 35, -110, -255, -400};
+        int[] xValues = new int[] { -800, -400, 0, 400, 800 };
+        int[] yValues = new int[] { 325, 84, -158, -400};
 
         for (int i = 0; i < yValues.Length; i++)
         {
@@ -189,9 +189,13 @@ public class SA_Object : MonoBehaviour
 {
     public SA_ObjectManager ObjManager;
 
+    public PacmanDrawer PacmanDrawer;
+
     //From Object Config:
     public int Index;
     public string ObjectName;
+    public float OpenAngle; //90 or 75 as of now
+    public int ClosedLineThickness;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -207,11 +211,11 @@ public class SA_Object : MonoBehaviour
     public float[] ObjectColor;
     public int SliderChange;
 
-
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool MoveAroundScreen;
     public bool ObjectPaused;
+    public float TimeOfPause;
     public GameObject Marker;
     public Vector3 Direction;
     private float NewDestStartTime;
@@ -234,6 +238,8 @@ public class SA_Object : MonoBehaviour
         ObjManager = objManager;
         Index = configValue.Index;
         ObjectName = configValue.ObjectName;
+        OpenAngle = configValue.OpenAngle;
+        ClosedLineThickness = configValue.ClosedLineThickness;
         IsTarget = configValue.IsTarget;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
@@ -264,6 +270,11 @@ public class SA_Object : MonoBehaviour
         SetNewDestination();
 
         SetupMarker(); //Marker for debugging purposes
+
+        PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
+        PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
+        PacmanDrawer.DrawMouth(OpenAngle);
+
     }
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
@@ -342,9 +353,10 @@ public class SA_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
+        gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanOpen");
+        gameObject.GetComponent<PacmanDrawer>().DrawMouth(OpenAngle);
     }
 
     private void HandlePausingWhileBeingSelected()
@@ -353,15 +365,16 @@ public class SA_Object : MonoBehaviour
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
+            {
                 ObjectPaused = true;
+                TimeOfPause = Time.time;
+            }
         }
+        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration + .2f)) //add .2 so the touch fb dissapears before object starts moving again
+            ObjectPaused = false;
 
-        if (InputBroker.GetMouseButtonUp(0))
-        {
-            GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
-            if (hit != null && hit == gameObject)
-                ObjectPaused = false;
-        }
+        if(ObjectPaused && InputBroker.GetMouseButton(0))
+            CurrentCycle.cycleStartTime += Time.deltaTime; //Push the cycle start time back while they're selecting.
     }
 
     private void HandleInput()
@@ -511,8 +524,6 @@ public class SA_Object : MonoBehaviour
 
     public void DestroyObj()
     {
-        ObjManager.trialLevel_FrameData.data.Remove(ObjManager.trialLevel_FrameData.data.FirstOrDefault(d => d.Name == ObjectName));
-
         ObjManager.RemoveFromObjectList(this);
 
         if(gameObject != null)
@@ -547,6 +558,8 @@ public class SA_Object_ConfigValues
     //From Object Config:
     public int Index;
     public string ObjectName;
+    public float OpenAngle;
+    public int ClosedLineThickness;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;

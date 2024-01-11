@@ -181,7 +181,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SpatialCue.AddSpecificInitializationMethod(() =>
         {
             //if (CurrentTrial.RandomSpatialCueColor)
-            //    SpatialCue_GO.GetComponent<Image>().color = GetRandomColor();
+                //SpatialCue_GO.GetComponent<Image>().color = GetRandomColor();
 
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
@@ -219,7 +219,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         Mask.AddSpecificInitializationMethod(() =>
         {
             //if (CurrentTrial.RandomMaskColor)
-            //    Mask_GO.GetComponent<Image>().color = GetRandomColor();
+                //Mask_GO.GetComponent<Image>().color = GetRandomColor();
 
             Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos;
             Mask_GO.SetActive(true);

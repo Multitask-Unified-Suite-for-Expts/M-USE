@@ -381,7 +381,7 @@ namespace SelectionTracking
             {
                 if (OngoingSelection != null)
                 {
-                    OngoingSelection.ErrorType = error;                    
+                    OngoingSelection.ErrorType = error;
                     TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection));
                 }
                 else

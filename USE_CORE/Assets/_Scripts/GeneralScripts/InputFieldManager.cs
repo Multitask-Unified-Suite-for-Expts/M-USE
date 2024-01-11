@@ -32,6 +32,7 @@ public class InputFieldManager : MonoBehaviour
     public GameObject inputField_GO;
     public string playerPrefKey;
 
+
     private void Start() //Load saved values
     {
         inputField = inputField_GO.GetComponent<TMP_InputField>();
@@ -55,7 +56,7 @@ public class InputFieldManager : MonoBehaviour
         else if (inputField_GO.name.ToLower().Contains("subjectage"))
             return "50";
         else if (inputField_GO.name.ToLower().Contains("serverurl"))
-            return "http://m-use.psy.vanderbilt.edu:8080"; //Eventually delete when go public
+            return "http://serverName:port";
         else if (inputField_GO.name.ToLower().Contains("serverdata"))
             return "DATA";
         else

@@ -7,6 +7,8 @@ using SustainedAttention_Namespace;
 using ConfigDynamicUI;
 using System.Linq;
 using System;
+using UnityEditor;
+using UnityEngine.UIElements;
 
 public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 {
@@ -29,7 +31,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     public GameObject SustainedAttention_CanvasGO;
     public GameObject BordersGO;
 
-    private SA_ObjectManager ObjectManager;
+    private SA_ObjectManager ObjManager;
 
     private GameObject StartButton;
 
@@ -47,6 +49,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     List<SA_Object> TrialObjects;
 
+
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -60,7 +64,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
 
-            HaloFBController.SetHaloIntensity(1f);
+            HaloFBController.SetHaloIntensity(3f);
 
             if (StartButton == null)
             {
@@ -83,26 +87,27 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             BordersGO.SetActive(false);
             LoadConfigUIVariables();
 
-            if (ObjectManager != null)
-                Destroy(ObjectManager);
+            if (ObjManager != null)
+                Destroy(ObjManager);
 
-            ObjectManager = gameObject.AddComponent<SA_ObjectManager>();
-            ObjectManager.trialLevel_FrameData = FrameData;
-            ObjectManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
-            ObjectManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
-            ObjectManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
+            ObjManager = gameObject.AddComponent<SA_ObjectManager>();
+            ObjManager.MaxTouchDuration = maxObjectTouchDuration.value;
+            ObjManager.TaskEventCodes = TaskEventCodes;
+            ObjManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
+            ObjManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
+            ObjManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
 
             List<SA_Object_ConfigValues> trialObjectsConfigValues = new List<SA_Object_ConfigValues>();
 
             foreach (int objIndex in CurrentTrial.TrialObjectIndices)
                 trialObjectsConfigValues.Add(CurrentTaskLevel.SA_Objects_ConfigValues[objIndex]);
             
-            TrialObjects = ObjectManager.CreateObjects(trialObjectsConfigValues);
+            TrialObjects = ObjManager.CreateObjects(trialObjectsConfigValues);
 
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Play); //Setup Handler
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play); //Setup Handler
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, SustainedAttention_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -130,7 +135,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() =>
         {
-            ObjectManager.ActivateTargets();
+            ObjManager.ActivateTargets();
             AudioFBController.Play("ContinueBeep");
         });
         DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, DisplayDistractors);
@@ -138,7 +143,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //DisplayDistractors state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayDistractors.AddSpecificInitializationMethod(() =>
         {
-            ObjectManager.ActivateDistractors();
+            ObjManager.ActivateDistractors();
             AudioFBController.Play("ContinueBeep");
         });
         DisplayDistractors.AddTimer(() => CurrentTrial.DisplayDistractorsDuration, Play);
@@ -151,7 +156,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 Handler.ClearSelections();
 
             //AudioFBController.Play("EC_BalloonChosen");
-            ObjectManager.ActivateObjectMovement();
+            ObjManager.ActivateObjectMovement();
         });
         Play.AddUpdateMethod(() =>
         {
@@ -230,7 +235,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
             HandleSlider();
         });
-        Play.SpecifyTermination(() => ObjectManager.DistractorList.Count < 1 && ObjectManager.TargetList.Count < 1, ITI);
+        Play.SpecifyTermination(() => ObjManager.DistractorList.Count < 1 && ObjManager.TargetList.Count < 1, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -242,10 +247,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     private void OnDestroy()
     {
-        if(ObjectManager != null)
+        if(ObjManager != null)
         {
-            ObjectManager.OnTargetIntervalMissed -= TargetIntervalMissed; //UNsubscribe to MissedInterval Event
-            ObjectManager.OnDistractorAvoided -= DistractorAvoided; //UNsubscribe to DistractorAvoided Event
+            ObjManager.OnTargetIntervalMissed -= TargetIntervalMissed; //UNsubscribe to MissedInterval Event
+            ObjManager.OnDistractorAvoided -= DistractorAvoided; //UNsubscribe to DistractorAvoided Event
         }
     }
     private void TargetIntervalMissed()
@@ -284,10 +289,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        if(ObjectManager != null)
+        if(ObjManager != null)
         {
-            ObjectManager.OnTargetIntervalMissed -= TargetIntervalMissed; //Unsubscribe from MissedInterval Event
-            ObjectManager.DestroyExistingObjects();
+            ObjManager.OnTargetIntervalMissed -= TargetIntervalMissed; //Unsubscribe from MissedInterval Event
+            ObjManager.DestroyExistingObjects();
         }
 
         SliderFBController.SliderGO.SetActive(false);
@@ -365,8 +370,45 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     {
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
 
-        //what else to track?
+        FrameData.AddDatum("ObjectNames", () => GetObjNamesString());
+        FrameData.AddDatum("ObjectPositions", () => GetObjPositionsString());
     }
+
+    private string GetObjNamesString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+
+        List<string> names = new List<string>();
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (obj.gameObject.activeInHierarchy)
+                    names.Add(obj.ObjectName);
+            }
+        }
+        return names.Count < 1 ? "[]" : $"[{string.Join(", ", names)}]";
+    }
+    private string GetObjPositionsString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+
+        List<string> positions = new List<string>();
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (obj.gameObject.activeInHierarchy)
+                    positions.Add(obj.transform.position.ToString());
+            }
+        }
+        return positions.Count < 1 ? "[]" : $"[{string.Join(", ", positions)}]";
+    }
+
 
     private void LoadConfigUIVariables()
     {

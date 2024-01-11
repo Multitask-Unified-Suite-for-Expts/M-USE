@@ -9,6 +9,9 @@ TagManager:
   - Game Configs
   - Center
   - PausePanel
+  - MiddleCircle
+  - LeftCircle
+  - RightCircle
   layers:
   - Default
   - TransparentFX

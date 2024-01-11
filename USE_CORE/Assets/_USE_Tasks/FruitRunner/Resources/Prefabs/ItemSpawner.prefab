@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1968265187260913155
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1968265187260913154}
+  - component: {fileID: 1968265187260913153}
+  m_Layer: 0
+  m_Name: ItemSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1968265187260913154
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968265187260913155}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1968265187260913153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1968265187260913155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1fe6efcde407473291554460ee472d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ItemPrefabs:
+  - {fileID: 1000013931470818, guid: 09092ad6d4eb8414c8fbf566a443b674, type: 3}
+  - {fileID: 1000010694622314, guid: 65772f4e9107841e4b2eadbb0c1312a3, type: 3}
+  - {fileID: 1000010714891294, guid: ef6431f1f1a774b27a85c0da7a6a392e, type: 3}
+  - {fileID: 1000012510692222, guid: 8822f1d17860b41f6880b936534df180, type: 3}
+  - {fileID: 1000013765287000, guid: b0ea6428bf6504d92940febf67ee14e6, type: 3}
+  - {fileID: 1000013656696560, guid: 9f9f9b76040c04a7ebfbf248692d2207, type: 3}
+  - {fileID: 1000013356204050, guid: e1a1a1f96cc2747d7bb89f9588b90e8f, type: 3}
+  - {fileID: 1000010646675420, guid: c004783bff2bd447c84b5f6e6fc693d5, type: 3}
+  - {fileID: 1000010986879176, guid: 2f9ebb15be5414434bcc3601c28a1620, type: 3}
+  - {fileID: 1000010728489230, guid: 30c94c05d51a9493cbb9344813cf5100, type: 3}
+  DoorPrefabs:
+  - {fileID: 2857151697680853970, guid: a77376374fe204cd2bf955a42331ee28, type: 3}
+  - {fileID: 3311961847115578471, guid: a0c811ba9ef6b4049b331103f92b703f, type: 3}
+  PrefabQuaddles: []
+  TrialQuaddles: []

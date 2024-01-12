@@ -7,15 +7,15 @@ public class ItemSpawner : MonoBehaviour
 {
     public List<GameObject> DoorPrefabs;
     public List<GameObject> TrialQuaddles;
-    private int ItemsBetweenDoorCount = 0;
+    private int Count_ItemsBetweenDoors = 0;
 
 
     private void Start()
     {
         DoorPrefabs = new List<GameObject>
         {
-            Resources.Load<GameObject>("Prefabs/LeftDoor"),
-            Resources.Load<GameObject>("Prefabs/RightDoor")
+            Resources.Load<GameObject>("Prefabs/Blockade_Left"),
+            Resources.Load<GameObject>("Prefabs/Blockade_Right")
         };
     }
 
@@ -28,24 +28,30 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
+
+
     public void SpawnItem(Transform parentTransform)
     {
         GameObject stim;
 
-        if (ItemsBetweenDoorCount < TrialQuaddles.Count)
+        if (Count_ItemsBetweenDoors < TrialQuaddles.Count)
         {
             stim = Instantiate(TrialQuaddles[Random.Range(0, TrialQuaddles.Count)]);
             stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
             stim.AddComponent<Item_Quaddle>();
             stim.AddComponent<CapsuleCollider>().isTrigger = true;
-            ItemsBetweenDoorCount++;
+            stim.tag = "Quaddle";
+
+            Count_ItemsBetweenDoors++;
         }
         else
         {
-            ItemsBetweenDoorCount = 0;
+            Count_ItemsBetweenDoors = 0;
             stim = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
-            stim.name = "Door";
-            stim.AddComponent<Item_Door>();
+            stim.name = "Blockade";
+            stim.AddComponent<Item_Blockade>();
+            stim.tag = "Blockade";
+
         }
 
         SetItemPosition(stim, parentTransform);
@@ -55,7 +61,7 @@ public class ItemSpawner : MonoBehaviour
 
     void SetItemPosition(GameObject item, Transform parentTransform)
     {
-        bool isDoor = item.name == "Door";
+        bool isDoor = item.name == "Blockade";
 
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
@@ -63,6 +69,7 @@ public class ItemSpawner : MonoBehaviour
         item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .7f, randomSpawnPoint.position.z); 
         item.transform.parent = parentTransform;
     }
+
 
 
 

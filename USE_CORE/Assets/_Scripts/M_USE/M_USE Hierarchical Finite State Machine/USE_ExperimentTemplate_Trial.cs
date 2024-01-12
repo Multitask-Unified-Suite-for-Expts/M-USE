@@ -691,14 +691,14 @@ namespace USE_ExperimentTemplate_Trial
             }
             return selectedReward.NumReward;
         }
+
         public void SetShadowType(string ShadowType, string LightName)
         {
-            Light mainLight = GameObject.Find("Directional Light").GetComponent<Light>();
             Light taskLight = GameObject.Find(LightName).GetComponent<Light>();
 
-            if(mainLight == null || taskLight == null)
+            if(taskLight == null)
             {
-                Debug.LogWarning("NOT SETTING SHADOW TYPE! COULDNT FIND ONE OF DirectionalLight OR " + LightName + " WHEN TRYING TO SET SHADOW TYPE! ");
+                Debug.LogWarning("NOT SETTING SHADOW TYPE! COULDNT FIND " + LightName + " WHEN TRYING TO SET SHADOW TYPE! ");
                 return;
             }
 
@@ -707,15 +707,12 @@ namespace USE_ExperimentTemplate_Trial
             switch (ShadowType)
             {
                 case "none":
-                    mainLight.shadows = LightShadows.None;
                     taskLight.shadows = LightShadows.None;
                     break;
                 case "soft":
-                    mainLight.shadows = LightShadows.Soft;
                     taskLight.shadows = LightShadows.Soft;
                     break;
                 case "hard":
-                    mainLight.shadows = LightShadows.Hard;
                     taskLight.shadows = LightShadows.Hard;
                     break;
                 default:

@@ -55,8 +55,6 @@ public class Tile : MonoBehaviour
     [HideInInspector] public bool isFlashing = false;
     [HideInInspector] public bool assignedTileFlash;
     [HideInInspector] public bool choiceFeedback;
-    [HideInInspector] public bool isStartTile;
-    [HideInInspector] public bool isFinishTile;
 
     [FormerlySerializedAs("flashingTile")] [HideInInspector] public GameObject flashingTileGO;
 
@@ -120,9 +118,9 @@ public class Tile : MonoBehaviour
         flashingTileGO = this.gameObject;
         isFlashing = true;
         flashStartTime = Time.unscaledTime;
-        if (flashingTile.isStartTile)
+        if (flashingTile.gameObject == MazeManager.startTileGO)
             initialTileColor = startColor;
-        else if (flashingTile.isFinishTile)
+        else if (flashingTile.gameObject == MazeManager.finishTileGO)
             initialTileColor = finishColor;
         else
             initialTileColor = defaultTileColor;// before it starts flashing set color

@@ -161,7 +161,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         var SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ITI);
-        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 18, MG_CanvasGO, false);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 15, MG_CanvasGO, false);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
@@ -222,7 +222,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             SelectionHandler.HandlerActive = false;
 
-            if (selectedGO.GetComponent<Tile>().isStartTile)
+            if (selectedGO == MazeManager.startTileGO)
             {
                 //If the tile that is selected is the start tile
                 MazeManager.startedMaze = true;
@@ -230,7 +230,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeStart"]);
             }
 
-            if (selectedGO.GetComponent<Tile>().isFinishTile && MazeManager.currentMaze.mNextStep == MazeManager.currentMaze.mFinish)
+            if (selectedGO == MazeManager.finishTileGO && MazeManager.currentMaze.mNextStep == MazeManager.currentMaze.mFinish)
             {
                 //if the tile that is selected is the end tile, stop the timer
                 MazeManager.finishedMaze = true;
@@ -343,7 +343,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if(MazeManager.currentMaze.loadingSquareMaze)
                 MazeManager.mazeBackgroundGO.SetActive(true);
             
-            MazeManager.currentTilePositionGO.GetComponent<Tile>().FlashTile();
+            if (!MazeManager.startedMaze)
+                MazeManager.startTileGO.GetComponent<Tile>().FlashTile();
+            else
+                MazeManager.currentTilePositionGO.GetComponent<Tile>().FlashTile();
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -464,6 +467,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             perseverativeErrors_InTrial++;
             CurrentTaskLevel.PerseverativeErrors_InBlock++;
             CurrentTaskLevel.PerseverativeErrors_InTask++;
+
             return true;
         }
         return false;

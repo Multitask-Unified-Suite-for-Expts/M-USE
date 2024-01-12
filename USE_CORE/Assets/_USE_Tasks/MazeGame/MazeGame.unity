@@ -362,7 +362,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -541,6 +541,8 @@ MonoBehaviour:
   consecutiveErrors: 0
   selectedTilesInPathGO: []
   selectedTilesGO: []
+  startTileGO: {fileID: 0}
+  finishTileGO: {fileID: 0}
   creatingSquareMaze: 0
   viewPath: 0
   darkenNonPathTiles: 0
@@ -694,7 +696,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 950, y: 950}
+  m_SizeDelta: {x: 1830, y: 950}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1026519224
 MonoBehaviour:
@@ -714,8 +716,8 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_StartCorner: 2
-  m_StartAxis: 0
+  m_StartCorner: 1
+  m_StartAxis: 1
   m_CellSize: {x: 120, y: 120}
   m_Spacing: {x: 40, y: 40}
   m_Constraint: 1
@@ -754,7 +756,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 950, y: 950}
+  m_SizeDelta: {x: 1930, y: 950}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1860654109
 GameObject:
@@ -1022,13 +1024,13 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  TotalErrors_InBlock: 
-  PerseverativeErrors_InBlock: 
-  BacktrackErrors_InBlock: 
-  RuleAbidingErrors_InBlock: 
-  RuleBreakingErrors_InBlock: 
-  RetouchCorrect_InBlock: 
-  RetouchErroneous_InBlock: 
+  TotalErrors_InBlock: 0
+  PerseverativeErrors_InBlock: 0
+  BacktrackErrors_InBlock: 0
+  RuleAbidingErrors_InBlock: 0
+  RuleBreakingErrors_InBlock: 0
+  RetouchCorrect_InBlock: 0
+  RetouchErroneous_InBlock: 0
   CorrectTouches_InBlock: 0
   NumSliderBarFull_InBlock: 0
   TotalErrors_InTask: 0

@@ -25,19 +25,19 @@ public class Item_Quaddle : Item
         if (other.CompareTag("Player"))
         {
             //audioManager.PlayNegativeItemClip();
-            audioManager.PlayPositiveItemClip();
+            //audioManager.PlayPositiveItemClip();
             Destroy(gameObject);
         }
     }
 }
 
-public class Item_Door : Item
+public class Item_Blockade : Item
 {
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            audioManager.PlayNegativeItemClip();
+            //audioManager.PlayNegativeItemClip();
             playerMovement.StartAnimation("injured");
             floorManager.DeactivateMovement();
         }

@@ -89,21 +89,26 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             //Handler.MinDuration = minObjectTouchDuration.value;
             //Handler.MaxDuration = maxObjectTouchDuration.value;
 
+            TokenFBController.enabled = false;
+
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
         {
+            TokenFBController.AdjustTokenBarSizing(100);
+            TokenFBController.SetRevealTime(.15f);
+            TokenFBController.SetUpdateTime(.25f);
+
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(25f, 1 * (1f / 4), new Vector3(0f, -10f, 0f));
             //////SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
-            SliderFBController.SliderGO.SetActive(true);
+            //SliderFBController.SliderGO.SetActive(true);
 
 
             //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Day");
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
+            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
         });
@@ -116,6 +121,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 PlayerGO = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
                 PlayerGO.name = "Player";
                 PlayerMovement = PlayerGO.GetComponent<PlayerMovement>();
+                PlayerMovement.TokenFbController = TokenFBController;
             }
 
             if (ItemSpawner == null)
@@ -141,14 +147,13 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         Setup.AddTimer(() => 1f, Play);
 
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
-        float startTime = 0f;
         Play.AddSpecificInitializationMethod(() =>
         {
             if (MovementCirclesController == null)
             {
                 MovementCirclesControllerGO = new GameObject("MovementCirclesController");
                 MovementCirclesController = MovementCirclesControllerGO.AddComponent<MovementCirclesController>();
-                MovementCirclesController.ManualStart(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
+                MovementCirclesController.SetupMovementCircles(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
             }
 
             PlayerMovement.StartAnimation("Run");
@@ -158,17 +163,16 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             AudioFBController.Play("EC_BalloonChosen");
 
-            startTime = Time.time;
+            TokenFBController.enabled = true;
         });
         //Play.AddUpdateMethod(() =>
         //{
-        //    if (Time.time - startTime >= 15f)
-        //    {
-        //        CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-        //        startTime = Time.time;
-        //    }
+
         //});
-        Play.AddTimer(() => 5000, ITI);
+        Play.AddTimer(() => 5000, ITI, () =>
+        {
+            TokenFBController.enabled = false;
+        });
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => .01f, FinishTrial);

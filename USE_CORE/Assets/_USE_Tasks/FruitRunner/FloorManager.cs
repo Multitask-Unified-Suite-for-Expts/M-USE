@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 15;
+    private readonly float MovementSpeed = 20;
     private GameObject floorTilePrefab;
     private int tilesOnScreen = 6;
 
@@ -16,11 +16,12 @@ public class FloorManager : MonoBehaviour
 
     private bool Move;
 
+    private Vector3 TileScale = new Vector3(1f, 1f, 1f); //Make configurable?
 
 
     void Start()
     {
-        floorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile");
+        floorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
         activeTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
@@ -70,15 +71,17 @@ public class FloorManager : MonoBehaviour
         {
             GameObject lastTile = activeTiles[activeTiles.Count - 1];
             BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
-            spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z; //removed .25f
+            spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z;
         }
 
         GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile " + (NumTilesSpawned + 1);
+        tile.transform.localScale = TileScale; //Set to Tile Scale size
         tile.gameObject.transform.parent = gameObject.transform;
         tile.AddComponent<Item_Floor>();
 
-        if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
+        //if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
+        if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
             itemSpawner.SpawnItem(tile.transform);
 
         activeTiles.Add(tile);

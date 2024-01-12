@@ -18,10 +18,11 @@ public class MovementCirclesController : MonoBehaviour
     public Color OriginalCircleColor;
 
     public List<GameObject> Circles;
-    
+
+    public Vector3 position = new Vector3(0f, -(Screen.height * .41f), 0f);
 
 
-    public void ManualStart(Canvas parentCanvas, GameObject player)
+    public void SetupMovementCircles(Canvas parentCanvas, GameObject player)
     {
         ParentCanvas = parentCanvas;
         PlayerMovement = player.GetComponent<PlayerMovement>();
@@ -31,7 +32,7 @@ public class MovementCirclesController : MonoBehaviour
         Instantiated.name = "MovementCirclesParent";
         Instantiated.transform.SetParent(ParentCanvas.transform);
         Instantiated.transform.localScale = Vector3.one;
-        Instantiated.transform.localPosition = new Vector3(0f, -(Screen.height * .45f), 0f);
+        Instantiated.transform.localPosition = position;
         Instantiated.transform.localRotation = Quaternion.identity;
 
         LeftCircleGO = Instantiated.transform.Find("LeftCircle").gameObject;

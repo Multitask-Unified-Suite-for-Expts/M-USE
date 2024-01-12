@@ -19,9 +19,22 @@ public class PlayerMovement : MonoBehaviour
     public MovementCirclesController CirclesController;
 
     public Animator Animator;
-    private enum AnimationState { Idle, Run, Injured};
-    private AnimationState CurrentAnimationState;
 
+    public TokenFBController TokenFbController;
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.CompareTag("Quaddle"))
+        {
+            StartAnimation("Happy");
+            TokenFbController.AddTokens(other.gameObject, 1, .4f);
+        }
+        else if(other.CompareTag("Blockade"))
+        {
+            TokenFbController.RemoveTokens(gameObject, 1, .4f);
+        }
+    }
 
     void Start()
     {
@@ -123,53 +136,32 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
-    public void StartAnimation(string animationName)
+    public void StartAnimation(string newAnimName)
     {
         if (Animator == null)
             Animator = GetComponent<Animator>();
 
-        switch (animationName.ToLower())
+        switch (newAnimName.ToLower())
         {
             case "idle":
-                SwitchAnimationState(AnimationState.Idle);
+                Animator.Play("Idle");
                 break;
             case "run":
-                SwitchAnimationState(AnimationState.Run);
+                Animator.Play("Run");
                 break;
             case "injured":
-                SwitchAnimationState(AnimationState.Injured);
+                Animator.Play("Injured");
+                break;
+            case "happy":
+                Animator.Play("Happy");
+                break;
+            case "sad":
+                Animator.Play("Sad");
                 break;
             default:
-                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured");
+                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad");
                 break;
         }
-    }
-
-    void SwitchAnimationState(AnimationState newState)
-    {
-        if (CurrentAnimationState == newState)
-            return;
-
-        CurrentAnimationState = newState;
-        switch (newState)
-        {
-            case AnimationState.Idle:
-                SetAnimatorParameters(isIdle: true, isRunning: false, isInjured: false);
-                break;
-            case AnimationState.Run:
-                SetAnimatorParameters(isIdle: false, isRunning: true, isInjured: false);
-                break;
-            case AnimationState.Injured:
-                SetAnimatorParameters(isIdle: false, isRunning: false, isInjured: true);
-                break;
-        }
-    }
-
-    void SetAnimatorParameters(bool isIdle, bool isRunning, bool isInjured)
-    {
-        Animator.SetBool("IsIdle", isIdle);
-        Animator.SetBool("IsRunning", isRunning);
-        Animator.SetBool("IsInjured", isInjured);
     }
 
 

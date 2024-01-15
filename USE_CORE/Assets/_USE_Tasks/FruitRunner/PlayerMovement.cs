@@ -15,26 +15,16 @@ public class PlayerMovement : MonoBehaviour
     public readonly Vector3 MiddlePos = Vector3.zero;
     public readonly Vector3 RightPos = new Vector3(1.9f, 0f, 0f);
 
+    public FloorManager FloorManager;
     private AudioManager audioManager;
     public MovementCirclesController CirclesController;
 
+    private bool Animate = true;
     public Animator Animator;
 
     public TokenFBController TokenFbController;
 
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.CompareTag("Quaddle"))
-        {
-            StartAnimation("Happy");
-            TokenFbController.AddTokens(other.gameObject, 1, .4f);
-        }
-        else if(other.CompareTag("Blockade"))
-        {
-            TokenFbController.RemoveTokens(gameObject, 1, .4f);
-        }
-    }
 
     void Start()
     {
@@ -54,8 +44,8 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = TargetPos; //keep it in place if not shifting
 
-            if(AllowInput)
-                HandleInput();
+            if (AllowInput)
+                HandleKeyboardInput();
         }
     }
 
@@ -73,10 +63,6 @@ public class PlayerMovement : MonoBehaviour
                 transform.position = TargetPos;
                 IsShifting = false;
             }
-        }
-        else
-        {
-            transform.position = TargetPos;
         }
     }
 
@@ -100,8 +86,12 @@ public class PlayerMovement : MonoBehaviour
         AllowInput = false;
     }
 
-    private void HandleInput()
+    private void HandleKeyboardInput()
     {
+        //Disable Input when doing injury animation
+        if(Animator.GetCurrentAnimatorStateInfo(0).IsName("Injured"))
+            return;
+
         if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
         {
             if (transform.position == MiddlePos)
@@ -138,6 +128,9 @@ public class PlayerMovement : MonoBehaviour
 
     public void StartAnimation(string newAnimName)
     {
+        if (!Animate)
+            return;
+
         if (Animator == null)
             Animator = GetComponent<Animator>();
 

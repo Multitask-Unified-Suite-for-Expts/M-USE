@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 20;
-    private GameObject floorTilePrefab;
-    private int tilesOnScreen = 6;
+    private readonly float FloorMovementSpeed = 20;
+    private GameObject FloorTilePrefab;
+    private int NumTilesOnScreen = 6;
+    private int NumTilesSpawned;
 
-    private List<GameObject> activeTiles;
+    private List<GameObject> ActiveTiles;
 
     private ItemSpawner itemSpawner;
-    private int NumTilesSpawned;
 
     private bool Move;
 
@@ -21,12 +21,12 @@ public class FloorManager : MonoBehaviour
 
     void Start()
     {
-        floorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
+        FloorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
-        activeTiles = new List<GameObject>();
+        ActiveTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
 
-        for (int i = 0; i < tilesOnScreen; i++)
+        for (int i = 0; i < NumTilesOnScreen; i++)
         {
             SpawnTile();
         }
@@ -43,9 +43,9 @@ public class FloorManager : MonoBehaviour
 
         MoveTiles();
 
-        if (activeTiles.Count > 0)
+        if (ActiveTiles.Count > 0)
         {
-            BoxCollider collider = activeTiles[0].GetComponent<BoxCollider>();
+            BoxCollider collider = ActiveTiles[0].GetComponent<BoxCollider>();
 
             if(collider.bounds.max.z < transform.position.z - collider.bounds.size.z)
             {
@@ -57,9 +57,9 @@ public class FloorManager : MonoBehaviour
 
     void MoveTiles()
     {
-        foreach(var tile in activeTiles)
+        foreach(var tile in ActiveTiles)
         {
-            tile.transform.Translate(Vector3.back * MovementSpeed * Time.deltaTime);
+            tile.transform.Translate(Vector3.back * FloorMovementSpeed * Time.deltaTime);
         }
     }
 
@@ -67,14 +67,14 @@ public class FloorManager : MonoBehaviour
     {
         Vector3 spawnPos = new Vector3(0f, -.5f, -.5f); //for first one
 
-        if(activeTiles.Count > 0)
+        if(ActiveTiles.Count > 0)
         {
-            GameObject lastTile = activeTiles[activeTiles.Count - 1];
+            GameObject lastTile = ActiveTiles[ActiveTiles.Count - 1];
             BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
             spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z;
         }
 
-        GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
+        GameObject tile = Instantiate(FloorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile " + (NumTilesSpawned + 1);
         tile.transform.localScale = TileScale; //Set to Tile Scale size
         tile.gameObject.transform.parent = gameObject.transform;
@@ -84,7 +84,7 @@ public class FloorManager : MonoBehaviour
         if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
             itemSpawner.SpawnItem(tile.transform);
 
-        activeTiles.Add(tile);
+        ActiveTiles.Add(tile);
 
         NumTilesSpawned++;
     }
@@ -105,8 +105,8 @@ public class FloorManager : MonoBehaviour
 
     void DeleteTile()
     {
-        Destroy(activeTiles[0]);
-        activeTiles.RemoveAt(0);
+        Destroy(ActiveTiles[0]);
+        ActiveTiles.RemoveAt(0);
     }
 
 

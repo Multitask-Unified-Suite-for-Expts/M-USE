@@ -61,18 +61,14 @@ public class MovementCirclesController : MonoBehaviour
     {
         HighlightActiveCircle(clickedGO);
 
-        if(clickedGO == LeftCircleGO)
-        {
+        if (clickedGO == LeftCircleGO)
             PlayerMovement.MoveToPosition(PlayerMovement.LeftPos);
-        }
         else if (clickedGO == MiddleCircleGO)
-        {
             PlayerMovement.MoveToPosition(PlayerMovement.MiddlePos);
-        }
         else if (clickedGO == RightCircleGO)
-        {
             PlayerMovement.MoveToPosition(PlayerMovement.RightPos);
-        }
+        else
+            Debug.LogWarning("CLICKED GO DOESNT MATCH LEFT, MIDDLE, or RIGHT circle!");
     }
 
     public void HighlightActiveCircle(GameObject clickedGO)

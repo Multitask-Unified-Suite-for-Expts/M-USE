@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Item : MonoBehaviour
 {
     protected AudioManager audioManager;
@@ -20,12 +21,22 @@ public class Item : MonoBehaviour
 
 public class Item_Quaddle : Item
 {
+    public bool IsNegative; //where will we set this?
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            //audioManager.PlayNegativeItemClip();
-            //audioManager.PlayPositiveItemClip();
+            if(IsNegative)
+            {
+                playerMovement.StartAnimation("Sad");
+                playerMovement.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
+            }
+            else
+            {
+                playerMovement.StartAnimation("Happy");
+                playerMovement.TokenFbController.AddTokens(other.gameObject, 1, .4f);
+            }
             Destroy(gameObject);
         }
     }
@@ -37,7 +48,7 @@ public class Item_Blockade : Item
     {
         if (other.CompareTag("Player"))
         {
-            //audioManager.PlayNegativeItemClip();
+            playerMovement.TokenFbController.RemoveTokens(gameObject, 1, .4f);
             playerMovement.StartAnimation("injured");
             floorManager.DeactivateMovement();
         }

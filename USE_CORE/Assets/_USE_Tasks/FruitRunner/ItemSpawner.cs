@@ -5,14 +5,14 @@ using USE_StimulusManagement;
 
 public class ItemSpawner : MonoBehaviour
 {
-    public List<GameObject> DoorPrefabs;
+    public List<GameObject> BlockadePrefabs;
     public List<GameObject> TrialQuaddles;
     private int Count_ItemsBetweenDoors = 0;
 
 
     private void Start()
     {
-        DoorPrefabs = new List<GameObject>
+        BlockadePrefabs = new List<GameObject>
         {
             Resources.Load<GameObject>("Prefabs/Blockade_Left"),
             Resources.Load<GameObject>("Prefabs/Blockade_Right")
@@ -47,7 +47,7 @@ public class ItemSpawner : MonoBehaviour
         else
         {
             Count_ItemsBetweenDoors = 0;
-            stim = Instantiate(DoorPrefabs[Random.Range(0, DoorPrefabs.Count)]);
+            stim = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
             stim.name = "Blockade";
             stim.AddComponent<Item_Blockade>();
             stim.tag = "Blockade";
@@ -61,12 +61,12 @@ public class ItemSpawner : MonoBehaviour
 
     void SetItemPosition(GameObject item, Transform parentTransform)
     {
-        bool isDoor = item.name == "Blockade";
+        bool isBlockade = item.name == "Blockade";
 
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
 
-        item.transform.position = new Vector3(isDoor ? item.transform.position.x : randomSpawnPoint.position.x, isDoor ? .75f : .7f, randomSpawnPoint.position.z); 
+        item.transform.position = new Vector3(isBlockade ? item.transform.position.x : randomSpawnPoint.position.x, isBlockade ? .75f : .7f, randomSpawnPoint.position.z); 
         item.transform.parent = parentTransform;
     }
 

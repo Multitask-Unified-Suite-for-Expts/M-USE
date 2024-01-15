@@ -2,12 +2,10 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using USE_States;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using FruitRunner_Namespace;
 using ConfigDynamicUI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
@@ -120,6 +118,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             {
                 PlayerGO = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
                 PlayerGO.name = "Player";
+                PlayerGO.tag = "Player";
                 PlayerMovement = PlayerGO.GetComponent<PlayerMovement>();
                 PlayerMovement.TokenFbController = TokenFBController;
             }
@@ -202,6 +201,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        //NEED TO DESTROY ALL THE EXTERNAL CLASSES (and their Gameobjects?)
+        //XXXX
+        //XXXX
+
         SliderFBController.SliderGO.SetActive(false);
         SliderFBController.SliderHaloGO.SetActive(false);
 

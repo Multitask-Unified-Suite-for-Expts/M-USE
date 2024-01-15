@@ -29,8 +29,10 @@ public class MazeManager:MonoBehaviour
     // Tile Container
     public TileSettings tileSettings; // Set in Editor
     public GameObject tileContainerGO; // Set in Editor
-    public GameObject tileConnectorsContainerGO;
-    
+    public GameObject tileConnectorsContainerGO; // Set in Editor
+    public GameObject landmarksContainerGO; // Set in Editor
+
+
     // Maze GameObjects
     public GameObject mazeBackgroundGO; // Set in Editor
     
@@ -85,10 +87,6 @@ public class MazeManager:MonoBehaviour
     }
     public StimGroup CreateMaze(Texture2D tileTex, Texture2D mazeBgTex)
     {
-
-        GameObject landmark =  new GameObject("Landmark", typeof(SpriteRenderer));
-        landmark.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("House");
-
         StimGroup tiles = new StimGroup("Tiles");
 
         
@@ -125,7 +123,9 @@ public class MazeManager:MonoBehaviour
             
             float xOffset = tileContainerGO.GetComponent<RectTransform>().rect.width/(customMazeDims.Max()+1);
             float yOffset = tileContainerGO.GetComponent<RectTransform>().rect.height/(customMazeDims.Count+1);
-            
+
+
+
             for (int row = 0; row < customMazeDims.Count; row++)
             {
                 int numCircles = customMazeDims[row]; // Adjust number of circles per row
@@ -142,13 +142,26 @@ public class MazeManager:MonoBehaviour
                     else
                          y = (-yOffset * (customMazeDims.Count / 2)) + (row * yOffset);
 
+
+                    string tileName = GetChessCoordName(col, row);
+                    Debug.LogWarning("TILE NAME: " +  tileName);
+                    if (mgTrialDef.Blockades.Contains(tileName))
+                    {
+                        Debug.LogWarning("this is being skipped: " +  tileName);
+                        continue;
+                    }
                     GameObject tileGO = InitializeTile(tileTex, col, row, tiles);
                     tileGO.transform.localPosition = new Vector2(x, y);
                 }
             }
 
+            
+
             AssignAdjacentTiles(tiles, xOffset, yOffset);
             mgTrialLevel.DeactivateChildren(tileConnectorsContainerGO);
+
+            if (mgTrialDef.Landmarks.Count > 0)
+                CreateLandmarks(mgTrialDef.Landmarks);
 
         }
         currentMaze.mName = $"{currentMaze.mStart}_{currentMaze.mFinish}";
@@ -171,9 +184,6 @@ public class MazeManager:MonoBehaviour
         if(!creatingSquareMaze) 
             tileGO.GetComponent<SpriteRenderer>().sprite =  Resources.Load<Sprite>("Star");
         
-       /* Material tileMaterial = new Material(tileGO.GetComponent<SpriteRenderer>().material);
-        tileMaterial.mainTexture = tileTex;
-        tileGO.GetComponent<SpriteRenderer>().material = tileMaterial;*/
         tileGO.name = GetChessCoordName(col, row);
         tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;
         Tile tile = tileGO.AddComponent<Tile>();
@@ -517,8 +527,46 @@ public class MazeManager:MonoBehaviour
         RemovePathProgressFollowingError();
         return 20;
     }
+
+    public void CreateLandmarks(Dictionary <string, string> landmarks)
+    {
+        foreach (var landmark in landmarks)
+        {
+            string[] positions = landmark.Value.Split('_');
+            Vector3 positionA = tileContainerGO.transform.Find(positions[0]).localPosition;
+            Vector3 positionB = tileContainerGO.transform.Find(positions[1]).localPosition;
+            Vector3 positionC = tileContainerGO.transform.Find(positions[2]).localPosition;
+
+
+            Vector3 centroid = CalculateCentroid(positionA, positionB, positionC);
+
+            GameObject landmarkGO = new GameObject(landmark.Key, typeof(SpriteRenderer));
+            landmarkGO.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>(landmarkGO.name);
+            landmarkGO.transform.SetParent(landmarksContainerGO.transform);
+            landmarkGO.transform.localPosition = centroid;
+
+            switch (landmark.Key)
+            {
+                case ("House"):
+                    landmarkGO.transform.localScale = new Vector3(50, 50, 1.5f);
+                    break;
+                case ("Tree"):
+                    landmarkGO.transform.localScale = new Vector3(20, 20, 1.5f);
+                    break;
+            }
+        }
+    }
+
     
     // Helper Functions
+    Vector3 CalculateCentroid(Vector3 positionA, Vector3 positionB, Vector3 positionC)
+    {
+        return new Vector3(
+            (positionA.x + positionB.x + positionC.x) / 3f,
+            (positionA.y + positionB.y + positionC.y) / 3f,
+            (positionA.z + positionB.z + positionC.z) / 3f
+        );
+    }
     string GetChessCoordName(int col, int row)
     {
         string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -543,13 +591,17 @@ public class MazeManager:MonoBehaviour
     {
         tileContainerGO.SetActive(true);
         tileConnectorsContainerGO.SetActive(true);
+        landmarksContainerGO.SetActive(true);
         
         mgTrialLevel.ActivateChildren(tileContainerGO);
         
         if (creatingSquareMaze)
             mazeBackgroundGO.SetActive(true);
         else
+        {
             mgTrialLevel.ActivateChildren(tileConnectorsContainerGO);
+            mgTrialLevel.ActivateChildren(landmarksContainerGO);
+        }
     }
     public void ResetSelectionClassifications()
     {

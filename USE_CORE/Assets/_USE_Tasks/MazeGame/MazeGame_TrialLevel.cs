@@ -58,6 +58,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     // Tile objects
     public StimGroup tiles; // top of trial level with other variable definitions
+    public StimGroup landmarks;
     public Texture2D tileTex;
     public Texture2D mazeBgTex;
     
@@ -609,7 +610,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             DestroyChildren(PlayerViewParent);
 
         DestroyChildren(MazeManager.tileConnectorsContainerGO);
-        
+        DestroyChildren(MazeManager.landmarksContainerGO);
+
+
         if (TokenFBController.isActiveAndEnabled)
             TokenFBController.enabled = false;
 

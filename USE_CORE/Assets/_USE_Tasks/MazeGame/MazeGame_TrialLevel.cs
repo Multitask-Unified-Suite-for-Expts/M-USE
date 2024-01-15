@@ -239,21 +239,21 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeFinish"]);
             }
         });
-        ChooseTile.SpecifyTermination(() => (MazeManager.mazeDuration > CurrentTrialDef.MaxMazeDuration) || (MazeManager.choiceDuration > CurrentTrialDef.MaxChoiceDuration), () => FinishTrial, () =>
+/*        ChooseTile.SpecifyTermination(() => (MazeManager.mazeDuration > CurrentTrialDef.MaxMazeDuration) || (MazeManager.choiceDuration > CurrentTrialDef.MaxChoiceDuration), () => FinishTrial, () =>
         {
-            // Timeout Termination
+            Timeout Termination
             Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-        
+
             CurrentTaskLevel.MazeDurations_InBlock.Add(null);
             CurrentTaskLevel.MazeDurations_InTask.Add(null);
-        
+
             CurrentTaskLevel.ChoiceDurations_InBlock.Add(null);
             CurrentTaskLevel.ChoiceDurations_InTask.Add(null);
-        
+
             runningPercentError.Add(null);
-        });
+        });*/
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
@@ -282,10 +282,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else if (MazeManager.correctSelection)
             {
+              
+
                 if (MazeManager.finishedMaze)
                     SliderFBController.UpdateSliderValue(1); // fill up the remainder of the slider
                 else
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
+              
                 if (!Session.WebBuild && !MazeManager.freePlay)
                     PlayerViewParent.transform.Find((MazeManager.currentPathIndex + 1).ToString()).GetComponent<Text>().color = new Color(0, 0.392f, 0);
             }

@@ -33,7 +33,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using USE_Data;
-
+using UnityEngine.UI.Extensions;
 
 namespace USE_UI
 {
@@ -545,6 +545,7 @@ namespace USE_UI
     public class USE_Line
     {
         public GameObject LineGO;
+        public UILineRenderer LineRenderer;
         public float LineSize = 1f;
         public float LineLength = 0f;
         public Color LineColor = new Color(1, 1, 1, 1);
@@ -555,7 +556,7 @@ namespace USE_UI
         public State SetInactiveOnTermination;
         public USE_Line(Canvas parent, Vector2 start, Vector2 end, Color col, string name, bool adjustAnchor = false)
         {
-            LineGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UILineRenderer));
+            LineGO = new GameObject(name, typeof(RectTransform), typeof(UILineRenderer));
             LineGO.transform.SetParent(parent.transform, false);
             if (adjustAnchor)
             {
@@ -565,7 +566,7 @@ namespace USE_UI
             }
             
             LineGO.GetComponent<RectTransform>().sizeDelta = new Vector2(LineSize, LineSize);
-            UnityEngine.UI.Extensions.UILineRenderer LineRenderer = LineGO.GetComponent<UnityEngine.UI.Extensions.UILineRenderer>();
+            LineRenderer = LineGO.GetComponent<UILineRenderer>();
             LineLength = Vector2.Distance(start, end);
             LineRenderer.LineThickness = 10f;
             LineRenderer.Points = new Vector2[] { start, end };

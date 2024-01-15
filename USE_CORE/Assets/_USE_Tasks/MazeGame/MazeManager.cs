@@ -7,7 +7,9 @@ using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
 using UnityEngine.Serialization;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 using UnityEngine.WSA;
 using USE_StimulusManagement;
 using USE_UI;
@@ -55,6 +57,8 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] public bool tileConnectorsLoaded;
     [HideInInspector] public Maze currentMaze;
 
+    [HideInInspector] public GameObject latestConnection;
+
     [HideInInspector] public float mazeDuration;
     [HideInInspector] public float choiceDuration;
     [HideInInspector] public float mazeStartTime;
@@ -81,6 +85,10 @@ public class MazeManager:MonoBehaviour
     }
     public StimGroup CreateMaze(Texture2D tileTex, Texture2D mazeBgTex)
     {
+
+        GameObject landmark =  new GameObject("Landmark", typeof(SpriteRenderer));
+        landmark.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("House");
+
         StimGroup tiles = new StimGroup("Tiles");
 
         
@@ -161,11 +169,11 @@ public class MazeManager:MonoBehaviour
     {
         GameObject tileGO = Instantiate(tilePrefab, tileContainerGO.transform);
         if(!creatingSquareMaze) 
-            tileGO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("Star");
+            tileGO.GetComponent<SpriteRenderer>().sprite =  Resources.Load<Sprite>("Star");
         
-        Material tileMaterial = new Material(tileGO.GetComponent<Image>().material);
+       /* Material tileMaterial = new Material(tileGO.GetComponent<SpriteRenderer>().material);
         tileMaterial.mainTexture = tileTex;
-        tileGO.GetComponent<Image>().material = tileMaterial;
+        tileGO.GetComponent<SpriteRenderer>().material = tileMaterial;*/
         tileGO.name = GetChessCoordName(col, row);
         tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;
         Tile tile = tileGO.AddComponent<Tile>();
@@ -173,6 +181,7 @@ public class MazeManager:MonoBehaviour
 
         StimDef tileStimDef = new StimDef(tiles, tileGO);
         tile.mCoord = new Coords(tileGO.name);
+
         
         AssignInitialTileColor(tile, currentMaze);
         AssignSliderValue(tile);
@@ -180,11 +189,13 @@ public class MazeManager:MonoBehaviour
         tileGO.SetActive(false);
         return tileGO;
     }
-    private void GenerateTileConnectors(GameObject otherTile, GameObject tile, Vector2 otherTilePos, Vector2 tilePos)
+    private void CreateTileConnectors(GameObject startTile, GameObject endTile, Vector2 startTilePos, Vector2 endTilePos)
     {
-        if (tileConnectorsContainerGO.transform.Find($"{otherTile.name}{tile.name}") == null)
+        if (tileConnectorsContainerGO.transform.Find($"{startTile.name}{endTile.name}") == null)
         {
-            USE_Line line = new USE_Line(mgTrialLevel.MG_CanvasGO.GetComponent<Canvas>(), tilePos, otherTilePos, Color.black, $"{tile.name}{otherTile.name}");
+            USE_Line line = new USE_Line(mgTrialLevel.MG_CanvasGO.GetComponent<Canvas>(), endTilePos, startTilePos, Color.white, $"{endTile.name}{startTile.name}");
+            line.LineRenderer.sprite = Resources.Load<Sprite>("dotted_road"); 
+            line.LineRenderer.LineThickness = 30;
             line.LineGO.transform.SetParent(tileConnectorsContainerGO.transform);
             line.LineGO.SetActive(true);
             line.LineGO.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
@@ -293,7 +304,7 @@ public class MazeManager:MonoBehaviour
                 continue;
 
             foreach (GameObject adjTile in tile.AdjacentTiles)
-                GenerateTileConnectors(adjTile, tileGO, adjTile.transform.localPosition,
+                CreateTileConnectors(adjTile, tileGO, adjTile.transform.localPosition,
                     tileGO.transform.localPosition);
         }
 
@@ -364,13 +375,24 @@ public class MazeManager:MonoBehaviour
         if (tile.mCoord.chessCoord == currentMaze.mNextStep)
         {
 
+
             // Provides feedback for last correct tile touch and updates next tile step
             if (TileGO == currentTilePositionGO)
             {
                // maze.mNextStep = maze.mPath[maze.mPath.FindIndex(pathCoord => pathCoord == tile.mCoord.chessCoord) + 1];
                 mgTrialLevel.HandleRetouchCorrect(currentPathIndex);
                 currentMaze.mNextStep = currentMaze.mPath[currentPathIndex+1];
+                
+                if(latestConnection != null)
+                    latestConnection.GetComponent<UILineRenderer>().material = Resources.Load<Material>("SelectedPath");
                 return 2;
+            }
+
+            if(currentTilePositionGO != null)
+            {
+                Transform connectorTransform = tileConnectorsContainerGO.transform.Find($"{currentTilePositionGO.name}{TileGO.name}") ?? tileConnectorsContainerGO.transform.Find($"{TileGO.name}{currentTilePositionGO.name}");
+                latestConnection = connectorTransform?.gameObject;
+                latestConnection.GetComponent<UILineRenderer>().material = Resources.Load<Material>("SelectedPath");
             }
 
             mgTrialLevel.HandleCorrectTouch();
@@ -453,6 +475,7 @@ public class MazeManager:MonoBehaviour
             Debug.LogWarning("**CORRECT TOUCH**");
 
             mgTrialLevel.HandleCorrectTouch();
+            
 
             // Helps set progress on the experimenter display
             selectedTilesInPathGO.Add(TileGO);
@@ -512,6 +535,8 @@ public class MazeManager:MonoBehaviour
         {
             currentMaze.mNextStep = currentTilePositionGO.name;
             currentTilePositionGO.GetComponent<Tile>().setColor(currentTilePositionGO.GetComponent<Tile>().initialTileColor);
+            if (latestConnection != null)
+                latestConnection.GetComponent<UILineRenderer>().material = null;
         }
     }
     public void ActivateMazeElements()

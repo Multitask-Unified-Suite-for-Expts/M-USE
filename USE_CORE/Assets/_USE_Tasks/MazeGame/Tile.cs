@@ -56,7 +56,7 @@ public class Tile : MonoBehaviour
     [HideInInspector] public bool assignedTileFlash;
     [HideInInspector] public bool choiceFeedback;
 
-    [FormerlySerializedAs("flashingTile")] [HideInInspector] public GameObject flashingTileGO;
+    [HideInInspector] public GameObject flashingTileGO;
 
     public void Initialize(TileSettings tileSettings, MazeManager mazeManager)
     {
@@ -74,7 +74,7 @@ public class Tile : MonoBehaviour
     }
     public void setColor(Color c)
     {
-        GetComponent<Image>().color = c;
+        GetComponent<SpriteRenderer>().color = c;
     } 
 
     public void ColorFeedback(int code)
@@ -99,8 +99,8 @@ public class Tile : MonoBehaviour
                 break;
         }
 
-        initialTileColor = gameObject.GetComponent<Image>().color;
-        gameObject.GetComponent<Image>().color = FBColor;
+        initialTileColor = gameObject.GetComponent<SpriteRenderer>().color;
+        gameObject.GetComponent<SpriteRenderer>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
     }
@@ -139,16 +139,16 @@ public class Tile : MonoBehaviour
             if (elapsed >= iFlashes * interval)
             {
                 if (iFlashes % 2 == 0)
-                    flashingTileGO.GetComponent<Image>().color = FBColor;
+                    flashingTileGO.GetComponent<SpriteRenderer>().color = FBColor;
                 else
-                    flashingTileGO.GetComponent<Image>().color = initialTileColor;
+                    flashingTileGO.GetComponent<SpriteRenderer>().color = initialTileColor;
 
                 iFlashes++;
             }
         
             if (iFlashes >= 2 * numBlinks)
             { 
-                flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
+                flashingTileGO.GetComponent<SpriteRenderer>().color = initialTileColor; // confirm it stops on original tile color
                 isFlashing = false;
             }
         }
@@ -163,10 +163,10 @@ public class Tile : MonoBehaviour
             {
                 if (!MazeManager.viewPath || CorrectnessCode != 1 && CorrectnessCode != 2)
                 {
-                    gameObject.GetComponent<Image>().color = initialTileColor;
+                    gameObject.GetComponent<SpriteRenderer>().color = initialTileColor;
                 }
                 else if(MazeManager.viewPath && CorrectnessCode == 2)
-                    gameObject.GetComponent<Image>().color= correctColor;
+                    gameObject.GetComponent<SpriteRenderer>().color= correctColor;
                
 
                 choiceFeedback = false;

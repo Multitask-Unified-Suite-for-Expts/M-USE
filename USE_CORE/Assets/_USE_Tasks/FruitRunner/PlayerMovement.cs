@@ -19,10 +19,13 @@ public class PlayerMovement : MonoBehaviour
     private AudioManager audioManager;
     public MovementCirclesController CirclesController;
 
-    private bool Animate = true;
     public Animator Animator;
 
     public TokenFBController TokenFbController;
+
+    public bool AllowHappyAndSadAnimations = false;
+
+    public GameObject ConfettiGO;
 
 
 
@@ -30,12 +33,12 @@ public class PlayerMovement : MonoBehaviour
     {
         Rb = GetComponent<Rigidbody>();
         transform.position = Vector3.zero;
+        TargetPos = MiddlePos;
+
         audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
 
         Animator = GetComponent<Animator>();
         StartAnimation("idle");
-
-        TargetPos = MiddlePos;
     }
 
     private void Update()
@@ -44,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = TargetPos; //keep it in place if not shifting
 
-            if (AllowInput)
+            if(AllowInput)
                 HandleKeyboardInput();
         }
     }
@@ -125,12 +128,31 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    public void FinalCelebration()
+    {
+        TargetPos = MiddlePos;
+        transform.position = MiddlePos;
+
+        DisableUserInput();
+        StartAnimation("Cheer");
+        GameObject landingGO = Instantiate(Resources.Load<GameObject>("Prefabs/Podium"));
+        landingGO.transform.parent = transform;
+
+        ConfettiGO = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
+        ConfettiGO.SetActive(true);
+        CirclesController.Instantiated.SetActive(false);
+    }
+
+    //Helper method used by trial level at end to put player back in middle for celebration. 
+    public void SetToMiddlePos()
+    {
+        TargetPos = MiddlePos;
+        transform.position = MiddlePos;
+    }
+
 
     public void StartAnimation(string newAnimName)
     {
-        if (!Animate)
-            return;
-
         if (Animator == null)
             Animator = GetComponent<Animator>();
 
@@ -146,17 +168,30 @@ public class PlayerMovement : MonoBehaviour
                 Animator.Play("Injured");
                 break;
             case "happy":
-                Animator.Play("Happy");
+                if(AllowHappyAndSadAnimations)
+                    Animator.Play("Happy");
                 break;
             case "sad":
-                Animator.Play("Sad");
+                if (AllowHappyAndSadAnimations)
+                    Animator.Play("Sad");
+                break;
+            case "cheer":
+                audioManager.PlayCrowdCheering();
+                Animator.Play("Cheer");
                 break;
             default:
-                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad");
+                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad, Cheer");
                 break;
         }
     }
 
+
+    private void OnDestroy()
+    {
+        audioManager.StopAllAudio();
+        if (ConfettiGO != null)
+            Destroy(ConfettiGO);
+    }
 
 
 }

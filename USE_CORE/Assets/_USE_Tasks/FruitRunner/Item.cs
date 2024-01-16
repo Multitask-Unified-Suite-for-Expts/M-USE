@@ -21,21 +21,28 @@ public class Item : MonoBehaviour
 
 public class Item_Quaddle : Item
 {
-    public bool IsNegative; //where will we set this?
+    public string QuaddleType;
+    public string QuaddleGeneralPosition;
+
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            if(IsNegative)
+            if(QuaddleType == "Positive")
+            {
+                playerMovement.StartAnimation("Happy");
+                playerMovement.TokenFbController.AddTokens(other.gameObject, 1, .4f);
+            }
+            else if(QuaddleType == "Negative")
             {
                 playerMovement.StartAnimation("Sad");
                 playerMovement.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
             }
-            else
+            else if(QuaddleType == "Neutral")
             {
-                playerMovement.StartAnimation("Happy");
-                playerMovement.TokenFbController.AddTokens(other.gameObject, 1, .4f);
+                //what to do with neutral stim?
+                audioManager.PlayPositiveItemClip();
             }
             Destroy(gameObject);
         }
@@ -48,7 +55,7 @@ public class Item_Blockade : Item
     {
         if (other.CompareTag("Player"))
         {
-            playerMovement.TokenFbController.RemoveTokens(gameObject, 1, .4f);
+            playerMovement.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
             playerMovement.StartAnimation("injured");
             floorManager.DeactivateMovement();
         }

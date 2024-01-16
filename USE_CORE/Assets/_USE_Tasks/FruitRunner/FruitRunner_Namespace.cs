@@ -17,6 +17,7 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_TrialDef : TrialDef
     {
+        public int NumGroups;
         public Reward[][] ProbablisticTrialStimTokenReward;
         public int[] TrialStimIndices;
         public string[] TrialStimTypes; //Positive, Negative, Neutral
@@ -26,10 +27,7 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_StimDef : StimDef
     {
-
-        public enum StimTypes { Target, Distractor, Neutral };
-        public StimTypes StimType;
-
-
+        public string QuaddleType;
+        public string QuaddleGeneralPosition;
     }
 }

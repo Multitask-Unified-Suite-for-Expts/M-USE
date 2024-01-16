@@ -7,16 +7,19 @@ public class FloorManager : MonoBehaviour
 {
     private readonly float FloorMovementSpeed = 20;
     private GameObject FloorTilePrefab;
-    private int NumTilesOnScreen = 6;
-    private int NumTilesSpawned;
+    //private int NumTilesOnScreen = 8;
+    public int NumTilesSpawned;
 
-    private List<GameObject> ActiveTiles;
+    public int TotalTiles;
+
+    public List<GameObject> ActiveTiles;
 
     private ItemSpawner itemSpawner;
 
     private bool Move;
 
-    private Vector3 TileScale = new Vector3(1f, 1f, 1f); //Make configurable?
+    private Vector3 TileScale = new Vector3(1f, 1f, 1f); //Make the Z configurable?
+
 
 
     void Start()
@@ -26,7 +29,7 @@ public class FloorManager : MonoBehaviour
         ActiveTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
 
-        for (int i = 0; i < NumTilesOnScreen; i++)
+        for (int i = 0; i <= TotalTiles; i++)
         {
             SpawnTile();
         }
@@ -50,7 +53,7 @@ public class FloorManager : MonoBehaviour
             if(collider.bounds.max.z < transform.position.z - collider.bounds.size.z)
             {
                 DeleteTile();
-                SpawnTile();
+                //SpawnTile();
             }
         }
     }

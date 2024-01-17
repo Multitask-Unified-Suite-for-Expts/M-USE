@@ -116,6 +116,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskSummaryData();
         data["Trials Completed"] = TrialsCompleted_Task;
         data["Trials Correct"] = TrialsCorrect_Task;
+        data["% Trials Correct"] = ((float)TrialsCorrect_Task / TrialsCompleted_Task * 100).ToString("F1") + "%";
         if (AS_AvgCalcThresh_Task != null && AS_AvgCalcThresh_Task.Any())
             data["AvgCalcThresh_AS"] = AS_AvgCalcThresh_Task.Average();
         if (PS_AvgCalcThresh_Task != null && PS_AvgCalcThresh_Task.Any())
@@ -143,11 +144,17 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
-                        "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
-                        "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
-                        "\nReward Pulses: " + NumRewardPulses_InBlock +
-                        "\nReversal Count: " + trialLevel.reversalsCount +
-                        "\nReversals Necessary for Termination: " + trialLevel.NumReversalsUntilTerm;
+                             "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
+                             "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
+                             "\nReward Pulses: " + NumRewardPulses_InBlock +
+                             "\nReversal Count: " + trialLevel.reversalsCount +
+                             "\nReversals Necessary for Termination: " + trialLevel.NumReversalsUntilTerm;
+
+
+        if (AS_AvgCalcThresh_Task != null && AS_AvgCalcThresh_Task.Any()) 
+            CurrentBlockString = CurrentBlockString + "\nAverage AS Convergence Value: " + AS_AvgCalcThresh_Task.Average();
+        if (PS_AvgCalcThresh_Task != null && PS_AvgCalcThresh_Task.Any()) 
+            CurrentBlockString = CurrentBlockString + "\nAverage PS Convergence Value: " + PS_AvgCalcThresh_Task.Average();
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }

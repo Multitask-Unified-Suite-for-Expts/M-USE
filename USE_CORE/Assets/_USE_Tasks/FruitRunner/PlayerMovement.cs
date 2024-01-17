@@ -25,8 +25,10 @@ public class PlayerMovement : MonoBehaviour
 
     public bool AllowHappyAndSadAnimations = false;
 
-    public GameObject ConfettiGO;
+    public GameObject CelebrationConfetti;
 
+    public enum AnimationStates { Idle, Run, Injured, Happy, Sad, Cheer};
+    public AnimationStates CurrentAnimationState;
 
 
     void Start()
@@ -138,8 +140,8 @@ public class PlayerMovement : MonoBehaviour
         GameObject landingGO = Instantiate(Resources.Load<GameObject>("Prefabs/Podium"));
         landingGO.transform.parent = transform;
 
-        ConfettiGO = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
-        ConfettiGO.SetActive(true);
+        CelebrationConfetti = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
+        CelebrationConfetti.SetActive(true);
         CirclesController.Instantiated.SetActive(false);
     }
 
@@ -156,26 +158,38 @@ public class PlayerMovement : MonoBehaviour
         if (Animator == null)
             Animator = GetComponent<Animator>();
 
+
+
         switch (newAnimName.ToLower())
         {
             case "idle":
+                CurrentAnimationState = AnimationStates.Idle;
                 Animator.Play("Idle");
                 break;
             case "run":
+                CurrentAnimationState = AnimationStates.Run;
                 Animator.Play("Run");
                 break;
             case "injured":
+                CurrentAnimationState = AnimationStates.Injured;
                 Animator.Play("Injured");
                 break;
             case "happy":
-                if(AllowHappyAndSadAnimations)
+                if (AllowHappyAndSadAnimations)
+                {
+                    CurrentAnimationState = AnimationStates.Happy;
                     Animator.Play("Happy");
+                }
                 break;
             case "sad":
                 if (AllowHappyAndSadAnimations)
+                {
+                    CurrentAnimationState = AnimationStates.Sad;
                     Animator.Play("Sad");
+                }
                 break;
             case "cheer":
+                CurrentAnimationState = AnimationStates.Cheer;
                 audioManager.PlayCrowdCheering();
                 Animator.Play("Cheer");
                 break;
@@ -188,9 +202,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnDestroy()
     {
-        audioManager.StopAllAudio();
-        if (ConfettiGO != null)
-            Destroy(ConfettiGO);
+        if(audioManager != null)
+            audioManager.StopAllAudio();
+
+        if (CelebrationConfetti != null)
+            Destroy(CelebrationConfetti);
     }
 
 

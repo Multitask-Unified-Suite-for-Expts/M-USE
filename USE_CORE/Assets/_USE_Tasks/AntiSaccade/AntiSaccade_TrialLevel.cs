@@ -495,7 +495,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
                              "\nDifficulty Level: " + difficultyLevel +
-                             "\nDisplay Target Duration (sec): " + CurrentTrial.DisplayTargetDuration;
+                             "\nDisplay Target Duration (sec): " + CurrentTrial.DisplayTargetDuration +
+                             "\npatial Cue Delay Duration (sec): " + CurrentTrial.SpatialCueDelayDuration;
     }
 
     private void LoadConfigUIVariables()
@@ -593,7 +594,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 0)
             {
                 DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                TimingValuesAtReversals.Add(CurrentTrial.DisplayTargetDuration);
+                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
                 
                 reversalsCount++;
             }
@@ -603,7 +604,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 1)
             {
                 DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                TimingValuesAtReversals.Add(CurrentTrial.DisplayTargetDuration);
+                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
                 reversalsCount++;
             }
         }

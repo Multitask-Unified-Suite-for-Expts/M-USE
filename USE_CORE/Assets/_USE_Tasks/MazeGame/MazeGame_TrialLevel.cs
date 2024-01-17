@@ -283,10 +283,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
             else if (MazeManager.correctSelection)
             {
-              
-
                 if (MazeManager.finishedMaze)
+                {
+                    Debug.LogWarning("filling up slider");
                     SliderFBController.UpdateSliderValue(1); // fill up the remainder of the slider
+                }
                 else
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
               

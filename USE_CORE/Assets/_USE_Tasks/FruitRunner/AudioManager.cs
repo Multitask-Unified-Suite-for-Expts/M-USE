@@ -11,6 +11,7 @@ public class AudioManager : MonoBehaviour
     private AudioClip PositiveCollected_AudioClip;
     private AudioClip NegativeCollected_AudioClip;
     private AudioClip Slide_AudioClip;
+    private AudioClip Cheering_AudioClip;
 
     private void Start()
     {
@@ -19,6 +20,27 @@ public class AudioManager : MonoBehaviour
         PositiveCollected_AudioClip = Resources.Load<AudioClip>("AudioClips/CorrectItemPickup");
         NegativeCollected_AudioClip = Resources.Load<AudioClip>("AudioClips/WrongItemPickup");
         Slide_AudioClip = Resources.Load<AudioClip>("AudioClips/Slide");
+        Cheering_AudioClip = Resources.Load<AudioClip>("AudioClips/Cheer");
+    }
+
+    public void StopAllAudio()
+    {
+        ItemAudioSource.Stop();
+        PlayerAudioSource.Stop();
+    }
+
+    public void PlayCrowdCheering()
+    {
+        PlayerAudioSource.clip = Cheering_AudioClip;
+        PlayerAudioSource.volume = 1f;
+        PlayerAudioSource.Play();
+    }
+
+    public void PlaySlideClip()
+    {
+        PlayerAudioSource.clip = Slide_AudioClip;
+        PlayerAudioSource.volume = .2f;
+        PlayerAudioSource.Play();
     }
 
     public void PlayPositiveItemClip()
@@ -35,12 +57,6 @@ public class AudioManager : MonoBehaviour
         ItemAudioSource.Play();
     }
 
-    public void PlaySlideClip()
-    {
-        PlayerAudioSource.clip = Slide_AudioClip;
-        PlayerAudioSource.volume = .2f;
-        PlayerAudioSource.Play();
-    }
 
 
 }

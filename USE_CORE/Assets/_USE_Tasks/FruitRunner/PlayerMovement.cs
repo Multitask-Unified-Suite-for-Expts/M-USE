@@ -15,24 +15,32 @@ public class PlayerMovement : MonoBehaviour
     public readonly Vector3 MiddlePos = Vector3.zero;
     public readonly Vector3 RightPos = new Vector3(1.9f, 0f, 0f);
 
+    public FloorManager FloorManager;
     private AudioManager audioManager;
     public MovementCirclesController CirclesController;
 
     public Animator Animator;
-    private enum AnimationState { Idle, Run, Injured};
-    private AnimationState CurrentAnimationState;
+
+    public TokenFBController TokenFbController;
+
+    public bool AllowHappyAndSadAnimations = false;
+
+    public GameObject CelebrationConfetti;
+
+    public enum AnimationStates { Idle, Run, Injured, Happy, Sad, Cheer};
+    public AnimationStates CurrentAnimationState;
 
 
     void Start()
     {
         Rb = GetComponent<Rigidbody>();
         transform.position = Vector3.zero;
+        TargetPos = MiddlePos;
+
         audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
 
         Animator = GetComponent<Animator>();
         StartAnimation("idle");
-
-        TargetPos = MiddlePos;
     }
 
     private void Update()
@@ -42,7 +50,7 @@ public class PlayerMovement : MonoBehaviour
             transform.position = TargetPos; //keep it in place if not shifting
 
             if(AllowInput)
-                HandleInput();
+                HandleKeyboardInput();
         }
     }
 
@@ -60,10 +68,6 @@ public class PlayerMovement : MonoBehaviour
                 transform.position = TargetPos;
                 IsShifting = false;
             }
-        }
-        else
-        {
-            transform.position = TargetPos;
         }
     }
 
@@ -87,8 +91,12 @@ public class PlayerMovement : MonoBehaviour
         AllowInput = false;
     }
 
-    private void HandleInput()
+    private void HandleKeyboardInput()
     {
+        //Disable Input when doing injury animation
+        if(Animator.GetCurrentAnimatorStateInfo(0).IsName("Injured"))
+            return;
+
         if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
         {
             if (transform.position == MiddlePos)
@@ -122,56 +130,84 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+    public void FinalCelebration()
+    {
+        TargetPos = MiddlePos;
+        transform.position = MiddlePos;
 
-    public void StartAnimation(string animationName)
+        DisableUserInput();
+        StartAnimation("Cheer");
+        GameObject landingGO = Instantiate(Resources.Load<GameObject>("Prefabs/Podium"));
+        landingGO.transform.parent = transform;
+
+        CelebrationConfetti = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
+        CelebrationConfetti.SetActive(true);
+        CirclesController.Instantiated.SetActive(false);
+    }
+
+    //Helper method used by trial level at end to put player back in middle for celebration. 
+    public void SetToMiddlePos()
+    {
+        TargetPos = MiddlePos;
+        transform.position = MiddlePos;
+    }
+
+
+    public void StartAnimation(string newAnimName)
     {
         if (Animator == null)
             Animator = GetComponent<Animator>();
 
-        switch (animationName.ToLower())
+
+
+        switch (newAnimName.ToLower())
         {
             case "idle":
-                SwitchAnimationState(AnimationState.Idle);
+                CurrentAnimationState = AnimationStates.Idle;
+                Animator.Play("Idle");
                 break;
             case "run":
-                SwitchAnimationState(AnimationState.Run);
+                CurrentAnimationState = AnimationStates.Run;
+                Animator.Play("Run");
                 break;
             case "injured":
-                SwitchAnimationState(AnimationState.Injured);
+                CurrentAnimationState = AnimationStates.Injured;
+                Animator.Play("Injured");
+                break;
+            case "happy":
+                if (AllowHappyAndSadAnimations)
+                {
+                    CurrentAnimationState = AnimationStates.Happy;
+                    Animator.Play("Happy");
+                }
+                break;
+            case "sad":
+                if (AllowHappyAndSadAnimations)
+                {
+                    CurrentAnimationState = AnimationStates.Sad;
+                    Animator.Play("Sad");
+                }
+                break;
+            case "cheer":
+                CurrentAnimationState = AnimationStates.Cheer;
+                audioManager.PlayCrowdCheering();
+                Animator.Play("Cheer");
                 break;
             default:
-                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured");
+                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad, Cheer");
                 break;
         }
     }
 
-    void SwitchAnimationState(AnimationState newState)
+
+    private void OnDestroy()
     {
-        if (CurrentAnimationState == newState)
-            return;
+        if(audioManager != null)
+            audioManager.StopAllAudio();
 
-        CurrentAnimationState = newState;
-        switch (newState)
-        {
-            case AnimationState.Idle:
-                SetAnimatorParameters(isIdle: true, isRunning: false, isInjured: false);
-                break;
-            case AnimationState.Run:
-                SetAnimatorParameters(isIdle: false, isRunning: true, isInjured: false);
-                break;
-            case AnimationState.Injured:
-                SetAnimatorParameters(isIdle: false, isRunning: false, isInjured: true);
-                break;
-        }
+        if (CelebrationConfetti != null)
+            Destroy(CelebrationConfetti);
     }
-
-    void SetAnimatorParameters(bool isIdle, bool isRunning, bool isInjured)
-    {
-        Animator.SetBool("IsIdle", isIdle);
-        Animator.SetBool("IsRunning", isRunning);
-        Animator.SetBool("IsInjured", isInjured);
-    }
-
 
 
 }

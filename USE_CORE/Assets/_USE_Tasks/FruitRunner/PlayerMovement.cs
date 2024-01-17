@@ -27,8 +27,6 @@ public class PlayerMovement : MonoBehaviour
 
     public GameObject CelebrationConfetti;
 
-    public GameObject PlayerConfetti;
-
     public enum AnimationStates { Idle, Run, Injured, Happy, Sad, Cheer};
     public AnimationStates CurrentAnimationState;
 
@@ -43,12 +41,6 @@ public class PlayerMovement : MonoBehaviour
 
         Animator = GetComponent<Animator>();
         StartAnimation("idle");
-
-        Debug.LogWarning("INSTANTIATING!");
-        PlayerConfetti = Instantiate(Resources.Load<GameObject>("Prefabs/PlayerConfetti"));
-        PlayerConfetti.transform.parent = transform;
-        PlayerConfetti.transform.position = Vector3.zero;
-        PlayerConfetti.SetActive(false);
     }
 
     private void Update()
@@ -59,11 +51,6 @@ public class PlayerMovement : MonoBehaviour
 
             if(AllowInput)
                 HandleKeyboardInput();
-        }
-
-        if(PlayerConfetti != null)
-        {
-            PlayerConfetti.SetActive(CurrentAnimationState == AnimationStates.Run);
         }
     }
 
@@ -148,7 +135,6 @@ public class PlayerMovement : MonoBehaviour
         TargetPos = MiddlePos;
         transform.position = MiddlePos;
 
-        PlayerConfetti.SetActive(false);
         DisableUserInput();
         StartAnimation("Cheer");
         GameObject landingGO = Instantiate(Resources.Load<GameObject>("Prefabs/Podium"));

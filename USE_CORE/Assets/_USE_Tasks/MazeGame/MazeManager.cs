@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms.VisualStyles;
+using Dropbox.Api.Sharing;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
@@ -94,9 +95,6 @@ public class MazeManager:MonoBehaviour
             tileSettings = ScriptableObject.CreateInstance<TileSettings>();
         
         SetTileSettings();
-        freePlay = currentMaze.freePlay;
-
-        
         if (creatingSquareMaze)
         {
             tileContainerGridLayoutGroup.enabled = true;
@@ -144,9 +142,6 @@ public class MazeManager:MonoBehaviour
 
 
                     string tileName = GetChessCoordName(col, row);
-
-                    if (mgTrialDef.Blockades?.Count > 0 && mgTrialDef.Blockades.Contains(tileName))
-                        continue;
                     
                     GameObject tileGO = InitializeTile(tileTex, col, row, tiles);
                     tileGO.transform.localPosition = new Vector2(x, y);
@@ -183,8 +178,11 @@ public class MazeManager:MonoBehaviour
             tileGO.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Star");
         else
             tileGO.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Tile");
+
+        string tileName = GetChessCoordName(col, row);
         
-        tileGO.name = GetChessCoordName(col, row);
+        
+        tileGO.name = tileName;
         tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;
         Tile tile = tileGO.AddComponent<Tile>();
         tile.Initialize(tileSettings, this);
@@ -192,7 +190,7 @@ public class MazeManager:MonoBehaviour
         StimDef tileStimDef = new StimDef(tiles, tileGO);
         tile.mCoord = new Coords(tileGO.name);
 
-        
+        tileGO.AddComponent<HoverOnTile>();
         AssignInitialTileColor(tile, currentMaze);
         AssignSliderValue(tile);
 
@@ -327,11 +325,15 @@ public class MazeManager:MonoBehaviour
             tile.setColor(tile.startColor);
             startTileGO = tile.gameObject;
         }
-
         else if (tile.mCoord.chessCoord == maze.mFinish)
         {
             tile.setColor(tile.finishColor);
             finishTileGO = tile.gameObject;
+        }
+        else if (mgTrialDef.Blockades != null  && mgTrialDef.Blockades.Contains(tile.mCoord.chessCoord))
+        {
+            tile.setColor(new Color(0,0,0));
+            tile.gameObject.GetComponent<BoxCollider>().enabled = false;
         }
         else if (!darkenNonPathTiles || maze.mPath.Contains((tile.mCoord.chessCoord)))
             tile.setColor(tile.defaultTileColor);
@@ -354,8 +356,14 @@ public class MazeManager:MonoBehaviour
     }
     private void AssignSliderValue(Tile tile)
     {
+
         if (freePlay)
-            tile.sliderValueChange = 1f / (currentMaze.mDims.x * currentMaze.mDims.y);
+        {
+            if(creatingSquareMaze)
+                tile.sliderValueChange = 1f / (currentMaze.mDims.x * currentMaze.mDims.y);
+            else
+              tile.sliderValueChange = 1f / currentMaze.customDims.Sum();
+        }
         else
             tile.sliderValueChange = 1f / currentMaze.mNumSquares; 
     }
@@ -384,8 +392,6 @@ public class MazeManager:MonoBehaviour
         
         if (tile.mCoord.chessCoord == currentMaze.mNextStep)
         {
-
-
             // Provides feedback for last correct tile touch and updates next tile step
             if (TileGO == currentTilePositionGO)
             {
@@ -484,9 +490,28 @@ public class MazeManager:MonoBehaviour
         {
             Debug.LogWarning("**CORRECT TOUCH**");
 
+            
+            // Provides feedback for last correct tile touch and updates next tile step
+            if (TileGO == currentTilePositionGO)
+            {
+                // maze.mNextStep = maze.mPath[maze.mPath.FindIndex(pathCoord => pathCoord == tile.mCoord.chessCoord) + 1];
+                mgTrialLevel.HandleRetouchCorrect(currentPathIndex);
+                if(latestConnection != null)
+                    latestConnection.GetComponent<UILineRenderer>().material = Resources.Load<Material>("SelectedPath");
+                return 2;
+            }
+            
+            
             mgTrialLevel.HandleCorrectTouch();
             
 
+            if(currentTilePositionGO != null)
+            {
+                Transform connectorTransform = tileConnectorsContainerGO.transform.Find($"{currentTilePositionGO.name}{TileGO.name}") ?? tileConnectorsContainerGO.transform.Find($"{TileGO.name}{currentTilePositionGO.name}");
+                latestConnection = connectorTransform?.gameObject;
+                latestConnection.GetComponent<UILineRenderer>().material = Resources.Load<Material>("SelectedPath");
+            }
+            
             // Helps set progress on the experimenter display
             selectedTilesInPathGO.Add(TileGO);
             currentTilePositionGO = TileGO;
@@ -545,15 +570,16 @@ public class MazeManager:MonoBehaviour
             landmarkGO.transform.SetParent(landmarksContainerGO.transform);
             landmarkGO.transform.localPosition = centroid;
 
-            switch (landmark.Key)
-            {
-                case ("House"):
-                    landmarkGO.transform.localScale = new Vector3(50, 50, 1.5f);
-                    break;
-                case ("Tree"):
-                    landmarkGO.transform.localScale = new Vector3(20, 20, 1.5f);
-                    break;
-            }
+            // Check if landmark.Key contains a certain keyword
+            if (landmark.Key.ToLower().Contains("house"))
+                landmarkGO.transform.localScale = new Vector3(24, 24, 1.5f);
+            
+            else if (landmark.Key.ToLower().Contains("tree"))
+                landmarkGO.transform.localScale = new Vector3(22, 22, 1.5f);
+            
+            else if (landmark.Key.ToLower().Contains("car"))
+                landmarkGO.transform.localScale = new Vector3(25, 25, 1.5f);
+            
         }
     }
 
@@ -575,6 +601,7 @@ public class MazeManager:MonoBehaviour
     public void LoadTextMaze(MazeGame_BlockDef mgBD)
     {
         currentMaze = new Maze(mgBD.MazeDef);
+        freePlay = currentMaze.freePlay;
         creatingSquareMaze = currentMaze.loadingSquareMaze;
     }
     private void RemovePathProgressFollowingError()

@@ -144,12 +144,10 @@ public class MazeManager:MonoBehaviour
 
 
                     string tileName = GetChessCoordName(col, row);
-                    Debug.LogWarning("TILE NAME: " +  tileName);
-                    if (mgTrialDef.Blockades.Contains(tileName))
-                    {
-                        Debug.LogWarning("this is being skipped: " +  tileName);
+
+                    if (mgTrialDef.Blockades?.Count > 0 && mgTrialDef.Blockades.Contains(tileName))
                         continue;
-                    }
+                    
                     GameObject tileGO = InitializeTile(tileTex, col, row, tiles);
                     tileGO.transform.localPosition = new Vector2(x, y);
                 }
@@ -160,7 +158,7 @@ public class MazeManager:MonoBehaviour
             AssignAdjacentTiles(tiles, xOffset, yOffset);
             mgTrialLevel.DeactivateChildren(tileConnectorsContainerGO);
 
-            if (mgTrialDef.Landmarks.Count > 0)
+            if (mgTrialDef.Landmarks?.Count > 0)
                 CreateLandmarks(mgTrialDef.Landmarks);
 
         }
@@ -181,8 +179,10 @@ public class MazeManager:MonoBehaviour
     private GameObject InitializeTile(Texture2D tileTex, int col, int row, StimGroup tiles)
     {
         GameObject tileGO = Instantiate(tilePrefab, tileContainerGO.transform);
-        if(!creatingSquareMaze) 
-            tileGO.GetComponent<SpriteRenderer>().sprite =  Resources.Load<Sprite>("Star");
+        if (!creatingSquareMaze)
+            tileGO.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Star");
+        else
+            tileGO.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Tile");
         
         tileGO.name = GetChessCoordName(col, row);
         tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;

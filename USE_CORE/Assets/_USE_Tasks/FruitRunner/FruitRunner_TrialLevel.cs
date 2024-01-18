@@ -84,7 +84,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
-
+            
             //Handler.MinDuration = minObjectTouchDuration.value;
             //Handler.MaxDuration = maxObjectTouchDuration.value;
 
@@ -125,7 +125,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
            
             ItemSpawnerGO = new GameObject("ItemSpawner");
             ItemSpawner = ItemSpawnerGO.AddComponent<ItemSpawner>();
-            ItemSpawner.AddToQuaddleList(trialStims.stimDefs);
+            ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
+            ItemSpawner.SetSpawnOrder(CurrentTrial.TrialStimOrder);
             ItemSpawner.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");

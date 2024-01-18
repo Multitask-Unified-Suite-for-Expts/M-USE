@@ -988,7 +988,6 @@ MonoBehaviour:
   TokenFbController: {fileID: 0}
   AllowHappyAndSadAnimations: 0
   CelebrationConfetti: {fileID: 0}
-  PlayerConfetti: {fileID: 0}
   CurrentAnimationState: 0
 --- !u!54 &2803750271114205897
 Rigidbody:
@@ -1113,7 +1112,7 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 0.5882353}
+      key0: {r: 0.09411765, g: 0.7254902, b: 0.6862745, a: 0.5882353}
       key1: {r: 1, g: 1, b: 1, a: 0}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}

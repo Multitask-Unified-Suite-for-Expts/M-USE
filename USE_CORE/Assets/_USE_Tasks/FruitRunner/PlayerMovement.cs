@@ -93,9 +93,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleKeyboardInput()
     {
-        //Disable Input when doing injury animation
-        if(Animator.GetCurrentAnimatorStateInfo(0).IsName("Injured"))
-            return;
+        //if(Animator.GetCurrentAnimatorStateInfo(0).IsName("Injured")) //Disable Input when doing injury animation
+        //    return;
 
         if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 
 public class Item : MonoBehaviour
@@ -17,6 +18,11 @@ public class Item : MonoBehaviour
         floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
         playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
     }
+
+    public virtual void SetItemPosition(Transform parentTransform)
+    {
+        Debug.LogWarning("PARENT GETTING CALLED");
+    }
 }
 
 public class Item_Quaddle : Item
@@ -24,6 +30,32 @@ public class Item_Quaddle : Item
     public string QuaddleType;
     public string QuaddleGeneralPosition;
 
+
+    public override void SetItemPosition(Transform parentTransform)
+    {
+        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
+        Transform spawnPoint;
+
+        switch (QuaddleGeneralPosition.ToLower().Trim())
+        {
+            case "left":
+                spawnPoint = spawnPoints[0];
+                break;
+            case "middle":
+                spawnPoint = spawnPoints[1];
+                break;
+            case "right":
+                spawnPoint = spawnPoints[2];
+                break;
+            default:
+                Debug.LogWarning("DEFAULT SWITCH CASE FOR STIM GENERAL POSITION. SETTING TO MIDDLE!");
+                spawnPoint = spawnPoints[1];
+                break;
+        }
+
+        transform.position = new Vector3(spawnPoint.position.x, .65f, spawnPoint.position.z);
+        transform.parent = parentTransform;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -51,6 +83,15 @@ public class Item_Quaddle : Item
 
 public class Item_Blockade : Item
 {
+
+    public override void SetItemPosition(Transform parentTransform)
+    {
+        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
+        Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+        transform.position = new Vector3(transform.position.x, .75f, randomSpawnPoint.position.z);
+        transform.parent = parentTransform;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))

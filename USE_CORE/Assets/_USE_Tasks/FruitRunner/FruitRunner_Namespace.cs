@@ -20,6 +20,7 @@ namespace FruitRunner_Namespace
         public int NumGroups;
         public Reward[][] ProbablisticTrialStimTokenReward;
         public int[] TrialStimIndices;
+        public int[] TrialStimOrder;
         public string[] TrialStimTypes; //Positive, Negative, Neutral
         public string[] TrialStimGeneralPositions; //Left, Middle, Right
 

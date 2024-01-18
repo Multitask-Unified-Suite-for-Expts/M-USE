@@ -13,13 +13,13 @@ public class MovementCirclesController : MonoBehaviour
     public GameObject RightCircleGO;
 
     public Canvas ParentCanvas;
+
     public PlayerMovement PlayerMovement;
 
     public Color OriginalCircleColor;
-
     public List<GameObject> Circles;
-
     public Vector3 position = new Vector3(0f, -(Screen.height * .41f), 0f);
+
 
 
     public void SetupMovementCircles(Canvas parentCanvas, GameObject player)
@@ -55,7 +55,6 @@ public class MovementCirclesController : MonoBehaviour
 
         MiddleCircleGO.GetComponent<Image>().color = Color.cyan; //Start middle one out as active
     }
-
 
     public void HandleCircleClicked(GameObject clickedGO)
     {

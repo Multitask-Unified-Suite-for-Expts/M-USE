@@ -7,11 +7,8 @@ public class FloorManager : MonoBehaviour
 {
     private readonly float FloorMovementSpeed = 20;
     private GameObject FloorTilePrefab;
-    //private int NumTilesOnScreen = 8;
     public int NumTilesSpawned;
-
     public int TotalTiles;
-
     public List<GameObject> ActiveTiles;
 
     private ItemSpawner itemSpawner;

@@ -12,6 +12,8 @@ public class ItemSpawner : MonoBehaviour
     public int[] SpawnOrder_StimIndices;
     private int SpawnIndex = 0;
 
+    public bool RandomSpawnLocations;
+
 
     private void Start()
     {
@@ -49,7 +51,7 @@ public class ItemSpawner : MonoBehaviour
             stim.name = "Blockade";
             stim.tag = "Blockade";
             stim.AddComponent<Item_Blockade>()
-                .SetItemPosition(parentTransform);
+                .SetItemPosition(RandomSpawnLocations, parentTransform);
         }
         else
         {
@@ -58,14 +60,15 @@ public class ItemSpawner : MonoBehaviour
 
             stim = Instantiate(quaddle.StimGameObject);
             stim.tag = "Quaddle";
-            stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
+            //stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
             stim.AddComponent<CapsuleCollider>().isTrigger = true;
-            stim.AddComponent<FaceCamera>();
+            //stim.AddComponent<FaceCamera>();
 
             Item_Quaddle quaddleComponent = stim.AddComponent<Item_Quaddle>();
-            quaddleComponent.QuaddleType = quaddle.QuaddleType;
+            quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;
             quaddleComponent.QuaddleGeneralPosition = quaddle.QuaddleGeneralPosition;
-            quaddleComponent.SetItemPosition(parentTransform);
+            quaddleComponent.QuaddleTokenRewardMag = quaddle.StimTokenRewardMag;
+            quaddleComponent.SetItemPosition(RandomSpawnLocations, parentTransform);
         }
 
         SpawnIndex++;

@@ -19,9 +19,8 @@ public class Item : MonoBehaviour
         playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
     }
 
-    public virtual void SetItemPosition(Transform parentTransform)
+    public virtual void SetItemPosition(bool randomPosition, Transform parentTransform)
     {
-        Debug.LogWarning("PARENT GETTING CALLED");
     }
 }
 
@@ -29,30 +28,37 @@ public class Item_Quaddle : Item
 {
     public string QuaddleType;
     public string QuaddleGeneralPosition;
+    public int QuaddleTokenRewardMag;
 
 
-    public override void SetItemPosition(Transform parentTransform)
+    public override void SetItemPosition(bool randomPosition, Transform parentTransform)
     {
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform spawnPoint;
 
-        switch (QuaddleGeneralPosition.ToLower().Trim())
+        if (randomPosition)
         {
-            case "left":
-                spawnPoint = spawnPoints[0];
-                break;
-            case "middle":
-                spawnPoint = spawnPoints[1];
-                break;
-            case "right":
-                spawnPoint = spawnPoints[2];
-                break;
-            default:
-                Debug.LogWarning("DEFAULT SWITCH CASE FOR STIM GENERAL POSITION. SETTING TO MIDDLE!");
-                spawnPoint = spawnPoints[1];
-                break;
+            spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
         }
-
+        else
+        {
+            switch (QuaddleGeneralPosition.ToLower().Trim())
+            {
+                case "left":
+                    spawnPoint = spawnPoints[0];
+                    break;
+                case "middle":
+                    spawnPoint = spawnPoints[1];
+                    break;
+                case "right":
+                    spawnPoint = spawnPoints[2];
+                    break;
+                default:
+                    Debug.LogWarning("DEFAULT SWITCH CASE FOR STIM GENERAL POSITION. SETTING TO MIDDLE!");
+                    spawnPoint = spawnPoints[1];
+                    break;
+            }
+        }
         transform.position = new Vector3(spawnPoint.position.x, .65f, spawnPoint.position.z);
         transform.parent = parentTransform;
     }
@@ -64,17 +70,20 @@ public class Item_Quaddle : Item
             if(QuaddleType == "Positive")
             {
                 playerMovement.StartAnimation("Happy");
-                playerMovement.TokenFbController.AddTokens(other.gameObject, 1, .4f);
+                playerMovement.TokenFbController.AddTokens(other.gameObject, QuaddleTokenRewardMag, .4f);
             }
             else if(QuaddleType == "Negative")
             {
                 playerMovement.StartAnimation("Sad");
-                playerMovement.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
+                playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
             }
             else if(QuaddleType == "Neutral")
             {
-                //what to do with neutral stim?
-                audioManager.PlayPositiveItemClip();
+                //NEED NEG AUDIO
+                //NO TOKEN CHANGE. BUT IF WE LET THEM SPECIFY THEN COULD BE SOME.
+                Debug.LogWarning("NEUTRAL!");
+                playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
+
             }
             Destroy(gameObject);
         }
@@ -84,7 +93,7 @@ public class Item_Quaddle : Item
 public class Item_Blockade : Item
 {
 
-    public override void SetItemPosition(Transform parentTransform)
+    public override void SetItemPosition(bool randomPosition, Transform parentTransform)
     {
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];

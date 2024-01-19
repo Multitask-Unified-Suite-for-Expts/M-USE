@@ -23,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
 
     public TokenFBController TokenFbController;
 
-    public bool AllowHappyAndSadAnimations = false;
+    public bool AllowItemPickupAnimations;
 
     public GameObject CelebrationConfetti;
 
@@ -52,6 +52,10 @@ public class PlayerMovement : MonoBehaviour
             if(AllowInput)
                 HandleKeyboardInput();
         }
+
+        //Temporary hotkey to allow toggling of animations:
+        if (InputBroker.GetKeyDown(KeyCode.I))
+            AllowItemPickupAnimations = !AllowItemPickupAnimations;
     }
 
     private void FixedUpdate()
@@ -174,14 +178,14 @@ public class PlayerMovement : MonoBehaviour
                 Animator.Play("Injured");
                 break;
             case "happy":
-                if (AllowHappyAndSadAnimations)
+                if (AllowItemPickupAnimations)
                 {
                     CurrentAnimationState = AnimationStates.Happy;
                     Animator.Play("Happy");
                 }
                 break;
             case "sad":
-                if (AllowHappyAndSadAnimations)
+                if (AllowItemPickupAnimations)
                 {
                     CurrentAnimationState = AnimationStates.Sad;
                     Animator.Play("Sad");

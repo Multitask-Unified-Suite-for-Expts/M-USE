@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float FloorMovementSpeed = 20;
+    public float FloorMovementSpeed = 20f; //20 is great for humans
     private GameObject FloorTilePrefab;
     public int NumTilesSpawned;
     public int TotalTiles;
@@ -15,9 +15,13 @@ public class FloorManager : MonoBehaviour
 
     private bool Move;
 
-    private Vector3 TileScale = new Vector3(1f, 1f, 1f); //Make the Z configurable?
+    public float TileScale_Z;
 
 
+    public void SetTotalTiles(int numPerGroup, int numGroups)
+    {
+        TotalTiles = 1 + (numPerGroup * numGroups); //Add 1 for initial empty tile
+    }
 
     void Start()
     {
@@ -76,7 +80,7 @@ public class FloorManager : MonoBehaviour
 
         GameObject tile = Instantiate(FloorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile " + (NumTilesSpawned + 1);
-        tile.transform.localScale = TileScale; //Set to Tile Scale size
+        tile.transform.localScale = new Vector3(1f, 1f, TileScale_Z);
         tile.gameObject.transform.parent = gameObject.transform;
         tile.AddComponent<Item_Floor>();
 

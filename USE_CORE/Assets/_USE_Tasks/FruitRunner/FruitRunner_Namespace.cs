@@ -17,18 +17,23 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_TrialDef : TrialDef
     {
-        public int NumGroups;
-        public Reward[][] ProbablisticTrialStimTokenReward;
         public int[] TrialStimIndices;
-        public int[] TrialStimOrder;
-        public string[] TrialStimTypes; //Positive, Negative, Neutral
-        public string[] TrialStimGeneralPositions; //Left, Middle, Right
+        public int[] TrialGroup_InSpawnOrder;
+        public int NumGroups;
+        public string[] TrialStimFeedback;
+        public string[] TrialStimGeneralPositions;
+        public Reward[][] ProbabilisticTokenReward;
+        public bool RandomStimLocations;
 
+        public float FloorMovementSpeed;
+        public float FloorTileLength;
+        public bool AllowItemPickupAnimations; //Happy and sad animations for when they go over a quaddle.
     }
 
     public class FruitRunner_StimDef : StimDef
     {
-        public string QuaddleType;
+        public string QuaddleFeedbackType;
         public string QuaddleGeneralPosition;
+
     }
 }

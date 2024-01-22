@@ -24,7 +24,7 @@ public class Tile : MonoBehaviour
 
     public float sliderValueChange;
 
-    public Vector3? localPosition = null;
+    public Vector3? position = null;
 // Reference to the ScriptableObject holding the settings
 
     // Access settings through this instance
@@ -101,7 +101,6 @@ public class Tile : MonoBehaviour
                 break;
         }
 
-        initialTileColor = gameObject.GetComponent<Image>().color;
         gameObject.GetComponent<Image>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
@@ -114,25 +113,20 @@ public class Tile : MonoBehaviour
         Tile flashingTile = this;
         flashingTileGO = this.gameObject;
         isFlashing = true;
-        flashStartTime = Time.unscaledTime;
-        if (flashingTile.gameObject == MazeManager.startTileGO)
-            initialTileColor = startColor;
-        else if (flashingTile.gameObject == MazeManager.finishTileGO)
-            initialTileColor = finishColor;
-        else
-            initialTileColor = defaultTileColor;// before it starts flashing set color
+         flashStartTime = Time.unscaledTime;
+        // if (flashingTile.gameObject == MazeManager.startTileGO)
+        //     initialTileColor = startColor;
+        // else if (flashingTile.gameObject == MazeManager.finishTileGO)
+        //     initialTileColor = finishColor;
+        // else
+        //     initialTileColor = defaultTileColor;// before it starts flashing set color
      }
 
     void Update()
     {
         if(transform.hasChanged)
-        {
-            Debug.LogWarning("THIS IS THE RECT: " + transform.position);
-            localPosition = transform.position;
-            
-           Debug.LogWarning("## POSITION: " + transform.position);
-           
-        }
+           position = transform.position;
+        
         
         if (isFlashing)
         {
@@ -167,11 +161,15 @@ public class Tile : MonoBehaviour
         
             if (elapsed >=  interval)
             {
-                if (!MazeManager.viewPath || CorrectnessCode != 1 && CorrectnessCode != 2)
+                if (!MazeManager.viewPath || (CorrectnessCode == 10 || (CorrectnessCode == 20 && !MazeManager.backtrackError)))
                     gameObject.GetComponent<Image>().color = initialTileColor;
-                else if(MazeManager.viewPath && CorrectnessCode == 2)
+                else if (MazeManager.viewPath && (CorrectnessCode == 2 || MazeManager.backtrackError))
+                {
                     gameObject.GetComponent<Image>().color= correctColor;
+                    Debug.LogWarning("this should make it green again");
+                }
                 choiceFeedback = false;
+                Debug.LogWarning("view path: " + MazeManager.viewPath + " correctness code: " + CorrectnessCode + " backtrack error?? " + MazeManager.backtrackError);
             }
         }
 

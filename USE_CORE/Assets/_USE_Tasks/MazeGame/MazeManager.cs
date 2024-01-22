@@ -57,6 +57,7 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] public bool outOfMoves;
     [HideInInspector] public bool startedMaze;
     [HideInInspector] public bool finishedMaze;
+    [HideInInspector] public bool backtrackError;
     [HideInInspector] public bool tileConnectorsLoaded;
     [HideInInspector] public Maze currentMaze;
 
@@ -324,22 +325,31 @@ public class MazeManager:MonoBehaviour
         if (tile.mCoord.chessCoord == maze.mStart)
         {
             tile.setColor(tile.startColor);
+            tile.initialTileColor = tile.startColor;
             startTileGO = tile.gameObject;
         }
         else if (tile.mCoord.chessCoord == maze.mFinish)
         {
             tile.setColor(tile.finishColor);
+            tile.initialTileColor = tile.finishColor;
             finishTileGO = tile.gameObject;
         }
         else if (mgTrialDef.Blockades != null  && mgTrialDef.Blockades.Contains(tile.mCoord.chessCoord))
         {
             tile.setColor(new Color(0,0,0));
+            tile.initialTileColor = new Color(0, 0, 0);
             tile.gameObject.GetComponent<BoxCollider>().enabled = false;
         }
         else if (!darkenNonPathTiles || maze.mPath.Contains((tile.mCoord.chessCoord)))
+        {
             tile.setColor(tile.defaultTileColor);
+            tile.initialTileColor = tile.defaultTileColor;
+        }
         else
+        {
             tile.setColor(new Color(0.5f, 0.5f, 0.5f));
+            tile.initialTileColor = new Color(0.5f, 0.5f, 0.5f);
+        }
 
     }
     private void AssignFlashingTiles(Maze maze, StimGroup tiles)
@@ -373,9 +383,7 @@ public class MazeManager:MonoBehaviour
     public int ManageHiddenPathTileTouch(Tile tile)
     {
         GameObject TileGO = tile.gameObject;
-
-        Debug.LogWarning("NEXT STEP: " + currentMaze.mNextStep);
-        //var touchedCoord = tile.mCoord;
+      //var touchedCoord = tile.mCoord;
         // ManageTileTouch - Returns correctness code
         // Return values:
         // 1 - correct tile touch
@@ -387,8 +395,11 @@ public class MazeManager:MonoBehaviour
 
         if (!startedMaze)
         {
-            mgTrialLevel.HandleRuleBreakingError(0);
+            mgTrialLevel.HandleRuleBreakingError();
+            Debug.LogWarning("NOT PRESSING THE START!!");
+
             return 20;
+            
         }
         
         if (tile.mCoord.chessCoord == currentMaze.mNextStep)
@@ -397,11 +408,13 @@ public class MazeManager:MonoBehaviour
             if (TileGO == currentTilePositionGO)
             {
                // maze.mNextStep = maze.mPath[maze.mPath.FindIndex(pathCoord => pathCoord == tile.mCoord.chessCoord) + 1];
-                mgTrialLevel.HandleRetouchCorrect(currentPathIndex);
+                mgTrialLevel.HandleRetouchCorrect();
                 currentMaze.mNextStep = currentMaze.mPath[currentPathIndex+1];
                 
                 if(latestConnection != null)
                     latestConnection.GetComponent<UILineRenderer>().material = Resources.Load<Material>("SelectedPath");
+                Debug.LogWarning("RETOUCH CORRECT!!");
+
                 return 2;
             }
 
@@ -424,6 +437,7 @@ public class MazeManager:MonoBehaviour
                 currentMaze.mNextStep = currentMaze.mPath[currentPathIndex+1];
             else
                 finishedMaze = true; // Finished the Maze
+            Debug.LogWarning("CORRECT!!");
 
             return 1;
             
@@ -433,11 +447,13 @@ public class MazeManager:MonoBehaviour
         {
             if (consecutiveErrors > 0) //Perseverative Error
             {
-                mgTrialLevel.HandleRuleBreakingError(currentPathIndex);
+                mgTrialLevel.HandleRuleBreakingError();
+                Debug.LogWarning("PERSEVERATIVE ERROR!!");
+
                 return 20;
             }
-            
-            mgTrialLevel.HandleRuleAbidingError(currentPathIndex);
+            Debug.LogWarning("REGISTERED A RULE ABIDING ERROR!!");
+            mgTrialLevel.HandleRuleAbidingError();
             RemovePathProgressFollowingError();
             return 10;
         }
@@ -447,12 +463,16 @@ public class MazeManager:MonoBehaviour
         {
             if (TileGO.Equals(currentTilePositionGO))
             {
-                mgTrialLevel.HandleRetouchErroneous(currentPathIndex);
+                mgTrialLevel.HandleRetouchErroneous();
+                Debug.LogWarning("RETOUCH ERRONEOUS !!");
+
                 return 2;
             }
 
-            mgTrialLevel.HandleBackTrackError(currentPathIndex);
-            mgTrialLevel.HandleRuleBreakingError(currentPathIndex);
+            mgTrialLevel.HandleBackTrackError();
+            mgTrialLevel.HandleRuleBreakingError();
+            backtrackError = true;
+            Debug.LogWarning("assigning backtrack error true!!");
 
             // Set the correct next step to the last correct tile touch
             RemovePathProgressFollowingError();
@@ -460,7 +480,9 @@ public class MazeManager:MonoBehaviour
         }
 
         // RULE BREAKING TOUCH
-        mgTrialLevel.HandleRuleBreakingError(currentPathIndex);
+        Debug.LogWarning("REGISTERED A RULE BREAKING ERROR!!");
+
+        mgTrialLevel.HandleRuleBreakingError();
         RemovePathProgressFollowingError();
         return 20;
     }
@@ -481,7 +503,7 @@ public class MazeManager:MonoBehaviour
         {
             Debug.LogWarning("**RULE-BREAK NOT PRESSING START ERROR**");
 
-            mgTrialLevel.HandleRuleBreakingError(currentPathIndex);
+            mgTrialLevel.HandleRuleBreakingError();
 
             return 20;
         }
@@ -496,7 +518,7 @@ public class MazeManager:MonoBehaviour
             if (TileGO == currentTilePositionGO)
             {
                 // maze.mNextStep = maze.mPath[maze.mPath.FindIndex(pathCoord => pathCoord == tile.mCoord.chessCoord) + 1];
-                mgTrialLevel.HandleRetouchCorrect(currentPathIndex);
+                mgTrialLevel.HandleRetouchCorrect();
                 if(latestConnection != null)
                     latestConnection.GetComponent<UILineRenderer>().material = Resources.Load<Material>("SelectedPath");
                 return 2;
@@ -532,24 +554,25 @@ public class MazeManager:MonoBehaviour
         {
             if (TileGO.Equals(currentTilePositionGO))
             {
-                mgTrialLevel.HandleRetouchErroneous(currentPathIndex);
+                mgTrialLevel.HandleRetouchErroneous();
                 Debug.LogWarning("**RETOUCH ERRONEOUS**");
 
                 return 2;
             }
 
-            mgTrialLevel.HandleBackTrackError(currentPathIndex);
-            mgTrialLevel.HandleRuleBreakingError(currentPathIndex);
+            mgTrialLevel.HandleBackTrackError();
+            mgTrialLevel.HandleRuleBreakingError();
 
             // Set the correct next step to the last correct tile touch
             Debug.LogWarning("**BACKTRACK ERROR**");
+            backtrackError = true;
             RemovePathProgressFollowingError();
             return 20;
         }
 
         // Set the correct next step to the last correct tile touch
         Debug.LogWarning("**RULE-BREAK NON-CONNECTING TILE ERROR**");
-        mgTrialLevel.HandleRuleBreakingError(currentPathIndex);
+        mgTrialLevel.HandleRuleBreakingError();
         RemovePathProgressFollowingError();
         return 20;
     }
@@ -631,9 +654,11 @@ public class MazeManager:MonoBehaviour
     }
     public void ResetSelectionClassifications()
     {
+        Debug.LogWarning("RESETTING THE CLASSIFICATIONS");
         correctSelection = false;
         returnToLast = false;
         erroneousReturnToLast = false;
+        backtrackError = false;
     }
     public void ResetMazeVariables()
     {
@@ -654,6 +679,7 @@ public class MazeManager:MonoBehaviour
         correctSelection = false;
         returnToLast = false;
         erroneousReturnToLast = false;
+        backtrackError = false;
     }
     
 }

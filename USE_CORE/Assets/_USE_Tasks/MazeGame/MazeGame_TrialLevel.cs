@@ -205,15 +205,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseTile.AddUpdateMethod(() =>
         {
-            Debug.LogWarning("tiles active: " + tiles.IsActive + " || web build: " + Session.WebBuild +
-                             " || free play: " + MazeManager.freePlay + " || playerviewloaded: " +
-                             playerViewTextLoaded);
-            if (tiles.IsActive && !Session.WebBuild && !MazeManager.freePlay && !playerViewTextLoaded)
-            {
-                Debug.LogWarning("in herrr");
+            if (!Session.WebBuild && !MazeManager.freePlay && !playerViewTextLoaded)
                 CreateTextOnExperimenterDisplay();
-                
-            }
+            
             SetTrialSummaryString(); // called every frame to update duration info
             
             if (SelectionHandler.SuccessfulSelections.Count > 0)
@@ -315,7 +309,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
 
             selectedGO = null; //Reset selectedGO before the next touch evaluation
-            MazeManager.ResetSelectionClassifications();
         });
         SelectionFeedback.AddUpdateMethod(() => { SetTrialSummaryString(); });// called every frame to update duration info
 
@@ -345,6 +338,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
             CurrentTaskLevel.CalculateBlockSummaryString();
             CurrentTaskLevel.SetTaskSummaryString();
+            
+            MazeManager.ResetSelectionClassifications();
+
         });
         TileFlashFeedback.AddSpecificInitializationMethod(() =>
         {
@@ -586,7 +582,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void DisableSceneElements()
     {
-        DeactivateChildren(MazeManager.gameObject);
+        MazeManager.mazeBackgroundGO.SetActive(false);
+        tiles.ToggleVisibility(false);
         if (GameObject.Find("SliderCanvas") != null)
             DeactivateChildren(GameObject.Find("SliderCanvas"));
     }
@@ -595,7 +592,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         // sets parent for any PlayerViewPanelController elements on experimenter display
         bool invalidLocalPositionEncountered = false;
-                    Debug.LogWarning( "\n tile transform container POSITION " +MazeManager.tileContainerGO.transform.position);
         for (int i = 0; i < MazeManager.currentMaze.mPath.Count; i++)
         {
             foreach (StimDef sd in tiles.stimDefs)
@@ -605,12 +601,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 
                 if (tileComponent.mCoord.chessCoord == MazeManager.currentMaze.mPath[i])
                 {
-                    if (tileComponent.localPosition == MazeManager.tileContainerGO.transform.position || tileComponent.localPosition  == null)
+                    if (tileComponent.position == MazeManager.tileContainerGO.transform.position || tileComponent.position  == null)
                     {
                         invalidLocalPositionEncountered = true;
                         break;
                     }
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint((Vector3)tileComponent.localPosition), PlayerViewParent.transform);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint((Vector3)tileComponent.position), PlayerViewParent.transform);
                     playerViewText = PlayerViewPanelController.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, PlayerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
@@ -687,7 +683,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    public void HandleRuleBreakingError(int currentPathIndex)
+    public void HandleRuleBreakingError()
     {
 
         if (Session.SessionDef.EventCodesActive)
@@ -705,7 +701,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tileFbDuration = MazeManager.tileSettings.incorrectRuleBreakingSeconds;
     }
 
-    public void HandleRuleAbidingError(int currentPathIndex)
+    public void HandleRuleAbidingError()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
@@ -722,13 +718,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tileFbDuration = MazeManager.tileSettings.incorrectRuleAbidingSeconds;
     }
 
-    public void HandleBackTrackError(int currentPathIndex)
+    public void HandleBackTrackError()
     {
         backtrackErrors_InTrial++;
         CurrentTaskLevel.BacktrackErrors_InBlock++;
         CurrentTaskLevel.BacktrackErrors_InTask++;
     }
-    public void HandleRetouchErroneous(int currentPathIndex)
+    public void HandleRetouchErroneous()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
@@ -738,11 +734,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchErroneous_InBlock++;
         CurrentTaskLevel.RetouchErroneous_InTask++;
 
-        MazeManager.consecutiveErrors = 0;
         tileFbDuration = MazeManager.tileSettings.prevCorrectFeedbackSeconds;
     }
 
-    public void HandleRetouchCorrect(int currentPathIndex)
+    public void HandleRetouchCorrect()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);

@@ -18,11 +18,16 @@ namespace FruitRunner_Namespace
     public class FruitRunner_TrialDef : TrialDef
     {
         public int[] TrialStimIndices;
+        public string[] TrialStimFeedback;
+
         public int[] TrialGroup_InSpawnOrder;
         public int NumGroups;
-        public string[] TrialStimFeedback;
         public string[] TrialStimGeneralPositions;
+
         public Reward[][] ProbabilisticTokenReward;
+
+        public string[][] practice;
+
         public bool RandomStimLocations;
 
         public float FloorMovementSpeed;

@@ -14,9 +14,16 @@ public class Item : MonoBehaviour
 
     private void Start()
     {
-        audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
-        floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
-        playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
+        try
+        {
+            audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
+            floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
+            playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
+        }
+        catch(Exception e)
+        {
+            Debug.LogError("ITEM START METHOD FAILED! Message: " + e.Message);
+        }
     }
 
     public virtual void SetItemPosition(bool randomPosition, Transform parentTransform)
@@ -79,9 +86,6 @@ public class Item_Quaddle : Item
             }
             else if(QuaddleType == "Neutral")
             {
-                //NEED NEG AUDIO
-                //NO TOKEN CHANGE. BUT IF WE LET THEM SPECIFY THEN COULD BE SOME.
-                Debug.LogWarning("NEUTRAL!");
                 playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
 
             }

@@ -29,6 +29,8 @@ public class FloorManager : MonoBehaviour
 
         ActiveTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        if (itemSpawner == null)
+            Debug.LogWarning("ITEM SPAWNER NULL");
 
         for (int i = 0; i <= TotalTiles; i++)
         {
@@ -87,6 +89,14 @@ public class FloorManager : MonoBehaviour
         //if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
         if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
             itemSpawner.SpawnItem(tile.transform);
+
+        //if(NumTilesSpawned + 1 == TotalTiles)
+        //{
+        //    Debug.LogWarning("GONNA SPAWN AN ARCH");
+        //    GameObject arch = Instantiate(Resources.Load<GameObject>("Prefabs/Arch"));
+        //    arch.transform.SetParent(tile.transform);
+
+        //}
 
         ActiveTiles.Add(tile);
 

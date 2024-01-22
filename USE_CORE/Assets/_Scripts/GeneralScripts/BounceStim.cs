@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BounceStim : MonoBehaviour
 {
-    public float bounceHeight = .2f;
+    public float bounceHeight = .25f;
     public float bounceSpeed = 5f;
     public float bounceOffset = 0f;
 

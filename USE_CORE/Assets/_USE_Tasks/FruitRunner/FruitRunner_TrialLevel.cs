@@ -181,7 +181,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
-        Debug.LogWarning("TRIAL STIM INDICES COUNT = " + CurrentTrial.TrialStimIndices.Length);
         trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
         TrialStims.Add(trialStims);
 
@@ -202,10 +201,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         Destroy(FloorManagerGO);
         Destroy(ItemSpawnerGO);
         Destroy(MovementCirclesControllerGO);
-
-
-        SliderFBController.SliderGO.SetActive(false);
-        SliderFBController.SliderHaloGO.SetActive(false);
 
         if (AbortCode == 0)
         {

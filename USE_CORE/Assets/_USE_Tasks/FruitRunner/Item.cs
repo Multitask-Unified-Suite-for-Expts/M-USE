@@ -79,9 +79,6 @@ public class Item_Quaddle : Item
             }
             else if(QuaddleType == "Neutral")
             {
-                //NEED NEG AUDIO
-                //NO TOKEN CHANGE. BUT IF WE LET THEM SPECIFY THEN COULD BE SOME.
-                Debug.LogWarning("NEUTRAL!");
                 playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
 
             }

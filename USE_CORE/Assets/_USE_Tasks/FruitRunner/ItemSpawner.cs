@@ -62,7 +62,7 @@ public class ItemSpawner : MonoBehaviour
             stim.tag = "Quaddle";
             //stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);
             stim.AddComponent<CapsuleCollider>().isTrigger = true;
-            //stim.AddComponent<FaceCamera>();
+            stim.AddComponent<FaceCamera>();
 
             Item_Quaddle quaddleComponent = stim.AddComponent<Item_Quaddle>();
             quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;

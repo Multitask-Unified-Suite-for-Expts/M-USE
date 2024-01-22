@@ -88,6 +88,14 @@ public class FloorManager : MonoBehaviour
         if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
             itemSpawner.SpawnItem(tile.transform);
 
+        //if(NumTilesSpawned + 1 == TotalTiles)
+        //{
+        //    Debug.LogWarning("GONNA SPAWN AN ARCH");
+        //    GameObject arch = Instantiate(Resources.Load<GameObject>("Prefabs/Arch"));
+        //    arch.transform.SetParent(tile.transform);
+
+        //}
+
         ActiveTiles.Add(tile);
 
         NumTilesSpawned++;

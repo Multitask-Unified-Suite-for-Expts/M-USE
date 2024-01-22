@@ -23,6 +23,8 @@ public class Tile : MonoBehaviour
     public Coords mCoord;
 
     public float sliderValueChange;
+
+    public Vector3? localPosition = null;
 // Reference to the ScriptableObject holding the settings
 
     // Access settings through this instance
@@ -104,14 +106,9 @@ public class Tile : MonoBehaviour
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
     }
-
+    
     public void FlashTile()
      {
-    //     if (!mgTrialLevel.MazeManager.startedMaze) // haven't selected the start yet
-    //         flashingTileGO = GameObject.Find(mgTrialLevel.MazeManager.currentMaze.mStart);
-    //     else
-    //         flashingTileGO = GameObject.Find(mgTrialLevel.MazeManager.currentMaze.mNextStep);
-
         iFlashes = 0;
 
         Tile flashingTile = this;
@@ -128,6 +125,15 @@ public class Tile : MonoBehaviour
 
     void Update()
     {
+        if(transform.hasChanged)
+        {
+            Debug.LogWarning("THIS IS THE RECT: " + transform.position);
+            localPosition = transform.position;
+            
+           Debug.LogWarning("## POSITION: " + transform.position);
+           
+        }
+        
         if (isFlashing)
         {
             FBColor = prevCorrectColor;

@@ -94,8 +94,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private PlayerViewPanel PlayerViewPanelController;
     private GameObject PlayerViewParent; // Helps set things onto the player view in the experimenter display
     public List<GameObject> playerViewTextList;
-    public GameObject playerViewText;
+    private GameObject playerViewText;
     private Vector2 textLocation;
+    private bool playerViewTextLoaded;
 
     // Touch Evaluation Variables
     private GameObject selectedGO;
@@ -183,8 +184,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.ConfigureSlider(sliderSize.value);
             SliderFBController.SliderGO.SetActive(true);
 
-            if (!Session.WebBuild && !MazeManager.freePlay)
-                CreateTextOnExperimenterDisplay();
 
             CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
@@ -201,9 +200,20 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
             
+            
+           
         });
         ChooseTile.AddUpdateMethod(() =>
         {
+            Debug.LogWarning("tiles active: " + tiles.IsActive + " || web build: " + Session.WebBuild +
+                             " || free play: " + MazeManager.freePlay + " || playerviewloaded: " +
+                             playerViewTextLoaded);
+            if (tiles.IsActive && !Session.WebBuild && !MazeManager.freePlay && !playerViewTextLoaded)
+            {
+                Debug.LogWarning("in herrr");
+                CreateTextOnExperimenterDisplay();
+                
+            }
             SetTrialSummaryString(); // called every frame to update duration info
             
             if (SelectionHandler.SuccessfulSelections.Count > 0)
@@ -584,17 +594,23 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void CreateTextOnExperimenterDisplay()
     {
         // sets parent for any PlayerViewPanelController elements on experimenter display
+        bool invalidLocalPositionEncountered = false;
+                    Debug.LogWarning( "\n tile transform container POSITION " +MazeManager.tileContainerGO.transform.position);
         for (int i = 0; i < MazeManager.currentMaze.mPath.Count; i++)
         {
             foreach (StimDef sd in tiles.stimDefs)
             {
                 Tile tileComponent = sd.StimGameObject.GetComponent<Tile>();
                 Vector2 textSize = new Vector2(200, 200);
-
+                
                 if (tileComponent.mCoord.chessCoord == MazeManager.currentMaze.mPath[i])
                 {
-                    Debug.LogWarning( "\n go local POSITION " +tileComponent.gameObject.transform.position);
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.gameObject.GetComponent<RectTransform>().transform.localPosition), PlayerViewParent.transform);
+                    if (tileComponent.localPosition == MazeManager.tileContainerGO.transform.position || tileComponent.localPosition  == null)
+                    {
+                        invalidLocalPositionEncountered = true;
+                        break;
+                    }
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint((Vector3)tileComponent.localPosition), PlayerViewParent.transform);
                     playerViewText = PlayerViewPanelController.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, PlayerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
@@ -602,6 +618,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         }
+
+        playerViewTextLoaded = !invalidLocalPositionEncountered;
     }
 
     public override void FinishTrialCleanup()
@@ -635,6 +653,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         selectedGO = null;
         choiceMade = false;
         configVariablesLoaded = false;
+        playerViewTextLoaded = false;
         Session.MouseTracker.ResetClicks();
         MazeManager.ResetMazeVariables();
         correctTouches_InTrial = 0;

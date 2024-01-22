@@ -102,12 +102,12 @@ public class MazeManager:MonoBehaviour
             for (var x = (int)currentMaze.mDims.x -1; x >= 0 ; x--)
             for (var y = (int)currentMaze.mDims.y -1; y >= 0; y--)
             {
-                GameObject tileGO = InitializeTile(tileTex, x, y, tiles);
+                GameObject tileGO = InitializeTile(x, y, tiles);
             }
             
             float mazeWidth = ((tileContainerGridLayoutGroup.cellSize.x + tileContainerGridLayoutGroup.spacing.x) * currentMaze.mDims.x) + tileContainerGridLayoutGroup.spacing.x;
             float mazeHeight = ((tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y) * currentMaze.mDims.y) + tileContainerGridLayoutGroup.spacing.y;
-            
+
             InitializeMazeBackground(mazeBgTex, mazeWidth, mazeHeight);
             AssignAdjacentTiles(tiles, tileContainerGridLayoutGroup.cellSize.x + tileContainerGridLayoutGroup.spacing.x, tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y);
 
@@ -143,7 +143,7 @@ public class MazeManager:MonoBehaviour
 
                     string tileName = GetChessCoordName(col, row);
                     
-                    GameObject tileGO = InitializeTile(tileTex, col, row, tiles);
+                    GameObject tileGO = InitializeTile(col, row, tiles);
                     tileGO.transform.localPosition = new Vector2(x, y);
                 }
             }
@@ -171,10 +171,9 @@ public class MazeManager:MonoBehaviour
         mazeBackgroundGO.GetComponent<Image>().material = mazeBgMaterial;
         mazeBackgroundGO.SetActive(false);
     }
-    private GameObject InitializeTile(Texture2D tileTex, int col, int row, StimGroup tiles)
+    private GameObject InitializeTile(int col, int row, StimGroup tiles)
     {
         GameObject tileGO = Instantiate(tilePrefab, tileContainerGO.transform);
-        Debug.LogWarning("TILE POSITION?? " + tileGO.GetComponent<RectTransform>().rect.position + " || " + tileGO.GetComponent<RectTransform>().rect.center + " || " + tileGO.GetComponent<RectTransform>().rect.min);
         string tileName = GetChessCoordName(col, row);
         tileGO.name = tileName;
         
@@ -618,12 +617,10 @@ public class MazeManager:MonoBehaviour
     }
     public void ActivateMazeElements()
     {
-        tileContainerGO.SetActive(true);
+        mgTrialLevel.tiles.ToggleVisibility(true);
         tileConnectorsContainerGO.SetActive(true);
         landmarksContainerGO.SetActive(true);
-        
-        mgTrialLevel.ActivateChildren(tileContainerGO);
-        
+
         if (creatingSquareMaze)
             mazeBackgroundGO.SetActive(true);
         else

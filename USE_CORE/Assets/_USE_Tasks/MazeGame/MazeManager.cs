@@ -142,8 +142,6 @@ public class MazeManager:MonoBehaviour
 
 
                     string tileName = GetChessCoordName(col, row);
-
-                    
                     
                     GameObject tileGO = InitializeTile(tileTex, col, row, tiles);
                     tileGO.transform.localPosition = new Vector2(x, y);
@@ -155,7 +153,7 @@ public class MazeManager:MonoBehaviour
             AssignAdjacentTiles(tiles, xOffset, yOffset);
             mgTrialLevel.DeactivateChildren(tileConnectorsContainerGO);
 
-            if (mgTrialDef.Landmarks != null) 
+            if (mgTrialDef.Landmarks?.Count > 0)
                 CreateLandmarks(mgTrialDef.Landmarks);
 
         }
@@ -178,6 +176,8 @@ public class MazeManager:MonoBehaviour
         GameObject tileGO = Instantiate(tilePrefab, tileContainerGO.transform);
         Debug.LogWarning("TILE POSITION?? " + tileGO.GetComponent<RectTransform>().rect.position + " || " + tileGO.GetComponent<RectTransform>().rect.center + " || " + tileGO.GetComponent<RectTransform>().rect.min);
         string tileName = GetChessCoordName(col, row);
+        tileGO.name = tileName;
+        
         if (creatingSquareMaze)
             tileGO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("Tile");
         else
@@ -185,10 +185,6 @@ public class MazeManager:MonoBehaviour
             tileGO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("Star");
             tileGO.transform.localScale = new Vector3(1.25f, 1.25f, 1);
         }
-        
-        
-        
-        tileGO.name = tileName;
         //tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;
         Tile tile = tileGO.AddComponent<Tile>();
         tile.Initialize(tileSettings, this);

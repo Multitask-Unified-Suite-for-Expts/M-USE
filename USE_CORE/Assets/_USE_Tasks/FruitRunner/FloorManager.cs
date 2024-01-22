@@ -29,6 +29,8 @@ public class FloorManager : MonoBehaviour
 
         ActiveTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        if (itemSpawner == null)
+            Debug.LogWarning("ITEM SPAWNER NULL");
 
         for (int i = 0; i <= TotalTiles; i++)
         {

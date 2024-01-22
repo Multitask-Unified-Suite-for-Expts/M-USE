@@ -15,6 +15,20 @@ public class ItemSpawner : MonoBehaviour
     public bool RandomSpawnLocations;
 
 
+    private void Update()
+    {
+        if(TrialQuaddles.Count > 0)
+        {
+            foreach(var quaddle in TrialQuaddles)
+            {
+                if(quaddle.StimGameObject == null)
+                {
+                    Debug.LogWarning("YUP STIM IS NULL!!!");
+                }
+            }
+        }
+    }
+
     private void Start()
     {
         BlockadePrefabs = new List<GameObject>
@@ -57,7 +71,6 @@ public class ItemSpawner : MonoBehaviour
         {
             //Spawn A Quaddle
             FruitRunner_StimDef quaddle = TrialQuaddles.FirstOrDefault(q => q.StimIndex == SpawnOrder_StimIndices[SpawnIndex]);
-
             stim = Instantiate(quaddle.StimGameObject);
             stim.tag = "Quaddle";
             //stim.transform.localScale = new Vector3(1.1f, 1.1f, 1.1f);

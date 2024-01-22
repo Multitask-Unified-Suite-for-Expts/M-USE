@@ -190,7 +190,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             stim.QuaddleFeedbackType = CurrentTrial.TrialStimFeedback[i];
             stim.QuaddleGeneralPosition = CurrentTrial.TrialStimGeneralPositions[i];
             stim.StimTokenRewardMag = chooseReward(CurrentTrial.ProbabilisticTokenReward[i]);
-
         }
     }
 

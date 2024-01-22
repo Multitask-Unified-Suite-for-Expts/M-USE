@@ -14,9 +14,16 @@ public class Item : MonoBehaviour
 
     private void Start()
     {
-        audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
-        floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
-        playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
+        try
+        {
+            audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
+            floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
+            playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
+        }
+        catch(Exception e)
+        {
+            Debug.LogError("ITEM START METHOD FAILED! Message: " + e.Message);
+        }
     }
 
     public virtual void SetItemPosition(bool randomPosition, Transform parentTransform)

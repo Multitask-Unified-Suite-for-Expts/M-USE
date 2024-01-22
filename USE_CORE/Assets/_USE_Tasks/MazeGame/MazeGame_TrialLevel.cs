@@ -189,7 +189,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CalculateBlockSummaryString();
             SetTrialSummaryString();
         });
-
         ChooseTile.AddSpecificInitializationMethod(() =>
         {
             //TouchFBController.SetPrefabSizes(tileScale);
@@ -206,7 +205,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         ChooseTile.AddUpdateMethod(() =>
         {
             SetTrialSummaryString(); // called every frame to update duration info
-
+            
             if (SelectionHandler.SuccessfulSelections.Count > 0)
             {
                 if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
@@ -594,7 +593,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 if (tileComponent.mCoord.chessCoord == MazeManager.currentMaze.mPath[i])
                 {
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.transform.position), PlayerViewParent.transform);
+                    Debug.LogWarning( "\n go local POSITION " +tileComponent.gameObject.transform.position);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(tileComponent.gameObject.GetComponent<RectTransform>().transform.localPosition), PlayerViewParent.transform);
                     playerViewText = PlayerViewPanelController.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, PlayerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);

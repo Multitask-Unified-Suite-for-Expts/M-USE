@@ -115,7 +115,7 @@ public class MazeManager:MonoBehaviour
         else
         {
             tileContainerGridLayoutGroup.enabled = false;
-            List<int> customMazeDims = currentMaze.customDims;
+            List<int> customMazeDims = currentMaze.mCustomDims;
             tileContainerGO.SetActive(true);
             tileContainerGO.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
             
@@ -176,20 +176,27 @@ public class MazeManager:MonoBehaviour
     private GameObject InitializeTile(Texture2D tileTex, int col, int row, StimGroup tiles)
     {
         GameObject tileGO = Instantiate(tilePrefab, tileContainerGO.transform);
+        Debug.LogWarning("TILE POSITION?? " + tileGO.GetComponent<RectTransform>().rect.position + " || " + tileGO.GetComponent<RectTransform>().rect.center + " || " + tileGO.GetComponent<RectTransform>().rect.min);
         string tileName = GetChessCoordName(col, row);
-        if(!creatingSquareMaze) 
-            tileGO.GetComponent<SpriteRenderer>().sprite =  Resources.Load<Sprite>("Star");
+        if (creatingSquareMaze)
+            tileGO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("Tile");
+        else
+        {
+            tileGO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("Star");
+            tileGO.transform.localScale = new Vector3(1.25f, 1.25f, 1);
+        }
+        
         
         
         tileGO.name = tileName;
-        tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;
+        //tileGO.transform.localScale = mgTaskDef.TileSize * tileGO.transform.localScale;
         Tile tile = tileGO.AddComponent<Tile>();
         tile.Initialize(tileSettings, this);
 
         StimDef tileStimDef = new StimDef(tiles, tileGO);
         tile.mCoord = new Coords(tileGO.name);
 
-        tileGO.AddComponent<HoverOnTile>();
+        tileGO.AddComponent<HoverEffect>();
         AssignInitialTileColor(tile, currentMaze);
         AssignSliderValue(tile);
 
@@ -361,7 +368,7 @@ public class MazeManager:MonoBehaviour
             if(creatingSquareMaze)
                 tile.sliderValueChange = 1f / (currentMaze.mDims.x * currentMaze.mDims.y);
             else
-              tile.sliderValueChange = 1f / currentMaze.customDims.Sum();
+              tile.sliderValueChange = 1f / currentMaze.mCustomDims.Sum();
         }
         else
             tile.sliderValueChange = 1f / currentMaze.mNumSquares; 
@@ -403,7 +410,7 @@ public class MazeManager:MonoBehaviour
                 return 2;
             }
 
-            if(currentTilePositionGO != null)
+            if(currentTilePositionGO != null && tileConnectorsContainerGO.transform.childCount != 0)
             {
                 Transform connectorTransform = tileConnectorsContainerGO.transform.Find($"{currentTilePositionGO.name}{TileGO.name}") ?? tileConnectorsContainerGO.transform.Find($"{TileGO.name}{currentTilePositionGO.name}");
                 latestConnection = connectorTransform?.gameObject;

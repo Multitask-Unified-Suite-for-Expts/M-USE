@@ -50,7 +50,7 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public List<int> mDims;
-        [CanBeNull] public List<int> customDims;
+        [CanBeNull] public List<int> mCustomDims;
         public string mName;
         public bool sideRestricted;
         public bool freePlay;
@@ -66,7 +66,7 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public Vector2 mDims;
-        [CanBeNull] public List<int> customDims;
+        [CanBeNull] public List<int> mCustomDims;
         public string mName;
         public bool sideRestricted;
         public bool loadingSquareMaze;
@@ -87,7 +87,7 @@ namespace HiddenMaze
             }
             else
             {
-                customDims = jsonMaze.customDims;
+                mCustomDims = jsonMaze.mCustomDims;
             }
 
             if (jsonMaze.mPath?.Count == 0)

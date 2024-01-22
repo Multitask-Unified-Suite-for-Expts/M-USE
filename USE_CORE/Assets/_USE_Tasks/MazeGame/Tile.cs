@@ -74,7 +74,7 @@ public class Tile : MonoBehaviour
     }
     public void setColor(Color c)
     {
-        GetComponent<SpriteRenderer>().color = c;
+        GetComponent<Image>().color = c;
     } 
 
     public void ColorFeedback(int code)
@@ -99,8 +99,8 @@ public class Tile : MonoBehaviour
                 break;
         }
 
-        initialTileColor = gameObject.GetComponent<SpriteRenderer>().color;
-        gameObject.GetComponent<SpriteRenderer>().color = FBColor;
+        initialTileColor = gameObject.GetComponent<Image>().color;
+        gameObject.GetComponent<Image>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
     }
@@ -139,16 +139,16 @@ public class Tile : MonoBehaviour
             if (elapsed >= iFlashes * interval)
             {
                 if (iFlashes % 2 == 0)
-                    flashingTileGO.GetComponent<SpriteRenderer>().color = FBColor;
+                    flashingTileGO.GetComponent<Image>().color = FBColor;
                 else
-                    flashingTileGO.GetComponent<SpriteRenderer>().color = initialTileColor;
+                    flashingTileGO.GetComponent<Image>().color = initialTileColor;
 
                 iFlashes++;
             }
         
             if (iFlashes >= 2 * numBlinks)
             { 
-                flashingTileGO.GetComponent<SpriteRenderer>().color = initialTileColor; // confirm it stops on original tile color
+                flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
                 isFlashing = false;
             }
         }
@@ -162,13 +162,9 @@ public class Tile : MonoBehaviour
             if (elapsed >=  interval)
             {
                 if (!MazeManager.viewPath || CorrectnessCode != 1 && CorrectnessCode != 2)
-                {
-                    gameObject.GetComponent<SpriteRenderer>().color = initialTileColor;
-                }
+                    gameObject.GetComponent<Image>().color = initialTileColor;
                 else if(MazeManager.viewPath && CorrectnessCode == 2)
-                    gameObject.GetComponent<SpriteRenderer>().color= correctColor;
-               
-
+                    gameObject.GetComponent<Image>().color= correctColor;
                 choiceFeedback = false;
             }
         }

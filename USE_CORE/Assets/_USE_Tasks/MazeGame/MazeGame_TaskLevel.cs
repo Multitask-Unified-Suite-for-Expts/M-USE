@@ -44,29 +44,18 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     // Config Loading Variables
     //public MazeDef[] MazeDefs;
 
-    // Maze Loading Variables
-    [HideInInspector] public int[] MazeNumSquares;
-    [HideInInspector] public int[] MazeNumTurns;
-    [HideInInspector] public Vector2[] MazeDims;
-    [HideInInspector] public string[] MazeStart;
-    [HideInInspector] public string[] MazeFinish;
-    [HideInInspector] public string[] MazeName;
-    [HideInInspector] public string[] MazeString;
-    [HideInInspector] public Maze currentMaze;
-    private string mazeKeyFilePath;
-    private MazeGame_TrialLevel mgTL;
-    private int mIndex;
+    
     
     
     // Block Data Tracking Variables
     [HideInInspector]
-    public int[] TotalErrors_InBlock;
-    public int[] PerseverativeErrors_InBlock;
-    public int[] BacktrackErrors_InBlock;
-    public int[] RuleAbidingErrors_InBlock;
-    public int[] RuleBreakingErrors_InBlock;
-    public int[] RetouchCorrect_InBlock;
-    public int[] RetouchErroneous_InBlock;
+    public int TotalErrors_InBlock;
+    public int PerseverativeErrors_InBlock;
+    public int BacktrackErrors_InBlock;
+    public int RuleAbidingErrors_InBlock;
+    public int RuleBreakingErrors_InBlock;
+    public int RetouchCorrect_InBlock;
+    public int RetouchErroneous_InBlock;
     public int CorrectTouches_InBlock; 
     public int NumSliderBarFull_InBlock;
     public List<float?> MazeDurations_InBlock = new List<float?>();
@@ -94,6 +83,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private int blocksAdded = 0;
     public MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     private MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
+    private MazeGame_TrialLevel mgTL;
 
     public override void DefineControlLevel()
     {
@@ -101,7 +91,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         ChoiceDurations_InTask = new List<float?>();
         
         mgTL = (MazeGame_TrialLevel)TrialLevel;
-
+        
+        
         //SetMazePaths();
 
         DefineBlockData();
@@ -120,33 +111,27 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             //InitializeMazeSearchingArrays();
 
             SetSkyBox(mgBD.ContextName);
-
+            
             mgTL.ContextName = mgBD.ContextName;
             MinTrials_InBlock = mgBD.MinTrials;
             MaxTrials_InBlock = mgBD.MaxTrials;
-            //FindMaze();
-            LoadTextMaze();
-            //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
             
-            
+            //FindMaze();
+            mgTL.MazeManager.LoadTextMaze(mgBD);
+            //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
+
             CalculateBlockSummaryString();
             ResetBlockVariables();
 
         });
+        RunBlock.AddDefaultTerminationMethod(() =>
+        {
+            mgTL.DestroyChildren(mgTL.MazeManager.tileContainerGO);
+            mgTL.DestroyChildren(mgTL.MazeManager.tileConnectorsContainerGO);
+        });
     }
 
-
-    private void InitializeBlockArrays()
-    {
-        RuleAbidingErrors_InBlock = new int[currentMaze.mNumSquares];
-        RuleBreakingErrors_InBlock = new int[currentMaze.mNumSquares];
-        BacktrackErrors_InBlock = new int[currentMaze.mNumSquares];
-        PerseverativeErrors_InBlock = new int[currentMaze.mNumSquares];
-        RetouchCorrect_InBlock = new int[currentMaze.mNumSquares];
-        RetouchErroneous_InBlock = new int[currentMaze.mNumSquares];
-        TotalErrors_InBlock = new int[currentMaze.mNumSquares];
-    }
 
     public void DefineBlockData()
     {
@@ -164,17 +149,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("NumSliderBarFull", ()=>NumSliderBarFull_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",MazeDurations_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", ChoiceDurations_InBlock));
-       // BlockData.AddDatum("NumNonStimSelections", () => mgTL.NonStimTouches_InBlock);
+       // BlockData.AddDatum("NumNonStimSelections", () => mgTrialLevel.NonStimTouches_InBlock);
     }
     public override OrderedDictionary GetBlockResultsData()
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Maze Duration"] = mgTL.mazeDuration.ToString("0.0") + "s",
+            ["Maze Duration"] = mgTL.MazeManager.mazeDuration.ToString("0.0") + "s",
             ["Correct Touches"] = CorrectTouches_InBlock,
-            ["Total Errors"] = TotalErrors_InBlock.Sum(),
-            ["Retouched Correct"] = RetouchCorrect_InBlock.Sum(),
-            ["Retouched Erroneous"] = RetouchErroneous_InBlock.Sum(),
+            ["Total Errors"] = TotalErrors_InBlock,
+            ["Retouched Correct"] = RetouchCorrect_InBlock,
+            ["Retouched Erroneous"] = RetouchErroneous_InBlock,
         };
         return data;
     }
@@ -200,13 +185,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     private void ResetBlockVariables()
     {
         CorrectTouches_InBlock = 0;
-        Array.Clear(PerseverativeErrors_InBlock, 0, PerseverativeErrors_InBlock.Length);
-        Array.Clear(BacktrackErrors_InBlock, 0, BacktrackErrors_InBlock.Length);
-        Array.Clear(RuleAbidingErrors_InBlock, 0, RuleAbidingErrors_InBlock.Length);
-        Array.Clear(RuleBreakingErrors_InBlock, 0, RuleBreakingErrors_InBlock.Length);
-        Array.Clear(TotalErrors_InBlock, 0, TotalErrors_InBlock.Length);
-        Array.Clear(RetouchCorrect_InBlock, 0, RetouchCorrect_InBlock.Length);
-        Array.Clear(RetouchErroneous_InBlock, 0, RetouchErroneous_InBlock.Length);
+        RuleAbidingErrors_InBlock = 0;
+        RuleBreakingErrors_InBlock = 0;
+        BacktrackErrors_InBlock = 0;
+        PerseverativeErrors_InBlock = 0;
+        RetouchCorrect_InBlock = 0;
+        RetouchErroneous_InBlock = 0;
+        TotalErrors_InBlock = 0;
         NumSliderBarFull_InBlock = 0;
         MazeDurations_InBlock.Clear();
         ChoiceDurations_InBlock.Clear();
@@ -225,13 +210,13 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", mgBD.BlockEndThreshold*100) +
                              "\n\nLast Trial's Percent Error: " + (latestPercentError == null ?
                                  ("N/A"):String.Format("{0:0.00}%", latestPercentError)) +
-                             "\nTotal Errors: " + TotalErrors_InBlock.Sum() +
-                             "\nRule-Abiding Errors: " + RuleAbidingErrors_InBlock.Sum() +
-                             "\nRule-Breaking Errors: " + RuleBreakingErrors_InBlock.Sum() +
-                             "\nPerseverative Errors: " + PerseverativeErrors_InBlock.Sum() +
-                             "\nBacktrack Errors: " + BacktrackErrors_InBlock.Sum() +
-                             "\nRetouch Correct: " + RetouchCorrect_InBlock.Sum() +
-                             "\nRetouch Erroneous: " + RetouchErroneous_InBlock.Sum() +
+                             "\nTotal Errors: " + TotalErrors_InBlock +
+                             "\nRule-Abiding Errors: " + RuleAbidingErrors_InBlock +
+                             "\nRule-Breaking Errors: " + RuleBreakingErrors_InBlock +
+                             "\nPerseverative Errors: " + PerseverativeErrors_InBlock+
+                             "\nBacktrack Errors: " + BacktrackErrors_InBlock +
+                             "\nRetouch Correct: " + RetouchCorrect_InBlock +
+                             "\nRetouch Erroneous: " + RetouchErroneous_InBlock +
                              "\n\nRewards: " + NumRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", CalculateAverageDuration(ChoiceDurations_InBlock)) +
@@ -292,15 +277,10 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             MazeName = MazeName.Where((source, index) => index != mIndex).ToArray();
         }
 
-        mgTL.mazeDefName = MazeName[mIndex];
+        mgTrialLevel.mazeDefName = MazeName[mIndex];
     }*/
 
-    public void LoadTextMaze()
-    {
-        currentMaze = new Maze(mgBD.MazeDef);
-        mgTL.InitializeTrialArrays();
-        InitializeBlockArrays();
-    }
+    
 
 
     /*public override List<CustomSettings> DefineCustomSettings()

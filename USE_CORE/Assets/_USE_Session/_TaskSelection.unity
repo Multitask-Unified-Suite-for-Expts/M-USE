@@ -1359,6 +1359,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1325135042155552104, guid: 23ec073a76b014e04a2f79392d18b64d,
+        type: 3}
+      propertyPath: m_Text
+      value: /Users/seema/Desktop/MUSE/SessionConfigs
+      objectReference: {fileID: 0}
     - target: {fileID: 1531526670250985284, guid: 23ec073a76b014e04a2f79392d18b64d,
         type: 3}
       propertyPath: m_IsActive

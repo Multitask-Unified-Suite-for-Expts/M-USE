@@ -56,24 +56,21 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
         
-        public List<int> runningPerformance;
-        public int difficultyLevel;
-        public int posStep;
-        public int negStep;
-        public string TrialDefSelectionStyle;
-        public int maxDiffLevel;
-        public int avgDiffLevel;
-        public int diffLevelJitter;
-        public int NumReversalsUntilTerm;
-        public int MinTrialsBeforeTermProcedure;
-        public int TerminationWindowSize;
-        public int reversalsCount;
-        public float blockAccuracy;
-        public List<int> DiffLevelsAtReversals;
-        public List<float> TimingValuesAtReversals;
-        public List<int> DiffLevelsSummary;
-        public int calculatedThreshold;
-        public float calculatedThreshold_timing;
+        [HideInInspector] public List<int> runningPerformance;
+        [HideInInspector] public int difficultyLevel;
+        [HideInInspector] public int posStep;
+        [HideInInspector] public int negStep;
+        [HideInInspector] public string TrialDefSelectionStyle;
+        [HideInInspector] public int maxDiffLevel;
+        [HideInInspector] public int avgDiffLevel;
+        [HideInInspector] public int diffLevelJitter;
+        [HideInInspector] public int NumReversalsUntilTerm;
+        [HideInInspector] public int MinTrialsBeforeTermProcedure;
+        [HideInInspector] public int TerminationWindowSize;
+        [HideInInspector] public int reversalsCount;
+        [HideInInspector] public List<int> DiffLevelsAtReversals;
+        [HideInInspector] public List<int> DiffLevelsSummary;
+        [HideInInspector] public int calculatedThreshold;
 
         [HideInInspector] public bool ForceBlockEnd;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
@@ -654,20 +651,20 @@ namespace USE_ExperimentTemplate_Trial
             Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
             return pvPosition;
         }
-        public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
-        {
-            GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-            Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
-            SquareGO.name = name;
-            SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-            SquareRenderer.material.SetFloat("_SpecularHighlights",0f);
-            SquareRenderer.material.mainTexture = tex;
-            SquareGO.transform.position = pos;
-            SquareGO.transform.localScale = scale;
-            SquareGO.SetActive(false);
-            return SquareGO;
-        }
+        // public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
+        // {
+        //     GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //
+        //     Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
+        //     SquareGO.name = name;
+        //     SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
+        //     SquareRenderer.material.SetFloat("_SpecularHighlights",0f);
+        //     SquareRenderer.material.mainTexture = tex;
+        //     SquareGO.transform.position = pos;
+        //     SquareGO.transform.localScale = scale;
+        //     SquareGO.SetActive(false);
+        //     return SquareGO;
+        // }
         public int chooseReward(Reward[] rewards)
         {
             float totalProbability = 0;

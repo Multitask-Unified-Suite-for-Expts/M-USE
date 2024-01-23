@@ -2,6 +2,8 @@ using USE_ExperimentTemplate_Task;
 using SustainedAttention_Namespace;
 using UnityEngine;
 using System.Collections.Specialized;
+using System.Collections.Generic;
+using System.Linq;
 
 
 public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
@@ -21,7 +23,11 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int AdditionalTargetSelections_Task = 0;
     [HideInInspector] public int DistractorSelections_Task = 0;
     [HideInInspector] public int DistractorRejections_Task = 0;
+    [HideInInspector] public int SliderBarCompletions_Task = 0;
 
+
+    //OBJECTS LOADED FROM OBJECT CONFIG:
+    public SA_Object_ConfigValues[] SA_Objects_ConfigValues;
 
 
     public override void DefineControlLevel()
@@ -30,10 +36,13 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         DefineBlockData();
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Sustained Attention");
-        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object, and when it closes its mouth, select it quickly!");
+        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object. When it animates (closes its mouth), select it as quickly as you can!");
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            //Grab custom settings from Object Config that are read in:
+            SA_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "SustainedAttention_ObjectsDef").AssignCustomSetting<SA_Object_ConfigValues[]>();
+
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
             trialLevel.ResetBlockVariables();
@@ -41,6 +50,13 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
+    }
+
+
+    public override List<CustomSettings> DefineCustomSettings()
+    {
+        customSettings.Add(new CustomSettings("SustainedAttention_ObjectsDef", typeof(SA_Object_ConfigValues), "array", SA_Objects_ConfigValues));
+        return customSettings;
     }
 
     public void CalculateBlockSummaryString()
@@ -78,6 +94,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         data["Additional Target Selections"] = AdditionalTargetSelections_Task;
         data["Target Selections Before First Anim"] = TargetSelectionsBeforeFirstAnim_Task;
         data["Intervals Without Selections"] = TargetAnimsWithoutSelection_Task;
+        data["SliderBar Completions"] = SliderBarCompletions_Task;
         return data;
     }
 
@@ -93,6 +110,8 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
             ["Premature Target Selections"] = trialLevel.TargetSelectionsBeforeFirstAnim_Block,
             ["Intervals Without A Selection"] = trialLevel.TargetAnimsWithoutSelection_Block,
             ["Additional Target Selections"] = trialLevel.AdditionalTargetSelections_Block,
+            ["SliderBar Completions"] = trialLevel.SliderBarCompletions_Block,
+
         };
         return data;
     }
@@ -106,16 +125,18 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
         BlockData.AddDatum("SuccessfulTargetSelections", () => trialLevel.SuccessfulTargetSelections_Block);
         BlockData.AddDatum("UnsuccessfulTargetSelections", () => trialLevel.UnsuccessfulTargetSelections_Block);
+        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
+
         BlockData.AddDatum("AdditionalTargetSelections", () => trialLevel.AdditionalTargetSelections_Block);
         BlockData.AddDatum("TargetSelectionsBeforeFirstAnim", () => trialLevel.TargetSelectionsBeforeFirstAnim_Block);
-        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
 
         BlockData.AddDatum("DistractorSelections", () => trialLevel.DistractorSelections_Block);
         BlockData.AddDatum("DistractorRejections", () => trialLevel.DistractorRejections_Block);
 
-
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
+
+        BlockData.AddDatum("SliderBarCompletions", () => trialLevel.SliderBarCompletions_Block);
     }
 
     private void HandleBlockStrings()

@@ -174,7 +174,7 @@ public class VerifyTask_Level : ControlLevel
                             }
 
                             Debug.Log(TaskLevel.TaskName + " " + cs.SearchString + " file imported.");
-                            Debug.Log(((MazeGame_Namespace.MazeDef[])cs.ParsedResult)[0].mDims);
+                            //Debug.Log(((MazeGame_Namespace.MazeDef[])cs.ParsedResult)[0].mDims);
 
                         }
                         
@@ -229,7 +229,8 @@ public class VerifyTask_Level : ControlLevel
             {"_StimDef_array", "_StimDef_array.txt"},
             {"_ConfigUiDetails_json", "_ConfigUiDetails_json.json"},
             {"_EventCodeConfig_json", "_EventCodeConfig_json.json"},
-            {"MazeDef_array", "MazeDef_array.txt"}
+            {"MazeDef_array", "MazeDef_array.txt"},
+            {"_ObjectsDef_array", "_ObjectsDef_array.txt"}
         };
         TextAsset configTextAsset;
         foreach (var entry in configDict)
@@ -238,42 +239,10 @@ public class VerifyTask_Level : ControlLevel
             if (configTextAsset == null) //try it without task name (cuz MazeDef.txt doesnt have MazeGame in front of it)
                 configTextAsset = Resources.Load<TextAsset>("DefaultSessionConfigs/" + TaskLevel.TaskName + "_DefaultConfigs/" + entry.Key);
             if (configTextAsset != null)
-                File.WriteAllBytes(TaskLevel.TaskConfigPath + Path.DirectorySeparatorChar + TaskLevel.TaskName + entry.Value,
-                    configTextAsset.bytes);
+                File.WriteAllBytes(TaskLevel.TaskConfigPath + Path.DirectorySeparatorChar + TaskLevel.TaskName + entry.Value, configTextAsset.bytes);
         }
     }
 
-
-    private void SetValuesForLoading(string searchString)
-    {
-        importSettings_Level.SettingsDetails[0].SearchString = searchString;
-
-        switch (searchString.ToLower())
-        {
-            case "taskdef":
-                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.TaskDefType;
-                break;
-            case "blockdef":
-                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.BlockDefType;
-                break;
-            case "trialdef":
-                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.TrialDefType;
-                break;
-            case "stimdef":
-                importSettings_Level.SettingsDetails[0].SettingType = TaskLevel.StimDefType;
-                break;
-            case "eventcode":
-                importSettings_Level.SettingsDetails[0].SettingType = typeof(Dictionary<string, EventCode>);
-                break;
-            case "configui":
-                importSettings_Level.SettingsDetails[0].SettingType = typeof(ConfigVarStore);
-                break;
-            default:
-                Debug.LogError("SET VALUES FOR LOADING DEFAULT SWITCH STATEMENT!");
-                break;
-        }
-
-    }
 
     public void SettingsConverterTask<T>(object parsedSettings) where T : TaskDef
     {

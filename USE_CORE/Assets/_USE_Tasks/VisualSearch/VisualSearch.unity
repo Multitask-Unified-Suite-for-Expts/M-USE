@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311924, g: 0.38073963, b: 0.3587269, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -252,7 +252,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
+  m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -368,6 +368,13 @@ MonoBehaviour:
   maxDiffLevel: 0
   avgDiffLevel: 0
   diffLevelJitter: 0
+  NumReversalsUntilTerm: 0
+  MinTrialsBeforeTermProcedure: 0
+  TerminationWindowSize: 0
+  reversalsCount: 0
+  DiffLevelsAtReversals: 
+  DiffLevelsSummary: 
+  calculatedThreshold: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -392,10 +399,9 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  runCalibration: 0
-  InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  SkyboxMaterial: {fileID: 0}
   HeldTooLongTexture: {fileID: 2800000, guid: 47b4a2dd1c0432a469c082a17ab4256a, type: 3}
   HeldTooShortTexture: {fileID: 2800000, guid: 386006c0d81ea3442b946e37d70067af, type: 3}
   MovedTooFarTexture: {fileID: 0}
@@ -538,12 +544,12 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  configUI: {fileID: 0}
+  ActiveSceneElements: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
-  BlockResultsPrefab: {fileID: 0}
-  BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}

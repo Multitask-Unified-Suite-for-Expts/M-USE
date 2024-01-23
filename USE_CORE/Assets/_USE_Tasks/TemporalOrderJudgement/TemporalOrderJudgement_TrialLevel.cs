@@ -117,7 +117,7 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
 
         //FixatioCross state -------------------------------------------------------------------------------------------------------------------------------------------
         FixationCross.AddSpecificInitializationMethod(() => CrossGO.SetActive(true));
-        FixationCross.AddTimer(() => CurrentTrial.CrossDuration, Display, () => CrossGO.SetActive(false));
+        FixationCross.AddTimer(() => CurrentTrial.FixCrossDuration, Display, () => CrossGO.SetActive(false));
 
         //Display state ------------------------------------------------------------------------------------------------------------------------------------------------
         Display.AddSpecificInitializationMethod(() =>
@@ -223,22 +223,20 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
         VisualStimGO.SetActive(false);
         VisualStimGO.transform.parent = TOJ_CanvasGO.transform;
         VisualStimGO.transform.localPosition = CurrentTrial.VisualStimPosition; //set to pos specified in trial def
-        VisualStimGO.transform.localScale = CurrentTrial.VisualStimSize; //set to size specified in trial def
+        VisualStimGO.transform.localScale = CurrentTrial.VisualStimScale; //set to size specified in trial def
         Image stimImage = VisualStimGO.AddComponent<Image>();
-        stimImage.sprite = Resources.Load<Sprite>(CurrentTrial.VisualStimIdentity); //Load the stim's image from resources!
-        if (CurrentTrial.VisualStimRandomColor)
-            stimImage.color = GetRandomColor();
+        stimImage.sprite = Resources.Load<Sprite>(CurrentTrial.VisualStimFilename); //Load the stim's image from resources!
+
 
         //Create Cross stim:
         CrossGO = new GameObject("Cross");
         CrossGO.SetActive(false);
         CrossGO.transform.parent = TOJ_CanvasGO.transform;
-        CrossGO.transform.localPosition = CurrentTrial.CrossPosition; //set to pos specified in trial def
-        CrossGO.transform.localScale = CurrentTrial.CrossSize; //set to size specified in trial def
+        CrossGO.transform.localPosition = CurrentTrial.FixCrossPosition; //set to pos specified in trial def
+        CrossGO.transform.localScale = CurrentTrial.FixCrossScale; //set to size specified in trial def
         Image crossImage = CrossGO.AddComponent<Image>();
-        crossImage.sprite = Resources.Load<Sprite>(CurrentTrial.CrossIdentity); //Load the cross image from resources!
-        if (CurrentTrial.CrossRandomColor)
-            crossImage.color = GetRandomColor();
+        crossImage.sprite = Resources.Load<Sprite>(CurrentTrial.FixCrossFilename); //Load the cross image from resources!
+
     }
 
     private void LoadResponsePanel()

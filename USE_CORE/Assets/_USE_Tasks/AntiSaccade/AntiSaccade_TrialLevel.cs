@@ -68,10 +68,11 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     //for data:
     private string DistractorStimIndices_String;
     private string DistractorStimsChoosePos_String;
-
     private bool SpinCorrectSelection;
-
     private bool GotTrialCorrect;
+    private float ReactionTime;
+    [HideInInspector] public List<float?> ReactionTimes_InBlock = new List<float?>();
+
 
     //MAIN TARGET:
     private GameObject TargetStim_GO;
@@ -180,7 +181,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SpatialCue.AddSpecificInitializationMethod(() =>
         {
             //if (CurrentTrial.RandomSpatialCueColor)
-            //    SpatialCue_GO.GetComponent<Image>().color = GetRandomColor();
+                //SpatialCue_GO.GetComponent<Image>().color = GetRandomColor();
 
             SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
@@ -218,7 +219,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         Mask.AddSpecificInitializationMethod(() =>
         {
             //if (CurrentTrial.RandomMaskColor)
-            //    Mask_GO.GetComponent<Image>().color = GetRandomColor();
+                //Mask_GO.GetComponent<Image>().color = GetRandomColor();
 
             Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos;
             Mask_GO.SetActive(true);
@@ -268,6 +269,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         float totalRotation = 0f;
         Feedback.AddSpecificInitializationMethod(() =>
         {
+            ReactionTime = ChooseStim.TimingInfo.Duration;
+            ReactionTimes_InBlock.Add(ReactionTime);
+            
             SpinCorrectSelection = false;
             totalRotation = 0f;
 
@@ -385,9 +389,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SpatialCue_GO.transform.localPosition = Vector3.zero;
         SpatialCue_GO.AddComponent<FaceCamera>();
         
-        if (SpatialCue_GO == null)
-            Debug.LogError(("NULL!"));
-        
         Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black"));
         Mask_GO.name = "Mask";
         Mask_GO.SetActive(false);
@@ -446,6 +447,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     public override void ResetTrialVariables()
     {
         GotTrialCorrect = false;
+        ReactionTime = 0;
     }
 
     public void ResetBlockVariables()
@@ -454,10 +456,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;
         calculatedThreshold = 0;
+        calculatedThreshold_timing = 0;
         reversalsCount = 0;
+        blockAccuracy = 0;
+        
         DiffLevelsSummary.Clear();
         DiffLevelsAtReversals.Clear();
+        TimingValuesAtReversals.Clear();
         runningPerformance.Clear();
+        ReactionTimes_InBlock.Clear();
     }
 
     public override void FinishTrialCleanup()
@@ -486,7 +493,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length;
+                             "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
+                             "\nDifficulty Level: " + difficultyLevel +
+                             "\nDisplay Target Duration (sec): " + CurrentTrial.DisplayTargetDuration +
+                             "\npatial Cue Delay Duration (sec): " + CurrentTrial.SpatialCueDelayDuration;
     }
 
     private void LoadConfigUIVariables()
@@ -525,6 +535,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TargetStimDisplayPos", () => CurrentTrial.TargetStim_DisplayPos.ToString());
         TrialData.AddDatum("TargetStimChoosePos", () => CurrentTrial.TargetStim_ChoosePos.ToString());
         TrialData.AddDatum("DistractorStimsChoosePos", () => DistractorStimsChoosePos_String);
+        TrialData.AddDatum("ReactionTime", ()=> ReactionTime);
+
     }
 
     private void DefineFrameData()
@@ -582,6 +594,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 0)
             {
                 DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
+                
                 reversalsCount++;
             }
         }
@@ -590,6 +604,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (prevResult == 1)
             {
                 DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
                 reversalsCount++;
             }
         }
@@ -601,6 +616,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
             calculatedThreshold = (int)lastElements.Average();
             Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            
+            List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
+            Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));
+            
+            calculatedThreshold_timing = lastElements_timing.Average();
+            Debug.Log("calculatedThreshold_timing: " + calculatedThreshold_timing);
+            
             return true;
         }
         return false;

@@ -132,6 +132,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<GameObject> ObjectList;
 
+    private GameObject PopParticles;
 
 
     public override void DefineControlLevel()
@@ -487,7 +488,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 InflationDurations_Block.Add(InflationDuration);
                 CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
-                AudioFBController.Play(Session.SessionDef.IsHuman ? "EC_HarshPop" : "EC_NicePop");
+                AudioFBController.Play(Session.SessionDef.IsHuman ? "BalloonPop" : "EC_NicePop");
+                PopParticles = Instantiate(Resources.Load<GameObject>(Session.SessionDef.IsHuman ? "Prefabs/BalloonPop_Effect" : "Prefabs/BalloonPop_Effect_Softer"));
+
+                PopParticles.name = "PopParticles";
             }
             else
             {
@@ -556,6 +560,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     private void DeactivateGameObjects()
     {
+        if (PopParticles != null)
+            Destroy(PopParticles);
+
         if (TrialStim != null && TrialStim.activeInHierarchy)
             TrialStim.SetActive(false);
 

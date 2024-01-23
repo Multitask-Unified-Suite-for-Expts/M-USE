@@ -289,7 +289,7 @@ namespace USE_ExperimentTemplate_Task
                 if (ContinueButtonClicked)
                     ContinueButtonClicked = false;
 
-                if (Session.SessionDef.IsHuman && BlockResultsGO != null)
+                if (BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
 
                 StartCoroutine(BlockData.AppendDataToBuffer());
@@ -469,6 +469,29 @@ namespace USE_ExperimentTemplate_Task
 
             return avgDuration;
         }
+        
+        public float CalculateStdDevDuration(List<float?> durations)
+        {
+            float stdDevDuration;
+
+            // Filter out null values and convert to double for standard deviation calculation
+            var nonNullDurations = durations.Where(item => item.HasValue).Select(item => (double)item.Value);
+
+            if (nonNullDurations.Any())
+            {
+                double mean = nonNullDurations.Average();
+                double sumOfSquares = nonNullDurations.Sum(value => Math.Pow(value - mean, 2));
+                double variance = sumOfSquares / nonNullDurations.Count();
+                stdDevDuration = (float)Math.Sqrt(variance);
+            }
+            else
+            {
+                stdDevDuration = 0f;
+            }
+
+            return stdDevDuration;
+        }
+
 
         private void HandleContinueButtonClick()
         {
@@ -1148,7 +1171,6 @@ public class TaskLevelTemplate_Methods
         public object ParsedResult;
         public Action<object> UpdateAction;
         
-        //public CustomSettings(string searchString, Type settingsType, string settingsParsingStyle, Action<object> updateAction)
         public CustomSettings(string searchString, Type settingsType, string settingsParsingStyle, object parsedResult)
         {
             SearchString = searchString;

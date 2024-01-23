@@ -9,11 +9,16 @@ TagManager:
   - Game Configs
   - Center
   - PausePanel
+  - Quaddle
+  - PlayerEyes
+  - LeftCircle
+  - MiddleCircle
+  - Blockade
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - FloorTile
   - Water
   - UI
   - PostProcessing

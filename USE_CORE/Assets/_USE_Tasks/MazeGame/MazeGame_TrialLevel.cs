@@ -321,7 +321,12 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
 
-                if (MazeManager.finishedMaze)
+                  percentError = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currentMaze.mNumSquares);
+                  runningPercentError.Add(percentError);
+                  CurrentTaskLevel.NumSliderBarFull_InBlock++;
+                  CurrentTaskLevel.NumSliderBarFull_InTask++;
+
+                if (Session.SyncBoxController != null)
                 {
                     HandleMazeCompletion();
                 }

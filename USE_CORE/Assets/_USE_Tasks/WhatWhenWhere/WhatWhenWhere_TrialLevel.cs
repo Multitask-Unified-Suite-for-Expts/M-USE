@@ -201,8 +201,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SetUpdateDuration(fbDuration.value);
             SliderFBController.SetFlashingDuration(flashingFbDuration.value);
             
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderReset");
-
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
                 StateAfterDelay = FlashNextCorrectStim;
@@ -498,9 +496,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
             runningErrorCount.Add(NumErrors_InTrial);
-            
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOn");
-                        
+                                    
             if (Session.SyncBoxController != null)
             {
                 Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
@@ -511,7 +507,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("SliderFbController_SliderCompleteFbOff");
             Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             
             CurrentTaskLevel.SetBlockSummaryString();

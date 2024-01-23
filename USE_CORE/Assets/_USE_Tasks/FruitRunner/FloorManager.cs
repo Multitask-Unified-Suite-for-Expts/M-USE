@@ -1,77 +1,127 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float MovementSpeed = 15f;
-
-    public GameObject floorTilePrefab;
-    private int tilesOnScreen = 15;
-
-    private List<GameObject> activeTiles;
+    public float FloorMovementSpeed = 20f; //20 is great for humans
+    private GameObject FloorTilePrefab;
+    public int NumTilesSpawned;
+    public int TotalTiles;
+    public List<GameObject> ActiveTiles;
 
     private ItemSpawner itemSpawner;
 
-    private int NumTilesSpawned;
+    private bool Move;
+
+    public float TileScale_Z;
+
+
+    public void SetTotalTiles(int numPerGroup, int numGroups)
+    {
+        TotalTiles = 1 + (numPerGroup * numGroups); //Add 1 for initial empty tile
+    }
 
     void Start()
     {
-        activeTiles = new List<GameObject>();
-        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        FloorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
-        for (int i = 0; i < tilesOnScreen; i++)
+        ActiveTiles = new List<GameObject>();
+        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        if (itemSpawner == null)
+            Debug.LogWarning("ITEM SPAWNER NULL");
+
+        for (int i = 0; i <= TotalTiles; i++)
         {
             SpawnTile();
         }
+
+        Move = false;
     }
+
+
 
     void Update()
     {
+        if (!Move)
+            return;
+
         MoveTiles();
 
-        if (activeTiles.Count > 0 && activeTiles[0].transform.position.z <= -8f)
+        if (ActiveTiles.Count > 0)
         {
-            SpawnTile();
-            DeleteTile();
+            BoxCollider collider = ActiveTiles[0].GetComponent<BoxCollider>();
+
+            if(collider.bounds.max.z < transform.position.z - collider.bounds.size.z)
+            {
+                DeleteTile();
+                //SpawnTile();
+            }
         }
     }
 
     void MoveTiles()
     {
-        foreach(var tile in activeTiles)
+        foreach(var tile in ActiveTiles)
         {
-            tile.transform.Translate(Vector3.back * MovementSpeed * Time.deltaTime);
+            tile.transform.Translate(Vector3.back * FloorMovementSpeed * Time.deltaTime);
         }
     }
 
     void SpawnTile()
     {
-        Vector3 spawnPos = new Vector3(0f, -.5f, 0f); //for first one
+        Vector3 spawnPos = new Vector3(0f, -.5f, -.5f); //for first one
 
-        if(activeTiles.Count > 0)
+        if(ActiveTiles.Count > 0)
         {
-            BoxCollider lastTileCollider = activeTiles[activeTiles.Count-1].GetComponent<BoxCollider>();
-            spawnPos = new Vector3(0, -.5f, (activeTiles[activeTiles.Count - 1].transform.position.z + (lastTileCollider.bounds.size.z + .2f)));
+            GameObject lastTile = ActiveTiles[ActiveTiles.Count - 1];
+            BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
+            spawnPos.z = lastTile.transform.position.z + lastTileCollider.bounds.size.z;
         }
-        
 
-        GameObject tile = Instantiate(floorTilePrefab, spawnPos, Quaternion.identity);
-        tile.name = "Tile";
+        GameObject tile = Instantiate(FloorTilePrefab, spawnPos, Quaternion.identity);
+        tile.name = "Tile " + (NumTilesSpawned + 1);
+        tile.transform.localScale = new Vector3(1f, 1f, TileScale_Z);
         tile.gameObject.transform.parent = gameObject.transform;
+        tile.AddComponent<Item_Floor>();
 
-        if(NumTilesSpawned > 4) //Dont spawn items on the first 4
+        //if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
+        if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
             itemSpawner.SpawnItem(tile.transform);
 
-        activeTiles.Add(tile);
+        //if(NumTilesSpawned + 1 == TotalTiles)
+        //{
+        //    Debug.LogWarning("GONNA SPAWN AN ARCH");
+        //    GameObject arch = Instantiate(Resources.Load<GameObject>("Prefabs/Arch"));
+        //    arch.transform.SetParent(tile.transform);
+
+        //}
+
+        ActiveTiles.Add(tile);
 
         NumTilesSpawned++;
     }
 
+
+
+    public void ActivateMovement()
+    {
+        Move = true;
+    }
+
+    public void DeactivateMovement()
+    {
+        Move = false;
+    }
+
+
+
     void DeleteTile()
     {
-        Destroy(activeTiles[0]);
-        activeTiles.RemoveAt(0);
+        Destroy(ActiveTiles[0]);
+        ActiveTiles.RemoveAt(0);
     }
+
 
 }

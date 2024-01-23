@@ -650,6 +650,34 @@ public class ImportSettings_Level : ControlLevel
 
 				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 			}
+        else if (typeof(T) == typeof(string[]))
+        {
+            try
+            {
+                return (string[])ConvertStringArray<string>(s);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+                    + typeof(T).Name + " but the conversion failed.");
+
+                throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+            }
+        }
+        else if (typeof(T) == typeof(string[][]))
+        {
+            try
+            {
+
+                return (string[][])ConvertStringJaggedArray<string>(s);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+                    + typeof(T).Name + " but the conversion failed.");
+
+                throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+            }
         }
         else if (typeof(T) != null)
 		{
@@ -785,7 +813,7 @@ public class ImportSettings_Level : ControlLevel
 	}
 	public static string[][] GetStringArrayofArrays(string s)
 	{
-		return (string[][])JsonConvert.DeserializeObject(s, typeof(string[][]));
+        return (string[][])JsonConvert.DeserializeObject(s, typeof(string[][]));
 	}
     
     // public static T[] ImportSettings_SingleTypeJSON<T>(string settingsCategory, string settingsPath, string serverFileString = null, string dictName = "")

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using USE_ExperimentTemplate_Classes;
 using Random = UnityEngine.Random;
 
 
@@ -23,6 +24,10 @@ public class SA_ObjectManager : MonoBehaviour
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;
     public event CycleEventHandler OnDistractorAvoided;
+
+    public Dictionary<string, EventCode> TaskEventCodes; //task event codes passed in so can trigger "Object Animation Occured" event code
+
+    public float MaxTouchDuration;
 
 
     public void NoSelectionDuringInterval(SA_Object obj)
@@ -71,41 +76,43 @@ public class SA_ObjectManager : MonoBehaviour
         }
     }
 
-    public void CreateObjects(bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, int[] sizes, int[] speeds, float[] nextDestDistances, Vector2[] intervalsAndDurations, Color color)
+    public List<SA_Object> CreateObjects(List<SA_Object_ConfigValues> objects)
     {
-        if(sizes.Length != speeds.Length)
-        {
-            Debug.LogError("ERROR CREATING SA OBJECTS. NOT ALL ARRAYS CONTAIN SAME NUMBER OF VALUES!");
-            return;
-        }
+        List<SA_Object> trialObjects = new List<SA_Object>();
 
-        for(int i = 0; i < sizes.Length; i++)
+        foreach(SA_Object_ConfigValues configValues in objects)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("Target_Open"));
-            go.name = isTarget ? $"Target{i+1}" : $"Distractor{i+1}";
+            GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
+
+            go.GetComponent<PacmanDrawer>().ManualStart();
+
+            go.name = configValues.IsTarget ? $"Target" : $"Distractor";
             go.SetActive(false);
             go.transform.SetParent(ObjectParent);
             go.transform.localPosition = Vector3.zero;
             go.transform.localScale = Vector3.one;
-            go.GetComponent<RectTransform>().sizeDelta = new Vector2(sizes[i], sizes[i]);
-            go.GetComponent<Image>().color = color;
-
-            go.GetComponent<CircleCollider2D>().radius = sizes[i] * .567f; //Set Collider radius
+            go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
+            go.GetComponent<Image>().color = new Color(configValues.ObjectColor[0], configValues.ObjectColor[1], configValues.ObjectColor[2]);
+            go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
 
             SA_Object obj = go.AddComponent<SA_Object>();
-            obj.SetupObject(this, isTarget, angleProbs, rotateTowardsDest, minAnimGap, responseWindow, closeDuration, speeds[i], sizes[i], nextDestDistances[i], intervalsAndDurations);
+            obj.SetupObject(this, configValues);
 
-            if (isTarget)
+            if (obj.IsTarget)
                 TargetList.Add(obj);
             else
                 DistractorList.Add(obj);
+
+            trialObjects.Add(obj);
         }
+
+        return trialObjects;
     }
     
     private void CalculateStartingPositions()
     {
-        int[] xValues = new int[] { -800, -600, -400, -200, 0, 200, 400, 600, 800 };
-        int[] yValues = new int[] { 325, 180, 35, -110, -255, -400};
+        int[] xValues = new int[] { -800, -400, 0, 400, 800 };
+        int[] yValues = new int[] { 325, 84, -158, -400};
 
         for (int i = 0; i < yValues.Length; i++)
         {
@@ -128,30 +135,31 @@ public class SA_ObjectManager : MonoBehaviour
 
     public void DestroyExistingObjects()
     {
-        if (TargetList.Count > 0)
+        List<SA_Object> targetListCopy = new List<SA_Object>(TargetList);
+        List<SA_Object> distractorListCopy = new List<SA_Object>(DistractorList);
+
+        foreach(SA_Object obj in targetListCopy)
         {
-            foreach (SA_Object obj in TargetList)
-            {
-                if(obj != null)
-                    obj.DestroyObj();
-            }
-            TargetList.Clear();
+            if (obj != null)
+                obj.DestroyObj();
         }
-        if (DistractorList.Count > 0)
+
+        foreach (SA_Object obj in distractorListCopy)
         {
-            foreach (SA_Object obj in DistractorList)
-            {
-                if(obj != null)
-                    obj.DestroyObj();
-            }
-            DistractorList.Clear();
+            if (obj != null)
+                obj.DestroyObj();
         }
+
+        TargetList.Clear();
+        DistractorList.Clear();
     }
 
     public void ActivateTargets()
     {
         foreach (var target in TargetList)
+        {
             target.gameObject.SetActive(true);
+        }
     }
 
     public void DeactivateTargets()
@@ -163,7 +171,9 @@ public class SA_ObjectManager : MonoBehaviour
     public void ActivateDistractors()
     {
         foreach (var distractor in DistractorList)
+        {
             distractor.gameObject.SetActive(true);
+        }
     }
 
     public void DeactivateDistractors()
@@ -179,7 +189,13 @@ public class SA_Object : MonoBehaviour
 {
     public SA_ObjectManager ObjManager;
 
-    public Vector3 AngleProbs;
+    public PacmanDrawer PacmanDrawer;
+
+    //From Object Config:
+    public int Index;
+    public string ObjectName;
+    public float OpenAngle; //90 or 75 as of now
+    public int ClosedLineThickness;
     public float MinAnimGap;
     public bool IsTarget;
     public bool RotateTowardsDest;
@@ -188,29 +204,27 @@ public class SA_Object : MonoBehaviour
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;
-
-    public Vector2[] RateAndDurations;
+    public Vector2[] RatesAndDurations;
+    public Vector3 AngleProbs;
+    public Vector2[] AngleRanges;
+    public int NumDestWithoutBigTurn;
+    public float[] ObjectColor;
+    public int SliderChange;
 
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
-    public bool Move; //Controls whether or not they're moving around the screen
+    public bool MoveAroundScreen;
     public bool ObjectPaused;
-
+    public float TimeOfPause;
     public GameObject Marker;
     public Vector3 Direction;
-
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
-
     public float AnimStartTime;
-
     public bool WithinDuration;
-
     private readonly List<float> PreviousAngleOffsets = new List<float>();
-
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
-
 
 
     public SA_Object()
@@ -219,21 +233,29 @@ public class SA_Object : MonoBehaviour
     }
 
 
-    public void SetupObject(SA_ObjectManager objManager, bool isTarget, Vector3 angleProbs, bool rotateTowardsDest, float minAnimGap, Vector2 responseWindow, float closeDuration, float speed, float size, float nextDestDist, Vector2[] ratesAndDurations)
+    public void SetupObject(SA_ObjectManager objManager, SA_Object_ConfigValues configValue)
     {
         ObjManager = objManager;
-        IsTarget = isTarget;
-        AngleProbs = angleProbs;
-        RotateTowardsDest = rotateTowardsDest;
-        MinAnimGap = minAnimGap;
-        ResponseWindow = responseWindow;
-        Speed = speed;
-        Size = size;
-        NextDestDist = nextDestDist;
-        CloseDuration = closeDuration;
-        RateAndDurations = ratesAndDurations;
+        Index = configValue.Index;
+        ObjectName = configValue.ObjectName;
+        OpenAngle = configValue.OpenAngle;
+        ClosedLineThickness = configValue.ClosedLineThickness;
+        IsTarget = configValue.IsTarget;
+        AngleProbs = configValue.AngleProbs;
+        RotateTowardsDest = configValue.RotateTowardsDest;
+        MinAnimGap = configValue.MinAnimGap;
+        ResponseWindow = configValue.ResponseWindow;
+        Speed = configValue.Speed;
+        Size = configValue.Size;
+        NextDestDist = configValue.NextDestDist;
+        CloseDuration = configValue.CloseDuration;
+        RatesAndDurations = configValue.RatesAndDurations;
+        ObjectColor = configValue.ObjectColor;
+        SliderChange = configValue.SliderChange;
+        AngleRanges = configValue.AngleRanges;
+        NumDestWithoutBigTurn = configValue.NumDestWithoutBigTurn;
 
-        foreach(var rateAndDur in RateAndDurations)
+        foreach (var rateAndDur in RatesAndDurations)
         {
             Cycle cycle = new()
             {
@@ -248,10 +270,12 @@ public class SA_Object : MonoBehaviour
         SetNewDestination();
 
         SetupMarker(); //Marker for debugging purposes
+
+        PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
+        PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
+        PacmanDrawer.DrawMouth(OpenAngle);
+
     }
-
-
-
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
@@ -288,10 +312,9 @@ public class SA_Object : MonoBehaviour
             DestroyObj();
     }
 
-
     private void Update()
     {
-        if(Move)
+        if(MoveAroundScreen)
         {
             if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
@@ -313,7 +336,7 @@ public class SA_Object : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(Move && !ObjectPaused)
+        if(MoveAroundScreen && !ObjectPaused)
         {
             if (AtDestination())
                 SetNewDestination();            
@@ -330,9 +353,10 @@ public class SA_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanClosed");
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
+        gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>("PacmanOpen");
+        gameObject.GetComponent<PacmanDrawer>().DrawMouth(OpenAngle);
     }
 
     private void HandlePausingWhileBeingSelected()
@@ -341,15 +365,16 @@ public class SA_Object : MonoBehaviour
         {
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
+            {
                 ObjectPaused = true;
+                TimeOfPause = Time.time;
+            }
         }
+        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration + .2f)) //add .2 so the touch fb dissapears before object starts moving again
+            ObjectPaused = false;
 
-        if (InputBroker.GetMouseButtonUp(0))
-        {
-            GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
-            if (hit != null && hit == gameObject)
-                ObjectPaused = false;
-        }
+        if(ObjectPaused && InputBroker.GetMouseButton(0))
+            CurrentCycle.cycleStartTime += Time.deltaTime; //Push the cycle start time back while they're selecting.
     }
 
     private void HandleInput()
@@ -375,7 +400,7 @@ public class SA_Object : MonoBehaviour
 
     public void ActivateMovement()
     {
-        Move = true;
+        MoveAroundScreen = true;
 
         AnimStartTime = 0; //used to be Time.time 
 
@@ -403,24 +428,25 @@ public class SA_Object : MonoBehaviour
     {
         float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg; //Extract angle from current Direction
 
-        float randomChance = Random.value; //Get randomNum between 0 and 1
+        float randomChance = Random.value; //Get randomNum between 0 and .99
         float angleOffset;
 
         if (randomChance < AngleProbs.x) //AngleProbs.x is the "Chance of a small angle"
-            angleOffset = Random.Range(0, 16f);
+            angleOffset = Random.Range(AngleRanges[0].x, AngleRanges[0].y); //Small Angle Range
         else if (randomChance < AngleProbs.x + AngleProbs.y) //AngleProbs.y is the "Chance of a medium angle"
-            angleOffset = Random.Range(16f, 46f);
+            angleOffset = Random.Range(AngleRanges[1].x, AngleRanges[1].y); //Medium Angle Range
         else
-            angleOffset = Random.Range(46f, 181f);
+            angleOffset = Random.Range(AngleRanges[2].x, AngleRanges[2].y); //Large Angle Range
 
-        if (PreviousAngleOffsets.Count > 4) //Could make a variable "NumMovesWithoutTurningAround"
+       
+        if (PreviousAngleOffsets.Count > NumDestWithoutBigTurn)
             PreviousAngleOffsets.RemoveAt(0);
 
-        if(angleOffset > 90f)
+        if (angleOffset > 90f)
         {
-           foreach(float offset in PreviousAngleOffsets)
+            foreach (float offset in PreviousAngleOffsets)
             {
-                if(Mathf.Abs(offset) > 90f)
+                if (Mathf.Abs(offset) > 90f)
                 {
                     angleOffset = Random.Range(0, 46);
                     break;
@@ -429,7 +455,7 @@ public class SA_Object : MonoBehaviour
         }
 
         float randomNum = Random.value; //Randomize whether to make it negative
-        if (randomNum < .5f)
+        if (randomNum < .5f) //50% chance to be negative
             angleOffset = -angleOffset;
 
         PreviousAngleOffsets.Add(angleOffset);
@@ -516,10 +542,7 @@ public class SA_Object : MonoBehaviour
         Marker.transform.SetParent(GameObject.Find("SustainedAttention_Canvas").transform);
         Marker.transform.localScale = new Vector3(.3f, .3f, .3f);
         Marker.transform.localPosition = CurrentDestination;
-        if (!IsTarget)
-            Marker.GetComponent<Image>().color = Color.magenta;
-        else
-            Marker.GetComponent<Image>().color = Color.yellow;
+        Marker.GetComponent<Image>().color = new Color(ObjectColor[0], ObjectColor[1], ObjectColor[2]);
         Marker.SetActive(false);
     }
 
@@ -527,6 +550,31 @@ public class SA_Object : MonoBehaviour
     {
         Marker.SetActive(!Marker.activeInHierarchy);
     }
+}
+
+//Class is used to read in SA Object Config values. Can't read in directly to SA_Object because that creates the gameobject. We need to create the gameobject after getting the object values.
+public class SA_Object_ConfigValues
+{
+    //From Object Config:
+    public int Index;
+    public string ObjectName;
+    public float OpenAngle;
+    public int ClosedLineThickness;
+    public float MinAnimGap;
+    public bool IsTarget;
+    public bool RotateTowardsDest;
+    public float Speed;
+    public float Size;
+    public float NextDestDist;
+    public Vector2 ResponseWindow;
+    public float CloseDuration;
+    public Vector2[] RatesAndDurations;
+    public Vector3 AngleProbs;
+    public Vector2[] AngleRanges;
+    public int NumDestWithoutBigTurn;
+    public float[] ObjectColor;
+    public int SliderChange;
+
 }
 
 public class Cycle

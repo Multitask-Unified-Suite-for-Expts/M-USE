@@ -43,11 +43,11 @@ namespace TemporalOrderJudgement_Namespace
 
     public class TemporalOrderJudgement_TrialDef : TrialDef
     {
-        public string VisualStimIdentity;
+        public string VisualStimFilename;
         public string AudioStimIdentity;
-        public string CrossIdentity;
+        public string FixCrossFilename;
 
-        public float CrossDuration;
+        public float FixCrossDuration;
         public float PostDisplayDelayDuration; //basically ends up being amount of time after visual stim is displayed
         public float ResponseDuration;
         public float FeedbackDuration;
@@ -55,14 +55,14 @@ namespace TemporalOrderJudgement_Namespace
         public float VisualStimOnsetDelay;
         public float AudioStimOnsetDelay;
 
-        public Vector3 VisualStimSize;
-        public Vector3 CrossSize;
+        public Vector3 VisualStimScale;
+        public Vector3 FixCrossScale;
 
         public Vector3 VisualStimPosition;
-        public Vector3 CrossPosition;
+        public Vector3 FixCrossPosition;
 
         public bool VisualStimRandomColor;
-        public bool CrossRandomColor;
+        public bool FixCrossRandomColor;
     }
 
     public class TemporalOrderJudgement_StimDef : StimDef

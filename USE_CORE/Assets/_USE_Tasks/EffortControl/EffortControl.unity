@@ -1246,6 +1246,13 @@ MonoBehaviour:
   maxDiffLevel: 0
   avgDiffLevel: 0
   diffLevelJitter: 0
+  NumReversalsUntilTerm: 0
+  MinTrialsBeforeTermProcedure: 0
+  TerminationWindowSize: 0
+  reversalsCount: 0
+  DiffLevelsAtReversals: 
+  DiffLevelsSummary: 
+  calculatedThreshold: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -1270,10 +1277,9 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  runCalibration: 0
-  InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  SkyboxMaterial: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
@@ -1401,7 +1407,6 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  PrefabPath: 
   ConfigFolderName: 
   TaskName: EffortControl
   TaskProjectFolder: 
@@ -1436,12 +1441,12 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  configUI: {fileID: 0}
+  ActiveSceneElements: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
-  BlockResultsPrefab: {fileID: 0}
-  BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
@@ -1502,7 +1507,7 @@ Light:
   m_Type: 1
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Intensity: 2
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208

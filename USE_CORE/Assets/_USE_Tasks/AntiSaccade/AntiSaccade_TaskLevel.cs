@@ -29,6 +29,9 @@ using AntiSaccade_Namespace;
 using UnityEngine;
 using System.Text;
 using System.Collections.Specialized;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 {
@@ -42,15 +45,21 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int TrialsCompleted_Task = 0;
     [HideInInspector] public int TrialsCorrect_Task = 0;
     [HideInInspector] public int TokenBarsCompleted_Task = 0;
-
+    [HideInInspector] public List<float> PS_AvgCalcThresh_Task; 
+    [HideInInspector] public List<float> AS_AvgCalcThresh_Task;
+    
+    
 
     public override void DefineControlLevel()
     {
         trialLevel = (AntiSaccade_TrialLevel)TrialLevel;
-
         CurrentBlockString = "";
 
+        AS_AvgCalcThresh_Task = new List<float>();
+        PS_AvgCalcThresh_Task = new List<float>();
+        
         DefineBlockData();
+        
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
@@ -58,11 +67,29 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
         });
-
-        BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
+        
+        BlockFeedback.AddSpecificInitializationMethod(() =>
+        {
+            AddToThresholdCategory();
+            HandleBlockStrings();
+        });
 
     }
 
+    private void AddToThresholdCategory()
+    {
+        string split = CurrentBlock.BlockName.Split(".")[1].ToLower();
+        if (split.Contains("as"))
+        {
+            AS_AvgCalcThresh_Task.Add(trialLevel.calculatedThreshold_timing);
+            Debug.Log("AS_AvgCalcThresh_Task: " + string.Join(", ", AS_AvgCalcThresh_Task));
+        }
+        else if (split.Contains("ps"))
+            PS_AvgCalcThresh_Task.Add(trialLevel.calculatedThreshold_timing);
+        else
+            Debug.LogWarning("BlockName includes neither AS nor PS!");
+    }
+    
     private void HandleBlockStrings()
     {
         if (!Session.WebBuild)
@@ -83,6 +110,19 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         };
         return data;
     }
+    
+    public override OrderedDictionary GetTaskSummaryData()
+    {
+        OrderedDictionary data = base.GetTaskSummaryData();
+        data["Trials Completed"] = TrialsCompleted_Task;
+        data["Trials Correct"] = TrialsCorrect_Task;
+        data["% Trials Correct"] = ((float)TrialsCorrect_Task / TrialsCompleted_Task * 100).ToString("F1") + "%";
+        if (AS_AvgCalcThresh_Task != null && AS_AvgCalcThresh_Task.Any())
+            data["AvgCalcThresh_AS"] = AS_AvgCalcThresh_Task.Average();
+        if (PS_AvgCalcThresh_Task != null && PS_AvgCalcThresh_Task.Any())
+            data["AvgCalcThresh_PS"] = PS_AvgCalcThresh_Task.Average();
+        return data;
+    }
 
     private void DefineBlockData()
     {
@@ -93,6 +133,10 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
         BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
+        BlockData.AddDatum("BlockAccuracy", () => (float)trialLevel.TrialsCorrect_Block / trialLevel.TrialCompletions_Block);
+        BlockData.AddDatum("AvgReactionTime", () => CalculateAverageDuration(trialLevel.ReactionTimes_InBlock));
+        BlockData.AddDatum("StdDevReactionTime", () => CalculateStdDevDuration(trialLevel.ReactionTimes_InBlock));
+
     }
 
     public void CalculateBlockSummaryString()
@@ -100,9 +144,17 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
 
         CurrentBlockString = "\nTrials Completed: " + trialLevel.TrialCompletions_Block +
-                        "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
-                        "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
-                        "\nReward Pulses: " + NumRewardPulses_InBlock;
+                             "\nTrials Correct: " + trialLevel.TrialsCorrect_Block +
+                             "\nTokenBar Completions: " + trialLevel.TokenBarCompletions_Block +
+                             "\nReward Pulses: " + NumRewardPulses_InBlock +
+                             "\nReversal Count: " + trialLevel.reversalsCount +
+                             "\nReversals Necessary for Termination: " + trialLevel.NumReversalsUntilTerm;
+
+
+        if (AS_AvgCalcThresh_Task != null && AS_AvgCalcThresh_Task.Any()) 
+            CurrentBlockString = CurrentBlockString + "\nAverage AS Convergence Value: " + AS_AvgCalcThresh_Task.Average();
+        if (PS_AvgCalcThresh_Task != null && PS_AvgCalcThresh_Task.Any()) 
+            CurrentBlockString = CurrentBlockString + "\nAverage PS Convergence Value: " + PS_AvgCalcThresh_Task.Average();
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }

@@ -1142,11 +1142,6 @@ namespace USE_States
 
 
 
-        public Color32 GetRandomColor()
-        {
-            return new Color32((byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), (byte)UnityEngine.Random.Range(0, 256), 255);
-        }
-
 
         public static Texture2D LoadExternalPNG(string filePath)
         {

@@ -86,6 +86,7 @@ public class Item_Quaddle : Item
             }
             else if(QuaddleType == "Neutral")
             {
+                playerMovement.StartAnimation("Sad"); //do we want sad animation for neutral?
                 playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
 
             }

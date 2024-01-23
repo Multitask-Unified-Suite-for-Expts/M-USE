@@ -455,7 +455,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialsCorrect_Block = 0;
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;
-        calculatedThreshold = 0;
+        calculatedThreshold_timing = 0;
         calculatedThreshold_timing = 0;
         reversalsCount = 0;
         blockAccuracy = 0;
@@ -615,8 +615,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
         {
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
-            calculatedThreshold = (int)lastElements.Average();
-            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            calculatedThreshold_timing = (int)lastElements.Average();
+            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
             
             List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
             Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));

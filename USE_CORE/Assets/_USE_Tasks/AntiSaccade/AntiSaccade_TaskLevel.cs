@@ -78,7 +78,8 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 
     private void AddToThresholdCategory()
     {
-        string split = CurrentBlock.BlockName.Split(".")[1].ToLower();
+        string split = CurrentBlock.BlockName.Split('.')[1].ToLower();
+        //string split = CurrentBlock.BlockName.Split(".")[1].ToLower();
         if (split.Contains("as"))
         {
             AS_AvgCalcThresh_Task.Add(trialLevel.calculatedThreshold_timing);
@@ -131,7 +132,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TrialsCorrect", () => trialLevel.TrialsCorrect_Block);
         BlockData.AddDatum("TokenBarCompletions", () => trialLevel.TokenBarCompletions_Block);
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
-        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
+        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold_timing);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
         BlockData.AddDatum("BlockAccuracy", () => (float)trialLevel.TrialsCorrect_Block / trialLevel.TrialCompletions_Block);
         BlockData.AddDatum("AvgReactionTime", () => CalculateAverageDuration(trialLevel.ReactionTimes_InBlock));

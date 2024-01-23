@@ -638,7 +638,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameEffortChosen_Block = 0;
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
-        calculatedThreshold = 0;
+        calculatedThreshold_timing = 0;
         reversalsCount = 0;
         DiffLevelsAtReversals.Clear();
         InflationDurations_Block.Clear();
@@ -1025,8 +1025,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
         {
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
-            calculatedThreshold = (int)lastElements.Average();
-            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            calculatedThreshold_timing = (int)lastElements.Average();
+            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
             return true;
         }
         return false;

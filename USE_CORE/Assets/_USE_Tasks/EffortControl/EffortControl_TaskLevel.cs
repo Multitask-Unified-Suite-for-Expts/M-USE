@@ -128,7 +128,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
                               "\n\nChose Higher Effort: " + trialLevel.NumHigherEffortChosen_Block +
                               "\nChose Lower Effort: " + trialLevel.NumLowerEffortChosen_Block +
                               "\nChose Same Effort: " + trialLevel.NumSameEffortChosen_Block) +
-                             "\nDifficulty Level Threshold: " + trialLevel.calculatedThreshold;
+                             "\nDifficulty Level Threshold: " + trialLevel.calculatedThreshold_timing;
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
     }
 
@@ -143,7 +143,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoseLowerEffort", () => trialLevel.NumLowerEffortChosen_Block);
         BlockData.AddDatum("TotalTouches", () => trialLevel.TotalTouches_Block);
         BlockData.AddDatum("AvgInflationDuration", () => CalculateAverageDuration(trialLevel.InflationDurations_Block));
-        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
+        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold_timing);
 
 
     }

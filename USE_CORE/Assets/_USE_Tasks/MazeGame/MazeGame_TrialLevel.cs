@@ -321,7 +321,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
 
-                  percentError = (float)decimal.Divide(totalErrors_InTrial.Sum(),CurrentTaskLevel.currentMaze.mNumSquares);
+                int[] nums = new int[3] { 1, 2, 3 };
+                int sum = nums.Sum();
+
+                  percentError = (float)decimal.Divide(totalErrors_InTrial, MazeManager.currentMaze.mNumSquares);
                   runningPercentError.Add(percentError);
                   CurrentTaskLevel.NumSliderBarFull_InBlock++;
                   CurrentTaskLevel.NumSliderBarFull_InTask++;

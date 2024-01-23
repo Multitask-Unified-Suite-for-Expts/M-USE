@@ -17,16 +17,16 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_TrialDef : TrialDef
     {
-        public int[] TrialStimIndices;
-        public string[] TrialStimFeedback;
+        public int[] TrialStimIndices; //indices of the stim for the trial 
+        public string[] TrialStimFeedback; //Positive, Negative, Neutral. Maps to TrialStimIndices.
 
-        public int[] TrialGroup_InSpawnOrder;
+        public int[][] TrialGroup_InSpawnOrder; //Trial stim indices in spawn order. Blockade is -1. 
+        public string[][] TrialStimGeneralPositions; //Left, Middle, Right. Mapped to TrialGroup_InSpawnOrder.
+
         public int NumGroups;
-        public string[] TrialStimGeneralPositions;
 
-        public Reward[][] ProbabilisticTokenReward;
+        public Reward[][] ProbabilisticTokenReward; //Maps to trialStimIndices
 
-        public string[][] practice;
 
         public bool RandomStimLocations;
 
@@ -38,7 +38,7 @@ namespace FruitRunner_Namespace
     public class FruitRunner_StimDef : StimDef
     {
         public string QuaddleFeedbackType;
-        public string QuaddleGeneralPosition;
+        //public string QuaddleGeneralPosition;
 
     }
 }

@@ -257,7 +257,7 @@ public class SA_Object : MonoBehaviour
 
         foreach (var rateAndDur in RatesAndDurations)
         {
-            Cycle cycle = new()
+            Cycle cycle = new Cycle()
             {
                 sa_Object = this,
                 duration = rateAndDur.y,

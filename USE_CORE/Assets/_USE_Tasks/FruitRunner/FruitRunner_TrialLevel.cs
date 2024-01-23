@@ -99,6 +99,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
+            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
+
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
         });
@@ -118,6 +120,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             ItemSpawnerGO = new GameObject("ItemSpawner");
             ItemSpawner = ItemSpawnerGO.AddComponent<ItemSpawner>();
             ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
+            ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
             ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
             ItemSpawner.RandomSpawnLocations = CurrentTrial.RandomStimLocations;
             ItemSpawner.gameObject.SetActive(true);
@@ -188,7 +191,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         {
             FruitRunner_StimDef stim = (FruitRunner_StimDef)trialStims.stimDefs[i];
             stim.QuaddleFeedbackType = CurrentTrial.TrialStimFeedback[i];
-            stim.QuaddleGeneralPosition = CurrentTrial.TrialStimGeneralPositions[i];
+            //stim.QuaddleGeneralPosition = CurrentTrial.TrialStimGeneralPositions[i];
             stim.StimTokenRewardMag = chooseReward(CurrentTrial.ProbabilisticTokenReward[i]);
         }
     }

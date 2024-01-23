@@ -133,7 +133,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("DistractorSelections", () => trialLevel.DistractorSelections_Block);
         BlockData.AddDatum("DistractorRejections", () => trialLevel.DistractorRejections_Block);
 
-        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold);
+        BlockData.AddDatum("CalculatedThreshold", () => trialLevel.calculatedThreshold_timing);
         BlockData.AddDatum("DiffLevelsSummary", () => trialLevel.DiffLevelsSummary);
 
         BlockData.AddDatum("SliderBarCompletions", () => trialLevel.SliderBarCompletions_Block);

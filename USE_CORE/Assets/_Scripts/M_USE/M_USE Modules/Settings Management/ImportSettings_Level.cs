@@ -650,36 +650,37 @@ public class ImportSettings_Level : ControlLevel
 
 				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
 			}
-        else if (typeof(T) == typeof(string[]))
-        {
-            try
-            {
-                return (string[])ConvertStringArray<string>(s);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-                    + typeof(T).Name + " but the conversion failed.");
+		}
+		else if (typeof(T) == typeof(string[]))
+		{
+			try
+			{
+				return (string[])ConvertStringArray<string>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
 
-                throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-            }
-        }
-        else if (typeof(T) == typeof(string[][]))
-        {
-            try
-            {
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) == typeof(string[][]))
+		{
+			try
+			{
 
-                return (string[][])ConvertStringJaggedArray<string>(s);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Tried to convert string \"" + s + "\" to type \""
-                    + typeof(T).Name + " but the conversion failed.");
+				return (string[][])ConvertStringJaggedArray<string>(s);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Tried to convert string \"" + s + "\" to type \""
+					+ typeof(T).Name + " but the conversion failed.");
 
-                throw new ArgumentException(e.Message + "\t" + e.StackTrace);
-            }
-        }
-        else if (typeof(T) != null)
+				throw new ArgumentException(e.Message + "\t" + e.StackTrace);
+			}
+		}
+		else if (typeof(T) != null)
 		{
 			try
 			{

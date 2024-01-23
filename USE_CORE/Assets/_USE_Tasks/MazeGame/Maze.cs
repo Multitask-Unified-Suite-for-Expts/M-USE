@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Serialization;
 using USE_Utilities;
@@ -48,9 +49,12 @@ namespace HiddenMaze
         public string mNextStep;
         public int mNumSquares;
         public int mNumTurns;
-        public List<int> mDims; 
+        public List<int> mDims;
+        [CanBeNull] public List<int> mCustomDims;
         public string mName;
         public bool sideRestricted;
+        public bool freePlay;
+        
     }
 
     public class Maze
@@ -62,29 +66,47 @@ namespace HiddenMaze
         public int mNumSquares;
         public int mNumTurns;
         public Vector2 mDims;
+        [CanBeNull] public List<int> mCustomDims;
         public string mName;
         public bool sideRestricted;
+        public bool loadingSquareMaze;
+        public bool freePlay;
+
 
         public Maze(string jsonString)
         {
             MazeJson jsonMaze = JsonUtility.FromJson<MazeJson>(jsonString);
 
-            // Assign values manually to the Maze class
+            if(jsonMaze.mDims?.Count == 2)
+            {
+                // Assign values manually to the Maze class
+                loadingSquareMaze = true;
+                mDims = new Vector2(jsonMaze.mDims[0], jsonMaze.mDims[1]);
+                mNumTurns = jsonMaze.mNumTurns;
+                mPath = jsonMaze.mPath;
+            }
+            else
+            {
+                mCustomDims = jsonMaze.mCustomDims;
+            }
+
+            if (jsonMaze.mPath?.Count == 0)
+            {
+                freePlay = true;
+            }
             mNextStep = jsonMaze.mStart;
+
+            mNumSquares = jsonMaze.mNumSquares;
             mName = jsonMaze.mName;
-            mDims = new Vector2(jsonMaze.mDims[0], jsonMaze.mDims[1]);
-            sideRestricted = jsonMaze.sideRestricted;
-            mPath = jsonMaze.mPath;
+            mPath = jsonMaze.mPath; 
             mStart = jsonMaze.mStart;
             mFinish = jsonMaze.mFinish;
-            mNumSquares = jsonMaze.mNumSquares;
-            mNumTurns = jsonMaze.mNumTurns;
+            sideRestricted = jsonMaze.sideRestricted;
         }
-    
 
 
-    // Create Maze object from JSON representation
-    public static Maze CreateFromJSON(string jsonString)
+        // Create Maze object from JSON representation
+        public static Maze CreateFromJSON(string jsonString)
         {
             Maze jsonMaze = JsonUtility.FromJson<Maze>(jsonString);
 

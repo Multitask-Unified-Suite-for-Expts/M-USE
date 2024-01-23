@@ -746,12 +746,14 @@ namespace USE_StimulusManagement
         }
 
         private void ActivateOnStateInit(object sender, EventArgs e)
-		{
+        {
+	        IsActive = true;
 			ToggleVisibility(true);
 		}
 
 		private void InactivateOnStateTerm(object sender, EventArgs e)
 		{
+			IsActive = false;
 			ToggleVisibility(false);
 			SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
 			SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;

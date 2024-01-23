@@ -246,7 +246,7 @@ namespace USE_Def_Namespace
         public float MaxStimLoadingDuration
         {
             get { return maxStimLoadingDuration; }
-            set { maxStimLoadingDuration = MathF.Max(value, 1f); }
+            set { maxStimLoadingDuration = Mathf.Max(value, 1f); }
         }
     }
 

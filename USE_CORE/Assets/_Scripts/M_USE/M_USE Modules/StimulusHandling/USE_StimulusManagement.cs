@@ -380,7 +380,8 @@ namespace USE_StimulusManagement
 
 		public async void LoadExternalStimFromFile()
 		{
-            StimExtension = "." + FileName.Split(".")[1];
+			StimExtension = "." + FileName.Split('.')[1];
+            //StimExtension = "." + FileName.Split(".")[1];
 
 			if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
 			{

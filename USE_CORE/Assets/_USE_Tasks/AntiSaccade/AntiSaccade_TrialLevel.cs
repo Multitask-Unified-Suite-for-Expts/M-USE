@@ -571,7 +571,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
         if (runningPerformance.Count > 1)
         {
-            prevResult = runningPerformance[^2];
+            prevResult = runningPerformance[runningPerformance.Count - 2];
+            //prevResult = runningPerformance[^2];
         }
 
         if (runningPerformance.Last() == 1)

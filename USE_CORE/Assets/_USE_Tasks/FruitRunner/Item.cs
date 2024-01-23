@@ -66,7 +66,7 @@ public class Item_Quaddle : Item
                     break;
             }
         }
-        transform.position = new Vector3(spawnPoint.position.x, .65f, spawnPoint.position.z);
+        transform.position = new Vector3(spawnPoint.position.x, .7f, spawnPoint.position.z);
         transform.parent = parentTransform;
     }
 

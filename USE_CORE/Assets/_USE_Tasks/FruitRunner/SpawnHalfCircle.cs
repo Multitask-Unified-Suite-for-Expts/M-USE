@@ -23,7 +23,7 @@ public class SpawnHalfCircle : MonoBehaviour
 
         for (int i = 0; i < numberOfObjects; i++)
         {
-            float angle = i * angleStep;
+            float angle = i * angleStep; //36
             float radians = Mathf.Deg2Rad * angle;
 
             float x = archRadius * Mathf.Cos(radians);

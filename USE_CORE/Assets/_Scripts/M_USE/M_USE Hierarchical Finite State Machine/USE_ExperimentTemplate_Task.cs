@@ -703,7 +703,8 @@ namespace USE_ExperimentTemplate_Task
                 sd.CanvasGameObject = taskCanvasGO;
 
                 sd.FileName = sd.FileName.Trim();
-                sd.StimExtension = "." + sd.FileName.Split(".")[1];
+                sd.StimExtension = "." + sd.FileName.Split('.')[1];
+                //sd.StimExtension = "." + sd.FileName.Split(".")[1];
 
                 //we will only use StimFolderPath if ExternalFilePath doesn't already contain it
                 if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.FileName.StartsWith(sd.StimFolderPath))

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    public float FloorMovementSpeed = 20f; //20 is great for humans
+    public float FloorMovementSpeed = 6f; //20 is great for humans
     private GameObject FloorTilePrefab;
     public int NumTilesSpawned;
     public int TotalTiles;
@@ -29,8 +29,6 @@ public class FloorManager : MonoBehaviour
 
         ActiveTiles = new List<GameObject>();
         itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
-        if (itemSpawner == null)
-            Debug.LogWarning("ITEM SPAWNER NULL");
 
         for (int i = 0; i <= TotalTiles; i++)
         {

@@ -59,8 +59,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Tile objects
     public StimGroup tiles; // top of trial level with other variable definitions
     public StimGroup landmarks;
-    public Texture2D tileTex;
-    public Texture2D mazeBgTex;
+/*    public Texture2D tileTex;
+    public Texture2D mazeBgTex;*/
     
     private int totalErrors_InTrial;
     private int ruleAbidingErrors_InTrial;
@@ -130,7 +130,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
-            FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
+            //FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
             MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
 
@@ -243,9 +243,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeFinish"]);
             }
         });
-/*        ChooseTile.SpecifyTermination(() => (MazeManager.mazeDuration > CurrentTrialDef.MaxMazeDuration) || (MazeManager.choiceDuration > CurrentTrialDef.MaxChoiceDuration), () => FinishTrial, () =>
+        ChooseTile.SpecifyTermination(() => (MazeManager.mazeDuration > CurrentTrialDef.MaxMazeDuration) || (MazeManager.choiceDuration > CurrentTrialDef.MaxChoiceDuration), () => FinishTrial, () =>
         {
-            Timeout Termination
             Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
@@ -257,7 +256,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.ChoiceDurations_InTask.Add(null);
 
             runningPercentError.Add(null);
-        });*/
+        });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
@@ -295,7 +294,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     SliderFBController.UpdateSliderValue(selectedGO.GetComponent<Tile>().sliderValueChange);
               
                 if (!Session.WebBuild && !MazeManager.freePlay)
+                {
+                    Debug.LogWarning("CURRENTpATHINDEX: " + MazeManager.currentPathIndex);
                     PlayerViewParent.transform.Find((MazeManager.currentPathIndex + 1).ToString()).GetComponent<Text>().color = new Color(0, 0.392f, 0);
+
+                }
             }
             else if (selectedGO != null && MazeManager.erroneousReturnToLast)
             {
@@ -405,7 +408,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private IEnumerator LoadTileAndBgTextures()
+/*    private IEnumerator LoadTileAndBgTextures()
     {
         if (mazeBgTex != null) // only want it to load them the first time. 
         {
@@ -445,7 +448,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
 
         TrialFilesLoaded = true; //Setting this to true triggers the LoadTrialTextures state to end
-    }
+    }*/
 
 
 
@@ -459,7 +462,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         LoadConfigVariables();
-        tiles = MazeManager.CreateMaze(tileTex, mazeBgTex);
+        tiles = MazeManager.CreateMaze();
         TrialStims.Add(tiles);
     }
     
@@ -602,20 +605,28 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         // sets parent for any PlayerViewPanelController elements on experimenter display
         bool invalidLocalPositionEncountered = false;
+        bool allDifferentPositions = tiles.stimDefs
+            .Select(sd => sd.StimGameObject.GetComponent<Tile>().position)
+            .Where(position => position != null)
+            .Distinct()
+            .Count() == tiles.stimDefs.Count;
+
+        if (!allDifferentPositions)
+        {
+            invalidLocalPositionEncountered = true;
+            return;
+        }
+        Debug.LogWarning("CURRENT MAXE PATH: " + string.Join(",",MazeManager.currentMaze.mPath));
         for (int i = 0; i < MazeManager.currentMaze.mPath.Count; i++)
         {
             foreach (StimDef sd in tiles.stimDefs)
             {
                 Tile tileComponent = sd.StimGameObject.GetComponent<Tile>();
+                Vector3? tilePosition = tileComponent.position;
                 Vector2 textSize = new Vector2(200, 200);
                 
                 if (tileComponent.mCoord.chessCoord == MazeManager.currentMaze.mPath[i])
                 {
-                    if (tileComponent.position == MazeManager.tileContainerGO.transform.position || tileComponent.position  == null)
-                    {
-                        invalidLocalPositionEncountered = true;
-                        break;
-                    }
                     textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint((Vector3)tileComponent.position), PlayerViewParent.transform);
                     playerViewText = PlayerViewPanelController.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
                         Color.red, textLocation, textSize, PlayerViewParent.transform);

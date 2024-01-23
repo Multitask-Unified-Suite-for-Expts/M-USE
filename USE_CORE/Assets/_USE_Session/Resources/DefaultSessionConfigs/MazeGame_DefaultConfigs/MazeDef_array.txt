@@ -1,3 +1,0 @@
-mDims	mNumTurns	mNumSquares	mStart	mFinish	mName	mString
- [6,6]	4	12	A5	D1	M6X6_T4_L12_A5_D1_00000002	{"sideRestricted":"TRUE","mDims":{"x":6,"y":6},"mPath":["A5","A4","B4","C4","D4","E4","F4","F3","E3","D3","D2","D1"],"mStart":"A5","mFinish":"D1","mNumTurns":4,"mNumSquares":12}
- [6,6]	4	10	C1	D1	M6X6_T4_L10_C1_D1_00000000	{"sideRestricted":"TRUE","mDims":{"x":6,"y":6},"mPath":["C1","B1","A1","A2","B2","C2","D2","E2","E1","D1"],"mStart":"C1","mFinish":"D1","mNumTurns":4,"mNumSquares":10}

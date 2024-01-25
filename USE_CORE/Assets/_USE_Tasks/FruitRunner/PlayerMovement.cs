@@ -162,7 +162,6 @@ public class PlayerMovement : MonoBehaviour
             Animator = GetComponent<Animator>();
 
 
-
         switch (newAnimName.ToLower())
         {
             case "idle":

@@ -367,9 +367,13 @@ public class TokenFBController : MonoBehaviour
 
         // Start the animation phase state machine with the first state
         if (tokensChange < 0)
+        {
             audioFBController.Play("NegativeShow");
+        }
         else
+        {
             audioFBController.Play("PositiveShow");
+        }
         
         animationPhase = AnimationPhase.Show;
         animationStartTime = Time.unscaledTime;

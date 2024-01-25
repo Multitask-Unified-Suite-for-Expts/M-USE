@@ -26,7 +26,7 @@ public class Item : MonoBehaviour
         }
     }
 
-    public virtual void SetItemPosition(bool randomPosition, Transform parentTransform)
+    public virtual void SetItemPosition(Transform parentTransform)
     {
     }
 }
@@ -38,34 +38,28 @@ public class Item_Quaddle : Item
     public int QuaddleTokenRewardMag;
 
 
-    public override void SetItemPosition(bool randomPosition, Transform parentTransform)
+    public override void SetItemPosition(Transform parentTransform)
     {
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform spawnPoint;
 
-        if (randomPosition)
+        switch (QuaddleGeneralPosition.ToLower().Trim())
         {
-            spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
+            case "left":
+                spawnPoint = spawnPoints[0];
+                break;
+            case "middle":
+                spawnPoint = spawnPoints[1];
+                break;
+            case "right":
+                spawnPoint = spawnPoints[2];
+                break;
+            default:
+                Debug.LogWarning("DEFAULT SWITCH CASE FOR STIM GENERAL POSITION. SETTING TO MIDDLE!");
+                spawnPoint = spawnPoints[1];
+                break;
         }
-        else
-        {
-            switch (QuaddleGeneralPosition.ToLower().Trim())
-            {
-                case "left":
-                    spawnPoint = spawnPoints[0];
-                    break;
-                case "middle":
-                    spawnPoint = spawnPoints[1];
-                    break;
-                case "right":
-                    spawnPoint = spawnPoints[2];
-                    break;
-                default:
-                    Debug.LogWarning("DEFAULT SWITCH CASE FOR STIM GENERAL POSITION. SETTING TO MIDDLE!");
-                    spawnPoint = spawnPoints[1];
-                    break;
-            }
-        }
+        
         transform.position = new Vector3(spawnPoint.position.x, .7f, spawnPoint.position.z);
         transform.parent = parentTransform;
     }
@@ -98,7 +92,7 @@ public class Item_Quaddle : Item
 public class Item_Blockade : Item
 {
 
-    public override void SetItemPosition(bool randomPosition, Transform parentTransform)
+    public override void SetItemPosition(Transform parentTransform)
     {
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];

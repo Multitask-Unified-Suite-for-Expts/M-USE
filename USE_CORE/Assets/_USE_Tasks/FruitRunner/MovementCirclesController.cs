@@ -78,6 +78,13 @@ public class MovementCirclesController : MonoBehaviour
         }
     }
 
+
+    private void OnDestroy()
+    {
+        if (Instantiated != null)
+            Destroy(Instantiated);
+    }
+
 }
 
 

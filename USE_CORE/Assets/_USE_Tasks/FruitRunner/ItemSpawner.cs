@@ -59,7 +59,7 @@ public class ItemSpawner : MonoBehaviour
             GameObject stim = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
             stim.name = "Blockade";
             stim.tag = "Blockade";
-            stim.AddComponent<Item_Blockade>().SetItemPosition(RandomSpawnLocations, parentTransform);
+            stim.AddComponent<Item_Blockade>().SetItemPosition(parentTransform);
             stim.SetActive(true);
         }
         else
@@ -68,6 +68,11 @@ public class ItemSpawner : MonoBehaviour
             string[] currentPositionsArray = QuaddleGeneralPositions[CurrentSpawnIndex];
             int numToSpawn = currentIndicesArray.Length;
 
+            if (numToSpawn > 3)
+                Debug.LogWarning("TRYING TO SPAWN MORE THAN 3 QUADDLES ON A TILE BUT THERE ARE ONLY 3 SPOTS!!!");
+
+            List<string> spawnLocations = new List<string>() { "Left", "Middle", "Right" };
+
             for (int i = 0; i < currentIndicesArray.Length; i++)
             {
                 FruitRunner_StimDef quaddle = TrialQuaddles.FirstOrDefault(q => q.StimIndex == currentIndicesArray[i]);
@@ -75,14 +80,24 @@ public class ItemSpawner : MonoBehaviour
                 GameObject stim = Instantiate(quaddle.StimGameObject);
                 stim.tag = "Quaddle";
                 stim.AddComponent<CapsuleCollider>().isTrigger = true;
-                //stim.AddComponent<FaceCamera>();
+                stim.AddComponent<FaceCamera>();
 
                 Item_Quaddle quaddleComponent = stim.AddComponent<Item_Quaddle>();
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;
                 quaddleComponent.QuaddleTokenRewardMag = quaddle.StimTokenRewardMag;
-                Debug.LogWarning(currentPositionsArray[i]);
-                quaddleComponent.QuaddleGeneralPosition = currentPositionsArray[i];
-                quaddleComponent.SetItemPosition(RandomSpawnLocations, parentTransform);
+
+                if(RandomSpawnLocations)
+                {
+                    int randomNum = (int)Random.Range(0f, spawnLocations.Count - 1);
+                    quaddleComponent.QuaddleGeneralPosition = spawnLocations[randomNum];
+                    spawnLocations.Remove(quaddleComponent.QuaddleGeneralPosition);
+                }
+                else
+                {
+                    quaddleComponent.QuaddleGeneralPosition = currentPositionsArray[i];
+                }
+
+                quaddleComponent.SetItemPosition(parentTransform);
 
                 stim.SetActive(true);
             }

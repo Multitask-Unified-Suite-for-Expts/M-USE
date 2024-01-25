@@ -16,36 +16,37 @@ using USE_ExperimentTemplate_Trial;
 public class Tile : MonoBehaviour
 {
     [HideInInspector] public MazeManager MazeManager;
-    public TileSettings TileSettings;
+    private TileSettings TileSettings;
 
-    public List<GameObject> AdjacentTiles = new List<GameObject>();
+    private List<GameObject> AdjacentTiles = new List<GameObject>();
 
-    public Coords mCoord;
+    private Coords mCoord;
 
-    public float sliderValueChange;
+    private float sliderValueChange;
 
-    public Vector3? position = null;
-// Reference to the ScriptableObject holding the settings
+    private Vector3? position = null;
+    // Reference to the ScriptableObject holding the settings
 
     // Access settings through this instance
-    public Color startColor => TileSettings.startColor;
-    public Color finishColor => TileSettings.finishColor;
-    public Color correctColor => TileSettings.correctColor;
-    public Color prevCorrectColor => TileSettings.prevCorrectColor;
-    public Color incorrectRuleAbidingColor => TileSettings.incorrectRuleAbidingColor;
-    public Color incorrectRuleBreakingColor => TileSettings.incorrectRuleBreakingColor;
-    public Color defaultTileColor => TileSettings.defaultTileColor;
-    public int numBlinks => TileSettings.numBlinks;
+    private Color startColor => TileSettings.GetTileColor("start");
+    private Color finishColor => TileSettings.GetTileColor("finish");
+    private Color correctColor => TileSettings.GetTileColor("correct");
+    private Color prevCorrectColor => TileSettings.GetTileColor("prevCorrect");
+    private Color incorrectRuleAbidingColor => TileSettings.GetTileColor("incorrectRuleAbiding");
+    private Color incorrectRuleBreakingColor => TileSettings.GetTileColor("incorrectRuleBreaking");
+    private Color defaultTileColor => TileSettings.GetTileColor("default");
+    private int numBlinks => TileSettings.GetNumBlinks();
 
     // Access feedback length settings
-    public float correctFeedbackSeconds => TileSettings.correctFeedbackSeconds;
-    public float prevCorrectFeedbackSeconds => TileSettings.prevCorrectFeedbackSeconds;
-    public float incorrectRuleAbidingSeconds => TileSettings.incorrectRuleAbidingSeconds;
-    public float incorrectRuleBreakingSeconds => TileSettings.incorrectRuleBreakingSeconds;
-    public float tileBlinkingDuration => TileSettings.tileBlinkingDuration;
-    public float timeoutSeconds => TileSettings.timeoutSeconds;
+    private float correctFeedbackDuration => TileSettings.GetFeedbackDuration("correct");
+    private float prevCorrectFeedbackDuration => TileSettings.GetFeedbackDuration("prevCorrect");
+    private float incorrectRuleAbidingFeedbackDuration => TileSettings.GetFeedbackDuration("incorrectRuleAbiding");
+    private float incorrectRuleBreakingFeedbackDuration => TileSettings.GetFeedbackDuration("incorrectRuleBreaking");
+    private float tileBlinkingDuration => TileSettings.GetFeedbackDuration("blinking");
+    private float timeoutSeconds => TileSettings.GetFeedbackDuration("timeout");
 
     private Color FBColor;
+    private float FBDuration;
     private float flashStartTime;
     private float FBStartTime;
     private int CorrectnessCode;
@@ -69,16 +70,55 @@ public class Tile : MonoBehaviour
     {
         if (!isFlashing)
         {
-            CorrectnessCode = MazeManager.freePlay ? MazeManager.ManageFreePlayTileTouch(this) : MazeManager.ManageHiddenPathTileTouch(this);
+            CorrectnessCode = MazeManager.IsFreePlay() ? MazeManager.ManageFreePlayTileTouch(this) : MazeManager.ManageHiddenPathTileTouch(this);
            
             ColorFeedback(CorrectnessCode);
         }
     }
-    public void setColor(Color c)
+    public void SetColor(Color c)
     {
         GetComponent<Image>().color = c;
     } 
-
+    public void SetTileFbDuration(float duration)
+    {
+        FBDuration = duration;
+    }
+    public float GetTileFbDuration()
+    {
+        return FBDuration;
+    }
+    public float GetSliderValueChange()
+    {
+        return sliderValueChange;
+    }
+    public void SetSliderValueChange(float val)
+    {
+        sliderValueChange = val;
+    }
+    public List<GameObject> GetAdjacentTiles()
+    {
+        return AdjacentTiles;
+    } 
+    public void SetAdjacentTiles(List<GameObject> tiles)
+    {
+        AdjacentTiles  = tiles;
+    }
+    public string GetChessCoord()
+    {
+        return mCoord.chessCoord;
+    }
+    public Coords GetCoord()
+    {
+        return mCoord;
+    }
+    public void SetCoord(Coords coord)
+    {
+        mCoord = coord;
+    }
+    public Vector3? GetTilePosition()
+    {
+        return position;
+    }
     public void ColorFeedback(int code)
     {
         switch (code)
@@ -86,21 +126,25 @@ public class Tile : MonoBehaviour
             case 1:
                 // CORRECT
                 FBColor =  correctColor;
+                FBDuration = correctFeedbackDuration;
                 break;
             case 2:
                 // PREVIOUSLY CORRECT
                 FBColor =  prevCorrectColor;
+                FBDuration = prevCorrectFeedbackDuration;
                 break;
             case 10:
                 // RULE-ABIDING INCORRECT
                 FBColor =  incorrectRuleAbidingColor;
+                FBDuration = incorrectRuleAbidingFeedbackDuration;
                 break;
             case 20:
                 // RULE-BREAKING INCORRECT
                 FBColor = incorrectRuleBreakingColor;
+                FBDuration = incorrectRuleBreakingFeedbackDuration;
                 break;
         }
-
+        Debug.LogWarning("CHANGING FB COLOR: " + FBColor.ToString() + " || fb duration: " + FBDuration);
         gameObject.GetComponent<Image>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
@@ -157,19 +201,17 @@ public class Tile : MonoBehaviour
         {
 
             float elapsed = Time.unscaledTime - FBStartTime;
-            float interval = MazeManager.mgTrialLevel.tileFbDuration;
+            float interval = FBDuration;
+            Debug.Log("TILE FB DURATION: " + FBDuration);
         
             if (elapsed >=  interval)
             {
-                if (!MazeManager.viewPath || (CorrectnessCode == 10 || (CorrectnessCode == 20 && !MazeManager.backtrackError)))
+                if (!MazeManager.IsPathVisible() || (CorrectnessCode == 10 || (CorrectnessCode == 20 && !MazeManager.IsBacktrack())))
                     gameObject.GetComponent<Image>().color = initialTileColor;
-                else if (MazeManager.viewPath && (CorrectnessCode == 2 || MazeManager.backtrackError))
-                {
+                else if (MazeManager.IsPathVisible() && (CorrectnessCode == 2 || MazeManager.IsBacktrack()))
                     gameObject.GetComponent<Image>().color= correctColor;
-                    Debug.LogWarning("this should make it green again");
-                }
+                
                 choiceFeedback = false;
-                Debug.LogWarning("view path: " + MazeManager.viewPath + " correctness code: " + CorrectnessCode + " backtrack error?? " + MazeManager.backtrackError);
             }
         }
 

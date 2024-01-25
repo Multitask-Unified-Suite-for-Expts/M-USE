@@ -1,16 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms.VisualStyles;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
-using UnityEngine.WSA;
 using USE_StimulusManagement;
 using USE_UI;
 
@@ -602,7 +597,8 @@ public class MazeManager:MonoBehaviour
             
             else if (landmark.Key.ToLower().Contains("car"))
                 landmarkGO.transform.localScale = new Vector3(25, 25, 1.5f);
-            
+
+            landmarkGO.SetActive(false);
         }
     }
 

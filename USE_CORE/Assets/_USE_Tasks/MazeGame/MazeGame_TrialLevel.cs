@@ -569,14 +569,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", () => mazeDefName);
         TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.selectedTilesGO));
-        TrialData.AddDatum("TotalErrors", () => $"[{string.Join(", ", totalErrors_InTrial)}]");
+        TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
-        TrialData.AddDatum("RetouchCorrect", () => $"[{string.Join(", ", retouchCorrect_InTrial)}]");
-        TrialData.AddDatum("RetouchErroneous", () => $"[{string.Join(", ", retouchErroneous_InTrial)}]");
-        TrialData.AddDatum("PerseverativeErrors", () => $"[{string.Join(", ", perseverativeErrors_InTrial)}]");
-        TrialData.AddDatum("BacktrackingErrors", () => $"[{string.Join(", ", backtrackErrors_InTrial)}]");
-        TrialData.AddDatum("Rule-AbidingErrors", () => $"[{string.Join(", ", ruleAbidingErrors_InTrial)}]");
-        TrialData.AddDatum("Rule-BreakingErrors", () => $"[{string.Join(", ", ruleBreakingErrors_InTrial)}]");
+        TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
+        TrialData.AddDatum("RetouchErroneous", () => retouchErroneous_InTrial);
+        TrialData.AddDatum("PerseverativeErrors", () => perseverativeErrors_InTrial);
+        TrialData.AddDatum("BacktrackingErrors", () => backtrackErrors_InTrial);
+        TrialData.AddDatum("Rule-AbidingErrors", () => ruleAbidingErrors_InTrial);
+        TrialData.AddDatum("Rule-BreakingErrors", () => ruleBreakingErrors_InTrial);
         TrialData.AddDatum("MazeDuration", () => MazeManager.mazeDuration);
         //TrialData.AddDatum("TotalClicks", ()=>MouseTracker.GetClickCount().Length);
     }
@@ -591,6 +591,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void DisableSceneElements()
     {
         MazeManager.mazeBackgroundGO.SetActive(false);
+        DeactivateChildren(MazeManager.tileConnectorsContainerGO);
+        DeactivateChildren(MazeManager.landmarksContainerGO);
         tiles.ToggleVisibility(false);
         if (GameObject.Find("SliderCanvas") != null)
             DeactivateChildren(GameObject.Find("SliderCanvas"));

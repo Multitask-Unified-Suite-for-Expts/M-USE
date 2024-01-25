@@ -127,8 +127,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddDefaultTerminationMethod(() =>
         {
-            mgTL.DestroyChildren(mgTL.MazeManager.tileContainerGO);
-            mgTL.DestroyChildren(mgTL.MazeManager.tileConnectorsContainerGO);
+            mgTL.MazeManager.MazeCleanUp();
         });
     }
 

@@ -561,7 +561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b784f645be64c4b8d9c52c435fa47d03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mgTrialLevel: {fileID: 1860654110}
   tilePrefab: {fileID: 8240155104330858003, guid: 5796f049ef3372046b3edd4795fcdc39,
     type: 3}
   tileSettings: {fileID: 0}
@@ -569,30 +568,10 @@ MonoBehaviour:
   tileConnectorsContainerGO: {fileID: 1165451016}
   landmarksContainerGO: {fileID: 495972936}
   mazeBackgroundGO: {fileID: 349460579}
-  currentPathIndex: 0
-  consecutiveErrors: 0
-  selectedTilesInPathGO: []
-  selectedTilesGO: []
-  startTileGO: {fileID: 0}
-  finishTileGO: {fileID: 0}
-  creatingSquareMaze: 0
-  viewPath: 0
-  darkenNonPathTiles: 0
-  returnToLast: 0
-  erroneousReturnToLast: 0
-  correctSelection: 0
-  freePlay: 1
-  outOfMoves: 0
-  startedMaze: 0
-  finishedMaze: 0
-  backtrackError: 0
-  tileConnectorsLoaded: 0
-  latestConnection: {fileID: 0}
   mazeDuration: 0
   choiceDuration: 0
   mazeStartTime: 0
   choiceStartTime: 0
-  currentTilePositionGO: {fileID: 0}
   tileContainerGridLayoutGroup: {fileID: 1026519224}
 --- !u!1 &859525660
 GameObject:

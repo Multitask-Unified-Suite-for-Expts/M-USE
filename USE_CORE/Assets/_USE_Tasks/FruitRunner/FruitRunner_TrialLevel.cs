@@ -188,8 +188,19 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         for (int i = 0; i < CurrentTrial.TrialStimIndices.Length; i++)
         {
             FruitRunner_StimDef stim = (FruitRunner_StimDef)trialStims.stimDefs[i];
-            stim.QuaddleFeedbackType = CurrentTrial.TrialStimFeedback[i];
+            
             stim.StimTokenRewardMag = chooseReward(CurrentTrial.ProbabilisticTokenReward[i]);
+
+            //Set quaddle feedback type (pos, neg, neutral) depending on token reward:
+            if(stim.StimTokenRewardMag == 0)
+                stim.QuaddleFeedbackType = "Neutral";
+            else if(stim.StimTokenRewardMag > 0)
+                stim.QuaddleFeedbackType = "Positive";
+            else if (stim.StimTokenRewardMag < 0)
+                stim.QuaddleFeedbackType = "Negative";
+            else
+                Debug.LogError("STIM TOKEN REWARD MAG IS SOMETHING OTHER THAN 1, 0, -1");
+
         }
     }
 

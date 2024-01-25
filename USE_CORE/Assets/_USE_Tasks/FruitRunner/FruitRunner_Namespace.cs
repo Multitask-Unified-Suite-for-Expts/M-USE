@@ -5,6 +5,7 @@ using USE_StimulusManagement;
 using USE_Def_Namespace;
 using USE_ExperimentTemplate_Classes;
 
+
 namespace FruitRunner_Namespace
 {
     public class FruitRunner_TaskDef : TaskDef
@@ -38,7 +39,5 @@ namespace FruitRunner_Namespace
     public class FruitRunner_StimDef : StimDef
     {
         public string QuaddleFeedbackType;
-        //public string QuaddleGeneralPosition;
-
     }
 }

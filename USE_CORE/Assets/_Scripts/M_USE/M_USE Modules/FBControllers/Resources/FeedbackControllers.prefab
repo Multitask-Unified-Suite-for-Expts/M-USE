@@ -31,7 +31,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -79,6 +78,10 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 655e170ede4c346eb913c03fefe2a9ea, type: 3}
   - name: BalloonPop
     clip: {fileID: 8300000, guid: 1f88583d3f6394226a907498d3d725ad, type: 3}
+  - name: CorrectItemPickup
+    clip: {fileID: 8300000, guid: 4369c023a9ca84616ac7fc373a8ac0d6, type: 3}
+  - name: WrongItemPickup
+    clip: {fileID: 8300000, guid: ee3603186195b42c7910026dc3a3b64a, type: 3}
   audioSource: {fileID: 0}
 --- !u!114 &2603858045197797024
 MonoBehaviour:

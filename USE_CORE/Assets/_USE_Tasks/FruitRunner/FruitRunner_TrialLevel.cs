@@ -166,9 +166,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         Celebration.AddSpecificInitializationMethod(() =>
         {
             PlayerMovement.FinalCelebration();
-
             TokenFBController.enabled = false;
-
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);
 
@@ -191,7 +189,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         {
             FruitRunner_StimDef stim = (FruitRunner_StimDef)trialStims.stimDefs[i];
             stim.QuaddleFeedbackType = CurrentTrial.TrialStimFeedback[i];
-            //stim.QuaddleGeneralPosition = CurrentTrial.TrialStimGeneralPositions[i];
             stim.StimTokenRewardMag = chooseReward(CurrentTrial.ProbabilisticTokenReward[i]);
         }
     }
@@ -199,6 +196,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+
         Destroy(PlayerGO);
         Destroy(FloorManagerGO);
         Destroy(ItemSpawnerGO);

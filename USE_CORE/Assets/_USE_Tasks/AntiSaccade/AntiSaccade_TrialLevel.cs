@@ -110,8 +110,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            HaloFBController.SetHaloSize(2f);
-            HaloFBController.SetHaloIntensity(.75f);
+            HaloFBController.SetCircleHaloIntensity(2f);
+            HaloFBController.SetCircleHaloIntensity(.75f);
         });
 
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -321,7 +321,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
 
             if (Time.time - Feedback.TimingInfo.StartTimeAbsolute > CurrentTrial.HaloFbDuration && !HaloFBController.IsHaloGameObjectNull())
-                HaloFBController.Destroy();
+                HaloFBController.DestroyCircleHalo();
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);
         Feedback.SpecifyTermination(() => !stimChosen, ITI, () => AudioFBController.Play("Negative"));

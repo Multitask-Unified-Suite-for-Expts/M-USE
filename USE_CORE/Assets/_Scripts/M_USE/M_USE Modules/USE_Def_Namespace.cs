@@ -453,7 +453,14 @@ namespace USE_Def_Namespace
         public System.Random RandomNumGenerator;
         
         public int DifficultyLevel;
-        
+
+
+        /// <summary>
+        /// The perceptual similarity score (1-5) of the quaddles for that trial.
+        /// </summary>
+        public int PerceptualSimilarity;
+
+
         /// <summary>
         /// Generates trial definitions based on block definitions.
         /// </summary>

@@ -79,8 +79,10 @@ public class ItemSpawner : MonoBehaviour
 
                 GameObject stim = Instantiate(quaddle.StimGameObject);
                 stim.tag = "Quaddle";
-                stim.AddComponent<CapsuleCollider>().isTrigger = true;
-                stim.AddComponent<FaceCamera>();
+                CapsuleCollider collider = stim.AddComponent<CapsuleCollider>();
+                collider.center = new Vector3(0f, 0f, -1f);
+                collider.isTrigger = true;
+                //stim.AddComponent<FaceCamera>();
 
                 Item_Quaddle quaddleComponent = stim.AddComponent<Item_Quaddle>();
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;

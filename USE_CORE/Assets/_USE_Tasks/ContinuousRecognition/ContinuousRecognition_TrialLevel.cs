@@ -351,7 +351,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.AddSpecificInitializationMethod(() =>
         {
             TokenUpdateStartTime = Time.time;
-            HaloFBController.Destroy();
+            HaloFBController.DestroyCircleHalo();
 
             if (!StimIsChosen)
                 return;
@@ -566,8 +566,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetHaloSize(1.55f);
-        HaloFBController.SetHaloIntensity(1.5f);
+        HaloFBController.SetCircleHaloSize(1.55f);
+        HaloFBController.SetCircleHaloIntensity(1.5f);
     }
 
     void RemoveShakeStimScript(StimGroup stimGroup)

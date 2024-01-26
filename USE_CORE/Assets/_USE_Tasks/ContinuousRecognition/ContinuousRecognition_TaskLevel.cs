@@ -31,6 +31,7 @@ using System.Collections.Specialized;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
+using System.Linq;
 
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
@@ -47,11 +48,16 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public int blocksAdded;
 
+    [HideInInspector] public Dictionary<int, PerceptualInterferance_BlockData> PerceptualInterferance_Task; //access its index for that Score's data
+
 
 
     public override void DefineControlLevel()
     {
         trialLevel = (ContinuousRecognition_TrialLevel) TrialLevel;
+
+        PerceptualInterferance_Task = new Dictionary<int, PerceptualInterferance_BlockData>();
+
         CurrentBlockString = "";
         DefineBlockData();
         blocksAdded = 0;
@@ -68,6 +74,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
+            AddSimilarityScoreBlockData();
+
             if(!Session.WebBuild && trialLevel.AbortCode == 0)
             {
                 CurrentBlockString += "\n" + "\n";
@@ -76,6 +84,18 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             }
         });        
     }
+
+
+
+    private void AddSimilarityScoreBlockData()
+    {
+        if (!PerceptualInterferance_Task.ContainsKey(CurrentBlock.PerceptualSimilarity))
+            PerceptualInterferance_Task[CurrentBlock.PerceptualSimilarity] = new PerceptualInterferance_BlockData();
+        
+        PerceptualInterferance_Task[CurrentBlock.PerceptualSimilarity].TotalBlocks++;
+        PerceptualInterferance_Task[CurrentBlock.PerceptualSimilarity].TrialsCorrect += trialLevel.NumCorrect_Block;
+    }
+
 
     public override void SetTaskSummaryString()
     {
@@ -106,8 +126,25 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         data["Trials Completed"] = TrialsCompleted_Task;
         data["Trials Correct"] = TrialsCorrect_Task;
         data["TokenBar Completions"] = TokenBarCompletions_Task;
+        data["PerceptualInterferance"] = GetPerceptualInterferanceString();
 
         return data;
+    }
+
+    private string GetPerceptualInterferanceString()
+    {
+        string summary = string.Join(", ",
+        PerceptualInterferance_Task.Select(kvp =>
+        {
+            int similarity = kvp.Key;
+            PerceptualInterferance_BlockData data = kvp.Value;
+            float avg = data.TrialsCorrect / data.TotalBlocks;
+
+            return $"(Similarity {similarity} - Blocks {data.TotalBlocks} - Avg Correct {avg:0.00})";
+        }));
+
+        Debug.LogWarning(summary);
+        return summary;
     }
 
     private void DefineBlockData()
@@ -140,5 +177,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if (trialLevel.AbortCode == 0)
             CurrentBlockSummaryString.AppendLine(CurrentBlockString.ToString());
     }
+
+}
+
+
+public class PerceptualInterferance_BlockData
+{
+    public int TotalBlocks;
+    public int TrialsCorrect; //confirm with thilo if want total correct or total completed.
 
 }

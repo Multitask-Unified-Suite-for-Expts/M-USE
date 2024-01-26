@@ -57,7 +57,6 @@ public class PlayerMovement : MonoBehaviour
         if (InputBroker.GetKeyDown(KeyCode.I))
             AllowItemPickupAnimations = !AllowItemPickupAnimations;
     }
-
     private void FixedUpdate()
     {
         if (IsShifting)
@@ -195,8 +194,13 @@ public class PlayerMovement : MonoBehaviour
                 audioManager.PlayCrowdCheering();
                 Animator.Play("Cheer");
                 break;
+            case "slash":
+                CurrentAnimationState = AnimationStates.Cheer;
+                //audioManager.PlayCrowdCheering();
+                Animator.Play("SwordSlash");
+                break;
             default:
-                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad, Cheer");
+                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad, Cheer Slash");
                 break;
         }
     }

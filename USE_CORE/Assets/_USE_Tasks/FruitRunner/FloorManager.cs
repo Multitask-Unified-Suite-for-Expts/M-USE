@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    public float FloorMovementSpeed = 15f; //20 is great for humans
+    public float FloorMovementSpeed = 10f; //20 is great for humans
     private GameObject FloorTilePrefab;
     public int NumTilesSpawned;
     public int TotalTiles;

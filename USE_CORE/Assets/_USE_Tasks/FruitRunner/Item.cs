@@ -64,26 +64,41 @@ public class Item_Quaddle : Item
         transform.parent = parentTransform;
     }
 
+    private void CreateParticlesOnObject(Vector3 spawnPos)
+    {
+        Vector3 offset = new Vector3(0f, 0f, 0f);
+        GameObject particleGO = Instantiate(Resources.Load<GameObject>(QuaddleType == "Positive" ? "Prefabs/ParticleHaloPositive" : "Prefabs/ParticleHaloNegative"));
+        particleGO.transform.position = spawnPos + offset;
+        particleGO.transform.localScale = new Vector3(.5f, .5f, .5f);
+        Destroy(particleGO, 2f);
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
+            //playerMovement.StartAnimation("slash");
+
             if(QuaddleType == "Positive")
             {
                 playerMovement.StartAnimation("Happy");
-                playerMovement.TokenFbController.AddTokens(other.gameObject, QuaddleTokenRewardMag, .4f);
+                playerMovement.TokenFbController.AddTokens(gameObject, QuaddleTokenRewardMag, -.3f);
+                //playerMovement.TokenFbController.AddTokens(other.gameObject, QuaddleTokenRewardMag, .6f);
             }
             else if(QuaddleType == "Negative")
             {
                 playerMovement.StartAnimation("Sad");
-                playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
+                playerMovement.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
+                //playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .6f); //abs value since its negative
             }
             else if(QuaddleType == "Neutral")
             {
-                playerMovement.StartAnimation("Sad"); //do we want sad animation for neutral?
-                playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .4f); //abs value since its negative
+                playerMovement.StartAnimation("Sad");
+                playerMovement.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
+                //playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .6f); //abs value since its negative
 
             }
+            CreateParticlesOnObject(transform.position);
             Destroy(gameObject);
         }
     }

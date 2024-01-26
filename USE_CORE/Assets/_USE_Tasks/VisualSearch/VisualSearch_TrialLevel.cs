@@ -108,8 +108,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetHaloSize(1.5f);
-            HaloFBController.SetHaloIntensity(5);
+            HaloFBController.SetCircleHaloIntensity(1.5f);
+            HaloFBController.SetCircleHaloIntensity(5);
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -258,7 +258,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowNegative(selectedGO, depth);
         });
 
-        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.Destroy());
+        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.DestroyCircleHalo());
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddSpecificInitializationMethod(() =>

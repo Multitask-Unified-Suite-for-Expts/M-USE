@@ -168,7 +168,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeOn"]);
 
-            if (CurrentTrialDef.GuidedMazeSelection)
+            if (CurrentTrialDef.TileFlashingRatio != 0)
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile;
@@ -323,7 +323,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     HandleMazeCompletion();
                 }
             }
-            else if (CheckTileFlash() || (CurrentTrialDef.GuidedMazeSelection && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
+            else if (CheckTileFlash() || (CurrentTrialDef.TileFlashingRatio != 0 && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
@@ -352,7 +352,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (!MazeManager.IsMazeStarted())
                 MazeManager.FlashNextCorrectTile(MazeManager.GetStartTile()); 
             else
-                MazeManager.FlashNextCorrectTile(MazeManager.GetCurrentTilePosition());
+                MazeManager.FlashNextCorrectTile(GameObject.Find(MazeManager.GetCurrentMaze().mNextStep));
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -663,7 +663,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.GuidedMazeSelection +
+                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.TileFlashingRatio +
                              "\n" +
                              "\n<b>Percent Error: </b>" + String.Format("{0:0.00}%", percentError * 100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial +
@@ -680,7 +680,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
-
 
     public void HandleRuleBreakingErrorData()
     {
@@ -701,13 +700,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
 
-        totalErrors_InTrial++;
-        CurrentTaskLevel.TotalErrors_InBlock++;
-        CurrentTaskLevel.TotalErrors_InTask++;
-
         ruleAbidingErrors_InTrial++;
         CurrentTaskLevel.RuleAbidingErrors_InBlock++;
         CurrentTaskLevel.RuleAbidingErrors_InTask++;
+
+        totalErrors_InTrial++;
+        CurrentTaskLevel.TotalErrors_InBlock++;
+        CurrentTaskLevel.TotalErrors_InTask++;
     }
 
     public void HandleBackTrackErrorData()

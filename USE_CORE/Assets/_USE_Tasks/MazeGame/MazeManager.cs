@@ -42,21 +42,22 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] private bool creatingSquareMaze;
     [HideInInspector] private bool viewPath;
     [HideInInspector] private bool darkenNonPathTiles;
-    [HideInInspector] private bool correctReturnToLast;
-    [HideInInspector] private bool erroneousReturnToLast;
+    [HideInInspector] private bool correctRetouch;
+    [HideInInspector] private bool retouchLastCorrectError;
+    [HideInInspector] private bool ruleAbidingError;
     [HideInInspector] private bool correctSelection;
     [HideInInspector] private bool freePlay;
     [HideInInspector] private bool outOfMoves;
     [HideInInspector] private bool startedMaze;
     [HideInInspector] private bool finishedMaze;
-    [HideInInspector] private bool backtrackError;
+    [HideInInspector] private bool backTrackError;
     [HideInInspector] private bool tileConnectorsLoaded;
     [HideInInspector] private Maze currentMaze;
 
     [HideInInspector] private GameObject latestConnection;
     [HideInInspector] private GameObject currentTilePositionGO;
     [HideInInspector] private GameObject selectedTileGO;
-    [HideInInspector] private GameObject lastSelectedGO;
+    [HideInInspector] private GameObject lastErrorTileGO;
 
     [HideInInspector] public float mazeDuration;
     [HideInInspector] public float choiceDuration;
@@ -340,7 +341,7 @@ public class MazeManager:MonoBehaviour
     private void AssignFlashingTiles(Maze maze, StimGroup tiles)
     {
 
-        if (!mgTrialDef.GuidedMazeSelection)
+        if (mgTrialDef.TileFlashingRatio == 0)
             return;
 
         for (int i = 0; i < maze.mPath.Count; i++)
@@ -381,6 +382,8 @@ public class MazeManager:MonoBehaviour
         if (!startedMaze)
         {
             mgTrialLevel.HandleRuleBreakingErrorData();
+            if(lastErrorTileGO == null)
+                lastErrorTileGO = TileGO;
             consecutiveErrors++;
             return 20;
             
@@ -431,15 +434,20 @@ public class MazeManager:MonoBehaviour
         // RULE-ABIDING ERROR ( and RULE ABIDING, BUT PERSEVERATIVE)
         if ( currentTilePositionGO.GetComponent<Tile>().GetAdjacentTiles().Contains(TileGO) && !selectedTilesInPathGO.Contains(TileGO))
         {
-            if (consecutiveErrors > 0) //Perseverative Error
+            if (consecutiveErrors > 0) // Fail to return to last correct after error
             {
                 mgTrialLevel.HandleRuleBreakingErrorData();
+                if (lastErrorTileGO == null)
+                    lastErrorTileGO = TileGO;
                 consecutiveErrors++;
 
                 return 20;
             }
             
             mgTrialLevel.HandleRuleAbidingErrorData();
+            ruleAbidingError = true;
+            if (lastErrorTileGO == null)
+                lastErrorTileGO = TileGO;
             consecutiveErrors++;
 
             RemovePathProgressFollowingError();
@@ -452,15 +460,20 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 mgTrialLevel.HandleRetouchErroneousData();
-                HandleRetouchErroneousMazeSettings();
+                retouchLastCorrectError = true;
+                if (lastErrorTileGO == null)
+                    lastErrorTileGO = TileGO;
+
                 return 2;
             }
 
             mgTrialLevel.HandleBackTrackErrorData();
             mgTrialLevel.HandleRuleBreakingErrorData();
+            if (lastErrorTileGO == null)
+                lastErrorTileGO = TileGO;
             consecutiveErrors++;
 
-            backtrackError = true;
+            backTrackError = true;
 
             // Set the correct next step to the last correct tile touch
             RemovePathProgressFollowingError();
@@ -468,6 +481,8 @@ public class MazeManager:MonoBehaviour
         }
 
         mgTrialLevel.HandleRuleBreakingErrorData();
+        if (lastErrorTileGO == null)
+            lastErrorTileGO = TileGO;
         consecutiveErrors++;
         RemovePathProgressFollowingError();
 
@@ -489,6 +504,8 @@ public class MazeManager:MonoBehaviour
         if (!startedMaze)
         {
             mgTrialLevel.HandleRuleBreakingErrorData();
+            if (lastErrorTileGO == null)
+                lastErrorTileGO = TileGO;
             consecutiveErrors++;
 
             return 20;
@@ -539,21 +556,30 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 mgTrialLevel.HandleRetouchErroneousData();
-                HandleRetouchErroneousMazeSettings();
+                retouchLastCorrectError = true;
+                if (lastErrorTileGO == null)
+                    lastErrorTileGO = TileGO;
+
                 return 2;
             }
 
             mgTrialLevel.HandleBackTrackErrorData();
             mgTrialLevel.HandleRuleBreakingErrorData();
+            if (lastErrorTileGO == null)
+                lastErrorTileGO = TileGO;
+
             consecutiveErrors++;
 
-            backtrackError = true;
+            backTrackError = true;
             RemovePathProgressFollowingError();
             return 20;
         }
 
         // Set the correct next step to the last correct tile touch
         mgTrialLevel.HandleRuleBreakingErrorData();
+        if (lastErrorTileGO == null)
+            lastErrorTileGO = TileGO;
+
         consecutiveErrors++;
 
         RemovePathProgressFollowingError();
@@ -649,14 +675,14 @@ public class MazeManager:MonoBehaviour
 
         currentMaze.mNextStep = currentMaze.mStart;
         selectedTileGO = null;
-        lastSelectedGO = null;
+        lastErrorTileGO = null;
     }
     public void ResetSelectionClassifications()
     {
         correctSelection = false;
-        correctReturnToLast = false;
-        erroneousReturnToLast = false;
-        backtrackError = false;
+        correctRetouch = false;
+        retouchLastCorrectError = false;
+        backTrackError = false;
         selectedTileGO = null;
     }
     public void ResetMazeVariables()
@@ -676,21 +702,17 @@ public class MazeManager:MonoBehaviour
         mazeStartTime = 0;
         
         correctSelection = false;
-        correctReturnToLast = false;
-        erroneousReturnToLast = false;
-        backtrackError = false;
+        correctRetouch = false;
+        retouchLastCorrectError = false;
+        backTrackError = false;
+        ruleAbidingError = false;
     }
     
     private void HandleRetouchCorrectMazeSettings()
     {
-        correctReturnToLast = true;
+        correctRetouch = true;
         consecutiveErrors = 0;
         selectedTileGO.GetComponent<Tile>().SetTileFbDuration(tileSettings.GetFeedbackDuration("prevCorrect"));
-    }
-
-    private void HandleRetouchErroneousMazeSettings()
-    {
-        erroneousReturnToLast = true;
     }
 
 
@@ -732,15 +754,15 @@ public class MazeManager:MonoBehaviour
     } 
     public bool IsErroneousReturnToLast()
     {
-        return erroneousReturnToLast;
+        return retouchLastCorrectError;
     }
     public bool IsCorrectReturnToLast()
     {
-        return correctReturnToLast;
+        return correctRetouch;
     }
     public bool IsBacktrack()
     {
-        return backtrackError;
+        return backTrackError;
     }
     public bool IsPathVisible()
     {
@@ -789,4 +811,31 @@ public class MazeManager:MonoBehaviour
         selectedTilesGO.Add(tileGO);
     }
 
+    public string DetermineErrorType()
+    {
+        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO) // Checks for Perseverative Error
+        {
+            if (backTrackError)
+                return "perseverativeBackTrackError";
+            else if (retouchLastCorrectError)
+                return "perseverativeRetouchLastCorrectError";
+            else if (ruleAbidingError)
+                return "perseverativeRuleAbidingError";
+            else
+                return "perseverativeRuleBreakingError";
+        }
+        else
+        {
+            if (correctSelection)
+                return "correctSelection";
+            if (backTrackError)
+                return "backTrackError";
+            else if (retouchLastCorrectError)
+                return "retouchLastCorrectError";
+            else if (ruleAbidingError)
+                return "ruleAbidingError";
+            else
+                return "ruleBreakingError";
+        }
+    }
 }

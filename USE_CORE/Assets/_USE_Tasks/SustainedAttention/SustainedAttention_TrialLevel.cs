@@ -216,7 +216,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     }
                     else //Selected a Distractor
                     {
-                        HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
+                        HaloFBController.ShowNegative(ChosenGO, HaloDepth);
                         SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;

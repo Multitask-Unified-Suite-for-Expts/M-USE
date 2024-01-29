@@ -263,7 +263,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () =>
         {
-            HaloFBController.DestroyCircleHalo();
+            HaloFBController.DestroyHalos();
             choiceMade = false;
         });
        

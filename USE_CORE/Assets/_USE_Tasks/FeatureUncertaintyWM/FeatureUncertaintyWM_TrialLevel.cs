@@ -359,7 +359,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () =>
         {
-            HaloFBController.DestroyCircleHalo();
+            HaloFBController.DestroyHalos();
         });
 
 

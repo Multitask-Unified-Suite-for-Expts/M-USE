@@ -65,8 +65,8 @@ public class HaloFBController : MonoBehaviour
 
         PositiveHaloPrefab.name = "PositiveHalo";
         NegativeHaloPrefab.name = "NegativeHalo";
-        PositiveParticlePrefab.name = "PositiveHalo";
-        NegativeParticlePrefab.name = "NegativeHalo";
+        PositiveParticlePrefab.name = "PositiveParticleHalo";
+        NegativeParticlePrefab.name = "NegativeParticleHalo";
 
 
     }
@@ -80,7 +80,7 @@ public class HaloFBController : MonoBehaviour
     {
         LeaveFBOn = true;
     }
-    public void ShowPositive(GameObject gameObj, float? depth = null, float? destroyTime = null)
+    public void ShowPositive(GameObject gameObj, float? depth = null)
     {
         state = State.Positive;
         if (depth == null)
@@ -88,11 +88,9 @@ public class HaloFBController : MonoBehaviour
         else
             Show2D(PositiveParticlePrefab, PositiveHaloPrefab, gameObj, depth.Value);
 
-        if (destroyTime != null)
-            StartCoroutine(DestroyCircleHaloCoroutine(destroyTime.Value));
     }
     
-    public void ShowNegative(GameObject gameObj, float? depth = null, float? destroyTime = null)
+    public void ShowNegative(GameObject gameObj, float? depth = null)
     {
         state = State.Negative;
         if(depth == null)
@@ -100,15 +98,19 @@ public class HaloFBController : MonoBehaviour
         else
             Show2D(NegativeParticlePrefab, NegativeHaloPrefab, gameObj, depth.Value);
 
-        if(destroyTime != null)
-            StartCoroutine(DestroyCircleHaloCoroutine(destroyTime.Value));
     }
     private void Show(GameObject particlePrefab, GameObject haloPrefab, GameObject gameObj)
     {
-        if (InstantiatedParticleHalo != null && !LeaveFBOn)
+        if (InstantiatedParticleHalo != null)
         {
-            Debug.LogWarning("Trying to show HaloFB but one is already being shown");
+            Debug.LogWarning("Trying to show PARTICLE HaloFB but one is already being shown");
             Destroy(InstantiatedParticleHalo);   
+        }
+
+        if (InstantiatedCircleHalo != null && !LeaveFBOn)
+        {
+            Debug.LogWarning("Trying to show CIRCLE HaloFB but one is already being shown");
+            Destroy(InstantiatedCircleHalo);
         }
 
         GameObject rootObj = gameObj.transform.root.gameObject;
@@ -125,16 +127,16 @@ public class HaloFBController : MonoBehaviour
         if (LeaveFBOn)
             StartCoroutine(CreateFollowUpHalo(haloPrefab, rootObj.transform, false));
 
+        Destroy(InstantiatedParticleHalo, ParticleEffectDuration * 2); //Destroy the particle effect gameobject after its done doing its effect (did x2 for some wiggle room)
+
 
         if(Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
-
-
     }
 
     private IEnumerator CreateFollowUpHalo(GameObject haloPrefab, Transform parent, bool use2D, float? depth = null)
     {
-        yield return new WaitForSeconds(ParticleEffectDuration * .75f);
+        yield return new WaitForSeconds(ParticleEffectDuration * .7f);
 
         InstantiatedCircleHalo = Instantiate(haloPrefab, parent);
 
@@ -182,7 +184,11 @@ public class HaloFBController : MonoBehaviour
             InstantiatedCircleHalo.SetActive(false);
         }
         else
-            ShowPositive(go);
+        {
+            Debug.LogWarning("ELSE");
+            //StartCoroutine(CreateFollowUpHalo(PositiveHaloPrefab, go.transform, false));
+            //ShowPositive(go);
+        }
 
         
         // Calculate the time to stay on and off for each flash
@@ -199,7 +205,7 @@ public class HaloFBController : MonoBehaviour
         }
 
         IsFlashing = false;
-        DestroyCircleHalo();
+        DestroyHalos();
     }
     
     // Call this method to start flashing the halo
@@ -211,10 +217,10 @@ public class HaloFBController : MonoBehaviour
     public IEnumerator DestroyCircleHaloCoroutine(float time)
     {
         yield return new WaitForSeconds(time);
-        DestroyCircleHalo();
+        DestroyHalos();
     }
 
-    public void DestroyCircleHalo()
+    public void DestroyHalos()
     {
         Destroy(InstantiatedCircleHalo);
         InstantiatedCircleHalo = null;

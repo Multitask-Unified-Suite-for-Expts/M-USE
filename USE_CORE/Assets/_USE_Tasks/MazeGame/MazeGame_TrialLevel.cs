@@ -30,6 +30,7 @@ using System.Linq;
 using ConfigDynamicUI;
 using HiddenMaze;
 using MazeGame_Namespace;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Assertions.Must;
 using UnityEngine.Rendering;
@@ -69,7 +70,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private int retouchErroneous_InTrial;
     private int correctTouches_InTrial;
     private int backtrackErrors_InTrial;
-    private int perseverativeErrors_InTrial;
+    private int perseverativeRetouchErrors_InTrial;
+    private int perseverativeBackTrackErrors_InTrial;
+    private int perseverativeRuleAbidingErrors_InTrial;
+    private int perseverativeRuleBreakingErrors_InTrial;
+
     private bool choiceMade;
     public List<float> choiceDurationsList = new List<float>();
 
@@ -168,7 +173,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["MazeOn"]);
 
-            if (CurrentTrialDef.GuidedMazeSelection)
+            if (CurrentTrialDef.TileFlashingRatio != 0)
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile;
@@ -210,7 +215,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 {
                     choiceMade = true;
                     AddChoiceDurationToDataTrackers();
-                    MazeManager.RecordSelectedTile(SelectionHandler.LastSuccessfulSelection.SelectedGameObject);
+                    MazeManager.SetSelectedTileGO(SelectionHandler.LastSuccessfulSelection.SelectedGameObject);
                     SelectionHandler.ClearSelections();
                 }
             }
@@ -259,6 +264,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
             // This is what actually determines the result of the tile choice
             MazeManager.GetSelectedTile().GetComponent<Tile>().SelectionFeedback();
+            ManageDataHandlers();
+            
             if (!MazeManager.IsFreePlay())
                 percentError = (float)decimal.Divide(totalErrors_InTrial, MazeManager.GetCurrentMaze().mNumSquares);
 
@@ -323,7 +330,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     HandleMazeCompletion();
                 }
             }
-            else if (CheckTileFlash() || (CurrentTrialDef.GuidedMazeSelection && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
+            else if (CheckTileFlash() || (CurrentTrialDef.TileFlashingRatio != 0 && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
                 StateAfterDelay = TileFlashFeedback;
             else
                 StateAfterDelay = ChooseTile; // could be incorrect or correct but it will still go back
@@ -352,7 +359,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (!MazeManager.IsMazeStarted())
                 MazeManager.FlashNextCorrectTile(MazeManager.GetStartTile()); 
             else
-                MazeManager.FlashNextCorrectTile(MazeManager.GetCurrentTilePosition());
+                MazeManager.FlashNextCorrectTile(GameObject.Find(MazeManager.GetCurrentMaze().mNextStep));
         });
         TileFlashFeedback.AddTimer(() => tileBlinkingDuration.value, ChooseTile, () =>
         {
@@ -467,10 +474,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.EventCodesActive)
                 Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["PerseverativeError"]);
 
-            perseverativeErrors_InTrial++;
-            CurrentTaskLevel.PerseverativeErrors_InBlock++;
-            CurrentTaskLevel.PerseverativeErrors_InTask++;
-
             return true;
         }
         return false;
@@ -558,10 +561,15 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
         TrialData.AddDatum("RetouchErroneous", () => retouchErroneous_InTrial);
-        TrialData.AddDatum("PerseverativeErrors", () => perseverativeErrors_InTrial);
+        
         TrialData.AddDatum("BacktrackingErrors", () => backtrackErrors_InTrial);
         TrialData.AddDatum("Rule-AbidingErrors", () => ruleAbidingErrors_InTrial);
         TrialData.AddDatum("Rule-BreakingErrors", () => ruleBreakingErrors_InTrial);
+        
+        TrialData.AddDatum("PerseverativeRetouchErrors", () => perseverativeRetouchErrors_InTrial);
+        TrialData.AddDatum("PerseverativeBackTrackErrors", () => perseverativeBackTrackErrors_InTrial);
+        TrialData.AddDatum("PerseverativeRuleAbidingErrors", () => perseverativeRuleAbidingErrors_InTrial);
+        TrialData.AddDatum("PerseverativeRuleBreakingErrors", () => perseverativeRuleBreakingErrors_InTrial);
         TrialData.AddDatum("MazeDuration", () => MazeManager.mazeDuration);
         //TrialData.AddDatum("TotalClicks", ()=>MouseTracker.GetClickCount().Length);
     }
@@ -652,7 +660,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         Session.MouseTracker.ResetClicks();
         MazeManager.ResetMazeVariables();
         correctTouches_InTrial = 0;
-        perseverativeErrors_InTrial = 0;
+        perseverativeRetouchErrors_InTrial = 0;
+        perseverativeBackTrackErrors_InTrial = 0;
+        perseverativeRuleAbidingErrors_InTrial = 0;
+        perseverativeRuleBreakingErrors_InTrial = 0;
         backtrackErrors_InTrial  = 0;
         ruleAbidingErrors_InTrial = 0;
         ruleBreakingErrors_InTrial = 0;
@@ -663,14 +674,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.GuidedMazeSelection +
+                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.TileFlashingRatio +
                              "\n" +
                              "\n<b>Percent Error: </b>" + String.Format("{0:0.00}%", percentError * 100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial +
                              "\n" +
                              "\n<b>Rule-Abiding Errors: </b>" + ruleAbidingErrors_InTrial +
                              "\n<b>Rule-Breaking Errors: </b>" + ruleBreakingErrors_InTrial +
-                             "\n<b>Perseverative Errors: </b>" + perseverativeErrors_InTrial +
                              "\n<b>Backtrack Errors: </b>" + backtrackErrors_InTrial +
                              "\n<b>Retouch Correct: </b>" + retouchCorrect_InTrial +
                              "\n<b>Retouch Erroneous: </b>" + retouchErroneous_InTrial +
@@ -680,7 +690,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                              "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
-
 
     public void HandleRuleBreakingErrorData()
     {
@@ -701,13 +710,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
 
-        totalErrors_InTrial++;
-        CurrentTaskLevel.TotalErrors_InBlock++;
-        CurrentTaskLevel.TotalErrors_InTask++;
-
         ruleAbidingErrors_InTrial++;
         CurrentTaskLevel.RuleAbidingErrors_InBlock++;
         CurrentTaskLevel.RuleAbidingErrors_InTask++;
+
+        totalErrors_InTrial++;
+        CurrentTaskLevel.TotalErrors_InBlock++;
+        CurrentTaskLevel.TotalErrors_InTask++;
     }
 
     public void HandleBackTrackErrorData()
@@ -721,9 +730,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
 
+        totalErrors_InTrial++;
+        CurrentTaskLevel.TotalErrors_InBlock++;
+        CurrentTaskLevel.TotalErrors_InTask++;
+        
         retouchErroneous_InTrial++;
-        CurrentTaskLevel.RetouchErroneous_InBlock++;
-        CurrentTaskLevel.RetouchErroneous_InTask++;
+        CurrentTaskLevel.RetouchError_InBlock++;
+        CurrentTaskLevel.RetouchError_InTask++;
     }
 
     public void HandleRetouchCorrectData()
@@ -744,6 +757,78 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.CorrectTouches_InBlock++;
         CurrentTaskLevel.CorrectTouches_InTask++;
     }
+    
+    public void HandlePerseverativeRetouchError()
+    {
+        perseverativeRetouchErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeRetouchErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeRetouchErrors_InTask++;
+    }
+    public void HandlePerseverativeBackTrackError()
+    {
+        perseverativeBackTrackErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
+    }
+    public void HandlePerseverativeRuleAbidingError()
+    {
+        perseverativeRuleAbidingErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeRuleAbidingErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeRuleAbidingErrors_InTask++;
+    }
+    public void HandlePerseverativeRuleBreakingError()
+    {
+        perseverativeRuleBreakingErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeRuleBreakingErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeRuleBreakingErrors_InTask++;
+    }
 
+
+    private void ManageDataHandlers()
+    {
+        string errorType = MazeManager.DetermineErrorType();
+        switch (errorType)
+        {
+            case "retouchCurrentTilePositionCorrect":
+                HandleRetouchCorrectData();
+                HandleCorrectTouch();
+                break;
+            case "correctNextTileChoice":
+                HandleCorrectTouch();
+                break;
+            case "backTrackError":
+                HandleBackTrackErrorData();
+                HandleRuleBreakingErrorData();
+                break;
+            case "retouchCurrentTilePositionError":
+                HandleRetouchErroneousData();
+                break;
+            case "ruleAbidingError":
+                HandleRuleAbidingErrorData();
+                break;
+            case "ruleBreakingError":
+                HandleRuleBreakingErrorData();
+                break;
+            case "perseverativeBackTrackError":
+                HandleBackTrackErrorData();
+                HandlePerseverativeBackTrackError();
+                HandleRuleBreakingErrorData();
+                break;
+            case "perseverativeRetouchCurrentTilePositionError":
+                HandlePerseverativeRetouchError();
+                HandleRetouchErroneousData();
+                break;
+            case "perseverativeRuleAbidingError":
+                HandlePerseverativeRuleAbidingError();
+                HandleRuleAbidingErrorData();
+                break;
+            case "perseverativeRuleBreakingError":
+                HandlePerseverativeRuleBreakingError();
+                HandleRuleBreakingErrorData();
+                break;
+            
+        }
+        
+    }
 
 }

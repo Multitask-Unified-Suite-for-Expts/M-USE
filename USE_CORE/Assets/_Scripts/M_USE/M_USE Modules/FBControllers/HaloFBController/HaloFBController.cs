@@ -121,7 +121,7 @@ public class HaloFBController : MonoBehaviour
         InstantiatedParticleHalo.transform.position = behindPos;
 
 
-        //CREATE SECOND HALO FOR WHEN LEAVE FEEDBACK ON
+        //Create circle halo for when LeaveFeedbackOn is true:
         if (LeaveFBOn)
             StartCoroutine(CreateFollowUpHalo(haloPrefab, rootObj.transform, false));
 
@@ -216,11 +216,14 @@ public class HaloFBController : MonoBehaviour
 
     public void DestroyCircleHalo()
     {
+        Destroy(InstantiatedCircleHalo);
+        InstantiatedCircleHalo = null;
         Destroy(InstantiatedParticleHalo);
-        if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
         InstantiatedParticleHalo = null;
         state = State.None;
+
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
     }
 
     public void SetParticleHaloSize(float size)

@@ -33,6 +33,7 @@ using System.Text;
 using HiddenMaze;
 using MazeGame_Namespace;
 using UnityEngine;
+using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using USE_Utilities;
@@ -50,12 +51,15 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     // Block Data Tracking Variables
     [HideInInspector]
     public int TotalErrors_InBlock;
-    public int PerseverativeErrors_InBlock;
+    public int PerseverativeRetouchErrors_InBlock;
+    public int PerseverativeBackTrackErrors_InBlock;
+    public int PerseverativeRuleAbidingErrors_InBlock;
+    public int PerseverativeRuleBreakingErrors_InBlock; 
     public int BacktrackErrors_InBlock;
     public int RuleAbidingErrors_InBlock;
     public int RuleBreakingErrors_InBlock;
     public int RetouchCorrect_InBlock;
-    public int RetouchErroneous_InBlock;
+    [FormerlySerializedAs("RetouchErroneous_InBlock")] public int RetouchError_InBlock;
     public int CorrectTouches_InBlock; 
     public int NumSliderBarFull_InBlock;
     public List<float?> MazeDurations_InBlock = new List<float?>();
@@ -64,12 +68,15 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     // Task Data Tracking Variables
     [HideInInspector]
     public int TotalErrors_InTask;
-    public int PerseverativeErrors_InTask;
+    public int PerseverativeRetouchErrors_InTask;
+    public int PerseverativeBackTrackErrors_InTask;
+    public int PerseverativeRuleAbidingErrors_InTask;
+    public int PerseverativeRuleBreakingErrors_InTask;
     public int BacktrackErrors_InTask;
     public int RuleAbidingErrors_InTask;
     public int RuleBreakingErrors_InTask;
     public int RetouchCorrect_InTask;
-    public int RetouchErroneous_InTask;
+    [FormerlySerializedAs("RetouchErroneous_InTask")] public int RetouchError_InTask;
     public int CorrectTouches_InTask;
     public int NumSliderBarFull_InTask;
     public List<float?> MazeDurations_InTask;
@@ -137,14 +144,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("BlockName", () => mgBD.BlockName);
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
-        BlockData.AddDatum("TotalErrors", () => $"[{string.Join(", ", TotalErrors_InBlock)}]");
+        BlockData.AddDatum("TotalErrors", () => TotalErrors_InBlock);
         BlockData.AddDatum("CorrectTouches", () => CorrectTouches_InBlock);
-        BlockData.AddDatum("RetouchCorrect",() => $"[{string.Join(", ", RetouchCorrect_InBlock)}]");
-        BlockData.AddDatum("RetouchErroneous",() => $"[{string.Join(", ", RetouchErroneous_InBlock)}]");
-        BlockData.AddDatum("PerseverativeErrors",() => $"[{string.Join(", ", PerseverativeErrors_InBlock)}]");
-        BlockData.AddDatum("BacktrackErrors", () => $"[{string.Join(", ", BacktrackErrors_InBlock)}]");
-        BlockData.AddDatum("RuleAbidingErrors", () => $"[{string.Join(", ", RuleAbidingErrors_InBlock)}]");
-        BlockData.AddDatum("RuleBreakingErrors", () => $"[{string.Join(", ", RuleBreakingErrors_InBlock)}]");
+        BlockData.AddDatum("RetouchCorrect",() => RetouchCorrect_InBlock);
+        BlockData.AddDatum("RetouchError",() => RetouchError_InBlock);
+        BlockData.AddDatum("PerseverativeRetouchErrors",() => PerseverativeRetouchErrors_InBlock);
+        BlockData.AddDatum("PerseverativeBackTrackErrors",() => PerseverativeBackTrackErrors_InBlock);
+        BlockData.AddDatum("PerseverativeRuleAbidingErrors",() => PerseverativeRuleAbidingErrors_InBlock);
+        BlockData.AddDatum("PerseverativeRuleBreakingErrors",() => PerseverativeRuleBreakingErrors_InBlock);
+        BlockData.AddDatum("BacktrackErrors", () => BacktrackErrors_InBlock);
+        BlockData.AddDatum("RuleAbidingErrors", () => RuleAbidingErrors_InBlock);
+        BlockData.AddDatum("RuleBreakingErrors", () => RuleBreakingErrors_InBlock);
         BlockData.AddDatum("NumSliderBarFull", ()=>NumSliderBarFull_InBlock);
         BlockData.AddDatum("MazeDurations", () => string.Join(",",MazeDurations_InBlock));
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", ChoiceDurations_InBlock));
@@ -158,7 +168,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             ["Correct Touches"] = CorrectTouches_InBlock,
             ["Total Errors"] = TotalErrors_InBlock,
             ["Retouched Correct"] = RetouchCorrect_InBlock,
-            ["Retouched Erroneous"] = RetouchErroneous_InBlock,
+            ["Retouched Erroneous"] = RetouchError_InBlock,
         };
         return data;
     }
@@ -171,13 +181,15 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         data["Total Errors"] = TotalErrors_InTask;
         data["Correct Touches"] = CorrectTouches_InTask;
         data["Retouch Correct"] = RetouchCorrect_InTask;
-        data["Retouch Erroneous"] = RetouchErroneous_InTask;
-        data["Perseverative Errors"] = PerseverativeErrors_InTask;
+        data["Retouch Error"] = RetouchError_InTask;
         data["Backtrack Errors"] = BacktrackErrors_InTask;
         data["Rule-Abiding Errors"] = RuleAbidingErrors_InTask;
         data["Rule-Breaking Errors"] = RuleBreakingErrors_InTask;
+        data["Perseverative Retouch Errors"] = PerseverativeRetouchErrors_InTask;
+        data["Perseverative Back Track Errors"] = PerseverativeBackTrackErrors_InTask;
+        data["Perseverative Rule Abiding Errors"] = PerseverativeRuleAbidingErrors_InTask;
+        data["Perseverative Rule Breaking Errors"] = PerseverativeRuleBreakingErrors_InTask;
         data["Average Maze Durations"] = CalculateAverageDuration(MazeDurations_InTask);
-        data["Average Choice Duration"] = CalculateAverageDuration(ChoiceDurations_InTask);
 
         return data;
     }
@@ -187,9 +199,12 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         RuleAbidingErrors_InBlock = 0;
         RuleBreakingErrors_InBlock = 0;
         BacktrackErrors_InBlock = 0;
-        PerseverativeErrors_InBlock = 0;
+        PerseverativeRetouchErrors_InBlock = 0;
+        PerseverativeBackTrackErrors_InBlock = 0;
+        PerseverativeRuleAbidingErrors_InBlock = 0;
+        PerseverativeRuleBreakingErrors_InBlock = 0; 
         RetouchCorrect_InBlock = 0;
-        RetouchErroneous_InBlock = 0;
+        RetouchError_InBlock = 0;
         TotalErrors_InBlock = 0;
         NumSliderBarFull_InBlock = 0;
         MazeDurations_InBlock.Clear();
@@ -212,10 +227,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "\nTotal Errors: " + TotalErrors_InBlock +
                              "\nRule-Abiding Errors: " + RuleAbidingErrors_InBlock +
                              "\nRule-Breaking Errors: " + RuleBreakingErrors_InBlock +
-                             "\nPerseverative Errors: " + PerseverativeErrors_InBlock+
                              "\nBacktrack Errors: " + BacktrackErrors_InBlock +
                              "\nRetouch Correct: " + RetouchCorrect_InBlock +
-                             "\nRetouch Erroneous: " + RetouchErroneous_InBlock +
+                             "\nRetouch Erroneous: " + RetouchError_InBlock +
                              "\n\nRewards: " + NumRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", CalculateAverageDuration(ChoiceDurations_InBlock)) +

@@ -234,7 +234,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
-                HaloFBController.SetLeaveFeedbackOn();
+                HaloFBController.SetLeaveFeedbackOn(true);
 
             ShotgunHandler.HandlerActive = true;
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -362,18 +362,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (CorrectSelection)
             {
-                if (GrayHalos.Count > 0)
+                /*if (GrayHalos.Count > 0)
                 {
                     // if correcting a previous error, delete all the existing gray halos
                     foreach (GameObject grayHalo in GrayHalos)
                     {
                         Destroy(grayHalo);
                     }
-                }
+                }*/
                 consecutiveError = 0;
                 // Only show positive if there isn't an existing halo around the object
-                if(GetRootObject(selectedGO.transform).transform.Find("PositiveHalo(Clone)")?.gameObject == null)
-                    HaloFBController.ShowPositive(selectedGO, depth);
+                
+                HaloFBController.ShowPositive(selectedGO, depth);
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
                 if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
@@ -397,13 +397,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 consecutiveError++;
                 Debug.Log("PERSEVERATION COUNT: " + perseverationCounter_InTrial);
                 
-                
-                if (GetRootObject(selectedGO.transform).transform.Find("NegativeHalo(Clone)")?.gameObject == null)
-                {
                     HaloFBController.ShowNegative(selectedGO, depth);
-                    GrayHalos.Add(GetRootObject(selectedGO.transform).transform.Find("NegativeHalo(Clone)").gameObject);
-                }
-
                 if (selectedSD.IsDistractor)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
@@ -414,8 +408,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                     numTouchedStims -= 1;
-                    if (GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveHalo(Clone)")?.gameObject != null)
-                        Destroy(GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveHalo(Clone)").gameObject);
                 }
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
@@ -462,7 +454,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 2 && startedSequence))
+                    if (CurrentTrialDef.GuidedSequenceLearning && (consecutiveError >= 2 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;

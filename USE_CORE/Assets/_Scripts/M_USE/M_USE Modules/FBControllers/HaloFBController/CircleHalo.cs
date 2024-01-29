@@ -35,11 +35,7 @@ public class CircleHalo : MonoBehaviour
         // IsFlashing = false;
     }
 
-    // Call this method to start flashing the halo
-    public void StartFlashingHalo(float flashingDuration, int numFlashes, GameObject go)
-    {
-        StartCoroutine(FlashHalo(flashingDuration, numFlashes, go));
-    }
+   
 
     public IEnumerator CreateCircleHalo(string feedbackType, GameObject gameObj, bool use2D, float particleEffectDuration, float? depth = null)
     {
@@ -47,7 +43,8 @@ public class CircleHalo : MonoBehaviour
 
         GameObject circleHaloPrefab = (feedbackType.ToLower() == "positive") ? PositiveCircleHaloPrefab : NegativeCircleHaloPrefab;
 
-        InstantiatedCircleHaloGO = Instantiate(circleHaloPrefab, gameObj.transform.root.transform);
+        if(InstantiatedCircleHaloGO == null)
+            InstantiatedCircleHaloGO = Instantiate(circleHaloPrefab, gameObj.transform.root.transform);
 
         if (use2D)
         {
@@ -61,6 +58,8 @@ public class CircleHalo : MonoBehaviour
             InstantiatedCircleHaloGO.transform.SetParent(gameObj.transform.root.transform);
         }
     }
+
+    public GameObject? GetInstantiatedCircleHaloGO() { return  InstantiatedCircleHaloGO; }
     /*
             public void SetCircleHaloSize(float size)
             {

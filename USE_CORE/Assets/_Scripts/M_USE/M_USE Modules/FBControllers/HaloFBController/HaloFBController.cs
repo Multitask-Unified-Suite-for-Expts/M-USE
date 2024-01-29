@@ -85,12 +85,16 @@ public class HaloFBController : MonoBehaviour
             // See if the selected game object has a CircleHalo Component, add one if not
             CircleHalo circleHalo = GetOrCreateCircleHalo(gameObj);
 
+            if (circleHalo.GetInstantiatedCircleHaloGO() == null)
+            {
+                if (depth == null)
+                    StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo.GetParticleEffectDuration()));
+                else
+                    StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
+            }
 
-            if (depth == null)
-                StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo.GetParticleEffectDuration()));
-            else
-                StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
         }
+
 
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
@@ -111,11 +115,14 @@ public class HaloFBController : MonoBehaviour
         {
             // See if the selected game object has a CircleHalo Component, add one if not
             CircleHalo circleHalo = GetOrCreateCircleHalo(gameObj);
+            if (circleHalo.GetInstantiatedCircleHaloGO() == null)
+            {
+                if (depth == null)
+                    StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, false, particleHalo.GetParticleEffectDuration()));
+                else
+                    StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
+            }
 
-            if (depth == null)
-                StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, false, particleHalo.GetParticleEffectDuration()));
-            else
-                StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
         }
 
         if (Session.SessionDef.EventCodesActive)
@@ -142,6 +149,7 @@ public class HaloFBController : MonoBehaviour
         CircleHalo circleHalo = gameObj.GetComponent<CircleHalo>();
         if (circleHalo == null)
         {
+            Debug.LogWarning("IT IS CREATING A NEW ONE");
             circleHalo = gameObj.AddComponent<CircleHalo>();
             circleHalo.Initialize(PositiveCircleHaloPrefab, NegativeCircleHaloPrefab);
         }

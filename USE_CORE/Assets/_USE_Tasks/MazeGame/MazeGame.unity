@@ -213,7 +213,6 @@ Transform:
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
   m_LocalPosition: {x: 2.5, y: 5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -246,7 +245,6 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -330,7 +328,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 665075549}
   m_RootOrder: 0
@@ -368,7 +365,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 1b1bb05862d905044ab9aecee075f235, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -404,7 +401,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 665075549}
   m_RootOrder: 3
@@ -504,7 +500,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -541,7 +536,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 349460580}
   - {fileID: 1165451017}
@@ -567,7 +561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b784f645be64c4b8d9c52c435fa47d03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mgTrialLevel: {fileID: 1860654110}
   tilePrefab: {fileID: 8240155104330858003, guid: 5796f049ef3372046b3edd4795fcdc39,
     type: 3}
   tileSettings: {fileID: 0}
@@ -575,30 +568,10 @@ MonoBehaviour:
   tileConnectorsContainerGO: {fileID: 1165451016}
   landmarksContainerGO: {fileID: 495972936}
   mazeBackgroundGO: {fileID: 349460579}
-  currentPathIndex: 0
-  consecutiveErrors: 0
-  selectedTilesInPathGO: []
-  selectedTilesGO: []
-  startTileGO: {fileID: 0}
-  finishTileGO: {fileID: 0}
-  creatingSquareMaze: 0
-  viewPath: 0
-  darkenNonPathTiles: 0
-  returnToLast: 0
-  erroneousReturnToLast: 0
-  correctSelection: 0
-  freePlay: 1
-  outOfMoves: 0
-  startedMaze: 0
-  finishedMaze: 0
-  backtrackError: 0
-  tileConnectorsLoaded: 0
-  latestConnection: {fileID: 0}
   mazeDuration: 0
   choiceDuration: 0
   mazeStartTime: 0
   choiceStartTime: 0
-  currentTilePositionGO: {fileID: 0}
   tileContainerGridLayoutGroup: {fileID: 1026519224}
 --- !u!1 &859525660
 GameObject:
@@ -690,7 +663,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 665075549}
   m_Father: {fileID: 0}
@@ -728,7 +700,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 665075549}
   m_RootOrder: 2
@@ -788,7 +759,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 665075549}
   m_RootOrder: 1
@@ -855,7 +825,9 @@ MonoBehaviour:
   reversalsCount: 0
   DiffLevelsAtReversals: 
   DiffLevelsSummary: 
-  calculatedThreshold: 0
+  TimingValuesAtReversals: []
+  calculatedThreshold_timing: 0
+  blockAccuracy: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -901,8 +873,6 @@ MonoBehaviour:
   landmarks:
     stimGroupName: 
     IsActive: 0
-  tileTex: {fileID: 0}
-  mazeBgTex: {fileID: 0}
   choiceDurationsList: []
   mazeOnsetDelay:
     name: 
@@ -1096,7 +1066,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0

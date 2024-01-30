@@ -75,25 +75,20 @@ public class FR_Item_Quaddle : FR_Item
     {
         if (other.CompareTag("Player"))
         {
-            //playerMovement.StartAnimation("slash");
-
             if(QuaddleType == "Positive")
             {
                 playerManager.StartAnimation("Happy");
                 playerManager.TokenFbController.AddTokens(gameObject, QuaddleTokenRewardMag, -.3f);
-                //playerMovement.TokenFbController.AddTokens(other.gameObject, QuaddleTokenRewardMag, .6f);
             }
             else if(QuaddleType == "Negative")
             {
                 playerManager.StartAnimation("Sad");
                 playerManager.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
-                //playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .6f); //abs value since its negative
             }
             else if(QuaddleType == "Neutral")
             {
                 playerManager.StartAnimation("Sad");
                 playerManager.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
-                //playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .6f); //abs value since its negative
 
             }
             CreateParticlesOnObject(transform.position);

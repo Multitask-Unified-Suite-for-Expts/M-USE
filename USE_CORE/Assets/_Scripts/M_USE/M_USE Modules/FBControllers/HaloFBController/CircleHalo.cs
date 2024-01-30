@@ -6,10 +6,10 @@ public class CircleHalo : MonoBehaviour
 {
     // Each stimulus with a circle halo will contain its own instance 
 
-    public GameObject PositiveCircleHaloPrefab; // Set in the Inspector
-    public GameObject NegativeCircleHaloPrefab; // Set in Inspector
+    public GameObject PositiveCircleHaloPrefab; // Passed in from HaloFBController during Intialize
+    public GameObject NegativeCircleHaloPrefab; // Passed in from HaloFBController during Intialize
 
-    private GameObject InstantiatedCircleHaloGO;
+    public GameObject InstantiatedCircleHaloGO;
 
     public void Initialize(GameObject posParticleHaloPrefab, GameObject negParticleHaloPrefab)
     {
@@ -17,12 +17,15 @@ public class CircleHalo : MonoBehaviour
         NegativeCircleHaloPrefab = negParticleHaloPrefab;
     }
 
-    public IEnumerator<WaitForSeconds> FlashHalo(float flashingDuration, int numFlashes, GameObject go)
+    public IEnumerator<WaitForSeconds> FlashHalo(HaloFBController haloFBController, float flashingDuration, int numFlashes, GameObject go)
     {
         // Calculate the time to stay on and off for each flash
         float onDuration = flashingDuration / (2 * numFlashes);
-        // IsFlashing = true;
+        haloFBController.SetIsFlashing(true);
         // Flash the halo for the specified number of times
+        Debug.LogWarning("THE GAME OBJECT IT IS ATTACVHED TO/S NAME: " + gameObject.name);
+        Debug.LogWarning("THE INSTANTIATED CIRCLE hALO GO: " + InstantiatedCircleHaloGO.name);
+
         for (int i = 0; i < numFlashes; i++)
         {
             InstantiatedCircleHaloGO.SetActive(true);
@@ -31,15 +34,13 @@ public class CircleHalo : MonoBehaviour
             InstantiatedCircleHaloGO.SetActive(false);
             yield return new WaitForSeconds(onDuration);
         }
+        haloFBController.SetIsFlashing(false);
 
-        // IsFlashing = false;
     }
-
-   
 
     public IEnumerator CreateCircleHalo(string feedbackType, GameObject gameObj, bool use2D, float particleEffectDuration, float? depth = null)
     {
-        yield return new WaitForSeconds(particleEffectDuration * .75f);
+        yield return new WaitForSeconds(particleEffectDuration * .5f);
 
         GameObject circleHaloPrefab = (feedbackType.ToLower() == "positive") ? PositiveCircleHaloPrefab : NegativeCircleHaloPrefab;
 
@@ -58,15 +59,11 @@ public class CircleHalo : MonoBehaviour
             InstantiatedCircleHaloGO.transform.SetParent(gameObj.transform.root.transform);
         }
     }
+    public void DestroyInstantiatedCircleHalo()
+    {
+        Destroy(InstantiatedCircleHaloGO);
+    }
 
     public GameObject? GetInstantiatedCircleHaloGO() { return  InstantiatedCircleHaloGO; }
-    /*
-            public void SetCircleHaloSize(float size)
-            {
-                Light light = PositiveHaloPrefab.GetComponent<Light>();
-                light.range = size;
-                light = NegativeHaloPrefab.GetComponent<Light>();
-                light.range = size;
-                return this;
-            }*/
+
 }

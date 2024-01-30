@@ -36,12 +36,12 @@ public class HaloFBController : MonoBehaviour
 
     public GameObject PositiveParticleHaloPrefab; // Set in Inspector
     public GameObject NegativeParticleHaloPrefab; // Set in Inspector
-    /*
-        private GameObject InstantiatedParticleHalo;
-        public GameObject InstantiatedCircleHalo;*/
+
+    private List<CircleHalo> PositiveCircleHalos = new List<CircleHalo>();
+    private List<CircleHalo> NegativeCircleHalos = new List<CircleHalo>();
 
     private bool LeaveFBOn;
-    public bool IsFlashing;
+    private bool IsFlashing;
 
     private enum State { None, Positive, Negative };
     private State state;
@@ -49,26 +49,8 @@ public class HaloFBController : MonoBehaviour
     public void Init(DataController frameData)
     {
         frameData.AddDatum("HaloType", () => state.ToString());
-        /*if (InstantiatedParticleHalo != null) {
-            Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
-            Destroy(InstantiatedParticleHalo);
-        }
-        InstantiatedParticleHalo = null;*//*
-
-        PositiveParticlePrefab = Resources.Load<GameObject>("Prefabs/ParticleHaloPositive");
-        NegativeParticlePrefab = Resources.Load<GameObject>("Prefabs/ParticleHaloNegative");*/
-
-        /*
-                PositiveHaloPrefab.name = "PositiveHalo";
-                NegativeHaloPrefab.name = "NegativeHalo";
-                PositiveParticlePrefab.name = "PositiveHalo";
-                NegativeParticlePrefab.name = "NegativeHalo";*/
     }
 
-    public void SetLeaveFeedbackOn(bool leaveFbOn)
-    {
-        LeaveFBOn = leaveFbOn;
-    }
     public void ShowPositive(GameObject gameObj, float? depth = null, float? destroyTime = null)
     {
         state = State.Positive;
@@ -87,15 +69,13 @@ public class HaloFBController : MonoBehaviour
 
             if (circleHalo.GetInstantiatedCircleHaloGO() == null)
             {
+                PositiveCircleHalos.Add(circleHalo);
                 if (depth == null)
                     StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo.GetParticleEffectDuration()));
                 else
                     StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
             }
-
         }
-
-
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
@@ -104,7 +84,6 @@ public class HaloFBController : MonoBehaviour
     {
         state = State.Negative;
         ParticleHalo particleHalo = GetOrCreateParticleHalo(gameObj);
-
 
         if (depth == null)
             particleHalo.ShowParticleHalo("negative", gameObj);
@@ -117,20 +96,17 @@ public class HaloFBController : MonoBehaviour
             CircleHalo circleHalo = GetOrCreateCircleHalo(gameObj);
             if (circleHalo.GetInstantiatedCircleHaloGO() == null)
             {
+                NegativeCircleHalos.Add(circleHalo);
+
                 if (depth == null)
                     StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, false, particleHalo.GetParticleEffectDuration()));
                 else
                     StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
             }
-
         }
 
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
-
-        /*
-                if (destroyTime != null)
-                    StartCoroutine(DestroyCircleHaloCoroutine(destroyTime.Value));*/
     }
     private ParticleHalo GetOrCreateParticleHalo(GameObject gameObj)
     {
@@ -149,7 +125,6 @@ public class HaloFBController : MonoBehaviour
         CircleHalo circleHalo = gameObj.GetComponent<CircleHalo>();
         if (circleHalo == null)
         {
-            Debug.LogWarning("IT IS CREATING A NEW ONE");
             circleHalo = gameObj.AddComponent<CircleHalo>();
             circleHalo.Initialize(PositiveCircleHaloPrefab, NegativeCircleHaloPrefab);
         }
@@ -211,8 +186,56 @@ public class HaloFBController : MonoBehaviour
     public void StartFlashingHalo(float flashingDuration, int numFlashes, GameObject go)
     {
         CircleHalo circleHalo = GetOrCreateCircleHalo(go);
-        StartCoroutine(circleHalo.FlashHalo(flashingDuration, numFlashes, go));
+        Debug.LogWarning("IS THE FLASHING DURATION NULL? " + (flashingDuration == null ? "YES" : "NO"));
+        Debug.LogWarning("IS THE numFlashes NULL? " + (numFlashes == null ? "YES" : "NO"));
+        Debug.LogWarning("IS THE go NULL? " + (go == null ? "YES" : "NO"));
+        Debug.LogWarning("IS THE CIRCLEHALO NULL? " + (circleHalo == null ? "YES" : "NO"));
+        StartCoroutine(circleHalo.FlashHalo(this, flashingDuration, numFlashes, go));
     }
+
+    public void SetLeaveFeedbackOn(bool leaveFbOn)
+    {
+        LeaveFBOn = leaveFbOn;
+    }
+    public bool IsHaloFlashing()
+    {
+        return IsFlashing;
+    }
+    // Method to destroy all CircleHalos in the lists
+    private void DestroyAllCircleHalos()
+    {
+        foreach (var circleHalo in PositiveCircleHalos)
+        {
+            Destroy(circleHalo);
+        }
+        PositiveCircleHalos.Clear();
+
+        foreach (var circleHalo in NegativeCircleHalos)
+        {
+            Destroy(circleHalo);
+        }
+        NegativeCircleHalos.Clear();
+    }
+    public void DestroyNegativeCircleHalos()
+    {
+        foreach (var circleHalo in NegativeCircleHalos)
+        {
+            circleHalo.DestroyInstantiatedCircleHalo();
+            Destroy(circleHalo);
+        }
+        NegativeCircleHalos.Clear();
+    }
+    // Method to destroy all halos
+    public void DestroyAllHalos()
+    {
+       // DestroyAllParticleHalos();
+        DestroyAllCircleHalos();
+        state = State.None;
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
+
+    }
+    public List<CircleHalo> GetNegativeCircleHalos() { return NegativeCircleHalos;   }
 
     /*private void Show(GameObject particlePrefab, GameObject haloPrefab, GameObject gameObj)
     {
@@ -268,11 +291,7 @@ public class HaloFBController : MonoBehaviour
 
     
 */
-    /*public IEnumerator DestroyCircleHaloCoroutine(float time)
-    {
-        yield return new WaitForSeconds(time);
-        DestroyCircleHalo();
-    }
+    /*
 
     public void DestroyHaloFeedback()
     {
@@ -286,29 +305,18 @@ public class HaloFBController : MonoBehaviour
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
     }
 */
-    public void DestroyCircleHalo()
-    {
-        Debug.LogWarning("in theory i destroy halos now");
-    }
-
     public bool IsHaloGameObjectNull()
     {
         Debug.LogWarning("THIS IS NOT IMPLEMENTED");
         return false;
     }
 
-    private GameObject GetRootObject(Transform childTransform)
+    public void SetIsFlashing(bool flashingStatus)
     {
-        Transform currentTransform = childTransform;
-
-        // Traverse up the hierarchy until we find the root object.
-        while (currentTransform.parent != null)
-        {
-            currentTransform = currentTransform.parent;
-        }
-
-        // The currentTransform now points to the root object's transform.
-        return currentTransform.gameObject;
+        IsFlashing = flashingStatus;
     }
-
+    public bool GetIsFlashing()
+    {
+        return IsFlashing;
+    }
 }

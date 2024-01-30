@@ -25,7 +25,6 @@ public class ParticleHalo : MonoBehaviour
         GameObject rootObj = gameObj.transform.root.gameObject;
         InstantiatedParticleHaloGO = Instantiate(particlePrefab, rootObj.transform);
 
-
         // Position the haloPrefab behind the game object
         float distanceBehind = 1.5f; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
@@ -34,6 +33,8 @@ public class ParticleHalo : MonoBehaviour
 
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+        
+        Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration *2);
     }
     public void ShowParticleHalo2D(string feedbackType, GameObject gameObj, float depth = 10)
     {
@@ -48,6 +49,9 @@ public class ParticleHalo : MonoBehaviour
 
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+       
+        Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration * 2);
+
     }
     public float GetParticleEffectDuration() { return ParticleEffectDuration; }
 }

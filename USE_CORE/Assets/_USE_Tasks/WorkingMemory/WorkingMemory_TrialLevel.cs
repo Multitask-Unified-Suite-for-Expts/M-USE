@@ -272,7 +272,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowNegative(selectedGO, depth);
         });
 
-        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyCircleHalo(); });
+        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });
 
 
         // The state that will handle the token feedback and wait for any animations

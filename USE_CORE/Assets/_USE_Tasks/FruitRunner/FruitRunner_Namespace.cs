@@ -14,6 +14,7 @@ namespace FruitRunner_Namespace
 
     public class FruitRunner_BlockDef : BlockDef
     {
+        public float FogStrength;
     }
 
     public class FruitRunner_TrialDef : TrialDef

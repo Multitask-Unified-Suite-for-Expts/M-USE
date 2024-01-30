@@ -31,6 +31,7 @@ using System.Collections.Specialized;
 using ContinuousRecognition_Namespace;
 using UnityEngine;
 using USE_ExperimentTemplate_Task;
+using System.Linq;
 
 
 public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
@@ -43,15 +44,23 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int TokenBarCompletions_Task;
     [HideInInspector] public float NonStimTouches_Task;
 
+    [HideInInspector] public List<int> RecencyInterference_Task;
+
+    [HideInInspector] public Dictionary<int, PerceptualInterferance_BlockData> PerceptualInterference_Task; //access its index for that Score's data
+
     [HideInInspector] public string CurrentBlockString;
 
     public int blocksAdded;
 
 
 
+
     public override void DefineControlLevel()
     {
         trialLevel = (ContinuousRecognition_TrialLevel) TrialLevel;
+
+        PerceptualInterference_Task = new Dictionary<int, PerceptualInterferance_BlockData>();
+
         CurrentBlockString = "";
         DefineBlockData();
         blocksAdded = 0;
@@ -68,6 +77,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
+            //Recency Data:
+            RecencyInterference_Task.Add(trialLevel.RecencyInterference_Block);
+
+            //Similarity Data:
+            AddSimilarityScoreBlockData();
+
+
             if(!Session.WebBuild && trialLevel.AbortCode == 0)
             {
                 CurrentBlockString += "\n" + "\n";
@@ -76,6 +92,18 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             }
         });        
     }
+
+
+
+    private void AddSimilarityScoreBlockData()
+    {
+        if (!PerceptualInterference_Task.ContainsKey(CurrentBlock.PerceptualSimilarity))
+            PerceptualInterference_Task[CurrentBlock.PerceptualSimilarity] = new PerceptualInterferance_BlockData();
+        
+        PerceptualInterference_Task[CurrentBlock.PerceptualSimilarity].TotalBlocks++;
+        PerceptualInterference_Task[CurrentBlock.PerceptualSimilarity].TrialsCorrect += trialLevel.NumCorrect_Block;
+    }
+
 
     public override void SetTaskSummaryString()
     {
@@ -94,7 +122,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             ["Trials Correct"] = trialLevel.NumCorrect_Block,
             ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
             ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0") + "s",
-            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block
+            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block,
+            ["RecencyInterference"] = trialLevel.RecencyInterference_Block
+
         };
         return data;
     }
@@ -106,8 +136,25 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         data["Trials Completed"] = TrialsCompleted_Task;
         data["Trials Correct"] = TrialsCorrect_Task;
         data["TokenBar Completions"] = TokenBarCompletions_Task;
+        data["PerceptualInterference"] = GetPerceptualInterferanceString();
+        if(RecencyInterference_Task.Count > 0)
+            data["Avg RecencyInterference"] = RecencyInterference_Task.Average();
 
         return data;
+    }
+
+    private string GetPerceptualInterferanceString()
+    {
+        string summary = string.Join(", ",
+        PerceptualInterference_Task.Select(kvp =>
+        {
+            int similarity = kvp.Key;
+            PerceptualInterferance_BlockData data = kvp.Value;
+            float avg = data.TrialsCorrect / data.TotalBlocks;
+
+            return $"(Similarity {similarity} - Blocks {data.TotalBlocks} - Avg Correct {avg:0.00})";
+        }));
+        return summary;
     }
 
     private void DefineBlockData()
@@ -140,5 +187,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         if (trialLevel.AbortCode == 0)
             CurrentBlockSummaryString.AppendLine(CurrentBlockString.ToString());
     }
+
+}
+
+
+public class PerceptualInterferance_BlockData
+{
+    public int TotalBlocks;
+    public int TrialsCorrect; //confirm with thilo if want total correct or total completed.
 
 }

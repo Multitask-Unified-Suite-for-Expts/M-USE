@@ -64,7 +64,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
 
-            HaloFBController.SetHaloIntensity(2f);
+            HaloFBController.SetCircleHaloIntensity(2f);
 
             if (StartButton == null)
             {
@@ -166,7 +166,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 ChosenObject = ChosenGO.GetComponent<SA_Object>();
                 if(ChosenObject != null)
                 {
-                    HaloFBController.SetHaloSize(.01f * ChosenObject.Size);
+                    HaloFBController.SetParticleHaloSize(.5f);
+                    HaloFBController.SetCircleHaloSize(.01f * ChosenObject.Size);
 
                     if (ChosenObject.IsTarget)
                     {
@@ -174,8 +175,8 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                         {
                             Debug.LogWarning("CORRECT DURATION: " + (Time.time - ChosenObject.AnimStartTime));
                             GiveRewardIfSliderFull = true;
-                            HaloFBController.ShowPositive(ChosenGO, HaloDepth, HaloDuration);
-                            SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps)); //eventually change slidergain[0]!!
+                            HaloFBController.ShowPositive(ChosenGO, HaloDepth); //removed HaloDuration since now particle effect halo
+                            SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps));
                             SuccessfulTargetSelections_Block++;
                             CurrentTaskLevel.SuccessfulTargetSelections_Task++;
                             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SuccessfulTargetSelection"]);
@@ -183,7 +184,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                         }
                         else
                         {
-                            HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
+                            HaloFBController.ShowNegative(ChosenGO, HaloDepth); //removed HaloDuration since now particle effect halo
                             SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
 
                             if(ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
@@ -215,7 +216,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                     }
                     else //Selected a Distractor
                     {
-                        HaloFBController.ShowNegative(ChosenGO, HaloDepth, HaloDuration);
+                        HaloFBController.ShowNegative(ChosenGO, HaloDepth);
                         SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;

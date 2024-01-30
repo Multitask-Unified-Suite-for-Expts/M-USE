@@ -228,6 +228,7 @@ namespace ContinuousRecognition_Namespace
 
     public class ContinuousRecognition_StimDef : StimDef
     {
+        public int TrialNumFirstShownOn = -1;
         public bool PreviouslyChosen;
     }
 

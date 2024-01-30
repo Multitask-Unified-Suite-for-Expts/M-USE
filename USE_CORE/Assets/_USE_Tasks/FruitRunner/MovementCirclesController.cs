@@ -13,20 +13,20 @@ public class MovementCirclesController : MonoBehaviour
     public GameObject RightCircleGO;
 
     public Canvas ParentCanvas;
-    public PlayerMovement PlayerMovement;
+
+    public FR_PlayerManager PlayerManager;
 
     public Color OriginalCircleColor;
-
     public List<GameObject> Circles;
-
     public Vector3 position = new Vector3(0f, -(Screen.height * .41f), 0f);
+
 
 
     public void SetupMovementCircles(Canvas parentCanvas, GameObject player)
     {
         ParentCanvas = parentCanvas;
-        PlayerMovement = player.GetComponent<PlayerMovement>();
-        PlayerMovement.CirclesController = this;
+        PlayerManager = player.GetComponent<FR_PlayerManager>();
+        PlayerManager.CirclesController = this;
 
         Instantiated = Instantiate(Resources.Load<GameObject>("Prefabs/MovementCircles"));
         Instantiated.name = "MovementCirclesParent";
@@ -56,17 +56,16 @@ public class MovementCirclesController : MonoBehaviour
         MiddleCircleGO.GetComponent<Image>().color = Color.cyan; //Start middle one out as active
     }
 
-
     public void HandleCircleClicked(GameObject clickedGO)
     {
         HighlightActiveCircle(clickedGO);
 
         if (clickedGO == LeftCircleGO)
-            PlayerMovement.MoveToPosition(PlayerMovement.LeftPos);
+            PlayerManager.MoveToPosition(PlayerManager.LeftPos);
         else if (clickedGO == MiddleCircleGO)
-            PlayerMovement.MoveToPosition(PlayerMovement.MiddlePos);
+            PlayerManager.MoveToPosition(PlayerManager.MiddlePos);
         else if (clickedGO == RightCircleGO)
-            PlayerMovement.MoveToPosition(PlayerMovement.RightPos);
+            PlayerManager.MoveToPosition(PlayerManager.RightPos);
         else
             Debug.LogWarning("CLICKED GO DOESNT MATCH LEFT, MIDDLE, or RIGHT circle!");
     }
@@ -77,6 +76,13 @@ public class MovementCirclesController : MonoBehaviour
         {
             go.GetComponent<Image>().color = go == clickedGO ? Color.cyan : OriginalCircleColor;
         }
+    }
+
+
+    private void OnDestroy()
+    {
+        if (Instantiated != null)
+            Destroy(Instantiated);
     }
 
 }

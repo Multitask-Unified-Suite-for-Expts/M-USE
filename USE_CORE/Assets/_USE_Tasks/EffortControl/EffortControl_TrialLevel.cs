@@ -488,8 +488,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 InflationDurations_Block.Add(InflationDuration);
                 CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
-                AudioFBController.Play("BalloonPop");
-                PopParticles = Instantiate(Resources.Load<GameObject>("Prefabs/BalloonPop_ParticleEffect"));
+                AudioFBController.Play(Session.SessionDef.IsHuman ? "BalloonPop" : "EC_NicePop");
+                PopParticles = Instantiate(Resources.Load<GameObject>(Session.SessionDef.IsHuman ? "Prefabs/BalloonPop_Effect" : "Prefabs/BalloonPop_Effect_Softer"));
+
                 PopParticles.name = "PopParticles";
             }
             else
@@ -637,7 +638,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         NumSameEffortChosen_Block = 0;
         NumSameRewardChosen_Block = 0;
         TotalTouches_Block = 0;
-        calculatedThreshold = 0;
+        calculatedThreshold_timing = 0;
         reversalsCount = 0;
         DiffLevelsAtReversals.Clear();
         InflationDurations_Block.Clear();
@@ -998,7 +999,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         if (runningPerformance.Count > 1)
         {
-            prevResult = runningPerformance[^2];
+            prevResult = runningPerformance[runningPerformance.Count - 2];
+            //prevResult = runningPerformance[^2];
         }
 
         if (runningPerformance.Last() == 1)
@@ -1023,8 +1025,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
         {
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
-            calculatedThreshold = (int)lastElements.Average();
-            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold);
+            calculatedThreshold_timing = (int)lastElements.Average();
+            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
             return true;
         }
         return false;

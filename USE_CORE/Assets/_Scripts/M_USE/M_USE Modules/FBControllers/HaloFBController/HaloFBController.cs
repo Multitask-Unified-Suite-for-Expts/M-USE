@@ -34,7 +34,11 @@ public class HaloFBController : MonoBehaviour
     public GameObject PositiveHaloPrefab;
     public GameObject NegativeHaloPrefab;
 
-    private GameObject instantiated;
+    public GameObject PositiveParticlePrefab;
+    public GameObject NegativeParticlePrefab;
+
+    private GameObject InstantiatedParticleHalo;
+    public GameObject InstantiatedCircleHalo;
 
     private bool LeaveFBOn = false;
     public bool IsFlashing;
@@ -42,99 +46,149 @@ public class HaloFBController : MonoBehaviour
     private enum State { None, Positive, Negative };
     private State state;
 
+    public float ParticleEffectDuration;
 
 
     public void Init(DataController frameData)
     {
         frameData.AddDatum("HaloType", () => state.ToString());
-        if (instantiated != null) {
+        if (InstantiatedParticleHalo != null) {
             Debug.LogWarning("Initializing HaloFB Controller with an already visible halo");
-            Destroy(instantiated);
+            Destroy(InstantiatedParticleHalo);
         }
-        instantiated = null;
+        InstantiatedParticleHalo = null;
+
+        PositiveParticlePrefab = Resources.Load<GameObject>("Prefabs/ParticleHaloPositive");
+        NegativeParticlePrefab = Resources.Load<GameObject>("Prefabs/ParticleHaloNegative");
+
+        ParticleEffectDuration = PositiveParticlePrefab.GetComponent<ParticleSystem>().main.duration;
+
+        PositiveHaloPrefab.name = "PositiveHalo";
+        NegativeHaloPrefab.name = "NegativeHalo";
+        PositiveParticlePrefab.name = "PositiveParticleHalo";
+        NegativeParticlePrefab.name = "NegativeParticleHalo";
+
+
     }
 
     public bool IsHaloGameObjectNull()
     {
-        return instantiated == null;
+        return InstantiatedParticleHalo == null;
     }
 
     public void SetLeaveFeedbackOn()
     {
         LeaveFBOn = true;
     }
-    public void ShowPositive(GameObject gameObj, float? depth = null, float? destroyTime = null)
+    public void ShowPositive(GameObject gameObj, float? depth = null)
     {
         state = State.Positive;
         if (depth == null)
-            Show(PositiveHaloPrefab, gameObj);
+            Show(PositiveParticlePrefab, PositiveHaloPrefab, gameObj);
         else
-            Show2D(PositiveHaloPrefab, gameObj, depth.Value);
+            Show2D(PositiveParticlePrefab, PositiveHaloPrefab, gameObj, depth.Value);
 
-        if (destroyTime != null)
-            StartCoroutine(DestroyAfterTime(destroyTime.Value));
     }
     
-    public void ShowNegative(GameObject gameObj, float? depth = null, float? destroyTime = null)
+    public void ShowNegative(GameObject gameObj, float? depth = null)
     {
         state = State.Negative;
         if(depth == null)
-            Show(NegativeHaloPrefab, gameObj);
+            Show(NegativeParticlePrefab, NegativeHaloPrefab, gameObj);
         else
-            Show2D(NegativeHaloPrefab, gameObj, depth.Value);
+            Show2D(NegativeParticlePrefab, NegativeHaloPrefab, gameObj, depth.Value);
 
-        if(destroyTime != null)
-            StartCoroutine(DestroyAfterTime(destroyTime.Value));
     }
-    private void Show(GameObject haloPrefab, GameObject gameObj)
+    private void Show(GameObject particlePrefab, GameObject haloPrefab, GameObject gameObj)
     {
-        if (instantiated != null && !LeaveFBOn)
+        if (InstantiatedParticleHalo != null)
         {
-            Debug.LogWarning("Trying to show HaloFB but one is already being shown");
-            Destroy(instantiated);   
+            Debug.LogWarning("Trying to show PARTICLE HaloFB but one is already being shown");
+            Destroy(InstantiatedParticleHalo);   
+        }
+
+        if (InstantiatedCircleHalo != null && !LeaveFBOn)
+        {
+            Debug.LogWarning("Trying to show CIRCLE HaloFB but one is already being shown");
+            Destroy(InstantiatedCircleHalo);
         }
 
         GameObject rootObj = gameObj.transform.root.gameObject;
-        instantiated = Instantiate(haloPrefab, rootObj.transform);
-        instantiated.transform.SetParent(rootObj.transform);
+        InstantiatedParticleHalo = Instantiate(particlePrefab, rootObj.transform);
+        InstantiatedParticleHalo.transform.SetParent(rootObj.transform);
 
         // Position the haloPrefab behind the game object
         float distanceBehind = 1.5f; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
-        instantiated.transform.position = behindPos;
+        InstantiatedParticleHalo.transform.position = behindPos;
+
+
+        //Create circle halo for when LeaveFeedbackOn is true:
+        if (LeaveFBOn)
+            StartCoroutine(CreateFollowUpHalo(haloPrefab, rootObj.transform, false));
+
+        Destroy(InstantiatedParticleHalo, ParticleEffectDuration * 2); //Destroy the particle effect gameobject after its done doing its effect (did x2 for some wiggle room)
+
 
         if(Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
     }
 
-    public void Show2D(GameObject haloPrefab, GameObject gameObj, float depth = 10)
+    private IEnumerator CreateFollowUpHalo(GameObject haloPrefab, Transform parent, bool use2D, float? depth = null)
     {
-        if (instantiated != null)
+        yield return new WaitForSeconds(ParticleEffectDuration * .7f);
+
+        InstantiatedCircleHalo = Instantiate(haloPrefab, parent);
+
+        if(use2D)
         {
-            if (!LeaveFBOn)
-            {
-                Destroy(instantiated);
-            }
+            Vector3 pos3d = parent.transform.position;
+            Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth.Value));
+            InstantiatedCircleHalo.transform.position = worldPos;
         }
+        else
+        {
+            InstantiatedCircleHalo.transform.SetParent(parent);
+        }
+    }
+
+    public void Show2D(GameObject particlePrefab, GameObject haloPrefab, GameObject gameObj, float depth = 10)
+    {
+        if (InstantiatedParticleHalo != null && !LeaveFBOn)
+                Destroy(InstantiatedParticleHalo);
+
         GameObject rootObj = gameObj.transform.root.gameObject;
-        instantiated = Instantiate(haloPrefab, null);
-        if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+
+        InstantiatedParticleHalo = Instantiate(particlePrefab, null);
         Vector3 pos3d = gameObj.transform.position;
         Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
-        instantiated.transform.position = worldPos;
+        InstantiatedParticleHalo.transform.position = worldPos;
+
+
+        //CREATE SECOND HALO FOR WHEN LEAVE FEEDBACK ON
+        if (LeaveFBOn)
+            StartCoroutine(CreateFollowUpHalo(haloPrefab, rootObj.transform, false));
+
+
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
     }
 
     public IEnumerator<WaitForSeconds> FlashHalo(float flashingDuration, int numFlashes, GameObject go)
     {
         if (go.GetComponentInChildren<Light>() != null)
         {
-            instantiated = GetRootObject(go.transform).GetComponentInChildren<Light>().gameObject;
-            instantiated.SetActive(false);
+            InstantiatedCircleHalo = GetRootObject(go.transform).GetComponentInChildren<Light>().gameObject;
+            InstantiatedCircleHalo.SetActive(false);
         }
         else
-            ShowPositive(go);
+        {
+            Debug.LogWarning("ELSE");
+            //StartCoroutine(CreateFollowUpHalo(PositiveHaloPrefab, go.transform, false));
+            //ShowPositive(go);
+        }
 
         
         // Calculate the time to stay on and off for each flash
@@ -143,15 +197,15 @@ public class HaloFBController : MonoBehaviour
         // Flash the halo for the specified number of times
         for (int i = 0; i < numFlashes; i++)
         {
-            instantiated.SetActive(true);
+            InstantiatedCircleHalo.SetActive(true);
             yield return new WaitForSeconds(onDuration);
-            
-            instantiated.SetActive(false);
+
+            InstantiatedCircleHalo.SetActive(false);
             yield return new WaitForSeconds(onDuration);
         }
 
         IsFlashing = false;
-        Destroy();
+        DestroyHalos();
     }
     
     // Call this method to start flashing the halo
@@ -160,22 +214,31 @@ public class HaloFBController : MonoBehaviour
         StartCoroutine(FlashHalo(flashingDuration, numFlashes, go));
     }
 
-    public IEnumerator DestroyAfterTime(float time)
+    public IEnumerator DestroyCircleHaloCoroutine(float time)
     {
         yield return new WaitForSeconds(time);
-        Destroy();
+        DestroyHalos();
     }
 
-    public void Destroy()
+    public void DestroyHalos()
     {
-        Destroy(instantiated);
+        Destroy(InstantiatedCircleHalo);
+        InstantiatedCircleHalo = null;
+        Destroy(InstantiatedParticleHalo);
+        InstantiatedParticleHalo = null;
+        state = State.None;
+
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
-        instantiated = null;
-        state = State.None;
     }
 
-    public HaloFBController SetHaloSize(float size)
+    public void SetParticleHaloSize(float size)
+    {
+        PositiveParticlePrefab.transform.localScale = new Vector3(size, size, size);
+        NegativeParticlePrefab.transform.localScale = new Vector3(size, size, size);
+    }
+
+    public HaloFBController SetCircleHaloSize(float size)
     {
         Light light = PositiveHaloPrefab.GetComponent<Light>();
         light.range = size;
@@ -187,16 +250,18 @@ public class HaloFBController : MonoBehaviour
     public HaloFBController SetPositiveHaloColor(Color color)
     {
         PositiveHaloPrefab.GetComponent<Light>().color = color;
+        PositiveParticlePrefab.GetComponent<ParticleSystem>().startColor = color;
         return this;
     }
 
     public HaloFBController SetNegativeHaloColor(Color color)
     {
         NegativeHaloPrefab.GetComponent<Light>().color = color;
+        NegativeParticlePrefab.GetComponent<ParticleSystem>().startColor = color;
         return this;
     }
 
-    public HaloFBController SetHaloIntensity(float intensity)
+    public HaloFBController SetCircleHaloIntensity(float intensity)
     {
         Light light = PositiveHaloPrefab.GetComponent<Light>();
         light.intensity = intensity;

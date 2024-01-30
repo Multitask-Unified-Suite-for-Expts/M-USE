@@ -178,8 +178,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 }
                 //LoadTextures(ContextExternalFilePath); //done at USE_TrialLevel, no longer needed here
                 // Initialize FB Controller Values
-                HaloFBController.SetHaloSize(5f);
-                HaloFBController.SetHaloIntensity(5);
+                HaloFBController.SetCircleHaloIntensity(5f);
+                HaloFBController.SetCircleHaloIntensity(5);
 
 
                 //instantiate that # of all component objects
@@ -359,7 +359,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () =>
         {
-            HaloFBController.Destroy();
+            HaloFBController.DestroyHalos();
         });
 
 

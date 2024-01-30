@@ -227,7 +227,7 @@ namespace USE_StimulusManagement
 
 		public void ToggleVisibility(bool visibility)
 		{
-            StimGameObject.SetActive(visibility);
+            StimGameObject?.SetActive(visibility);
 		}
 
 		public void AddToStimGroup(StimGroup sg)
@@ -380,7 +380,8 @@ namespace USE_StimulusManagement
 
 		public async void LoadExternalStimFromFile()
 		{
-            StimExtension = "." + FileName.Split(".")[1];
+			StimExtension = "." + FileName.Split('.')[1];
+            //StimExtension = "." + FileName.Split(".")[1];
 
 			if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
 			{
@@ -745,12 +746,14 @@ namespace USE_StimulusManagement
         }
 
         private void ActivateOnStateInit(object sender, EventArgs e)
-		{
+        {
+	        IsActive = true;
 			ToggleVisibility(true);
 		}
 
 		private void InactivateOnStateTerm(object sender, EventArgs e)
 		{
+			IsActive = false;
 			ToggleVisibility(false);
 			SetActiveOnInitialization.StateInitializationFinished -= ActivateOnStateInit;
 			SetInactiveOnTermination.StateTerminationFinished -= InactivateOnStateTerm;

@@ -20,12 +20,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject StartButton;
 
-    private int SliderGainSteps;
-
-    [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
+    [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, setupDuration, playDuration, celebrationDuration, itiDuration;
 
     GameObject PlayerGO;
-    private PlayerMovement PlayerMovement;
+    private FR_PlayerManager PlayerManager;
 
     public GameObject MovementCirclesControllerGO;
     public MovementCirclesController MovementCirclesController;
@@ -34,7 +32,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public FloorManager FloorManager;
 
     public GameObject ItemSpawnerGO;
-    public ItemSpawner ItemSpawner;
+    public FR_ItemSpawner ItemSpawner;
 
 
     private StimGroup trialStims;
@@ -45,14 +43,12 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         State InitTrial = new State("IniTrial");
         State Setup = new State("Setup");
         State Play = new State("Play");
-        State Ending = new State("Ending");
+        State Celebration = new State("Celebration");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, Setup, Play, Ending, ITI });
+        AddActiveStates(new List<State> { InitTrial, Setup, Play, Celebration, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SliderFBController.InitializeSlider();
-
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -80,15 +76,19 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            //SetTrialSummaryString();
+            LoadConfigUIVariables();
+
+            SetTrialSummaryString();
 
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            //Handler.MinDuration = minObjectTouchDuration.value;
-            //Handler.MaxDuration = maxObjectTouchDuration.value;
+            Handler.MinDuration = minObjectTouchDuration.value;
+            Handler.MaxDuration = maxObjectTouchDuration.value;
 
             TokenFBController.enabled = false;
+            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
+            TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
 
         });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
@@ -97,17 +97,11 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(.15f);
             TokenFBController.SetUpdateTime(.25f);
 
-            CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(25f, 1 * (1f / 4), new Vector3(0f, -10f, 0f));
-            //////SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));
-            SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
-            SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
-            SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
-            //SliderFBController.SliderGO.SetActive(true);
-
-
             //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
+            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
+            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/PT_Skybox");
+            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
+
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
         });
@@ -118,23 +112,29 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerGO = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
             PlayerGO.name = "Player";
             PlayerGO.tag = "Player";
-            PlayerMovement = PlayerGO.GetComponent<PlayerMovement>();
-            PlayerMovement.TokenFbController = TokenFBController;
-            PlayerMovement.StartAnimation("idle");
-            PlayerMovement.DisableUserInput();
+            PlayerManager = PlayerGO.GetComponent<FR_PlayerManager>();
+            PlayerManager.TokenFbController = TokenFBController;
+            PlayerManager.StartAnimation("idle");
+            PlayerManager.DisableUserInput();
+            PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
            
             ItemSpawnerGO = new GameObject("ItemSpawner");
-            ItemSpawner = ItemSpawnerGO.AddComponent<ItemSpawner>();
-            ItemSpawner.AddToQuaddleList(trialStims.stimDefs);
+            ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemSpawner>();
+            ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
+            ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
+            ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
+            ItemSpawner.RandomSpawnLocations = CurrentTrial.RandomStimLocations;
             ItemSpawner.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");
             FloorManager = FloorManagerGO.AddComponent<FloorManager>();
-            FloorManager.TotalTiles = 1 + (trialStims.stimDefs.Count + 1) * CurrentTrial.NumGroups; // +2 is 1 for initial tile that has nothing on it, and 1 for a door being part of every quaddle group
+            FloorManager.SetTotalTiles(CurrentTrial.TrialGroup_InSpawnOrder.Length, CurrentTrial.NumGroups);
+            FloorManager.FloorMovementSpeed = CurrentTrial.FloorMovementSpeed;
+            FloorManager.TileScale_Z = CurrentTrial.FloorTileLength;
             FloorManager.gameObject.SetActive(true);
             
         });
-        Setup.AddTimer(() => .5f, Play);
+        Setup.AddTimer(() => setupDuration.value, Play);
 
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         bool finishedPlaying = false;
@@ -144,8 +144,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             MovementCirclesController = MovementCirclesControllerGO.AddComponent<MovementCirclesController>();
             MovementCirclesController.SetupMovementCircles(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
             
-            PlayerMovement.StartAnimation("Run");
-            PlayerMovement.AllowUserInput();
+            PlayerManager.StartAnimation("Run");
+            PlayerManager.AllowUserInput();
 
             FloorManager.ActivateMovement();
 
@@ -160,21 +160,19 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             if (FloorManager.NumTilesSpawned > 1 && FloorManager.ActiveTiles.Count == 1)
                 finishedPlaying = true;
         });
-        Play.SpecifyTermination(() => finishedPlaying, Ending);
-        Play.AddTimer(() => 1000, Ending);
+        Play.SpecifyTermination(() => finishedPlaying, Celebration);
+        Play.AddTimer(() => playDuration.value, Celebration);
 
-        //Ending state ----------------------------------------------------------------------------------------------------------------------------------------------
-        Ending.AddSpecificInitializationMethod(() =>
+        //Celebration state ----------------------------------------------------------------------------------------------------------------------------------------------
+        Celebration.AddSpecificInitializationMethod(() =>
         {
-            PlayerMovement.FinalCelebration();
-
+            PlayerManager.FinalCelebration();
             TokenFBController.enabled = false;
-
         });
-        Ending.AddTimer(() => 5f, ITI);
+        Celebration.AddTimer(() => celebrationDuration.value, ITI);
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
-        ITI.AddTimer(() => .01f, FinishTrial);
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
 
         DefineTrialData();
@@ -188,33 +186,33 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         trialStims = new StimGroup("TargetStim", group, CurrentTrial.TrialStimIndices);
         TrialStims.Add(trialStims);
 
-        for(int i = 0; i < CurrentTrial.TrialStimIndices.Length; i++)
+        for (int i = 0; i < CurrentTrial.TrialStimIndices.Length; i++)
         {
             FruitRunner_StimDef stim = (FruitRunner_StimDef)trialStims.stimDefs[i];
-            stim.StimTokenRewardMag = chooseReward(CurrentTrial.ProbablisticTrialStimTokenReward[i]);
-        }
-    }
+            
+            stim.StimTokenRewardMag = chooseReward(CurrentTrial.ProbabilisticTokenReward[i]);
 
-    private void CalculateSliderSteps()
-    {
-        foreach (int sliderGain in CurrentTrial.SliderGain)
-        {
-            SliderGainSteps += sliderGain;
+            //Set quaddle feedback type (pos, neg, neutral) depending on token reward:
+            if(stim.StimTokenRewardMag == 0)
+                stim.QuaddleFeedbackType = "Neutral";
+            else if(stim.StimTokenRewardMag > 0)
+                stim.QuaddleFeedbackType = "Positive";
+            else if (stim.StimTokenRewardMag < 0)
+                stim.QuaddleFeedbackType = "Negative";
+            else
+                Debug.LogError("STIM TOKEN REWARD MAG IS SOMETHING OTHER THAN 1, 0, -1");
+
         }
-        SliderGainSteps += CurrentTrial.SliderInitialValue;
     }
 
 
     public override void FinishTrialCleanup()
     {
+
         Destroy(PlayerGO);
         Destroy(FloorManagerGO);
         Destroy(ItemSpawnerGO);
         Destroy(MovementCirclesControllerGO);
-
-
-        SliderFBController.SliderGO.SetActive(false);
-        SliderFBController.SliderHaloGO.SetActive(false);
 
         if (AbortCode == 0)
         {
@@ -231,8 +229,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
-        SliderGainSteps = 0;
-        SliderFBController.ResetSliderBarFull();
+
     }
 
     public void ResetBlockVariables()
@@ -265,12 +262,13 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        //minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        //maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
-        //itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
-        //sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
-        //sliderFlashingDuration = ConfigUiVariables.get<ConfigNumber>("sliderFlashingDuration");
-        //sliderUpdateDuration = ConfigUiVariables.get<ConfigNumber>("sliderUpdateDuration");
+        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
+        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+
+        setupDuration = ConfigUiVariables.get<ConfigNumber>("setupDuration");
+        playDuration = ConfigUiVariables.get<ConfigNumber>("playDuration");
+        celebrationDuration = ConfigUiVariables.get<ConfigNumber>("celebrationDuration");
+        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
     }
 
 }

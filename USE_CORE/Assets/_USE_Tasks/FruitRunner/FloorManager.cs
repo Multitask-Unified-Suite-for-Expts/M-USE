@@ -5,29 +5,30 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    private readonly float FloorMovementSpeed = 20;
+    [HideInInspector] public float FloorMovementSpeed = 15f; //20 is great for humans
+    [HideInInspector] public int NumTilesSpawned;
     private GameObject FloorTilePrefab;
-    //private int NumTilesOnScreen = 8;
-    public int NumTilesSpawned;
+    private int TotalTiles;
+    [HideInInspector] public List<GameObject> ActiveTiles;
 
-    public int TotalTiles;
-
-    public List<GameObject> ActiveTiles;
-
-    private ItemSpawner itemSpawner;
+    private FR_ItemSpawner itemSpawner;
 
     private bool Move;
 
-    private Vector3 TileScale = new Vector3(1f, 1f, 1f); //Make the Z configurable?
+    public float TileScale_Z;
 
 
+    public void SetTotalTiles(int numPerGroup, int numGroups)
+    {
+        TotalTiles = 1 + (numPerGroup * numGroups); //Add 1 for initial empty tile
+    }
 
     void Start()
     {
         FloorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
         ActiveTiles = new List<GameObject>();
-        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<FR_ItemSpawner>();
 
         for (int i = 0; i <= TotalTiles; i++)
         {
@@ -79,19 +80,17 @@ public class FloorManager : MonoBehaviour
 
         GameObject tile = Instantiate(FloorTilePrefab, spawnPos, Quaternion.identity);
         tile.name = "Tile " + (NumTilesSpawned + 1);
-        tile.transform.localScale = TileScale; //Set to Tile Scale size
+        tile.transform.localScale = new Vector3(1f, 1f, TileScale_Z);
         tile.gameObject.transform.parent = gameObject.transform;
-        tile.AddComponent<Item_Floor>();
+        tile.AddComponent<FR_Item_Floor>();
 
-        //if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
-        if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
+        if (NumTilesSpawned > 1) //No item on first tile
             itemSpawner.SpawnItem(tile.transform);
 
         ActiveTiles.Add(tile);
 
         NumTilesSpawned++;
     }
-
 
 
     public void ActivateMovement()

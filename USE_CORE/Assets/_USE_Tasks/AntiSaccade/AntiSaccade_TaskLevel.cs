@@ -119,9 +119,9 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         data["Trials Correct"] = TrialsCorrect_Task;
         data["% Trials Correct"] = ((float)TrialsCorrect_Task / TrialsCompleted_Task * 100).ToString("F1") + "%";
         if (AS_AvgCalcThresh_Task != null && AS_AvgCalcThresh_Task.Any())
-            data["AvgCalcThresh_AS"] = AS_AvgCalcThresh_Task.Average();
+            data["AvgCalcThresh_AS"] = 2.0 * AS_AvgCalcThresh_Task.Average(); // "* 2.0" because we're lumping displaytargetduration and spatialcuedelay together for our metric
         if (PS_AvgCalcThresh_Task != null && PS_AvgCalcThresh_Task.Any())
-            data["AvgCalcThresh_PS"] = PS_AvgCalcThresh_Task.Average();
+            data["AvgCalcThresh_PS"] = 2.0 * PS_AvgCalcThresh_Task.Average(); // "* 2.0" because we're lumping displaytargetduration and spatialcuedelay together for our metric
         return data;
     }
 

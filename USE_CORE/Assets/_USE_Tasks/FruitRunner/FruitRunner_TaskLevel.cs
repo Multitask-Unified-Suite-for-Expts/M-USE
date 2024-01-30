@@ -18,11 +18,13 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         DefineBlockData();
 
+
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Fruit Runner");
         Session.HumanStartPanel.AddTaskInstructions(TaskName, "Collect the target objects to earn your reward!");
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            SetTrialFogStrength();
             trialLevel.ResetBlockVariables();
             SetSkyBox(CurrentBlock.ContextName);
             CalculateBlockSummaryString();
@@ -32,6 +34,13 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
 
+    }
+
+    void SetTrialFogStrength()
+    {
+        RenderSettings.fog = true;
+        RenderSettings.fogDensity = CurrentBlock.FogStrength;
+        
     }
 
 

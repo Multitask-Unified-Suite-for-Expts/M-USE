@@ -227,7 +227,7 @@ namespace USE_StimulusManagement
 
 		public void ToggleVisibility(bool visibility)
 		{
-            StimGameObject.SetActive(visibility);
+            StimGameObject?.SetActive(visibility);
 		}
 
 		public void AddToStimGroup(StimGroup sg)

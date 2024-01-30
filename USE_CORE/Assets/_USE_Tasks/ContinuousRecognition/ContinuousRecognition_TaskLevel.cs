@@ -137,7 +137,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         data["Trials Correct"] = TrialsCorrect_Task;
         data["TokenBar Completions"] = TokenBarCompletions_Task;
         data["PerceptualInterference"] = GetPerceptualInterferanceString();
-        data["Avg RecencyInterference"] = RecencyInterference_Task.Average();
+        if(RecencyInterference_Task.Count > 0)
+            data["Avg RecencyInterference"] = RecencyInterference_Task.Average();
 
         return data;
     }

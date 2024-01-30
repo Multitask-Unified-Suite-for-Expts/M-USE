@@ -14,7 +14,7 @@ public class MovementCirclesController : MonoBehaviour
 
     public Canvas ParentCanvas;
 
-    public PlayerMovement PlayerMovement;
+    public FR_PlayerManager PlayerManager;
 
     public Color OriginalCircleColor;
     public List<GameObject> Circles;
@@ -25,8 +25,8 @@ public class MovementCirclesController : MonoBehaviour
     public void SetupMovementCircles(Canvas parentCanvas, GameObject player)
     {
         ParentCanvas = parentCanvas;
-        PlayerMovement = player.GetComponent<PlayerMovement>();
-        PlayerMovement.CirclesController = this;
+        PlayerManager = player.GetComponent<FR_PlayerManager>();
+        PlayerManager.CirclesController = this;
 
         Instantiated = Instantiate(Resources.Load<GameObject>("Prefabs/MovementCircles"));
         Instantiated.name = "MovementCirclesParent";
@@ -61,11 +61,11 @@ public class MovementCirclesController : MonoBehaviour
         HighlightActiveCircle(clickedGO);
 
         if (clickedGO == LeftCircleGO)
-            PlayerMovement.MoveToPosition(PlayerMovement.LeftPos);
+            PlayerManager.MoveToPosition(PlayerManager.LeftPos);
         else if (clickedGO == MiddleCircleGO)
-            PlayerMovement.MoveToPosition(PlayerMovement.MiddlePos);
+            PlayerManager.MoveToPosition(PlayerManager.MiddlePos);
         else if (clickedGO == RightCircleGO)
-            PlayerMovement.MoveToPosition(PlayerMovement.RightPos);
+            PlayerManager.MoveToPosition(PlayerManager.RightPos);
         else
             Debug.LogWarning("CLICKED GO DOESNT MATCH LEFT, MIDDLE, or RIGHT circle!");
     }

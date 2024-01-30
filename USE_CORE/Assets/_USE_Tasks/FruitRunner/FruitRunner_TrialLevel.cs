@@ -23,7 +23,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, setupDuration, playDuration, celebrationDuration, itiDuration;
 
     GameObject PlayerGO;
-    private PlayerMovement PlayerMovement;
+    private FR_PlayerManager PlayerManager;
 
     public GameObject MovementCirclesControllerGO;
     public MovementCirclesController MovementCirclesController;
@@ -32,7 +32,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public FloorManager FloorManager;
 
     public GameObject ItemSpawnerGO;
-    public ItemSpawner ItemSpawner;
+    public FR_ItemSpawner ItemSpawner;
 
 
     private StimGroup trialStims;
@@ -98,7 +98,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(.25f);
 
             //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
+            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
+            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/PT_Skybox");
             //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
 
             CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
@@ -111,14 +112,14 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerGO = Instantiate(Resources.Load<GameObject>("Prefabs/Player"));
             PlayerGO.name = "Player";
             PlayerGO.tag = "Player";
-            PlayerMovement = PlayerGO.GetComponent<PlayerMovement>();
-            PlayerMovement.TokenFbController = TokenFBController;
-            PlayerMovement.StartAnimation("idle");
-            PlayerMovement.DisableUserInput();
-            PlayerMovement.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
+            PlayerManager = PlayerGO.GetComponent<FR_PlayerManager>();
+            PlayerManager.TokenFbController = TokenFBController;
+            PlayerManager.StartAnimation("idle");
+            PlayerManager.DisableUserInput();
+            PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
            
             ItemSpawnerGO = new GameObject("ItemSpawner");
-            ItemSpawner = ItemSpawnerGO.AddComponent<ItemSpawner>();
+            ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemSpawner>();
             ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
             ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
             ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
@@ -143,8 +144,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             MovementCirclesController = MovementCirclesControllerGO.AddComponent<MovementCirclesController>();
             MovementCirclesController.SetupMovementCircles(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
             
-            PlayerMovement.StartAnimation("Run");
-            PlayerMovement.AllowUserInput();
+            PlayerManager.StartAnimation("Run");
+            PlayerManager.AllowUserInput();
 
             FloorManager.ActivateMovement();
 
@@ -165,7 +166,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         //Celebration state ----------------------------------------------------------------------------------------------------------------------------------------------
         Celebration.AddSpecificInitializationMethod(() =>
         {
-            PlayerMovement.FinalCelebration();
+            PlayerManager.FinalCelebration();
             TokenFBController.enabled = false;
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);

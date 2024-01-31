@@ -75,6 +75,9 @@ public class HaloFBController : MonoBehaviour
                 else
                     StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
             }
+            else
+                StartCoroutine(circleHalo.ReactivateInstantiatedCircleHalo(particleHalo.GetParticleEffectDuration()));
+
         }
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
@@ -103,6 +106,8 @@ public class HaloFBController : MonoBehaviour
                 else
                     StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
             }
+            else
+                StartCoroutine(circleHalo.ReactivateInstantiatedCircleHalo(particleHalo.GetParticleEffectDuration()));
         }
 
         if (Session.SessionDef.EventCodesActive)
@@ -119,10 +124,18 @@ public class HaloFBController : MonoBehaviour
         return particleHalo;
     }
 
-
     private CircleHalo GetOrCreateCircleHalo(GameObject gameObj)
     {
+        // Check if the current game object has the CircleHalo component
         CircleHalo circleHalo = gameObj.GetComponent<CircleHalo>();
+
+        // If not found, check the children recursively
+        if (circleHalo == null)
+        {
+            circleHalo = SearchInChildrenForCircleHalo(gameObj.transform);
+        }
+
+        // If CircleHalo still not found, create and initialize a new one
         if (circleHalo == null)
         {
             circleHalo = gameObj.AddComponent<CircleHalo>();
@@ -130,6 +143,34 @@ public class HaloFBController : MonoBehaviour
         }
 
         return circleHalo;
+    }
+
+    // Recursive method to search for CircleHalo in children
+    private CircleHalo SearchInChildrenForCircleHalo(Transform parent)
+    {
+        // Iterate through each child of the parent transform
+        foreach (Transform child in parent)
+        {
+            // Check if the child has the CircleHalo component
+            CircleHalo circleHalo = child.GetComponent<CircleHalo>();
+
+            // If found, return it
+            if (circleHalo != null)
+            {
+                return circleHalo;
+            }
+
+            // If not found, recursively search in the child's children
+            CircleHalo foundInChild = SearchInChildrenForCircleHalo(child);
+
+            // If CircleHalo found in any child, return it
+            if (foundInChild != null)
+            {
+                return foundInChild;
+            }
+        }
+
+        return null; // Returns null if CircleHalo not found in any child
     }
 
 
@@ -186,10 +227,6 @@ public class HaloFBController : MonoBehaviour
     public void StartFlashingHalo(float flashingDuration, int numFlashes, GameObject go)
     {
         CircleHalo circleHalo = GetOrCreateCircleHalo(go);
-        Debug.LogWarning("IS THE FLASHING DURATION NULL? " + (flashingDuration == null ? "YES" : "NO"));
-        Debug.LogWarning("IS THE numFlashes NULL? " + (numFlashes == null ? "YES" : "NO"));
-        Debug.LogWarning("IS THE go NULL? " + (go == null ? "YES" : "NO"));
-        Debug.LogWarning("IS THE CIRCLEHALO NULL? " + (circleHalo == null ? "YES" : "NO"));
         StartCoroutine(circleHalo.FlashHalo(this, flashingDuration, numFlashes, go));
     }
 
@@ -224,6 +261,20 @@ public class HaloFBController : MonoBehaviour
             Destroy(circleHalo);
         }
         NegativeCircleHalos.Clear();
+    } 
+    public void DestroySpecificHalo(GameObject go)
+    {
+        // Check if the current game object has the CircleHalo component
+        CircleHalo circleHalo = go.GetComponent<CircleHalo>();
+
+        // If not found, check the children recursively
+        if (circleHalo == null)
+        {
+            circleHalo = SearchInChildrenForCircleHalo(go.transform);
+        }
+
+        circleHalo.DestroyInstantiatedCircleHalo();
+        Destroy(circleHalo);
     }
     // Method to destroy all halos
     public void DestroyAllHalos()

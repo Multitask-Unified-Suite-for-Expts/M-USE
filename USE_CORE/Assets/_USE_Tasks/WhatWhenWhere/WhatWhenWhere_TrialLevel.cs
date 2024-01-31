@@ -366,7 +366,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // Only show positive if there isn't an existing halo around the object
                 
                 HaloFBController.ShowPositive(selectedGO, depth);
-                
+                Debug.LogWarning("IS THIS BEING REGISTERED AS A CORRECT SELECTION? ");
                 if (HaloFBController.GetNegativeCircleHalos().Count > 0)
                     HaloFBController.DestroyNegativeCircleHalos();
                 
@@ -412,8 +412,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             selectedGO = null;
         });
-        
-        //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
+         
         SelectionFeedback.AddTimer(()=> fbDuration.value, Delay, () =>
         {
             DelayDuration = 0;
@@ -450,7 +449,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 2 && startedSequence))
+                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 1 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;

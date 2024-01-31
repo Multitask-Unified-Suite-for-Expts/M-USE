@@ -23,8 +23,6 @@ public class CircleHalo : MonoBehaviour
         float onDuration = flashingDuration / (2 * numFlashes);
         haloFBController.SetIsFlashing(true);
         // Flash the halo for the specified number of times
-        Debug.LogWarning("THE GAME OBJECT IT IS ATTACVHED TO/S NAME: " + gameObject.name);
-        Debug.LogWarning("THE INSTANTIATED CIRCLE hALO GO: " + InstantiatedCircleHaloGO.name);
 
         for (int i = 0; i < numFlashes; i++)
         {
@@ -58,6 +56,12 @@ public class CircleHalo : MonoBehaviour
         {
             InstantiatedCircleHaloGO.transform.SetParent(gameObj.transform.root.transform);
         }
+    }
+    public IEnumerator ReactivateInstantiatedCircleHalo(float particleEffectDuration)
+    {
+        yield return new WaitForSeconds(particleEffectDuration * .5f);
+
+        InstantiatedCircleHaloGO.SetActive(true);
     }
     public void DestroyInstantiatedCircleHalo()
     {

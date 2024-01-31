@@ -321,7 +321,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
 
             if (Time.time - Feedback.TimingInfo.StartTimeAbsolute > CurrentTrial.HaloFbDuration && !HaloFBController.IsHaloGameObjectNull())
-                HaloFBController.DestroyHalos();
+                HaloFBController.DestroyAllHalos();
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);
         Feedback.SpecifyTermination(() => !stimChosen, ITI, () => AudioFBController.Play("Negative"));

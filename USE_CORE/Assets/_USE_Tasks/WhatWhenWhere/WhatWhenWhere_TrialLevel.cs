@@ -58,7 +58,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public int numTouchedStims = 0;
     private bool trialComplete = false;
     private GameObject targetStimGameObject;
-    private List<GameObject> GrayHalos = new List<GameObject>();
 
     
     //Trial Data Logging variables
@@ -213,10 +212,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             //previousTargetStimGameObject = targetStimGameObject;
             AssignCorrectStim();
+            Debug.LogWarning("IN THE FLASH NEXT CORRECT STIM INIT");
             HaloFBController.StartFlashingHalo(1f, 2, targetStimGameObject);
         });
         
-        FlashNextCorrectStim.SpecifyTermination(()=> !HaloFBController.IsFlashing, ChooseStimulus);
+        FlashNextCorrectStim.SpecifyTermination(()=> !HaloFBController.GetIsFlashing(), ChooseStimulus);
        
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
@@ -234,7 +234,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             choiceMade = false;
             if (CurrentTrialDef.LeaveFeedbackOn)
-                HaloFBController.SetLeaveFeedbackOn();
+                HaloFBController.SetLeaveFeedbackOn(true);
 
             ShotgunHandler.HandlerActive = true;
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -362,19 +362,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (CorrectSelection)
             {
-                //if (GrayHalos.Count > 0)
-                //{
-                //    // if correcting a previous error, delete all the existing gray halos
-                //    foreach (GameObject grayHalo in GrayHalos)
-                //    {
-                //        Destroy(grayHalo);
-                //    }
-                //}
                 consecutiveError = 0;
 
-                // Only show positive if there isn't an existing halo around the object
-                //if(GetRootObject(selectedGO.transform).transform.Find("PositiveHalo(Clone)")?.gameObject == null)
-                    HaloFBController.ShowPositive(selectedGO, depth);
+                
+                HaloFBController.ShowPositive(selectedGO, depth);
+                if (HaloFBController.GetNegativeCircleHalos().Count > 0)
+                    HaloFBController.DestroyNegativeCircleHalos();
 
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;
@@ -397,15 +390,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     CurrentTaskLevel.perseverationCounter_InTask++;
                 }
                 consecutiveError++;
-                Debug.Log("PERSEVERATION COUNT: " + perseverationCounter_InTrial);
-
-                HaloFBController.ShowNegative(selectedGO, depth);
-
-                //if (GetRootObject(selectedGO.transform).transform.Find("NegativeParticleHalo(Clone)")?.gameObject == null)
-                //{
-                //    //GrayHalos.Add(GetRootObject(selectedGO.transform).transform.Find("NegativeParticleHalo(Clone)").gameObject);
-                //}
-
+                
+                    HaloFBController.ShowNegative(selectedGO, depth);
                 if (selectedSD.IsDistractor)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
@@ -416,8 +402,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
                     numTouchedStims -= 1;
-                    //if (GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveParticleHalo(Clone)")?.gameObject != null)
-                    //    Destroy(GetRootObject(LastCorrectStimGO.transform).transform.Find("PositiveParticleHalo(Clone)").gameObject);
                 }
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
@@ -426,14 +410,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
             selectedGO = null;
         });
-        
-        //don't control timing with AddTimer, use slider class SliderUpdateFinished bool 
+         
         SelectionFeedback.AddTimer(()=> fbDuration.value, Delay, () =>
         {
             DelayDuration = 0;
             
             if (!CurrentTrialDef.LeaveFeedbackOn) 
-                HaloFBController.DestroyHalos();
+                HaloFBController.DestroyAllHalos();
             
 
             // If the sequence has been completed, send to slider feedback state
@@ -464,7 +447,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning && (consecutiveError >= 2 && startedSequence))
+                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 1 && startedSequence))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;
@@ -496,7 +479,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             percentError = (float)decimal.Divide(NumErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
             runningPercentError.Add(percentError);
             
-            Debug.Log("NUM ERRORS IN TRIAL:  " + NumErrors_InTrial);
             runningErrorCount.Add(NumErrors_InTrial);
                                     
             if (Session.SyncBoxController != null)
@@ -645,7 +627,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         selectionClassification = "";
         selectionClassifications_InTrial.Clear();
         SliderFBController.ResetSliderBarFull();
-        GrayHalos.Clear();
     }
 
     
@@ -841,19 +822,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetTrialSummaryString();
         if (TrialCount_InTask != 0)
             CurrentTaskLevel.SetTaskSummaryString();
-    }
-    GameObject GetRootObject(Transform childTransform)
-    {
-        Transform currentTransform = childTransform;
-
-        // Traverse up the hierarchy until we find the root object.
-        while (currentTransform.parent != null)
-        {
-            currentTransform = currentTransform.parent;
-        }
-
-        // The currentTransform now points to the root object's transform.
-        return currentTransform.gameObject;
     }
 }
 

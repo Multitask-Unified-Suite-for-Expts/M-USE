@@ -256,7 +256,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = SearchDisplay;
             DelayDuration = postSampleDelayDuration.value;
-
         });
 
 
@@ -359,7 +358,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () =>
         {
-            HaloFBController.DestroyHalos();
+            HaloFBController.DestroyAllHalos();
         });
 
 

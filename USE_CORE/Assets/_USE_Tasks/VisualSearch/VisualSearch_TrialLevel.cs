@@ -259,6 +259,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.DestroyAllHalos());
+
         
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
         TokenFeedback.AddSpecificInitializationMethod(() =>

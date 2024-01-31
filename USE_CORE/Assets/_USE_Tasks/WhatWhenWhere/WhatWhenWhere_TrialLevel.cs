@@ -363,13 +363,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (CorrectSelection)
             {
                 consecutiveError = 0;
-                // Only show positive if there isn't an existing halo around the object
+
                 
                 HaloFBController.ShowPositive(selectedGO, depth);
-                Debug.LogWarning("IS THIS BEING REGISTERED AS A CORRECT SELECTION? ");
                 if (HaloFBController.GetNegativeCircleHalos().Count > 0)
                     HaloFBController.DestroyNegativeCircleHalos();
-                
 
                 SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
                 numTouchedStims += 1;

@@ -393,7 +393,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         Mask_GO.name = "Mask";
         Mask_GO.SetActive(false);
         Mask_GO.transform.localPosition = Vector3.zero;
-        Mask_GO.transform.localRotation = Quaternion.Euler(85f, 0f, 90f); // fixing hashtag_black's rotation
+        SpatialCue_GO.AddComponent<FaceCamera>();
+        //Mask_GO.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
     }
 
     private void CreateGameObjects()
@@ -496,7 +497,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
                              "\nDifficulty Level: " + difficultyLevel +
                              "\nDisplay Target Duration (sec): " + CurrentTrial.DisplayTargetDuration +
-                             "\npatial Cue Delay Duration (sec): " + CurrentTrial.SpatialCueDelayDuration;
+                             "\nSpatial Cue Delay Duration (sec): " + CurrentTrial.SpatialCueDelayDuration;
     }
 
     private void LoadConfigUIVariables()

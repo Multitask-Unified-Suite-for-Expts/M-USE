@@ -71,6 +71,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float AvgTimeToChoice_Block, TimeToCompletion_Block, TimeToCompletion_StartTime, TokenUpdateStartTime, TimeRemaining;
     [HideInInspector] public List <float> TimeToChoice_Block;
 
+    [HideInInspector] public int RecencyInterference_Block;
+
     private int score;
     [HideInInspector] public int Score
     {
@@ -301,6 +303,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 else //THEY GUESSED WRONG
                 {
+                    RecencyInterference_Block = (TrialCount_InBlock + 1) - ChosenStim.TrialNumFirstShownOn;
                     WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
@@ -558,6 +561,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TimeToChoice_Block.Clear();
         AvgTimeToChoice_Block = 0;
         TimeToCompletion_Block = 0;
+        RecencyInterference_Block = 0;
         score = 0;
     }
 
@@ -893,7 +897,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             trialStims = new StimGroup("TrialStims", group, TrialStimIndices);
             foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
+            {
                 stim.PreviouslyChosen = false;
+            }
             trialStims.SetLocations(CurrentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
 
@@ -970,6 +976,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             trialStims = new StimGroup($"TrialStims", group, TrialStimIndices);
             trialStims.SetLocations(CurrentTrial.TrialStimLocations);
             TrialStims.Add(trialStims);
+        }
+
+        foreach (ContinuousRecognition_StimDef stim in trialStims.stimDefs)
+        {
+            if (stim.TrialNumFirstShownOn == -1)
+                stim.TrialNumFirstShownOn = TrialCount_InBlock + 1;
         }
 
         trialStims.SetVisibilityOnOffStates(GetStateFromName("DisplayStims"), GetStateFromName("TokenUpdate"));

@@ -5,20 +5,18 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 
-public class Item : MonoBehaviour
+public class FR_Item : MonoBehaviour
 {
-    protected AudioManager audioManager;
     protected FloorManager floorManager;
-    protected PlayerMovement playerMovement;
+    protected FR_PlayerManager playerManager;
 
 
     private void Start()
     {
         try
         {
-            audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
             floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
-            playerMovement = GameObject.Find("Player").GetComponent<PlayerMovement>();
+            playerManager = GameObject.Find("Player").GetComponent<FR_PlayerManager>();
         }
         catch(Exception e)
         {
@@ -31,7 +29,7 @@ public class Item : MonoBehaviour
     }
 }
 
-public class Item_Quaddle : Item
+public class FR_Item_Quaddle : FR_Item
 {
     public string QuaddleType;
     public string QuaddleGeneralPosition;
@@ -40,7 +38,7 @@ public class Item_Quaddle : Item
 
     public override void SetItemPosition(Transform parentTransform)
     {
-        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
+        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<FR_Item_Floor>().spawnPoints;
         Transform spawnPoint;
 
         switch (QuaddleGeneralPosition.ToLower().Trim())
@@ -77,25 +75,20 @@ public class Item_Quaddle : Item
     {
         if (other.CompareTag("Player"))
         {
-            //playerMovement.StartAnimation("slash");
-
             if(QuaddleType == "Positive")
             {
-                playerMovement.StartAnimation("Happy");
-                playerMovement.TokenFbController.AddTokens(gameObject, QuaddleTokenRewardMag, -.3f);
-                //playerMovement.TokenFbController.AddTokens(other.gameObject, QuaddleTokenRewardMag, .6f);
+                playerManager.StartAnimation("Happy");
+                playerManager.TokenFbController.AddTokens(gameObject, QuaddleTokenRewardMag, -.3f);
             }
             else if(QuaddleType == "Negative")
             {
-                playerMovement.StartAnimation("Sad");
-                playerMovement.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
-                //playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .6f); //abs value since its negative
+                playerManager.StartAnimation("Sad");
+                playerManager.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
             }
             else if(QuaddleType == "Neutral")
             {
-                playerMovement.StartAnimation("Sad");
-                playerMovement.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
-                //playerMovement.TokenFbController.RemoveTokens(other.gameObject, Mathf.Abs(QuaddleTokenRewardMag), .6f); //abs value since its negative
+                playerManager.StartAnimation("Sad");
+                playerManager.TokenFbController.RemoveTokens(gameObject, Mathf.Abs(QuaddleTokenRewardMag), -.3f); //abs value since its negative
 
             }
             CreateParticlesOnObject(transform.position);
@@ -104,12 +97,12 @@ public class Item_Quaddle : Item
     }
 }
 
-public class Item_Blockade : Item
+public class FR_Item_Blockade : FR_Item
 {
 
     public override void SetItemPosition(Transform parentTransform)
     {
-        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<Item_Floor>().spawnPoints;
+        List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<FR_Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
         transform.position = new Vector3(transform.position.x, .75f, randomSpawnPoint.position.z);
         transform.parent = parentTransform;
@@ -119,8 +112,8 @@ public class Item_Blockade : Item
     {
         if (other.CompareTag("Player"))
         {
-            playerMovement.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
-            playerMovement.StartAnimation("injured");
+            playerManager.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
+            playerManager.StartAnimation("injured");
             floorManager.DeactivateMovement();
         }
     }
@@ -129,14 +122,14 @@ public class Item_Blockade : Item
     {
         if (other.CompareTag("Player"))
         {
-            playerMovement.StartAnimation("run");
+            playerManager.StartAnimation("run");
             floorManager.ActivateMovement();
         }
     }
 
 }
 
-public class Item_Floor : Item
+public class FR_Item_Floor : FR_Item
 {
     public List<Transform> spawnPoints;
 
@@ -145,12 +138,20 @@ public class Item_Floor : Item
     {
         spawnPoints = new List<Transform>();
 
-        Transform child = transform.Find("Row4");
-
-        foreach(Transform grandChild in child)
+        try
         {
-            if (grandChild.name.ToLower().Contains("spawnpoint"))
-                spawnPoints.Add(grandChild);
+            Transform child = transform.Find("Row4");
+       
+            foreach(Transform grandChild in child)
+            {
+                if (grandChild.name.ToLower().Contains("spawnpoint"))
+                    spawnPoints.Add(grandChild);
+            }
         }
+        catch(Exception e)
+        {
+            Debug.LogError("FAILED DURING FR_Item_Floor's Awake Method! | Error: " + e.Message);
+        }
+
     }
 }

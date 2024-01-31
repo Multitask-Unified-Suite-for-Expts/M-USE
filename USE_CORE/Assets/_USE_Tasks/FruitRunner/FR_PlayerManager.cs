@@ -1,22 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
-public class PlayerMovement : MonoBehaviour
+public class FR_PlayerManager : MonoBehaviour
 {
     private Rigidbody Rb;
     private Vector3 TargetPos;
     private bool AllowInput;
     private bool IsShifting = false;
-    private float SideShiftSpeed = 19f;
+    private readonly float SideShiftSpeed = 19f;
 
     public readonly Vector3 LeftPos = new Vector3(-1.9f, 0f, 0f);
     public readonly Vector3 MiddlePos = Vector3.zero;
     public readonly Vector3 RightPos = new Vector3(1.9f, 0f, 0f);
 
-    public FloorManager FloorManager;
-    private AudioManager audioManager;
+    public FloorManager floorManager;
+    private FR_AudioManager audioManager;
     public MovementCirclesController CirclesController;
 
     public Animator Animator;
@@ -37,11 +38,21 @@ public class PlayerMovement : MonoBehaviour
         transform.position = Vector3.zero;
         TargetPos = MiddlePos;
 
-        audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
+        audioManager = gameObject.AddComponent<FR_AudioManager>();
+
+        try
+        {
+            floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
+        }
+        catch(Exception e)
+        {
+            Debug.LogError("FR_PlayerManager Start() method failed! Couldnt find the FloorManager GameObject | Error: " + e.Message);
+        }
 
         Animator = GetComponent<Animator>();
         StartAnimation("idle");
     }
+
 
     private void Update()
     {
@@ -49,7 +60,7 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = TargetPos; //keep it in place if not shifting
 
-            if(AllowInput)
+            if (AllowInput)
                 HandleKeyboardInput();
         }
 
@@ -57,6 +68,8 @@ public class PlayerMovement : MonoBehaviour
         if (InputBroker.GetKeyDown(KeyCode.I))
             AllowItemPickupAnimations = !AllowItemPickupAnimations;
     }
+
+
     private void FixedUpdate()
     {
         if (IsShifting)
@@ -169,7 +182,7 @@ public class PlayerMovement : MonoBehaviour
                 break;
             case "run":
                 CurrentAnimationState = AnimationStates.Run;
-                Animator.Play("Run");
+                Animator.Play(floorManager.FloorMovementSpeed >= 10f ? "Run" : "Jog");
                 break;
             case "injured":
                 CurrentAnimationState = AnimationStates.Injured;
@@ -194,17 +207,11 @@ public class PlayerMovement : MonoBehaviour
                 audioManager.PlayCrowdCheering();
                 Animator.Play("Cheer");
                 break;
-            case "slash":
-                CurrentAnimationState = AnimationStates.Cheer;
-                //audioManager.PlayCrowdCheering();
-                Animator.Play("SwordSlash");
-                break;
             default:
-                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad, Cheer Slash");
+                Debug.LogWarning("Invalid Animation State Provided. Options are: Idle, Run, Injured, Happy, Sad, Cheer");
                 break;
         }
     }
-
 
     private void OnDestroy()
     {
@@ -215,8 +222,8 @@ public class PlayerMovement : MonoBehaviour
             Destroy(CelebrationConfetti);
     }
 
-
 }
+
 
 
 

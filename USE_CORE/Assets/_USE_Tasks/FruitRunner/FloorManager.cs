@@ -5,13 +5,13 @@ using UnityEngine;
 
 public class FloorManager : MonoBehaviour
 {
-    public float FloorMovementSpeed = 10f; //20 is great for humans
+    [HideInInspector] public float FloorMovementSpeed = 15f; //20 is great for humans
+    [HideInInspector] public int NumTilesSpawned;
     private GameObject FloorTilePrefab;
-    public int NumTilesSpawned;
-    public int TotalTiles;
-    public List<GameObject> ActiveTiles;
+    private int TotalTiles;
+    [HideInInspector] public List<GameObject> ActiveTiles;
 
-    private ItemSpawner itemSpawner;
+    private FR_ItemSpawner itemSpawner;
 
     private bool Move;
 
@@ -28,7 +28,7 @@ public class FloorManager : MonoBehaviour
         FloorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
         ActiveTiles = new List<GameObject>();
-        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<ItemSpawner>();
+        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<FR_ItemSpawner>();
 
         for (int i = 0; i <= TotalTiles; i++)
         {
@@ -82,25 +82,15 @@ public class FloorManager : MonoBehaviour
         tile.name = "Tile " + (NumTilesSpawned + 1);
         tile.transform.localScale = new Vector3(1f, 1f, TileScale_Z);
         tile.gameObject.transform.parent = gameObject.transform;
-        tile.AddComponent<Item_Floor>();
+        tile.AddComponent<FR_Item_Floor>();
 
-        //if (NumTilesSpawned > 1 && NumTilesSpawned % 2 != 0) //No item on first floor, and then have an empty floor in between each floor that has an item. 
-        if (NumTilesSpawned > 1) //No item on first floor, and then have an empty floor in between each floor that has an item. 
+        if (NumTilesSpawned > 1) //No item on first tile
             itemSpawner.SpawnItem(tile.transform);
-
-        //if(NumTilesSpawned + 1 == TotalTiles)
-        //{
-        //    Debug.LogWarning("GONNA SPAWN AN ARCH");
-        //    GameObject arch = Instantiate(Resources.Load<GameObject>("Prefabs/Arch"));
-        //    arch.transform.SetParent(tile.transform);
-
-        //}
 
         ActiveTiles.Add(tile);
 
         NumTilesSpawned++;
     }
-
 
 
     public void ActivateMovement()

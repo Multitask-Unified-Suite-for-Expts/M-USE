@@ -5,7 +5,7 @@ using USE_StimulusManagement;
 using System.Linq;
 
 
-public class ItemSpawner : MonoBehaviour
+public class FR_ItemSpawner : MonoBehaviour
 {
     public List<GameObject> BlockadePrefabs;
 
@@ -59,7 +59,7 @@ public class ItemSpawner : MonoBehaviour
             GameObject stim = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
             stim.name = "Blockade";
             stim.tag = "Blockade";
-            stim.AddComponent<Item_Blockade>().SetItemPosition(parentTransform);
+            stim.AddComponent<FR_Item_Blockade>().SetItemPosition(parentTransform);
             stim.SetActive(true);
         }
         else
@@ -84,7 +84,7 @@ public class ItemSpawner : MonoBehaviour
                 collider.isTrigger = true;
                 //stim.AddComponent<FaceCamera>();
 
-                Item_Quaddle quaddleComponent = stim.AddComponent<Item_Quaddle>();
+                FR_Item_Quaddle quaddleComponent = stim.AddComponent<FR_Item_Quaddle>();
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;
                 quaddleComponent.QuaddleTokenRewardMag = quaddle.StimTokenRewardMag;
 

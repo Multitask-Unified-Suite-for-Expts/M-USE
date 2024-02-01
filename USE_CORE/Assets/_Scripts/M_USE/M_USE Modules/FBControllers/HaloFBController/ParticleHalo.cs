@@ -34,7 +34,7 @@ public class ParticleHalo : MonoBehaviour
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         
-        Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration *2);
+        Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration);
     }
     public void ShowParticleHalo2D(string feedbackType, GameObject gameObj, float depth = 10)
     {

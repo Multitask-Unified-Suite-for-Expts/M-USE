@@ -384,18 +384,25 @@ namespace USE_UI
         [HideInInspector] public Image Image;
 
         //Used as backdrop for THR
-        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color) 
+        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color, Vector2? size = null, Vector3? pos = null) 
         {
             BackdropGO = new GameObject(name);
             Image = BackdropGO.AddComponent<Image>();
             BackdropGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
             RectTransform canvasRect = parent.GetComponent<RectTransform>();
-            Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
-            //Image.rectTransform.sizeDelta = size;
+
+            if(size != null)
+                Image.rectTransform.sizeDelta = size.Value;
+            else
+                Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
             Image.color = color;
-            BackdropGO.transform.localPosition = Vector3.zero; //for old thr
-            //BackdropGO.transform.localPosition = new Vector3(0f, 0f, 100f); //for new thr
+
+            if (pos != null)
+                BackdropGO.transform.localPosition = pos.Value;
+            else
+                BackdropGO.transform.localPosition = Vector3.zero;
+
             BackdropGO.SetActive(false);
             return BackdropGO;
         }

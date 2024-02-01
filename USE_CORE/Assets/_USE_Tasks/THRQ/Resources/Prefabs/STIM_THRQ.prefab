@@ -256,7 +256,7 @@ GameObject:
   - component: {fileID: 4215373708382987893}
   - component: {fileID: 4971820403978598697}
   m_Layer: 0
-  m_Name: STIM_THR
+  m_Name: STIM_THRQ
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

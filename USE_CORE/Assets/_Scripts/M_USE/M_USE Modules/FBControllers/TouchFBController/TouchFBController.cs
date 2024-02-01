@@ -67,6 +67,10 @@ public class TouchFBController : MonoBehaviour
         }
     }
 
+    //so that other classes can subscribe and know exactly when a type of error feedback is occuring:
+    public delegate void TouchErrorFeedbackEventHandler(object sender, TouchFeedbackArgs e);
+    public event TouchErrorFeedbackEventHandler TouchErrorFeedbackEvent;
+
 
     public void Init(DataController trialData, DataController frameData)
     {
@@ -134,6 +138,10 @@ public class TouchFBController : MonoBehaviour
             {
                 return;
             }
+
+            TouchErrorFeedbackEvent?.Invoke(this, e);
+
+            //Debug.LogWarning("DUR AT TOUCHFB: " + e.Selection.Duration);
 
             switch (e.Selection.ErrorType)
             {
@@ -237,6 +245,8 @@ public class TouchFBController : MonoBehaviour
 
     public void SetPrefabSizes(float size)
     {
+        FeedbackSize = size;
+
         if (PrefabList.Count > 0)
         {
             foreach (GameObject prefab in PrefabList)

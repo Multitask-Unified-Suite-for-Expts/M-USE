@@ -491,7 +491,9 @@ namespace SelectionTracking
                     if (initErrors == null)
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                     else
+                    {
                         SelectionErrorHandling(initErrors);
+                    }
                 }
             }
 
@@ -515,7 +517,6 @@ namespace SelectionTracking
                 }
                 else
                 {
-                    SelectionErrorHandling(updateErrors);
                     return false;
                 }
             }
@@ -526,7 +527,7 @@ namespace SelectionTracking
                 string? termErrors = CheckAllErrorTriggers("term");
 
                 if (term == null || term.Value)
-                {   
+                {
                     if (termErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
                         OngoingSelection.CompleteSelection(true);

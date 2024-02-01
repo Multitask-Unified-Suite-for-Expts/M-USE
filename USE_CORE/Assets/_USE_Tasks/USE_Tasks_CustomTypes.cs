@@ -41,6 +41,7 @@ using AntiSaccade_Namespace;
 using TemporalOrderJudgement_Namespace;
 using SustainedAttention_Namespace;
 using FruitRunner_Namespace;
+using THRQ_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -215,6 +216,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(FruitRunner_BlockDef),
                 TrialDefType = typeof(FruitRunner_TrialDef),
                 StimDefType = typeof(FruitRunner_StimDef)
+            }
+        }
+        ,{
+            "THRQ", new TaskTypes
+            {
+                TaskLevelType = typeof(THRQ_TaskLevel),
+                TrialLevelType = typeof(THRQ_TrialLevel),
+                TaskDefType = typeof(THRQ_TaskDef),
+                BlockDefType = typeof(THRQ_BlockDef),
+                TrialDefType = typeof(THRQ_TrialDef),
+                StimDefType = typeof(THRQ_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

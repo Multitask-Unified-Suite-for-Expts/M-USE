@@ -354,7 +354,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.AddSpecificInitializationMethod(() =>
         {
             TokenUpdateStartTime = Time.time;
-            HaloFBController.DestroyHalos();
+            HaloFBController.DestroyAllHalos();
 
             if (!StimIsChosen)
                 return;

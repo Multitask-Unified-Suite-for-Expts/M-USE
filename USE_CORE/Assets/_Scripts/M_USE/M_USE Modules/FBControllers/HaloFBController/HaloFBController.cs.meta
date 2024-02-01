@@ -8,6 +8,11 @@ MonoImporter:
       type: 3}
   - NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
       type: 3}
+  - PositiveParticlePrefab: {fileID: 8146530953326796319, guid: 90b06cf83fb5f2a48aeb4992c098a270,
+      type: 3}
+  - NegativeParticlePrefab: {fileID: 6565023332562688939, guid: 44215ceaa6d78cc4d89d11e7efcbaec5,
+      type: 3}
+  - InstantiatedCircleHalo: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

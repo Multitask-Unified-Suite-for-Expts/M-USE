@@ -59,7 +59,6 @@ namespace MazeGame_Namespace
         public bool ViewPath;
         public bool ErrorPenalty;
         public int RewardRatio;
-        public bool GuidedMazeSelection;
         public bool DarkenNonPathTiles;
         public int TileFlashingRatio = 1;
         public float MaxMazeDuration;
@@ -103,7 +102,6 @@ namespace MazeGame_Namespace
                 td.RandomMinMaxTrials = RandomMinMaxTrials;
                 td.ErrorPenalty = ErrorPenalty;
                 td.MaxTrials = MaxTrials;
-                td.GuidedMazeSelection = GuidedMazeSelection;
                 td.DarkenNonPathTiles = DarkenNonPathTiles;
                 td.TileFlashingRatio = TileFlashingRatio;
                 td.MaxMazeDuration = MaxMazeDuration;
@@ -128,7 +126,6 @@ namespace MazeGame_Namespace
         public bool ViewPath;
         public bool ErrorPenalty;
         public int RewardRatio;
-        public bool GuidedMazeSelection;
         public bool DarkenNonPathTiles;
         public int TileFlashingRatio;
         public float MaxMazeDuration;

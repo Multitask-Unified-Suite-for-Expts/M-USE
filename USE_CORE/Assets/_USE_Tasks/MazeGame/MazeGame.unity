@@ -971,7 +971,6 @@ MonoBehaviour:
     min: 0
     precision: 0
   playerViewTextList: []
-  tileFbDuration: 0
   MazeManager: {fileID: 665075550}
 --- !u!114 &1860654111
 MonoBehaviour:
@@ -1037,21 +1036,27 @@ MonoBehaviour:
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
   TotalErrors_InBlock: 0
-  PerseverativeErrors_InBlock: 0
+  PerseverativeRetouchErrors_InBlock: 0
+  PerseverativeBackTrackErrors_InBlock: 0
+  PerseverativeRuleAbidingErrors_InBlock: 0
+  PerseverativeRuleBreakingErrors_InBlock: 0
   BacktrackErrors_InBlock: 0
   RuleAbidingErrors_InBlock: 0
   RuleBreakingErrors_InBlock: 0
   RetouchCorrect_InBlock: 0
-  RetouchErroneous_InBlock: 0
+  RetouchError_InBlock: 0
   CorrectTouches_InBlock: 0
   NumSliderBarFull_InBlock: 0
   TotalErrors_InTask: 0
-  PerseverativeErrors_InTask: 0
+  PerseverativeRetouchErrors_InTask: 0
+  PerseverativeBackTrackErrors_InTask: 0
+  PerseverativeRuleAbidingErrors_InTask: 0
+  PerseverativeRuleBreakingErrors_InTask: 0
   BacktrackErrors_InTask: 0
   RuleAbidingErrors_InTask: 0
   RuleBreakingErrors_InTask: 0
   RetouchCorrect_InTask: 0
-  RetouchErroneous_InTask: 0
+  RetouchError_InTask: 0
   CorrectTouches_InTask: 0
   NumSliderBarFull_InTask: 0
   BlockAveragesString: 

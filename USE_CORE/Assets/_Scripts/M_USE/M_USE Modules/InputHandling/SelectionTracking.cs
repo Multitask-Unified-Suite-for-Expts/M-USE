@@ -207,7 +207,9 @@ namespace SelectionTracking
                 InputLocations = new List<Vector3>();
 
                 if(go != null)
+                {
                     ParentName = GetRootParentName(go);
+                }
             }
 
             public static string GetRootParentName(GameObject go)
@@ -233,6 +235,7 @@ namespace SelectionTracking
             {
                 EndTime = Time.time;
                 Duration = EndTime - StartTime;
+                //Debug.LogWarning("COMPLETE SELECTION DUR: " + Duration);
                 WasSuccessful = success;
                 //error handling?
             }
@@ -336,6 +339,17 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
+            }
+
+            public bool LastSelectionMatches(GameObject go)
+            {
+                if(go != null && LastSelection != null && LastSelection.SelectedGameObject != null)
+                {
+                    if (ReferenceEquals(LastSelection.SelectedGameObject, go))
+                        return true;
+                }
+
+                return false;
             }
 
             public bool LastSuccessfulSelectionMatches(List<GameObject> gameObjects) //Used for startbutton since it has 3 children GO's

@@ -50,6 +50,8 @@ public class TouchFBController : MonoBehaviour
     public bool TouchFbEnabled;
     private bool UseRootGoPos;
 
+    private List<GameObject> ObjectsToIgnore;
+
     //Textures are currently set in The Trial Template "LoadTextures" method:
     public static Texture2D HeldTooLong_Texture;
     public static Texture2D HeldTooShort_Texture;
@@ -88,7 +90,13 @@ public class TouchFBController : MonoBehaviour
         };
     }
 
-    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO, bool useRootPosition)
+    public void AddToIgnoreList(List<GameObject> objectsToIgnore)
+    {
+        ObjectsToIgnore ??= new List<GameObject>();
+        ObjectsToIgnore.AddRange(objectsToIgnore);
+    }
+
+    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO, bool useRootPosition, List<GameObject> objects = null)
     {
         TouchFbEnabled = true;
         Handler = handler;
@@ -103,6 +111,8 @@ public class TouchFBController : MonoBehaviour
         else //If not null, check if existing prefab's size is same as new size. If not, update the prefab size
             if (HeldTooShort_Prefab.transform.localScale != new Vector3(fbSize, fbSize, 1f))
                 SetPrefabSizes(FeedbackSize);
+
+        ObjectsToIgnore = new List<GameObject>();
 
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
@@ -120,6 +130,11 @@ public class TouchFBController : MonoBehaviour
 
         if(!FeedbackOn)
         {
+            if (ObjectsToIgnore.Contains(e.Selection.SelectedGameObject))
+            {
+                return;
+            }
+
             switch (e.Selection.ErrorType)
             {
                 case "DurationTooLong":

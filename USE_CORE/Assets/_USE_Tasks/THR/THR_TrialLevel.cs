@@ -139,8 +139,6 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null && Session.SessionDef.IsHuman)
                 StartButton = Session.HumanStartPanel.StartButtonGO;
-
-            //THR_CanvasGO.GetComponent<Canvas>().sortingOrder = 0;
         });
 
         //SETUP TRIAL state -------------------------------------------------------------------------------------------------------------------------

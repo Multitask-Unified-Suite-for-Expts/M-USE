@@ -16,9 +16,11 @@ public class FR_PlayerManager : MonoBehaviour
     public readonly Vector3 MiddlePos = Vector3.zero;
     public readonly Vector3 RightPos = new Vector3(1.9f, 0f, 0f);
 
-    public FloorManager floorManager;
+    public FR_FloorManager floorManager;
     private FR_AudioManager audioManager;
-    public MovementCirclesController CirclesController;
+    public MovementCirclesController MovementCirclesController;
+
+    public Transform CanvasTransform;
 
     public Animator Animator;
 
@@ -32,17 +34,22 @@ public class FR_PlayerManager : MonoBehaviour
     public AnimationStates CurrentAnimationState;
 
 
+
     void Start()
     {
         Rb = GetComponent<Rigidbody>();
         transform.position = Vector3.zero;
         TargetPos = MiddlePos;
 
+        //Setup Movement Circles:
+        MovementCirclesController = gameObject.AddComponent<MovementCirclesController>();
+        MovementCirclesController.SetupMovementCircles(CanvasTransform);
+
         audioManager = gameObject.AddComponent<FR_AudioManager>();
 
         try
         {
-            floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
+            floorManager = GameObject.Find("FloorManager").GetComponent<FR_FloorManager>();
         }
         catch(Exception e)
         {
@@ -117,12 +124,12 @@ public class FR_PlayerManager : MonoBehaviour
             if (transform.position == MiddlePos)
             {
                 MoveToPosition(LeftPos);
-                CirclesController.HighlightActiveCircle(CirclesController.LeftCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.LeftCircleGO);
             }
             else if (transform.position == RightPos)
             {
                 MoveToPosition(MiddlePos);
-                CirclesController.HighlightActiveCircle(CirclesController.MiddleCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.MiddleCircleGO);
             }
         }
 
@@ -131,13 +138,13 @@ public class FR_PlayerManager : MonoBehaviour
             if (transform.position == MiddlePos)
             {
                 MoveToPosition(RightPos);
-                CirclesController.HighlightActiveCircle(CirclesController.RightCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.RightCircleGO);
 
             }
             else if (transform.position == LeftPos)
             {
                 MoveToPosition(MiddlePos);
-                CirclesController.HighlightActiveCircle(CirclesController.MiddleCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.MiddleCircleGO);
 
             }
         }
@@ -157,7 +164,7 @@ public class FR_PlayerManager : MonoBehaviour
 
         CelebrationConfetti = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
         CelebrationConfetti.SetActive(true);
-        CirclesController.Instantiated.SetActive(false);
+        MovementCirclesController.Instantiated.SetActive(false);
     }
 
     //Helper method used by trial level at end to put player back in middle for celebration. 

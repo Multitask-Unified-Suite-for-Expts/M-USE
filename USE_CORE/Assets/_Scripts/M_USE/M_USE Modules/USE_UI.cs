@@ -392,8 +392,10 @@ namespace USE_UI
             Image.rectTransform.anchoredPosition = Vector2.zero;
             RectTransform canvasRect = parent.GetComponent<RectTransform>();
             Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
+            //Image.rectTransform.sizeDelta = size;
             Image.color = color;
-            BackdropGO.transform.localPosition = Vector3.zero;
+            BackdropGO.transform.localPosition = Vector3.zero; //for old thr
+            //BackdropGO.transform.localPosition = new Vector3(0f, 0f, 100f); //for new thr
             BackdropGO.SetActive(false);
             return BackdropGO;
         }

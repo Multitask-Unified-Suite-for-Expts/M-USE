@@ -371,4 +371,3 @@ public class HaloFBController : MonoBehaviour
         return IsFlashing;
     }
 }
-

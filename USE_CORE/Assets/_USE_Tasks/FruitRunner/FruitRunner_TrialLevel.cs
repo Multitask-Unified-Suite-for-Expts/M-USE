@@ -29,7 +29,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public MovementCirclesController MovementCirclesController;
 
     public GameObject FloorManagerGO;
-    public FloorManager FloorManager;
+    public FR_FloorManager FloorManager;
 
     public GameObject ItemSpawnerGO;
     public FR_ItemSpawner ItemSpawner;
@@ -114,9 +114,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerGO.tag = "Player";
             PlayerManager = PlayerGO.GetComponent<FR_PlayerManager>();
             PlayerManager.TokenFbController = TokenFBController;
-            PlayerManager.StartAnimation("idle");
+            //PlayerManager.StartAnimation("idle");
             PlayerManager.DisableUserInput();
             PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
+            PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
            
             ItemSpawnerGO = new GameObject("ItemSpawner");
             ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemSpawner>();
@@ -127,11 +128,16 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             ItemSpawner.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");
-            FloorManager = FloorManagerGO.AddComponent<FloorManager>();
+            FloorManager = FloorManagerGO.AddComponent<FR_FloorManager>();
             FloorManager.SetTotalTiles(CurrentTrial.TrialGroup_InSpawnOrder.Length, CurrentTrial.NumGroups);
             FloorManager.FloorMovementSpeed = CurrentTrial.FloorMovementSpeed;
             FloorManager.TileScale_Z = CurrentTrial.FloorTileLength;
             FloorManager.gameObject.SetActive(true);
+
+
+            //CameraIntroMovement camMovement = Camera.main.gameObject.AddComponent<CameraIntroMovement>();
+            //camMovement.player = PlayerGO.transform;
+
             
         });
         Setup.AddTimer(() => setupDuration.value, Play);
@@ -140,10 +146,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         bool finishedPlaying = false;
         Play.AddSpecificInitializationMethod(() =>
         {
-            MovementCirclesControllerGO = new GameObject("MovementCirclesController");
-            MovementCirclesController = MovementCirclesControllerGO.AddComponent<MovementCirclesController>();
-            MovementCirclesController.SetupMovementCircles(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
-            
             PlayerManager.StartAnimation("Run");
             PlayerManager.AllowUserInput();
 

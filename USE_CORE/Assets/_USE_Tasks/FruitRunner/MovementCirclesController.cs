@@ -12,7 +12,7 @@ public class MovementCirclesController : MonoBehaviour
     public GameObject MiddleCircleGO;
     public GameObject RightCircleGO;
 
-    public Canvas ParentCanvas;
+    public Transform ParentCanvasTransform;
 
     public FR_PlayerManager PlayerManager;
 
@@ -22,15 +22,13 @@ public class MovementCirclesController : MonoBehaviour
 
 
 
-    public void SetupMovementCircles(Canvas parentCanvas, GameObject player)
+    public void SetupMovementCircles(Transform parentCanvas)
     {
-        ParentCanvas = parentCanvas;
-        PlayerManager = player.GetComponent<FR_PlayerManager>();
-        PlayerManager.CirclesController = this;
+        ParentCanvasTransform = parentCanvas;
 
         Instantiated = Instantiate(Resources.Load<GameObject>("Prefabs/MovementCircles"));
         Instantiated.name = "MovementCirclesParent";
-        Instantiated.transform.SetParent(ParentCanvas.transform);
+        Instantiated.transform.SetParent(ParentCanvasTransform.transform);
         Instantiated.transform.localScale = Vector3.one;
         Instantiated.transform.localPosition = position;
         Instantiated.transform.localRotation = Quaternion.identity;

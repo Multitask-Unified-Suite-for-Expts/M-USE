@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public class FR_Item : MonoBehaviour
 {
-    protected FloorManager floorManager;
+    protected FR_FloorManager floorManager;
     protected FR_PlayerManager playerManager;
 
 
@@ -15,7 +15,7 @@ public class FR_Item : MonoBehaviour
     {
         try
         {
-            floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
+            floorManager = GameObject.Find("FloorManager").GetComponent<FR_FloorManager>();
             playerManager = GameObject.Find("Player").GetComponent<FR_PlayerManager>();
         }
         catch(Exception e)

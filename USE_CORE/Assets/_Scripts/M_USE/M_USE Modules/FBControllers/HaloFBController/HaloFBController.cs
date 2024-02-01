@@ -122,7 +122,6 @@ public class HaloFBController : MonoBehaviour
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         InstantiatedParticleHalo.transform.position = behindPos;
 
-
         //Create circle halo for when LeaveFeedbackOn is true:
         if (LeaveFBOn)
             StartCoroutine(CreateFollowUpHalo(haloPrefab, rootObj.transform, false));

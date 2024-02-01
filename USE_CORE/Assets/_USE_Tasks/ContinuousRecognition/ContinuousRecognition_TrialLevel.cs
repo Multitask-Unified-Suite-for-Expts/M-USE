@@ -570,7 +570,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetCircleHaloSize(1.55f);
+        HaloFBController.SetParticleHaloSize(.65f);
+        //HaloFBController.SetCircleHaloSize(1f);
         HaloFBController.SetCircleHaloIntensity(1.5f);
     }
 

@@ -51,7 +51,7 @@ public class HaloFBController : MonoBehaviour
         frameData.AddDatum("HaloType", () => state.ToString());
     }
 
-    public void ShowPositive(GameObject gameObj, float? depth = null, float? destroyTime = null)
+    public void ShowPositive(GameObject gameObj, float? destroyTime = null, float? depth = null)
     {
         state = State.Positive;
 
@@ -71,9 +71,9 @@ public class HaloFBController : MonoBehaviour
             {
                 PositiveCircleHalos.Add(circleHalo);
                 if (depth == null)
-                    StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo.GetParticleEffectDuration()));
+                    StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo.GetParticleEffectDuration(), destroyTime, null));
                 else
-                    StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
+                    StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo.GetParticleEffectDuration(), destroyTime, depth.Value));
             }
             else
                 StartCoroutine(circleHalo.ReactivateInstantiatedCircleHalo(particleHalo.GetParticleEffectDuration()));
@@ -83,7 +83,7 @@ public class HaloFBController : MonoBehaviour
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
     }
-    public void ShowNegative(GameObject gameObj, float? depth = null, float? destroyTime = null)
+    public void ShowNegative(GameObject gameObj,  float? destroyTime = null, float? depth = null)
     {
         state = State.Negative;
         ParticleHalo particleHalo = GetOrCreateParticleHalo(gameObj);
@@ -102,9 +102,9 @@ public class HaloFBController : MonoBehaviour
                 NegativeCircleHalos.Add(circleHalo);
 
                 if (depth == null)
-                    StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, false, particleHalo.GetParticleEffectDuration()));
+                    StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, false, particleHalo.GetParticleEffectDuration(), destroyTime, null));
                 else
-                    StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo.GetParticleEffectDuration(), depth.Value));
+                    StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo.GetParticleEffectDuration(), destroyTime, depth.Value));
             }
             else
                 StartCoroutine(circleHalo.ReactivateInstantiatedCircleHalo(particleHalo.GetParticleEffectDuration()));

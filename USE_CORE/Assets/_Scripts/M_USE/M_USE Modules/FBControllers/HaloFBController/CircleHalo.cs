@@ -36,7 +36,7 @@ public class CircleHalo : MonoBehaviour
 
     }
 
-    public IEnumerator CreateCircleHalo(string feedbackType, GameObject gameObj, bool use2D, float particleEffectDuration, float? depth = null)
+    public IEnumerator CreateCircleHalo(string feedbackType, GameObject gameObj, bool use2D, float particleEffectDuration, float? circleEffectDuration = null, float? depth = null)
     {
         yield return new WaitForSeconds(particleEffectDuration * .5f);
 
@@ -56,6 +56,9 @@ public class CircleHalo : MonoBehaviour
         {
             InstantiatedCircleHaloGO.transform.SetParent(gameObj.transform.root.transform);
         }
+
+        if (circleEffectDuration != null)
+            Destroy(InstantiatedCircleHaloGO, (float)circleEffectDuration);
     }
     public IEnumerator ReactivateInstantiatedCircleHalo(float particleEffectDuration)
     {

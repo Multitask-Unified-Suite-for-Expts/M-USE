@@ -778,8 +778,7 @@ public class MazeManager:MonoBehaviour
     public string DetermineErrorType()
     {
         string errorType = "";
-        Debug.LogWarning("LAST ERROR TILE: " + lastErrorTileGO?.name + "SELECTED TILE GO: " + selectedTileGO);
-        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO) // Checks for Perseverative Error
+        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO && !correctNextTileChoice) // Checks for Perseverative Error
         {
             if (backTrackError)
                 errorType = "perseverativeBackTrackError";

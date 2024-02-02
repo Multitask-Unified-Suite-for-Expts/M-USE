@@ -144,7 +144,6 @@ public class Tile : MonoBehaviour
                 FBDuration = incorrectRuleBreakingFeedbackDuration;
                 break;
         }
-        Debug.LogWarning("CHANGING FB COLOR: " + FBColor.ToString() + " || fb duration: " + FBDuration);
         gameObject.GetComponent<Image>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;

@@ -34,7 +34,6 @@ public class TileSettings : ScriptableObject
                 return prevCorrectFeedbackDuration;
             
             case ("incorrectRuleAbiding"):
-                Debug.LogWarning("RETURNING THIS RULE ABIDING DURATIONL: " + incorrectRuleAbidingDuration);
                 return incorrectRuleAbidingDuration;
             
             case ("incorrectRuleBreaking"):

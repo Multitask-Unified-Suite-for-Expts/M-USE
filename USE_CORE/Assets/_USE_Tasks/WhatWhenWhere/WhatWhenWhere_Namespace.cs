@@ -52,6 +52,9 @@ namespace WhatWhenWhere_Namespace
         public int MaxCorrectTrials;
         public int? MaxTrialErrors;
 
+        public float MaxSimilarity;
+        public float MinSimilarity;
+        public float MeanSimilarity;
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -125,5 +128,18 @@ namespace WhatWhenWhere_Namespace
     public class WhatWhenWhere_TaskDef : TaskDef
     {
     }
-    
+
+    public class WhatWhenWhere_BlockDataSummary
+    {
+        public int TotalTouches;
+        public int CorrectTouches;
+        public int IncompleteTouches;
+        public float MinSimilarity;
+        public float MaxSimilarity;
+        public float MeanSimilarity;
+        public float BlockDuration;
+        public float NumRewardedTrials;
+        public int TrialsToCriterion;
+    }
+
 }

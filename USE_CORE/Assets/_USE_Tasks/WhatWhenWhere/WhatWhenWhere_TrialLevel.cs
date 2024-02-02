@@ -39,11 +39,12 @@ using USE_ExperimentTemplate_Task;
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WWW_CanvasGO;
+    public WhatWhenWhere_SequenceManager SequenceManager; // Set in Inspector;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
-    public WhatWhenWhere_TaskDef currentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
+    public WhatWhenWhere_TaskDef CurrentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
 
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
@@ -52,27 +53,25 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     //stim group
     private StimGroup searchStims, distractorStims;
-    private List<int> TouchedObjects = new List<int>();
 
-    // feedback variables
-    public int numTouchedStims = 0;
-    private bool trialComplete = false;
-    private GameObject targetStimGameObject;
 
-    
-    //Trial Data Logging variables
-    private string selectionClassification = "";
-    private List<string> selectionClassifications_InTrial = new List<string>();
-    public int consecutiveError = 0;
-    private List<float?> SearchDurations_InTrial = new List<float?> { };
-    public List<int> runningAcc = new List<int>();
     public string ContextName;
-    private bool retouchErroneous = false;
-    private int retouchErroneousCounter_InTrial;
-    private bool retouchCorrect;
-    private int retouchCorrectCounter_InTrial;
-    private int NumErrors_InTrial;
-    private int NumCorrect_InTrial;
+    public List<int> runningAcc = new List<int>();
+    private string selectionType;
+
+    private int ruleAbidingErrors_InTrial;
+    private int distractorRuleAbidingErrors_InTrial;
+    private int backTrackErrors_InTrial;
+    private int retouchErrors_InTrial;    
+    private int perseverativeRuleAbidingErrors_InTrial;
+    private int perseverativeDistractorRuleAbidingErrors_InTrial;
+    private int perseverativeBackTrackErrors_InTrial;
+    private int perseverativeRetouchErrors_InTrial;
+    private int correctSelections_InTrial;
+    private int retouchCorrect_InTrial;
+    private int totalErrors_InTrial;
+    private int completedSequences_InTrial;
+    private List<float?> searchDurations_InTrial = new List<float?>();
 
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
@@ -90,17 +89,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //data logging variables
     private string searchStimsLocations, distractorStimsLocations;
     
-    private float searchDuration = 0;
-    private float sbDelay = 0;
+    private float searchDurationStartTime;
+    private float startButtonPresentationDelay;
     
     // misc variables
     private bool variablesLoaded;
-    private int correctIndex;
-    public int NumSliderBarFilled = 0;
     private int sliderGainSteps, sliderLossSteps;
-    private bool isSliderValueIncrease = false;
-    private int perseverationCounter_InTrial;
-    private bool startedSequence;
     
 
     //Player View Variables
@@ -114,12 +108,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     // Stimuli Variables
     private GameObject StartButton;
 
-    // Stim Evaluation Variables
-    private GameObject selectedGO = null;
-    private WhatWhenWhere_StimDef selectedSD = null;
-    private GameObject LastCorrectStimGO;
 
-    private bool CorrectSelection;
     private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
     private bool choiceMade = false;
 
@@ -132,20 +121,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State ChooseStimulus = new State("ChooseStimulus");
         State FlashNextCorrectStim = new State("FlashNextCorrectStim");
         State SelectionFeedback = new State("SelectionFeedback");
-        State FinalFeedback = new State("FinalFeedback");
+        State SliderFlashingFeedback = new State("SliderFlashingFeedback");
         State ITI = new State("ITI");
         AddActiveStates(new List<State>
         {
-            InitTrial, ChooseStimulus, SelectionFeedback, FinalFeedback, ITI, FlashNextCorrectStim
+            InitTrial, ChooseStimulus, SelectionFeedback, SliderFlashingFeedback, ITI, FlashNextCorrectStim
         });
 
         string[] stateNames = new string[]
-            {"InitTrial", "ChooseStimulus", "FlashNextCorrectStim", "SelectionFeedback", "FinalFeedback", "ITI"};
+            {"InitTrial", "ChooseStimulus", "FlashNextCorrectStim", "SelectionFeedback", "SliderFlashingFeedback", "ITI"};
 
         Add_ControlLevel_InitializationMethod(() =>
         {
             SliderFBController.InitializeSlider();
-            
             
             // Initialize FB Controller Values
             HaloFBController.SetCircleHaloSize(3);
@@ -168,52 +156,48 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 variablesLoaded = true;
                 LoadConfigUiVariables();
-
             }
 
+            if (CurrentTrialDef.LeaveFeedbackOn)
+                HaloFBController.SetLeaveFeedbackOn(true);
+
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(currentTaskDef.ShadowType, "WhatWhenWhere_DirectionalLight");
-            if (currentTaskDef.StimFacingCamera)
+            SetShadowType(CurrentTaskDef.ShadowType, "WhatWhenWhere_DirectionalLight");
+            if (CurrentTaskDef.StimFacingCamera)
                 MakeStimFaceCamera();
 
             UpdateExperimenterDisplaySummaryStrings();
 
             // Determine Start Button onset if the participant has made consecutive errors that exceed the error threshold
-            if (consecutiveError >= CurrentTrialDef.ErrorThreshold)
-                sbDelay = timeoutDuration.value;
+            if (SequenceManager.GetConsecutiveErrorCount() >= CurrentTrialDef.ErrorThreshold)
+                startButtonPresentationDelay = timeoutDuration.value;
             else
-                sbDelay = startButtonDelay.value;
+                startButtonPresentationDelay = startButtonDelay.value;
         });
 
-        SetupTrial.AddTimer(()=> sbDelay, InitTrial);
+        SetupTrial.AddTimer(()=> startButtonPresentationDelay, InitTrial);
 
-        ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, FinalFeedback);
+        ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SliderFlashingFeedback);
 
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
 
         InitTrial.AddSpecificInitializationMethod(() => InitializeShotgunHandler());
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
-            CalculateSliderSteps();
-            SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitialValue*(1f/sliderGainSteps));
-            SliderFBController.SliderGO.SetActive(true);
-            SliderFBController.SetUpdateDuration(fbDuration.value);
-            SliderFBController.SetFlashingDuration(flashingFbDuration.value);
+            PrepareSliderForTrial();
             
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
                 StateAfterDelay = FlashNextCorrectStim;
             else
                 StateAfterDelay = ChooseStimulus;
-            
         });
         
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
         {
-            //previousTargetStimGameObject = targetStimGameObject;
-            AssignCorrectStim();
-            Debug.LogWarning("IN THE FLASH NEXT CORRECT STIM INIT");
-            HaloFBController.StartFlashingHalo(1f, 2, targetStimGameObject);
+            if (SequenceManager.GetTargetStimGO() == null)
+                SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder,searchStims, distractorStims);
+            HaloFBController.StartFlashingHalo(1f, 2, SequenceManager.GetTargetStimGO());
         });
         
         FlashNextCorrectStim.SpecifyTermination(()=> !HaloFBController.GetIsFlashing(), ChooseStimulus);
@@ -221,194 +205,89 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
-            if (!CurrentTrialDef.GuidedSequenceLearning)
-                AssignCorrectStim();
-           
-            searchDuration = 0;
+            if(SequenceManager.GetTargetStimGO() != null)
+                SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder, searchStims, distractorStims);
 
+            searchDurationStartTime = Time.time;
+            choiceMade = false;
+
+            ShotgunHandler.HandlerActive = true;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
+            
             if(!Session.WebBuild)
             {
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                     CreateTextOnExperimenterDisplay();
             }
-
-            choiceMade = false;
-            if (CurrentTrialDef.LeaveFeedbackOn)
-                HaloFBController.SetLeaveFeedbackOn(true);
-
-            ShotgunHandler.HandlerActive = true;
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            searchDuration += Time.deltaTime;
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
-                selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
+                GameObject selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+                WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
                 ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
+                {
                     choiceMade = true;
+                    SequenceManager.SetSelectedGO(selectedGO);
+                    SequenceManager.SetSelectedSD(selectedSD);
+                    if (!SequenceManager.GetStartedSequence())
+                    {
+                        SequenceManager.SetStartedSequence(true);
+                        SequenceManager.SetSequenceStartTime(Time.time);
+                    }
+                }
             }
         });
-        ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, ()=>
+        ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, () =>
         {
-            CorrectSelection = selectedSD.IsCurrentTarget;
-
-            if (CorrectSelection)
-            {
-                startedSequence = true;
-
-                selectionClassification = "Correct";
-                // UpdateCounters_Correct();
-                if (selectedGO == LastCorrectStimGO)
-                {
-                    retouchCorrect = true;
-                    retouchCorrectCounter_InTrial++;
-                    CurrentTaskLevel.retouchCorrectCounter_InTask++;
-                    selectionClassification = "RetouchCorrect";
-                }
-
-                LastCorrectStimGO = selectedGO;
-                CurrentTaskLevel.NumCorrectSelections_InBlock++;
-                NumCorrect_InTrial++;
-                isSliderValueIncrease = true;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
-                
-            }
-            else
-            {
-                
-                isSliderValueIncrease = false;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
-                //Repetition Error
-                if (TouchedObjects.Contains(selectedSD.StimIndex))
-                {
-                    CurrentTaskLevel.RepetitionErrorCount_InBlock++;
-                    selectionClassification = "RepetitionError";
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RepetitionError"]);
-
-                    if (selectedGO == LastCorrectStimGO && consecutiveError == 0)
-                    {
-                        retouchErroneous = true;
-                        retouchErroneousCounter_InTrial++;
-                        CurrentTaskLevel.retouchErroneousCounter_InTask++;
-                        selectionClassification = "RetouchErroneous";
-                    }
-
-                }
-                
-                // Slot Errors
-                else
-                {
-                    //Distractor Error
-                    if (selectedSD.IsDistractor)
-                    {
-                        CurrentTaskLevel.DistractorSlotErrorCount_InBlock++;
-                        selectionClassification = "DistractorSlotError";
-                        Session.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnDistractorObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-                    }
-                    //Stimuli Slot error
-                    else
-                    {
-                        CurrentTaskLevel.SlotErrorCount_InBlock++;
-                        selectionClassification = "SlotError";
-                        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SlotError"]);
-                    }
-                }
-                
-                runningAcc.Add(0);
-                if (!retouchErroneous)
-                {
-                    CurrentTaskLevel.NumErrors_InBlock++;
-                    NumErrors_InTrial++;
-                }
-            
-            }
-            selectionClassifications_InTrial.Add(selectionClassification);
-
-            UpdateExperimenterDisplaySummaryStrings();
+            HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
-            Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-            AbortCode = 6;
-
-            consecutiveError++;
-            runningAcc.Add(0);
-            SearchDurations_InTrial.Add(null);
-            CurrentTaskLevel.SearchDurations_InBlock.Add(null);
-            CurrentTaskLevel.SearchDurations_InTask.Add(null);
-            selectionClassification = "AbortedTrial";
-            selectionClassifications_InTrial.Add(selectionClassification);
-            
-            runningPercentError.Add(null);
-            runningErrorCount.Add(null);
+            HandleAbortedTrialData();
         });
-        // ChooseStimulus.SpecifyTermination(() => trialComplete, FinalFeedback);
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
-            TouchedObjects.Add(selectedSD.StimIndex);
-            SearchDurations_InTrial.Add(searchDuration);
-            CurrentTaskLevel.SearchDurations_InBlock.Add(searchDuration);
-            CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
-           // totalFbDuration = (fbDuration.value + flashingFbDuration.value);
-            
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
-            if (CorrectSelection)
+            SequenceManager.ManageSelection();
+            ManageDataHandlers();
+
+            GameObject selectedGO = SequenceManager.GetSelectedGO();
+            WhatWhenWhere_StimDef selectedSD = SequenceManager.GetSelectedSD();
+
+            if (selectionType.ToLower().Contains("correct"))
             {
-                consecutiveError = 0;
-
-                
-                HaloFBController.ShowPositive(selectedGO, depth);
-                if (HaloFBController.GetNegativeCircleHalos().Count > 0)
-                    HaloFBController.DestroyNegativeCircleHalos();
-
-                SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[numTouchedStims]*(1f/sliderGainSteps));
-                numTouchedStims += 1;
-                if (numTouchedStims == CurrentTrialDef.CorrectObjectTouchOrder.Length)
-                    trialComplete = true;
-                
-                selectionClassification = "None";
+                AudioFBController.Play("Positive");
+                HaloFBController.ShowPositive(selectedGO, fbDuration.value, depth);
             }
             else //Chose Incorrect
             {
                 AudioFBController.Play("Negative");
-                if (retouchErroneous)
+                HaloFBController.ShowNegative(selectedGO, depth);
+                if (selectionType.ToLower().Contains("retoucherror"))
                     return;
-                
-                
-                // ERRONEOUS RETOUCH LAST CORRECT doesn't INCREMENT CONSECUTIVE ERROR
-                if (consecutiveError >= 1)
-                {
-                    perseverationCounter_InTrial++;
-                    CurrentTaskLevel.perseverationCounter_InTask++;
-                }
-                consecutiveError++;
-                
-                    HaloFBController.ShowNegative(selectedGO, depth);
+
+
                 if (selectedSD.IsDistractor)
                     stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
                 else
                     stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
-                
-                if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial") && numTouchedStims != 0 && consecutiveError == 1)
-                {
-                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELY
-                    numTouchedStims -= 1;
-                }
+
+                if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial") && SequenceManager.GetSeqIdx() != -1)
+                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
-                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx]*(1f/sliderLossSteps)); // NOT IMPLEMENTED: NEEDS TO CONSIDER SEPARATE LOSS/GAIN FOR DISTRACTOR & TARGET STIMS SEPARATELy
+                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
             }
-            
-            
-            selectedGO = null;
+
+
+            SequenceManager.ResetSelectionClassifications();
         });
          
         SelectionFeedback.AddTimer(()=> fbDuration.value, Delay, () =>
@@ -420,12 +299,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             
 
             // If the sequence has been completed, send to slider feedback state
-            if (trialComplete)
-                StateAfterDelay = FinalFeedback;
+            if (SequenceManager.GetFinishedSequence())
+                StateAfterDelay = SliderFlashingFeedback;
             else
             {
                 // If there is a MaxTrialErrors defined in the BlockDef and the number of errors in the trial exceed that value, send to ITI
-                if(CurrentTrialDef.MaxTrialErrors != null && NumErrors_InTrial >= CurrentTrialDef.MaxTrialErrors)
+                if(CurrentTrialDef.MaxTrialErrors != null && totalErrors_InTrial >= CurrentTrialDef.MaxTrialErrors)
                 {
                     StateAfterDelay = ITI;
                 }
@@ -433,7 +312,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, either move onto the next stim in the sequence or terminate the trial for an incorrect choice
                 else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
                 {
-                    if (CorrectSelection)
+                    if (selectionType.ToLower().Contains("correct"))
                     {
                         if (CurrentTrialDef.GuidedSequenceLearning)
                             StateAfterDelay = FlashNextCorrectStim;
@@ -447,49 +326,28 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (consecutiveError >= 1 && startedSequence))
+                    if (CurrentTrialDef.GuidedSequenceLearning || (SequenceManager.GetConsecutiveErrorCount() >= 1 && SequenceManager.GetStartedSequence()))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;
                 }
             }
 
-            CorrectSelection = false;
-            
-            retouchErroneous = false;
-            retouchCorrect = false;
             
             UpdateExperimenterDisplaySummaryStrings();
         });
-        FinalFeedback.AddSpecificInitializationMethod(() =>
+        SliderFlashingFeedback.AddSpecificInitializationMethod(() =>
         {
             ShotgunHandler.HandlerActive = false;
-            
-            trialComplete = false;
-            selectionClassification = "None";
 
             //Destroy all created text objects on Player View of Experimenter Display
             if(!Session.WebBuild)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
 
-            runningAcc.Add(1);
-            NumSliderBarFilled += 1;
-            CurrentTaskLevel.NumSliderBarFilled_InTask++;
-            
-            percentError = (float)decimal.Divide(NumErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
-            runningPercentError.Add(percentError);
-            
-            runningErrorCount.Add(NumErrors_InTrial);
-                                    
-            if (Session.SyncBoxController != null)
-            {
-                Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize); 
-                CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
-            }
+            HandleCompletedSequence();
            
         });
-        FinalFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
+        SliderFlashingFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             
@@ -501,17 +359,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             float latestAccuracy;
 
-            if (runningAcc.Count > 10)
-            {
-                latestAccuracy = ((runningAcc.Skip(Math.Max(0, runningAcc.Count - 10)).Sum() / 10f)*100);
-                if (latestAccuracy > 70 && CurrentTaskLevel.LearningSpeed == -1)
-                    CurrentTaskLevel.LearningSpeed = TrialCount_InBlock + 1;
-            }
-            
-            if (currentTaskDef.NeutralITI)
+            if (CurrentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
-                string path = !string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath;
+                string path = !string.IsNullOrEmpty(CurrentTaskDef.ContextExternalFilePath) ? CurrentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath;
                 CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + "NeutralITI" + ".png");
             }
 
@@ -524,8 +375,45 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+    private void HandleCompletedSequence()
+    {
+        runningAcc.Add(1);
+        completedSequences_InTrial += 1;
+        CurrentTaskLevel.CompletedSequences_InBlock++;
+        CurrentTaskLevel.CompletedSequences_InTask++;
 
+        percentError = (float)decimal.Divide(totalErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
+        runningPercentError.Add(percentError);
+
+        runningErrorCount.Add(totalErrors_InTrial);
+
+        if (Session.SyncBoxController != null)
+        {
+            Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+        }
+    }
+    private void HandleSearchDurationData(float? searchDuration)
+    {
+        searchDurations_InTrial.Add(searchDuration);
+        CurrentTaskLevel.SearchDurations_InBlock.Add(searchDuration);
+        CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
+        searchDurationStartTime = 0;
+    }
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
+    private void HandleAbortedTrialData()
+    {
+        Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+        AbortCode = 6;
+
+        HandleSearchDurationData(null);
+        runningAcc.Add(0);
+
+        runningPercentError.Add(null);
+        runningErrorCount.Add(null);
+    }
     public override void AddToStimLists()
     {
         foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
@@ -602,30 +490,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
-        NumErrors_InTrial = 0;
-        NumCorrect_InTrial = 0;
-
-        retouchCorrectCounter_InTrial = 0;
-        retouchErroneousCounter_InTrial = 0;
-        perseverationCounter_InTrial = 0;
-        numTouchedStims = 0;
-        searchDuration = 0;
+        searchDurationStartTime = 0;
         sliderGainSteps = 0;
         sliderLossSteps = 0;
         stimIdx = null;
-        selectedGO = null;
-        selectedSD = null;
-        LastCorrectStimGO = null;
-        CorrectSelection = false;
         choiceMade = false;
-        retouchErroneous = false;
-        retouchCorrect = false;
-        startedSequence = false;
-        perseverationCounter_InTrial = 0;
-        SearchDurations_InTrial.Clear();
-        TouchedObjects.Clear();
-        selectionClassification = "";
-        selectionClassifications_InTrial.Clear();
+        SequenceManager?.ResetSequenceManagerVariables();
+
+        searchDurations_InTrial.Clear();
+        ruleAbidingErrors_InTrial = 0;
+        distractorRuleAbidingErrors_InTrial = 0;
+        backTrackErrors_InTrial = 0;
+        retouchErrors_InTrial = 0;
+        correctSelections_InTrial = 0;
+        retouchCorrect_InTrial = 0;
+        totalErrors_InTrial = 0;
+        completedSequences_InTrial = 0;
         SliderFBController.ResetSliderBarFull();
     }
 
@@ -639,12 +519,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SearchStimLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimLocations", () => distractorStimsLocations);
-        TrialData.AddDatum("TouchedObjects", () => String.Join(",",TouchedObjects));
-        TrialData.AddDatum("SelectionClassifications", () => String.Join(",", selectionClassifications_InTrial));
-        TrialData.AddDatum("SearchDurations", () => String.Join(",",SearchDurations_InTrial));
-        TrialData.AddDatum("NumErrors", () => NumErrors_InTrial);
-        TrialData.AddDatum("RetouchCorrect", () => retouchCorrectCounter_InTrial);
-        TrialData.AddDatum("RetouchErroneous", () => retouchErroneousCounter_InTrial);
+        TrialData.AddDatum("SelectedGOs", () => String.Join(",",SequenceManager?.GetAllSelectedGOs()));
+        TrialData.AddDatum("SearchDurations", () => String.Join(",",searchDurations_InTrial));
+        TrialData.AddDatum("RuleAbidingErrors", () => ruleAbidingErrors_InTrial);
+        TrialData.AddDatum("DistractorRuleAbidingErrors", () => distractorRuleAbidingErrors_InTrial);
+        TrialData.AddDatum("BackTrackErrors_InTrial", () => backTrackErrors_InTrial);
+        TrialData.AddDatum("RetouchErrors", () => retouchErrors_InTrial);
+        TrialData.AddDatum("CorrectSelections", () => correctSelections_InTrial);
+        TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
+        TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
     }
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
@@ -656,16 +539,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "Selected Object Indices: " + string.Join(",",TouchedObjects) +
-                             "\nCorrect Selection? : " + CorrectSelection +
+        TrialSummaryString = "Selected Object Indices: " + string.Join(",",SequenceManager.GetAllSelectedGOs()) +
+                             "\nSelection Type : " + selectionType +
                              "\nLast Trial's Percent Error : " + percentError +
-                             "\nNum Errors in Trial : " + NumErrors_InTrial +
                              "\n" +
-                             "\nError: " + selectionClassification +
+                             "\nTotal Correct Selections in Trial : " + totalErrors_InTrial +
+                             "\nTotal Errors in Trial : " + totalErrors_InTrial +
                              "\n" +
-                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(SearchDurations_InTrial) +
-                             "\nRetouch Correct: " + retouchCorrectCounter_InTrial +
-                             "\nRetouch Erroneous: " + retouchErroneousCounter_InTrial;
+                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(searchDurations_InTrial);
     }
 
     
@@ -748,35 +629,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     
     //-------------------------------------------------------------MISCELLANEOUS METHODS--------------------------------------------------------------------------
-    private void AssignCorrectStim()
-    {
-        targetStimGameObject = null;
-        
-        //if we haven't finished touching all stims
-        if (numTouchedStims < CurrentTrialDef.CorrectObjectTouchOrder.Length)
-        {
-            //find which stimulus is currently target
-            correctIndex = CurrentTrialDef.CorrectObjectTouchOrder[numTouchedStims] - 1;
-
-            for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; iStim++)
-            {
-                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) searchStims.stimDefs[iStim];
-                if (iStim == correctIndex)
-                {
-                    sd.IsCurrentTarget = true;
-                    targetStimGameObject = sd.StimGameObject;
-                }
-                else 
-                    sd.IsCurrentTarget = false;
-            }
-        
-            for (int iDist = 0; iDist < CurrentTrialDef.DistractorStimIndices.Length; ++iDist)
-            {
-                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef) distractorStims.stimDefs[iDist];
-                sd.IsDistractor = true;
-            }
-        }
-    }
+    
 
     private void CalculateSliderSteps()
     {
@@ -802,7 +655,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            StartButton = Session.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
+            StartButton = Session.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), CurrentTaskDef.StartButtonPosition, CurrentTaskDef.StartButtonScale);
             Session.USE_StartButton.SetVisibilityOnOffStates(visOnState, visOffState);
         }
     }
@@ -822,6 +675,154 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SetTrialSummaryString();
         if (TrialCount_InTask != 0)
             CurrentTaskLevel.SetTaskSummaryString();
+    }
+    private void PrepareSliderForTrial()
+    {
+        CalculateSliderSteps();
+        SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitialValue * (1f / sliderGainSteps));
+        SliderFBController.SliderGO.SetActive(true);
+        SliderFBController.SetUpdateDuration(fbDuration.value);
+        SliderFBController.SetFlashingDuration(flashingFbDuration.value);
+    }
+
+    public void HandleRuleAbidingErrorData()
+    {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
+
+        ruleAbidingErrors_InTrial++;
+        CurrentTaskLevel.RuleAbidingErrors_InBlock++;
+        CurrentTaskLevel.RuleAbidingErrors_InTask++;
+    }
+    public void HandleDistractorRuleAbidingErrorData()
+    {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
+
+        ruleAbidingErrors_InTrial++;
+        CurrentTaskLevel.RuleAbidingErrors_InBlock++;
+        CurrentTaskLevel.RuleAbidingErrors_InTask++;
+    }
+
+    public void HandleBackTrackErrorData()
+    {
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RepetitionError"]);
+
+        backTrackErrors_InTrial++;
+        CurrentTaskLevel.BackTrackErrors_InBlock++;
+        CurrentTaskLevel.BackTrackErrors_InTask++;
+    }
+    public void HandleRetouchErrorData()
+    {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
+
+        retouchErrors_InTrial++;
+        CurrentTaskLevel.RetouchErrors_InBlock++;
+        CurrentTaskLevel.RetouchErrors_InTask++;
+    }
+
+    public void HandleRetouchCorrectData()
+    {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
+
+        retouchCorrect_InTrial++;
+        CurrentTaskLevel.RetouchCorrect_InBlock++;
+        CurrentTaskLevel.RetouchCorrect_InTask++;
+    }
+
+    public void HandleCorrectSelectionData()
+    {
+        Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+
+        correctSelections_InTrial++;
+        CurrentTaskLevel.CorrectSelections_InBlock++;
+        CurrentTaskLevel.CorrectSelections_InTask++;
+    }
+
+    public void HandlePerseverativeRetouchErrorData()
+    {
+        perseverativeRetouchErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeRetouchErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeRetouchErrors_InTask++;
+    }
+    public void HandlePerseverativeBackTrackErrorData()
+    {
+        perseverativeBackTrackErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
+    }
+    public void HandlePerseverativeRuleAbidingErrorData()
+    {
+        perseverativeRuleAbidingErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeRuleAbidingErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeRuleAbidingErrors_InTask++;
+    }    
+    public void HandlePerseverativeDistractorRuleAbidingErrorData()
+    {
+        perseverativeDistractorRuleAbidingErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeDistractorRuleAbidingErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeDistractorRuleAbidingErrors_InTask++;
+    }
+
+    private void HandleErrorData()
+    {
+        totalErrors_InTrial++;
+        CurrentTaskLevel.TotalErrors_InBlock++;
+        CurrentTaskLevel.TotalErrors_InTask++;
+    }
+    private void ManageDataHandlers()
+    {
+        selectionType = SequenceManager.DetermineErrorType();
+        switch (selectionType)
+        {
+            case "retouchCorrect":
+                HandleRetouchCorrectData();
+                HandleCorrectSelectionData();
+                break;
+            case "correctSelection":
+                HandleCorrectSelectionData();
+                break;
+            case "backTrackError":
+                HandleBackTrackErrorData();
+                HandleErrorData();
+                break;
+            case "retouchError":
+                HandleRetouchErrorData();
+                HandleErrorData();
+                break;
+            case "ruleAbidingError":
+                HandleRuleAbidingErrorData();
+                HandleErrorData();
+                break;
+            case "distractorRuleAbidingError":
+                HandleDistractorRuleAbidingErrorData();
+                HandleErrorData();
+                break;
+            case "perseverativeBackTrackError":
+                HandleBackTrackErrorData();
+                HandlePerseverativeBackTrackErrorData();
+                HandleErrorData();
+                break;
+            case "perseverativeRetouchError":
+                HandlePerseverativeRetouchErrorData();
+                HandleRetouchErrorData();
+                HandleErrorData();
+                break;
+            case "perseverativeRuleAbidingError":
+                HandlePerseverativeRuleAbidingErrorData();
+                HandleRuleAbidingErrorData();
+                HandleErrorData();
+                break;
+            case "perseverativeDistractorRuleAbidingError":
+                HandlePerseverativeDistractorRuleAbidingErrorData();
+                HandleDistractorRuleAbidingErrorData();
+                HandleErrorData();
+                break;
+
+        }
+
     }
 }
 

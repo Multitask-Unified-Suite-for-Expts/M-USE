@@ -671,7 +671,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         retouchCorrect_InTrial = 0;
         retouchErroneous_InTrial = 0;
     }
-    void SetTrialSummaryString()
+    private void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
                              "\n<b>Guided Selection: </b>" + CurrentTrialDef.TileFlashingRatio +
@@ -691,7 +691,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    public void HandleRuleBreakingErrorData()
+    private void HandleRuleBreakingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleBreakingError"]);
@@ -705,7 +705,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.TotalErrors_InTask++;
     }
 
-    public void HandleRuleAbidingErrorData()
+    private void HandleRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
@@ -719,13 +719,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.TotalErrors_InTask++;
     }
 
-    public void HandleBackTrackErrorData()
+    private void HandleBackTrackErrorData()
     {
         backtrackErrors_InTrial++;
         CurrentTaskLevel.BacktrackErrors_InBlock++;
         CurrentTaskLevel.BacktrackErrors_InTask++;
     }
-    public void HandleRetouchErroneousData()
+    private void HandleRetouchErroneousData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
@@ -739,7 +739,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchError_InTask++;
     }
 
-    public void HandleRetouchCorrectData()
+    private void HandleRetouchCorrectData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
@@ -749,7 +749,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchCorrect_InTask++;
     }
 
-    public void HandleCorrectTouch()
+    private void HandleCorrectTouch()
     {
         Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
 
@@ -757,26 +757,26 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.CorrectTouches_InBlock++;
         CurrentTaskLevel.CorrectTouches_InTask++;
     }
-    
-    public void HandlePerseverativeRetouchError()
+
+    private void HandlePerseverativeRetouchError()
     {
         perseverativeRetouchErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InTask++;
     }
-    public void HandlePerseverativeBackTrackError()
+    private void HandlePerseverativeBackTrackError()
     {
         perseverativeBackTrackErrors_InTrial++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
     }
-    public void HandlePerseverativeRuleAbidingError()
+    private void HandlePerseverativeRuleAbidingError()
     {
         perseverativeRuleAbidingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InTask++;
     }
-    public void HandlePerseverativeRuleBreakingError()
+    private void HandlePerseverativeRuleBreakingError()
     {
         perseverativeRuleBreakingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRuleBreakingErrors_InBlock++;

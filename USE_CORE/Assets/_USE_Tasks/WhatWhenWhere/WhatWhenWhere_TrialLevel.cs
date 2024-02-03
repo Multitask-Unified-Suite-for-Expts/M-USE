@@ -45,6 +45,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
     public WhatWhenWhere_TaskDef CurrentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
+    private SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
 
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
@@ -90,10 +91,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private string searchStimsLocations, distractorStimsLocations;
     
     private float searchDurationStartTime;
-    private float startButtonPresentationDelay;
     
     // misc variables
     private bool variablesLoaded;
+    private bool choiceMade = false;
     private int sliderGainSteps, sliderLossSteps;
     
 
@@ -107,12 +108,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     // Stimuli Variables
     private GameObject StartButton;
+    private float startButtonPresentationDelay;
 
 
-    private int? stimIdx; // used to index through the arrays in the config file/mapping different columns
-    private bool choiceMade = false;
 
-    private SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
 
     public override void DefineControlLevel()
     {
@@ -205,7 +204,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
-            if(SequenceManager.GetTargetStimGO() != null)
+
+            if(SequenceManager.GetTargetStimGO() == null)
                 SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder, searchStims, distractorStims);
 
             searchDurationStartTime = Time.time;
@@ -254,6 +254,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             ShotgunHandler.HandlerActive = false;
             int? depth = Session.Using2DStim ? 50 : (int?)null;
+            int? stimIdx = null;
 
             SequenceManager.ManageSelection();
             ManageDataHandlers();
@@ -261,28 +262,42 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             GameObject selectedGO = SequenceManager.GetSelectedGO();
             WhatWhenWhere_StimDef selectedSD = SequenceManager.GetSelectedSD();
 
+
+            if (selectedSD.IsDistractor)
+                stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
+            else
+                stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
+
             if (selectionType.ToLower().Contains("correct"))
             {
                 AudioFBController.Play("Positive");
-                HaloFBController.ShowPositive(selectedGO, fbDuration.value, depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.LeaveFeedbackOn, depth: depth);
+
+                if(SequenceManager.GetFinishedSequence())
+                    SliderFBController.UpdateSliderValue(1);
+                else
+                    SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[(int)stimIdx] * (1f / sliderGainSteps));
             }
             else //Chose Incorrect
             {
                 AudioFBController.Play("Negative");
-                HaloFBController.ShowNegative(selectedGO, depth);
+
                 if (selectionType.ToLower().Contains("retoucherror"))
+                {
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, depth: depth);
+                    SequenceManager.ResetSelectionClassifications();
                     return;
-
-
-                if (selectedSD.IsDistractor)
-                    stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
+                }
+                else if (selectionType.ToLower().Contains("backtrackerror"))
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, depth: depth);
                 else
-                    stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.LeaveFeedbackOn, destroyTime: 0.76f, depth: depth);
 
 
-                if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial") && SequenceManager.GetSeqIdx() != -1)
-                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
-                else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+                if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
+                    SequenceManager.GetLastCorrectStimGO().GetComponent<CircleHalo>().DeactivateInstantiatedCircleHalo();
+
+                if(SliderFBController.GetSliderValue() != 0 && SequenceManager.GetConsecutiveErrorCount() == 1)
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
             }
 
@@ -326,7 +341,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (SequenceManager.GetConsecutiveErrorCount() >= 1 && SequenceManager.GetStartedSequence()))
+                    if (CurrentTrialDef.GuidedSequenceLearning || (SequenceManager.GetConsecutiveErrorCount() >= 2 && SequenceManager.GetSelectedFirstStimInSequence()))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;
@@ -357,8 +372,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddSpecificInitializationMethod(() =>
         {
-            float latestAccuracy;
-
             if (CurrentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
@@ -493,7 +506,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         searchDurationStartTime = 0;
         sliderGainSteps = 0;
         sliderLossSteps = 0;
-        stimIdx = null;
         choiceMade = false;
         SequenceManager?.ResetSequenceManagerVariables();
 
@@ -697,7 +709,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public void HandleDistractorRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRuleAbidingError"]);
 
         ruleAbidingErrors_InTrial++;
         CurrentTaskLevel.RuleAbidingErrors_InBlock++;
@@ -706,7 +718,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public void HandleBackTrackErrorData()
     {
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RepetitionError"]);
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BackTrackError"]);
 
         backTrackErrors_InTrial++;
         CurrentTaskLevel.BackTrackErrors_InBlock++;
@@ -715,7 +727,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public void HandleRetouchErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchError"]);
 
         retouchErrors_InTrial++;
         CurrentTaskLevel.RetouchErrors_InBlock++;
@@ -725,7 +737,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public void HandleRetouchCorrectData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchCorrect"]);
 
         retouchCorrect_InTrial++;
         CurrentTaskLevel.RetouchCorrect_InBlock++;
@@ -734,7 +746,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public void HandleCorrectSelectionData()
     {
-        Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
 
         correctSelections_InTrial++;
         CurrentTaskLevel.CorrectSelections_InBlock++;
@@ -743,24 +756,36 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public void HandlePerseverativeRetouchErrorData()
     {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchError"]);
+
         perseverativeRetouchErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InTask++;
     }
     public void HandlePerseverativeBackTrackErrorData()
     {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BackTrackError"]);
+
         perseverativeBackTrackErrors_InTrial++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
     }
     public void HandlePerseverativeRuleAbidingErrorData()
     {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
+
         perseverativeRuleAbidingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InTask++;
     }    
     public void HandlePerseverativeDistractorRuleAbidingErrorData()
     {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRuleAbidingError"]);
+
         perseverativeDistractorRuleAbidingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeDistractorRuleAbidingErrors_InBlock++;
         CurrentTaskLevel.PerseverativeDistractorRuleAbidingErrors_InTask++;
@@ -775,6 +800,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void ManageDataHandlers()
     {
         selectionType = SequenceManager.DetermineErrorType();
+        Debug.LogWarning("SELECTION TYPE: " +  selectionType);
         switch (selectionType)
         {
             case "retouchCorrect":

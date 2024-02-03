@@ -267,9 +267,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, depth);
+                HaloFBController.ShowPositive(selectedGO, depth: depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, depth);
+                HaloFBController.ShowNegative(selectedGO, depth: depth);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });

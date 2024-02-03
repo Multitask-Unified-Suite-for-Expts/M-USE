@@ -126,6 +126,14 @@ public class SliderFBController : MonoBehaviour
     {
         sliderBarFull = false;
     }
+    public float GetSliderValue()
+    {
+        return Slider.value;
+    }
+    public void SetSliderValue(float val)
+    {
+        Slider.value = val;
+    }
     public void Update()
     {
         if (animationPhase == AnimationPhase.None)

@@ -183,7 +183,8 @@ public class MazeManager:MonoBehaviour
         StimDef tileStimDef = new StimDef(tiles, tileGO);
         tile.SetCoord(new Coords(tileGO.name));
 
-        tileGO.AddComponent<HoverEffect>();
+        if(Session.SessionDef.IsHuman)
+            tileGO.AddComponent<HoverEffect>();
         AssignInitialTileColor(tile, currentMaze);
         AssignSliderValue(tile);
 

@@ -9,20 +9,22 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 {
     private GameObject selectedGO;
     private WhatWhenWhere_StimDef selectedSD;
-    private List<GameObject> selectedGOs_InSequence = new List<GameObject>();
-    private List<GameObject> selectedGOs_All = new List<GameObject>();
+    private List<WhatWhenWhere_StimDef> selectedSDs_InSequence = new List<WhatWhenWhere_StimDef>();
+    private List<WhatWhenWhere_StimDef> selectedSDs_All = new List<WhatWhenWhere_StimDef>();
 
 
     // Stim Evaluation Variables
+    private WhatWhenWhere_StimDef lastCorrectStimSD;
     private GameObject lastCorrectStimGO;
     private GameObject lastErrorStimGO;
     private GameObject targetStimGO;
-    private int sequenceIdx = -1;
+    private int sequenceIdx;
     private int totalStimInSequence;
     private float sequenceStartTime;
     private float sequenceDuration;
-
     private int consecutiveErrors;
+
+    private bool selectedFirstStimInSequence;
     private bool correctSelection;
     private bool retouchCorrect;
     private bool retouchError;
@@ -37,35 +39,39 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     public void ManageSelection()
     {
         correctSelection = selectedSD.IsCurrentTarget;
-
         if (correctSelection)
         {
             // could be selection of the next correct object in the sequence OR return to last correctly selected object after an error
+            if (!selectedFirstStimInSequence)
+                selectedFirstStimInSequence = true;
 
-            if (selectedGO == lastCorrectStimGO)
+            if (selectedSD == lastCorrectStimSD)
                 retouchCorrect = true;
 
             consecutiveErrors = 0;
             sequenceIdx++;
+
+            lastCorrectStimSD = selectedSD;
             lastCorrectStimGO = selectedGO;
 
-            if (sequenceIdx == (totalStimInSequence - 1))
+            if (sequenceIdx == totalStimInSequence)
             {
                 finishedSequence = true;
                 sequenceDuration = Time.time - sequenceStartTime;
             }
 
             if(!retouchCorrect)
-                selectedGOs_InSequence.Add(selectedGO);
+                selectedSDs_InSequence.Add(selectedSD);
 
         }
         else
         {
-            if (selectedGOs_InSequence.Any(go => go.name.Equals(selectedSD.StimName)))
+            if (selectedSDs_InSequence.Any(sd => sd.StimIndex.Equals(selectedSD.StimIndex)))
             {
-                backTrackError = true;
-                if (selectedGO == lastCorrectStimGO && consecutiveErrors == 0)
+                if (selectedSD.StimIndex == lastCorrectStimSD.StimIndex)
                     retouchError = true;
+                else
+                    backTrackError = true;
             }
 
             else
@@ -76,13 +82,14 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
                     ruleAbidingError = true;
             }
             
-            consecutiveErrors++;
-            if(consecutiveErrors == 1)
+            if(!retouchError)
+                consecutiveErrors++;
+            if(consecutiveErrors == 1 && sequenceIdx != 0)
                 sequenceIdx--;
 
 
         }
-        selectedGOs_All.Add(selectedGO);
+        selectedSDs_All.Add(selectedSD);
     }
 
     public string DetermineErrorType()
@@ -137,6 +144,15 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     {
         return selectedSD;
     }
+    public WhatWhenWhere_StimDef GetLastCorrectStimSD()
+    {
+        return lastCorrectStimSD;
+    }    
+    
+    public GameObject GetLastCorrectStimGO()
+    {
+        return lastCorrectStimGO;
+    }
  
     public void SetStartedSequence(bool isSequenceStarted)
     {
@@ -157,6 +173,10 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     public int GetConsecutiveErrorCount()
     {
         return consecutiveErrors;
+    }    
+    public bool GetSelectedFirstStimInSequence()
+    {
+        return selectedFirstStimInSequence;
     }
     public void ResetSelectionClassifications()
     {
@@ -166,21 +186,32 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
         backTrackError = false;
         distractorRuleAbidingError = false;
         ruleAbidingError = false;
+
+        targetStimGO = null;
+        selectedGO = null;
+        selectedSD = null;
     }
     public void ResetSequenceManagerVariables()
     {
         // Stim Evaluation Variables
+        lastCorrectStimSD = null;
         lastCorrectStimGO = null;
         lastErrorStimGO = null;
         targetStimGO = null;
-        
-        sequenceIdx = -1;
+        selectedGO = null;
+        selectedSD = null;
+
+        selectedSDs_InSequence.Clear();
+        selectedSDs_All.Clear();
+
+        sequenceIdx = 0;
         totalStimInSequence = 0;
         sequenceStartTime = 0;
         sequenceDuration = 0;
 
         startedSequence = false;
         finishedSequence = false;
+        selectedFirstStimInSequence = false;
 
         ResetSelectionClassifications();
     }
@@ -188,30 +219,30 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     public void AssignStimClassifiers(int[] correctObjectTouchOrder, StimGroup searchStims, StimGroup distractorStims)
     {
         targetStimGO = null;
+        //find which stimulus is currently target
+        int correctIndex = correctObjectTouchOrder[sequenceIdx] - 1;
 
-            //find which stimulus is currently target
-            int correctIndex = correctObjectTouchOrder[sequenceIdx] - 1;
-
-            for (int iStim = 0; iStim < searchStims.stimDefs.Count; iStim++)
+        for (int iStim = 0; iStim < searchStims.stimDefs.Count; iStim++)
+        {
+            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[iStim];
+            if (iStim == correctIndex)
             {
-                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[iStim];
-                if (iStim == correctIndex)
-                {
-                    sd.IsCurrentTarget = true;
-                    targetStimGO = sd.StimGameObject;
-                }
-                else
-                    sd.IsCurrentTarget = false;
+                sd.IsCurrentTarget = true;
+                targetStimGO = sd.StimGameObject;
             }
+            else
+                sd.IsCurrentTarget = false;
+        }
 
-            for (int iDist = 0; iDist < distractorStims.stimDefs.Count; ++iDist)
-            {
-                WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)distractorStims.stimDefs[iDist];
-                sd.IsDistractor = true;
-            }
+
+        for (int iDist = 0; iDist < distractorStims.stimDefs.Count; ++iDist)
+        {
+            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)distractorStims.stimDefs[iDist];
+            sd.IsDistractor = true;
+        }
 
         totalStimInSequence = correctObjectTouchOrder.Length;
-        
+
     }
 
     public GameObject GetTargetStimGO()
@@ -219,9 +250,9 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
         return targetStimGO;
     }
 
-    public List<GameObject> GetAllSelectedGOs()
+    public List<WhatWhenWhere_StimDef> GetAllSelectedGOs()
     {
-        return selectedGOs_All;
+        return selectedSDs_All;
     }
     public int GetSeqIdx()
     {

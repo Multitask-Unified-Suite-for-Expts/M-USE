@@ -342,14 +342,14 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
             if (CorrectSelection)
             {
-                HaloFBController.ShowPositive(selectedGO, depth);
+                HaloFBController.ShowPositive(selectedGO, depth: depth);
                 // HaloFBController.PositiveHaloPrefab.transform.SetParent(null);
                 // // Vector3 goWorldPos = TaskLevel.TaskCam.WorldToScreenPoint(selectedGO.transform.position);
                 // HaloFBController.PositiveHaloPrefab.transform.position = selectedGO.transform.position;
             }
             else
             {
-                HaloFBController.ShowNegative(selectedGO, depth);
+                HaloFBController.ShowNegative(selectedGO, depth:depth);
                 // HaloFBController.NegativeHaloPrefab.transform.SetParent(null);
                 // // Vector3 goWorldPos = TaskLevel.TaskCam.WorldToScreenPoint(selectedGO.transform.position);
                 // HaloFBController.NegativeHaloPrefab.transform.position = selectedGO.transform.position;

@@ -468,7 +468,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Whether or not the circle halo will be created after a selection is made
         /// </summary>
-        public bool CircleHaloActive;
+        public bool CircleHaloActive = true;
 
         /// <summary>
         /// Generates trial definitions based on block definitions.
@@ -618,7 +618,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Whether or not the circle halo will be created after a selection is made
         /// </summary>
-        public bool CircleHaloActive;
+        public bool CircleHaloActive = true;
 
         public int DifficultyLevel;
         public int posStep;

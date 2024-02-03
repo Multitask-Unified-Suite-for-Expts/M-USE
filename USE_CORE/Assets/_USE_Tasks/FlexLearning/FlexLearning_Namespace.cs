@@ -116,6 +116,7 @@ namespace FlexLearning_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
+
     }
 
     public class FlexLearning_StimDef : StimDef

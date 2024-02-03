@@ -253,9 +253,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, depth: depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, depth: depth);
+                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.DestroyAllHalos());

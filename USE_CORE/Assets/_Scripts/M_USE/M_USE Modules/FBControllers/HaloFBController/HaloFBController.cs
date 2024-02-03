@@ -84,7 +84,7 @@ public class HaloFBController : MonoBehaviour
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
     }
-    public void ShowNegative(GameObject gameObj,  bool particleHaloActive = true, bool circleHaloActive = false, float? destroyTime = null, float? depth = null)
+    public void ShowNegative(GameObject gameObj,  bool particleHaloActive = false, bool circleHaloActive = true, float? destroyTime = null, float? depth = null)
     {
         state = State.Negative;
 

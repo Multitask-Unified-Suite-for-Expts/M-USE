@@ -43,6 +43,7 @@ namespace WhatWhenWhere_Namespace
         // Configuration of Stimuli
         public bool RandomizedLocations;
         public bool LeaveFeedbackOn;
+        public bool ParticleHaloActive;
 
         // Slider Variables
         public int[] SliderGain;
@@ -52,6 +53,11 @@ namespace WhatWhenWhere_Namespace
         public int MaxCorrectTrials;
         public int? MaxTrialErrors;
 
+        public float MaxSimilarity;
+        public float MinSimilarity;
+        public float MeanSimilarity;
+
+        
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -67,7 +73,7 @@ namespace WhatWhenWhere_Namespace
             }
 
             TrialDefs = new List<WhatWhenWhere_TrialDef>().ConvertAll(x => (TrialDef)x);
-            for (int iTrial = 0; iTrial< MaxTrials; iTrial++)
+            for (int iTrial = 0; iTrial < MaxTrials; iTrial++)
             {
                 WhatWhenWhere_TrialDef td = new WhatWhenWhere_TrialDef();
                 td.BlockName = BlockName;
@@ -92,6 +98,8 @@ namespace WhatWhenWhere_Namespace
                 td.MaxCorrectTrials = MaxCorrectTrials;
                 td.MaxTrialErrors = MaxTrialErrors;
                 td.GuidedSequenceLearning = GuidedSequenceLearning;
+                td.ParticleHaloActive = ParticleHaloActive;
+
                 TrialDefs.Add(td);
             }
         }
@@ -114,6 +122,8 @@ namespace WhatWhenWhere_Namespace
         public bool GuidedSequenceLearning;
         public int MaxCorrectTrials;
         public int? MaxTrialErrors;
+
+        public bool ParticleHaloActive;
     }
 
     public class WhatWhenWhere_StimDef : StimDef
@@ -125,5 +135,19 @@ namespace WhatWhenWhere_Namespace
     public class WhatWhenWhere_TaskDef : TaskDef
     {
     }
-    
+
+    public class WhatWhenWhere_BlockDataSummary
+    {
+        public int BlockNum;
+        public int TotalTouches;
+        public int CorrectTouches;
+        public int IncompleteTouches;
+        public float MinSimilarity;
+        public float MaxSimilarity;
+        public float MeanSimilarity;
+        public float BlockDuration;
+        public float NumRewardedTrials;
+        public int TrialsToCriterion;
+    }
+
 }

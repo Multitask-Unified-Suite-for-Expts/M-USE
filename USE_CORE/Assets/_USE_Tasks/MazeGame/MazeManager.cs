@@ -183,7 +183,8 @@ public class MazeManager:MonoBehaviour
         StimDef tileStimDef = new StimDef(tiles, tileGO);
         tile.SetCoord(new Coords(tileGO.name));
 
-        tileGO.AddComponent<HoverEffect>();
+        if(Session.SessionDef.IsHuman)
+            tileGO.AddComponent<HoverEffect>();
         AssignInitialTileColor(tile, currentMaze);
         AssignSliderValue(tile);
 
@@ -778,8 +779,7 @@ public class MazeManager:MonoBehaviour
     public string DetermineErrorType()
     {
         string errorType = "";
-        Debug.LogWarning("LAST ERROR TILE: " + lastErrorTileGO?.name + "SELECTED TILE GO: " + selectedTileGO);
-        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO) // Checks for Perseverative Error
+        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO && !correctNextTileChoice) // Checks for Perseverative Error
         {
             if (backTrackError)
                 errorType = "perseverativeBackTrackError";

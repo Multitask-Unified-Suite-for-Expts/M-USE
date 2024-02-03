@@ -466,6 +466,11 @@ namespace USE_Def_Namespace
         public bool ParticleHaloActive;
 
         /// <summary>
+        /// Whether or not the circle halo will be created after a selection is made
+        /// </summary>
+        public bool CircleHaloActive;
+
+        /// <summary>
         /// Generates trial definitions based on block definitions.
         /// </summary>
         public virtual void GenerateTrialDefsFromBlockDef()
@@ -609,6 +614,11 @@ namespace USE_Def_Namespace
         /// Whether or not the particle halo will be created after a selection is made
         /// </summary>
         public bool ParticleHaloActive;
+        
+        /// <summary>
+        /// Whether or not the circle halo will be created after a selection is made
+        /// </summary>
+        public bool CircleHaloActive;
 
         public int DifficultyLevel;
         public int posStep;

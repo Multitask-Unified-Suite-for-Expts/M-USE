@@ -69,6 +69,7 @@ namespace FlexLearning_Namespace
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs.Add(td);
             }
         }
@@ -100,6 +101,7 @@ namespace FlexLearning_Namespace
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;
             }
         }

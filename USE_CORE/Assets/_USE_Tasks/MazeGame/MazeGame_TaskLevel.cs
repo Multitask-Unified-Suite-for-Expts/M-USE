@@ -37,6 +37,7 @@ using UnityEngine.Serialization;
 using USE_ExperimentTemplate_Task;
 using USE_Settings;
 using USE_Utilities;
+using WhatWhenWhere_Namespace;
 using static UnityEngine.LightProbeProxyVolume;
 using Random = UnityEngine.Random;
 
@@ -59,7 +60,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public int RuleAbidingErrors_InBlock;
     public int RuleBreakingErrors_InBlock;
     public int RetouchCorrect_InBlock;
-    [FormerlySerializedAs("RetouchErroneous_InBlock")] public int RetouchError_InBlock;
+    public int RetouchError_InBlock;
     public int CorrectTouches_InBlock; 
     public int NumSliderBarFull_InBlock;
     public List<float?> MazeDurations_InBlock = new List<float?>();
@@ -76,7 +77,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public int RuleAbidingErrors_InTask;
     public int RuleBreakingErrors_InTask;
     public int RetouchCorrect_InTask;
-    [FormerlySerializedAs("RetouchErroneous_InTask")] public int RetouchError_InTask;
+    public int RetouchError_InTask;
     public int CorrectTouches_InTask;
     public int NumSliderBarFull_InTask;
     public List<float?> MazeDurations_InTask;
@@ -91,6 +92,10 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     public MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     private MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
     private MazeGame_TrialLevel mgTL;
+
+    private List<MazeGame_BlockDataSummary> MG_BlockSummaryData = new List<MazeGame_BlockDataSummary>();
+    private MazeGame_BlockDataSummary blockDataSummary;
+
 
     public override void DefineControlLevel()
     {
@@ -108,7 +113,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        
+        blockDataSummary = new MazeGame_BlockDataSummary();
+
         blocksAdded = 0;
         //LoadMazeDef();
 
@@ -134,6 +140,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         });
         RunBlock.AddDefaultTerminationMethod(() =>
         {
+            AssignBlockSummaryDataFields(blockDataSummary);
             mgTL.MazeManager.MazeCleanUp();
         });
     }
@@ -191,6 +198,11 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         data["Perseverative Rule Breaking Errors"] = PerseverativeRuleBreakingErrors_InTask;
         data["Average Maze Durations"] = CalculateAverageDuration(MazeDurations_InTask);
 
+        foreach (MazeGame_BlockDataSummary blockDataSummary in MG_BlockSummaryData)
+        {
+            data[$"\nBlock {blockDataSummary.BlockNum}"] = CreateBlockSummaryDataString(blockDataSummary);
+
+        }
         return data;
     }
     private void ResetBlockVariables()
@@ -239,6 +251,57 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         if (PreviousBlocksString.Length > 0)
             CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+    }
+    private string CreateBlockSummaryDataString(MazeGame_BlockDataSummary blockSummary)
+    {
+        string blockDataSummaryString = $"\nTotal Touches: {blockSummary.TotalTouches}" +
+                                        $"\nIncomplete Touches: {blockSummary.IncompleteTouches}" +
+                                        $"\nCorrect Selections: {blockSummary.CorrectTouches}" +
+                                        $"\nIncorrect Selections: {blockSummary.IncorrectTouches}" +
+                                       
+                                        $"\n\nRule Abiding Errors: {blockSummary.RuleAbidingErrors}" +
+                                        $"\nPerseverative Rule Abiding Errors: {blockSummary.PerseverativeRuleAbidingErrors}" +
+                                        
+                                        $"\n\nRule Breaking Errors: {blockSummary.RuleBreakingErrors}" +
+                                        $"\nPerseverative Rule Breaking Errors: {blockSummary.PerseverativeRuleBreakingErrors}" +
+                                        
+                                        $"\n\nBacktrack Errors: {blockSummary.BacktrackErrors}" +
+                                        $"\nPerseverative Backtrack Errors: {blockSummary.PerseverativeBackTrackErrors}" +
+                                        
+                                        $"\n\nRetouch Error: {blockSummary.RetouchError}" +
+                                        $"\nPerseverative Retouch Error: {blockSummary.PerseverativeRetouchErrors}" +
+                                        $"\nRetouch Correct: {blockSummary.RetouchCorrect}" +
+                                        
+                                        $"\n\nAvg Maze Duration: {blockSummary.AvgMazeDuration}" +
+                                        $"\nAvg Choice Duration: {blockSummary.AvgChoiceDuration}" +
+                                        $"\nNum Completed Trials: {blockSummary.NumCompletedTrials}" +
+                                        $"\nTrials To Criterion: {blockSummary.TrialsToCriterion}";
+        return blockDataSummaryString;
+    }
+    private void AssignBlockSummaryDataFields(MazeGame_BlockDataSummary blockSummary)
+    {
+        blockSummary.BlockNum = BlockCount + 1;
+        blockSummary.TotalTouches = (int)TotalTouches_InBlock;
+        blockSummary.IncompleteTouches = (int)TotalIncompleteTouches_InBlock;
+        blockSummary.CorrectTouches = CorrectTouches_InBlock;
+        blockSummary.RetouchCorrect = RetouchCorrect_InBlock;
+        blockSummary.IncorrectTouches = TotalErrors_InBlock;
+        blockSummary.RuleAbidingErrors = RuleAbidingErrors_InBlock;
+        blockSummary.PerseverativeRuleAbidingErrors = PerseverativeRuleAbidingErrors_InBlock;
+        blockSummary.RuleBreakingErrors = RuleBreakingErrors_InBlock;
+        blockSummary.PerseverativeRuleBreakingErrors = PerseverativeRuleBreakingErrors_InBlock;
+        blockSummary.BacktrackErrors = BacktrackErrors_InBlock;
+        blockSummary.PerseverativeBackTrackErrors = PerseverativeBackTrackErrors_InBlock;
+        blockSummary.RetouchError = RetouchError_InBlock;
+        blockSummary.PerseverativeRetouchErrors = PerseverativeRetouchErrors_InBlock;
+        blockSummary.AvgMazeDuration = String.Format("{0:0.00}", CalculateAverageDuration(MazeDurations_InBlock));
+        blockSummary.AvgChoiceDuration = String.Format("{0:0.00}", CalculateAverageDuration(ChoiceDurations_InBlock));
+        blockSummary.NumCompletedTrials = NumSliderBarFull_InBlock;
+        blockSummary.TrialsToCriterion = mgTL.ReachedCriterion ? (mgTL.TrialCount_InBlock + 1) : -1;
+
+        MG_BlockSummaryData.Add(blockSummary);
+
+        Debug.LogWarning("THIS IS THE SUMMARY STRING: " + CreateBlockSummaryDataString(blockSummary));
     }
     public override void SetTaskSummaryString()
     {

@@ -435,8 +435,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         RewardGiven = false;
         choiceMade = false;
-        if (Session.MouseTracker != null)
-            Session.MouseTracker.ResetClicks();
     }
     private void DefineTrialData()
     {

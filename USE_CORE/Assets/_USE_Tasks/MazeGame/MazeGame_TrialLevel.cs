@@ -440,8 +440,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
+        return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
             CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock);
     }
@@ -652,7 +651,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         choiceMade = false;
         configVariablesLoaded = false;
         playerViewTextLoaded = false;
-        Session.MouseTracker.ResetClicks();
         MazeManager.ResetMazeVariables();
         correctTouches_InTrial = 0;
         perseverativeRetouchErrors_InTrial = 0;

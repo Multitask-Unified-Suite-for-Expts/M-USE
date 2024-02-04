@@ -58,7 +58,6 @@ public class MouseTracker : InputTracker
             if (InputBroker.GetMouseButtonUp(iButton))
             {
                 ButtonCompletedClickCount[iButton]++;
-
                 if (target != null)
                     Session.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}ReleasedFrom", null);
             }

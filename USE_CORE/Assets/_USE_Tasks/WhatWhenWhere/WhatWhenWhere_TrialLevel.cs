@@ -284,14 +284,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                 if (selectionType.ToLower().Contains("retoucherror"))
                 {
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:false, depth: depth);
                     SequenceManager.ResetSelectionClassifications();
                     return;
                 }
                 else if (selectionType.ToLower().Contains("backtrackerror"))
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:false, depth: depth);
                 else
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.LeaveFeedbackOn, destroyTime: 0.76f, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.LeaveFeedbackOn, destroyTime: (CurrentTrialDef.ParticleHaloActive? 0.76f:1.26f), depth: depth);
 
 
                 if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
@@ -438,27 +438,25 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-       
         // If there is a MaxCorrectTrials defined, end the block when the minimum number of trials is run and the maximum number of correct trials is achieved
         if (CurrentTrialDef.MaxCorrectTrials != 0)
             return ( TrialCount_InBlock >= CurrentTaskLevel.MinTrials_InBlock && runningAcc.Count(num => num == 1) >= CurrentTrialDef.MaxCorrectTrials);
         
         // If using the SimpleThreshold block end, use the following CheckBlockEnd method
         if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
-            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
                 CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTrialDef.MaxTrials);
 
         // If using the CurrentTrialPercentError block end, use the following CheckBlockEnd method
         if (CurrentTrialDef.BlockEndType == "CurrentTrialPercentError")
-            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
         
         // If using the CurrentTrialErrorCount block end, use the following CheckBlockEnd method
         if (CurrentTrialDef.BlockEndType == "CurrentTrialErrorCount")
-            return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningErrorCount,
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningErrorCount,
                 CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
 
@@ -697,7 +695,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SliderFBController.SetFlashingDuration(flashingFbDuration.value);
     }
 
-    public void HandleRuleAbidingErrorData()
+    private void HandleRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
@@ -706,7 +704,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RuleAbidingErrors_InBlock++;
         CurrentTaskLevel.RuleAbidingErrors_InTask++;
     }
-    public void HandleDistractorRuleAbidingErrorData()
+    private void HandleDistractorRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRuleAbidingError"]);
@@ -716,7 +714,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RuleAbidingErrors_InTask++;
     }
 
-    public void HandleBackTrackErrorData()
+    private void HandleBackTrackErrorData()
     {
         Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BackTrackError"]);
 
@@ -724,7 +722,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.BackTrackErrors_InBlock++;
         CurrentTaskLevel.BackTrackErrors_InTask++;
     }
-    public void HandleRetouchErrorData()
+    private void HandleRetouchErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchError"]);
@@ -734,7 +732,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchErrors_InTask++;
     }
 
-    public void HandleRetouchCorrectData()
+    private void HandleRetouchCorrectData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchCorrect"]);
@@ -744,7 +742,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchCorrect_InTask++;
     }
 
-    public void HandleCorrectSelectionData()
+    private void HandleCorrectSelectionData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
@@ -754,38 +752,26 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.CorrectSelections_InTask++;
     }
 
-    public void HandlePerseverativeRetouchErrorData()
+    private void HandlePerseverativeRetouchErrorData()
     {
-        if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchError"]);
-
         perseverativeRetouchErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InTask++;
     }
-    public void HandlePerseverativeBackTrackErrorData()
+    private void HandlePerseverativeBackTrackErrorData()
     {
-        if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BackTrackError"]);
-
         perseverativeBackTrackErrors_InTrial++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
     }
-    public void HandlePerseverativeRuleAbidingErrorData()
+    private void HandlePerseverativeRuleAbidingErrorData()
     {
-        if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
-
         perseverativeRuleAbidingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InTask++;
-    }    
-    public void HandlePerseverativeDistractorRuleAbidingErrorData()
+    }
+    private void HandlePerseverativeDistractorRuleAbidingErrorData()
     {
-        if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRuleAbidingError"]);
-
         perseverativeDistractorRuleAbidingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeDistractorRuleAbidingErrors_InBlock++;
         CurrentTaskLevel.PerseverativeDistractorRuleAbidingErrors_InTask++;
@@ -800,7 +786,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void ManageDataHandlers()
     {
         selectionType = SequenceManager.DetermineErrorType();
-        Debug.LogWarning("SELECTION TYPE: " +  selectionType);
         switch (selectionType)
         {
             case "retouchCorrect":
@@ -848,6 +833,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 break;
 
         }
+
+
 
     }
 }

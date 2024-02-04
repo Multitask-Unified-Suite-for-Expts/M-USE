@@ -141,6 +141,7 @@ namespace WhatWhenWhere_Namespace
         public int BlockNum;
         public int TotalTouches;
         public int CorrectTouches;
+        public int IncorrectTouches;
         public int IncompleteTouches;
         public float MinSimilarity;
         public float MaxSimilarity;

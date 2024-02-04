@@ -352,7 +352,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflateAudioPlayed = false;
             InflationDuration = 0;
             ScaleTimer = 0;
-            Session.MouseTracker.ResetClicks();
             clickTimings = new List<float>();
             timeTracker = 0;
 

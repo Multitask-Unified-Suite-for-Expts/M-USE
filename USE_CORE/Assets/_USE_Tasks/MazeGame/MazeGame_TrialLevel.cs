@@ -198,9 +198,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
-            
-            
-           
         });
         ChooseTile.AddUpdateMethod(() =>
         {
@@ -285,7 +282,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 if (MazeManager.IsMazeFinished())
                 {
-                    Debug.LogWarning("filling up slider");
                     SliderFBController.SetFlashingDuration(flashingFbDuration.value);
                     SliderFBController.UpdateSliderValue(1); // fill up the remainder of the slider
                 }
@@ -322,8 +318,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                   percentError = (float)decimal.Divide(totalErrors_InTrial, MazeManager.GetCurrentMaze().mNumSquares);
                   runningPercentError.Add(percentError);
-                  CurrentTaskLevel.NumSliderBarFull_InBlock++;
-                  CurrentTaskLevel.NumSliderBarFull_InTask++;
 
                 if (Session.SyncBoxController != null)
                 {
@@ -547,6 +541,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
 
+        finishedFbDuration = flashingFbDuration.value + correctFbDuration.value;
         configVariablesLoaded = true;
     }
 

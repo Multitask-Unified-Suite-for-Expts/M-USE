@@ -133,6 +133,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public List<GameObject> ObjectList;
 
     private GameObject PopParticles;
+    
+    // Variables for implementing MinTrialToTrialDuration
+    private float trialStartTime;
+    private float trialEndDelayDuration;
+    private float trialDuration;
 
 
     public override void DefineControlLevel()
@@ -142,8 +147,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State CenterSelection = new State("CenterSelection");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
+        State ConfirmMinTrialDuration = new State("ConfirmMinTrialDuration");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ConfirmMinTrialDuration, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -216,6 +222,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
+            trialStartTime = Time.time;
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
@@ -525,8 +532,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 AddTokenInflateAudioPlayed = true;
             }
         });
-        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
-        Feedback.SpecifyTermination(() => true && Response != 1, ITI);
+        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ConfirmMinTrialDuration);
+        Feedback.SpecifyTermination(() => true && Response != 1, ConfirmMinTrialDuration);
         Feedback.AddUniversalTerminationMethod(() =>
         {
             if(TokenFBController.IsTokenBarFull())
@@ -534,7 +541,22 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
-
+        ConfirmMinTrialDuration.AddDefaultInitializationMethod(() =>
+        {
+            StateAfterDelay = ITI;
+            trialDuration = Time.time - trialStartTime;
+            if (CurrentTrial.RandomMinTrialDuration != null)
+            {
+                CurrentTrial.MinTrialDuration = CurrentTaskLevel.CurrentBlock.RandomNumGenerator.Next(CurrentTrial.RandomMinTrialDuration[0], CurrentTrial.RandomMinTrialDuration[1]);
+                if (trialDuration > CurrentTrial.MinTrialDuration)
+                    trialEndDelayDuration = 0;
+                else
+                    trialEndDelayDuration = (float)CurrentTrial.MinTrialDuration - trialDuration;
+            }
+            else
+                trialEndDelayDuration = 0;
+        });
+        ConfirmMinTrialDuration.AddTimer(() => trialEndDelayDuration, ITI);
         //ITI state ------------------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(itiDuration.value, FinishTrial);
         
@@ -978,6 +1000,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
         TrialData.AddDatum("ClicksPerOutline", () => CurrentTrial.ClicksPerOutline);
         TrialData.AddDatum("TrialTouches", () => TrialTouches);
+        TrialData.AddDatum("TrialDuration", () => trialDuration);
     }
 
     private void DefineFrameData()

@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 using System.Collections.Generic;
+using UnityEngine;
 using USE_Def_Namespace;
 using USE_StimulusManagement;
 
@@ -55,6 +56,8 @@ namespace EffortControl_Namespace
         public int NumReversalsUntilTerm = -1;
         public int MinTrialsBeforeTermProcedure = -1;
         public int TerminationWindowSize = -1;
+        public int[] RandomMinTrialDuration;
+        public int? MinTrialDuration;
         
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -71,6 +74,11 @@ namespace EffortControl_Namespace
                 MinTrials = MinMaxTrials[0];
             }
 
+            if(RandomMinTrialDuration != null)
+            {
+               Debug.LogWarning($"ATLEAST IA M TRYING TO ASSIG IT {RandomMinTrialDuration[0]} to {RandomMinTrialDuration[1]}");
+                MinTrialDuration = RandomNumGenerator.Next(RandomMinTrialDuration[0], RandomMinTrialDuration[1]);
+            }
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
 
             for (int iTrial = 0; iTrial < NumTrials; iTrial++) 
@@ -98,7 +106,7 @@ namespace EffortControl_Namespace
                 td.NumReversalsUntilTerm = NumReversalsUntilTerm;
                 td.MinTrialsBeforeTermProcedure = MinTrialsBeforeTermProcedure;
                 td.TerminationWindowSize = TerminationWindowSize;
-                
+                td.MinTrialDuration = MinTrialDuration;
                 TrialDefs.Add(td);
             }
         }
@@ -106,6 +114,7 @@ namespace EffortControl_Namespace
         public override void AddToTrialDefsFromBlockDef()
         {
             MaxTrials = TrialDefs.Count;
+
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
             {
                 EffortControl_TrialDef td = (EffortControl_TrialDef)TrialDefs[iTrial];
@@ -117,7 +126,7 @@ namespace EffortControl_Namespace
                 td.NumReversalsUntilTerm = NumReversalsUntilTerm;
                 td.MinTrialsBeforeTermProcedure = MinTrialsBeforeTermProcedure;
                 td.TerminationWindowSize = TerminationWindowSize;
-                
+
                 TrialDefs[iTrial] = td;
             }
         }
@@ -144,6 +153,8 @@ namespace EffortControl_Namespace
         public int NumReversalsUntilTerm;
         public int MinTrialsBeforeTermProcedure;
         public int TerminationWindowSize;
+        public int[] RandomMinTrialDuration;
+        public int? MinTrialDuration;
     }
 
     public class EffortControl_StimDef : StimDef

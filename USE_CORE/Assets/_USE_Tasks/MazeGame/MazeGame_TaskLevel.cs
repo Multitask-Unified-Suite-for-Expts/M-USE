@@ -113,7 +113,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         PreviousBlocksString = new StringBuilder();
 
-        blockDataSummary = new MazeGame_BlockDataSummary();
 
         blocksAdded = 0;
         //LoadMazeDef();
@@ -136,6 +135,8 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
 
             CalculateBlockSummaryString();
             ResetBlockVariables();
+            blockDataSummary = new MazeGame_BlockDataSummary();
+
 
         });
         RunBlock.AddDefaultTerminationMethod(() =>
@@ -201,7 +202,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         foreach (MazeGame_BlockDataSummary blockDataSummary in MG_BlockSummaryData)
         {
             data[$"\nBlock {blockDataSummary.BlockNum}"] = CreateBlockSummaryDataString(blockDataSummary);
-
         }
         return data;
     }

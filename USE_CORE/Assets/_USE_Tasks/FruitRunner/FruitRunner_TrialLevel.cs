@@ -6,6 +6,7 @@ using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using FruitRunner_Namespace;
 using ConfigDynamicUI;
+using TMPro;
 
 
 public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
@@ -17,6 +18,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     //Set in Inspector:
     public GameObject FruitRunner_CanvasGO;
     public List<Material> SkyboxMaterials;
+    public FR_ScoreManager ScoreManager;
 
     private GameObject StartButton;
 
@@ -36,6 +38,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
 
     private StimGroup trialStims;
+
 
 
     public override void DefineControlLevel()
@@ -114,7 +117,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerGO.tag = "Player";
             PlayerManager = PlayerGO.GetComponent<FR_PlayerManager>();
             PlayerManager.TokenFbController = TokenFBController;
-            //PlayerManager.StartAnimation("idle");
             PlayerManager.DisableUserInput();
             PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
             PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
@@ -124,7 +126,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
             ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
             ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
-            ItemSpawner.RandomSpawnLocations = CurrentTrial.RandomStimLocations;
             ItemSpawner.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");
@@ -137,8 +138,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             //CameraIntroMovement camMovement = Camera.main.gameObject.AddComponent<CameraIntroMovement>();
             //camMovement.player = PlayerGO.transform;
-
-            
         });
         Setup.AddTimer(() => setupDuration.value, Play);
 
@@ -146,6 +145,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         bool finishedPlaying = false;
         Play.AddSpecificInitializationMethod(() =>
         {
+            ScoreManager.Score = 0;
+            ScoreManager.ActivateScoreText();
+
             PlayerManager.StartAnimation("Run");
             PlayerManager.AllowUserInput();
 
@@ -161,6 +163,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         {
             if (FloorManager.NumTilesSpawned > 1 && FloorManager.ActiveTiles.Count == 1)
                 finishedPlaying = true;
+
         });
         Play.SpecifyTermination(() => finishedPlaying, Celebration);
         Play.AddTimer(() => playDuration.value, Celebration);
@@ -170,6 +173,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         {
             PlayerManager.FinalCelebration();
             TokenFBController.enabled = false;
+            ScoreManager.DeactivateScoreText();
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);
 
@@ -180,6 +184,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
         DefineFrameData();
     }
+
+
 
 
     protected override void DefineTrialStims()
@@ -272,5 +278,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         celebrationDuration = ConfigUiVariables.get<ConfigNumber>("celebrationDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
     }
+
+
 
 }

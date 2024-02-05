@@ -88,16 +88,16 @@ public class FR_ItemSpawner : MonoBehaviour
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;
                 quaddleComponent.QuaddleTokenRewardMag = quaddle.StimTokenRewardMag;
 
-                if(RandomSpawnLocations)
-                {
-                    int randomNum = (int)Random.Range(0f, spawnLocations.Count - 1);
-                    quaddleComponent.QuaddleGeneralPosition = spawnLocations[randomNum];
-                    spawnLocations.Remove(quaddleComponent.QuaddleGeneralPosition);
-                }
-                else
-                {
-                    quaddleComponent.QuaddleGeneralPosition = currentPositionsArray[i];
-                }
+                //if(RandomSpawnLocations)
+                //{
+                //    int randomNum = (int)Random.Range(0f, spawnLocations.Count - 1);
+                //    quaddleComponent.QuaddleGeneralPosition = spawnLocations[randomNum];
+                //    spawnLocations.Remove(quaddleComponent.QuaddleGeneralPosition);
+                //}
+                //else
+                
+                quaddleComponent.QuaddleGeneralPosition = currentPositionsArray[i];
+                
 
                 quaddleComponent.SetItemPosition(parentTransform);
 

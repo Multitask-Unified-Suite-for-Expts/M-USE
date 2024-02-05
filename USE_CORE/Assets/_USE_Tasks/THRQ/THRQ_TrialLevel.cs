@@ -79,6 +79,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
 
 
     private GameObject StimGO;
+    private ProgressBar ProgressBar;
 
     private bool SelectionMade;
     private bool SuccessfulSelection;
@@ -106,6 +107,8 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
                 StimGO.transform.position = Vector3.zero;
                 StimGO.transform.localScale = new Vector3(5f, 5f, 5f);
                 StimGO.SetActive(false);
+                ProgressBar = StimGO.AddComponent<ProgressBar>();
+                ProgressBar.ManualStart(THRQ_CanvasGO.transform, StimGO);
 
                 USE_Backdrop = gameObject.AddComponent<USE_Backdrop>();
                 BackdropGO = USE_Backdrop.CreateBackdrop(THRQ_BackdropCanvasGO.GetComponent<Canvas>(), "BackdropGO", new Color32(6, 10, 17, 255), new Vector2(250f, 150f), new Vector3(0f, 0f, 100f));
@@ -172,11 +175,18 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         //SELECT OBJECT state -------------------------------------------------------------------------------------------------------------------------
         SelectObject.AddSpecificInitializationMethod(() =>
         {
+            Input.ResetInputAxes();
+
             TouchFBController.SetPrefabSizes(CurrentTrial.ObjectSize * 10f);
 
-            Input.ResetInputAxes();
+            ProgressBar.minHoldDuration = CurrentTrial.MinTouchDuration;
+            ProgressBar.SetProgressBarScale(new Vector2(300f, 40f));
+            ProgressBar.ResetProgressBarValue();
+            ProgressBar.ActivateProgressBar();
+
             StimGO.SetActive(true);
             BackdropGO.SetActive(true);
+
             SelectObjectStartTime = Time.time;
             MainObjectTouched = false;
             BackdropTouchTime = 0;
@@ -250,7 +260,6 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         {
             if(SuccessfulSelection)
             {
-                Debug.LogWarning("HELD CORRECTLY");
                 RewardEarnedTime = Time.time;
 
                 AudioFBController.Play("Positive");
@@ -272,12 +281,10 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
             {
                 if (ErrorType == "DurationTooShort")
                 {
-                    Debug.LogWarning("--HELD TOO SHORT");
                     NumReleasedEarly_Trial++;
                 }
                 else if (ErrorType == "DurationTooLong")
                 {
-                    Debug.LogWarning("--HELD TOO LONG");
                     NumReleasedLate_Trial++;
                 }
                 else if (ErrorType == "MovedTooFar")
@@ -339,6 +346,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         ITI.AddDefaultTerminationMethod(() =>
         {
             StimGO.SetActive(false);
+            ProgressBar.DeactivateProgressBar();
 
             UpdateData();
             CurrentTaskLevel.CalculateBlockSummaryString();
@@ -361,6 +369,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
     {
         if(e.Selection.SelectedGameObject == StimGO)
         {
+            Debug.LogWarning("DURATION: " + e.Selection.Duration + " | ERROR TYPE: " + e.Selection.ErrorType);
             ErrorType = e.Selection.ErrorType;
             SelectionMade = true;
         };

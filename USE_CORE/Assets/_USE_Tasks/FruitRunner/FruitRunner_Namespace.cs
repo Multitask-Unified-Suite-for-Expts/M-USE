@@ -24,7 +24,6 @@ namespace FruitRunner_Namespace
 
         public int[][] TrialGroup_InSpawnOrder; //Trial stim indices in spawn order. Blockade is -1. 
         public string[][] TrialStimGeneralPositions; //Left, Middle, Right. Mapped to TrialGroup_InSpawnOrder.
-        public bool RandomStimLocations;
 
         public int NumGroups;
 

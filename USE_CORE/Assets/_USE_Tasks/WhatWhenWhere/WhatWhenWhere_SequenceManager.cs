@@ -11,6 +11,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     private WhatWhenWhere_StimDef selectedSD;
     private List<WhatWhenWhere_StimDef> selectedSDs_InSequence = new List<WhatWhenWhere_StimDef>();
     private List<WhatWhenWhere_StimDef> selectedSDs_All = new List<WhatWhenWhere_StimDef>();
+    private List<GameObject> selectedGOs_All = new List<GameObject>();
+    private List<string> selectionClassifications_All = new List<string>();
 
 
     // Stim Evaluation Variables
@@ -90,6 +92,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 
         }
         selectedSDs_All.Add(selectedSD);
+        selectedGOs_All.Add(selectedGO);
     }
 
     public string DetermineErrorType()
@@ -126,6 +129,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
         if (distractorRuleAbidingError || ruleAbidingError || backTrackError || retouchError)
             lastErrorStimGO = selectedGO;
 
+        selectionClassifications_All.Add(selectionType);
         return selectionType;
     }
     public void SetSelectedGO(GameObject go)
@@ -203,6 +207,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 
         selectedSDs_InSequence.Clear();
         selectedSDs_All.Clear();
+        selectedGOs_All.Clear();
+        selectionClassifications_All.Clear();
 
         sequenceIdx = 0;
         totalStimInSequence = 0;
@@ -250,9 +256,17 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
         return targetStimGO;
     }
 
-    public List<WhatWhenWhere_StimDef> GetAllSelectedGOs()
+    public List<WhatWhenWhere_StimDef> GetAllSelectedSDs()
     {
         return selectedSDs_All;
+    }    
+    public List<GameObject> GetAllSelectedGOs()
+    {
+        return selectedGOs_All;
+    } 
+    public List<string> GetAllSelectionClassifications()
+    {
+        return selectionClassifications_All;
     }
     public int GetSeqIdx()
     {

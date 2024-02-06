@@ -57,10 +57,13 @@ namespace USE_ExperimentTemplate_Task
         
         // protected int NumBlocksInTask;
         [HideInInspector] public int NumAbortedTrials_InTask;
+        [HideInInspector] public int NumAbortedTrials_InBlock;
+
+        [HideInInspector] public int NumRewardPulses_InBlock;
         [HideInInspector] public int NumRewardPulses_InTask;
 
-        [HideInInspector] public int NumAbortedTrials_InBlock;
-        [HideInInspector] public int NumRewardPulses_InBlock;
+        [HideInInspector] public int? TotalTouches_InBlock;
+        [HideInInspector] public int? TotalIncompleteTouches_InBlock;
 
         [HideInInspector] public int MinTrials_InBlock;
         [HideInInspector] public int MaxTrials_InBlock;
@@ -104,7 +107,7 @@ namespace USE_ExperimentTemplate_Task
         protected State VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask;
         protected bool BlockFbFinished;
         protected float BlockFbSimpleDuration;
-        protected TaskLevelTemplate_Methods TaskLevel_Methods;
+        public TaskLevelTemplate_Methods TaskLevel_Methods;
         public List<GameObject> ActiveSceneElements;
 
         // protected int? MinTrials, MaxTrials;
@@ -158,6 +161,7 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
             TrialLevel.TaskLevel = this;
+            TaskLevel_Methods.TrialLevel = TrialLevel;
 
             Add_ControlLevel_InitializationMethod(() =>
             {
@@ -215,6 +219,9 @@ namespace USE_ExperimentTemplate_Task
 
                 NumAbortedTrials_InBlock = 0;
                 NumRewardPulses_InBlock = 0;
+                TotalTouches_InBlock = 0;
+                TotalIncompleteTouches_InBlock = 0;
+                Session.MouseTracker.ResetClicks();
 
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
@@ -230,6 +237,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
                 TrialLevel.ForceBlockEnd = false;
+                TrialLevel.ReachedCriterion = false;
 
                 Session.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
             });
@@ -927,6 +935,8 @@ namespace USE_ExperimentTemplate_Task
 
 public class TaskLevelTemplate_Methods
     {
+        public ControlLevel_Trial_Template TrialLevel;
+
         //CALCULATE ADPATIVE TRIAL DEF 
         public int DetermineTrialDefDifficultyLevel()
         {
@@ -954,6 +964,7 @@ public class TaskLevelTemplate_Methods
 
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;
                     }
@@ -963,6 +974,7 @@ public class TaskLevelTemplate_Methods
                     Debug.Log("CHECKING BLOCK END - ERROR COUNT: " + rTrialPerformance[rTrialPerformance.Count - 1] + "THRESHOLD: " + performanceThreshold);
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;
                     }
@@ -1018,6 +1030,7 @@ public class TaskLevelTemplate_Methods
                     Debug.Log("Immediate: " + immediateAvg + ", threshold: " + accThreshold);
                     if (immediateAvg >= accThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to performance above threshold.");
                         return true;
                     }
@@ -1026,6 +1039,7 @@ public class TaskLevelTemplate_Methods
                 case "ThresholdAndPeak":
                     if (immediateAvg >= accThreshold && immediateAvg <= prevAvg)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to performance above threshold and no continued improvement.");
                         return true;
                     }
@@ -1034,11 +1048,13 @@ public class TaskLevelTemplate_Methods
                 case "ThresholdOrAsymptote":
                     if (sumdif != null && sumdif.Value <= 1)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to asymptotic performance.");
                         return true;
                     }
                     else if (immediateAvg >= accThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to performance above threshold.");
                         return true;
                     }

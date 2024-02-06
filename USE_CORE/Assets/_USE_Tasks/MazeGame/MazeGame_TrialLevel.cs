@@ -198,9 +198,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
-            
-            
-           
         });
         ChooseTile.AddUpdateMethod(() =>
         {
@@ -285,7 +282,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 if (MazeManager.IsMazeFinished())
                 {
-                    Debug.LogWarning("filling up slider");
                     SliderFBController.SetFlashingDuration(flashingFbDuration.value);
                     SliderFBController.UpdateSliderValue(1); // fill up the remainder of the slider
                 }
@@ -305,6 +301,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Negative");
             }
+
         });
         SelectionFeedback.AddUpdateMethod(() => { SetTrialSummaryString(); });// called every frame to update duration info
 
@@ -316,14 +313,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
-
-                int[] nums = new int[3] { 1, 2, 3 };
-                int sum = nums.Sum();
-
-                  percentError = (float)decimal.Divide(totalErrors_InTrial, MazeManager.GetCurrentMaze().mNumSquares);
-                  runningPercentError.Add(percentError);
-                  CurrentTaskLevel.NumSliderBarFull_InBlock++;
-                  CurrentTaskLevel.NumSliderBarFull_InTask++;
 
                 if (Session.SyncBoxController != null)
                 {
@@ -446,8 +435,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
+        return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
             CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock);
     }
@@ -547,6 +535,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
 
+        finishedFbDuration = flashingFbDuration.value + correctFbDuration.value;
         configVariablesLoaded = true;
     }
 
@@ -657,7 +646,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         choiceMade = false;
         configVariablesLoaded = false;
         playerViewTextLoaded = false;
-        Session.MouseTracker.ResetClicks();
         MazeManager.ResetMazeVariables();
         correctTouches_InTrial = 0;
         perseverativeRetouchErrors_InTrial = 0;

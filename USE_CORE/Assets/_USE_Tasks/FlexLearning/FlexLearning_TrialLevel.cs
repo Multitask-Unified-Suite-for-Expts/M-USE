@@ -119,8 +119,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
             
             // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloIntensity(1.5f);
-            HaloFBController.SetCircleHaloIntensity(5);
+            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
         });
         
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -431,7 +431,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
-        Session.MouseTracker.ResetClicks();
     }
     private void DefineTrialData()
     {
@@ -506,8 +505,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
     protected override bool CheckBlockEnd()
     {
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return (TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
+        return (CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
             CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock) || TrialCount_InBlock == CurrentTaskLevel.MaxTrials_InBlock);
         

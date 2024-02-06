@@ -64,6 +64,8 @@ namespace WorkingMemory_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.ContextName = ContextName;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;
             }
         }

@@ -105,7 +105,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Slider & Animation variables
     private float finishedFbDuration;
 
-    [FormerlySerializedAs("mazeManager")] public MazeManager MazeManager;
+    public MazeManager MazeManager;
 
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
@@ -547,7 +547,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("MazeDefName", () => mazeDefName);
         TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles()));
         TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
-        // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
+        TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); 
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
         TrialData.AddDatum("RetouchErroneous", () => retouchErroneous_InTrial);
         
@@ -801,6 +801,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 HandleBackTrackErrorData();
                 HandlePerseverativeBackTrackError();
                 HandleRuleBreakingErrorData();
+                HandlePerseverativeRuleBreakingError();
                 break;
             case "perseverativeRetouchCurrentTilePositionError":
                 HandlePerseverativeRetouchError();

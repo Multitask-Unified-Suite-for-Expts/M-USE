@@ -61,9 +61,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private string selectionType;
 
     private int ruleAbidingErrors_InTrial;
+    private int ruleBreakingErrors_InTrial;
     private int distractorRuleAbidingErrors_InTrial;
     private int backTrackErrors_InTrial;
     private int retouchErrors_InTrial;    
+    private int perseverativeRuleBreakingErrors_InTrial;
     private int perseverativeRuleAbidingErrors_InTrial;
     private int perseverativeDistractorRuleAbidingErrors_InTrial;
     private int perseverativeBackTrackErrors_InTrial;
@@ -556,6 +558,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SequenceManager?.ResetSequenceManagerVariables();
 
         searchDurations_InTrial.Clear();
+        ruleBreakingErrors_InTrial = 0;
         ruleAbidingErrors_InTrial = 0;
         distractorRuleAbidingErrors_InTrial = 0;
         backTrackErrors_InTrial = 0;
@@ -580,10 +583,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("TouchedObjects", () => string.Join(",", SequenceManager.GetAllSelectedSDs().Select(sd => sd.StimIndex)));
         TrialData.AddDatum("SelectionClassifications", () => string.Join(",", SequenceManager.GetAllSelectionClassifications()));
         TrialData.AddDatum("SearchDurations", () => String.Join(",",searchDurations_InTrial));
+        TrialData.AddDatum("RuleBreakingErrors", () => ruleBreakingErrors_InTrial);
         TrialData.AddDatum("RuleAbidingErrors", () => ruleAbidingErrors_InTrial);
         TrialData.AddDatum("DistractorRuleAbidingErrors", () => distractorRuleAbidingErrors_InTrial);
         TrialData.AddDatum("BackTrackErrors", () => backTrackErrors_InTrial);
         TrialData.AddDatum("RetouchErrors", () => retouchErrors_InTrial);
+        TrialData.AddDatum("PerseverativeRuleBreakingErrors", () => perseverativeRuleBreakingErrors_InTrial);
+        TrialData.AddDatum("PerseverativeRuleAbidingErrors", () => perseverativeRuleAbidingErrors_InTrial);
+        TrialData.AddDatum("PerseverativeDistractorRuleAbidingErrors", () => perseverativeDistractorRuleAbidingErrors_InTrial);
+        TrialData.AddDatum("PerseverativeBackTrackErrors", () => perseverativeBackTrackErrors_InTrial);
+        TrialData.AddDatum("PerseverativeRetouchErrors", () => perseverativeRetouchErrors_InTrial);
         TrialData.AddDatum("CorrectSelections", () => correctSelections_InTrial);
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
         TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
@@ -743,7 +752,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         SliderFBController.SetUpdateDuration(fbDuration.value);
         SliderFBController.SetFlashingDuration(flashingFbDuration.value);
     }
+    private void HandleRuleBreakingErrorData()
+    {
+        if (Session.SessionDef.EventCodesActive)
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleBreakingError"]);
 
+        ruleBreakingErrors_InTrial++;
+        CurrentTaskLevel.RuleBreakingErrors_InBlock++;
+        CurrentTaskLevel.RuleBreakingErrors_InTask++;
+    }
     private void HandleRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
@@ -813,6 +830,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
     }
+    private void HandlePerseverativeRuleBreakingErrorData()
+    {
+        perseverativeRuleBreakingErrors_InTrial++;
+        CurrentTaskLevel.PerseverativeRuleBreakingErrors_InBlock++;
+        CurrentTaskLevel.PerseverativeRuleBreakingErrors_InTask++;
+    }
     private void HandlePerseverativeRuleAbidingErrorData()
     {
         perseverativeRuleAbidingErrors_InTrial++;
@@ -846,6 +869,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 break;
             case "backTrackError":
                 HandleBackTrackErrorData();
+                HandleRuleBreakingErrorData();
                 HandleErrorData();
                 break;
             case "retouchError":
@@ -856,6 +880,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 HandleRuleAbidingErrorData();
                 HandleErrorData();
                 break;
+            case "ruleBreakingError":
+                HandleRuleBreakingErrorData();
+                HandleErrorData();
+                break;
             case "distractorRuleAbidingError":
                 HandleDistractorRuleAbidingErrorData();
                 HandleErrorData();
@@ -863,11 +891,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             case "perseverativeBackTrackError":
                 HandleBackTrackErrorData();
                 HandlePerseverativeBackTrackErrorData();
+                HandlePerseverativeRuleBreakingErrorData();
+                HandleRuleBreakingErrorData();
                 HandleErrorData();
                 break;
             case "perseverativeRetouchError":
                 HandlePerseverativeRetouchErrorData();
                 HandleRetouchErrorData();
+                HandleErrorData();
+                break;
+            case "perseverativeRuleBreakingError":
+                HandlePerseverativeRuleBreakingErrorData();
+                HandleRuleBreakingErrorData();
                 HandleErrorData();
                 break;
             case "perseverativeRuleAbidingError":

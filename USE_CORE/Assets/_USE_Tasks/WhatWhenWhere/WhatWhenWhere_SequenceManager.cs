@@ -33,6 +33,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     private bool backTrackError;
     private bool distractorRuleAbidingError;
     private bool ruleAbidingError;
+    private bool ruleBreakingError;
     private bool startedSequence;
     private bool finishedSequence;
 
@@ -75,7 +76,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
                 else
                     backTrackError = true;
             }
-
+            else if (consecutiveErrors > 0)
+                ruleBreakingError = true;
             else
             {
                 if (selectedSD.IsDistractor)
@@ -104,6 +106,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
                 selectionType = "perseverativeBackTrackError";
             else if (retouchError)
                 selectionType = "perseverativeRetouchError";
+            else if (ruleBreakingError)
+                selectionType = "perseverativeRuleBreakingError";
             else if (ruleAbidingError)
                 selectionType = "perseverativeRuleAbidingError";
             else if (distractorRuleAbidingError)
@@ -120,13 +124,15 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
                 selectionType = "backTrackError";
             else if (retouchError)
                 selectionType = "retouchError";
+            else if (ruleBreakingError)
+                selectionType = "ruleBreakingError";
             else if (ruleAbidingError)
                 selectionType = "ruleAbidingError";
             else if (distractorRuleAbidingError)
                 selectionType = "distractorRuleAbidingError";
         }
 
-        if (distractorRuleAbidingError || ruleAbidingError || backTrackError || retouchError)
+        if (distractorRuleAbidingError || ruleAbidingError || backTrackError || retouchError || ruleBreakingError)
             lastErrorStimGO = selectedGO;
 
         selectionClassifications_All.Add(selectionType);
@@ -190,6 +196,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
         backTrackError = false;
         distractorRuleAbidingError = false;
         ruleAbidingError = false;
+        ruleBreakingError = false;
 
         targetStimGO = null;
         selectedGO = null;

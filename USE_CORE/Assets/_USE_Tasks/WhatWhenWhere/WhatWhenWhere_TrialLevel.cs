@@ -190,6 +190,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = FlashNextCorrectStim;
             else
                 StateAfterDelay = ChooseStimulus;
+            RemoveRoughnessFromStimMaterial();
         });
         
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
@@ -215,7 +216,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
             
-            if(!Session.WebBuild)
+            
+            if (!Session.WebBuild)
             {
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                     CreateTextOnExperimenterDisplay();
@@ -225,7 +227,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                GameObject selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+                GameObject selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject.transform.root.gameObject;
                 WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
                 ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
@@ -499,6 +501,52 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
+    private void AdjustQuaddleBodyRoughness(float roughnessValue, GameObject parentGameObject)
+    {
+        // Recursively search for the "Body" and "Head" GameObject among all children
+        FindAndSetRoughnessRecursively(roughnessValue, parentGameObject.transform);
+    }
+
+    private Transform FindTransformRecursively(string transformName, Transform parentTransform)
+    {
+        Transform transform = parentTransform.Find(transformName);
+        foreach (Transform childTransform in parentTransform)
+        {
+            Transform foundTransform = FindTransformRecursively(transformName, childTransform);
+            if (foundTransform != null)
+                return foundTransform;
+        }
+        return transform;
+    }
+
+    private void FindAndSetRoughnessRecursively(float roughnessValue, Transform parentTransform)
+    {
+        // Check if the current transform has a child named "Body" and "Head"
+        Transform bodyTransform = FindTransformRecursively("Body", parentTransform);
+        Transform headTransform = FindTransformRecursively("Head", parentTransform);
+
+        if (bodyTransform != null)
+        {
+            MeshRenderer bodyRenderer = bodyTransform.GetComponent<MeshRenderer>();
+            Material bodyMaterial = bodyRenderer.material;
+            bodyMaterial.SetFloat("roughnessFactor", roughnessValue);
+        }
+        if (headTransform != null)
+        {
+            MeshRenderer headRenderer = headTransform.GetComponent<MeshRenderer>();
+            Material headMaterial = headRenderer.material;
+            headMaterial.SetFloat("roughnessFactor", roughnessValue);
+        }
+
+    }
+
+    private void RemoveRoughnessFromStimMaterial()
+    {
+        foreach (var sd in searchStims.stimDefs)
+            AdjustQuaddleBodyRoughness(0, sd.StimGameObject);
+        foreach (var sd in distractorStims.stimDefs)
+            AdjustQuaddleBodyRoughness(0, sd.StimGameObject);
+    }
     public override void ResetTrialVariables()
     {
         searchDurationStartTime = 0;
@@ -529,11 +577,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("SearchStimLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimLocations", () => distractorStimsLocations);
-        TrialData.AddDatum("SelectedGOs", () => String.Join(",",SequenceManager?.GetAllSelectedGOs()));
+        TrialData.AddDatum("TouchedObjects", () => string.Join(",", SequenceManager.GetAllSelectedSDs().Select(sd => sd.StimIndex)));
+        TrialData.AddDatum("SelectionClassifications", () => string.Join(",", SequenceManager.GetAllSelectionClassifications()));
         TrialData.AddDatum("SearchDurations", () => String.Join(",",searchDurations_InTrial));
         TrialData.AddDatum("RuleAbidingErrors", () => ruleAbidingErrors_InTrial);
         TrialData.AddDatum("DistractorRuleAbidingErrors", () => distractorRuleAbidingErrors_InTrial);
-        TrialData.AddDatum("BackTrackErrors_InTrial", () => backTrackErrors_InTrial);
+        TrialData.AddDatum("BackTrackErrors", () => backTrackErrors_InTrial);
         TrialData.AddDatum("RetouchErrors", () => retouchErrors_InTrial);
         TrialData.AddDatum("CorrectSelections", () => correctSelections_InTrial);
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
@@ -549,7 +598,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "Selected Object Indices: " + string.Join(",",SequenceManager.GetAllSelectedGOs()) +
+        TrialSummaryString = "Selected Object Indices: " + string.Join(",",SequenceManager.GetAllSelectedSDs().Select(obj => obj.StimIndex)) +
                              "\nSelection Type : " + selectionType +
                              "\nLast Trial's Percent Error : " + percentError +
                              "\n" +

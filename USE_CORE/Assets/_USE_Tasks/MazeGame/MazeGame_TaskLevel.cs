@@ -300,8 +300,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         blockSummary.TrialsToCriterion = mgTL.ReachedCriterion ? (mgTL.TrialCount_InBlock + 1) : -1;
 
         MG_BlockSummaryData.Add(blockSummary);
-
-        Debug.LogWarning("THIS IS THE SUMMARY STRING: " + CreateBlockSummaryDataString(blockSummary));
     }
     public override void SetTaskSummaryString()
     {

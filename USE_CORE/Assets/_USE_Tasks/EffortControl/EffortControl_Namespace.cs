@@ -56,8 +56,8 @@ namespace EffortControl_Namespace
         public int NumReversalsUntilTerm = -1;
         public int MinTrialsBeforeTermProcedure = -1;
         public int TerminationWindowSize = -1;
-        public int[] RandomMinTrialDuration;
-        public int? MinTrialDuration;
+        public float[] RandomMinTrialDuration;
+        public float? MinTrialDuration;
         
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -76,8 +76,9 @@ namespace EffortControl_Namespace
 
             if(RandomMinTrialDuration != null)
             {
-               Debug.LogWarning($"ATLEAST IA M TRYING TO ASSIG IT {RandomMinTrialDuration[0]} to {RandomMinTrialDuration[1]}");
-                MinTrialDuration = RandomNumGenerator.Next(RandomMinTrialDuration[0], RandomMinTrialDuration[1]);
+                int lowestPossibleDuration = (int)(RandomMinTrialDuration[0] * 100);
+                int highestPossibleDuration = (int)(RandomMinTrialDuration[1] * 100);
+                MinTrialDuration = (RandomNumGenerator.Next(lowestPossibleDuration, highestPossibleDuration)) / 100;
             }
             TrialDefs = new List<EffortControl_TrialDef>().ConvertAll(x => (TrialDef)x);
 
@@ -153,8 +154,8 @@ namespace EffortControl_Namespace
         public int NumReversalsUntilTerm;
         public int MinTrialsBeforeTermProcedure;
         public int TerminationWindowSize;
-        public int[] RandomMinTrialDuration;
-        public int? MinTrialDuration;
+        public float[] RandomMinTrialDuration;
+        public float? MinTrialDuration;
     }
 
     public class EffortControl_StimDef : StimDef

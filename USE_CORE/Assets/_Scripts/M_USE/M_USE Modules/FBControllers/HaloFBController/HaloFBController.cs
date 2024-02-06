@@ -190,6 +190,11 @@ public class HaloFBController : MonoBehaviour
     {
         PositiveCircleHaloPrefab.GetComponent<Light>().intensity = newIntensity;
         NegativeCircleHaloPrefab.GetComponent<Light>().intensity = newIntensity;
+    }    
+    public void SetCircleHaloRange(float newRange)
+    {
+        PositiveCircleHaloPrefab.GetComponent<Light>().range = newRange;
+        NegativeCircleHaloPrefab.GetComponent<Light>().range = newRange;
     }
 
     public void SetPositiveCircleHaloColor(Color color)

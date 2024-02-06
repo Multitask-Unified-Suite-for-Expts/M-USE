@@ -301,6 +301,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Negative");
             }
+
         });
         SelectionFeedback.AddUpdateMethod(() => { SetTrialSummaryString(); });// called every frame to update duration info
 
@@ -312,12 +313,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
-
-                int[] nums = new int[3] { 1, 2, 3 };
-                int sum = nums.Sum();
-
-                  percentError = (float)decimal.Divide(totalErrors_InTrial, MazeManager.GetCurrentMaze().mNumSquares);
-                  runningPercentError.Add(percentError);
 
                 if (Session.SyncBoxController != null)
                 {

@@ -360,7 +360,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflationDuration = 0;
             ScaleTimer = 0;
             clickTimings = new List<float>();
-            timeTracker = 0;
+            timeTracker = Time.time;
 
             TrialTouches = 0;
             NumInflations = 0;
@@ -547,7 +547,16 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             trialDuration = Time.time - trialStartTime;
             if (CurrentTrial.RandomMinTrialDuration != null)
             {
-                CurrentTrial.MinTrialDuration = CurrentTaskLevel.CurrentBlock.RandomNumGenerator.Next(CurrentTrial.RandomMinTrialDuration[0], CurrentTrial.RandomMinTrialDuration[1]);
+                // Get the lowest and highest possible durations scaled by 100
+                int lowestPossibleDuration = (int)(CurrentTrial.RandomMinTrialDuration[0] * 100);
+                int highestPossibleDuration = (int)(CurrentTrial.RandomMinTrialDuration[1] * 100);
+
+                // Generate a random number between the scaled values
+                int randomDuration = CurrentTaskLevel.CurrentBlock.RandomNumGenerator.Next(lowestPossibleDuration, highestPossibleDuration);
+
+                // Convert the random duration back to its original scale by dividing by 100
+                CurrentTrial.MinTrialDuration = randomDuration / 100.0f; // Use float division to retain decimal precision
+
                 if (trialDuration > CurrentTrial.MinTrialDuration)
                     trialEndDelayDuration = 0;
                 else
@@ -806,7 +815,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
-
         }
         else
         {

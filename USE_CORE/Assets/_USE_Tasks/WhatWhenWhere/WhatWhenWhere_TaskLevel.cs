@@ -219,7 +219,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
         WWW_BlockSummaryData.Add(blockSummary);
 
-        Debug.LogWarning("THIS IS THE SUMMARY STRING: " + CreateBlockSummaryDataString(blockSummary));
     }
 
     public void ClearStrings()

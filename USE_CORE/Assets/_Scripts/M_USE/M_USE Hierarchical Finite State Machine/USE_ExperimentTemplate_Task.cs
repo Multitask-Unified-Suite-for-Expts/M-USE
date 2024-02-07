@@ -224,7 +224,6 @@ namespace USE_ExperimentTemplate_Task
                 Session.MouseTracker.ResetClicks();
 
                 CurrentBlockDef = BlockDefs[BlockCount];
-                Debug.LogWarning("CURRENT BLOCK COUNT: " + BlockCount);
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)
                     TrialLevel.TrialCount_InTask = -1;

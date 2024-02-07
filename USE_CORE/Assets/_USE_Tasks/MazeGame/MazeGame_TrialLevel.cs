@@ -131,7 +131,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             //FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
-            MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
 
             if (!Session.WebBuild) //player view variables
             {
@@ -156,7 +155,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            
+
             CurrentTaskLevel.SetTaskSummaryString();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
@@ -440,6 +439,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         LoadConfigVariables();
+
+        if (!MazeManager.GetMazeManagerInitialized())
+            MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
         tiles = MazeManager.CreateMaze();
         TrialStims.Add(tiles);
     }

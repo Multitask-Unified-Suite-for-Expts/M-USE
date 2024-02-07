@@ -192,8 +192,6 @@ public class Tile : MonoBehaviour
 
             float elapsed = Time.unscaledTime - FBStartTime;
             float interval = FBDuration;
-            Debug.Log("TILE FB DURATION: " + FBDuration);
-        
             if (elapsed >=  interval)
             {
                 if (!MazeManager.IsPathVisible() || (CorrectnessCode == 10 || (CorrectnessCode == 20 && !MazeManager.IsBacktrack())))

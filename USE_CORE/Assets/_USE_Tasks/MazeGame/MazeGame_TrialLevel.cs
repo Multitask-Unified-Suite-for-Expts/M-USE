@@ -314,10 +314,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
 
-                if (Session.SyncBoxController != null)
-                {
-                    HandleMazeCompletion();
-                }
+                 HandleMazeCompletion();
+                
             }
             else if (CheckTileFlash() || (CurrentTrialDef.TileFlashingRatio != 0 && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
                 StateAfterDelay = TileFlashFeedback;
@@ -500,7 +498,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
         
         DisableSceneElements();
-
     }
 
     private void AddChoiceDurationToDataTrackers()
@@ -545,7 +542,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", () => mazeDefName);
-        TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles()));
+        TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles().Select(go => go.name)));
         TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
         TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); 
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);

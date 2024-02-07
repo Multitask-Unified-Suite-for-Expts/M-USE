@@ -454,8 +454,6 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 retouchCurrentTilePositionError = true;
-                consecutiveErrors++;
-
                 return 2;
             }
             
@@ -537,7 +535,6 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 retouchCurrentTilePositionError = true;
-                consecutiveErrors++;
                 return 2;
             }
             
@@ -679,7 +676,6 @@ public class MazeManager:MonoBehaviour
         ruleAbidingError = false;
         ruleBreakingError = false;
     }
-
 
     public void ActivateMazeBackground()
     {

@@ -131,7 +131,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             //FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
-            MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
 
             if (!Session.WebBuild) //player view variables
             {
@@ -156,7 +155,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            
+
             CurrentTaskLevel.SetTaskSummaryString();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
@@ -314,10 +313,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
 
-                if (Session.SyncBoxController != null)
-                {
-                    HandleMazeCompletion();
-                }
+                 HandleMazeCompletion();
+                
             }
             else if (CheckTileFlash() || (CurrentTrialDef.TileFlashingRatio != 0 && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
                 StateAfterDelay = TileFlashFeedback;
@@ -442,6 +439,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     protected override void DefineTrialStims()
     {
         LoadConfigVariables();
+
+        if (!MazeManager.GetMazeManagerInitialized())
+            MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
         tiles = MazeManager.CreateMaze();
         TrialStims.Add(tiles);
     }
@@ -500,7 +500,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
         
         DisableSceneElements();
-
     }
 
     private void AddChoiceDurationToDataTrackers()
@@ -544,7 +543,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", () => mazeDefName);
-        TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles()));
+        TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles().Select(go => go.name)));
         TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
         TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); 
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);

@@ -53,6 +53,7 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] private bool finishedMaze;
     [HideInInspector] private bool backTrackError;
     [HideInInspector] private bool tileConnectorsLoaded;
+    [HideInInspector] private bool mazeManagerInitialized;
     [HideInInspector] private Maze currentMaze;
 
     [HideInInspector] private GameObject latestConnection;
@@ -454,8 +455,6 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 retouchCurrentTilePositionError = true;
-                consecutiveErrors++;
-
                 return 2;
             }
             
@@ -537,7 +536,6 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 retouchCurrentTilePositionError = true;
-                consecutiveErrors++;
                 return 2;
             }
             
@@ -663,7 +661,8 @@ public class MazeManager:MonoBehaviour
 
         selectedTilesInPathGO.Clear();
         selectedTilesGO.Clear();
-        
+
+        mazeManagerInitialized = false;
         startedMaze = false;
         finishedMaze = false;
         outOfMoves = false;
@@ -678,8 +677,9 @@ public class MazeManager:MonoBehaviour
         backTrackError = false;
         ruleAbidingError = false;
         ruleBreakingError = false;
-    }
 
+      
+    }
 
     public void ActivateMazeBackground()
     {
@@ -753,7 +753,10 @@ public class MazeManager:MonoBehaviour
     {
         return finishTileGO;
     }
-
+    public bool GetMazeManagerInitialized()
+    {
+        return mazeManagerInitialized;
+    }
     public void SetSelectedTileGO(GameObject? tileGO)
     {
         selectedTileGO = tileGO;

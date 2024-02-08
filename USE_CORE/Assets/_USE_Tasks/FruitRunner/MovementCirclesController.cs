@@ -22,9 +22,10 @@ public class MovementCirclesController : MonoBehaviour
 
 
 
-    public void SetupMovementCircles(Transform parentCanvas)
+    public void SetupMovementCircles(Transform parentCanvas, FR_PlayerManager playerManager)
     {
         ParentCanvasTransform = parentCanvas;
+        PlayerManager = playerManager;
 
         Instantiated = Instantiate(Resources.Load<GameObject>("Prefabs/MovementCircles"));
         Instantiated.name = "MovementCirclesParent";

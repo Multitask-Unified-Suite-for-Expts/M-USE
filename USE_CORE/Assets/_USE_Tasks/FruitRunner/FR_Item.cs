@@ -75,7 +75,7 @@ public class FR_Item_Quaddle : FR_Item
     {
         if (other.CompareTag("Player"))
         {
-            FR_EventManager.TriggerScoreChanged(QuaddleTokenRewardMag * 100);
+            FR_EventManager.TriggerScoreChanged(QuaddleTokenRewardMag * 1000);
 
             if(QuaddleType == "Positive")
             {
@@ -114,7 +114,7 @@ public class FR_Item_Blockade : FR_Item
     {
         if (other.CompareTag("Player"))
         {
-            FR_EventManager.TriggerScoreChanged(-50);
+            FR_EventManager.TriggerScoreChanged(-500);
 
             playerManager.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
             playerManager.StartAnimation("injured");

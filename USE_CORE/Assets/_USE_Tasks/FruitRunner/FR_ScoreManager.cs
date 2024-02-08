@@ -9,6 +9,7 @@ public class FR_ScoreManager : MonoBehaviour
     public GameObject ScoreGO;
     public TextMeshProUGUI ScoreText;
     [HideInInspector] public int Score;
+    private float ScoreFlashDuration = .3f;
 
 
     private void Start()
@@ -35,6 +36,11 @@ public class FR_ScoreManager : MonoBehaviour
         ScoreGO.SetActive(false);
     }
 
+    public void ToggleScoreText()
+    {
+        ScoreGO.SetActive(!ScoreGO.activeInHierarchy);
+    }
+
     public void SubscribeToEventManager()
     {
         FR_EventManager.OnScoreChanged += ScoreChanged;
@@ -56,7 +62,7 @@ public class FR_ScoreManager : MonoBehaviour
     {
         Color startingColor = ScoreText.color;
         ScoreText.color = scoreChange > 0 ? Color.green : Color.red;
-        yield return new WaitForSeconds(.25f);
+        yield return new WaitForSeconds(ScoreFlashDuration);
         ScoreText.color = startingColor;
     }
 }

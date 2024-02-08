@@ -7,7 +7,7 @@ using USE_StimulusManagement;
 using FruitRunner_Namespace;
 using ConfigDynamicUI;
 using TMPro;
-
+using UnityEngine.UI;
 
 public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 {
@@ -18,7 +18,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     //Set in Inspector:
     public GameObject FruitRunner_CanvasGO;
     public List<Material> SkyboxMaterials;
+    public List<Color> FogColors;
     public FR_ScoreManager ScoreManager;
+    public GameObject SpeedSliderGO;
+    public Slider SpeedSlider;
 
     private GameObject StartButton;
 
@@ -39,6 +42,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup trialStims;
 
+    private CameraIntroMovement CamMovement;
 
 
     public override void DefineControlLevel()
@@ -100,12 +104,12 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetRevealTime(.15f);
             TokenFBController.SetUpdateTime(.25f);
 
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/PT_Skybox");
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
+            Skybox skybox = CurrentTaskLevel.TaskCam.GetComponent<Skybox>();
+            skybox.material = CurrentTrial.SkyboxName.ToLower() == "random" ? SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)] : Resources.Load<Material>("Materials/" + CurrentTrial.SkyboxName);
+            skybox.enabled = true;
 
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
+            RenderSettings.fogColor = FogColors[SkyboxMaterials.IndexOf(skybox.material)];
+
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
         });
 
@@ -135,16 +139,22 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             FloorManager.TileScale_Z = CurrentTrial.FloorTileLength;
             FloorManager.gameObject.SetActive(true);
 
-
-            //CameraIntroMovement camMovement = Camera.main.gameObject.AddComponent<CameraIntroMovement>();
-            //camMovement.player = PlayerGO.transform;
+            if (CamMovement != null)
+                Destroy(CamMovement);
+            CamMovement = Camera.main.gameObject.AddComponent<CameraIntroMovement>();
+            CamMovement.StartMovement(PlayerGO.transform, new Vector3(0f, 4f, -6f), new Vector3(0f, 2f, -3f));
         });
-        Setup.AddTimer(() => setupDuration.value, Play);
+        Setup.SpecifyTermination(() => !CamMovement.Move, Play);
+        //Setup.AddTimer(() => setupDuration.value, Play);
 
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         bool finishedPlaying = false;
+        float startTime = 0f;
         Play.AddSpecificInitializationMethod(() =>
         {
+            SpeedSliderGO.SetActive(true);
+            SpeedSlider.value = FloorManager.FloorMovementSpeed;
+
             ScoreManager.Score = 0;
             ScoreManager.ActivateScoreText();
 
@@ -158,11 +168,35 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
 
             finishedPlaying = false;
+
+            startTime = Time.time;
         });
         Play.AddUpdateMethod(() =>
         {
+            if(Time.time - startTime > 4f)
+            {
+                Skybox skybox = CurrentTaskLevel.TaskCam.GetComponent<Skybox>();
+                skybox.material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
+                RenderSettings.fogColor = FogColors[SkyboxMaterials.IndexOf(skybox.material)];
+                startTime = Time.time;
+            }
+
             if (FloorManager.NumTilesSpawned > 1 && FloorManager.ActiveTiles.Count == 1)
                 finishedPlaying = true;
+
+            if (SpeedSlider != null)
+                FloorManager.FloorMovementSpeed = SpeedSlider.value;
+
+            if(InputBroker.GetKeyDown(KeyCode.A))
+            {
+                PlayerManager.AllowItemPickupAnimations = !PlayerManager.AllowItemPickupAnimations;
+            }
+
+            if(InputBroker.GetKeyDown(KeyCode.Q))
+            {
+                ScoreManager.ToggleScoreText();
+                SpeedSliderGO.SetActive(!SpeedSliderGO.activeInHierarchy);
+            }
 
         });
         Play.SpecifyTermination(() => finishedPlaying, Celebration);
@@ -171,6 +205,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         //Celebration state ----------------------------------------------------------------------------------------------------------------------------------------------
         Celebration.AddSpecificInitializationMethod(() =>
         {
+            SpeedSliderGO.SetActive(false);
+
             PlayerManager.FinalCelebration();
             TokenFBController.enabled = false;
             ScoreManager.DeactivateScoreText();
@@ -184,8 +220,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
         DefineFrameData();
     }
-
-
 
 
     protected override void DefineTrialStims()
@@ -216,7 +250,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        SpeedSliderGO.SetActive(false);
+        ScoreManager.DeactivateScoreText();
 
+        Destroy(ScoreManager);
         Destroy(PlayerGO);
         Destroy(FloorManagerGO);
         Destroy(ItemSpawnerGO);
@@ -265,6 +302,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("PlayerPosition", () => PlayerGO == null ? "-" : PlayerGO.transform.position.ToString());
         //what else to track?
     }
 

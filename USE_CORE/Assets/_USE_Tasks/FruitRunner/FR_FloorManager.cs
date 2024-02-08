@@ -66,7 +66,6 @@ public class FR_FloorManager : MonoBehaviour
     void SpawnTile()
     {
         Vector3 spawnPos = new Vector3(0f, -.5f, -15.5f); //for first one
-        //Vector3 spawnPos = new Vector3(0f, -.5f, -.5f); //for first one
 
         if (ActiveTiles.Count > 0)
         {

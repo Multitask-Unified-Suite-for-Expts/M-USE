@@ -3,6 +3,7 @@ using FruitRunner_Namespace;
 using UnityEngine;
 using USE_StimulusManagement;
 using System.Linq;
+using USE_Def_Namespace;
 
 
 public class FR_ItemSpawner : MonoBehaviour
@@ -56,15 +57,23 @@ public class FR_ItemSpawner : MonoBehaviour
         if (currentIndicesArray.Length == 1 && currentIndicesArray[0] == -1)
         {
             //Spawn a Blockade:
-            GameObject stim = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
-            stim.name = "Blockade";
-            stim.tag = "Blockade";
-            stim.AddComponent<FR_Item_Blockade>().SetItemPosition(parentTransform);
-            stim.SetActive(true);
+            GameObject blockade = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
+            blockade.name = "Blockade";
+            blockade.tag = "Blockade";
+            blockade.AddComponent<FR_Item_Blockade>().SetItemPosition(parentTransform);
+            blockade.SetActive(true);
         }
         else if(currentIndicesArray.Length == 1 && currentIndicesArray[0] == -2)
         {
             //dont spawn a quaddle when its -2
+        }
+        else if (currentIndicesArray.Length == 1 && currentIndicesArray[0] == -3)
+        {
+            //Spawn a Banana:
+            GameObject banana = Instantiate(Resources.Load<GameObject>("Prefabs/Banana"));
+            banana.name = "Banana";
+            banana.AddComponent<FR_Item_Banana>().SetItemPosition(parentTransform);
+            banana.SetActive(true);
         }
         else
         {
@@ -77,7 +86,7 @@ public class FR_ItemSpawner : MonoBehaviour
 
             List<string> spawnLocations = new List<string>() { "Left", "Middle", "Right" };
 
-            for (int i = 0; i < currentIndicesArray.Length; i++)
+            for (int i = 0; i < numToSpawn; i++)
             {
                 FruitRunner_StimDef quaddle = TrialQuaddles.FirstOrDefault(q => q.StimIndex == currentIndicesArray[i]);
 

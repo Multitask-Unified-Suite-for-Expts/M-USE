@@ -130,6 +130,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
             ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
             ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
+            ItemSpawner.BananaTokenGain = CurrentTrial.BananaTokenGain;
+            ItemSpawner.BlockadeTokenLoss = CurrentTrial.BlockadeTokenLoss;
             ItemSpawner.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");

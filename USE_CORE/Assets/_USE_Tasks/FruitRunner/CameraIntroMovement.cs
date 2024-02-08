@@ -32,16 +32,12 @@ public class CameraIntroMovement : MonoBehaviour
             {
                 Vector3 newPosition = Vector3.Lerp(StartingPos, EndingPos, elapsedTime / MovementDuration);
                 transform.position = newPosition;
-                //transform.LookAt(Player.position);
-
                 elapsedTime += Time.deltaTime;
             }
             else
             {
-                transform.position = EndingPos;
-                transform.rotation = Quaternion.Euler(15f, 0f, 0f);
+                transform.SetPositionAndRotation(EndingPos, Quaternion.Euler(15f, 0f, 0f));
                 Move = false;
-                Debug.LogWarning("DONE WITH CAMERA MOVEMENT");
                 Destroy(this);
             }
 

@@ -101,8 +101,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
         {
             TokenFBController.AdjustTokenBarSizing(100);
-            TokenFBController.SetRevealTime(.15f);
-            TokenFBController.SetUpdateTime(.25f);
+            TokenFBController.SetRevealTime(.1f);
+            TokenFBController.SetUpdateTime(.2f);
 
             Skybox skybox = CurrentTaskLevel.TaskCam.GetComponent<Skybox>();
             skybox.material = CurrentTrial.SkyboxName.ToLower() == "random" ? SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)] : Resources.Load<Material>("Materials/" + CurrentTrial.SkyboxName);
@@ -139,8 +139,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             FloorManager.TileScale_Z = CurrentTrial.FloorTileLength;
             FloorManager.gameObject.SetActive(true);
 
-            if (CamMovement != null)
-                Destroy(CamMovement);
             CamMovement = Camera.main.gameObject.AddComponent<CameraIntroMovement>();
             CamMovement.StartMovement(PlayerGO.transform, new Vector3(0f, 4f, -6f), new Vector3(0f, 2f, -3f));
         });
@@ -149,7 +147,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         bool finishedPlaying = false;
-        float startTime = 0f;
         Play.AddSpecificInitializationMethod(() =>
         {
             SpeedSliderGO.SetActive(true);
@@ -168,19 +165,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
 
             finishedPlaying = false;
-
-            startTime = Time.time;
         });
         Play.AddUpdateMethod(() =>
         {
-            if(Time.time - startTime > 4f)
-            {
-                Skybox skybox = CurrentTaskLevel.TaskCam.GetComponent<Skybox>();
-                skybox.material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-                RenderSettings.fogColor = FogColors[SkyboxMaterials.IndexOf(skybox.material)];
-                startTime = Time.time;
-            }
-
             if (FloorManager.NumTilesSpawned > 1 && FloorManager.ActiveTiles.Count == 1)
                 finishedPlaying = true;
 

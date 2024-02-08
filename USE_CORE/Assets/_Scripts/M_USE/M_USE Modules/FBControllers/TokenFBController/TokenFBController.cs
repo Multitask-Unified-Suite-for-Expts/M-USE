@@ -348,6 +348,7 @@ public class TokenFBController : MonoBehaviour
         } else {
             numTokens = Mathf.Min(numTokens, totalTokensNum - numCollected);
         }
+
         if (numTokens == 0)
         {
             audioFBController.Play("NegativeShow"); //fixes issue where they choose wrong but no tokens in bar so doesn't make it down to play neg FB. 

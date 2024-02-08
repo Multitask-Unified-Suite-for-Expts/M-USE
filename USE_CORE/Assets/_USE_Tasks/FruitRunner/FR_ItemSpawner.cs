@@ -3,7 +3,6 @@ using FruitRunner_Namespace;
 using UnityEngine;
 using USE_StimulusManagement;
 using System.Linq;
-using USE_Def_Namespace;
 
 
 public class FR_ItemSpawner : MonoBehaviour
@@ -12,13 +11,14 @@ public class FR_ItemSpawner : MonoBehaviour
 
     public List<FruitRunner_StimDef> TrialQuaddles;
 
+
     public int[][] SpawnOrder_StimIndices;
     public string[][] QuaddleGeneralPositions;
 
     private int CurrentSpawnIndex = 0;
 
-    public bool RandomSpawnLocations;
-
+    public int BananaTokenGain;
+    public int BlockadeTokenLoss;
 
 
     private void Start()
@@ -60,7 +60,9 @@ public class FR_ItemSpawner : MonoBehaviour
             GameObject blockade = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
             blockade.name = "Blockade";
             blockade.tag = "Blockade";
-            blockade.AddComponent<FR_Item_Blockade>().SetItemPosition(parentTransform);
+            FR_Item_Blockade blockadeComponent = blockade.AddComponent<FR_Item_Blockade>();
+            blockadeComponent.TokenLoss = BlockadeTokenLoss;
+            blockadeComponent.SetItemPosition(parentTransform);
             blockade.SetActive(true);
         }
         else if(currentIndicesArray.Length == 1 && currentIndicesArray[0] == -2)
@@ -72,7 +74,9 @@ public class FR_ItemSpawner : MonoBehaviour
             //Spawn a Banana:
             GameObject banana = Instantiate(Resources.Load<GameObject>("Prefabs/Banana"));
             banana.name = "Banana";
-            banana.AddComponent<FR_Item_Banana>().SetItemPosition(parentTransform);
+            FR_Item_Banana bananaComponent = banana.AddComponent<FR_Item_Banana>();
+            bananaComponent.TokenGain = BananaTokenGain;
+            bananaComponent.SetItemPosition(parentTransform);
             banana.SetActive(true);
         }
         else
@@ -80,11 +84,6 @@ public class FR_ItemSpawner : MonoBehaviour
             //Spawn Quaddle(s)
             string[] currentPositionsArray = QuaddleGeneralPositions[CurrentSpawnIndex];
             int numToSpawn = currentIndicesArray.Length;
-
-            if (numToSpawn > 3)
-                Debug.LogWarning("TRYING TO SPAWN MORE THAN 3 QUADDLES ON A TILE BUT THERE ARE ONLY 3 SPOTS!!!");
-
-            List<string> spawnLocations = new List<string>() { "Left", "Middle", "Right" };
 
             for (int i = 0; i < numToSpawn; i++)
             {

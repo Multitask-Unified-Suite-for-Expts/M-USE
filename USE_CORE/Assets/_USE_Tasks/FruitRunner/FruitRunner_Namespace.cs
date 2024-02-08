@@ -27,6 +27,9 @@ namespace FruitRunner_Namespace
 
         public int NumGroups;
 
+        public int BlockadeTokenLoss;
+        public int BananaTokenGain; //Token reward for when using the banana prefab instead of quaddle. 
+
         public float FloorMovementSpeed;
         public float FloorTileLength;
         public bool AllowItemPickupAnimations; //Happy and sad animations for when they go over a quaddle.

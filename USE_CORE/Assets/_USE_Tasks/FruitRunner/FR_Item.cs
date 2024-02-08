@@ -11,7 +11,7 @@ public class FR_Item : MonoBehaviour
     protected FR_PlayerManager playerManager;
 
 
-    private void Start()
+    private void Awake()
     {
         try
         {
@@ -22,11 +22,6 @@ public class FR_Item : MonoBehaviour
         {
             Debug.LogError("ITEM START METHOD FAILED! Message: " + e.Message);
         }
-
-        if (playerManager == null)
-            Debug.LogError("PLAYER MAN IS NULL!!!!!!!!!!!!");
-        else
-            Debug.LogWarning("NOT NULL....");
     }
 
     public virtual void SetItemPosition(Transform parentTransform)
@@ -69,9 +64,8 @@ public class FR_Item_Quaddle : FR_Item
 
     private void CreateParticlesOnObject(Vector3 spawnPos)
     {
-        Vector3 offset = new Vector3(0f, 0f, 0f);
         GameObject particleGO = Instantiate(Resources.Load<GameObject>(QuaddleType == "Positive" ? "Prefabs/ParticleHaloPositive" : "Prefabs/ParticleHaloNegative"));
-        particleGO.transform.position = spawnPos + offset;
+        particleGO.transform.position = spawnPos;
         particleGO.transform.localScale = new Vector3(.5f, .5f, .5f);
         Destroy(particleGO, 2f);
     }
@@ -105,21 +99,36 @@ public class FR_Item_Quaddle : FR_Item
 }
 
 
-//BUT HOW DO I CONTROL HOW MUCH TOKEN REWARD??
+//Currently still random positions though
 public class FR_Item_Banana : FR_Item
 {
+    public int TokenGain;
+
     public Vector3 rotationAxis = Vector3.up;
-    public float rotationSpeed = 75f;
+    public float rotationSpeed = 100f;
+
+    public float bobbingAmount = .1f;
+    public float bobbingSpeed = .5f;
+
+    private Vector3 originalPos;
+    private float randomBobbingOffset;
+
 
     private void Start()
     {
         transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+
+        originalPos = transform.position;
+        randomBobbingOffset = Random.Range(0f, 2 * Mathf.PI);
     }
 
     private void Update()
     {
         float rotationAmount = rotationSpeed * Time.deltaTime;
         transform.Rotate(rotationAxis, rotationAmount);
+
+        float bobbingOffset = Mathf.Sin((Time.time + randomBobbingOffset) * 2 * Mathf.PI * bobbingSpeed) * bobbingAmount;
+        transform.position = new Vector3(originalPos.x, originalPos.y, transform.position.z) + Vector3.up * bobbingOffset;
     }
 
     public override void SetItemPosition(Transform parentTransform)
@@ -132,9 +141,8 @@ public class FR_Item_Banana : FR_Item
 
     public void CreateParticlesOnObject(Vector3 spawnPos)
     {
-        Vector3 offset = new Vector3(0f, 0f, 0f);
         GameObject particleGO = Instantiate(Resources.Load<GameObject>("Prefabs/ParticleHaloPositive"));
-        particleGO.transform.position = spawnPos + offset;
+        particleGO.transform.position = spawnPos;
         particleGO.transform.localScale = new Vector3(.5f, .5f, .5f);
         Destroy(particleGO, 2f);
     }
@@ -144,16 +152,9 @@ public class FR_Item_Banana : FR_Item
         if (other.CompareTag("Player"))
         {
             FR_EventManager.TriggerScoreChanged(1000);
-            //if (playerManager == null)
-            //    Debug.LogWarning("PLAYER IS NULL");
-            //playerManager.StartAnimation("Happy");
-            //playerManager.TokenFbController.AddTokens(gameObject, 1, -.3f);
-
-            //Session.TrialLevel.HaloFBController.SetParticleHaloSize(.5f);
-            //Session.TrialLevel.HaloFBController.ShowPositive(gameObject);
-
+            playerManager.StartAnimation("Happy");
+            playerManager.TokenFbController.AddTokens(gameObject, TokenGain, -.3f);
             CreateParticlesOnObject(transform.position);
-
             Destroy(gameObject);
         }
     }
@@ -163,6 +164,8 @@ public class FR_Item_Banana : FR_Item
 
 public class FR_Item_Blockade : FR_Item
 {
+    public int TokenLoss;
+
 
     public override void SetItemPosition(Transform parentTransform)
     {
@@ -178,7 +181,7 @@ public class FR_Item_Blockade : FR_Item
         {
             FR_EventManager.TriggerScoreChanged(-500);
 
-            playerManager.TokenFbController.RemoveTokens(other.gameObject, 1, .4f);
+            playerManager.TokenFbController.RemoveTokens(other.gameObject, TokenLoss, .4f);
             playerManager.StartAnimation("injured");
             floorManager.DeactivateMovement();
         }

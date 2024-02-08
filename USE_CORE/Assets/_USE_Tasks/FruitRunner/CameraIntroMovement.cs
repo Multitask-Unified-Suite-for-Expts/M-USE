@@ -4,21 +4,22 @@ using UnityEngine;
 
 public class CameraIntroMovement : MonoBehaviour
 {
-    public Transform player; // Reference to the player's transform
-    public float movementDuration = 5f; // Duration of the intro movement
-    public Vector3 startingPosition; // Explicitly set the starting position
-    public Vector3 endingPosition; // Explicitly set the ending position
+    public Transform Player;
+    public float MovementDuration = 1f;
+    public Vector3 StartingPos; 
+    public Vector3 EndingPos;
 
     private float elapsedTime = 0f;
 
     public bool Move = false;
 
-    public void StartMovement(Vector3 startPos, Vector3 endPos)
+    public void StartMovement(Transform player, Vector3 startPos, Vector3 endPos)
     {
-        startingPosition = startPos;
-        endingPosition = endPos;
+        Player = player;
+        StartingPos = startPos;
+        EndingPos = endPos;
 
-        transform.position = startingPosition;
+        transform.position = StartingPos;
 
         Move = true;
     }
@@ -27,19 +28,18 @@ public class CameraIntroMovement : MonoBehaviour
     {
         if(Move)
         {
-            if (elapsedTime < movementDuration)
+            if (elapsedTime < MovementDuration)
             {
-                // Calculate the new position
-                Vector3 newPosition = Vector3.Lerp(startingPosition, endingPosition, elapsedTime / movementDuration);
-
-                // Set the new position and look at the player
+                Vector3 newPosition = Vector3.Lerp(StartingPos, EndingPos, elapsedTime / MovementDuration);
                 transform.position = newPosition;
-                transform.LookAt(player.position);
+                //transform.LookAt(Player.position);
 
                 elapsedTime += Time.deltaTime;
             }
             else
             {
+                transform.position = EndingPos;
+                transform.rotation = Quaternion.Euler(15f, 0f, 0f);
                 Move = false;
                 Debug.LogWarning("DONE WITH CAMERA MOVEMENT");
                 Destroy(this);

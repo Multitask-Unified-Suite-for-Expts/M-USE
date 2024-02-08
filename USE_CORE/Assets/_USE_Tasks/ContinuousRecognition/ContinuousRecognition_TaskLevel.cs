@@ -152,7 +152,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             PerceptualInterferance_BlockData data = kvp.Value;
             float avg = data.TrialsCorrect / data.TotalBlocks;
 
-            return $"(Similarity {similarity} - Blocks {data.TotalBlocks} - Avg Correct {avg:0.00})";
+            return $"\n(Similarity {similarity} - Blocks {data.TotalBlocks} - Avg Correct {avg:0.00})";
         }));
         return summary;
     }

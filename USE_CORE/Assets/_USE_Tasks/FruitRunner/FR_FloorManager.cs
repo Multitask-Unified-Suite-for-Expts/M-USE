@@ -10,17 +10,14 @@ public class FR_FloorManager : MonoBehaviour
     private GameObject FloorTilePrefab;
     private int TotalTiles;
     [HideInInspector] public List<GameObject> ActiveTiles;
-
     private FR_ItemSpawner itemSpawner;
-
     private bool Move;
-
-    public float TileScale_Z;
+    [HideInInspector] public float TileScale_Z;
 
 
     public void SetTotalTiles(int numPerGroup, int numGroups)
     {
-        TotalTiles = 1 + (numPerGroup * numGroups); //Add 1 for initial empty tile
+        TotalTiles = 2 + (numPerGroup * numGroups); //Add 1 for initial empty tile
     }
 
     void Start()
@@ -54,7 +51,6 @@ public class FR_FloorManager : MonoBehaviour
             if(collider.bounds.max.z < transform.position.z - collider.bounds.size.z)
             {
                 DeleteTile();
-                //SpawnTile();
             }
         }
     }
@@ -69,9 +65,10 @@ public class FR_FloorManager : MonoBehaviour
 
     void SpawnTile()
     {
-        Vector3 spawnPos = new Vector3(0f, -.5f, -.5f); //for first one
+        Vector3 spawnPos = new Vector3(0f, -.5f, -15.5f); //for first one
+        //Vector3 spawnPos = new Vector3(0f, -.5f, -.5f); //for first one
 
-        if(ActiveTiles.Count > 0)
+        if (ActiveTiles.Count > 0)
         {
             GameObject lastTile = ActiveTiles[ActiveTiles.Count - 1];
             BoxCollider lastTileCollider = lastTile.GetComponent<BoxCollider>();
@@ -84,7 +81,7 @@ public class FR_FloorManager : MonoBehaviour
         tile.gameObject.transform.parent = gameObject.transform;
         tile.AddComponent<FR_Item_Floor>();
 
-        if (NumTilesSpawned > 1) //No item on first tile
+        if (NumTilesSpawned > 2) //No item on first tile
             itemSpawner.SpawnItem(tile.transform);
 
         ActiveTiles.Add(tile);

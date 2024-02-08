@@ -43,7 +43,7 @@ public class FR_PlayerManager : MonoBehaviour
 
         //Setup Movement Circles:
         MovementCirclesController = gameObject.AddComponent<MovementCirclesController>();
-        MovementCirclesController.SetupMovementCircles(CanvasTransform);
+        MovementCirclesController.SetupMovementCircles(CanvasTransform, this);
 
         audioManager = gameObject.AddComponent<FR_AudioManager>();
 
@@ -189,7 +189,8 @@ public class FR_PlayerManager : MonoBehaviour
                 break;
             case "run":
                 CurrentAnimationState = AnimationStates.Run;
-                Animator.Play(floorManager.FloorMovementSpeed >= 10f ? "Run" : "Jog");
+                Animator.Play("Run");
+                //Animator.Play(floorManager.FloorMovementSpeed >= 10f ? "Run" : "Jog"); //I also removed jog from animator
                 break;
             case "injured":
                 CurrentAnimationState = AnimationStates.Injured;

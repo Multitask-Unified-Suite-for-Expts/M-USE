@@ -62,6 +62,10 @@ public class FR_ItemSpawner : MonoBehaviour
             stim.AddComponent<FR_Item_Blockade>().SetItemPosition(parentTransform);
             stim.SetActive(true);
         }
+        else if(currentIndicesArray.Length == 1 && currentIndicesArray[0] == -2)
+        {
+            //dont spawn a quaddle when its -2
+        }
         else
         {
             //Spawn Quaddle(s)
@@ -87,18 +91,9 @@ public class FR_ItemSpawner : MonoBehaviour
                 FR_Item_Quaddle quaddleComponent = stim.AddComponent<FR_Item_Quaddle>();
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;
                 quaddleComponent.QuaddleTokenRewardMag = quaddle.StimTokenRewardMag;
-
-                //if(RandomSpawnLocations)
-                //{
-                //    int randomNum = (int)Random.Range(0f, spawnLocations.Count - 1);
-                //    quaddleComponent.QuaddleGeneralPosition = spawnLocations[randomNum];
-                //    spawnLocations.Remove(quaddleComponent.QuaddleGeneralPosition);
-                //}
-                //else
                 
                 quaddleComponent.QuaddleGeneralPosition = currentPositionsArray[i];
-                
-
+               
                 quaddleComponent.SetItemPosition(parentTransform);
 
                 stim.SetActive(true);

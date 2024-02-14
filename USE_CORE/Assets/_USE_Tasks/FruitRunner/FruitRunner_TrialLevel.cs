@@ -230,12 +230,18 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private void SubscribeToEvents()
     {
+        FR_EventManager.OnPlayerShift += PlayerShift;
         FR_EventManager.OnTargetHit += TargetHit;
         FR_EventManager.OnTargetMissed += TargetMissed;
         FR_EventManager.OnDistractorHit += DistractorHit;
         FR_EventManager.OnDistractorAvoided += DistractorAvoided;
         FR_EventManager.OnBlockadeAvoided += BlockadeAvoided;
         FR_EventManager.OnBlockadeHit += BlockadeHit;
+    }
+
+    public void PlayerShift(string from, string to)
+    {
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["ShiftFrom" + from + "To" + to]);
     }
 
     public void TargetHit(string pos)
@@ -390,6 +396,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     private void OnDestroy()
     {
         //UnSubscribe from Events:
+        FR_EventManager.OnPlayerShift -= PlayerShift;
         FR_EventManager.OnTargetHit -= TargetHit;
         FR_EventManager.OnTargetMissed -= TargetMissed;
         FR_EventManager.OnDistractorHit -= DistractorHit;

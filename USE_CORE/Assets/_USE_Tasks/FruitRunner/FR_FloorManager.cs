@@ -10,7 +10,7 @@ public class FR_FloorManager : MonoBehaviour
     private GameObject FloorTilePrefab;
     private int TotalTiles;
     [HideInInspector] public List<GameObject> ActiveTiles;
-    private FR_ItemSpawner itemSpawner;
+    private FR_ItemManager itemSpawner;
     private bool Move;
     [HideInInspector] public float TileScale_Z;
 
@@ -25,7 +25,7 @@ public class FR_FloorManager : MonoBehaviour
         FloorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
         ActiveTiles = new List<GameObject>();
-        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<FR_ItemSpawner>();
+        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<FR_ItemManager>();
 
         for (int i = 0; i <= TotalTiles; i++)
         {

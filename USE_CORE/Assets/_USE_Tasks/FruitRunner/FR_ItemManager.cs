@@ -5,7 +5,7 @@ using USE_StimulusManagement;
 using System.Linq;
 
 
-public class FR_ItemSpawner : MonoBehaviour
+public class FR_ItemManager : MonoBehaviour
 {
     public List<GameObject> BlockadePrefabs;
 
@@ -58,11 +58,12 @@ public class FR_ItemSpawner : MonoBehaviour
         {
             //Spawn a Blockade:
             GameObject blockade = Instantiate(BlockadePrefabs[Random.Range(0, BlockadePrefabs.Count)]);
-            blockade.name = "Blockade";
-            blockade.tag = "Blockade";
             FR_Item_Blockade blockadeComponent = blockade.AddComponent<FR_Item_Blockade>();
+            blockadeComponent.GeneralPosition = blockade.name.ToLower().Contains("left") ? "Left" : "Right";
             blockadeComponent.TokenLoss = BlockadeTokenLoss;
             blockadeComponent.SetItemPosition(parentTransform);
+            blockade.name = "Blockade";
+            blockade.tag = "Blockade";
             blockade.SetActive(true);
         }
         else if(currentIndicesArray.Length == 1 && currentIndicesArray[0] == -2)
@@ -100,7 +101,7 @@ public class FR_ItemSpawner : MonoBehaviour
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;
                 quaddleComponent.QuaddleTokenRewardMag = quaddle.StimTokenRewardMag;
                 
-                quaddleComponent.QuaddleGeneralPosition = currentPositionsArray[i];
+                quaddleComponent.GeneralPosition = currentPositionsArray[i];
                
                 quaddleComponent.SetItemPosition(parentTransform);
 

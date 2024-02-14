@@ -1,13 +1,12 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using FruitRunner_Namespace;
 using ConfigDynamicUI;
-using TMPro;
 using UnityEngine.UI;
+
 
 public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 {
@@ -37,12 +36,27 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public FR_FloorManager FloorManager;
 
     public GameObject ItemSpawnerGO;
-    public FR_ItemSpawner ItemSpawner;
+    public FR_ItemManager ItemSpawner;
 
 
     private StimGroup trialStims;
 
     private CameraIntroMovement CamMovement;
+
+    //DATA:
+    [HideInInspector] public int TargetsHit_Trial;
+    [HideInInspector] public int TargetsMissed_Trial;
+    [HideInInspector] public int DistractorsHit_Trial;
+    [HideInInspector] public int DistractorsAvoided_Trial;
+    [HideInInspector] public int BlockadesHit_Trial;
+    [HideInInspector] public int BlockadesAvoided_Trial;
+
+    [HideInInspector] public int TargetsHit_Block;
+    [HideInInspector] public int TargetsMissed_Block;
+    [HideInInspector] public int DistractorsHit_Block;
+    [HideInInspector] public int DistractorsAvoided_Block;
+    [HideInInspector] public int BlockadesHit_Block;
+    [HideInInspector] public int BlockadesAvoided_Block;
 
 
     public override void DefineControlLevel()
@@ -56,6 +70,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            SubscribeToEvents();
+
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -126,7 +142,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
            
             ItemSpawnerGO = new GameObject("ItemSpawner");
-            ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemSpawner>();
+            ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemManager>();
             ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
             ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
             ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
@@ -211,6 +227,64 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     }
 
 
+
+    private void SubscribeToEvents()
+    {
+        FR_EventManager.OnTargetHit += TargetHit;
+        FR_EventManager.OnTargetMissed += TargetMissed;
+        FR_EventManager.OnDistractorHit += DistractorHit;
+        FR_EventManager.OnDistractorAvoided += DistractorAvoided;
+        FR_EventManager.OnBlockadeAvoided += BlockadeAvoided;
+        FR_EventManager.OnBlockadeHit += BlockadeHit;
+    }
+
+    public void TargetHit(string pos)
+    {
+        TargetsHit_Trial++;
+        TargetsHit_Block++;
+        CurrentTaskLevel.TargetsHit_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetHit" + pos]);
+
+    }
+    public void TargetMissed(string pos)
+    {
+        TargetsMissed_Trial++;
+        TargetsMissed_Block++;
+        CurrentTaskLevel.TargetsMissed_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetMissed" + pos]);
+
+    }
+    public void DistractorHit(string pos)
+    {
+        DistractorsHit_Trial++;
+        DistractorsHit_Block++;
+        CurrentTaskLevel.DistractorsHit_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorHit" + pos]);
+
+    }
+    public void DistractorAvoided(string pos)
+    {
+        DistractorsAvoided_Trial++;
+        DistractorsAvoided_Block++;
+        CurrentTaskLevel.DistractorsAvoided_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorAvoided" + pos]);
+    }
+    public void BlockadeHit(string pos)
+    {
+        BlockadesHit_Trial++;
+        BlockadesHit_Block++;
+        CurrentTaskLevel.BlockadesHit_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BlockadeHit" + pos]);
+
+    }
+    public void BlockadeAvoided(string pos)
+    {
+        BlockadesAvoided_Block++;
+        BlockadesAvoided_Trial++;
+        CurrentTaskLevel.BlockadesAvoided_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BlockadeAvoided" + pos]);
+    }
+
     protected override void DefineTrialStims()
     {
         StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
@@ -230,9 +304,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 stim.QuaddleFeedbackType = "Positive";
             else if (stim.StimTokenRewardMag < 0)
                 stim.QuaddleFeedbackType = "Negative";
-            else
-                Debug.LogError("STIM TOKEN REWARD MAG IS SOMETHING OTHER THAN 1, 0, -1");
-
         }
     }
 
@@ -263,12 +334,22 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
-
+        TargetsHit_Trial = 0;
+        TargetsMissed_Trial = 0;
+        DistractorsHit_Trial = 0;
+        DistractorsAvoided_Trial = 0;
+        BlockadesHit_Trial = 0;
+        BlockadesAvoided_Trial = 0;
     }
 
     public void ResetBlockVariables()
     {
-
+        TargetsHit_Block = 0;
+        TargetsMissed_Block = 0;
+        DistractorsHit_Block = 0;
+        DistractorsAvoided_Block = 0;
+        BlockadesHit_Block = 0;
+        BlockadesAvoided_Block = 0;
     }
 
     void GiveReward()
@@ -306,6 +387,17 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
     }
 
+    private void OnDestroy()
+    {
+        //UnSubscribe from Events:
+        FR_EventManager.OnTargetHit -= TargetHit;
+        FR_EventManager.OnTargetMissed -= TargetMissed;
+        FR_EventManager.OnDistractorHit -= DistractorHit;
+        FR_EventManager.OnDistractorAvoided -= DistractorAvoided;
+        FR_EventManager.OnBlockadeAvoided -= BlockadeAvoided;
+        FR_EventManager.OnBlockadeHit -= BlockadeHit;
+        
+    }
 
 
 }

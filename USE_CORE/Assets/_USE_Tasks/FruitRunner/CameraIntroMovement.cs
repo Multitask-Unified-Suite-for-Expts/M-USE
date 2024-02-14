@@ -36,7 +36,7 @@ public class CameraIntroMovement : MonoBehaviour
             }
             else
             {
-                transform.SetPositionAndRotation(EndingPos, Quaternion.Euler(15f, 0f, 0f));
+                //transform.SetPositionAndRotation(EndingPos, Quaternion.Euler(15f, 0f, 0f));
                 Move = false;
                 Destroy(this);
             }

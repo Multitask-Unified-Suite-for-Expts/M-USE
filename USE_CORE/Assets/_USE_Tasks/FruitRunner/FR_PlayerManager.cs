@@ -99,9 +99,33 @@ public class FR_PlayerManager : MonoBehaviour
         if (newPos == TargetPos)
             return;
 
+        TriggerPlayerShiftEvent(newPos);
+
         TargetPos = newPos;
         IsShifting = true;
         audioManager.PlaySlideClip();
+    }
+
+    private void TriggerPlayerShiftEvent(Vector3 newPos)
+    {
+        string from = "";
+        if (TargetPos == LeftPos)
+            from = "Left";
+        else if (TargetPos == MiddlePos)
+            from = "Middle";
+        else
+            from = "Right";
+
+        string to = "";
+        if (newPos == LeftPos)
+            to = "Left";
+        else if (newPos == MiddlePos)
+            to = "Middle";
+        else
+            to = "Right";
+
+        FR_EventManager.TriggerPlayerShift(from, to);
+       
     }
 
     public void AllowUserInput()

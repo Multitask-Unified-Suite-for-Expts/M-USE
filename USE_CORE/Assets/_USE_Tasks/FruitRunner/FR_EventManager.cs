@@ -6,8 +6,7 @@ using USE_ExperimentTemplate_Classes;
 
 public static class FR_EventManager
 {
-    public static event Action<int> OnScoreChanged;
-
+    public static event Action<string, string> OnPlayerShift; 
     public static event Action<string> OnTargetHit;
     public static event Action<string> OnTargetMissed;
     public static event Action<string> OnDistractorHit;
@@ -15,7 +14,13 @@ public static class FR_EventManager
     public static event Action<string> OnBlockadeHit;
     public static event Action<string> OnBlockadeAvoided;
 
+    public static event Action<int> OnScoreChanged;
 
+
+    public static void TriggerPlayerShift(string from, string to)
+    {
+        OnPlayerShift?.Invoke(from, to);
+    }
 
     public static void TriggerTargetHit(string generalPos)
     {

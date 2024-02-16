@@ -131,7 +131,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             //FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
-
             if (!Session.WebBuild) //player view variables
             {
                 PlayerViewPanelController = gameObject.AddComponent<PlayerViewPanel>();
@@ -188,6 +187,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseTile.AddSpecificInitializationMethod(() =>
         {
+            Input.ResetInputAxes(); //reset input in case they holding down
+
             //TouchFBController.SetPrefabSizes(tileScale);
             MazeManager.ActivateMazeElements();
             MazeManager.choiceStartTime = Time.unscaledTime;
@@ -543,6 +544,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", () => mazeDefName);
+        TrialData.AddDatum("MazeDefName", () => CurrentTrialDef.MazeName);
         TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles().Select(go => go.name)));
         TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
         TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); 
@@ -659,8 +661,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.TileFlashingRatio +
+        TrialSummaryString = "<b>Maze Name: </b>" + CurrentTrialDef.MazeName +
+                             "\n<b>Tile Flashing ratio: </b>" + CurrentTrialDef.TileFlashingRatio +
                              "\n" +
                              "\n<b>Percent Error: </b>" + String.Format("{0:0.00}%", percentError * 100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial +

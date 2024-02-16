@@ -78,7 +78,7 @@ public class MazeManager:MonoBehaviour
             choiceDuration = Time.unscaledTime - choiceStartTime;
     }
 
-    public void Initialize(MazeGame_TrialLevel trialLevel, MazeGame_TrialDef trialDef, MazeGame_TaskDef taskDef)
+    public void InitializeMazeManager(MazeGame_TrialLevel trialLevel, MazeGame_TrialDef trialDef, MazeGame_TaskDef taskDef)
     {
         mgTrialLevel = trialLevel;
         mgTrialDef = trialDef;
@@ -119,8 +119,6 @@ public class MazeManager:MonoBehaviour
             
             float xOffset = tileContainerGO.GetComponent<RectTransform>().rect.width/(customMazeDims.Max()+1);
             float yOffset = tileContainerGO.GetComponent<RectTransform>().rect.height/(customMazeDims.Count+1);
-
-
 
             for (int row = 0; row < customMazeDims.Count; row++)
             {

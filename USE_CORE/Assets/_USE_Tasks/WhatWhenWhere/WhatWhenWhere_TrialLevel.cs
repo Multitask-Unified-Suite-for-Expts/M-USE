@@ -207,8 +207,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
+            Input.ResetInputAxes(); //reset input in case they holding down
 
-            if(SequenceManager.GetTargetStimGO() == null)
+            if (SequenceManager.GetTargetStimGO() == null)
                 SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder, searchStims, distractorStims);
 
             searchDurationStartTime = Time.time;

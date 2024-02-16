@@ -205,12 +205,9 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-
                 TrialCount_InBlock = -1;
-                if (TrialCount_InBlock <= 0)
-                {
-                    DefineCustomTrialDefSelection();
-                }
+                DefineCustomTrialDefSelection();
+                
                 TrialStims = new List<StimGroup>();
                 AudioFBController?.UpdateAudioSource();
 
@@ -238,7 +235,6 @@ namespace USE_ExperimentTemplate_Trial
                     TrialFilesLoaded = true;
             });
             LoadTrialTextures.SpecifyTermination(() => TrialFilesLoaded, LoadTrialStims);
-
 
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>

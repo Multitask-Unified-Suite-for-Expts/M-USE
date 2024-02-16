@@ -442,7 +442,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         LoadConfigVariables();
 
         if (!MazeManager.GetMazeManagerInitialized())
-            MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
+            MazeManager.InitializeMazeManager(this, CurrentTrialDef, CurrentTaskDef);
         tiles = MazeManager.CreateMaze();
         TrialStims.Add(tiles);
     }

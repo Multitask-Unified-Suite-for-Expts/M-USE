@@ -39,10 +39,12 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     WhatWhenWhere_TrialLevel wwwTL;
 
 
+    [HideInInspector] public int RuleBreakingErrors_InBlock;
     [HideInInspector] public int RuleAbidingErrors_InBlock;
     [HideInInspector] public int DistractorRuleAbidingErrors_InBlock;
     [HideInInspector] public int BackTrackErrors_InBlock;
     [HideInInspector] public int RetouchErrors_InBlock;
+    [HideInInspector] public int PerseverativeRuleBreakingErrors_InBlock;
     [HideInInspector] public int PerseverativeRuleAbidingErrors_InBlock;
     [HideInInspector] public int PerseverativeDistractorRuleAbidingErrors_InBlock;
     [HideInInspector] public int PerseverativeBackTrackErrors_InBlock;
@@ -53,11 +55,13 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int CompletedSequences_InBlock;
     [HideInInspector] public List<float?> SearchDurations_InBlock = new List<float?>();
 
+    [HideInInspector] public int RuleBreakingErrors_InTask;
     [HideInInspector] public int RuleAbidingErrors_InTask;
     [HideInInspector] public int DistractorRuleAbidingErrors_InTask;
     [HideInInspector] public int BackTrackErrors_InTask;
     [HideInInspector] public int RetouchErrors_InTask;
     [HideInInspector] public int PerseverativeRuleAbidingErrors_InTask;
+    [HideInInspector] public int PerseverativeRuleBreakingErrors_InTask;
     [HideInInspector] public int PerseverativeDistractorRuleAbidingErrors_InTask;
     [HideInInspector] public int PerseverativeBackTrackErrors_InTask;
     [HideInInspector] public int PerseverativeRetouchErrors_InTask;
@@ -125,6 +129,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
         data["Correct Selections"] = CorrectSelections_InTask;
         data["Total Errors"] = TotalErrors_InTask;
+        data["Rule Breaking Errors"] = RuleBreakingErrors_InTask;
         data["Rule Abiding Errors"] = RuleAbidingErrors_InTask;
         data["Distractor Rule Abiding Errors"] = DistractorRuleAbidingErrors_InTask;
         data["Back Track Errors"] = BackTrackErrors_InTask;
@@ -178,10 +183,16 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
        // BlockData.AddDatum("Search Durations", () => String.Join(",", SearchDurations_InBlock));
+        BlockData.AddDatum("RuleBreakingErrors_InBlock", () => RuleBreakingErrors_InBlock);
         BlockData.AddDatum("RuleAbidingErrors_InBlock", () => RuleAbidingErrors_InBlock);
         BlockData.AddDatum("DistractorRuleAbidingErrors_InBlock", () => DistractorRuleAbidingErrors_InBlock);
         BlockData.AddDatum("BackTrackErrors_InBlock", () => BackTrackErrors_InBlock);
-        BlockData.AddDatum("RetouchErrors_InBlock", () => RetouchErrors_InBlock);
+        BlockData.AddDatum("RetouchErrors_InBlock", () => RetouchErrors_InBlock);     
+        BlockData.AddDatum("PerseverativeRuleBreakingErrors_InBlock", () => PerseverativeRuleBreakingErrors_InBlock);
+        BlockData.AddDatum("PerseverativeRuleAbidingErrors_InBlock", () => PerseverativeRuleAbidingErrors_InBlock);
+        BlockData.AddDatum("PerseverativeDistractorRuleAbidingErrors_InBlock", () => PerseverativeDistractorRuleAbidingErrors_InBlock);
+        BlockData.AddDatum("PerseverativeBackTrackErrors_InBlock", () => PerseverativeBackTrackErrors_InBlock);
+        BlockData.AddDatum("PerseverativeRetouchErrors_InBlock", () => PerseverativeRetouchErrors_InBlock);
         BlockData.AddDatum("RetouchCorrect_InBlock", () => RetouchCorrect_InBlock);
         BlockData.AddDatum("CorrectSelections_InBlock", () => CorrectSelections_InBlock);
         BlockData.AddDatum("TotalErrors_InBlock", () => TotalErrors_InBlock);
@@ -227,10 +238,12 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     }
     public void ResetBlockDataVariables()
     {
+        RuleBreakingErrors_InBlock = 0;
         RuleAbidingErrors_InBlock = 0;
         DistractorRuleAbidingErrors_InBlock = 0;
         BackTrackErrors_InBlock = 0;
         RetouchErrors_InBlock = 0;
+        PerseverativeRuleBreakingErrors_InBlock = 0;
         PerseverativeRuleAbidingErrors_InBlock = 0;
         PerseverativeDistractorRuleAbidingErrors_InBlock = 0;
         PerseverativeBackTrackErrors_InBlock = 0;

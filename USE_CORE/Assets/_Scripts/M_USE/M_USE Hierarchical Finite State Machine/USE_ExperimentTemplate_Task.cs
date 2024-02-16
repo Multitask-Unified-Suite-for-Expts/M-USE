@@ -385,7 +385,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(false);
 
-                Destroy(GameObject.Find("FeedbackControllers"));
+                Destroy(GameObject.Find("InputManager").transform.Find("FeedbackControllers(Clone)").gameObject);
 
                 if (!Session.WebBuild)
                 {
@@ -960,8 +960,7 @@ public class TaskLevelTemplate_Methods
             switch (blockEndType)
             {
                 case "CurrentTrialPercentError":
-                    Debug.Log("CHECKING BLOCK END - rTrialPerformance.Count: " + rTrialPerformance.Count + ", PERCENT ERROR " + (rTrialPerformance[rTrialPerformance.Count - 1]));
-
+                    Debug.LogWarning("CHECKING BLOCK END - rTrialPerformance.Count: " + rTrialPerformance.Count + ", PERCENT ERROR " + (rTrialPerformance[rTrialPerformance.Count - 1]));
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
                         TrialLevel.ReachedCriterion = true;

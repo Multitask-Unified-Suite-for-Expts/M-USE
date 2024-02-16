@@ -534,6 +534,7 @@ namespace SelectionTracking
                         OngoingSelection.WasSuccessful = true;
                         LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
+                        LastSuccessfulSelection.InputLocations.Add(OngoingSelection.InputLocations[0]);
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:

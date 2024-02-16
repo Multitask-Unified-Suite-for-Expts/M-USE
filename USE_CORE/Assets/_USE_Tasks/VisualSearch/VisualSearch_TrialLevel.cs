@@ -53,11 +53,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber minObjectTouchDuration, itiDuration, fbDuration, maxObjectTouchDuration, 
         selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, searchDisplayDelay;
     private float tokenFbDuration;
-    
+
     // Stim Evaluation Variables
-    private GameObject selectedGO = null;
-    private bool CorrectSelection = false;
-    VisualSearch_StimDef selectedSD = null;
+    private GameObject selectedGO;
+    private bool CorrectSelection;
+    VisualSearch_StimDef selectedSD;
     
     //Player View Variables
     private PlayerViewPanel playerView;
@@ -73,18 +73,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
     [HideInInspector] public decimal Accuracy_InBlock;
-   
+
     // Trial Data Variables
-    private int? SelectedStimIndex = null;
-    private Vector3? SelectedStimLocation = null;
-    private float SearchDuration = 0;
-    private bool RewardGiven = false;
-    private bool choiceMade = false;
-
-    public GameObject chosenStimObj;
-    public VisualSearch_StimDef chosenStimDef;
-    public bool StimIsChosen;
-
+    private int? SelectedStimIndex;
+    private Vector3? SelectedStimLocation;
+    private float searchStartTime;
+    private bool RewardGiven;
+    private bool choiceMade;
+    private VisualSearch_TrialDataSummary vs_TrialDataSummary;
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
@@ -114,6 +110,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            vs_TrialDataSummary = new VisualSearch_TrialDataSummary();
+            vs_TrialDataSummary.featureSimilarity = CurrentTrialDef.FeatureSimilarity;
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "VisualSearch_DirectionalLight");
             if (currentTaskDef.StimFacingCamera)
@@ -179,6 +177,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they holding down
             // Toggle TokenBar and Stim to be visible
             TokenFBController.enabled = true;
+            searchStartTime = Time.time;
             
 
             Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
@@ -195,11 +194,19 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
+
                 selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
-                ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
+                {
+                    float searchDuration = Time.time - searchStartTime;
+                    SearchDurations_InBlock.Add(searchDuration);
+                    CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
+                    vs_TrialDataSummary.reactionTime = searchDuration;
+                    vs_TrialDataSummary.selectionPrecision = Vector2.Distance(Input.mousePosition, Camera.main.WorldToScreenPoint(selectedGO.transform.root.position));
                     choiceMade = true;
+                }
+                ShotgunHandler.ClearSelections();
             }
         });
         
@@ -208,13 +215,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             CorrectSelection = selectedSD.IsTarget;
 
             if (CorrectSelection)
-            {       
+            {
+                vs_TrialDataSummary.correctSelection = true;
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
             }
             else
             {
+                vs_TrialDataSummary.correctSelection = false;
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
@@ -235,6 +244,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             SearchDurations_InBlock.Add(null);
+            vs_TrialDataSummary.reactionTime = null;
+            vs_TrialDataSummary.correctSelection = null;
+            vs_TrialDataSummary.selectionPrecision = null;
+
 
             SetTrialSummaryString();
 
@@ -245,9 +258,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
 
-            SearchDuration = SearchDisplay.TimingInfo.Duration;
-            SearchDurations_InBlock.Add(SearchDuration);
-            CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
+            
             UpdateExperimenterDisplaySummaryStrings();
 
             int? depth = Session.Using2DStim ? 50 : (int?)null;
@@ -407,7 +418,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (sd.StimTokenRewardMag > 0)
                 sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
             else
+            {
+                vs_TrialDataSummary.numDistractors++;
                 sd.IsTarget = false;
+            }
 
         }
 
@@ -431,7 +445,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         SelectedStimIndex = null;
         SelectedStimLocation = null;
-        SearchDuration = 0;
+        searchStartTime = 0;
         CorrectSelection = false;
         RewardGiven = false;
         choiceMade = false;
@@ -444,7 +458,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SelecteStimIndex", () => selectedSD?.StimIndex ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);
         TrialData.AddDatum("CorrectSelection", () => CorrectSelection ? 1 : 0);
-        TrialData.AddDatum("SearchDuration", ()=> SearchDuration);
+        TrialData.AddDatum("SearchDuration", ()=> searchStartTime);
         TrialData.AddDatum("RewardGiven", ()=> RewardGiven? 1 : 0);
         TrialData.AddDatum("TotalClicks", ()=> Session.MouseTracker.GetClickCount()[0]);
     }
@@ -497,7 +511,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nCorrect Selection: " + CorrectSelection +
                              "\n" +
-                             "\nSearch Duration: " + SearchDuration +
+                             "\nSearch Duration: " + searchStartTime +
                              "\n" + 
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
     }

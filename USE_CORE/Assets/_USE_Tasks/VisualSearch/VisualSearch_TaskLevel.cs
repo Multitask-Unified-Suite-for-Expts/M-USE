@@ -75,16 +75,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
             
             SetBlockSummaryString();
         });
-        BlockFeedback.AddSpecificInitializationMethod(() =>
-        {
-            if(!Session.WebBuild)
-            {/*
-                if (BlockStringsAdded > 0)
-                    CurrentBlockString += "\n";
-                BlockStringsAdded++;
-                PreviousBlocksString.Insert(0, CurrentBlockString);*/
-            }
-        });
         AssignBlockData();
     }
 
@@ -108,9 +98,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
         
         if (SearchDurations_InTask.Count > 0)
-            data["Average Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
+            data["\nAverage Reaction Time"] = CalculateAverageDuration(SearchDurations_InTask);
         if(vsTL.TrialCount_InTask != 0)
-            data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
+            data["\nAccuracy"] = decimal.Divide(NumCorrect_InTask, (vsTL.TrialCount_InTask));
         
         return data;
     }

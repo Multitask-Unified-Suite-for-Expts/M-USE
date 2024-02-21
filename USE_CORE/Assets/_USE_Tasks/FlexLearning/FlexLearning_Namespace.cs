@@ -43,7 +43,7 @@ namespace FlexLearning_Namespace
         public Reward[][] ProbablisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
         public bool RandomizedLocations;
-        public bool TokensWithStimOn = false;
+        public bool TokensWithStimOn;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -68,6 +68,8 @@ namespace FlexLearning_Namespace
                 td.PulseSize = PulseSize;
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs.Add(td);
             }
         }
@@ -98,6 +100,8 @@ namespace FlexLearning_Namespace
                 td.RandomMinMaxTrials = RandomMinMaxTrials;
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -112,6 +116,7 @@ namespace FlexLearning_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
+
     }
 
     public class FlexLearning_StimDef : StimDef

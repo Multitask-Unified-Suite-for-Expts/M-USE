@@ -49,7 +49,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public int BlockStringsAdded = 0;
-    EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
+    [HideInInspector] public EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
 
 

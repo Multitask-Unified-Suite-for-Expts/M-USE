@@ -289,7 +289,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrial.UseSpinAnimation)
                     SpinCorrectSelection = true;
 
-                HaloFBController.ShowPositive(ChosenGO, haloDepth);
+                HaloFBController.ShowPositive(ChosenGO, depth:haloDepth);
                 TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                 
@@ -297,7 +297,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                HaloFBController.ShowNegative(ChosenGO, haloDepth);
+                HaloFBController.ShowNegative(ChosenGO, depth:haloDepth);
                 TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 

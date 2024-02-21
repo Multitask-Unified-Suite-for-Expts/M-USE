@@ -517,10 +517,10 @@ namespace USE_ExperimentTemplate_Session
                 TaskButtonsContainer = GameObject.Find("TaskButtonsGrid");
 
                 GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
-                int size = Session.WebBuild ? 250 : Session.SessionDef.TaskButtonSize; //using 250 for web build
+                int size = Session.SessionDef.TaskButtonSize;
                 gridLayout.cellSize = new Vector2(size, size);
-                gridLayout.constraintCount = Session.WebBuild ? 5 : Session.SessionDef.TaskButtonGridMaxPerRow; //using 5 for WebBuild since there are 9 tasks
-                int spacing = Session.WebBuild ? 45 : Session.SessionDef.TaskButtonSpacing; //using 45 for web build
+                gridLayout.constraintCount = Session.SessionDef.TaskButtonGridMaxPerRow;
+                int spacing = Session.SessionDef.TaskButtonSpacing; //was 45 for web build
                 gridLayout.spacing = new Vector2(spacing, spacing);
 
                 List<GameObject> gridList = new List<GameObject>();
@@ -634,6 +634,13 @@ namespace USE_ExperimentTemplate_Session
                     if (!Session.SessionDef.PlayBackgroundMusic)
                         RedAudioCross.SetActive(true);
                 }
+            });
+
+            selectTask.AddUpdateMethod(() =>
+            {
+                GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                if (hit != null)
+                    Debug.LogWarning(hit.name);
             });
 
             selectTask.AddLateUpdateMethod(() =>

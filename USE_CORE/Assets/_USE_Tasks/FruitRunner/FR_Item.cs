@@ -13,7 +13,7 @@ public class FR_Item : MonoBehaviour
 
     private Collider Collider;
 
-    [HideInInspector] public bool CodeSent;
+    [HideInInspector] public bool ItemSurpassed;
 
     [HideInInspector] public GameObject ParticlesGO;
 
@@ -38,12 +38,12 @@ public class FR_Item : MonoBehaviour
 
     private void Update()
     {
-        if(PlayerGO != null && !CodeSent)
+        if(PlayerGO != null && !ItemSurpassed)
         {
             if (Collider.bounds.max.z <= PlayerGO.transform.position.z)
             {
                 ItemMissed();
-                CodeSent = true;
+                ItemSurpassed = true;
             }
         }
     }
@@ -63,6 +63,8 @@ public class FR_Item_Quaddle : FR_Item
     public string QuaddleType;
     public int QuaddleTokenRewardMag;
 
+    private FR_Item_Floor FloorParent;
+
 
     public override void ItemMissed()
     {
@@ -75,6 +77,8 @@ public class FR_Item_Quaddle : FR_Item
 
     public override void SetItemPosition(Transform parentTransform)
     {
+        FloorParent = parentTransform.GetComponent<FR_Item_Floor>();
+
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<FR_Item_Floor>().spawnPoints;
         Transform spawnPoint;
 
@@ -111,6 +115,12 @@ public class FR_Item_Quaddle : FR_Item
     {
         if (other.CompareTag("Player"))
         {
+
+            if (FloorParent.SelectionOccuredOnTile)
+                return;
+            
+            FloorParent.SelectionOccuredOnTile = true;
+
             FR_EventManager.TriggerScoreChanged(QuaddleTokenRewardMag * 1000);
 
             if (QuaddleType == "Positive")
@@ -147,6 +157,9 @@ public class FR_Item_Banana : FR_Item
     private Vector3 originalPos;
     private float randomBobbingOffset;
 
+    private FR_Item_Floor FloorParent;
+
+
 
     private void Start()
     {
@@ -172,6 +185,8 @@ public class FR_Item_Banana : FR_Item
 
     public override void SetItemPosition(Transform parentTransform)
     {
+        FloorParent = parentTransform.GetComponent<FR_Item_Floor>();
+
         List<Transform> spawnPoints = parentTransform.gameObject.GetComponent<FR_Item_Floor>().spawnPoints;
         Transform randomSpawnPoint = spawnPoints[Random.Range(0, spawnPoints.Count)];
 
@@ -198,6 +213,13 @@ public class FR_Item_Banana : FR_Item
     {
         if (other.CompareTag("Player"))
         {
+            if(FloorParent.SelectionOccuredOnTile)
+            {
+                Debug.LogWarning("TRIED TO MAKE ANOTHER SELECTION!");
+                return;
+            }
+
+            FloorParent.SelectionOccuredOnTile = true;
             FR_EventManager.TriggerTargetHit(GeneralPosition);
             FR_EventManager.TriggerScoreChanged(1000);
             playerManager.StartAnimation("Happy");
@@ -257,6 +279,8 @@ public class FR_Item_Blockade : FR_Item
 public class FR_Item_Floor : FR_Item
 {
     public List<Transform> spawnPoints;
+
+    public bool SelectionOccuredOnTile;
 
 
     private void Awake()

@@ -31,7 +31,6 @@ using System.IO;
 using UnityEngine.UI;
 using System.Collections;
 
-
 public class InitScreen_Level : ControlLevel
 {
     public GameObject InitScreen_GO;
@@ -75,7 +74,7 @@ public class InitScreen_Level : ControlLevel
     public GameObject LocalConfigsToggle_GreyPanel;
     public GameObject LocalDataToggle_GreyPanel;
 
-    private AudioSource AudioSource;
+    private AudioSource ButtonAudioSource;
     [HideInInspector] public AudioClip ToggleChange_AudioClip;
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
@@ -92,6 +91,11 @@ public class InitScreen_Level : ControlLevel
     private KeyboardController KeyboardController;
     public Toggle KeyboardToggle;
 
+    private GameObject Parent_MuseTextGO;
+    private GameObject MuseTextGO;
+    private GameObject PlayBackgroundImageGO;
+    private GameObject PlayTextGO;
+
 
     public override void DefineControlLevel()
     {
@@ -102,24 +106,44 @@ public class InitScreen_Level : ControlLevel
 
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
-        Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
-        Setup.SpecifyTermination(() => true, StartScreen);
+        Setup.AddSpecificInitializationMethod(() =>
+        {
+            SetupInitScreen();
+        });
+        Setup.AddTimer(() => 1f, StartScreen); //using small timer to while things load
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddSpecificInitializationMethod(() =>
         {
-            StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
-            StartPanel_GO.SetActive(true);
+            Parent_MuseTextGO = Instantiate(Resources.Load<GameObject>("NewTitleText"), InitScreenCanvas_GO.transform);
+            Parent_MuseTextGO.name = "TitleTextParent";
+            Parent_MuseTextGO.SetActive(true);
+
+            PlayBackgroundImageGO = Parent_MuseTextGO.transform.Find("BackgroundImage").gameObject;
+
+            PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
+            PlayTextGO = PlayBackgroundImageGO.transform.Find("PlayText").gameObject;
+            PlayBackgroundImageGO.SetActive(false);
+
+            Session.BackgroundMusicController.PlayMusic();
+
+            Session.InitCamGO.AddComponent<CameraCircle>();
+
+            StartCoroutine(PlayButtonDelay(3f));
+
         });
         StartScreen.AddUpdateMethod(() =>
         {
             if (StartPanel_GO.transform.localPosition != Vector3.zero)
                 StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
         });
-        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen, () =>
+        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
+        StartScreen.AddUniversalTerminationMethod(() =>
         {
             ConfirmButtonPressed = false;
             StartPanel_GO.SetActive(false);
+            Parent_MuseTextGO.SetActive(false);
+            //Session.InitCamGO.GetComponent<Skybox>().material = Resources.Load<Material>("MUSE_MainBackground");
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
@@ -150,8 +174,21 @@ public class InitScreen_Level : ControlLevel
             SetDataInfo();
             InitScreenCanvas_GO.SetActive(false);
             Session.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
+
+            Destroy(Session.InitCamGO.GetComponent<CameraCircle>());
+
+            //Set Y of the camera so its far above the terrain for task selection
+            Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, 60f, Camera.main.transform.position.z);
+            Camera.main.gameObject.AddComponent<CameraCircle>().targetHeight = 55f;
         });
 
+    }
+
+    private IEnumerator PlayButtonDelay(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+
+        PlayBackgroundImageGO.SetActive(true);
     }
 
     public void OnKeyboardTogglePressed()
@@ -363,11 +400,13 @@ public class InitScreen_Level : ControlLevel
 
         GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 
-        if (selectedGO.name.ToLower().Contains("config"))
-            HandleConfigToggle(selectedGO);
-
-        else if (selectedGO.name.ToLower().Contains("data"))
-            HandleDataToggle(selectedGO);
+        if(selectedGO != null)
+        {
+            if (selectedGO.name.ToLower().Contains("config"))
+                HandleConfigToggle(selectedGO);
+            else if (selectedGO.name.ToLower().Contains("data"))
+                HandleDataToggle(selectedGO);
+        }
     }
 
     private void SetupInitScreen()
@@ -413,7 +452,7 @@ public class InitScreen_Level : ControlLevel
             LocalDataToggle_GreyPanel.SetActive(false);
         }
 
-        AudioSource = gameObject.AddComponent<AudioSource>();
+        ButtonAudioSource = gameObject.AddComponent<AudioSource>();
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
@@ -534,8 +573,8 @@ public class InitScreen_Level : ControlLevel
     {
         if (clip != null)
         {
-            AudioSource.clip = clip;
-            AudioSource.Play();
+            ButtonAudioSource.clip = clip;
+            ButtonAudioSource.Play();
         }
         else
             Debug.Log("CANT PLAY AUDIO CLIP BECAUSE IT IS NULL!");

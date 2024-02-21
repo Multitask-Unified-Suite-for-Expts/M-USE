@@ -34,6 +34,10 @@ namespace FruitRunner_Namespace
         public float FloorTileLength;
         public bool AllowItemPickupAnimations; //Happy and sad animations for when they go over a quaddle.
         public string SkyboxName;
+
+        public bool ShowUI;
+
+        public bool StimFacingCamera;
     }
 
     public class FruitRunner_StimDef : StimDef

@@ -123,12 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &100811633 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5756791190835640363, guid: 23ec073a76b014e04a2f79392d18b64d,
-    type: 3}
-  m_PrefabInstance: {fileID: 1245077610}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &110387819 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5610038090375749628, guid: 23ec073a76b014e04a2f79392d18b64d,
@@ -3421,7 +3415,6 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   InitScreen_GO: {fileID: 1010477782}
-  StartPanel_GO: {fileID: 100811633}
   MainPanel_GO: {fileID: 1338016534}
   InitScreenCanvas_GO: {fileID: 2008034526}
   SubjectID_Text: {fileID: 384181289}
@@ -4170,12 +4163,12 @@ PrefabInstance:
     - target: {fileID: 8358610373213751794, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1500
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8358610373213751794, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 1000
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8358610373213751794, guid: 313d3489a024849fa948cea0c7f5d9bf,
         type: 3}

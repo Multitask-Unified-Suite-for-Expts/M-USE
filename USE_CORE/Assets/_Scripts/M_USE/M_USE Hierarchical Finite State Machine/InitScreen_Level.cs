@@ -104,10 +104,7 @@ public class InitScreen_Level : ControlLevel
 
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
-        Setup.AddSpecificInitializationMethod(() =>
-        {
-            SetupInitScreen();
-        });
+        Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
         Setup.AddTimer(() => 1f, StartScreen); //using small timer to while things load
 
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------

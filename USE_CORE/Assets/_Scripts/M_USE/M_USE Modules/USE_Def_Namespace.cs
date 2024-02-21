@@ -209,7 +209,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Maximum number of task buttons per row. Default is 5.
         /// </summary>
-        public int TaskButtonGridMaxPerRow = 5;
+        public int TaskButtonGridMaxPerRow = 4;
 
         /// <summary>
         /// List of positions for task button grid. To be set in session config.

@@ -495,9 +495,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 InflationDurations_Block.Add(InflationDuration);
                 CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
                 AudioFBController.Play(Session.SessionDef.IsHuman ? "BalloonPop" : "EC_NicePop");
-                PopParticles = Instantiate(Resources.Load<GameObject>(Session.SessionDef.IsHuman ? "Prefabs/BalloonPop_Effect" : "Prefabs/BalloonPop_Effect_Softer"));
+                if(Session.SessionDef.IsHuman)
+                {
+                    PopParticles = Instantiate(Resources.Load<GameObject>("Prefabs/BalloonPop_Effect"));
+                    PopParticles.name = "PopParticles";
+                }
 
-                PopParticles.name = "PopParticles";
             }
             else
             {

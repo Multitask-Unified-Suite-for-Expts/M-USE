@@ -34,7 +34,8 @@ using System.Collections;
 public class InitScreen_Level : ControlLevel
 {
     public GameObject InitScreen_GO;
-    public GameObject StartPanel_GO;
+    private GameObject MuseTextParentGO;
+    private GameObject PlayBackgroundImageGO;
     public GameObject MainPanel_GO;
 
     public GameObject InitScreenCanvas_GO;
@@ -91,10 +92,7 @@ public class InitScreen_Level : ControlLevel
     private KeyboardController KeyboardController;
     public Toggle KeyboardToggle;
 
-    private GameObject Parent_MuseTextGO;
-    private GameObject MuseTextGO;
-    private GameObject PlayBackgroundImageGO;
-    private GameObject PlayTextGO;
+
 
 
     public override void DefineControlLevel()
@@ -115,35 +113,26 @@ public class InitScreen_Level : ControlLevel
         //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
         StartScreen.AddSpecificInitializationMethod(() =>
         {
-            Parent_MuseTextGO = Instantiate(Resources.Load<GameObject>("NewTitleText"), InitScreenCanvas_GO.transform);
-            Parent_MuseTextGO.name = "TitleTextParent";
-            Parent_MuseTextGO.SetActive(true);
+            MuseTextParentGO = Instantiate(Resources.Load<GameObject>("NewTitleText"), InitScreenCanvas_GO.transform);
+            MuseTextParentGO.name = "TitleTextParent";
+            MuseTextParentGO.SetActive(true);
 
-            PlayBackgroundImageGO = Parent_MuseTextGO.transform.Find("BackgroundImage").gameObject;
-
+            PlayBackgroundImageGO = MuseTextParentGO.transform.Find("BackgroundImage").gameObject;
             PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
-            PlayTextGO = PlayBackgroundImageGO.transform.Find("PlayText").gameObject;
             PlayBackgroundImageGO.SetActive(false);
 
             Session.BackgroundMusicController.PlayMusic();
 
             Session.InitCamGO.AddComponent<CameraCircle>();
 
-            StartCoroutine(PlayButtonDelay(3f));
+            StartCoroutine(PlayButtonDelay(2f));
 
-        });
-        StartScreen.AddUpdateMethod(() =>
-        {
-            if (StartPanel_GO.transform.localPosition != Vector3.zero)
-                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
         });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
         StartScreen.AddUniversalTerminationMethod(() =>
         {
             ConfirmButtonPressed = false;
-            StartPanel_GO.SetActive(false);
-            Parent_MuseTextGO.SetActive(false);
-            //Session.InitCamGO.GetComponent<Skybox>().material = Resources.Load<Material>("MUSE_MainBackground");
+            MuseTextParentGO.SetActive(false);
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------

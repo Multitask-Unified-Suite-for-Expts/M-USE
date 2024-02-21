@@ -35,8 +35,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public GameObject FloorManagerGO;
     public FR_FloorManager FloorManager;
 
-    public GameObject ItemSpawnerGO;
-    public FR_ItemManager ItemSpawner;
+    public GameObject ItemManagerGO;
+    public FR_ItemManager ItemManager;
 
 
     private StimGroup trialStims;
@@ -127,6 +127,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             RenderSettings.fogColor = FogColors[SkyboxMaterials.IndexOf(skybox.material)];
 
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
+
+            HaloFBController.SetPositiveParticleHaloColor(Color.green);
         });
 
         //Setup state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,14 +143,15 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
             PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
            
-            ItemSpawnerGO = new GameObject("ItemSpawner");
-            ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemManager>();
-            ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
-            ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
-            ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
-            ItemSpawner.BananaTokenGain = CurrentTrial.BananaTokenGain;
-            ItemSpawner.BlockadeTokenLoss = CurrentTrial.BlockadeTokenLoss;
-            ItemSpawner.gameObject.SetActive(true);
+            ItemManagerGO = new GameObject("ItemManager");
+            ItemManager = ItemManagerGO.AddComponent<FR_ItemManager>();
+            ItemManager.SetupQuaddleList(trialStims.stimDefs);
+            ItemManager.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
+            ItemManager.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
+            ItemManager.BananaTokenGain = CurrentTrial.BananaTokenGain;
+            ItemManager.BlockadeTokenLoss = CurrentTrial.BlockadeTokenLoss;
+            ItemManager.StimFaceCamera = CurrentTrial.StimFacingCamera;
+            ItemManager.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");
             FloorManager = FloorManagerGO.AddComponent<FR_FloorManager>();
@@ -167,11 +170,14 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         bool finishedPlaying = false;
         Play.AddSpecificInitializationMethod(() =>
         {
-            SpeedSliderGO.SetActive(true);
-            SpeedSlider.value = FloorManager.FloorMovementSpeed;
+            if(CurrentTrial.ShowUI)
+            {
+                SpeedSliderGO.SetActive(true);
+                SpeedSlider.value = FloorManager.FloorMovementSpeed;
 
-            ScoreManager.Score = 0;
-            ScoreManager.ActivateScoreText();
+                ScoreManager.Score = 0;
+                ScoreManager.ActivateScoreText();
+            }
 
             PlayerManager.StartAnimation("Run");
             PlayerManager.AllowUserInput();
@@ -189,7 +195,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             if (FloorManager.NumTilesSpawned > 1 && FloorManager.ActiveTiles.Count == 1)
                 finishedPlaying = true;
 
-            if (SpeedSlider != null)
+            if (CurrentTrial.ShowUI && SpeedSlider != null)
                 FloorManager.FloorMovementSpeed = SpeedSlider.value;
 
             if(InputBroker.GetKeyDown(KeyCode.A))
@@ -322,7 +328,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         Destroy(ScoreManager);
         Destroy(PlayerGO);
         Destroy(FloorManagerGO);
-        Destroy(ItemSpawnerGO);
+        Destroy(ItemManagerGO);
         Destroy(MovementCirclesControllerGO);
 
         if (AbortCode == 0)
@@ -367,12 +373,25 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>";
+        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+            "\nTargetsHit " + TargetsHit_Trial +
+            "\nTargetsMissed " + TargetsMissed_Trial +
+            "\nDistractorsHit " + DistractorsHit_Trial +
+            "\nDistractorsAvoided " + DistractorsAvoided_Trial;
     }
 
     private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
+
+        //Data values:
+        TrialData.AddDatum("TargetsHit", () => TargetsHit_Trial);
+        TrialData.AddDatum("TargetsMissed", () => TargetsMissed_Trial);
+        TrialData.AddDatum("DistractorsHit", () => DistractorsHit_Trial);
+        TrialData.AddDatum("DistractorsAvoided", () => DistractorsAvoided_Trial);
+        TrialData.AddDatum("BlockadesHit", () => BlockadesHit_Trial);
+        TrialData.AddDatum("BlockadesAvoided", () => BlockadesAvoided_Trial);
+
     }
 
     private void DefineFrameData()

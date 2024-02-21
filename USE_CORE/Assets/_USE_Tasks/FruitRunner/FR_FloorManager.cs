@@ -6,18 +6,19 @@ using UnityEngine;
 public class FR_FloorManager : MonoBehaviour
 {
     [HideInInspector] public float FloorMovementSpeed = 15f; //20 is great for humans
+    private int NumInitialEmptyTiles = 2; //Num of empty (item-less) tiles before items are spawned on them
     [HideInInspector] public int NumTilesSpawned;
     private GameObject FloorTilePrefab;
     private int TotalTiles;
     [HideInInspector] public List<GameObject> ActiveTiles;
-    private FR_ItemManager itemSpawner;
+    private FR_ItemManager itemManager;
     private bool Move;
     [HideInInspector] public float TileScale_Z;
 
 
     public void SetTotalTiles(int numPerGroup, int numGroups)
     {
-        TotalTiles = 2 + (numPerGroup * numGroups); //Add 1 for initial empty tile
+        TotalTiles = NumInitialEmptyTiles + (numPerGroup * numGroups); //Add 1 for initial empty tile
     }
 
     void Start()
@@ -25,7 +26,7 @@ public class FR_FloorManager : MonoBehaviour
         FloorTilePrefab = Resources.Load<GameObject>("Prefabs/Tile_Double");
 
         ActiveTiles = new List<GameObject>();
-        itemSpawner = GameObject.Find("ItemSpawner").GetComponent<FR_ItemManager>();
+        itemManager = GameObject.Find("ItemManager").GetComponent<FR_ItemManager>();
 
         for (int i = 0; i <= TotalTiles; i++)
         {
@@ -80,8 +81,8 @@ public class FR_FloorManager : MonoBehaviour
         tile.gameObject.transform.parent = gameObject.transform;
         tile.AddComponent<FR_Item_Floor>();
 
-        if (NumTilesSpawned > 2) //No item on first tile
-            itemSpawner.SpawnItem(tile.transform);
+        if (NumTilesSpawned > NumInitialEmptyTiles) //No item on initial tiles
+            itemManager.SpawnItem(tile.transform);
 
         ActiveTiles.Add(tile);
 

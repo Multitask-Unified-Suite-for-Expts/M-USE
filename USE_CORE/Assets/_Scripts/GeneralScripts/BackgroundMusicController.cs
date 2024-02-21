@@ -40,7 +40,8 @@ public class BackgroundMusicController : MonoBehaviour
 
     private void SetupMusic()
     {
-        BackgroundMusic_AudioClip = Resources.Load<AudioClip>("BackgroundMusic");
+        BackgroundMusic_AudioClip = Resources.Load<AudioClip>("PerfectBeauty");
+        //BackgroundMusic_AudioClip = Resources.Load<AudioClip>("BackgroundMusic");
         BackgroundMusic_AudioSource = gameObject.AddComponent<AudioSource>();
         BackgroundMusic_AudioSource.clip = BackgroundMusic_AudioClip;
         BackgroundMusic_AudioSource.loop = true;

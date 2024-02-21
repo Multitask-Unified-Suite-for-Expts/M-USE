@@ -1,0 +1,91 @@
+{
+    "TargetHitLeft": {
+        "Value": 1,
+        "Description": "Target Hit Left"
+    },
+    "TargetMissedLeft": {
+        "Value": 2,
+        "Description": "Target Missed Left"
+    },
+    "TargetHitRight": {
+        "Value": 3,
+        "Description": "Target Hit Right"
+    },
+    "TargetMissedRight": {
+        "Value": 4,
+        "Description": "Target Missed Right"
+    },
+    "TargetHitMiddle": {
+        "Value": 5,
+        "Description": "Target Hit Middle"
+    },
+    "TargetMissedMiddle": {
+        "Value": 6,
+        "Description": "Target Missed Middle"
+    },
+    "DistractorHitLeft": {
+        "Value": 7,
+        "Description": "Distractor Hit Left"
+    },
+    "DistractorAvoidedLeft": {
+        "Value": 8,
+        "Description": "Distractor Avoided Left"
+    },
+    "DistractorHitRight": {
+        "Value": 9,
+        "Description": "Distractor Hit Right"
+    },
+    "DistractorAvoidedRight": {
+        "Value": 10,
+        "Description": "Distractor Avoided Right"
+    },
+    "DistractorHitMiddle": {
+        "Value": 11,
+        "Description": "Distractor Hit Middle"
+    },
+    "DistractorAvoidedMiddle": {
+        "Value": 12,
+        "Description": "Distractor Avoided Middle"
+    },
+    "BlockadeHitLeft": {
+        "Value": 13,
+        "Description": "Blockade Hit Left"
+    },
+    "BlockadeHitRight": {
+        "Value": 14,
+        "Description": "Blockade Hit Right"
+    },
+    "BlockadeAvoidedLeft": {
+        "Value": 15,
+        "Description": "Blockade Avoided Left"
+    },
+    "BlockadeAvoidedRight": {
+        "Value": 16,
+        "Description": "Blockade Avoided Right"
+    },
+    "ShiftFromMiddleToRight": {
+        "Value": 17,
+        "Description": "Shift From Middle To Right"
+    },
+    "ShiftFromMiddleToLeft": {
+        "Value": 18,
+        "Description": "Shift From Middle To Left"
+    },
+    "ShiftFromRightToLeft": {
+        "Value": 19,
+        "Description": "Shift From Right To Left"
+    },
+    "ShiftFromLeftToRight": {
+        "Value": 20,
+        "Description": "Shift From Left To Right"
+    },
+    "ShiftFromLeftToMiddle": {
+        "Value": 21,
+        "Description": "Shift From Left To Middle"
+    },
+    "ShiftFromRightToMiddle": {
+        "Value": 22,
+        "Description": "Shift From Right To Middle"
+    }
+
+}

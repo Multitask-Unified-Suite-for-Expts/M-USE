@@ -20,6 +20,8 @@ public class FR_ItemManager : MonoBehaviour
     public int BananaTokenGain;
     public int BlockadeTokenLoss;
 
+    public bool StimFaceCamera;
+
 
     private void Start()
     {
@@ -95,7 +97,8 @@ public class FR_ItemManager : MonoBehaviour
                 CapsuleCollider collider = stim.AddComponent<CapsuleCollider>();
                 collider.center = new Vector3(0f, 0f, -1f);
                 collider.isTrigger = true;
-                //stim.AddComponent<FaceCamera>();
+                if(StimFaceCamera)
+                    stim.AddComponent<FaceCamera>();
 
                 FR_Item_Quaddle quaddleComponent = stim.AddComponent<FR_Item_Quaddle>();
                 quaddleComponent.QuaddleType = quaddle.QuaddleFeedbackType;

@@ -439,6 +439,12 @@ MonoBehaviour:
   verifyTask_Level: {fileID: 0}
   CurrentBlockString: 
   BlockStringsAdded: 0
+  TargetsHit_Task: 0
+  TargetsMissed_Task: 0
+  DistractorsHit_Task: 0
+  DistractorsAvoided_Task: 0
+  BlockadesHit_Task: 0
+  BlockadesAvoided_Task: 0
 --- !u!114 &177450400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -596,6 +602,18 @@ MonoBehaviour:
   FloorManager: {fileID: 0}
   ItemSpawnerGO: {fileID: 0}
   ItemSpawner: {fileID: 0}
+  TargetsHit_Trial: 0
+  TargetsMissed_Trial: 0
+  DistractorsHit_Trial: 0
+  DistractorsAvoided_Trial: 0
+  BlockadesHit_Trial: 0
+  BlockadesAvoided_Trial: 0
+  TargetsHit_Block: 0
+  TargetsMissed_Block: 0
+  DistractorsHit_Block: 0
+  DistractorsAvoided_Block: 0
+  BlockadesHit_Block: 0
+  BlockadesAvoided_Block: 0
 --- !u!1001 &224883842
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1977,7 +1995,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278979596
+    rgba: 4283716698
   m_fontColor: {r: 0.3529412, g: 0.32941177, b: 0.32941177, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3

@@ -100,6 +100,8 @@ namespace USE_ExperimentTemplate_Session
         private ImportSettings_Level importSettings_Level;
         private InitScreen_Level initScreen_Level;
 
+        public GameObject MainDirectionalLight;
+
 
         public bool waitForSerialPort;
 
@@ -426,13 +428,19 @@ namespace USE_ExperimentTemplate_Session
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                MainDirectionalLight.SetActive(true);
+                Session.TerrainGO.SetActive(true);
+
                 if (Session.SessionDef.PlayBackgroundMusic)
                 {
                     Session.BackgroundMusicController.PlayMusic();
                     RedAudioCross.SetActive(false);
                 }
                 else
+                {
+                    Session.BackgroundMusicController.StopMusic();
                     RedAudioCross.SetActive(true);
+                }
 
 
                 HumanVersionToggleButton.SetActive(Session.SessionDef.IsHuman);
@@ -666,6 +674,9 @@ namespace USE_ExperimentTemplate_Session
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
+                MainDirectionalLight.SetActive(false);
+                Session.TerrainGO.SetActive(false);
+
                 Session.LoadingController.ActivateLoadingCanvas();
 
                 TaskButtonsContainer.SetActive(false);
@@ -789,6 +800,8 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                Session.BackgroundMusicController.StopMusic();
+
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
                 AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
 
@@ -919,6 +932,7 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
+                Session.TerrainGO = GameObject.Find("Terrain");
                 Session.FullScreenController = GameObject.Find("MiscScripts").GetComponent<FullScreenController>();
                 Session.BackgroundMusicController = GameObject.Find("MiscScripts").GetComponent<BackgroundMusicController>();
                 Session.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
@@ -931,6 +945,8 @@ namespace USE_ExperimentTemplate_Session
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
+
+                MainDirectionalLight = GameObject.Find("Directional Light");
 
                 HumanVersionToggleButton.SetActive(false);
                 ToggleAudioButton.SetActive(false);

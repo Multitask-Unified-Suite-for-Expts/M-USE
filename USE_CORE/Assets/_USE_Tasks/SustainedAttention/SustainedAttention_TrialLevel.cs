@@ -155,7 +155,6 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            //AudioFBController.Play("EC_BalloonChosen");
             ObjManager.ActivateObjectMovement();
         });
         Play.AddUpdateMethod(() =>

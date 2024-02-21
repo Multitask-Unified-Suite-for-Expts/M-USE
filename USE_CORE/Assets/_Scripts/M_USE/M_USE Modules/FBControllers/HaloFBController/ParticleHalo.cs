@@ -30,12 +30,12 @@ public class ParticleHalo : MonoBehaviour
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         InstantiatedParticleHaloGO.transform.position = behindPos;
 
-
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         
         Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration);
     }
+
     public void ShowParticleHalo2D(string feedbackType, GameObject gameObj, float depth = 10)
     {
         GameObject particlePrefab = (feedbackType.ToLower() == "positive") ? PositiveParticleHaloPrefab : NegativeParticleHaloPrefab;

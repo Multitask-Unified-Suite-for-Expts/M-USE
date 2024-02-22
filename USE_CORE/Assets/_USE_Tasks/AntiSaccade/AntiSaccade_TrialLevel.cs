@@ -289,7 +289,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrial.UseSpinAnimation)
                     SpinCorrectSelection = true;
 
-                HaloFBController.ShowPositive(ChosenGO, depth:haloDepth);
+                HaloFBController.ShowPositive(ChosenGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: haloDepth);
                 TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                 
@@ -297,7 +297,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                HaloFBController.ShowNegative(ChosenGO, depth:haloDepth);
+                HaloFBController.ShowNegative(ChosenGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: haloDepth);
                 TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 
@@ -320,7 +320,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (Time.time - Feedback.TimingInfo.StartTimeAbsolute > CurrentTrial.HaloFbDuration && !HaloFBController.IsHaloGameObjectNull())
+            if (Time.time - Feedback.TimingInfo.StartTimeAbsolute > CurrentTrial.HaloFbDuration)
                 HaloFBController.DestroyAllHalos();
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);

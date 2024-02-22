@@ -152,4 +152,27 @@ namespace MazeGame_Namespace
         public string mString;
 
     }
+    public class MazeGame_BlockDataSummary
+    {
+        public int BlockNum;
+        public int TotalTouches;
+        public int IncompleteTouches;
+        public int CorrectTouches;
+        public int RetouchCorrect;
+        public int IncorrectTouches;
+        public int RuleAbidingErrors;
+        public int PerseverativeRuleAbidingErrors;
+        public int RuleBreakingErrors;
+        public int PerseverativeRuleBreakingErrors;
+        public int BacktrackErrors;
+        public int PerseverativeBackTrackErrors;
+        public int RetouchError;
+        public int PerseverativeRetouchErrors;
+        public string AvgMazeDuration;
+        public string AvgChoiceDuration;
+        public float NumCompletedTrials;
+        public int TrialsToCriterion;
+    }
+
+
 }

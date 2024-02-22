@@ -114,8 +114,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloIntensity(1.5f);
-            HaloFBController.SetCircleHaloIntensity(5);
+            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
         });
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
@@ -267,9 +267,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, depth);
+                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });

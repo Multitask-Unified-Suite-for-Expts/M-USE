@@ -105,7 +105,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Slider & Animation variables
     private float finishedFbDuration;
 
-    [FormerlySerializedAs("mazeManager")] public MazeManager MazeManager;
+    public MazeManager MazeManager;
 
     public MazeGame_TrialDef CurrentTrialDef => GetCurrentTrialDef<MazeGame_TrialDef>();
     public MazeGame_TaskLevel CurrentTaskLevel => GetTaskLevel<MazeGame_TaskLevel>();
@@ -131,8 +131,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.InitializeSlider();
             //FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
-            MazeManager.Initialize(this, CurrentTrialDef, CurrentTaskDef);
-
             if (!Session.WebBuild) //player view variables
             {
                 PlayerViewPanelController = gameObject.AddComponent<PlayerViewPanel>();
@@ -156,7 +154,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
-            
+
             CurrentTaskLevel.SetTaskSummaryString();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
@@ -189,6 +187,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseTile.AddSpecificInitializationMethod(() =>
         {
+            Input.ResetInputAxes(); //reset input in case they holding down
+
             //TouchFBController.SetPrefabSizes(tileScale);
             MazeManager.ActivateMazeElements();
             MazeManager.choiceStartTime = Time.unscaledTime;
@@ -198,9 +198,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.HandlerActive = true;
             if (SelectionHandler.AllSelections.Count > 0)
                 SelectionHandler.ClearSelections();
-            
-            
-           
         });
         ChooseTile.AddUpdateMethod(() =>
         {
@@ -285,7 +282,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 if (MazeManager.IsMazeFinished())
                 {
-                    Debug.LogWarning("filling up slider");
                     SliderFBController.SetFlashingDuration(flashingFbDuration.value);
                     SliderFBController.UpdateSliderValue(1); // fill up the remainder of the slider
                 }
@@ -305,6 +301,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             {
                 AudioFBController.Play("Negative");
             }
+
         });
         SelectionFeedback.AddUpdateMethod(() => { SetTrialSummaryString(); });// called every frame to update duration info
 
@@ -317,18 +314,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 StateAfterDelay = ITI;
                 DelayDuration = 0;
 
-                int[] nums = new int[3] { 1, 2, 3 };
-                int sum = nums.Sum();
-
-                  percentError = (float)decimal.Divide(totalErrors_InTrial, MazeManager.GetCurrentMaze().mNumSquares);
-                  runningPercentError.Add(percentError);
-                  CurrentTaskLevel.NumSliderBarFull_InBlock++;
-                  CurrentTaskLevel.NumSliderBarFull_InTask++;
-
-                if (Session.SyncBoxController != null)
-                {
-                    HandleMazeCompletion();
-                }
+                 HandleMazeCompletion();
+                
             }
             else if (CheckTileFlash() || (CurrentTrialDef.TileFlashingRatio != 0 && GameObject.Find(MazeManager.GetCurrentMaze().mNextStep).GetComponent<Tile>().assignedTileFlash))
                 StateAfterDelay = TileFlashFeedback;
@@ -446,14 +433,16 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        return TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
+        return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
             CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
             CurrentTaskLevel.MaxTrials_InBlock);
     }
     protected override void DefineTrialStims()
     {
         LoadConfigVariables();
+
+        if (!MazeManager.GetMazeManagerInitialized())
+            MazeManager.InitializeMazeManager(this, CurrentTrialDef, CurrentTaskDef);
         tiles = MazeManager.CreateMaze();
         TrialStims.Add(tiles);
     }
@@ -512,7 +501,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         }
         
         DisableSceneElements();
-
     }
 
     private void AddChoiceDurationToDataTrackers()
@@ -543,10 +531,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         incorrectRuleBreakingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleBreakingFbDuration");
         tileBlinkingDuration = ConfigUiVariables.get<ConfigNumber>("tileBlinkingDuration");
         maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
-        maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
         minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
         maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
 
+        finishedFbDuration = flashingFbDuration.value + correctFbDuration.value;
         configVariablesLoaded = true;
     }
 
@@ -556,9 +544,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
         TrialData.AddDatum("MazeDefName", () => mazeDefName);
-        TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles()));
+        TrialData.AddDatum("MazeDefName", () => CurrentTrialDef.MazeName);
+        TrialData.AddDatum("SelectedTiles", () => string.Join(",", MazeManager.GetAllSelectedTiles().Select(go => go.name)));
         TrialData.AddDatum("TotalErrors", () => totalErrors_InTrial);
-        // TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); DOESN'T GIVE ANYTHING USEFUL, JUST PATH LENGTH
+        TrialData.AddDatum("CorrectTouches", () => correctTouches_InTrial); 
         TrialData.AddDatum("RetouchCorrect", () => retouchCorrect_InTrial);
         TrialData.AddDatum("RetouchErroneous", () => retouchErroneous_InTrial);
         
@@ -657,7 +646,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         choiceMade = false;
         configVariablesLoaded = false;
         playerViewTextLoaded = false;
-        Session.MouseTracker.ResetClicks();
         MazeManager.ResetMazeVariables();
         correctTouches_InTrial = 0;
         perseverativeRetouchErrors_InTrial = 0;
@@ -671,10 +659,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         retouchCorrect_InTrial = 0;
         retouchErroneous_InTrial = 0;
     }
-    void SetTrialSummaryString()
+    private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Maze Name: </b>" + mazeDefName +
-                             "\n<b>Guided Selection: </b>" + CurrentTrialDef.TileFlashingRatio +
+        TrialSummaryString = "<b>Maze Name: </b>" + CurrentTrialDef.MazeName +
+                             "\n<b>Tile Flashing ratio: </b>" + CurrentTrialDef.TileFlashingRatio +
                              "\n" +
                              "\n<b>Percent Error: </b>" + String.Format("{0:0.00}%", percentError * 100) +
                              "\n<b>Total Errors: </b>" + totalErrors_InTrial +
@@ -691,7 +679,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
     }
 
-    public void HandleRuleBreakingErrorData()
+    private void HandleRuleBreakingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleBreakingError"]);
@@ -705,7 +693,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.TotalErrors_InTask++;
     }
 
-    public void HandleRuleAbidingErrorData()
+    private void HandleRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
@@ -719,13 +707,13 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.TotalErrors_InTask++;
     }
 
-    public void HandleBackTrackErrorData()
+    private void HandleBackTrackErrorData()
     {
         backtrackErrors_InTrial++;
         CurrentTaskLevel.BacktrackErrors_InBlock++;
         CurrentTaskLevel.BacktrackErrors_InTask++;
     }
-    public void HandleRetouchErroneousData()
+    private void HandleRetouchErroneousData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
@@ -739,7 +727,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchError_InTask++;
     }
 
-    public void HandleRetouchCorrectData()
+    private void HandleRetouchCorrectData()
     {
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LastCorrectSelection"]);
@@ -749,7 +737,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.RetouchCorrect_InTask++;
     }
 
-    public void HandleCorrectTouch()
+    private void HandleCorrectTouch()
     {
         Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
 
@@ -757,26 +745,26 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.CorrectTouches_InBlock++;
         CurrentTaskLevel.CorrectTouches_InTask++;
     }
-    
-    public void HandlePerseverativeRetouchError()
+
+    private void HandlePerseverativeRetouchError()
     {
         perseverativeRetouchErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRetouchErrors_InTask++;
     }
-    public void HandlePerseverativeBackTrackError()
+    private void HandlePerseverativeBackTrackError()
     {
         perseverativeBackTrackErrors_InTrial++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InBlock++;
         CurrentTaskLevel.PerseverativeBackTrackErrors_InTask++;
     }
-    public void HandlePerseverativeRuleAbidingError()
+    private void HandlePerseverativeRuleAbidingError()
     {
         perseverativeRuleAbidingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InBlock++;
         CurrentTaskLevel.PerseverativeRuleAbidingErrors_InTask++;
     }
-    public void HandlePerseverativeRuleBreakingError()
+    private void HandlePerseverativeRuleBreakingError()
     {
         perseverativeRuleBreakingErrors_InTrial++;
         CurrentTaskLevel.PerseverativeRuleBreakingErrors_InBlock++;
@@ -813,6 +801,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 HandleBackTrackErrorData();
                 HandlePerseverativeBackTrackError();
                 HandleRuleBreakingErrorData();
+                HandlePerseverativeRuleBreakingError();
                 break;
             case "perseverativeRetouchCurrentTilePositionError":
                 HandlePerseverativeRetouchError();

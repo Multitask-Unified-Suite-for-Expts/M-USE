@@ -537,10 +537,8 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
 
     protected override bool CheckBlockEnd()
     {
-        TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-
         // Using Simple Threshold Block End
-            return TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", RunningAcc,
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd("SimpleThreshold", RunningAcc,
                  CurrentTrial.PerfThresholdEndTrials, CurrentTrial.PerfWindowEndTrials, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTrial.MaxTrials);
 

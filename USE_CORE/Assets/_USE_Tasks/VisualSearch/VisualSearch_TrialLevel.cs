@@ -108,8 +108,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloIntensity(1.5f);
-            HaloFBController.SetCircleHaloIntensity(5);
+            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -253,9 +253,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, depth);
+                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => HaloFBController.DestroyAllHalos());
@@ -435,8 +435,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         CorrectSelection = false;
         RewardGiven = false;
         choiceMade = false;
-        if (Session.MouseTracker != null)
-            Session.MouseTracker.ResetClicks();
     }
     private void DefineTrialData()
     {

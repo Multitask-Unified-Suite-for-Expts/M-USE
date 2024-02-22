@@ -71,6 +71,8 @@ namespace VisualSearch_Namespace
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.MaxTrials = MaxTrials;
                 td.BlockCount = BlockCount;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;             
                 TrialDefs.Add(td);
             }
@@ -91,7 +93,8 @@ namespace VisualSearch_Namespace
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.TokensWithStimOn = TokensWithStimOn;
-
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;
             }
         }

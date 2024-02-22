@@ -158,7 +158,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -409,6 +409,7 @@ GameObject:
   - component: {fileID: 1584810909}
   - component: {fileID: 1584810911}
   - component: {fileID: 1584810910}
+  - component: {fileID: 1584810912}
   m_Layer: 0
   m_Name: WhatWhenWhere_Scripts
   m_TagString: Untagged
@@ -473,6 +474,7 @@ MonoBehaviour:
   calculatedThreshold_timing: 0
   blockAccuracy: 0
   ForceBlockEnd: 0
+  ReachedCriterion: 0
   TaskDataPath: 
   TrialSummaryString: 
   TaskLevel: {fileID: 1584810911}
@@ -508,10 +510,9 @@ MonoBehaviour:
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
   WWW_CanvasGO: {fileID: 1329241485}
-  numTouchedStims: 0
-  consecutiveError: 0
-  runningAcc: 
+  SequenceManager: {fileID: 1584810912}
   ContextName: 
+  runningAcc: 
   flashingFbDuration:
     name: 
     hidden: 0
@@ -592,7 +593,6 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  NumSliderBarFilled: 0
   playerViewTextList: []
   playerViewText: {fileID: 0}
 --- !u!114 &1584810911
@@ -619,9 +619,9 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   NumAbortedTrials_InTask: 0
-  NumRewardPulses_InTask: 0
   NumAbortedTrials_InBlock: 0
   NumRewardPulses_InBlock: 0
+  NumRewardPulses_InTask: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
   ForceTaskEnd: 0
@@ -659,17 +659,44 @@ MonoBehaviour:
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
+  RuleAbidingErrors_InBlock: 0
+  DistractorRuleAbidingErrors_InBlock: 0
+  BackTrackErrors_InBlock: 0
+  RetouchErrors_InBlock: 0
+  PerseverativeRuleAbidingErrors_InBlock: 0
+  PerseverativeDistractorRuleAbidingErrors_InBlock: 0
+  PerseverativeBackTrackErrors_InBlock: 0
+  PerseverativeRetouchErrors_InBlock: 0
+  CorrectSelections_InBlock: 0
+  RetouchCorrect_InBlock: 0
+  TotalErrors_InBlock: 0
+  CompletedSequences_InBlock: 0
+  RuleAbidingErrors_InTask: 0
+  DistractorRuleAbidingErrors_InTask: 0
+  BackTrackErrors_InTask: 0
+  RetouchErrors_InTask: 0
+  PerseverativeRuleAbidingErrors_InTask: 0
+  PerseverativeDistractorRuleAbidingErrors_InTask: 0
+  PerseverativeBackTrackErrors_InTask: 0
+  PerseverativeRetouchErrors_InTask: 0
+  CorrectSelections_InTask: 0
+  RetouchCorrect_InTask: 0
+  TotalErrors_InTask: 0
+  CompletedSequences_InTask: 0
   NumSliderBarFilled_InTask: 0
-  RepetitionErrorCount_InBlock: 0
-  SlotErrorCount_InBlock: 0
-  DistractorSlotErrorCount_InBlock: 0
-  NumCorrectSelections_InBlock: 0
-  NumErrors_InBlock: 0
-  retouchErroneousCounter_InTask: 0
-  retouchCorrectCounter_InTask: 0
-  perseverationCounter_InTask: 0
-  LearningSpeed: -1
   BlockAveragesString: 
+--- !u!114 &1584810912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584810908}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04cf1731a331ff4429803a064441fadd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2128323196
 GameObject:
   m_ObjectHideFlags: 0

@@ -75,7 +75,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public int blockAccuracy;
 
 
-        [HideInInspector] public bool ForceBlockEnd;
+        [HideInInspector] public bool ForceBlockEnd, ReachedCriterion;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
         protected State LoadTrialTextures, LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
@@ -206,12 +206,9 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
-
                 TrialCount_InBlock = -1;
-                if (TrialCount_InBlock <= 0)
-                {
-                    DefineCustomTrialDefSelection();
-                }
+                DefineCustomTrialDefSelection();
+                
                 TrialStims = new List<StimGroup>();
                 AudioFBController?.UpdateAudioSource();
 
@@ -239,7 +236,6 @@ namespace USE_ExperimentTemplate_Trial
                     TrialFilesLoaded = true;
             });
             LoadTrialTextures.SpecifyTermination(() => TrialFilesLoaded, LoadTrialStims);
-
 
 
             LoadTrialStims.AddUniversalInitializationMethod(() =>
@@ -282,7 +278,8 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
-
+                TouchFBController?.ClearErrorCounts();
+                Session.MouseTracker?.ResetClicks();
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>
@@ -340,12 +337,14 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
 
+                TaskLevel.TotalTouches_InBlock += Session.MouseTracker.GetClickCount()[0];
+                TaskLevel.TotalIncompleteTouches_InBlock += TouchFBController?.ErrorCount;
+
                 WriteDataFiles();
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
                 
-                TouchFBController?.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
                 TrialSummaryString = "";
                 

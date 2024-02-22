@@ -44,6 +44,8 @@ namespace FlexLearning_Namespace
         public Reward[] ProbabilisticNumPulses;
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
+        public float? FeatureSimilarity;
+
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -116,7 +118,7 @@ namespace FlexLearning_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
-
+        public float? FeatureSimilarity;
     }
 
     public class FlexLearning_StimDef : StimDef

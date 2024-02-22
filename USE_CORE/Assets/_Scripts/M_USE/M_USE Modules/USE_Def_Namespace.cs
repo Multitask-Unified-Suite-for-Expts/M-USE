@@ -348,6 +348,13 @@ namespace USE_Def_Namespace
         public bool NeutralITI;
         
         public string TrialDefSelectionStyle;
+
+        /// <summary>
+        /// The Task's Directional Light Intensity.
+        /// </summary>
+        public float TaskDirectionalLightIntensity = 1.35f; //1.35 for new quaddles, 2 for old quaddles
+
+
     }
 
     public class BlockDef

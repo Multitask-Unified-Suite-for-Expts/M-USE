@@ -80,6 +80,7 @@ namespace USE_ExperimentTemplate_Task
         public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
 
         public GameObject TaskDirectionalLight;
+
         private int TaskStringsAdded = 0;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
@@ -168,6 +169,11 @@ namespace USE_ExperimentTemplate_Task
             {
                 TaskCam.gameObject.SetActive(true);
 
+                if (TaskDirectionalLight != null)
+                {
+                    TaskDirectionalLight.GetComponent<Light>().intensity = TaskDef.TaskDirectionalLightIntensity; //Set light for the task. 
+                }
+
                 if (TaskCanvasses != null)
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(true);
@@ -216,9 +222,11 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues. 
+                //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues.
                 if (TaskDirectionalLight != null)
-                    TaskDirectionalLight.SetActive(true);
+                {
+                    TaskDirectionalLight.SetActive(true);  
+                }
 
                 BlockCount++;
 

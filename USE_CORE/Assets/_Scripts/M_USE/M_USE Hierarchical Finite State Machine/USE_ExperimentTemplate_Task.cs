@@ -79,6 +79,7 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector]
         public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
 
+        public GameObject TaskDirectionalLight;
         private int TaskStringsAdded = 0;
         public Camera TaskCam;
         public Canvas[] TaskCanvasses;
@@ -215,6 +216,10 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues. 
+                if (TaskDirectionalLight != null)
+                    TaskDirectionalLight.SetActive(true);
+
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;

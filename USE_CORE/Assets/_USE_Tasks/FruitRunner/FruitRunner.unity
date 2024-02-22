@@ -410,6 +410,7 @@ MonoBehaviour:
   TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
+  TaskDirectionalLight: {fileID: 539003692}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
   StimCanvas_2D: {fileID: 0}
@@ -600,8 +601,8 @@ MonoBehaviour:
   MovementCirclesController: {fileID: 0}
   FloorManagerGO: {fileID: 0}
   FloorManager: {fileID: 0}
-  ItemSpawnerGO: {fileID: 0}
-  ItemSpawner: {fileID: 0}
+  ItemManagerGO: {fileID: 0}
+  ItemManager: {fileID: 0}
   TargetsHit_Trial: 0
   TargetsMissed_Trial: 0
   DistractorsHit_Trial: 0
@@ -1114,7 +1115,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &539003693
 Light:
   m_ObjectHideFlags: 0

@@ -176,6 +176,7 @@ namespace USE_ExperimentTemplate_Trial
 
         public Type TrialDefType, StimDefType;
 
+
         public void DefineTrialLevel()
         {
             Session.TrialLevel = this;

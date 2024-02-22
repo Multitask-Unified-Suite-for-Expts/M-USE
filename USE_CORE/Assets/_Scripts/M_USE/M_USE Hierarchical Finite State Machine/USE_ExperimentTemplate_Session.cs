@@ -108,9 +108,9 @@ namespace USE_ExperimentTemplate_Session
 
         public override void DefineControlLevel()
         {
-#if (UNITY_WEBGL)
+            #if (UNITY_WEBGL)
                 Session.WebBuild = true;
-#endif
+            #endif
 
             Session.SessionLevel = this;
 
@@ -431,6 +431,8 @@ namespace USE_ExperimentTemplate_Session
                 MainDirectionalLight.SetActive(true);
                 Session.TerrainGO.SetActive(true);
 
+                Session.InitCamGO.SetActive(false);
+
                 if (Session.SessionDef.PlayBackgroundMusic)
                 {
                     Session.BackgroundMusicController.PlayMusic();
@@ -515,6 +517,7 @@ namespace USE_ExperimentTemplate_Session
 
 
                 TaskButtonsContainer = GameObject.Find("TaskButtonsGrid");
+                TaskButtonsContainer.SetActive(false);
 
                 GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
                 int size = Session.SessionDef.TaskButtonSize;
@@ -626,6 +629,7 @@ namespace USE_ExperimentTemplate_Session
                     count++;
                 }
 
+                TaskButtonsContainer.SetActive(true);
 
                 if (Session.SessionDef.IsHuman)
                 {
@@ -634,13 +638,7 @@ namespace USE_ExperimentTemplate_Session
                     if (!Session.SessionDef.PlayBackgroundMusic)
                         RedAudioCross.SetActive(true);
                 }
-            });
 
-            selectTask.AddUpdateMethod(() =>
-            {
-                GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
-                if (hit != null)
-                    Debug.LogWarning(hit.name);
             });
 
             selectTask.AddLateUpdateMethod(() =>
@@ -807,6 +805,7 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                Session.InitCamGO.SetActive(false);
                 Session.BackgroundMusicController.StopMusic();
 
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
@@ -828,6 +827,8 @@ namespace USE_ExperimentTemplate_Session
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                Session.InitCamGO.SetActive(true);
+
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
                 

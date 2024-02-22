@@ -80,7 +80,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private float searchStartTime;
     private bool RewardGiven;
     private bool choiceMade;
-    private VisualSearch_TrialDataSummary vs_TrialDataSummary;
+    private VisualSearch_TrialDataSummary TrialDataSummary;
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
@@ -110,8 +110,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            vs_TrialDataSummary = new VisualSearch_TrialDataSummary();
-            vs_TrialDataSummary.featureSimilarity = CurrentTrialDef.FeatureSimilarity;
+            TrialDataSummary = new VisualSearch_TrialDataSummary();
+            CurrentTaskLevel.AllTrialDataSummaries.Add(TrialDataSummary);
+            TrialDataSummary.FeatureSimilarity = CurrentTrialDef.FeatureSimilarity;
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "VisualSearch_DirectionalLight");
             if (currentTaskDef.StimFacingCamera)
@@ -202,8 +203,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     float searchDuration = Time.time - searchStartTime;
                     SearchDurations_InBlock.Add(searchDuration);
                     CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
-                    vs_TrialDataSummary.reactionTime = searchDuration;
-                    vs_TrialDataSummary.selectionPrecision = Vector2.Distance(Input.mousePosition, Camera.main.WorldToScreenPoint(selectedGO.transform.root.position));
+                    TrialDataSummary.ReactionTime = searchDuration;
+                    TrialDataSummary.SelectionPrecision = ShotgunHandler.LastSuccessfulSelection.SelectionPrecision;
                     choiceMade = true;
                 }
                 ShotgunHandler.ClearSelections();
@@ -216,14 +217,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if (CorrectSelection)
             {
-                vs_TrialDataSummary.correctSelection = true;
+                TrialDataSummary.CorrectSelection = 1;
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
             }
             else
             {
-                vs_TrialDataSummary.correctSelection = false;
+                TrialDataSummary.CorrectSelection = 0;
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
@@ -244,9 +245,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             SearchDurations_InBlock.Add(null);
-            vs_TrialDataSummary.reactionTime = null;
-            vs_TrialDataSummary.correctSelection = null;
-            vs_TrialDataSummary.selectionPrecision = null;
+            TrialDataSummary.ReactionTime = null;
+            TrialDataSummary.CorrectSelection = null;
+            TrialDataSummary.SelectionPrecision = null;
 
 
             SetTrialSummaryString();
@@ -321,6 +322,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI"));
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
             }
+
+            var test = CurrentTaskLevel.CreateTaskDataSummary();
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
         {
@@ -419,7 +422,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 sd.IsTarget = true; //ONLY HOLDS TRUE IF POSITIVE REWARD GIVEN TO TARGET
             else
             {
-                vs_TrialDataSummary.numDistractors++;
+                TrialDataSummary.NumDistractors++;
                 sd.IsTarget = false;
             }
 

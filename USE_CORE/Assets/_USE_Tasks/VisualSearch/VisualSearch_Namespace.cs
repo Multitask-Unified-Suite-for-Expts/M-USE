@@ -41,7 +41,7 @@ namespace VisualSearch_Namespace
         public Reward[] ProbabilisticNumPulses;
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
-        public float FeatureSimilarity;
+        public float? FeatureSimilarity;
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -109,7 +109,7 @@ namespace VisualSearch_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool TokensWithStimOn;
         public bool RandomizedLocations;
-        public float FeatureSimilarity;
+        public float? FeatureSimilarity;
     }
 
     public class VisualSearch_StimDef : StimDef
@@ -119,11 +119,23 @@ namespace VisualSearch_Namespace
 
     public class VisualSearch_TrialDataSummary
     {
-        public float featureSimilarity;
-        public float? reactionTime;
-        public int numDistractors;
-        public float? selectionPrecision;
-        public bool? correctSelection;
+        public float? FeatureSimilarity;
+        public float? ReactionTime;
+        public int NumDistractors;
+        public float? SelectionPrecision;
+        public int? CorrectSelection;
+
+    }
+    public class VisualSearch_TaskDataSummary
+    {
+        public float? AvgReactionTime;
+        public double? HighFeatureSimilarityAccuracy;
+        public double? LowFeatureSimilarityAccuracy;
+        public double? DistractorInterferenceAccuracy;
+        public double? DistractorInterferenceReactionTime;
+        public float? AvgSelectionPrecision;
+        public float? TotalAccuracy;
+        public float? MedianFeatureSimilarity;
 
     }
 }

@@ -80,7 +80,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     {
         string[] splitArray = CurrentBlock.BlockName.Split('.');
 
-        if (splitArray.Length < 1)
+        if (splitArray.Length < 2)
             return;
 
         string split = splitArray[1].ToLower();

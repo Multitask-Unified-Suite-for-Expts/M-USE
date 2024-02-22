@@ -39,11 +39,9 @@ public class ParticleHalo : MonoBehaviour
     public void ShowParticleHalo2D(string feedbackType, GameObject gameObj, float depth = 10)
     {
         GameObject particlePrefab = (feedbackType.ToLower() == "positive") ? PositiveParticleHaloPrefab : NegativeParticleHaloPrefab;
-        GameObject rootObj = gameObj.transform.root.gameObject;
 
         InstantiatedParticleHaloGO = Instantiate(particlePrefab, null);
-        Vector3 pos3d = rootObj.transform.position;
-        Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
+        Vector2 pos2d = Camera.main.WorldToScreenPoint(gameObj.transform.position);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
         InstantiatedParticleHaloGO.transform.position = worldPos;
 

@@ -78,8 +78,13 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 
     private void AddToThresholdCategory()
     {
-        string split = CurrentBlock.BlockName.Split('.')[1].ToLower();
-        //string split = CurrentBlock.BlockName.Split(".")[1].ToLower();
+        string[] splitArray = CurrentBlock.BlockName.Split('.');
+
+        if (splitArray.Length < 1)
+            return;
+
+        string split = splitArray[1].ToLower();
+
         if (split.Contains("as"))
         {
             AS_AvgCalcThresh_Task.Add(trialLevel.calculatedThreshold_timing);

@@ -34,7 +34,6 @@ using System.Collections.Generic;
 using TMPro;
 using USE_Data;
 using UnityEngine.UI.Extensions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace USE_UI
 {

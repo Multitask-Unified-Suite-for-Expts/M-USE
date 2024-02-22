@@ -238,7 +238,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &560915191
 Light:
   m_ObjectHideFlags: 0
@@ -527,6 +527,7 @@ MonoBehaviour:
   TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
+  TaskDirectionalLight: {fileID: 560915190}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
   StimCanvas_2D: {fileID: 0}

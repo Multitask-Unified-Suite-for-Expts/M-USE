@@ -122,7 +122,7 @@ public class InitScreen_Level : ControlLevel
 
             Session.InitCamGO.AddComponent<CameraCircle>();
 
-            StartCoroutine(PlayButtonDelay(2f));
+            StartCoroutine(PlayButtonDelay(1f));
 
         });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
@@ -166,6 +166,10 @@ public class InitScreen_Level : ControlLevel
             //Set Y of the camera so its far above the terrain for task selection
             Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, 60f, Camera.main.transform.position.z);
             Camera.main.gameObject.AddComponent<CameraCircle>().targetHeight = 55f;
+
+            //Set init cam pos to main cam so that later we can turn it on and it looks the same:
+            Session.InitCamGO.transform.position = Camera.main.transform.position;
+
         });
 
     }
@@ -397,6 +401,12 @@ public class InitScreen_Level : ControlLevel
 
     private void SetupInitScreen()
     {
+        if (Session.WebBuild)
+        {
+            InitScreenCanvas_GO.GetComponent<Canvas>().targetDisplay = 0;
+            Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
+        }
+
         KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
 
         SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
@@ -442,9 +452,6 @@ public class InitScreen_Level : ControlLevel
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
-
-        if (Session.WebBuild)
-            Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
     }
 
     public void HandleSettingButtonClicked()

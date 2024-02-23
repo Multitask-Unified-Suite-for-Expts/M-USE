@@ -191,6 +191,7 @@ namespace SelectionTracking
             public StimDefPointer SelectedStimDefPointer;
             public bool WasSuccessful;
             public List<Vector3> InputLocations;
+            public float SelectionPrecision;
             public string ErrorType;
 
             public string ParentName;
@@ -534,6 +535,7 @@ namespace SelectionTracking
                         OngoingSelection.WasSuccessful = true;
                         LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
+                        LastSuccessfulSelection.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(LastSuccessfulSelection.SelectedGameObject.transform.root.position));
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:

@@ -120,7 +120,7 @@ public class InitScreen_Level : ControlLevel
 
             Session.BackgroundMusicController.PlayMusic();
 
-            Session.InitCamGO.AddComponent<CameraCircle>();
+            //Session.InitCamGO.AddComponent<CameraCircle>();
 
             StartCoroutine(PlayButtonDelay(1f));
 
@@ -164,8 +164,8 @@ public class InitScreen_Level : ControlLevel
             Destroy(Session.InitCamGO.GetComponent<CameraCircle>());
 
             //Set Y of the camera so its far above the terrain for task selection
-            Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, 60f, Camera.main.transform.position.z);
-            Camera.main.gameObject.AddComponent<CameraCircle>().targetHeight = 55f;
+            Camera.main.transform.position = new Vector3(Camera.main.transform.position.x, 70f, Camera.main.transform.position.z);
+            //Camera.main.gameObject.AddComponent<CameraCircle>().targetHeight = 55f;
 
             //Set init cam pos to main cam so that later we can turn it on and it looks the same:
             Session.InitCamGO.transform.position = Camera.main.transform.position;

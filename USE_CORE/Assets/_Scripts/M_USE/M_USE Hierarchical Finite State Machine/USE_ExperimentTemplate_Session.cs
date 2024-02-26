@@ -928,7 +928,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
                     skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
-                Debug.LogWarning("SETTING");
                 skyboxComponent.material = Resources.Load<Material>("Materials/Skybox1");
                 //skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
             }
@@ -1003,7 +1002,6 @@ namespace USE_ExperimentTemplate_Session
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
             skybox.material = Resources.Load<Material>("Materials/Skybox1");
-            Debug.LogWarning("NAME: " + skybox.material.name);
             //skybox.material = Resources.Load<Material>("MUSE_MainBackground");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;

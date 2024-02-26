@@ -120,17 +120,7 @@ namespace USE_ExperimentTemplate_Trial
 
         public int CurrentTrialDefIndex;
 
-        //if anyone uses this test it!
-        public List<GameObject> AssignStimToList(StimGroup sg, List<GameObject> existingList = null)
-        {
-            if (existingList == null)
-                existingList = new List<GameObject>();
 
-            foreach (var stim in sg.stimDefs)
-                existingList.Add(stim.StimGameObject);
-
-            return existingList;
-        }
 
         public virtual void DefineCustomTrialDefSelection()
         {
@@ -177,6 +167,25 @@ namespace USE_ExperimentTemplate_Trial
         public Type TrialDefType, StimDefType;
 
 
+        public virtual void OnTokenBarFull()
+        {
+
+        }
+
+        public void SubscribeToEvents()
+        {
+            if(TokenFBController != null)
+                TokenFBController.OnTokenBarFilled += OnTokenBarFull;
+        }
+
+        private void OnDestroy()
+        {
+            if(TokenFBController != null)
+                TokenFBController.OnTokenBarFilled -= OnTokenBarFull;
+
+        }
+
+
         public void DefineTrialLevel()
         {
             Session.TrialLevel = this;
@@ -206,6 +215,8 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
+                SubscribeToEvents();
+
                 TrialCount_InBlock = -1;
                 DefineCustomTrialDefSelection();
                 

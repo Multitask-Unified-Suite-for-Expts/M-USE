@@ -52,7 +52,8 @@ public class TokenFBController : MonoBehaviour
     private int totalTokensNum = 5;
     private int numCollected = 0;
     private int numTokenBarFull = 0;
-    private bool tokenBarFull = false;
+
+
     // Rendering
     private Rect tokenBoxRect;
     private GUIStyle whiteStyle;
@@ -83,7 +84,6 @@ public class TokenFBController : MonoBehaviour
     {
         trialData.AddDatum("TokenBarValue", () => numCollected);
         trialData.AddDatum("TokenChange", () => tokensChange);
-        trialData.AddDatum("TokenBarFull", ()=> tokenBarFull);
         frameData.AddDatum("TokenAnimationPhase", () => animationPhase.ToString());
         this.audioFBController = audioFBController;
         numCollected = 0;
@@ -142,15 +142,8 @@ public class TokenFBController : MonoBehaviour
     {
         return numCollected;
     }
-   public void ResetTokenBarFull()
-    {
-        tokenBarFull = false;
 
-    }
-    public bool IsTokenBarFull()
-    {
-        return tokenBarFull;
-    }
+
 
     public void AdjustTokenBarSizing(int newTokenSize)
     {
@@ -249,7 +242,6 @@ public class TokenFBController : MonoBehaviour
                     if (numCollected >= totalTokensNum)
                     {
                         animationPhase = AnimationPhase.Flashing;
-                        tokenBarFull = true;
                         OnTokenBarFilled?.Invoke(); //Invoke the event so other script can subscribe to it
                         audioFBController.Play("TripleCollected");
                         Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);

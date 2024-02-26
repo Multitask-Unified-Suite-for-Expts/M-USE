@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 
+using System;
 using UnityEngine;
 using USE_Data;
 
@@ -72,6 +73,10 @@ public class TokenFBController : MonoBehaviour
     private float flashingTime = 0.5f; // How long the token bar should flash when it fills up
     // Audio
     AudioFBController audioFBController;
+
+    public event Action OnTokenBarFilled;
+
+
 
 
     public void Init(DataController trialData, DataController frameData, AudioFBController audioFBController)
@@ -245,6 +250,7 @@ public class TokenFBController : MonoBehaviour
                     {
                         animationPhase = AnimationPhase.Flashing;
                         tokenBarFull = true;
+                        OnTokenBarFilled?.Invoke(); //Invoke the event so other script can subscribe to it
                         audioFBController.Play("TripleCollected");
                         Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["TokenFbController_FullTbAnimationStart"]);
                         animationEndTime += flashingTime;

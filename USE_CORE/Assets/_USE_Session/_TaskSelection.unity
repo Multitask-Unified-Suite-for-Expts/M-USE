@@ -3415,6 +3415,7 @@ MonoBehaviour:
   Paused: 1
   InitScreen_GO: {fileID: 1010477782}
   MainPanel_GO: {fileID: 1338016534}
+  QuaddleImagesGO: {fileID: 0}
   InitScreenCanvas_GO: {fileID: 2008034526}
   SubjectID_Text: {fileID: 384181289}
   SubjectAge_Text: {fileID: 2146358355}
@@ -4054,7 +4055,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 1
 --- !u!224 &2008034530
 RectTransform:

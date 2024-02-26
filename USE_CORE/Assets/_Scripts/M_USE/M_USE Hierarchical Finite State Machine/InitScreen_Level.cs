@@ -123,7 +123,6 @@ public class InitScreen_Level : ControlLevel
 
             Session.BackgroundMusicController.PlayMusic();
 
-
             StartCoroutine(PlayButtonDelay(2f));
 
         });

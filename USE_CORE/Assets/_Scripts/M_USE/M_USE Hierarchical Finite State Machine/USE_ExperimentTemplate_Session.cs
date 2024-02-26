@@ -429,7 +429,6 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 MainDirectionalLight.SetActive(true);
-                Session.TerrainGO.SetActive(true);
 
                 Session.InitCamGO.SetActive(false);
 
@@ -680,7 +679,6 @@ namespace USE_ExperimentTemplate_Session
             loadTask.AddSpecificInitializationMethod(() =>
             {
                 MainDirectionalLight.SetActive(false);
-                Session.TerrainGO.SetActive(false);
 
                 Session.LoadingController.ActivateLoadingCanvas();
 
@@ -930,7 +928,9 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
                     skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
-                skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
+                Debug.LogWarning("SETTING");
+                skyboxComponent.material = Resources.Load<Material>("Materials/Skybox1");
+                //skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
             }
             else
                 Debug.LogWarning("TASK CAM IS NULL!");
@@ -940,7 +940,6 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
-                Session.TerrainGO = GameObject.Find("Terrain");
                 Session.FullScreenController = GameObject.Find("MiscScripts").GetComponent<FullScreenController>();
                 Session.BackgroundMusicController = GameObject.Find("MiscScripts").GetComponent<BackgroundMusicController>();
                 Session.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
@@ -1003,7 +1002,9 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("MUSE_MainBackground");
+            skybox.material = Resources.Load<Material>("Materials/Skybox1");
+            Debug.LogWarning("NAME: " + skybox.material.name);
+            //skybox.material = Resources.Load<Material>("MUSE_MainBackground");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
             ExpDisplayRenderImage = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();

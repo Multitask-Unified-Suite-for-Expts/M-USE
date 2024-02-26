@@ -75,8 +75,6 @@ public static class Session
     public static GameObject TaskSelectionCanvasGO;
     public static GameObject InitCamGO;
 
-    public static GameObject TerrainGO;
-
     public static HumanStartPanel HumanStartPanel;
     public static ExperimenterDisplayController ExperimenterDisplayController;
     public static SessionDataControllers SessionDataControllers;

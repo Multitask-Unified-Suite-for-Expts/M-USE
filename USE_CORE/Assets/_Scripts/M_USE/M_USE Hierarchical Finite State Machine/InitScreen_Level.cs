@@ -37,6 +37,7 @@ public class InitScreen_Level : ControlLevel
     private GameObject MuseTextParentGO;
     private GameObject PlayBackgroundImageGO;
     public GameObject MainPanel_GO;
+    public GameObject QuaddleImagesGO;
 
     public GameObject InitScreenCanvas_GO;
 
@@ -114,11 +115,14 @@ public class InitScreen_Level : ControlLevel
             MuseTextParentGO.name = "TitleTextParent";
             MuseTextParentGO.SetActive(true);
 
+            QuaddleImagesGO = MuseTextParentGO.transform.Find("QuaddleImages").gameObject;
+
             PlayBackgroundImageGO = MuseTextParentGO.transform.Find("BackgroundImage").gameObject;
             PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
             PlayBackgroundImageGO.SetActive(false);
 
             Session.BackgroundMusicController.PlayMusic();
+
 
             StartCoroutine(PlayButtonDelay(2f));
 
@@ -166,7 +170,6 @@ public class InitScreen_Level : ControlLevel
     private IEnumerator PlayButtonDelay(float duration)
     {
         yield return new WaitForSeconds(duration);
-
         PlayBackgroundImageGO.SetActive(true);
     }
 

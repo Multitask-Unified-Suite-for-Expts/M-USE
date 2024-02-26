@@ -185,8 +185,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
 
         OrderedDictionary data = base.GetTaskSummaryData();
-        data["Num Slider Bar Full"] = NumSliderBarFull_InTask;
-        data["Total Errors"] = TotalErrors_InTask;
+        data["Num Completed Mazes"] = NumSliderBarFull_InTask;
+        data["Proportion Completed Mazes"] = NumSliderBarFull_InTask / (mgTL.TrialCount_InTask + 1);
+        data["\nTotal Errors"] = TotalErrors_InTask;
         data["Correct Touches"] = CorrectTouches_InTask;
         data["Retouch Correct"] = RetouchCorrect_InTask;
         data["Retouch Error"] = RetouchError_InTask;

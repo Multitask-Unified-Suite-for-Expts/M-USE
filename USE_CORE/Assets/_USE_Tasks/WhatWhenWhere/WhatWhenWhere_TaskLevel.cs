@@ -125,6 +125,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskSummaryData();
 
         data["Completed Sequences"] = CompletedSequences_InTask;
+        data["Proportion Completed"] = CompletedSequences_InTask / (wwwTL.TrialCount_InTask + 1);
         data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
 
         data["Correct Selections"] = CorrectSelections_InTask;

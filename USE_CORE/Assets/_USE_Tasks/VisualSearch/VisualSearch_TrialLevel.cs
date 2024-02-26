@@ -292,27 +292,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
         });
-       
-        TokenFeedback.AddTimer(() => tokenFbDuration, () => ITI, () =>
-        {
-            if (TokenFBController.IsTokenBarFull())
-            {
-                NumTokenBarFull_InBlock++;
-                CurrentTaskLevel.NumTokenBarFull_InTask++;
-                if (Session.SyncBoxController != null)
-                {
-                    int NumPulses;
-                    if (CurrentTrialDef.ProbablisticNumPulses != null)
-                        NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
-                    else
-                        NumPulses = CurrentTrialDef.NumPulses;
-                    Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
-                    RewardGiven = true;
-                }
-            }
-        });
+
+        TokenFeedback.AddTimer(() => tokenFbDuration, () => ITI);
+
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
@@ -332,6 +314,24 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineTrialData();
         DefineFrameData();
+    }
+
+    public override void OnTokenBarFull()
+    {
+        NumTokenBarFull_InBlock++;
+        CurrentTaskLevel.NumTokenBarFull_InTask++;
+        if (Session.SyncBoxController != null)
+        {
+            int NumPulses;
+            if (CurrentTrialDef.ProbablisticNumPulses != null)
+                NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
+            else
+                NumPulses = CurrentTrialDef.NumPulses;
+            Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
+            CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
+            RewardGiven = true;
+        }
     }
 
 
@@ -377,8 +377,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         }
 
         CurrentTaskLevel.SetBlockSummaryString();
-        TokenFBController.ResetTokenBarFull();
-
     }
     private void DestroyTextOnExperimenterDisplay()
     {

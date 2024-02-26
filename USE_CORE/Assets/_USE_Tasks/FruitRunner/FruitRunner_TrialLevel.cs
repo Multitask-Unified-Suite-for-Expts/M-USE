@@ -70,7 +70,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SubscribeToEvents();
+            SubscribeToFrEvents();
 
             if (StartButton == null)
             {
@@ -232,11 +232,16 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
-
-
-    private void SubscribeToEvents()
+    public override void OnTokenBarFull()
     {
-        TokenFBController.OnTokenBarFilled += TokenBarFilled;
+        //GIVE REWARD:
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+    }
+
+    private void SubscribeToFrEvents()
+    {
         FR_EventManager.OnPlayerShift += PlayerShift;
         FR_EventManager.OnTargetHit += TargetHit;
         FR_EventManager.OnTargetMissed += TargetMissed;
@@ -246,13 +251,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         FR_EventManager.OnBlockadeHit += BlockadeHit;
     }
 
-    public void TokenBarFilled()
-    {
-        //GIVE REWARD:
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-    }
 
     public void PlayerShift(string from, string to)
     {
@@ -373,12 +371,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         BlockadesAvoided_Block = 0;
     }
 
-    void GiveReward()
-    {
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-    }
 
     private void SetTrialSummaryString()
     {
@@ -424,10 +416,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     private void OnDestroy()
     {
         //UnSubscribe from Events:
-
-        if(TokenFBController != null)
-            TokenFBController.OnTokenBarFilled -= TokenBarFilled;
-
         FR_EventManager.OnPlayerShift -= PlayerShift;
         FR_EventManager.OnTargetHit -= TargetHit;
         FR_EventManager.OnTargetMissed -= TargetMissed;

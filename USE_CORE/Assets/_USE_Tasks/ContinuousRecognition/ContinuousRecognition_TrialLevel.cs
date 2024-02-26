@@ -379,7 +379,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
-            HandleTokenUpdate();
             DeactivatePlayerViewText();
 
             if (CurrentTrial.ShakeStim)
@@ -465,23 +464,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (AbortCode == AbortCodeDict["EndTrial"])
                 EndBlock = true;
         }
-
-        TokenFBController.ResetTokenBarFull();
     }
 
-    private void HandleTokenUpdate()
+    public override void OnTokenBarFull()
     {
-        if (TokenFBController.IsTokenBarFull())
-        {
-            NumTbCompletions_Block++;
-            CurrentTaskLevel.TokenBarCompletions_Task++;
+        NumTbCompletions_Block++;
+        CurrentTaskLevel.TokenBarCompletions_Task++;
 
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-        }
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
     }
+
 
     public override void AddToStimLists() //For EventCodes:
     {

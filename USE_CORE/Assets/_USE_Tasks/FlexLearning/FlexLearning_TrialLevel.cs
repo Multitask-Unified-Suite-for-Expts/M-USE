@@ -286,28 +286,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
         });
-        TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
-        {
-            if (TokenFBController.IsTokenBarFull())
-            {
-                NumTokenBarFull_InBlock++;
-                CurrentTaskLevel.NumTokenBarFull_InTask++;
+        TokenFeedback.AddTimer(() => tokenFbDuration, ITI);
 
-                if (Session.SyncBoxController != null)
-                {
-                    int NumPulses;
-                    if (CurrentTrialDef.ProbablisticNumPulses != null)
-                        NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
-                    else
-                        NumPulses = CurrentTrialDef.NumPulses;
-                    Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-                    //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-                    CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
-                    RewardGiven = true;
-                }
-            }
-        });
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
@@ -326,6 +306,26 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineTrialData();
         DefineFrameData();
+    }
+
+    public override void OnTokenBarFull()
+    {
+        NumTokenBarFull_InBlock++;
+        CurrentTaskLevel.NumTokenBarFull_InTask++;
+
+        if (Session.SyncBoxController != null)
+        {
+            int NumPulses;
+            if (CurrentTrialDef.ProbablisticNumPulses != null)
+                NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
+            else
+                NumPulses = CurrentTrialDef.NumPulses;
+            Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
+            //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
+            CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
+            RewardGiven = true;
+        }
     }
 
 
@@ -369,9 +369,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.ClearStrings();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
-
-        TokenFBController.ResetTokenBarFull();
-
     }
 
     protected override void DefineTrialStims()

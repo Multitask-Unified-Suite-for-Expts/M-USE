@@ -929,7 +929,6 @@ namespace USE_ExperimentTemplate_Session
                 if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
                     skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
                 skyboxComponent.material = Resources.Load<Material>("Materials/Skybox1");
-                //skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
             }
             else
                 Debug.LogWarning("TASK CAM IS NULL!");
@@ -957,7 +956,6 @@ namespace USE_ExperimentTemplate_Session
                 HumanVersionToggleButton.SetActive(false);
                 ToggleAudioButton.SetActive(false);
                 Session.TaskSelectionCanvasGO.SetActive(false); //have to find HumanVersionToggleButton and ToggleAudioButton before setting TaskSelectionCanvas inactive.
-                Starfield.SetActive(false);
             }
             catch (Exception e)
             {

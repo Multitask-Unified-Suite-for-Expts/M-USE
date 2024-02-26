@@ -374,10 +374,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-            "\nTargetsHit " + TargetsHit_Trial +
-            "\nTargetsMissed " + TargetsMissed_Trial +
-            "\nDistractorsHit " + DistractorsHit_Trial +
-            "\nDistractorsAvoided " + DistractorsAvoided_Trial;
+            "\nTargetsHit: " + TargetsHit_Trial +
+            "\nTargetsMissed: " + TargetsMissed_Trial +
+            "\nDistractorsHit: " + DistractorsHit_Trial +
+            "\nDistractorsAvoided: " + DistractorsAvoided_Trial;
     }
 
     private void DefineTrialData()

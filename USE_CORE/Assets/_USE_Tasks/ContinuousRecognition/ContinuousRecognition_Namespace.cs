@@ -122,6 +122,9 @@ namespace ContinuousRecognition_Namespace
                 trial.UseStarfield = UseStarfield;
                 trial.ShakeStim = ShakeStim;
 
+                trial.ParticleHaloActive = ParticleHaloActive;
+                trial.CircleHaloActive = CircleHaloActive;
+
                 TrialDefs.Add(trial);
                 numTrialStims++;
             }

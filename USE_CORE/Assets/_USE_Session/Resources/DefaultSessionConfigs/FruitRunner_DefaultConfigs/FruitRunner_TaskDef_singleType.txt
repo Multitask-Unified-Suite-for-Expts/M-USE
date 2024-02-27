@@ -1,4 +1,4 @@
-string	ExternalStimFolderPath	"/Users/ntraczewski/Desktop/MUSE/Resources/Stimuli"
-float	ExternalStimScale	1.1
-List<string>	FeedbackControllers	["Audio", "Halo", "Token", "Slider"]
+float	ExternalStimScale	2
+float	TaskDirectionalLightIntensity	1.55
+List<string>	FeedbackControllers	["Audio", "Halo", "Token"]
 

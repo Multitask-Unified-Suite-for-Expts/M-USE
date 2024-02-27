@@ -43,6 +43,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private CameraIntroMovement CamMovement;
 
+
     //DATA:
     [HideInInspector] public int TargetsHit_Trial;
     [HideInInspector] public int TargetsMissed_Trial;

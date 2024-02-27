@@ -352,7 +352,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// The Task's Directional Light Intensity.
         /// </summary>
-        public float TaskDirectionalLightIntensity = 1.35f; //1.35 for new quaddles, 2 for old quaddles
+        public virtual float TaskDirectionalLightIntensity { get; set; } = 1.35f; //1.35 for new quaddles, 2 for old quaddles
 
 
     }

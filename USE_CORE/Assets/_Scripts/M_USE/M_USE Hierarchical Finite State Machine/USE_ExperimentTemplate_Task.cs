@@ -925,7 +925,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (obj.name == $"{taskLevel.TaskName}_Scripts")
                     {
-                        // Skip the task level script
+                        // Skip the task level script and task level camera
                         continue;
                     }
 

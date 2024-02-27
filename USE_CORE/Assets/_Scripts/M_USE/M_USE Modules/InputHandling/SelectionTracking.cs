@@ -535,7 +535,8 @@ namespace SelectionTracking
                         OngoingSelection.WasSuccessful = true;
                         LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
-                        LastSuccessfulSelection.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(LastSuccessfulSelection.SelectedGameObject.transform.root.position));
+                        if(OngoingSelection.SelectedGameObject != null)
+                            LastSuccessfulSelection.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(OngoingSelection.SelectedGameObject.transform.root.position));
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:

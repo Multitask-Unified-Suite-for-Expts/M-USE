@@ -33,6 +33,7 @@ namespace FlexLearning_Namespace
 {
     public class FlexLearning_TaskDef : TaskDef
     {
+        public override float TaskDirectionalLightIntensity { get; set; } = 2f;
     }
 
     public class FlexLearning_BlockDef : BlockDef

@@ -98,8 +98,9 @@ public class FR_Item_Quaddle : FR_Item
                 spawnPoint = spawnPoints[1];
                 break;
         }
-        
-        transform.position = new Vector3(spawnPoint.position.x, .7f, spawnPoint.position.z);
+
+        float y = Session.UsingDefaultConfigs ? .5f : .7f;
+        transform.position = new Vector3(spawnPoint.position.x, y, spawnPoint.position.z);
         transform.parent = parentTransform;
     }
 

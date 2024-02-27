@@ -343,9 +343,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 10 : (int?)null;
 
             if (GotTrialCorrect)
-                HaloFBController.ShowPositive(ChosenGO, depth: depth);
+                HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
             else
-                HaloFBController.ShowNegative(ChosenGO, depth:depth);
+                HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);

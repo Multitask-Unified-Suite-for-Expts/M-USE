@@ -95,7 +95,8 @@ public class FR_ItemManager : MonoBehaviour
                 GameObject stim = Instantiate(quaddle.StimGameObject);
                 stim.tag = "Quaddle";
                 CapsuleCollider collider = stim.AddComponent<CapsuleCollider>();
-                collider.center = new Vector3(0f, 0f, -1f);
+                if(!Session.UsingDefaultConfigs) //TEMP SOLUTION
+                    collider.center = new Vector3(0f, 0f, -1f);
                 collider.isTrigger = true;
                 if(StimFaceCamera)
                     stim.AddComponent<FaceCamera>();

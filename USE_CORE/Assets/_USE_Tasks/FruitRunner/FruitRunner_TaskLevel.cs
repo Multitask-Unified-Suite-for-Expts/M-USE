@@ -19,6 +19,8 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int BlockadesAvoided_Task;
 
 
+    private Quaternion CameraOriginalRotation;
+
 
 
 
@@ -28,12 +30,15 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         DefineBlockData();
 
+        CameraOriginalRotation = Camera.main.transform.rotation;
 
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Fruit Runner");
         Session.HumanStartPanel.AddTaskInstructions(TaskName, "Collect the target objects to earn your reward!");
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
+            Camera.main.transform.rotation = CameraOriginalRotation;
+
             SetTrialFogStrength();
             trialLevel.ResetBlockVariables();
             SetSkyBox(CurrentBlock.ContextName);
@@ -41,9 +46,11 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
             //TaskCam.fieldOfView = 50;
 
         });
-
-        BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
-
+        BlockFeedback.AddSpecificInitializationMethod(() =>
+        {
+            Camera.main.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+            HandleBlockStrings();
+        });
     }
 
     void SetTrialFogStrength()
@@ -57,7 +64,6 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
             ["Targets Hit"] = trialLevel.TargetsHit_Block,
             ["Targets Missed"] = trialLevel.TargetsMissed_Block,
             ["Distractors Hit"] = trialLevel.DistractorsHit_Block,

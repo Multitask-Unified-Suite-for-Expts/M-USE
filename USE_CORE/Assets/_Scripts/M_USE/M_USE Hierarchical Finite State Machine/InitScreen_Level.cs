@@ -123,9 +123,7 @@ public class InitScreen_Level : ControlLevel
 
             Session.BackgroundMusicController.PlayMusic();
 
-
-            StartCoroutine(PlayButtonDelay(2f));
-
+            PlayBackgroundImageGO.SetActive(true);
         });
         StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
         StartScreen.AddUniversalTerminationMethod(() =>
@@ -167,11 +165,6 @@ public class InitScreen_Level : ControlLevel
 
     }
 
-    private IEnumerator PlayButtonDelay(float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        PlayBackgroundImageGO.SetActive(true);
-    }
 
     public void OnKeyboardTogglePressed()
     {

@@ -43,6 +43,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private CameraIntroMovement CamMovement;
 
+
     //DATA:
     [HideInInspector] public int TargetsHit_Trial;
     [HideInInspector] public int TargetsMissed_Trial;
@@ -70,7 +71,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SubscribeToEvents();
+            SubscribeToFrEvents();
 
             if (StartButton == null)
             {
@@ -232,9 +233,15 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+    public override void OnTokenBarFull()
+    {
+        //GIVE REWARD:
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+    }
 
-
-    private void SubscribeToEvents()
+    private void SubscribeToFrEvents()
     {
         FR_EventManager.OnPlayerShift += PlayerShift;
         FR_EventManager.OnTargetHit += TargetHit;
@@ -244,6 +251,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         FR_EventManager.OnBlockadeAvoided += BlockadeAvoided;
         FR_EventManager.OnBlockadeHit += BlockadeHit;
     }
+
 
     public void PlayerShift(string from, string to)
     {
@@ -364,12 +372,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         BlockadesAvoided_Block = 0;
     }
 
-    void GiveReward()
-    {
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-    }
 
     private void SetTrialSummaryString()
     {

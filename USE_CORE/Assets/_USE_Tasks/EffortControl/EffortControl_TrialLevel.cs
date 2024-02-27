@@ -539,8 +539,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         Feedback.SpecifyTermination(() => true && Response != 1, ConfirmMinTrialDuration);
         Feedback.AddUniversalTerminationMethod(() =>
         {
-            if(TokenFBController.IsTokenBarFull())
-                GiveReward();
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
@@ -577,6 +575,23 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public override void OnTokenBarFull()
+    {
+        if (SideChoice == "Left")
+        {
+            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
+        }
+        else
+        {
+            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
+        }
+    }
+
     public override void ResetTrialVariables()
     {
         NumInflations = 0;
@@ -630,7 +645,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         ClearTrialSummaryString();
-        TokenFBController.ResetTokenBarFull();
     }
 
     public override void DefineCustomTrialDefSelection()
@@ -808,24 +822,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StimRight.transform.position = RightStimOriginalPosition;
     }
 
-    private void GiveReward()
-    {
-        if (Session.SyncBoxController == null)
-            return;
-
-        if (SideChoice == "Left")
-        {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
-        }
-        else
-        {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
-        }
-    }
 
     private void DisableAllGameobjects()
     {

@@ -530,6 +530,9 @@ namespace USE_ExperimentTemplate_Task
                 BlockResultsGO.transform.localScale = Vector3.one;
                 BlockResultsGO.transform.localPosition = Vector3.zero;
 
+                //Set rotation of Blockresults to same rotation as camera so its straight on:
+                BlockResultsGO.transform.rotation = Camera.main.transform.rotation;
+
                 GameObject continueButtonGO = BlockResultsGO.transform.Find("ContinueButton").gameObject;
                 if (continueButtonGO != null)
                     continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);

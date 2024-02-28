@@ -749,6 +749,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         CalculateSliderSteps();
         SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitialValue * (1f / sliderGainSteps));
+        SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
         SliderFBController.SliderGO.SetActive(true);
         SliderFBController.SetUpdateDuration(fbDuration.value);
         SliderFBController.SetFlashingDuration(flashingFbDuration.value);

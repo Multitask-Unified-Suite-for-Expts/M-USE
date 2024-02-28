@@ -119,7 +119,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
             
             // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloRange(Session.UsingDefaultConfigs ? 1.75f: 2.5f);
             HaloFBController.SetCircleHaloIntensity(3f);
         });
         
@@ -255,8 +255,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
-            if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, particleHaloActive:CurrentTrialDef.ParticleHaloActive, circleHaloActive:CurrentTrialDef.CircleHaloActive, depth: depth);
+            if (CorrectSelection)
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
         });

@@ -1,0 +1,5 @@
+NumPulses	PulseSize	SpoofGazeWithMouse
+1	250	FALSE
+1	250	FALSE
+1	250	FALSE
+1	250	FALSE

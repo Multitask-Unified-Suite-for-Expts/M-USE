@@ -86,7 +86,9 @@ namespace USE_UI
                 { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
                 { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
                 { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
-                { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
+                { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
+                { "GazeCalibration", "Calibrate the Gaze Tracker by looking at the dots!" }
+
             };
             TaskNamesDict = new Dictionary<string, string>()
             {
@@ -98,7 +100,9 @@ namespace USE_UI
                 { "THR", "Touch Hold Release" },
                 { "VisualSearch", "Visual Search" },
                 { "WhatWhenWhere", "What When Where" },
-                { "WorkingMemory", "Working Memory" }
+                { "WorkingMemory", "Working Memory" },
+                { "GazeCalibration", "Gaze Calibration" }
+
             };
         }
 

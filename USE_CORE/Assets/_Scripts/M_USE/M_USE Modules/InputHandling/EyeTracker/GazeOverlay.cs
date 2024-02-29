@@ -90,7 +90,6 @@ public class GazeOverlay : MonoBehaviour
 
     Vector2 GetGazePosition()
     {
-        // Replace this with your method for determining the gaze position.
         return InputBroker.gazePosition;
     }
 }

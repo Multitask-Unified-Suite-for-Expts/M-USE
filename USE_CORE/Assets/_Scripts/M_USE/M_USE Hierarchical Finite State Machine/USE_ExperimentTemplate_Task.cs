@@ -208,10 +208,10 @@ namespace USE_ExperimentTemplate_Task
                         if (taskCanvasGO.TryGetComponent(out Canvas taskCanvas))
                             Session.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
                         else
-                            Debug.LogError("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
+                            Debug.LogWarning("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
                     }
                     else
-                        Debug.LogError("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
+                        Debug.LogWarning("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
                 }
 
                 if (Session.SessionDef.FlashPanelsActive)
@@ -928,7 +928,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (obj.name == $"{taskLevel.TaskName}_Scripts")
                     {
-                        // Skip the task level script
+                        // Skip the task level script and task level camera
                         continue;
                     }
 

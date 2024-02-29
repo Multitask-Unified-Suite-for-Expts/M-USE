@@ -52,7 +52,6 @@ namespace GazeCalibration_Namespace
             for (int iTrial = 0; iTrial < NumTrials; iTrial++)
             {
                 GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
-                td.NumTrials = NumTrials;
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.SpoofGazeWithMouse = SpoofGazeWithMouse;
@@ -74,8 +73,8 @@ namespace GazeCalibration_Namespace
         public int NumTrials;
         public bool SpoofGazeWithMouse;
         public float[] CalibPointsInset = new float[] {0.15f, 0.15f};
-        public float MaxCircleScale = 0.75f;
-        public float MinCircleScale = 0.15f;
+        public float MaxCircleScale = 0.075f;
+        public float MinCircleScale = 0.015f;
         public float ShrinkDuration = 1.5f;
     }
 

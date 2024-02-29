@@ -33,6 +33,7 @@ namespace VisualSearch_Namespace
 {
     public class VisualSearch_TaskDef : TaskDef
     {
+        public override float TaskDirectionalLightIntensity { get; set; } = 2f;
     }
 
     public class VisualSearch_BlockDef : BlockDef

@@ -125,8 +125,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            
-
             // Create necessary variables to display text onto the Experimenter Display
             if (!Session.WebBuild)
             {
@@ -149,7 +147,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (!CurrentTrialDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
 
-            InfoString.Append("<b>Info</b>" 
+            InfoString.Append("<b>Info</b>"
                                 + "\nPress <b>Space</b> to begin a <b>9</b> point calibration"
                                 + "\nPress <b>6</b>, <b>5</b>, or <b>3</b> to begin the respective point calibration");
             SetTrialSummaryString();
@@ -166,6 +164,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 CreateResultContainer();
             }
+
+            AssignGazeCalibrationCameraToTrackboxCanvas();
+
+
         });
 
 
@@ -195,13 +197,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             
             else if (InputBroker.GetKeyUp(KeyCode.Alpha1))
                 numCalibPoints = 1;
-
-           
-
-            // **USED FOR DEBUGGING, DELETE ONCE DONE
-            // PlayerTextGO.GetComponent<UnityEngine.UI.Text>().text = SelectionHandler.CurrentInputLocation().ToString();
-            //PlayerTextGO.SetActive(true);
-            // **
         });
         
         Init.SpecifyTermination(() => numCalibPoints != 0, Blink, () =>
@@ -736,5 +731,49 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = CurrentProgressString.ToString() + ResultsString.ToString() + InfoString.ToString();
     }
-    
+
+    private void AssignGazeCalibrationCameraToTrackboxCanvas()
+    {
+        // Find the GazeCalibration_Camera GameObject in the scene
+        GameObject gazeCalibrationCameraGO = GameObject.Find("GazeCalibration_Camera");
+        if (gazeCalibrationCameraGO != null)
+        {
+            // Get the Camera component attached to the GazeCalibration_Camera GameObject
+            Camera gazeCalibrationCamera = gazeCalibrationCameraGO.GetComponent<Camera>();
+
+            if (gazeCalibrationCamera != null)
+            {
+                // Find the CanvasTrackBox child of the TrackBoxGuide_GO GameObject
+                Transform canvasTrackBoxTransform = Session.TobiiEyeTrackerController.TrackBoxGuide_GO.transform.Find("CanvasTrackBox");
+
+                if (canvasTrackBoxTransform != null)
+                {
+                    Canvas canvas = canvasTrackBoxTransform.GetComponent<Canvas>();
+                    if (canvas != null)
+                    {
+                        // Assign the camera to the worldCamera property of the Canvas component
+                        canvas.worldCamera = gazeCalibrationCamera;
+                    }
+                    else
+                    {
+                        Debug.LogError("The CanvasTrackBox does not have a Canvas component attached.");
+                    }
+                }
+                else
+                {
+                    Debug.LogError("CanvasTrackBox child GameObject not found.");
+                }
+            }
+            else
+            {
+                Debug.LogError("GazeCalibration_Camera does not have a Camera component attached.");
+            }
+        }
+        else
+        {
+            Debug.LogError("GazeCalibration_Camera GameObject not found in the scene.");
+        }
+
+    }
+
 }

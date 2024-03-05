@@ -189,6 +189,9 @@ public class FR_PlayerManager : MonoBehaviour
         CelebrationConfetti = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
         CelebrationConfetti.SetActive(true);
         MovementCirclesController.Instantiated.SetActive(false);
+
+        GameObject floor = Instantiate(Resources.Load<GameObject>("Prefabs/FinalPlane"));
+        floor.SetActive(true);
     }
 
     //Helper method used by trial level at end to put player back in middle for celebration. 

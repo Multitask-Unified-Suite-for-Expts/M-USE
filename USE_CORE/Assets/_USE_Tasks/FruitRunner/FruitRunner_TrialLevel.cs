@@ -38,6 +38,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public GameObject ItemManagerGO;
     public FR_ItemManager ItemManager;
 
+    public SpawnHalfCircle CircleSpawner;
+    public GameObject CircleSpawnerGO;
+
 
     private StimGroup trialStims;
 
@@ -92,6 +95,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             CurrentTaskLevel.TaskCam.fieldOfView = 50;
+
+            if (CircleSpawnerGO != null)
+                Destroy(CircleSpawnerGO);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -222,6 +228,18 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerManager.FinalCelebration();
             TokenFBController.enabled = false;
             ScoreManager.DeactivateScoreText();
+
+
+            //Circle Spawner:
+            CircleSpawnerGO = new GameObject("CircleSpawner");
+            CircleSpawnerGO.transform.position = Vector3.zero;
+            CircleSpawnerGO.transform.localScale = Vector3.one;
+            CircleSpawner = CircleSpawnerGO.AddComponent<SpawnHalfCircle>();
+            List<GameObject> prefabList = new List<GameObject>() { };
+            foreach (var stim in trialStims.stimDefs)
+                prefabList.Add(stim.StimGameObject);
+            CircleSpawner.SetPrefabs(prefabList);
+            CircleSpawner.SpawnObjectsInArch();
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);
 

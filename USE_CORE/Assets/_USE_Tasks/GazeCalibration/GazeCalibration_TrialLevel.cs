@@ -84,7 +84,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private USE_Circle CalibCircle;
     private GameObject PlayerViewPanelGO;
     private PlayerViewPanel PlayerViewPanel;
-    private GameObject PlayerTextGO;
     private GameObject ResultContainer;
     
     // Tobii SDK Variables 
@@ -285,7 +284,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                                 + "\n\nPress <b>Space</b> to override and calibrate regardless of gaze input location");
             SetTrialSummaryString();
         });
-        
+
+        //Set keyboardOverride to true if they press space
         Check.AddUpdateMethod(() => keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space));
         
         Check.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Calibrate, () =>

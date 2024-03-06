@@ -229,7 +229,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             ScoreManager.DeactivateScoreText();
 
-
             //Circle Spawner:
             CircleSpawnerGO = new GameObject("CircleSpawner");
             CircleSpawnerGO.transform.position = Vector3.zero;

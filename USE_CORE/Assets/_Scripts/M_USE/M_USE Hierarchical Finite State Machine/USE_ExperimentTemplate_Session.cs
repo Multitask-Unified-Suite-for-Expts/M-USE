@@ -525,6 +525,9 @@ namespace USE_ExperimentTemplate_Session
                 int spacing = Session.SessionDef.TaskButtonSpacing; //was 45 for web build
                 gridLayout.spacing = new Vector2(spacing, spacing);
 
+                //Set rotation to that of main camera:
+                TaskButtonsContainer.transform.eulerAngles = Camera.main.transform.eulerAngles;
+
                 List<GameObject> gridList = new List<GameObject>();
 
                 if(Session.SessionDef.TaskButtonGridSpots != null)
@@ -567,6 +570,8 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonGO.transform.SetParent(TaskButtonsContainer.transform);
                         taskButtonGO.transform.localPosition = Vector3.zero;
                         taskButtonGO.transform.localScale = Vector3.one;
+                        //This evens out the icons in relation to the camera so they appear straight
+                        taskButtonGO.transform.eulerAngles = Camera.main.transform.eulerAngles;
                     }
 
                     string taskFolderPath = GetConfigFolderPath(configName);
@@ -928,7 +933,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
                     skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
-                skyboxComponent.material = Resources.Load<Material>("Materials/Skybox1");
+                skyboxComponent.material = Resources.Load<Material>("Materials/Skybox2");
             }
             else
                 Debug.LogWarning("TASK CAM IS NULL!");
@@ -999,7 +1004,7 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("Materials/Skybox1");
+            skybox.material = Resources.Load<Material>("Materials/Skybox2");
             //skybox.material = Resources.Load<Material>("MUSE_MainBackground");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;

@@ -37,7 +37,7 @@ public class InitScreen_Level : ControlLevel
     private GameObject MuseTextParentGO;
     private GameObject PlayBackgroundImageGO;
     public GameObject MainPanel_GO;
-    public GameObject QuaddleImagesGO;
+    public GameObject QuaddlesGO;
 
     public GameObject InitScreenCanvas_GO;
 
@@ -95,41 +95,60 @@ public class InitScreen_Level : ControlLevel
 
 
 
-
     public override void DefineControlLevel()
     {
         State Setup = new State("Setup");
-        State StartScreen = new State("StartScreen");
+        State FadeQuaddlesIn = new State("FadeQuaddlesIn");
+        State WaitForStartPressed = new State("WaitForStartPressed");
         State CollectInfoScreen = new State("CollectInfoScreen");
-        AddActiveStates(new List<State> { Setup, StartScreen, CollectInfoScreen });
+        AddActiveStates(new List<State> { Setup, FadeQuaddlesIn, WaitForStartPressed, CollectInfoScreen });
 
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
         Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
-        Setup.AddTimer(() => 1f, StartScreen); //using small timer to while things load
+        Setup.SpecifyTermination(() => true, FadeQuaddlesIn);
 
-        //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        StartScreen.AddSpecificInitializationMethod(() =>
+        //FadeQuaddlesIn State-----------------------------------------------------------------------------------------------------------------------------------
+        Vector3 startingPos = new Vector3();
+        float fadeInSpeed = 3f;
+        bool DoneFading = false;
+        FadeQuaddlesIn.AddSpecificInitializationMethod(() =>
         {
+            DoneFading = false;
+
             MuseTextParentGO = Instantiate(Resources.Load<GameObject>("NewTitleText"), InitScreenCanvas_GO.transform);
             MuseTextParentGO.name = "TitleTextParent";
             MuseTextParentGO.SetActive(true);
 
-            QuaddleImagesGO = MuseTextParentGO.transform.Find("QuaddleImages").gameObject;
+            QuaddlesGO = Instantiate(Resources.Load<GameObject>("IntroStim"));
+            QuaddlesGO.name = "IntroStim";
+            QuaddlesGO.SetActive(true);
 
             PlayBackgroundImageGO = MuseTextParentGO.transform.Find("BackgroundImage").gameObject;
             PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
             PlayBackgroundImageGO.SetActive(false);
 
-            Session.BackgroundMusicController.PlayMusic();
-
             PlayBackgroundImageGO.SetActive(true);
+
+            startingPos = QuaddlesGO.transform.position;
+            QuaddlesGO.transform.position = new Vector3(QuaddlesGO.transform.position.x, -3f, QuaddlesGO.transform.position.z);
         });
-        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
-        StartScreen.AddUniversalTerminationMethod(() =>
+        FadeQuaddlesIn.AddUpdateMethod(() =>
+        {
+            if (QuaddlesGO.transform.position != startingPos)
+                QuaddlesGO.transform.position = Vector3.MoveTowards(QuaddlesGO.transform.position, startingPos, fadeInSpeed * Time.deltaTime);
+            else
+                DoneFading = true;
+        });
+        FadeQuaddlesIn.SpecifyTermination(() => DoneFading, WaitForStartPressed);
+
+        //WaitForStartPressed State-----------------------------------------------------------------------------------------------------------------------------------
+        WaitForStartPressed.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
+        WaitForStartPressed.AddUniversalTerminationMethod(() =>
         {
             ConfirmButtonPressed = false;
             MuseTextParentGO.SetActive(false);
+            QuaddlesGO.SetActive(false);
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
@@ -160,6 +179,10 @@ public class InitScreen_Level : ControlLevel
             SetDataInfo();
             InitScreenCanvas_GO.SetActive(false);
             Session.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
+
+            //Set Main cam rotation and position to that of the init cam:
+            Camera.main.transform.position = Session.InitCamGO.transform.position;
+            Camera.main.transform.rotation = Session.InitCamGO.transform.rotation;
 
         });
 
@@ -386,6 +409,8 @@ public class InitScreen_Level : ControlLevel
 
     private void SetupInitScreen()
     {
+        Session.BackgroundMusicController.PlayMusic();
+
         if (Session.WebBuild)
         {
             InitScreenCanvas_GO.GetComponent<Canvas>().targetDisplay = 0;

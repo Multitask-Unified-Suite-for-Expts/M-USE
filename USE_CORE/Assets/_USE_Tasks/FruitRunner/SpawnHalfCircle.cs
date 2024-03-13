@@ -28,14 +28,17 @@ public class SpawnHalfCircle : MonoBehaviour
             float x = archRadius * Mathf.Cos(radians);
             float z = archRadius * Mathf.Sin(radians);
 
-            Vector3 spawnPosition = new Vector3(x, -1.75f, z + zAdj) + transform.position;
+            float y = Session.UsingDefaultConfigs ? -2.25f : -1.75f;
+
+            Vector3 spawnPosition = new Vector3(x, y, z + zAdj) + transform.position;
 
             spawnedGameObjects = new List<GameObject>();
 
             GameObject instantiated = Instantiate(prefabsToSpawn[i], spawnPosition, Quaternion.identity);
             instantiated.transform.parent = transform;
             //instantiated.AddComponent<BounceStim>();
-            instantiated.transform.localScale = new Vector3(2f, 2f, 2f);
+            float scale = Session.UsingDefaultConfigs ? 3f : 2f;
+            instantiated.transform.localScale = new Vector3(scale, scale, scale);
             instantiated.transform.LookAt(GameObject.Find("Player").transform);
             instantiated.SetActive(true);
             spawnedGameObjects.Add(instantiated);

@@ -28,7 +28,10 @@ public class FR_PlayerManager : MonoBehaviour
 
     public bool AllowItemPickupAnimations;
 
+    public bool UsingBananas;
+
     public GameObject CelebrationConfetti;
+    public GameObject FinalPlane;
 
     public enum AnimationStates { Idle, Run, Injured, Happy, Sad, Cheer};
     public AnimationStates CurrentAnimationState;
@@ -190,8 +193,17 @@ public class FR_PlayerManager : MonoBehaviour
         CelebrationConfetti.SetActive(true);
         MovementCirclesController.Instantiated.SetActive(false);
 
-        GameObject floor = Instantiate(Resources.Load<GameObject>("Prefabs/FinalPlane"));
-        floor.SetActive(true);
+        if (UsingBananas)
+            return;
+
+        FinalPlane = Instantiate(Resources.Load<GameObject>("Prefabs/FinalPlane"));
+        FinalPlane.SetActive(true);
+    }
+
+    public void DeactivateFinalPlane()
+    {
+        if(FinalPlane != null)
+            FinalPlane.SetActive(false);
     }
 
     //Helper method used by trial level at end to put player back in middle for celebration. 

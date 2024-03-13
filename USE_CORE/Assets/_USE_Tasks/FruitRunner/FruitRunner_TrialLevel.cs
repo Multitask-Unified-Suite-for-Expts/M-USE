@@ -46,6 +46,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private CameraIntroMovement CamMovement;
 
+    private bool UsingBananas;
 
     //DATA:
     [HideInInspector] public int TargetsHit_Trial;
@@ -149,6 +150,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerManager.DisableUserInput();
             PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
             PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
+
+            SetUsingBananas();
            
             ItemManagerGO = new GameObject("ItemManager");
             ItemManager = ItemManagerGO.AddComponent<FR_ItemManager>();
@@ -238,9 +241,15 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             foreach (var stim in trialStims.stimDefs)
                 prefabList.Add(stim.StimGameObject);
             CircleSpawner.SetPrefabs(prefabList);
-            CircleSpawner.SpawnObjectsInArch();
+            if(!UsingBananas)
+                CircleSpawner.SpawnObjectsInArch();
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);
+        Celebration.AddDefaultTerminationMethod(() =>
+        {
+            CircleSpawner.DestroySpawnedObjects();
+            PlayerManager.DeactivateFinalPlane();
+        });
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -248,6 +257,22 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         DefineTrialData();
         DefineFrameData();
+    }
+
+    public void SetUsingBananas()
+    {
+        //If using bananas, mark the banana boolean true for the PlayerManager so it wont instantiate quaddles/finalPlane at the celebration
+        for (int i = 0; i < CurrentTrial.TrialGroup_InSpawnOrder.Length; i++)
+        {
+            for (int j = 0; j < CurrentTrial.TrialGroup_InSpawnOrder[i].Length; j++)
+            {
+                if (CurrentTrial.TrialGroup_InSpawnOrder[i][j] == -3)
+                {
+                    UsingBananas = true;
+                    PlayerManager.UsingBananas = true;
+                }
+            }
+        }
     }
 
     public override void OnTokenBarFull()

@@ -5,6 +5,7 @@ using UnityEngine;
 public class SpawnHalfCircle : MonoBehaviour
 {
     private List<GameObject> prefabsToSpawn;
+    public List<GameObject> spawnedGameObjects;
     private float archRadius = 7;
     private float angleRange = 180;
     private float zAdj = 9f;
@@ -29,13 +30,23 @@ public class SpawnHalfCircle : MonoBehaviour
 
             Vector3 spawnPosition = new Vector3(x, -1.75f, z + zAdj) + transform.position;
 
+            spawnedGameObjects = new List<GameObject>();
+
             GameObject instantiated = Instantiate(prefabsToSpawn[i], spawnPosition, Quaternion.identity);
             instantiated.transform.parent = transform;
             //instantiated.AddComponent<BounceStim>();
             instantiated.transform.localScale = new Vector3(2f, 2f, 2f);
             instantiated.transform.LookAt(GameObject.Find("Player").transform);
             instantiated.SetActive(true);
+            spawnedGameObjects.Add(instantiated);
         }
+    }
+
+    public void DestroySpawnedObjects()
+    {
+        if(spawnedGameObjects != null && spawnedGameObjects.Count > 0)
+        foreach (GameObject go in spawnedGameObjects)
+            Destroy(go);
     }
 }
 

@@ -63,6 +63,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int BlockadesHit_Block;
     [HideInInspector] public int BlockadesAvoided_Block;
 
+    [HideInInspector] public int Score_Block;
+
 
     public override void DefineControlLevel()
     {
@@ -232,23 +234,13 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             ScoreManager.DeactivateScoreText();
 
-            //Circle Spawner:
-            CircleSpawnerGO = new GameObject("CircleSpawner");
-            CircleSpawnerGO.transform.position = Vector3.zero;
-            CircleSpawnerGO.transform.localScale = Vector3.one;
-            CircleSpawner = CircleSpawnerGO.AddComponent<SpawnHalfCircle>();
-            List<GameObject> prefabList = new List<GameObject>() { };
-            foreach (var stim in trialStims.stimDefs)
-                prefabList.Add(stim.StimGameObject);
-            CircleSpawner.SetPrefabs(prefabList);
-            if(!UsingBananas)
-                CircleSpawner.SpawnObjectsInArch();
+            SpawnQuaddleCircle();
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);
         Celebration.AddDefaultTerminationMethod(() =>
         {
             CircleSpawner.DestroySpawnedObjects();
-            PlayerManager.DeactivateFinalPlane();
+            PlayerManager.DestroyFinalPlane();
         });
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -257,6 +249,21 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         DefineTrialData();
         DefineFrameData();
+    }
+
+    private void SpawnQuaddleCircle()
+    {
+        //Circle Spawner:
+        CircleSpawnerGO = new GameObject("CircleSpawner");
+        CircleSpawnerGO.transform.position = Vector3.zero;
+        CircleSpawnerGO.transform.localScale = Vector3.one;
+        CircleSpawner = CircleSpawnerGO.AddComponent<SpawnHalfCircle>();
+        List<GameObject> prefabList = new List<GameObject>() { };
+        foreach (var stim in trialStims.stimDefs)
+            prefabList.Add(stim.StimGameObject);
+        CircleSpawner.SetPrefabs(prefabList);
+        if (!UsingBananas)
+            CircleSpawner.SpawnObjectsInArch();
     }
 
     public void SetUsingBananas()
@@ -372,10 +379,11 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
+        Score_Block += ScoreManager.Score;
+
         SpeedSliderGO.SetActive(false);
         ScoreManager.DeactivateScoreText();
 
-        Destroy(ScoreManager);
         Destroy(PlayerGO);
         Destroy(FloorManagerGO);
         Destroy(ItemManagerGO);

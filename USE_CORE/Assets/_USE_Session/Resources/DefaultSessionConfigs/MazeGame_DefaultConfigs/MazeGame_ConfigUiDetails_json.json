@@ -83,7 +83,7 @@
     },
     "minObjectTouchDuration": {
       "name": "Min Object Touch Duration",
-      "value": 0.01,
+      "value": 0.001,
       "min": 0.01,
       "max": 5,
       "precision": 1,

@@ -200,10 +200,10 @@ public class FR_PlayerManager : MonoBehaviour
         FinalPlane.SetActive(true);
     }
 
-    public void DeactivateFinalPlane()
+    public void DestroyFinalPlane()
     {
-        if(FinalPlane != null)
-            FinalPlane.SetActive(false);
+        if (FinalPlane != null)
+            Destroy(FinalPlane);
     }
 
     //Helper method used by trial level at end to put player back in middle for celebration. 

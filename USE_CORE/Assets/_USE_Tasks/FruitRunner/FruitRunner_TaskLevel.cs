@@ -64,12 +64,10 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Targets Hit"] = trialLevel.TargetsHit_Block,
-            ["Targets Missed"] = trialLevel.TargetsMissed_Block,
-            ["Distractors Hit"] = trialLevel.DistractorsHit_Block,
-            ["Distractors Avoided"] = trialLevel.DistractorsAvoided_Block,
-            ["Blockades Hit"] = trialLevel.BlockadesHit_Block,
-            ["Blockades Avoided"] = trialLevel.BlockadesAvoided_Block,
+            ["Score"] = trialLevel.Score_Block,
+            ["Targets Hit"] = $"{trialLevel.TargetsHit_Block}/{trialLevel.TargetsHit_Block + trialLevel.TargetsMissed_Block}",
+            ["Distractors Hit"] = $"{trialLevel.DistractorsAvoided_Block}/{trialLevel.DistractorsHit_Block + trialLevel.DistractorsAvoided_Block}",
+            ["Blockades Hit"] = $"{trialLevel.BlockadesHit_Block}/{trialLevel.BlockadesHit_Block + trialLevel.BlockadesAvoided_Block}",
         };
         return data;
     }

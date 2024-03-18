@@ -118,7 +118,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Score"] = trialLevel.Score + "XP",
+            ["Score"] = trialLevel.Score,
             ["Trials Correct"] = trialLevel.NumCorrect_Block,
             ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
             ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0") + "s",

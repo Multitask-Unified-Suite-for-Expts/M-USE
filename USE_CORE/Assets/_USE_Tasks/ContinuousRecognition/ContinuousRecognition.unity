@@ -182,8 +182,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'SCORE: <SCORE>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 87a725ad2b107470ab8144534fa584f1, type: 2}
-  m_sharedMaterial: {fileID: 3760565098222212243, guid: 87a725ad2b107470ab8144534fa584f1,
+  m_fontAsset: {fileID: 11400000, guid: 197a61983a1054977a6d7d4699fdfa28, type: 2}
+  m_sharedMaterial: {fileID: 4054686679257504613, guid: 197a61983a1054977a6d7d4699fdfa28,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -1144,9 +1144,9 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   NumAbortedTrials_InTask: 0
-  NumRewardPulses_InTask: 0
   NumAbortedTrials_InBlock: 0
   NumRewardPulses_InBlock: 0
+  NumRewardPulses_InTask: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
   ForceTaskEnd: 0
@@ -1234,6 +1234,7 @@ MonoBehaviour:
   calculatedThreshold_timing: 0
   blockAccuracy: 0
   ForceBlockEnd: 0
+  ReachedCriterion: 0
   TaskDataPath: 
   TrialSummaryString: 
   TaskLevel: {fileID: 0}
@@ -1450,7 +1451,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'TRIALS: <TRIALS>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 87a725ad2b107470ab8144534fa584f1, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 197a61983a1054977a6d7d4699fdfa28, type: 2}
   m_sharedMaterial: {fileID: 3760565098222212243, guid: 87a725ad2b107470ab8144534fa584f1,
     type: 2}
   m_fontSharedMaterials: []
@@ -1515,7 +1516,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &1932148022

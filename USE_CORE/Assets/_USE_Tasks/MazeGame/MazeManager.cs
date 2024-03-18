@@ -687,6 +687,10 @@ public class MazeManager:MonoBehaviour
     {
         nextCorrectTile.GetComponent<Tile>().FlashTile();
     }
+    public void TerminateNextCorrectTileFlashing(GameObject nextCorrectTile)
+    {
+        nextCorrectTile.GetComponent<Tile>().TerminateTileFlashing();
+    }
     public Maze GetCurrentMaze()
     {
         return currentMaze;

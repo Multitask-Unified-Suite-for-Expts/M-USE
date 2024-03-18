@@ -155,7 +155,11 @@ public class Tile : MonoBehaviour
         // else
         //     initialTileColor = defaultTileColor;// before it starts flashing set color
      }
-
+    public void TerminateTileFlashing()
+    {
+        flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
+        isFlashing = false;
+    }
     void Update()
     {
         if(transform.hasChanged)
@@ -181,9 +185,8 @@ public class Tile : MonoBehaviour
             }
         
             if (iFlashes >= 2 * numBlinks)
-            { 
-                flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
-                isFlashing = false;
+            {
+                TerminateTileFlashing();
             }
         }
 

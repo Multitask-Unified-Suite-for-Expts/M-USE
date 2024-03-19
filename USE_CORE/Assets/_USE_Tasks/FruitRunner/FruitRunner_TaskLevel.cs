@@ -43,8 +43,6 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             SetSkyBox(CurrentBlock.ContextName);
             CalculateBlockSummaryString();
-            //TaskCam.fieldOfView = 50;
-
         });
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {

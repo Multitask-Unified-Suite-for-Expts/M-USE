@@ -38,6 +38,8 @@ namespace FruitRunner_Namespace
         public bool ShowUI;
 
         public bool StimFacingCamera;
+
+        public bool SkipCelebrationState;
     }
 
     public class FruitRunner_StimDef : StimDef

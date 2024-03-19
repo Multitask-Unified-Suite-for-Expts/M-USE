@@ -1,3 +1,4 @@
 BlockName	BlockCount	ContextName	FogStrength
 B1	1	LinearDark	0.03
 B2	2	LinearDark	0.035
+B3	3	LinearDark	0.04

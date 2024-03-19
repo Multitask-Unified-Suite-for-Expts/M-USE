@@ -182,6 +182,11 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         bool finishedPlaying = false;
         Play.AddSpecificInitializationMethod(() =>
         {
+            //Determine next state depending on SkipCelebrationState boolean:
+            CurrentTrial.SkipCelebrationState = true;
+            StateAfterDelay = CurrentTrial.SkipCelebrationState ? ITI : Celebration;
+            DelayDuration = 0;
+
             if(CurrentTrial.ShowUI)
             {
                 SpeedSliderGO.SetActive(true);
@@ -222,18 +227,19 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             }
 
         });
-        Play.SpecifyTermination(() => finishedPlaying, Celebration);
-        Play.AddTimer(() => playDuration.value, Celebration);
+        Play.SpecifyTermination(() => finishedPlaying, Delay);
+        Play.AddTimer(() => playDuration.value, Delay);
+        Play.AddDefaultTerminationMethod(() =>
+        {
+            SpeedSliderGO.SetActive(false);
+            TokenFBController.enabled = false;
+            ScoreManager.DeactivateScoreText();
+        });
 
         //Celebration state ----------------------------------------------------------------------------------------------------------------------------------------------
         Celebration.AddSpecificInitializationMethod(() =>
         {
-            SpeedSliderGO.SetActive(false);
-
             PlayerManager.FinalCelebration();
-            TokenFBController.enabled = false;
-            ScoreManager.DeactivateScoreText();
-
             SpawnQuaddleCircle();
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);

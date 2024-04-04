@@ -302,8 +302,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
                     SequenceManager.GetLastCorrectStimGO().GetComponent<CircleHalo>().DeactivateInstantiatedCircleHalo();
 
-                if(SliderFBController.GetSliderValue() != 0 && SequenceManager.GetConsecutiveErrorCount() == 1)
+                if (SliderFBController.GetSliderValue() != 0 && SequenceManager.GetConsecutiveErrorCount() == 1)
+                {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
+                    
+                }
             }
 
 

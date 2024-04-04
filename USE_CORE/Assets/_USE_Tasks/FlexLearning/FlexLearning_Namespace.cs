@@ -46,6 +46,7 @@ namespace FlexLearning_Namespace
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
         public float? FeatureSimilarity;
+        public Dictionary<int, string> DifficultyLevelDefintion;
 
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -73,6 +74,7 @@ namespace FlexLearning_Namespace
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.ParticleHaloActive = ParticleHaloActive;
                 td.CircleHaloActive = CircleHaloActive;
+                td.DifficultyLevelDefinition = DifficultyLevelDefintion;
                 TrialDefs.Add(td);
             }
         }
@@ -105,6 +107,7 @@ namespace FlexLearning_Namespace
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.ParticleHaloActive = ParticleHaloActive;
                 td.CircleHaloActive = CircleHaloActive;
+                td.DifficultyLevelDefinition = DifficultyLevelDefintion;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -120,10 +123,27 @@ namespace FlexLearning_Namespace
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
         public float? FeatureSimilarity;
+        public Dictionary<int, string> DifficultyLevelDefinition;
     }
 
     public class FlexLearning_StimDef : StimDef
     {
         public bool IsTarget;
+    }
+    
+    public class FlexLearning_TaskDataSummary
+    {
+        public float? AvgReactionTime;
+        public double? DifficultyLevelEffectOnAccuracy;
+        public float? TotalAccuracy;
+    }
+    public class FlexLearning_TrialDataSummary
+    {
+        public float? DifficultyLevel;
+        public string DiffcultyLevelDescription;
+        public float? ReactionTime;
+        public int NumDistractors;
+        public int? CorrectSelection;
+
     }
 }

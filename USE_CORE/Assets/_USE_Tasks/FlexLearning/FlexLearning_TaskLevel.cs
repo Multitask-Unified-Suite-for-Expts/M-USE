@@ -120,6 +120,9 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskSummaryData();
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
+        
+       // data["\nPerformance Metrics"] = CreateTaskDataSummary();
+
         if(SearchDurations_InTask.Count > 0)
             data["Average Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
         if(flTL.TrialCount_InTask != 0)
@@ -127,6 +130,44 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         
         return data;
     }
+    // public string CreateTaskDataSummary()
+    // {
+    //     FlexLearning_TaskDataSummary taskDataSummary = new FlexLearning_TaskDataSummary();
+    //     string taskDataSummaryString;
+    //     // Pre-calculate common values used in multiple calculations
+    //     var validTrials = AllTrialDataSummaries.Where(trial => trial.ReactionTime.HasValue && trial.SelectionPrecision.HasValue && trial.CorrectSelection.HasValue).ToList();
+    //     var totalTrials = validTrials.Count;
+    //     var totalCorrectSelections = validTrials.Count(trial => trial.CorrectSelection == 1);
+    //
+    //     // Single iteration for reaction time and selection precision calculations
+    //     if (totalTrials > 0)
+    //     {
+    //         taskDataSummary.AvgReactionTime = validTrials.Average(trial => trial.ReactionTime.Value);
+    //         taskDataSummary.AvgSelectionPrecision = validTrials.Average(trial => trial.SelectionPrecision.Value);
+    //         taskDataSummary.TotalAccuracy = (float)totalCorrectSelections / totalTrials;
+    //     }
+    //     else
+    //     {
+    //         taskDataSummary.AvgReactionTime = -1f;
+    //         taskDataSummary.AvgSelectionPrecision = -1f;
+    //         taskDataSummary.TotalAccuracy = 0f;
+    //     }
+    //
+    //     // Calculate Median Feature Similarity, High/Low Similarity Accuracy, and Distractor Interference
+    //     CalculatePerceptualInterference(taskDataSummary, validTrials);
+    //     CalculateDistractorInterference(taskDataSummary, validTrials);
+    //
+    //     taskDataSummaryString = $"\nTotal Accuracy: {taskDataSummary.TotalAccuracy:F4}" +
+    //                     $"\nAverage Reaction Time: {taskDataSummary.AvgReactionTime:F4}" +
+    //                     $"\nAverage Selection Precision: {taskDataSummary.AvgSelectionPrecision:F4}" +
+    //                     $"\n\nDistractor Interference on Reaction Time: {taskDataSummary.DistractorInterferenceReactionTime:F4}" +
+    //                     $"\nDistractor Interference on Accuracy: {taskDataSummary.DistractorInterferenceAccuracy:F4}" +
+    //                     $"\n\nMedian Feature Similarity: {taskDataSummary.MedianFeatureSimilarity}" +
+    //                     $"\nHigh Feature Similarity Accuracy: {taskDataSummary.HighFeatureSimilarityAccuracy:F4}" +
+    //                     $"\nLow Feature Similarity Accuracy: {taskDataSummary.LowFeatureSimilarityAccuracy:F4}\n";
+    //
+    //     return taskDataSummaryString;
+    // }
 
     public void SetBlockSummaryString()
     {

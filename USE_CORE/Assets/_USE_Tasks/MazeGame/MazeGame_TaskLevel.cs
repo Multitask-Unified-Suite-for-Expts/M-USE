@@ -172,7 +172,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = new OrderedDictionary
         {
-            ["Maze Duration"] = mgTL.MazeManager.mazeDuration.ToString("0.0") + "s",
+            ["Maze Duration"] = mgTL.MazeManager.GetMazeDuration().ToString("0.0") + "s",
             ["Correct Touches"] = CorrectTouches_InBlock,
             ["Total Errors"] = TotalErrors_InBlock,
             ["Retouched Correct"] = RetouchCorrect_InBlock,

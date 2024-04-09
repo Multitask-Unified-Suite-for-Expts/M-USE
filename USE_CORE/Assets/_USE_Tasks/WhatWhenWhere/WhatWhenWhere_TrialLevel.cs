@@ -276,7 +276,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (selectionType.ToLower().Contains("correct"))
             {
                 AudioFBController.Play("Positive");
-                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.LeaveFeedbackOn, depth: depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrialDef.LeaveFeedbackOn ?  (float?)null : (CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
 
                 if(SequenceManager.GetFinishedSequence())
                     SliderFBController.UpdateSliderValue(1);
@@ -289,14 +289,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                 if (selectionType.ToLower().Contains("retoucherror"))
                 {
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:false, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:true, destroyTime: CurrentTrialDef.LeaveFeedbackOn ? (float?)null : (CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
                     SequenceManager.ResetSelectionClassifications();
                     return;
                 }
                 else if (selectionType.ToLower().Contains("backtrackerror"))
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:false, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:true, destroyTime: CurrentTrialDef.LeaveFeedbackOn ? (float?)null : (CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
                 else
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.LeaveFeedbackOn, destroyTime: (CurrentTrialDef.ParticleHaloActive? 0.76f:1.26f), depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrialDef.LeaveFeedbackOn ? (float?)null : (CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
 
 
                 if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())

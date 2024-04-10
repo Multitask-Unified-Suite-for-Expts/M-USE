@@ -57,6 +57,7 @@ public class HaloFBController : MonoBehaviour
 
         ParticleHalo particleHalo = null;
         CircleHalo circleHalo = null;
+        Debug.LogWarning("IS THE CIRCLE HALO ACTIVE? " + circleHaloActive);
 
         if (particleHaloActive)
         {
@@ -72,7 +73,6 @@ public class HaloFBController : MonoBehaviour
         {
             // See if the selected game object has a CircleHalo Component, add one if not
             circleHalo = GetOrCreateCircleHalo(gameObj);
-
             PositiveCircleHalos.Add(circleHalo);
             if (depth == null)
                 StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo?.GetParticleEffectDuration(), destroyTime, null));

@@ -26,7 +26,11 @@ public class CircleHalo : MonoBehaviour
 
         for (int i = 0; i < numFlashes; i++)
         {
-            InstantiatedCircleHaloGO.SetActive(true);
+            if(InstantiatedCircleHaloGO == null)
+                InstantiatedCircleHaloGO = Instantiate(PositiveCircleHaloPrefab, go.transform.root.transform);
+            else    
+                InstantiatedCircleHaloGO.SetActive(true);
+            
             yield return new WaitForSeconds(onDuration);
 
             InstantiatedCircleHaloGO.SetActive(false);

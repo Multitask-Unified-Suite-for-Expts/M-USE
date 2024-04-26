@@ -115,6 +115,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
+    public override OrderedDictionary GetTaskResultsData()
+    {
+        OrderedDictionary data = base.GetTaskResultsData();
+        //data["Longest Streak"] = LongestStreak;
+        //data["Average Streak"] = GetAvgStreak();
+        //data["Trials Correct"] = TrialsCorrect_Task;
+        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        return data;
+    }
+
     public void CalculateBlockSummaryString()
     {
         ClearStrings();

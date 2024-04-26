@@ -59,8 +59,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
         hotKeyText.GetComponent<Text>().supportRichText = true;
         hotKeyText.GetComponent<Text>().alignment = TextAnchor.UpperCenter;
-        hotKeyText.GetComponent<Text>().text = "<size=25><b><color=#2d3436ff>Hot Keys</color></b></size>" + "\n\n<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>" + "\n-----------------------------------" +
-            "\n\n<size=25><b><color=#2d3436ff>ConfigUI Control</color></b></size>" + "\n\n<size=20>" + ConfigUIList.GenerateConfigUIHotKeyDescriptions() + "</size>";
+
+        hotKeyText.GetComponent<Text>().text = "<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>";
     }
     public override void CustomPanelUpdate()
     {
@@ -341,6 +341,10 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     Debug.Log("---PRESSED END TASK HOTKEY---");
                     if(Session.TrialLevel != null)
                     {
+                        //deactivate human start panel
+                        if (Session.HumanStartPanel.HumanStartPanelGO != null)
+                            Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
+
                         Session.TrialLevel.AbortCode = 5;
                         Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
                         Session.TrialLevel.ForceBlockEnd = true;

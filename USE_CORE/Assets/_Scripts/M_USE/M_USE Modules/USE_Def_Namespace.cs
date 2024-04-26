@@ -182,6 +182,11 @@ namespace USE_Def_Namespace
         public float BlockResultsDuration;
 
         /// <summary>
+        /// Duration of the task results, specific for human session configurations.
+        /// </summary>
+        public float TaskResultsDuration;
+
+        /// <summary>
         /// Indicates if background music should be played.
         /// </summary>
         public bool PlayBackgroundMusic;
@@ -248,6 +253,11 @@ namespace USE_Def_Namespace
             get { return maxStimLoadingDuration; }
             set { maxStimLoadingDuration = Mathf.Max(value, 1f); }
         }
+
+        /// <summary>
+        /// Duration of the SessionSummary screen before the session finishes.
+        /// </summary>
+        public float SessionSummaryDuration = 300000f;
     }
 
     public class TaskDef

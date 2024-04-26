@@ -47,8 +47,6 @@ namespace USE_UI
         [HideInInspector] public GameObject InstructionsButtonGO;
         [HideInInspector] public GameObject InstructionsGO;
         [HideInInspector] public GameObject TitleTextGO;
-        [HideInInspector] public GameObject HumanBackgroundGO;
-        [HideInInspector] public GameObject BackgroundPanelGO;
         [HideInInspector] public GameObject EndTaskButtonGO;
 
         [HideInInspector] public GameObject HumanStartPanelPrefab; //Set to Session In inspector, then passed down
@@ -144,11 +142,6 @@ namespace USE_UI
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
-            HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, 1000f);
-
-            BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
-
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
             if (Session.UsingDefaultConfigs)
                 EndTaskButtonGO.AddComponent<ButtonHoverEffect>();
@@ -179,6 +172,9 @@ namespace USE_UI
                 if (Time.timeScale == 0) //if paused, unpause before ending task
                     Time.timeScale = 1;
 
+                //deactivate human panel since task is over 
+                HumanStartPanelGO.SetActive(false);
+
                 Session.TrialLevel.AbortCode = 5;
                 Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
                 Session.TrialLevel.ForceBlockEnd = true;
@@ -207,16 +203,11 @@ namespace USE_UI
         {
             if (trialCountInTask == 0) //Show Full Human Panel With BlueBackground
             {
-                HumanBackgroundGO.SetActive(true);
                 TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
                 TitleTextGO.SetActive(true);
-                BackgroundPanelGO.SetActive(false);
             }
             else
             {
-                BackgroundPanelGO.SetActive(true);
-                HumanBackgroundGO.SetActive(false);
-
                 if (trialCountInBlock > 0) //Mid block - show only playbutton and instructions
                 {
                     TitleTextGO.SetActive(false);

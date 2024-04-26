@@ -68,7 +68,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void DefineControlLevel()
     {
-        State InitTrial = new State("IniTrial");
+        State InitTrial = new State("InitTrial");
         State Setup = new State("Setup");
         State Play = new State("Play");
         State Celebration = new State("Celebration");
@@ -183,7 +183,6 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         Play.AddSpecificInitializationMethod(() =>
         {
             //Determine next state depending on SkipCelebrationState boolean:
-            CurrentTrial.SkipCelebrationState = true;
             StateAfterDelay = CurrentTrial.SkipCelebrationState ? ITI : Celebration;
             DelayDuration = 0;
 

@@ -89,6 +89,7 @@ public class AudioFBController : MonoBehaviour
         {
             if (IsPlaying())
                 audioSource.Stop();
+
             audioSource.PlayOneShot(clip);
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
         }

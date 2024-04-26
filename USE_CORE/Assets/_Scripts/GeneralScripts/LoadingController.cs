@@ -25,25 +25,46 @@ SOFTWARE.
 
 
 using UnityEngine;
-
+using TMPro;
 
 [RequireComponent(typeof(Canvas))] //Class is attached to LoadingCanvas gameobject in scene
 public class LoadingController : MonoBehaviour
 {
-    private GameObject Star_GO;
+    //Set in inspector:
+    public GameObject Star_GO;
+    public TextMeshProUGUI DotsText;
+
     private readonly float StarRotationSpeed = 125f;
+    private float dotStartTime;
+    private float dotInterval = .4f;
 
     void Start()
     {
-        Star_GO = transform.Find("LoadingStar").gameObject;
-        if (Star_GO == null)
-            Debug.LogError("UNABLE TO FIND LoadingStar GAMEOBJECT!");
+        if (Star_GO == null || DotsText == null)
+            Debug.LogError("STARGO OR DOTSTEXT IS NULL!");
+
         DeactivateLoadingCanvas();
+
+        DotsText.text = ".";
+        dotStartTime = Time.time;
     }
 
     private void Update()
     {
         RotateStar();
+
+        if(Time.time - dotStartTime >= dotInterval)
+            UpdateDotText();
+    }
+
+    private void UpdateDotText()
+    {
+        if (DotsText.text.Length > 2)
+            DotsText.text = ".";
+        else
+            DotsText.text += ".";
+
+        dotStartTime = Time.time;
     }
 
     private void RotateStar()

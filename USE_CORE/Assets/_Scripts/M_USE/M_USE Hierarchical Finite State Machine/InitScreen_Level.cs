@@ -116,7 +116,7 @@ public class InitScreen_Level : ControlLevel
         {
             DoneFading = false;
 
-            MuseTextParentGO = Instantiate(Resources.Load<GameObject>("NewTitleText"), InitScreenCanvas_GO.transform);
+            MuseTextParentGO = Instantiate(Resources.Load<GameObject>("TitleText"), InitScreenCanvas_GO.transform);
             MuseTextParentGO.name = "TitleTextParent";
             MuseTextParentGO.SetActive(true);
 
@@ -409,7 +409,7 @@ public class InitScreen_Level : ControlLevel
 
     private void SetupInitScreen()
     {
-        Session.BackgroundMusicController.PlayMusic();
+        //Session.BackgroundMusicController.PlayMusic();
 
         if (Session.WebBuild)
         {

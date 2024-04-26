@@ -51,7 +51,7 @@ public class LogPanel: ExperimenterDisplayPanel
 
     public override void CustomPanelUpdate()
     {
-        logPanelText.text = "<size=25><color=#2d3436ff>" + logText + "</color></size>";
+        logPanelText.text = "<size=22><color=#d9d9d9>" + logText + "</color></size>";
     }
 
     private void HandleLog(string condition, string stackTrace, LogType type)

@@ -66,10 +66,6 @@ public static class Session
     public static BackgroundMusicController BackgroundMusicController;
     public static LoadingController LoadingController;
 
-    public static GameObject BlockResultsPrefab;
-    public static GameObject BlockResults_GridElementPrefab;
-
-
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
@@ -115,10 +111,9 @@ public static class Session
     public static List<GameObject> TargetObjects, DistractorObjects, IrrelevantObjects;
 
 
+
     static Session()
     {
-        LoadPrefabs();
-
         TargetObjects = new List<GameObject>();
         DistractorObjects = new List<GameObject>();
         IrrelevantObjects = new List<GameObject>();
@@ -131,12 +126,6 @@ public static class Session
         TargetObjects.Clear();
         DistractorObjects.Clear();
         IrrelevantObjects.Clear();
-    }
-
-    private static void LoadPrefabs()
-    {
-        BlockResults_GridElementPrefab = Resources.Load<GameObject>("BlockResults_GridElement");
-        BlockResultsPrefab = Resources.Load<GameObject>("BlockResults");
     }
 
     public static List<GameObject> GetStartButtonChildren()

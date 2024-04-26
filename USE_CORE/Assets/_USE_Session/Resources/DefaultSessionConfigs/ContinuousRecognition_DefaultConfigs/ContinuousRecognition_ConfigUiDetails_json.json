@@ -34,8 +34,8 @@
 		"displayStimDuration": {
 			"value": 0.2,
 			"min": 0.1,
-			"max": 0.5,
-			"precision": 0,
+			"max": 1.0,
+			"precision": 1,
 			"isRange": true,
 			"name": "Display Stim Duration",
 			"hidden": false

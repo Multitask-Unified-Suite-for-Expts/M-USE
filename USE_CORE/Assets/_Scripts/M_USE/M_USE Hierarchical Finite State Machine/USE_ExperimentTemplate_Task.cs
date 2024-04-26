@@ -108,7 +108,7 @@ namespace USE_ExperimentTemplate_Task
         public Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
         protected State VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask;
         protected bool BlockFbFinished;
-        protected float BlockFbSimpleDuration;
+        protected bool TaskFbFinished;
         public TaskLevelTemplate_Methods TaskLevel_Methods;
         public List<GameObject> ActiveSceneElements;
 
@@ -124,8 +124,11 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector] public AudioClip BlockResults_AudioClip; //Passed by SessionLevel
         [HideInInspector] public GameObject BlockResultsGO;
+        [HideInInspector] public GameObject TaskResultsGO;
 
-        private bool ContinueButtonClicked;
+
+        private bool BlockResults_ContinueButtonClicked;
+        private bool TaskResults_ContinueButtonClicked;
 
         //Passed by session level
         [HideInInspector] public ImportSettings_Level importSettings_Level;
@@ -274,25 +277,21 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
-            float blockFeedbackDuration =  0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
+            float blockFeedbackDuration = 0f; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
                 blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;
-                if (blockFeedbackDuration > 0)
-                {
-                    OrderedDictionary taskBlockResults = GetBlockResultsData();
-                    if (taskBlockResults != null && taskBlockResults.Count > 0)
-                        DisplayBlockResults(taskBlockResults);
-                }
+                OrderedDictionary taskBlockResults = GetBlockResultsData();
+                if (blockFeedbackDuration > 0 && taskBlockResults != null && taskBlockResults.Count > 0)
+                    DisplayBlockResults(taskBlockResults);
                 else
-                    blockFeedbackDuration = 0;
+                    blockFeedbackDuration = 0f;
 
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
             });
             BlockFeedback.AddUpdateMethod(() =>
             {
-                if (ContinueButtonClicked ||
-                    (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
+                if (BlockResults_ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
                     BlockFbFinished = true;
                 else
                     BlockFbFinished = false;
@@ -307,8 +306,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 SetTaskSummaryString();
 
-                if (ContinueButtonClicked)
-                    ContinueButtonClicked = false;
+                BlockResults_ContinueButtonClicked = false;
 
                 if (BlockResultsGO != null)
                     BlockResultsGO.SetActive(false);
@@ -318,13 +316,20 @@ namespace USE_ExperimentTemplate_Task
 
                 StartCoroutine(FrameData.AppendDataToBuffer());
                 StartCoroutine(FrameData.AppendDataToFile());
-
-
             });
 
             //FinishTask State-----------------------------------------------------------------------------------------------------
+            float taskFeedbackDuration = 0f;
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                taskFeedbackDuration = Session.SessionDef.TaskResultsDuration;
+
+                OrderedDictionary taskResults = GetTaskResultsData();
+                if (taskFeedbackDuration > 0 && taskResults != null && taskResults.Count > 0)
+                    DisplayTaskResults(taskResults);
+                else
+                    taskFeedbackDuration = 0f;
+
                 if (TrialLevel.TouchFBController != null && TrialLevel.TouchFBController.TouchFbEnabled)
                     TrialLevel.TouchFBController.DisableTouchFeedback();
 
@@ -350,8 +355,21 @@ namespace USE_ExperimentTemplate_Task
 
                 ClearActiveTaskHandlers();
             });
+            FinishTask.AddUpdateMethod(() =>
+            {
+                if (TaskResults_ContinueButtonClicked || (Time.time - FinishTask.TimingInfo.StartTimeAbsolute >= taskFeedbackDuration))
+                    TaskFbFinished = true;
+                else
+                    TaskFbFinished = false;
+            });
+            FinishTask.SpecifyTermination(() => TaskFbFinished, () => null);
+            FinishTask.AddDefaultTerminationMethod(() =>
+            {
+                TaskResults_ContinueButtonClicked = false;
 
-            FinishTask.SpecifyTermination(() => true, () => null);
+                if (TaskResultsGO != null)
+                    TaskResultsGO.SetActive(false);
+            });
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
@@ -514,17 +532,70 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void HandleContinueButtonClick()
+        private void HandleBlockContinueButtonClicked()
         {
-            ContinueButtonClicked = true;
+            BlockResults_ContinueButtonClicked = true;
         }
 
-        private void DisplayBlockResults(OrderedDictionary taskBlockResults)
+        private void HandleTaskContinueButtonClicked()
+        {
+            TaskResults_ContinueButtonClicked = true;
+        }
+
+        private void DisplayTaskResults(OrderedDictionary taskResults)
+        {
+            if(taskResults == null)
+            {
+                Debug.LogWarning("NO TASK RESULTS");
+                return;
+            }
+            GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
+            if (taskCanvas != null)
+            {
+                TaskResultsGO = Instantiate(Resources.Load<GameObject>("BlockResults"));
+                TaskResultsGO.name = "TaskResults";
+                TaskResultsGO.transform.SetParent(taskCanvas.transform);
+                TaskResultsGO.transform.localScale = Vector3.one;
+                TaskResultsGO.transform.localPosition = Vector3.zero;
+
+                //Set rotation of TaskResults to same rotation as camera so its straight on:
+                TaskResultsGO.transform.rotation = Camera.main.transform.rotation;
+
+                TaskResultsGO.transform.Find("Background").transform.Find("HeaderPanel").GetComponentInChildren<TextMeshProUGUI>().text = "Task Results";
+
+                GameObject continueButtonGO = TaskResultsGO.transform.Find("Background").transform.Find("ContinueButton").gameObject;
+                if (continueButtonGO != null)
+                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleTaskContinueButtonClicked);
+
+                Transform gridParent = TaskResultsGO.transform.Find("Background").transform.Find("GridSection");
+
+                AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.clip = BlockResults_AudioClip;
+                audioSource.volume = .9f;
+                audioSource.Play();
+
+                int count = 0;
+                foreach (DictionaryEntry entry in taskResults)
+                {
+                    audioSource.Play();
+                    GameObject gridItem = Instantiate(Resources.Load<GameObject>("TaskResults_GridItem"), gridParent);
+                    gridItem.name = entry.Key.ToString();
+                    TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
+                    itemText.text = $"{entry.Key}:  <color=#0681B5><b>{entry.Value}</b></color>";
+
+                    count++;
+                }
+            }
+            else
+                Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
+        }
+
+        private void DisplayBlockResults(OrderedDictionary blockResults)
         {
             GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
             if (taskCanvas != null)
             {
-                BlockResultsGO = Instantiate(Session.BlockResultsPrefab);
+                BlockResultsGO = Instantiate(Resources.Load<GameObject>("BlockResults"));
                 BlockResultsGO.name = "BlockResults";
                 BlockResultsGO.transform.SetParent(taskCanvas.transform);
                 BlockResultsGO.transform.localScale = Vector3.one;
@@ -533,11 +604,11 @@ namespace USE_ExperimentTemplate_Task
                 //Set rotation of Blockresults to same rotation as camera so its straight on:
                 BlockResultsGO.transform.rotation = Camera.main.transform.rotation;
 
-                GameObject continueButtonGO = BlockResultsGO.transform.Find("ContinueButton").gameObject;
+                GameObject continueButtonGO = BlockResultsGO.transform.Find("Background").transform.Find("ContinueButton").gameObject;
                 if (continueButtonGO != null)
-                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);
+                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleBlockContinueButtonClicked);
 
-                Transform gridParent = BlockResultsGO.transform.Find("Grid");
+                Transform gridParent = BlockResultsGO.transform.Find("Background").transform.Find("GridSection");
 
                 AudioSource blockResults_AudioSource = gameObject.AddComponent<AudioSource>();
                 blockResults_AudioSource.clip = BlockResults_AudioClip;
@@ -545,13 +616,14 @@ namespace USE_ExperimentTemplate_Task
                 blockResults_AudioSource.Play();
 
                 int count = 0;
-                foreach (DictionaryEntry entry in taskBlockResults)
+                foreach (DictionaryEntry entry in blockResults)
                 {
                     blockResults_AudioSource.Play();
-                    GameObject gridItem = Instantiate(Session.BlockResults_GridElementPrefab, gridParent);
-                    gridItem.name = "GridElement" + count;
+                    GameObject gridItem = Instantiate(Resources.Load<GameObject>("TaskResults_GridItem"), gridParent);
+                    gridItem.name = entry.Key.ToString();
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
-                    itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
+                    itemText.text = $"{entry.Key}:  <color=#0681B5><b>{entry.Value}</b></color>";
+
                     count++;
                 }
             }
@@ -584,9 +656,19 @@ namespace USE_ExperimentTemplate_Task
         {
             return new OrderedDictionary
             {
-                ["Trial Count In Task"] = TrialLevel.TrialCount_InTask + 1,
-                ["Aborted Trials In Task"] = NumAbortedTrials_InTask,
-                ["Num Reward Pulses"] = NumRewardPulses_InTask
+                ["Total Trials"] = TrialLevel.TrialCount_InTask + 1,
+                ["Aborted Trials"] = NumAbortedTrials_InTask,
+                ["Reward Pulses"] = NumRewardPulses_InTask
+            };
+        }
+
+        public virtual OrderedDictionary GetTaskResultsData()
+        {
+            return new OrderedDictionary
+            {
+                //["--Total Trials"] = TrialLevel.TrialCount_InTask + 1,
+                //["--Aborted Trials"] = NumAbortedTrials_InTask,
+                //["--Reward Pulses"] = NumRewardPulses_InTask
             };
         }
 

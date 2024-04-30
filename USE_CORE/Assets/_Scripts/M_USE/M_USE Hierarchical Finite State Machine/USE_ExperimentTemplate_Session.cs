@@ -556,16 +556,17 @@ namespace USE_ExperimentTemplate_Session
 
                 List<GameObject> gridList = new List<GameObject>();
 
-                if(Session.SessionDef.TaskButtonGridSpots != null)
+                if (Session.SessionDef.TaskButtonGridSpots != null)
                 {
-                    for(int i = 0; i < Session.SessionDef.NumGridSpots; i++)
+                    for (int i = 0; i < Session.SessionDef.NumGridSpots; i++)
                     {
-                        GameObject gridItem = new GameObject("GridItem_" + (i+1));
+                        GameObject gridItem = new GameObject("GridItem_" + (i + 1));
                         gridItem.AddComponent<RawImage>();
                         gridItem.GetComponent<RawImage>().enabled = false;
                         gridItem.transform.SetParent(TaskButtonsContainer.transform);
                         gridItem.transform.localPosition = Vector3.zero;
                         gridItem.transform.localScale = Vector3.one;
+                        gridItem.transform.eulerAngles = Camera.main.transform.eulerAngles;
                         gridList.Add(gridItem);
                     }
                 }

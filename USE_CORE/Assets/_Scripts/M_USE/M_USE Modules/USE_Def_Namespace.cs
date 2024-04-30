@@ -257,7 +257,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Duration of the SessionSummary screen before the session finishes.
         /// </summary>
-        public float SessionSummaryDuration = 300000f;
+        public float SessionSummaryDuration = 180f;
     }
 
     public class TaskDef

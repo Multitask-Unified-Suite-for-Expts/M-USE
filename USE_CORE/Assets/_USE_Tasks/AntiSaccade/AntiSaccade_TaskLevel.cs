@@ -106,16 +106,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
-            ["Trials Completed"] = trialLevel.TrialCompletions_Block,
-            ["TokenBar Completions"] = trialLevel.TokenBarCompletions_Block,
-        };
-        return data;
-    }
     
     public override OrderedDictionary GetTaskSummaryData()
     {

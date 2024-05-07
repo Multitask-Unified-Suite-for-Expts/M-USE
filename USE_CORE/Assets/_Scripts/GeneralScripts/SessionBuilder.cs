@@ -240,6 +240,7 @@ public class SessionBuilder : MonoBehaviour
             return Tasks;
         return null;
     }
+
     public TaskObject GetTaskByName(string taskName)
     {
         if (Tasks != null && Tasks.Count > 0)
@@ -320,7 +321,6 @@ public class SessionBuilder : MonoBehaviour
                     if (taskObject != null)
                         taskObject.AddOption(configName);
                 }
-
 
                 //ADD CONFIG TO QUEUE SINCE WHATEVER IN TASK MAPPINGS SHOULD BE INITIALLY QUEUE'D UP:
                 AddToQueue(taskObject, configName);

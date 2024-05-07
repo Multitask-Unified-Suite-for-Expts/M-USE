@@ -102,31 +102,15 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         flTL.TotalTokensCollected_InBlock = 0;
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = flTL.TrialCount_InBlock + 1,
-            ["Trials Correct"] = flTL.NumCorrect_InBlock,
-            ["Accuracy"] = flTL.Accuracy_InBlock.ToString("0.00") + "%",
-            ["Errors"] = flTL.NumErrors_InBlock,
-            ["Token Bar Completions"] = flTL.NumTokenBarFull_InBlock,
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
-        
-       // data["\nPerformance Metrics"] = CreateTaskDataSummary();
-
-        if(SearchDurations_InTask.Count > 0)
-            data["Average Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
         if(flTL.TrialCount_InTask != 0)
             data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (flTL.TrialCount_InTask));
+        if(SearchDurations_InTask.Count > 0)
+            data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
         
         return data;
     }
@@ -172,10 +156,14 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        if (flTL.TrialCount_InTask != 0)
+            data["Accuracy"] = String.Format("{0:0.00}", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask));
+
+        if (SearchDurations_InTask.Count > 0)
+            data["Average Search Duration"] = String.Format("{0:0.000}", CalculateAverageDuration(SearchDurations_InTask));
+
+        data["Token Bar Completions"] = NumTokenBarFull_InTask;
 
         return data;
     }

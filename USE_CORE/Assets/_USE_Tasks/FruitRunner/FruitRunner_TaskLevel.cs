@@ -58,18 +58,6 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
         
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Score"] = trialLevel.Score_Block,
-            ["Targets Hit"] = $"{trialLevel.TargetsHit_Block}/{trialLevel.TargetsHit_Block + trialLevel.TargetsMissed_Block}",
-            ["Distractors Hit"] = $"{trialLevel.DistractorsAvoided_Block}/{trialLevel.DistractorsHit_Block + trialLevel.DistractorsAvoided_Block}",
-            ["Blockades Hit"] = $"{trialLevel.BlockadesHit_Block}/{trialLevel.BlockadesHit_Block + trialLevel.BlockadesAvoided_Block}",
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
@@ -88,10 +76,10 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["Targets Hit"] = $"{TargetsHit_Task}/{TargetsHit_Task + TargetsMissed_Task}";
+        data["Distractors Avoided"] = $"{DistractorsAvoided_Task}/{DistractorsAvoided_Task + DistractorsHit_Task}";
+        data["Blockades Avoided"] = $"{BlockadesAvoided_Task}/{BlockadesAvoided_Task + BlockadesHit_Task}";
 
         return data;
     }

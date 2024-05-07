@@ -127,21 +127,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Score"] = trialLevel.Score,
-            ["Trials Correct"] = trialLevel.NumCorrect_Block,
-            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
-            ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0") + "s",
-            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block,
-            ["RecencyInterference"] = trialLevel.RecencyInterference_Block
-
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();

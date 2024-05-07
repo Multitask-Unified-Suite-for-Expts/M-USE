@@ -98,7 +98,9 @@ public class SessionSummaryController : MonoBehaviour
             foreach (TaskObject task in tasks)
             {
                 if (task.TrialsCompleted < 1)
+                {
                     break;
+                }
 
                 GameObject go = Instantiate(Resources.Load<GameObject>("SessionSummary_GridItem"));
                 go.name = task.TaskName;

@@ -274,7 +274,7 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                Session.LoadingController.DeactivateLoadingCanvas();
+                //Session.LoadingController.DeactivateLoadingCanvas();
 
                 if (Session.WebBuild)
                     Cursor.visible = true;
@@ -302,7 +302,7 @@ namespace USE_ExperimentTemplate_Trial
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
                 //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
-                StartCoroutine(DisableTaskMainBackground());
+                StartCoroutine(TurnOffLoadingCanvas());
 
             });
 
@@ -322,7 +322,9 @@ namespace USE_ExperimentTemplate_Trial
                     }
                 }
 
-                
+                //Session.LoadingController.DeactivateLoadingCanvas();
+
+
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -359,7 +361,6 @@ namespace USE_ExperimentTemplate_Trial
                 Resources.UnloadUnusedAssets();
                 TrialSummaryString = "";
                 
-
                 Session.ClearStimLists();
             });
 
@@ -437,16 +438,12 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
-        private IEnumerator DisableTaskMainBackground()
+        private IEnumerator TurnOffLoadingCanvas()
         {
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            if (TaskLevel.TaskCam != null)
-            {
-                if (TaskLevel.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
-                    skyboxComponent.enabled = false;
-            }
+            Session.LoadingController.DeactivateLoadingCanvas();
         }
 
         private IEnumerator HandleLoadingStims()

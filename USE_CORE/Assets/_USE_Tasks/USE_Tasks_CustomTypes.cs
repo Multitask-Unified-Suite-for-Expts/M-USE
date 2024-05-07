@@ -42,6 +42,7 @@ using TemporalOrderJudgement_Namespace;
 using SustainedAttention_Namespace;
 using FruitRunner_Namespace;
 using THRQ_Namespace;
+using AudioVisual_Namespace;
 //#END OF USING DIRECTIVES - DO NOT DELETE THIS LINE#
 
 
@@ -227,6 +228,17 @@ static public class USE_Tasks_CustomTypes
                 BlockDefType = typeof(THRQ_BlockDef),
                 TrialDefType = typeof(THRQ_TrialDef),
                 StimDefType = typeof(THRQ_StimDef)
+            }
+        }
+        ,{
+            "AudioVisual", new TaskTypes
+            {
+                TaskLevelType = typeof(AudioVisual_TaskLevel),
+                TrialLevelType = typeof(AudioVisual_TrialLevel),
+                TaskDefType = typeof(AudioVisual_TaskDef),
+                BlockDefType = typeof(AudioVisual_BlockDef),
+                TrialDefType = typeof(AudioVisual_TrialDef),
+                StimDefType = typeof(AudioVisual_StimDef)
             }
         }
 //#END OF CUSTOMTASKTYPES DICTIONARY - DO NOT DELETE THIS LINE#

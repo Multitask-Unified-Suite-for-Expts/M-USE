@@ -80,18 +80,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         AssignBlockData();
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Accuracy"] = string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock),
-            ["Trials Completed"] = vsTL.TrialCount_InBlock + 1,
-            ["Avg Search Duration"] = CalculateAverageDuration(vsTL.SearchDurations_InBlock).ToString("0.0") + "s",
-            ["Token Bar Completions"] = vsTL.NumTokenBarFull_InBlock
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
@@ -106,10 +94,15 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["Accuracy"] = String.Format("{0:0.000}", NumCorrect_InTask / (NumCorrect_InTask + NumErrors_InTask));
+        data["Token Bar Filled"] = NumTokenBarFull_InTask;
+        data["Avg Search Duration"] = String.Format("{0:0.000}", SearchDurations_InTask.Average());
+
+        //need accuracy as well:
+        //
+
+
 
         return data;
     }

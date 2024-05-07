@@ -109,17 +109,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         });
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = wwwTL.TrialCount_InBlock + 1,
-            ["Correct Selections"] = CorrectSelections_InBlock,
-            ["Errors"] = TotalErrors_InBlock
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
@@ -149,10 +138,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["Slider Completions"] = NumSliderBarFilled_InTask;
+        data["Avg Search Duration"] = String.Format("{0:0.000}", CalculateAverageDuration(SearchDurations_InTask));
 
         return data;
     }

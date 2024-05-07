@@ -75,6 +75,7 @@ namespace USE_ExperimentTemplate_Session
         //Experimenter Display variables:
         private GameObject ExperimenterDisplay_Parent;
         private GameObject ExperimenterDisplayGO;
+        private Canvas ExperimenterDisplayCanvas;
         private GameObject SessionBuilderGO;
         private SessionBuilder SessionBuilder;
         private GameObject TaskOrder_GridParent;
@@ -168,14 +169,16 @@ namespace USE_ExperimentTemplate_Session
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(() => initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                if (Session.WebBuild)
+                CreateExperimenterDisplay();
+                
+                if(Session.WebBuild)
                     Session.InitCamGO.SetActive(false);
                 else
                 {
-                    CreateExperimenterDisplay();
-                    CreateMirrorCam();
                     Starfield.SetActive(false);
+                    CreateMirrorCam();
                 }
+
             });
 
             string selectedConfigFolderName = null;
@@ -301,8 +304,6 @@ namespace USE_ExperimentTemplate_Session
                 DefiningTask = false;
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
-
-                SetTaskMainBackground();
             });
             setupGazeCalibration.AddChildLevel(setupTaskLevel);
             setupGazeCalibration.AddSpecificInitializationMethod(() =>
@@ -462,12 +463,20 @@ namespace USE_ExperimentTemplate_Session
             {
                 Session.InitCamGO.SetActive(false);
 
+                if (Session.WebBuild)
+                {
+                    ExperimenterDisplayCanvas.targetDisplay = 1;
+                }
+
                 MainDirectionalLight.SetActive(true);
                 Session.TaskSelectionCanvasGO.SetActive(true);
                 Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
                 SessionCam.gameObject.SetActive(true);
                 AssignExperimenterDisplayRenderTexture(SessionCam);
                 ExperimenterDisplayGO.SetActive(true);
+
+                //Turn off the spinning background on the Exp Display now that session builder is done:
+                ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false);
 
 
                 if (Session.SessionDef.PlayBackgroundMusic)
@@ -499,14 +508,14 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
-                if(!Session.WebBuild)
+
+
+                if (taskCount >= SessionBuilder.GetQueueLength())
                 {
-                    if (taskCount >= SessionBuilder.GetQueueLength())
-                    {
-                        TasksFinished = true;
-                        return;
-                    }
+                    TasksFinished = true;
+                    return;
                 }
+
 
                 if (TaskButtonsContainer != null)
                 {
@@ -730,13 +739,12 @@ namespace USE_ExperimentTemplate_Session
                 GameObject taskButton = taskButtonGOs[selectedConfigFolderName];
                 RawImage image = taskButton.GetComponent<RawImage>();
 
-                if (!Session.WebBuild) //Let patients play same task as many times as they want
-                {
-                    image.color = new Color(.5f, .5f, .5f, .35f);
-                    image.raycastTarget = false;
-                    if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
-                        Destroy(hoverEffect);
-                }
+
+                image.color = new Color(.5f, .5f, .5f, .35f);
+                image.raycastTarget = false;
+                if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
+                    Destroy(hoverEffect);
+                
 
                 string taskName = (string)Session.SessionDef.TaskMappings[selectedConfigFolderName];
 
@@ -804,8 +812,6 @@ namespace USE_ExperimentTemplate_Session
                 SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
 
-                SetTaskMainBackground(); 
-
                 if (CameraRenderTexture != null)
                     CameraRenderTexture.Release();
 
@@ -866,6 +872,8 @@ namespace USE_ExperimentTemplate_Session
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
                 OrderedDictionary taskResultsData = CurrentTask.GetTaskResultsData();
+                Debug.LogWarning("TASK: " + CurrentTask.TaskName);
+                Debug.LogWarning("TCIT: " + CurrentTask.TrialLevel.TrialCount_InTask);
                 SessionBuilder.SetTaskData(CurrentTask.TaskName, CurrentTask.TrialLevel.TrialCount_InTask, CurrentTask.Duration, taskResultsData);
                 SessionBuilder.SetExpDisplayIconAsInactive(taskCount);
 
@@ -934,8 +942,12 @@ namespace USE_ExperimentTemplate_Session
                 HumanVersionToggleButton.SetActive(false);
 
                 List<TaskObject> tasks = SessionBuilder.GetTasks();
-                if (tasks != null && tasks.Any(task => task.TrialsCompleted > 0))
-                    CreateSessionSummaryPanel(tasks);
+                if (tasks != null)
+                {
+                    tasks = tasks.Where(task => task.TrialsCompleted > 0).ToList();
+                    if (tasks.Count > 0)
+                        CreateSessionSummaryPanel(tasks);
+                }
                 else
                     skipSessionSummary = true;
 
@@ -979,6 +991,8 @@ namespace USE_ExperimentTemplate_Session
 
             if (tasks != null)
                 SessionSummaryController.CreateTaskSummaryGridItems(tasks);
+            else
+                Debug.LogError("TASKS ARE NULL");
         }
 
 
@@ -993,18 +1007,6 @@ namespace USE_ExperimentTemplate_Session
                 Session.SerialPortController.ClosePort();
         }
 
-        //Method is used to have every task set their main background as the MUSE blue background
-        private void SetTaskMainBackground()
-        {
-            if (CurrentTask.TaskCam != null)
-            {
-                if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
-                    skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
-                skyboxComponent.material = Resources.Load<Material>("Materials/Skybox2");
-            }
-            else
-                Debug.LogWarning("TASK CAM IS NULL!");
-        }
 
         private void FindGameObjects()
         {
@@ -1068,7 +1070,12 @@ namespace USE_ExperimentTemplate_Session
             SessionBuilder = SessionBuilderGO.GetComponent<SessionBuilder>();
             SessionBuilderGO.SetActive(false);
 
-            ExperimenterDisplayGO = ExperimenterDisplay_Parent.transform.Find("ExperimenterCanvas").transform.Find("ExpDisplay").gameObject;
+            ExperimenterDisplayCanvas = ExperimenterDisplay_Parent.transform.Find("ExperimenterCanvas").GetComponent<Canvas>();
+
+            if (Session.WebBuild)
+                ExperimenterDisplayCanvas.targetDisplay = 0;
+
+            ExperimenterDisplayGO = ExperimenterDisplayCanvas.transform.Find("ExpDisplay").gameObject;
 
             TaskOrder_GridParent = ExperimenterDisplayGO.transform.Find("HotKeyPanel").transform.Find("Image").transform.Find("TaskOrderSection").transform.Find("TaskOrder_GridParent").gameObject;
 
@@ -1220,6 +1227,7 @@ namespace USE_ExperimentTemplate_Session
                 ExpDisplayRenderImage.texture = CameraRenderTexture;
             }
         }
+
         private void AppendSerialData()
         {
             if (Session.SessionDef.SerialPortActive)

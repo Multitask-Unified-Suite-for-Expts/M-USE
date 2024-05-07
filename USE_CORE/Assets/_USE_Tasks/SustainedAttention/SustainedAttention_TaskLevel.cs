@@ -108,23 +108,6 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = trialLevel.TrialCompletions_Block,
-            ["Successful Target Selections"] = trialLevel.SuccessfulTargetSelections_Block,
-            ["Unsuccessful Target Selections"] = trialLevel.UnsuccessfulTargetSelections_Block,
-            ["Distractor Selections"] = trialLevel.DistractorSelections_Block,
-            ["Distractor Rejections"] = trialLevel.DistractorRejections_Block,
-            ["Premature Target Selections"] = trialLevel.TargetSelectionsBeforeFirstAnim_Block,
-            ["Intervals Without A Selection"] = trialLevel.TargetAnimsWithoutSelection_Block,
-            ["Additional Target Selections"] = trialLevel.AdditionalTargetSelections_Block,
-            ["SliderBar Completions"] = trialLevel.SliderBarCompletions_Block,
-
-        };
-        return data;
-    }
 
     private void DefineBlockData()
     {

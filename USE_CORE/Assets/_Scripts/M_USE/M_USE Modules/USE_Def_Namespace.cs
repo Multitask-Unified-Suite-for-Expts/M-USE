@@ -177,11 +177,6 @@ namespace USE_Def_Namespace
         public int RewardHotKeyPulseSize = 250;
 
         /// <summary>
-        /// Duration of the block results, specific for human session configurations.
-        /// </summary>
-        public float BlockResultsDuration;
-
-        /// <summary>
         /// Duration of the task results, specific for human session configurations.
         /// </summary>
         public float TaskResultsDuration;

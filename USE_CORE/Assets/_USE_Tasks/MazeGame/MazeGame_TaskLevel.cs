@@ -168,26 +168,17 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ChoiceDurations", () => string.Join(",", ChoiceDurations_InBlock));
        // BlockData.AddDatum("NumNonStimSelections", () => mgTrialLevel.NonStimTouches_InBlock);
     }
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Maze Duration"] = mgTL.MazeManager.mazeDuration.ToString("0.0") + "s",
-            ["Correct Touches"] = CorrectTouches_InBlock,
-            ["Total Errors"] = TotalErrors_InBlock,
-            ["Retouched Correct"] = RetouchCorrect_InBlock,
-            ["Retouched Erroneous"] = RetouchError_InBlock,
-        };
-        return data;
-    }
 
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["Fastest Time"] = MazeDurations_InTask.Min();
+        data["Avg Time"] = String.Format("{0:0.000}", CalculateAverageDuration(MazeDurations_InTask));
+        data["Errors"] = TotalErrors_InTask;
+        data["Correct Touches"] = CorrectTouches_InTask;
+
+        //need to add trials completed:
 
         return data;
     }

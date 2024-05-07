@@ -74,25 +74,15 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = wmTL.TrialCount_InBlock + 1,
-            ["Trials Correct"] = wmTL.NumCorrect_InBlock,
-            ["Errors"] = wmTL.NumErrors_InBlock,
-            ["Avg Search Duration"] = CalculateAverageDuration(wmTL.SearchDurations_InBlock).ToString("0.0") + "s",
-        };
-        return data;
-    }
 
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["TokenBar Filled"] = NumTokenBarFull_InTask;
+
+        if (SearchDurations_InTask.Count > 0)
+            data["Average Search Duration"] = String.Format("{0:0.000}", CalculateAverageDuration(SearchDurations_InTask));
 
         return data;
     }

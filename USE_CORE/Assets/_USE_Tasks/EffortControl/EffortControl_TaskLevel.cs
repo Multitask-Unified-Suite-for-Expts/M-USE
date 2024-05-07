@@ -82,19 +82,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Total Touches"] = trialLevel.TotalTouches_Block,
-            ["Chose Higher Effort"] = trialLevel.NumHigherEffortChosen_Block,
-            ["Chose Lower Effort"] = trialLevel.NumLowerEffortChosen_Block,
-            ["Chose Higher Reward"] = trialLevel.NumHigherRewardChosen_Block,
-            ["Chose Lower Reward"] = trialLevel.NumLowerRewardChosen_Block
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
 
@@ -118,10 +105,10 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
-        //data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["Chose Higher Effort"] = $"{NumHigherEffortChosen_Task}/{NumHigherEffortChosen_Task + NumLowerEffortChosen_Task}" ;
+        data["Chose Higher Reward"] = $"{NumHigherRewardChosen_Task}/{NumHigherRewardChosen_Task + NumLowerRewardChosen_Task}";
+        data["Chose Left Side"] = $"{NumChosenLeft_Task}/{NumChosenLeft_Task + NumChosenRight_Task}";
 
         return data;
     }

@@ -107,7 +107,6 @@ namespace USE_ExperimentTemplate_Task
         public Type TaskLevelType;
         public Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
         protected State VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask;
-        protected bool BlockFbFinished;
         protected bool TaskFbFinished;
         public TaskLevelTemplate_Methods TaskLevel_Methods;
         public List<GameObject> ActiveSceneElements;
@@ -123,11 +122,8 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool StimsHandled;
 
         [HideInInspector] public AudioClip BlockResults_AudioClip; //Passed by SessionLevel
-        [HideInInspector] public GameObject BlockResultsGO;
         [HideInInspector] public GameObject TaskResultsGO;
 
-
-        private bool BlockResults_ContinueButtonClicked;
         private bool TaskResults_ContinueButtonClicked;
 
         //Passed by session level
@@ -277,39 +273,19 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
-            float blockFeedbackDuration = 0f; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;
-                OrderedDictionary taskBlockResults = GetBlockResultsData();
-                if (blockFeedbackDuration > 0 && taskBlockResults != null && taskBlockResults.Count > 0)
-                    DisplayBlockResults(taskBlockResults);
-                else
-                    blockFeedbackDuration = 0f;
-
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
-            });
-            BlockFeedback.AddUpdateMethod(() =>
-            {
-                if (BlockResults_ContinueButtonClicked || (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
-                    BlockFbFinished = true;
-                else
-                    BlockFbFinished = false;
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                StartCoroutine(FrameData.AppendDataToBuffer());
             });
-            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
-            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
+            BlockFeedback.SpecifyTermination(() => true && BlockCount < BlockDefs.Length - 1, RunBlock);
+            BlockFeedback.SpecifyTermination(() => true && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
                 SetTaskSummaryString();
-
-                BlockResults_ContinueButtonClicked = false;
-
-                if (BlockResultsGO != null)
-                    BlockResultsGO.SetActive(false);
 
                 StartCoroutine(BlockData.AppendDataToBuffer());
                 StartCoroutine(BlockData.AppendDataToFile());
@@ -532,11 +508,6 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void HandleBlockContinueButtonClicked()
-        {
-            BlockResults_ContinueButtonClicked = true;
-        }
-
         private void HandleTaskContinueButtonClicked()
         {
             TaskResults_ContinueButtonClicked = true;
@@ -590,46 +561,6 @@ namespace USE_ExperimentTemplate_Task
                 Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
         }
 
-        private void DisplayBlockResults(OrderedDictionary blockResults)
-        {
-            GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
-            if (taskCanvas != null)
-            {
-                BlockResultsGO = Instantiate(Resources.Load<GameObject>("BlockResults"));
-                BlockResultsGO.name = "BlockResults";
-                BlockResultsGO.transform.SetParent(taskCanvas.transform);
-                BlockResultsGO.transform.localScale = Vector3.one;
-                BlockResultsGO.transform.localPosition = Vector3.zero;
-
-                //Set rotation of Blockresults to same rotation as camera so its straight on:
-                BlockResultsGO.transform.rotation = Camera.main.transform.rotation;
-
-                GameObject continueButtonGO = BlockResultsGO.transform.Find("Background").transform.Find("ContinueButton").gameObject;
-                if (continueButtonGO != null)
-                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleBlockContinueButtonClicked);
-
-                Transform gridParent = BlockResultsGO.transform.Find("Background").transform.Find("GridSection");
-
-                AudioSource blockResults_AudioSource = gameObject.AddComponent<AudioSource>();
-                blockResults_AudioSource.clip = BlockResults_AudioClip;
-                blockResults_AudioSource.volume = .9f;
-                blockResults_AudioSource.Play();
-
-                int count = 0;
-                foreach (DictionaryEntry entry in blockResults)
-                {
-                    blockResults_AudioSource.Play();
-                    GameObject gridItem = Instantiate(Resources.Load<GameObject>("TaskResults_GridItem"), gridParent);
-                    gridItem.name = entry.Key.ToString();
-                    TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
-                    itemText.text = $"{entry.Key}:  <color=#0681B5><b>{entry.Value}</b></color>";
-
-                    count++;
-                }
-            }
-            else
-                Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
-        }
 
         public void ClearActiveTaskHandlers()
         {
@@ -670,11 +601,6 @@ namespace USE_ExperimentTemplate_Task
                 //["--Aborted Trials"] = NumAbortedTrials_InTask,
                 //["--Reward Pulses"] = NumRewardPulses_InTask
             };
-        }
-
-        public virtual OrderedDictionary GetBlockResultsData()
-        {
-            return new OrderedDictionary();
         }
 
         public virtual List<CustomSettings> DefineCustomSettings()

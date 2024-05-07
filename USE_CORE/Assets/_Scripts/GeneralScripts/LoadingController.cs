@@ -76,6 +76,11 @@ public class LoadingController : MonoBehaviour
     public void ActivateLoadingCanvas()
     {
         gameObject.SetActive(true);
+
+        if (Session.WebBuild)
+        {
+            GetComponent<Canvas>().targetDisplay = 0;
+        }
     }
 
     public void DeactivateLoadingCanvas()

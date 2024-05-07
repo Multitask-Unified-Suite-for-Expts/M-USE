@@ -37,6 +37,8 @@ namespace MazeGame_Namespace
         public float TileSize;
         public string TileTexture;
         public int NumBlinks;
+
+        public float[] DefaultTileColor;
         public float[] StartColor;
         public float[] FinishColor;
         public float[] CorrectColor;

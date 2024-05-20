@@ -829,6 +829,7 @@ MonoBehaviour:
   calculatedThreshold_timing: 0
   blockAccuracy: 0
   ForceBlockEnd: 0
+  ReachedCriterion: 0
   TaskDataPath: 
   TrialSummaryString: 
   TaskLevel: {fileID: 0}
@@ -996,9 +997,9 @@ MonoBehaviour:
   TaskProjectFolder: 
   BlockCount: 0
   NumAbortedTrials_InTask: 0
-  NumRewardPulses_InTask: 0
   NumAbortedTrials_InBlock: 0
   NumRewardPulses_InBlock: 0
+  NumRewardPulses_InTask: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
   ForceTaskEnd: 0

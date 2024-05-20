@@ -63,7 +63,7 @@ public static class Session
 
     public static CameraSyncController CameraSyncController;
     public static FullScreenController FullScreenController;
-    public static BackgroundMusicController BackgroundMusicController;
+    public static SessionAudioController SessionAudioController;
     public static LoadingController LoadingController;
 
     public static SessionInfoPanel SessionInfoPanel;

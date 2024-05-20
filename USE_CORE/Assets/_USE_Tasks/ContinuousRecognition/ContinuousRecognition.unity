@@ -1242,7 +1242,6 @@ MonoBehaviour:
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
   BlockResults_AudioClip: {fileID: 0}
-  BlockResultsGO: {fileID: 0}
   TaskResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}

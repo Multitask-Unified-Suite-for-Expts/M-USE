@@ -76,7 +76,6 @@ public class InitScreen_Level : ControlLevel
     public GameObject LocalConfigsToggle_GreyPanel;
     public GameObject LocalDataToggle_GreyPanel;
 
-    private AudioSource ButtonAudioSource;
     [HideInInspector] public AudioClip ToggleChange_AudioClip;
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
@@ -178,7 +177,7 @@ public class InitScreen_Level : ControlLevel
             SetConfigInfo();
             SetDataInfo();
             InitScreenCanvas_GO.SetActive(false);
-            Session.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
+            Session.LoadingController.ActivateLoadingCanvas(Session.WebBuild ? 0 : 1); //turn on loading canvas/circle so that it immedietely shows its loading!
 
             //Set Main cam rotation and position to that of the init cam:
             Camera.main.transform.position = Session.InitCamGO.transform.position;
@@ -191,7 +190,7 @@ public class InitScreen_Level : ControlLevel
 
     public void OnKeyboardTogglePressed()
     {
-        PlayAudio(ToggleChange_AudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
         KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
@@ -394,7 +393,7 @@ public class InitScreen_Level : ControlLevel
     public void OnToggleChange()
     {
         if (ValuesLoaded)
-            PlayAudio(ToggleChange_AudioClip);
+            Session.SessionAudioController.PlayAudioClip("ClickedButton");
 
         GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 
@@ -409,8 +408,6 @@ public class InitScreen_Level : ControlLevel
 
     private void SetupInitScreen()
     {
-        //Session.BackgroundMusicController.PlayMusic();
-
         if (Session.WebBuild)
         {
             InitScreenCanvas_GO.GetComponent<Canvas>().targetDisplay = 0;
@@ -458,7 +455,6 @@ public class InitScreen_Level : ControlLevel
             LocalDataToggle_GreyPanel.SetActive(false);
         }
 
-        ButtonAudioSource = gameObject.AddComponent<AudioSource>();
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
@@ -471,7 +467,7 @@ public class InitScreen_Level : ControlLevel
 
     private void DisplayErrorMessage(string message, string errorType)
     {
-        PlayAudio(Error_AudioClip);
+        Session.SessionAudioController.PlayAudioClip("Error");
         ErrorType = errorType;
         ErrorHandling_GO.SetActive(true);
         ErrorHandling_GO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = message;
@@ -491,14 +487,14 @@ public class InitScreen_Level : ControlLevel
             DisplayErrorMessage("Input a Data Folder Path!", "EmptyDataFolder");
         else
         {
-            PlayAudio(ToggleChange_AudioClip);
+            Session.SessionAudioController.PlayAudioClip("ClickedButton");
             ConfirmButtonPressed = true;
         }
     }
 
     public void HandleStartSessionButtonPress()
     {
-        PlayAudio(ToggleChange_AudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
         ConfirmButtonPressed = true;
     }
 
@@ -518,7 +514,7 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
-                PlayAudio(Connected_AudioClip);
+                Session.SessionAudioController.PlayAudioClip("Connected");
                 ConnectedToServer = true;
                 if(ServerConfig_Toggle.isOn)
                     GreyOutPanels_Array[2].SetActive(false);
@@ -535,7 +531,7 @@ public class InitScreen_Level : ControlLevel
             else
             {
                 Debug.LogWarning("UNABLE TO CONNECT TO SERVER!");
-                PlayAudio(Error_AudioClip);
+                Session.SessionAudioController.PlayAudioClip("Error");
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
                 RedX_GO.SetActive(true);
             }
@@ -570,17 +566,6 @@ public class InitScreen_Level : ControlLevel
     {
         string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<TextMeshProUGUI>().text : LocalData_Text.GetComponent<TextMeshProUGUI>().text;
         return datavalue.Remove(datavalue.Length - 1, 1);
-    }
-
-    public void PlayAudio(AudioClip clip)
-    {
-        if (clip != null)
-        {
-            ButtonAudioSource.clip = clip;
-            ButtonAudioSource.Play();
-        }
-        else
-            Debug.Log("CANT PLAY AUDIO CLIP BECAUSE IT IS NULL!");
     }
 
 

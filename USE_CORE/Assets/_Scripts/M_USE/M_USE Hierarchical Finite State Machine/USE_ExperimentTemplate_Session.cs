@@ -94,7 +94,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Already in scene, so find them:
-        [HideInInspector] public GameObject Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject ToggleAudioButton;
         public GameObject RedAudioCross;
@@ -165,6 +164,9 @@ namespace USE_ExperimentTemplate_Session
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
 
+            if (Session.SessionAudioController == null)
+                Session.SessionAudioController = GameObject.Find("MiscScripts").AddComponent<SessionAudioController>();
+
             //InitScreen State---------------------------------------------------------------------------------------------------------------
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(() => initScreen.ChildLevel.Terminated, setupSession, () =>
@@ -175,7 +177,6 @@ namespace USE_ExperimentTemplate_Session
                     Session.InitCamGO.SetActive(false);
                 else
                 {
-                    Starfield.SetActive(false);
                     CreateMirrorCam();
                 }
 
@@ -338,7 +339,6 @@ namespace USE_ExperimentTemplate_Session
                 // Deactivate TaskSelection scene elements
                 Session.LoadingController.DeactivateLoadingCanvas();
                 FrameData.gameObject.SetActive(false);
-                Starfield.SetActive(false);
                 SessionCam.gameObject.SetActive(false);
                 Session.TaskSelectionCanvasGO.SetActive(false);
 
@@ -453,46 +453,43 @@ namespace USE_ExperimentTemplate_Session
             sessionBuilder.AddDefaultTerminationMethod(() =>
             {
                 SessionBuilderGO.SetActive(false);
-
-                if (Session.BackgroundMusicController == null)
-                    Session.BackgroundMusicController = GameObject.Find("MiscScripts").AddComponent<BackgroundMusicController>();
             });
 
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 Session.InitCamGO.SetActive(false);
-
-                if (Session.WebBuild)
-                {
-                    ExperimenterDisplayCanvas.targetDisplay = 1;
-                }
+                SessionCam.gameObject.SetActive(true);
 
                 MainDirectionalLight.SetActive(true);
                 Session.TaskSelectionCanvasGO.SetActive(true);
                 Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
-                SessionCam.gameObject.SetActive(true);
-                AssignExperimenterDisplayRenderTexture(SessionCam);
-                ExperimenterDisplayGO.SetActive(true);
 
-                //Turn off the spinning background on the Exp Display now that session builder is done:
-                ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false);
+                if(!Session.WebBuild)
+                {
+                    AssignExperimenterDisplayRenderTexture(SessionCam);
+                    ExperimenterDisplayCanvas.gameObject.SetActive(true);
+                    ExperimenterDisplayGO.SetActive(true);
+                    //Turn off the spinning background on the Exp Display now that session builder is done:
+                    ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false);
+                }
+                else
+                    ExperimenterDisplayCanvas.gameObject.SetActive(false);
+               
 
 
                 if (Session.SessionDef.PlayBackgroundMusic)
                 {
-                    Session.BackgroundMusicController.PlayMusic();
+                    Session.SessionAudioController.PlayBackgroundMusic();
                     RedAudioCross.SetActive(false);
                 }
                 else
                 {
-                    Session.BackgroundMusicController.StopMusic();
+                    Session.SessionAudioController.StopBackgroundMusic();
                     RedAudioCross.SetActive(true);
                 }
 
                 HumanVersionToggleButton.SetActive(Session.SessionDef.IsHuman);
-
-                Starfield.SetActive(Session.SessionDef.IsHuman);
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
@@ -732,7 +729,8 @@ namespace USE_ExperimentTemplate_Session
             {
                 MainDirectionalLight.SetActive(false);
 
-                Session.LoadingController.ActivateLoadingCanvas();
+                Debug.LogWarning("ACTIVATING LOADING CANVAS ON FRAME: " + Time.frameCount);
+                Session.LoadingController.ActivateLoadingCanvas(0); //0 for both web build and normal since monkeys on display 0;
 
                 TaskButtonsContainer.SetActive(false);
 
@@ -807,7 +805,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 Session.TaskSelectionCanvasGO.SetActive(false);
                 DefiningTask = false;
-                Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
@@ -852,7 +849,7 @@ namespace USE_ExperimentTemplate_Session
             runTask.AddUniversalInitializationMethod(() =>
             {
                 Session.InitCamGO.SetActive(false);
-                Session.BackgroundMusicController.StopMusic();
+                Session.SessionAudioController.StopBackgroundMusic();
 
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
                 AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
@@ -872,8 +869,6 @@ namespace USE_ExperimentTemplate_Session
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
                 OrderedDictionary taskResultsData = CurrentTask.GetTaskResultsData();
-                Debug.LogWarning("TASK: " + CurrentTask.TaskName);
-                Debug.LogWarning("TCIT: " + CurrentTask.TrialLevel.TrialCount_InTask);
                 SessionBuilder.SetTaskData(CurrentTask.TaskName, CurrentTask.TrialLevel.TrialCount_InTask, CurrentTask.Duration, taskResultsData);
                 SessionBuilder.SetExpDisplayIconAsInactive(taskCount);
 
@@ -1019,7 +1014,6 @@ namespace USE_ExperimentTemplate_Session
                 Session.LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
                 Session.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
                 Session.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
-                Starfield = GameObject.Find("Starfield");
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
@@ -1161,14 +1155,14 @@ namespace USE_ExperimentTemplate_Session
         {
             Session.SessionDef.PlayBackgroundMusic = !Session.SessionDef.PlayBackgroundMusic;
 
-            if (Session.BackgroundMusicController.BackgroundMusic_AudioSource.isPlaying)
+            if (Session.SessionAudioController.BackgroundMusic_AudioSource.isPlaying)
             {
-                Session.BackgroundMusicController.StopMusic();
+                Session.SessionAudioController.StopBackgroundMusic();
                 RedAudioCross.SetActive(true);
             }
             else
             {
-                Session.BackgroundMusicController.PlayMusic();
+                Session.SessionAudioController.PlayBackgroundMusic();
                 RedAudioCross.SetActive(false);
             }
         }
@@ -1180,25 +1174,24 @@ namespace USE_ExperimentTemplate_Session
             if(Session.SessionDef.IsHuman)
             {
                 ToggleAudioButton.SetActive(true);
-                RedAudioCross.SetActive(!Session.BackgroundMusicController.BackgroundMusic_AudioSource.isPlaying);
+                RedAudioCross.SetActive(!Session.SessionAudioController.BackgroundMusic_AudioSource.isPlaying);
 
                 if (Session.SessionDef.PlayBackgroundMusic)
                 {
-                    Session.BackgroundMusicController.PlayMusic();
+                    Session.SessionAudioController.PlayBackgroundMusic();
                     RedAudioCross.SetActive(false);
                 }
             }
             else
             {
-                if(Session.BackgroundMusicController.BackgroundMusic_AudioSource != null)
+                if(Session.SessionAudioController.BackgroundMusic_AudioSource != null)
                 {
-                    Session.BackgroundMusicController.StopMusic();
+                    Session.SessionAudioController.StopBackgroundMusic();
                     RedAudioCross.SetActive(true);
                 }
                 ToggleAudioButton.SetActive(false);   
             }
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = Session.SessionDef.IsHuman ? "Human Version" : "Primate Version";
-            Starfield.SetActive(!Starfield.activeInHierarchy);
         }
 
         private void LoadGazeGameObjects()
@@ -1219,13 +1212,10 @@ namespace USE_ExperimentTemplate_Session
 
         public void AssignExperimenterDisplayRenderTexture(Camera cam)
         {
-            if (!Session.WebBuild)
-            {
-                CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                CameraRenderTexture.Create();
-                cam.targetTexture = CameraRenderTexture;
-                ExpDisplayRenderImage.texture = CameraRenderTexture;
-            }
+            CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+            CameraRenderTexture.Create();
+            cam.targetTexture = CameraRenderTexture;
+            ExpDisplayRenderImage.texture = CameraRenderTexture;   
         }
 
         private void AppendSerialData()

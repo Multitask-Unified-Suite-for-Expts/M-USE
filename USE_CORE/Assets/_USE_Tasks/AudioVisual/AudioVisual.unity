@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311915, g: 0.3807396, b: 0.35872662, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -132,6 +132,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 114466712}
+  - component: {fileID: 114466713}
+  - component: {fileID: 114466714}
   m_Layer: 0
   m_Name: AudioVisual_Scripts
   m_TagString: Untagged
@@ -153,6 +155,206 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114466713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 114466711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a31329880fd75491c9c6f3f246173c31, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: AudioVisual_TaskLevel
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  ConfigFolderName: 
+  TaskName: AudioVisual
+  TaskProjectFolder: 
+  BlockCount: 0
+  NumAbortedTrials_InTask: 0
+  NumAbortedTrials_InBlock: 0
+  NumRewardPulses_InBlock: 0
+  NumRewardPulses_InTask: 0
+  MinTrials_InBlock: 0
+  MaxTrials_InBlock: 0
+  ForceTaskEnd: 0
+  TrialLevel: {fileID: 114466714}
+  BlockData: {fileID: 0}
+  FrameData: {fileID: 0}
+  TrialData: {fileID: 0}
+  TaskConfigPath: 
+  TaskDataPath: 
+  TaskDirectionalLight: {fileID: 494274429}
+  TaskCam: {fileID: 0}
+  TaskCanvasses: []
+  StimCanvas_2D: {fileID: 0}
+  PreloadedStims:
+    stimGroupName: 
+    IsActive: 0
+  PrefabStims:
+    stimGroupName: 
+    IsActive: 0
+  ExternalStims:
+    stimGroupName: 
+    IsActive: 0
+  RuntimeStims:
+    stimGroupName: 
+    IsActive: 0
+  PreloadedStimGameObjects: []
+  PrefabStimPaths: []
+  configUI: {fileID: 0}
+  ActiveSceneElements: []
+  DrawRenderTexture: {fileID: 0}
+  TaskLevelDefined: 0
+  TrialAndBlockDefsHandled: 0
+  StimsHandled: 0
+  BlockResults_AudioClip: {fileID: 0}
+  TaskResultsGO: {fileID: 0}
+  importSettings_Level: {fileID: 0}
+  verifyTask_Level: {fileID: 0}
+  CurrentBlockString: 
+  blocksAdded: 0
+--- !u!114 &114466714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 114466711}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a28591001fbaa4a72bb4c6a7e3034fb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ControlLevelName: AudioVisual_TrialLevel
+  Terminated: 0
+  isMainLevel: 0
+  CallDefineLevelAutomatically: 0
+  quitApplicationAtEnd: 0
+  DebugActive: 1
+  Paused: 1
+  TrialData: {fileID: 0}
+  FrameData: {fileID: 0}
+  BlockCount: 0
+  TrialCount_InTask: 0
+  TrialCount_InBlock: 0
+  AbortCode: 0
+  runningPerformance: 
+  difficultyLevel: 0
+  posStep: 0
+  negStep: 0
+  TrialDefSelectionStyle: 
+  maxDiffLevel: 0
+  avgDiffLevel: 0
+  diffLevelJitter: 0
+  NumReversalsUntilTerm: 0
+  MinTrialsBeforeTermProcedure: 0
+  TerminationWindowSize: 0
+  reversalsCount: 0
+  DiffLevelsAtReversals: 
+  DiffLevelsSummary: 
+  TimingValuesAtReversals: []
+  calculatedThreshold_timing: 0
+  blockAccuracy: 0
+  ForceBlockEnd: 0
+  ReachedCriterion: 0
+  TaskDataPath: 
+  TrialSummaryString: 
+  TaskLevel: {fileID: 0}
+  PreloadedStims:
+    stimGroupName: 
+    IsActive: 0
+  PrefabStims:
+    stimGroupName: 
+    IsActive: 0
+  ExternalStims:
+    stimGroupName: 
+    IsActive: 0
+  RuntimeStims:
+    stimGroupName: 
+    IsActive: 0
+  TrialStims: []
+  SessionInfoPanel: {fileID: 0}
+  TrialCompleteTime: 0
+  TouchFBController: {fileID: 0}
+  AudioFBController: {fileID: 0}
+  HaloFBController: {fileID: 0}
+  TokenFBController: {fileID: 0}
+  SliderFBController: {fileID: 0}
+  PauseIconGO: {fileID: 0}
+  TrialStimsLoaded: 0
+  SkyboxMaterial: {fileID: 0}
+  HeldTooLongTexture: {fileID: 0}
+  HeldTooShortTexture: {fileID: 0}
+  MovedTooFarTexture: {fileID: 0}
+  MovedTooFarSquareTexture: {fileID: 0}
+  HeldTooShortSquareTexture: {fileID: 0}
+  HeldTooLongSquareTexture: {fileID: 0}
+  TrialFilesLoaded: 0
+  CurrentTrialDefIndex: 0
+  AV_CanvasGO: {fileID: 1444675847}
+  WaitCueGO: {fileID: 0}
+  LeftIconGO: {fileID: 0}
+  RightIconGO: {fileID: 0}
+  SoundAudioSource: {fileID: 0}
+  SoundAudioClip: {fileID: 0}
+  TimerGO: {fileID: 596344089}
+  TimerText: {fileID: 596344088}
+  minObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  maxObjectTouchDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  touchFbDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenUpdateDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenRevealDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
+  tokenFlashingDuration:
+    name: 
+    hidden: 0
+    value: 0
+    isRange: 0
+    max: 0
+    min: 0
+    precision: 0
 --- !u!1 &494274429
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,7 +371,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &494274430
 Light:
   m_ObjectHideFlags: 0
@@ -246,6 +448,154 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1001 &596344086
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1444675851}
+    m_Modifications:
+    - target: {fileID: 1621472221633927787, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_Name
+      value: Timer
+      objectReference: {fileID: 0}
+    - target: {fileID: 1621472221633927787, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 685229e6a4ead447ca5383b071527590, type: 3}
+--- !u!224 &596344087 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 8160697459167884208, guid: 685229e6a4ead447ca5383b071527590,
+    type: 3}
+  m_PrefabInstance: {fileID: 596344086}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &596344088 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5474702355931123323, guid: 685229e6a4ead447ca5383b071527590,
+    type: 3}
+  m_PrefabInstance: {fileID: 596344086}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &596344089 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1621472221633927787, guid: 685229e6a4ead447ca5383b071527590,
+    type: 3}
+  m_PrefabInstance: {fileID: 596344086}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1444675847
 GameObject:
   m_ObjectHideFlags: 0
@@ -322,7 +672,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -336,7 +686,8 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_Children: []
+  m_Children:
+  - {fileID: 596344087}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -381,7 +732,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 1, g: 1, b: 1, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

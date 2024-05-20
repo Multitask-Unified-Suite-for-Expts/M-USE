@@ -33,6 +33,7 @@ namespace FlexLearning_Namespace
 {
     public class FlexLearning_TaskDef : TaskDef
     {
+        public override float TaskDirectionalLightIntensity { get; set; } = 2f;
     }
 
     public class FlexLearning_BlockDef : BlockDef
@@ -43,7 +44,10 @@ namespace FlexLearning_Namespace
         public Reward[][] ProbablisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
         public bool RandomizedLocations;
-        public bool TokensWithStimOn = false;
+        public bool TokensWithStimOn;
+        public float? FeatureSimilarity;
+        public Dictionary<int, string> DifficultyLevelDefintion;
+
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -68,6 +72,9 @@ namespace FlexLearning_Namespace
                 td.PulseSize = PulseSize;
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
+                td.DifficultyLevelDefinition = DifficultyLevelDefintion;
                 TrialDefs.Add(td);
             }
         }
@@ -98,6 +105,9 @@ namespace FlexLearning_Namespace
                 td.RandomMinMaxTrials = RandomMinMaxTrials;
                 td.MaxTrials = MaxTrials;
                 td.TokensWithStimOn = TokensWithStimOn;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
+                td.DifficultyLevelDefinition = DifficultyLevelDefintion;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -112,10 +122,28 @@ namespace FlexLearning_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
+        public float? FeatureSimilarity;
+        public Dictionary<int, string> DifficultyLevelDefinition;
     }
 
     public class FlexLearning_StimDef : StimDef
     {
         public bool IsTarget;
+    }
+    
+    public class FlexLearning_TaskDataSummary
+    {
+        public float? AvgReactionTime;
+        public double? DifficultyLevelEffectOnAccuracy;
+        public float? TotalAccuracy;
+    }
+    public class FlexLearning_TrialDataSummary
+    {
+        public float? DifficultyLevel;
+        public string DiffcultyLevelDescription;
+        public float? ReactionTime;
+        public int NumDistractors;
+        public int? CorrectSelection;
+
     }
 }

@@ -16,9 +16,11 @@ public class FR_PlayerManager : MonoBehaviour
     public readonly Vector3 MiddlePos = Vector3.zero;
     public readonly Vector3 RightPos = new Vector3(1.9f, 0f, 0f);
 
-    public FloorManager floorManager;
+    public FR_FloorManager floorManager;
     private FR_AudioManager audioManager;
-    public MovementCirclesController CirclesController;
+    public MovementCirclesController MovementCirclesController;
+
+    public Transform CanvasTransform;
 
     public Animator Animator;
 
@@ -26,10 +28,14 @@ public class FR_PlayerManager : MonoBehaviour
 
     public bool AllowItemPickupAnimations;
 
+    public bool UsingBananas;
+
     public GameObject CelebrationConfetti;
+    public GameObject FinalPlane;
 
     public enum AnimationStates { Idle, Run, Injured, Happy, Sad, Cheer};
     public AnimationStates CurrentAnimationState;
+
 
 
     void Start()
@@ -38,11 +44,15 @@ public class FR_PlayerManager : MonoBehaviour
         transform.position = Vector3.zero;
         TargetPos = MiddlePos;
 
+        //Setup Movement Circles:
+        MovementCirclesController = gameObject.AddComponent<MovementCirclesController>();
+        MovementCirclesController.SetupMovementCircles(CanvasTransform, this);
+
         audioManager = gameObject.AddComponent<FR_AudioManager>();
 
         try
         {
-            floorManager = GameObject.Find("FloorManager").GetComponent<FloorManager>();
+            floorManager = GameObject.Find("FloorManager").GetComponent<FR_FloorManager>();
         }
         catch(Exception e)
         {
@@ -92,9 +102,33 @@ public class FR_PlayerManager : MonoBehaviour
         if (newPos == TargetPos)
             return;
 
+        TriggerPlayerShiftEvent(newPos);
+
         TargetPos = newPos;
         IsShifting = true;
         audioManager.PlaySlideClip();
+    }
+
+    private void TriggerPlayerShiftEvent(Vector3 newPos)
+    {
+        string from = "";
+        if (TargetPos == LeftPos)
+            from = "Left";
+        else if (TargetPos == MiddlePos)
+            from = "Middle";
+        else
+            from = "Right";
+
+        string to = "";
+        if (newPos == LeftPos)
+            to = "Left";
+        else if (newPos == MiddlePos)
+            to = "Middle";
+        else
+            to = "Right";
+
+        FR_EventManager.TriggerPlayerShift(from, to);
+       
     }
 
     public void AllowUserInput()
@@ -117,12 +151,12 @@ public class FR_PlayerManager : MonoBehaviour
             if (transform.position == MiddlePos)
             {
                 MoveToPosition(LeftPos);
-                CirclesController.HighlightActiveCircle(CirclesController.LeftCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.LeftCircleGO);
             }
             else if (transform.position == RightPos)
             {
                 MoveToPosition(MiddlePos);
-                CirclesController.HighlightActiveCircle(CirclesController.MiddleCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.MiddleCircleGO);
             }
         }
 
@@ -131,13 +165,13 @@ public class FR_PlayerManager : MonoBehaviour
             if (transform.position == MiddlePos)
             {
                 MoveToPosition(RightPos);
-                CirclesController.HighlightActiveCircle(CirclesController.RightCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.RightCircleGO);
 
             }
             else if (transform.position == LeftPos)
             {
                 MoveToPosition(MiddlePos);
-                CirclesController.HighlightActiveCircle(CirclesController.MiddleCircleGO);
+                MovementCirclesController.HighlightActiveCircle(MovementCirclesController.MiddleCircleGO);
 
             }
         }
@@ -157,7 +191,19 @@ public class FR_PlayerManager : MonoBehaviour
 
         CelebrationConfetti = Instantiate(Resources.Load<GameObject>("Prefabs/Confetti"));
         CelebrationConfetti.SetActive(true);
-        CirclesController.Instantiated.SetActive(false);
+        MovementCirclesController.Instantiated.SetActive(false);
+
+        if (UsingBananas)
+            return;
+
+        FinalPlane = Instantiate(Resources.Load<GameObject>("Prefabs/FinalPlane"));
+        FinalPlane.SetActive(true);
+    }
+
+    public void DestroyFinalPlane()
+    {
+        if (FinalPlane != null)
+            Destroy(FinalPlane);
     }
 
     //Helper method used by trial level at end to put player back in middle for celebration. 
@@ -182,7 +228,8 @@ public class FR_PlayerManager : MonoBehaviour
                 break;
             case "run":
                 CurrentAnimationState = AnimationStates.Run;
-                Animator.Play(floorManager.FloorMovementSpeed >= 10f ? "Run" : "Jog");
+                Animator.Play("Run");
+                //Animator.Play(floorManager.FloorMovementSpeed >= 10f ? "Run" : "Jog"); //I also removed jog from animator
                 break;
             case "injured":
                 CurrentAnimationState = AnimationStates.Injured;

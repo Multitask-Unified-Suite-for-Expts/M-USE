@@ -54,7 +54,8 @@ namespace HiddenMaze
         public string mName;
         public bool sideRestricted;
         public bool freePlay;
-        
+        public bool trainingLevel;
+
     }
 
     public class Maze
@@ -71,7 +72,7 @@ namespace HiddenMaze
         public bool sideRestricted;
         public bool loadingSquareMaze;
         public bool freePlay;
-
+        public bool trainingLevel;
 
         public Maze(string jsonString)
         {
@@ -102,6 +103,7 @@ namespace HiddenMaze
             mStart = jsonMaze.mStart;
             mFinish = jsonMaze.mFinish;
             sideRestricted = jsonMaze.sideRestricted;
+            trainingLevel = jsonMaze.trainingLevel;
         }
 
 

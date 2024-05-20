@@ -53,6 +53,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     public int blocksAdded;
 
 
+    //Data for Task Summary at end of session:
+    [HideInInspector] public int LongestStreak = 0;
+    [HideInInspector] public float AverageStreak = 0f;
+
+
+
+
 
 
     public override void DefineControlLevel()
@@ -77,6 +84,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
+            if (trialLevel.TrialCount_InBlock > LongestStreak)
+                LongestStreak = trialLevel.TrialCount_InBlock;
+
             //Recency Data:
             RecencyInterference_Task.Add(trialLevel.RecencyInterference_Block);
 
@@ -93,7 +103,10 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         });        
     }
 
-
+    private float GetAvgStreak()
+    {
+        return TrialsCompleted_Task / (BlockCount + 1);
+    }
 
     private void AddSimilarityScoreBlockData()
     {
@@ -114,31 +127,26 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Score"] = trialLevel.Score + "XP",
-            ["Trials Correct"] = trialLevel.NumCorrect_Block,
-            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
-            ["Completion Time"] = trialLevel.TimeToCompletion_Block.ToString("0") + "s",
-            ["TokenBar Completions"] = trialLevel.NumTbCompletions_Block,
-            ["RecencyInterference"] = trialLevel.RecencyInterference_Block
-
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
         
-        data["Trials Completed"] = TrialsCompleted_Task;
         data["Trials Correct"] = TrialsCorrect_Task;
         data["TokenBar Completions"] = TokenBarCompletions_Task;
-        data["PerceptualInterference"] = GetPerceptualInterferanceString();
+        data["Perceptual Interference"] = GetPerceptualInterferanceString();
         if(RecencyInterference_Task.Count > 0)
             data["Avg RecencyInterference"] = RecencyInterference_Task.Average();
+
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskResultsData()
+    {
+        OrderedDictionary data = base.GetTaskResultsData();
+        data["Longest Streak"] = LongestStreak;
+        data["Average Streak"] = GetAvgStreak();
+        data["Trials Correct"] = TrialsCorrect_Task;
+        data["TokenBar Completions"] = TokenBarCompletions_Task;
 
         return data;
     }
@@ -152,7 +160,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             PerceptualInterferance_BlockData data = kvp.Value;
             float avg = data.TrialsCorrect / data.TotalBlocks;
 
-            return $"(Similarity {similarity} - Blocks {data.TotalBlocks} - Avg Correct {avg:0.00})";
+            return $"\n(Similarity {similarity} - Blocks {data.TotalBlocks} - Avg Correct {avg:0.00})";
         }));
         return summary;
     }

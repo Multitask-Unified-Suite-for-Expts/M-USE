@@ -78,8 +78,13 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
 
     private void AddToThresholdCategory()
     {
-        string split = CurrentBlock.BlockName.Split('.')[1].ToLower();
-        //string split = CurrentBlock.BlockName.Split(".")[1].ToLower();
+        string[] splitArray = CurrentBlock.BlockName.Split('.');
+
+        if (splitArray.Length < 2)
+            return;
+
+        string split = splitArray[1].ToLower();
+
         if (split.Contains("as"))
         {
             AS_AvgCalcThresh_Task.Add(trialLevel.calculatedThreshold_timing);
@@ -101,16 +106,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
-            ["Trials Completed"] = trialLevel.TrialCompletions_Block,
-            ["TokenBar Completions"] = trialLevel.TokenBarCompletions_Block,
-        };
-        return data;
-    }
     
     public override OrderedDictionary GetTaskSummaryData()
     {
@@ -122,6 +117,17 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
             data["AvgCalcThresh_AS"] = 2.0 * AS_AvgCalcThresh_Task.Average(); // "* 2.0" because we're lumping displaytargetduration and spatialcuedelay together for our metric
         if (PS_AvgCalcThresh_Task != null && PS_AvgCalcThresh_Task.Any())
             data["AvgCalcThresh_PS"] = 2.0 * PS_AvgCalcThresh_Task.Average(); // "* 2.0" because we're lumping displaytargetduration and spatialcuedelay together for our metric
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskResultsData()
+    {
+        OrderedDictionary data = base.GetTaskResultsData();
+        //data["Longest Streak"] = LongestStreak;
+        //data["Average Streak"] = GetAvgStreak();
+        //data["Trials Correct"] = TrialsCorrect_Task;
+        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
         return data;
     }
 

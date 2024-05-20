@@ -42,6 +42,7 @@ using USE_ExperimentTemplate_Task;
 using SelectionTracking;
 using TMPro;
 using System.Runtime.InteropServices;
+using System.Collections.Specialized;
 #if (!UNITY_WEBGL)
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 #endif
@@ -71,8 +72,16 @@ namespace USE_ExperimentTemplate_Session
         public FrameData FrameData;
         [HideInInspector] public RenderTexture CameraRenderTexture;
 
-        private GameObject ExperimenterDisplay;
+        //Experimenter Display variables:
+        private GameObject ExperimenterDisplay_Parent;
+        private GameObject ExperimenterDisplayGO;
+        private Canvas ExperimenterDisplayCanvas;
+        private GameObject SessionBuilderGO;
+        private SessionBuilder SessionBuilder;
+        private GameObject TaskOrder_GridParent;
+
         public RawImage ExpDisplayRenderImage;
+
 
         public Camera SessionCam;
 
@@ -85,7 +94,6 @@ namespace USE_ExperimentTemplate_Session
         [HideInInspector] public GameObject TaskButtonsContainer;
 
         //Already in scene, so find them:
-        [HideInInspector] public GameObject Starfield;
         public GameObject HumanVersionToggleButton;
         public GameObject ToggleAudioButton;
         public GameObject RedAudioCross;
@@ -100,15 +108,21 @@ namespace USE_ExperimentTemplate_Session
         private ImportSettings_Level importSettings_Level;
         private InitScreen_Level initScreen_Level;
 
+        public GameObject MainDirectionalLight;
+
 
         public bool waitForSerialPort;
 
 
+        public GameObject SessionSummaryGO;
+        public SessionSummaryController SessionSummaryController;
+
+
         public override void DefineControlLevel()
         {
-#if (UNITY_WEBGL)
+            #if (UNITY_WEBGL)
                 Session.WebBuild = true;
-#endif
+            #endif
 
             Session.SessionLevel = this;
 
@@ -116,6 +130,7 @@ namespace USE_ExperimentTemplate_Session
 
             State initScreen = new State("InitScreen");
             State setupSession = new State("SetupSession");
+            State sessionBuilder = new State("SessionBuilder");
             selectTask = new State("SelectTask");
             loadTask = new State("LoadTask");
             State setupTask = new State("SetupTask");
@@ -124,7 +139,7 @@ namespace USE_ExperimentTemplate_Session
             State loadGazeCalibration = new State("LoadGazeCalibration");
             State setupGazeCalibration = new State("SetupGazeCalibration");
             State gazeCalibration = new State("GazeCalibration");
-            AddActiveStates(new List<State> { initScreen, setupSession, selectTask, loadTask, setupTask, runTask, finishSession, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
+            AddActiveStates(new List<State> { initScreen, setupSession, sessionBuilder, selectTask, loadTask, setupTask, runTask, finishSession, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
 
             initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
@@ -149,18 +164,22 @@ namespace USE_ExperimentTemplate_Session
 
             importSettings_Level = gameObject.GetComponent<ImportSettings_Level>();
 
+            if (Session.SessionAudioController == null)
+                Session.SessionAudioController = GameObject.Find("MiscScripts").AddComponent<SessionAudioController>();
+
             //InitScreen State---------------------------------------------------------------------------------------------------------------
             initScreen.AddChildLevel(initScreen_Level);
             initScreen.SpecifyTermination(() => initScreen.ChildLevel.Terminated, setupSession, () =>
             {
-                if (Session.WebBuild)
+                CreateExperimenterDisplay();
+                
+                if(Session.WebBuild)
                     Session.InitCamGO.SetActive(false);
                 else
                 {
-                    CreateExperimenterDisplay();
                     CreateMirrorCam();
-                    Starfield.SetActive(false);
                 }
+
             });
 
             string selectedConfigFolderName = null;
@@ -214,7 +233,7 @@ namespace USE_ExperimentTemplate_Session
             });
 
             setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && Session.GazeCalibrationController != null && Session.GazeCalibrationController.RunCalibration, loadGazeCalibration);
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && Session.GazeCalibrationController == null, selectTask);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && Session.GazeCalibrationController == null, sessionBuilder);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -253,10 +272,7 @@ namespace USE_ExperimentTemplate_Session
 
 
                 if (!Session.WebBuild)
-                {
-                    Session.InitCamGO.SetActive(false);
-                    Session.SessionInfoPanel = GameObject.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
-                }
+                    Session.SessionInfoPanel = ExperimenterDisplayGO.transform.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("SetupSessionEnds");
             });
@@ -289,8 +305,6 @@ namespace USE_ExperimentTemplate_Session
                 DefiningTask = false;
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
-
-                SetTaskMainBackground();
             });
             setupGazeCalibration.AddChildLevel(setupTaskLevel);
             setupGazeCalibration.AddSpecificInitializationMethod(() =>
@@ -325,7 +339,6 @@ namespace USE_ExperimentTemplate_Session
                 // Deactivate TaskSelection scene elements
                 Session.LoadingController.DeactivateLoadingCanvas();
                 FrameData.gameObject.SetActive(false);
-                Starfield.SetActive(false);
                 SessionCam.gameObject.SetActive(false);
                 Session.TaskSelectionCanvasGO.SetActive(false);
 
@@ -423,39 +436,68 @@ namespace USE_ExperimentTemplate_Session
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
 
+
+            //SessionBuilder State---------------------------------------------------------------------------------------------------------------
+            sessionBuilder.AddUniversalInitializationMethod(() =>
+            {
+                Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
+
+                AssignExperimenterDisplayRenderTexture(SessionCam);
+
+                ExperimenterDisplayGO.SetActive(false);
+
+                //ACTIVATE SESSION BUILDER:
+                SessionBuilder.ManualStart(TaskOrder_GridParent);
+            });
+            sessionBuilder.SpecifyTermination(() => SessionBuilder.RunButtonClicked, selectTask);
+            sessionBuilder.AddDefaultTerminationMethod(() =>
+            {
+                SessionBuilderGO.SetActive(false);
+            });
+
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                Session.InitCamGO.SetActive(false);
+                SessionCam.gameObject.SetActive(true);
+
+                MainDirectionalLight.SetActive(true);
+                Session.TaskSelectionCanvasGO.SetActive(true);
+                Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
+
+                if(!Session.WebBuild)
+                {
+                    AssignExperimenterDisplayRenderTexture(SessionCam);
+                    ExperimenterDisplayCanvas.gameObject.SetActive(true);
+                    ExperimenterDisplayGO.SetActive(true);
+                    //Turn off the spinning background on the Exp Display now that session builder is done:
+                    ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false);
+                }
+                else
+                    ExperimenterDisplayCanvas.gameObject.SetActive(false);
+               
+
+
                 if (Session.SessionDef.PlayBackgroundMusic)
                 {
-                    Session.BackgroundMusicController.PlayMusic();
+                    Session.SessionAudioController.PlayBackgroundMusic();
                     RedAudioCross.SetActive(false);
                 }
                 else
+                {
+                    Session.SessionAudioController.StopBackgroundMusic();
                     RedAudioCross.SetActive(true);
-
+                }
 
                 HumanVersionToggleButton.SetActive(Session.SessionDef.IsHuman);
-
-                Starfield.SetActive(Session.SessionDef.IsHuman);
 
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
 
-                Session.TaskSelectionCanvasGO.SetActive(true);
-
-                AssignExperimenterDisplayRenderTexture(SessionCam);
-
                 Session.EventCodeManager.SendCodeImmediate("SelectTaskStarts");
-
-               
 
                 SessionSettings.Restore();
                 selectedConfigFolderName = null;
-
-                Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
-
-                SessionCam.gameObject.SetActive(true);
 
 
                 // Don't show the task buttons if we encountered an error during setup
@@ -463,14 +505,14 @@ namespace USE_ExperimentTemplate_Session
                     return;
 
                 SceneLoading = true;
-                if(!Session.WebBuild)
+
+
+                if (taskCount >= SessionBuilder.GetQueueLength())
                 {
-                    if (taskCount >= Session.SessionDef.TaskMappings.Count)
-                    {
-                        TasksFinished = true;
-                        return;
-                    }
+                    TasksFinished = true;
+                    return;
                 }
+
 
                 if (TaskButtonsContainer != null)
                 {
@@ -478,8 +520,7 @@ namespace USE_ExperimentTemplate_Session
                     if (Session.SessionDef.GuidedTaskSelection)
                     {
                         // if guided selection, we need to adjust the shading of the icons and buttons after the task buttons object is already created                        
-                        string key = Session.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
-
+                        string key = SessionBuilder.GetItemInQueue(taskCount).ConfigName;
                         foreach (KeyValuePair<string, GameObject> taskButton in taskButtonGOs)
                         {
                             if (taskButton.Key == key)
@@ -507,35 +548,43 @@ namespace USE_ExperimentTemplate_Session
 
 
                 TaskButtonsContainer = GameObject.Find("TaskButtonsGrid");
+                TaskButtonsContainer.SetActive(false);
 
                 GridLayoutGroup gridLayout = TaskButtonsContainer.GetComponent<GridLayoutGroup>();
-                int size = Session.WebBuild ? 250 : Session.SessionDef.TaskButtonSize; //using 250 for web build
+                int size = Session.SessionDef.TaskButtonSize;
                 gridLayout.cellSize = new Vector2(size, size);
-                gridLayout.constraintCount = Session.WebBuild ? 5 : Session.SessionDef.TaskButtonGridMaxPerRow; //using 5 for WebBuild since there are 9 tasks
-                int spacing = Session.WebBuild ? 45 : Session.SessionDef.TaskButtonSpacing; //using 45 for web build
+                gridLayout.constraintCount = Session.SessionDef.TaskButtonGridMaxPerRow;
+                int spacing = Session.SessionDef.TaskButtonSpacing; //was 45 for web build
                 gridLayout.spacing = new Vector2(spacing, spacing);
+
+                //Set rotation to that of main camera:
+                TaskButtonsContainer.transform.eulerAngles = Camera.main.transform.eulerAngles;
 
                 List<GameObject> gridList = new List<GameObject>();
 
-                if(Session.SessionDef.TaskButtonGridSpots != null)
+                if (Session.SessionDef.TaskButtonGridSpots != null)
                 {
-                    for(int i = 0; i < Session.SessionDef.NumGridSpots; i++)
+                    for (int i = 0; i < Session.SessionDef.NumGridSpots; i++)
                     {
-                        GameObject gridItem = new GameObject("GridItem_" + (i+1));
+                        GameObject gridItem = new GameObject("GridItem_" + (i + 1));
                         gridItem.AddComponent<RawImage>();
                         gridItem.GetComponent<RawImage>().enabled = false;
                         gridItem.transform.SetParent(TaskButtonsContainer.transform);
                         gridItem.transform.localPosition = Vector3.zero;
                         gridItem.transform.localScale = Vector3.one;
+                        gridItem.transform.eulerAngles = Camera.main.transform.eulerAngles;
                         gridList.Add(gridItem);
                     }
                 }
 
+                List<QueueItem> tasksInQueue = SessionBuilder.GetQueueItems();
+
                 int count = 0;
-                foreach (DictionaryEntry task in Session.SessionDef.TaskMappings)
+
+                foreach (QueueItem task in tasksInQueue)
                 {
-                    string configName = (string)task.Key;
-                    string taskName = (string)task.Value;
+                    string configName = task.ConfigName;
+                    string taskName = task.TaskName;
 
                     GameObject taskButtonGO;
                     RawImage image;
@@ -557,6 +606,8 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonGO.transform.SetParent(TaskButtonsContainer.transform);
                         taskButtonGO.transform.localPosition = Vector3.zero;
                         taskButtonGO.transform.localScale = Vector3.one;
+                        //This evens out the icons in relation to the camera so they appear straight
+                        taskButtonGO.transform.eulerAngles = Camera.main.transform.eulerAngles;
                     }
 
                     string taskFolderPath = GetConfigFolderPath(configName);
@@ -588,10 +639,10 @@ namespace USE_ExperimentTemplate_Session
                         image.texture = LoadExternalPNG(Session.SessionDef.TaskIconsFolderPath + Path.DirectorySeparatorChar + taskName + ".png");
 
 
+                    // If guided task selection, only make the next icon interactable
                     if (Session.SessionDef.GuidedTaskSelection)
                     {
-                        // If guided task selection, only make the next icon interactable
-                        string key = Session.SessionDef.TaskMappings.Keys.Cast<string>().ElementAt(taskCount);
+                        string key = SessionBuilder.GetItemInQueue(taskCount).ConfigName;
 
                         if (configName == key)
                         {
@@ -614,10 +665,12 @@ namespace USE_ExperimentTemplate_Session
                             taskButtonGO.AddComponent<HoverEffect>();
                     }
 
-                    taskButtonGOs.Add(configName, taskButtonGO);
+                    if(!taskButtonGOs.ContainsKey(configName))
+                        taskButtonGOs.Add(configName, taskButtonGO);
                     count++;
                 }
 
+                TaskButtonsContainer.SetActive(true);
 
                 if (Session.SessionDef.IsHuman)
                 {
@@ -626,6 +679,7 @@ namespace USE_ExperimentTemplate_Session
                     if (!Session.SessionDef.PlayBackgroundMusic)
                         RedAudioCross.SetActive(true);
                 }
+
             });
 
             selectTask.AddLateUpdateMethod(() =>
@@ -635,7 +689,9 @@ namespace USE_ExperimentTemplate_Session
                 {
                     string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
+                    {
                         selectedConfigFolderName = chosenGO;
+                    }
                 }
 
                 AppendSerialData();
@@ -649,39 +705,47 @@ namespace USE_ExperimentTemplate_Session
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
             selectTask.AddTimer(() => Session.SessionDef != null ? Session.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
             {
-                foreach (DictionaryEntry task in Session.SessionDef.TaskMappings)
+                List<QueueItem> tasksInQueue = SessionBuilder.GetQueueItems();
+                if(tasksInQueue != null && tasksInQueue.Count > 0)
                 {
-                    //Find the next task in the list that is still interactable
-                    string configName = (string)task.Key;
+                    foreach(QueueItem task in tasksInQueue)
+                    {
+                        //Find the next task in the list that is still interactable
+                        string configName = task.ConfigName;
 
-                    // If the next task button in the task mappings is not interactable, skip until the next available config is found
-                    if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
-                        continue;
+                        // If the next task button in the task mappings is not interactable, skip until the next available config is found
+                        if (!taskButtonGOs[configName].GetComponent<RawImage>().raycastTarget)
+                            continue;
 
-                    selectedConfigFolderName = configName;
-                    break;
+                        selectedConfigFolderName = configName;
+                        break;
+                    }
                 }
+
             });
             selectTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
-                Session.LoadingController.ActivateLoadingCanvas();
+                MainDirectionalLight.SetActive(false);
+
+                Debug.LogWarning("ACTIVATING LOADING CANVAS ON FRAME: " + Time.frameCount);
+                Session.LoadingController.ActivateLoadingCanvas(0); //0 for both web build and normal since monkeys on display 0;
 
                 TaskButtonsContainer.SetActive(false);
 
                 GameObject taskButton = taskButtonGOs[selectedConfigFolderName];
                 RawImage image = taskButton.GetComponent<RawImage>();
 
-                if (!Session.WebBuild) //Let patients play same task as many times as they want
-                {
-                    image.color = new Color(.5f, .5f, .5f, .35f);
-                    image.raycastTarget = false;
-                    if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
-                        Destroy(hoverEffect);
-                }
+
+                image.color = new Color(.5f, .5f, .5f, .35f);
+                image.raycastTarget = false;
+                if (taskButton.TryGetComponent<HoverEffect>(out var hoverEffect))
+                    Destroy(hoverEffect);
                 
+
                 string taskName = (string)Session.SessionDef.TaskMappings[selectedConfigFolderName];
+
                 loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
                 SceneLoading = true;
                 loadScene.completed += (_) =>
@@ -741,12 +805,9 @@ namespace USE_ExperimentTemplate_Session
             {
                 Session.TaskSelectionCanvasGO.SetActive(false);
                 DefiningTask = false;
-                Starfield.SetActive(false);
                 runTask.AddChildLevel(CurrentTask);
                 SessionCam.gameObject.SetActive(false);
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
-
-                SetTaskMainBackground(); 
 
                 if (CameraRenderTexture != null)
                     CameraRenderTexture.Release();
@@ -754,8 +815,6 @@ namespace USE_ExperimentTemplate_Session
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(CurrentTask.TaskName));
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
             });
-            //automatically finish tasks after running one - placeholder for proper selection
-            //runTask.AddLateUpdateMethod
             setupTask.AddChildLevel(setupTaskLevel);
             setupTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
 
@@ -789,6 +848,9 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                Session.InitCamGO.SetActive(false);
+                Session.SessionAudioController.StopBackgroundMusic();
+
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
                 AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
 
@@ -802,12 +864,14 @@ namespace USE_ExperimentTemplate_Session
                 AppendSerialData();
                 if(Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
-
-                //Session.EventCodeManager.EventCodeLateUpdate();
             });
 
             runTask.SpecifyTermination(() => CurrentTask.Terminated, selectTask, () =>
             {
+                OrderedDictionary taskResultsData = CurrentTask.GetTaskResultsData();
+                SessionBuilder.SetTaskData(CurrentTask.TaskName, CurrentTask.TrialLevel.TrialCount_InTask, CurrentTask.Duration, taskResultsData);
+                SessionBuilder.SetExpDisplayIconAsInactive(taskCount);
+
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
                 
@@ -862,13 +926,32 @@ namespace USE_ExperimentTemplate_Session
             });
 
             //FinishSession State---------------------------------------------------------------------------------------------------------------
+            bool skipSessionSummary = false;
             finishSession.AddSpecificInitializationMethod(() =>
             {
+                skipSessionSummary = false;
+
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishSessionStarts");
+
+                ToggleAudioButton.SetActive(false);
+                HumanVersionToggleButton.SetActive(false);
+
+                List<TaskObject> tasks = SessionBuilder.GetTasks();
+                if (tasks != null)
+                {
+                    tasks = tasks.Where(task => task.TrialsCompleted > 0).ToList();
+                    if (tasks.Count > 0)
+                        CreateSessionSummaryPanel(tasks);
+                }
+                else
+                    skipSessionSummary = true;
+
             });
             finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
-
-            finishSession.SpecifyTermination(() => true, () => null, () =>
+            finishSession.SpecifyTermination(() => skipSessionSummary, () => null);
+            finishSession.SpecifyTermination(() => SessionSummaryController.EndSessionButtonClicked, () => null);
+            finishSession.AddTimer(() => Session.SessionDef.SessionSummaryDuration, () => null);
+            finishSession.AddDefaultTerminationMethod(() =>
             {
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
@@ -890,6 +973,23 @@ namespace USE_ExperimentTemplate_Session
             });
         }
 
+        private void CreateSessionSummaryPanel(List<TaskObject> tasks)
+        {
+            SessionSummaryGO = Instantiate(Resources.Load<GameObject>("SessionSummary"));
+            SessionSummaryGO.name = "SessionSummaryPanel";
+            SessionSummaryController = SessionSummaryGO.GetComponent<SessionSummaryController>();
+            SessionSummaryController.SessionBuilder = SessionBuilder;
+            SessionSummaryGO.transform.SetParent(Session.TaskSelectionCanvasGO.transform);
+            SessionSummaryGO.transform.localPosition = Vector3.zero;
+            SessionSummaryGO.transform.localScale = Vector3.one;
+            SessionSummaryGO.transform.eulerAngles = Camera.main.transform.eulerAngles;
+
+            if (tasks != null)
+                SessionSummaryController.CreateTaskSummaryGridItems(tasks);
+            else
+                Debug.LogError("TASKS ARE NULL");
+        }
+
 
         private void OnApplicationQuit()
         {
@@ -902,40 +1002,27 @@ namespace USE_ExperimentTemplate_Session
                 Session.SerialPortController.ClosePort();
         }
 
-        //Method is used to have every task set their main background as the MUSE blue background
-        private void SetTaskMainBackground()
-        {
-            if (CurrentTask.TaskCam != null)
-            {
-                if (!CurrentTask.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
-                    skyboxComponent = CurrentTask.TaskCam.gameObject.AddComponent<Skybox>();
-                skyboxComponent.material = Resources.Load<Material>("MUSE_MainBackground");
-            }
-            else
-                Debug.LogWarning("TASK CAM IS NULL!");
-        }
 
         private void FindGameObjects()
         {
             try
             {
                 Session.FullScreenController = GameObject.Find("MiscScripts").GetComponent<FullScreenController>();
-                Session.BackgroundMusicController = GameObject.Find("MiscScripts").GetComponent<BackgroundMusicController>();
                 Session.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 Session.InitCamGO = GameObject.Find("InitCamera");
                 Session.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 Session.LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
                 Session.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
                 Session.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
-                Starfield = GameObject.Find("Starfield");
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
 
+                MainDirectionalLight = GameObject.Find("Directional Light");
+
                 HumanVersionToggleButton.SetActive(false);
                 ToggleAudioButton.SetActive(false);
                 Session.TaskSelectionCanvasGO.SetActive(false); //have to find HumanVersionToggleButton and ToggleAudioButton before setting TaskSelectionCanvas inactive.
-                Starfield.SetActive(false);
             }
             catch (Exception e)
             {
@@ -967,11 +1054,26 @@ namespace USE_ExperimentTemplate_Session
 
         private void CreateExperimenterDisplay()
         {
-            ExperimenterDisplay = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
-            ExperimenterDisplay.name = "ExperimenterDisplay";
-            Session.ExperimenterDisplayController = ExperimenterDisplay.AddComponent<ExperimenterDisplayController>();
-            ExperimenterDisplay.AddComponent<PreserveObject>();
-            Session.ExperimenterDisplayController.InitializeExperimenterDisplay(ExperimenterDisplay);
+            ExperimenterDisplay_Parent = Instantiate(Resources.Load<GameObject>("Default_ExperimenterDisplay"));
+            ExperimenterDisplay_Parent.name = "ExperimenterDisplay";
+            Session.ExperimenterDisplayController = ExperimenterDisplay_Parent.AddComponent<ExperimenterDisplayController>();
+            ExperimenterDisplay_Parent.AddComponent<PreserveObject>();
+            Session.ExperimenterDisplayController.InitializeExperimenterDisplay(ExperimenterDisplay_Parent);
+
+            SessionBuilderGO = ExperimenterDisplay_Parent.transform.Find("ExperimenterCanvas").transform.Find("SessionBuilder").gameObject;
+            SessionBuilder = SessionBuilderGO.GetComponent<SessionBuilder>();
+            SessionBuilderGO.SetActive(false);
+
+            ExperimenterDisplayCanvas = ExperimenterDisplay_Parent.transform.Find("ExperimenterCanvas").GetComponent<Canvas>();
+
+            if (Session.WebBuild)
+                ExperimenterDisplayCanvas.targetDisplay = 0;
+
+            ExperimenterDisplayGO = ExperimenterDisplayCanvas.transform.Find("ExpDisplay").gameObject;
+
+            TaskOrder_GridParent = ExperimenterDisplayGO.transform.Find("HotKeyPanel").transform.Find("Image").transform.Find("TaskOrderSection").transform.Find("TaskOrder_GridParent").gameObject;
+
+            ExperimenterDisplayGO.SetActive(false);
         }
 
         private void CreateMirrorCam()
@@ -979,10 +1081,11 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("MUSE_MainBackground");
+            skybox.material = Resources.Load<Material>("Materials/Skybox2");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
-            ExpDisplayRenderImage = GameObject.Find("MainCameraCopy").GetComponent<RawImage>();
+
+            ExpDisplayRenderImage = ExperimenterDisplayGO.transform.Find("TopRightSection_Background").transform.Find("MainCameraCopy").gameObject.GetComponent<RawImage>();
         }
         
         private void CreateSessionSettingsFolder()
@@ -1052,14 +1155,14 @@ namespace USE_ExperimentTemplate_Session
         {
             Session.SessionDef.PlayBackgroundMusic = !Session.SessionDef.PlayBackgroundMusic;
 
-            if (Session.BackgroundMusicController.BackgroundMusic_AudioSource.isPlaying)
+            if (Session.SessionAudioController.BackgroundMusic_AudioSource.isPlaying)
             {
-                Session.BackgroundMusicController.StopMusic();
+                Session.SessionAudioController.StopBackgroundMusic();
                 RedAudioCross.SetActive(true);
             }
             else
             {
-                Session.BackgroundMusicController.PlayMusic();
+                Session.SessionAudioController.PlayBackgroundMusic();
                 RedAudioCross.SetActive(false);
             }
         }
@@ -1071,25 +1174,24 @@ namespace USE_ExperimentTemplate_Session
             if(Session.SessionDef.IsHuman)
             {
                 ToggleAudioButton.SetActive(true);
-                RedAudioCross.SetActive(!Session.BackgroundMusicController.BackgroundMusic_AudioSource.isPlaying);
+                RedAudioCross.SetActive(!Session.SessionAudioController.BackgroundMusic_AudioSource.isPlaying);
 
                 if (Session.SessionDef.PlayBackgroundMusic)
                 {
-                    Session.BackgroundMusicController.PlayMusic();
+                    Session.SessionAudioController.PlayBackgroundMusic();
                     RedAudioCross.SetActive(false);
                 }
             }
             else
             {
-                if(Session.BackgroundMusicController.BackgroundMusic_AudioSource != null)
+                if(Session.SessionAudioController.BackgroundMusic_AudioSource != null)
                 {
-                    Session.BackgroundMusicController.StopMusic();
+                    Session.SessionAudioController.StopBackgroundMusic();
                     RedAudioCross.SetActive(true);
                 }
                 ToggleAudioButton.SetActive(false);   
             }
             HumanVersionToggleButton.GetComponentInChildren<TextMeshProUGUI>().text = Session.SessionDef.IsHuman ? "Human Version" : "Primate Version";
-            Starfield.SetActive(!Starfield.activeInHierarchy);
         }
 
         private void LoadGazeGameObjects()
@@ -1101,7 +1203,8 @@ namespace USE_ExperimentTemplate_Session
                 Session.TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                 Session.TobiiEyeTrackerController.EyeTracker_GO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                 Session.TobiiEyeTrackerController.TrackBoxGuide_GO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
-              //  Session.TobiiEyeTrackerController.GazeTrail_GO = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);
+               // THIS LINE BELOW CONTROLS THE OVERLAYING GAZE ONTO THE PLAYER SCENE
+                Session.TobiiEyeTrackerController.GazeTrail_GO = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);
                 Session.GazeCalibrationController = Instantiate(Resources.Load<GameObject>("GazeCalibration")).GetComponent<GazeCalibrationController>();
             }
             
@@ -1109,14 +1212,12 @@ namespace USE_ExperimentTemplate_Session
 
         public void AssignExperimenterDisplayRenderTexture(Camera cam)
         {
-            if (!Session.WebBuild)
-            {
-                CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-                CameraRenderTexture.Create();
-                cam.targetTexture = CameraRenderTexture;
-                ExpDisplayRenderImage.texture = CameraRenderTexture;
-            }
+            CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+            CameraRenderTexture.Create();
+            cam.targetTexture = CameraRenderTexture;
+            ExpDisplayRenderImage.texture = CameraRenderTexture;   
         }
+
         private void AppendSerialData()
         {
             if (Session.SessionDef.SerialPortActive)

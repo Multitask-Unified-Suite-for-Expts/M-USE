@@ -289,7 +289,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrial.UseSpinAnimation)
                     SpinCorrectSelection = true;
 
-                HaloFBController.ShowPositive(ChosenGO, haloDepth);
+                HaloFBController.ShowPositive(ChosenGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: haloDepth);
                 TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                 
@@ -297,7 +297,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                HaloFBController.ShowNegative(ChosenGO, haloDepth);
+                HaloFBController.ShowNegative(ChosenGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: haloDepth);
                 TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 
@@ -320,26 +320,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (Time.time - Feedback.TimingInfo.StartTimeAbsolute > CurrentTrial.HaloFbDuration && !HaloFBController.IsHaloGameObjectNull())
-                HaloFBController.DestroyHalos();
+            if (Time.time - Feedback.TimingInfo.StartTimeAbsolute > CurrentTrial.HaloFbDuration)
+                HaloFBController.DestroyAllHalos();
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);
         Feedback.SpecifyTermination(() => !stimChosen, ITI, () => AudioFBController.Play("Negative"));
         Feedback.AddUniversalTerminationMethod(() =>
         {
-            if (TokenFBController.IsTokenBarFull())
-            {
-                TokenBarCompletions_Block++;
-                CurrentTaskLevel.TokenBarsCompleted_Task++;
-
-                if (Session.SyncBoxController != null)
-                {
-                    Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-                    CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-                }
-                TokenFBController.ResetTokenBarFull();
-            }
             TokenFBController.enabled = false;
             TargetStim_GO.SetActive(false);
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOff"]);
@@ -355,6 +342,17 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
+
+    public override void OnTokenBarFull()
+    {
+        TokenBarCompletions_Block++;
+        CurrentTaskLevel.TokenBarsCompleted_Task++;
+
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+    }
+
     private void MakeStimFaceCamera(StimGroup stims)
     {
         foreach (var stim in stims.stimDefs)

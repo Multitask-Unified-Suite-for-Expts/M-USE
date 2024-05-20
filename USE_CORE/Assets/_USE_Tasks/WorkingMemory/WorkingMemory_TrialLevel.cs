@@ -114,8 +114,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloIntensity(1.5f);
-            HaloFBController.SetCircleHaloIntensity(5);
+            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
         });
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
@@ -267,12 +267,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, depth);
+                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
         });
 
-        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyHalos(); });
+        SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });
+
 
 
         // The state that will handle the token feedback and wait for any animations
@@ -298,20 +299,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TotalTokensCollected_InTask += selectedSD.StimTokenRewardMag;
             }
         });
-        TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
-        {
-            if (TokenFBController.IsTokenBarFull())
-            {
-                NumTokenBarFull_InBlock++;
-                CurrentTaskLevel.NumTokenBarFull_InTask++;
-                if (Session.SyncBoxController != null)
-                {
-                    Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                    CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
-                }
-            }
-        });
+        TokenFeedback.AddTimer(() => tokenFbDuration, ITI);
+
         ITI.AddSpecificInitializationMethod(() =>
         {
             if (currentTaskDef.NeutralITI)
@@ -332,6 +321,16 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         DefineTrialData();
     }
 
+    public override void OnTokenBarFull()
+    {
+        NumTokenBarFull_InBlock++;
+        CurrentTaskLevel.NumTokenBarFull_InTask++;
+
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+        
+    }
 
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     public override void AddToStimLists()
@@ -380,9 +379,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
-
-        TokenFBController.ResetTokenBarFull();
-
     }
 
     public void ResetBlockVariables()

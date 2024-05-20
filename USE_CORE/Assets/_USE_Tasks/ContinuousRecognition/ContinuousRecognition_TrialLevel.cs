@@ -343,9 +343,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 10 : (int?)null;
 
             if (GotTrialCorrect)
-                HaloFBController.ShowPositive(ChosenGO, depth);
+                HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
             else
-                HaloFBController.ShowNegative(ChosenGO, depth);
+                HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -354,7 +354,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.AddSpecificInitializationMethod(() =>
         {
             TokenUpdateStartTime = Time.time;
-            HaloFBController.DestroyHalos();
+            HaloFBController.DestroyAllHalos();
 
             if (!StimIsChosen)
                 return;
@@ -379,7 +379,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
-            HandleTokenUpdate();
             DeactivatePlayerViewText();
 
             if (CurrentTrial.ShakeStim)
@@ -465,23 +464,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (AbortCode == AbortCodeDict["EndTrial"])
                 EndBlock = true;
         }
-
-        TokenFBController.ResetTokenBarFull();
     }
 
-    private void HandleTokenUpdate()
+    public override void OnTokenBarFull()
     {
-        if (TokenFBController.IsTokenBarFull())
-        {
-            NumTbCompletions_Block++;
-            CurrentTaskLevel.TokenBarCompletions_Task++;
+        NumTbCompletions_Block++;
+        CurrentTaskLevel.TokenBarCompletions_Task++;
 
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-        }
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
     }
+
 
     public override void AddToStimLists() //For EventCodes:
     {
@@ -570,7 +565,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetCircleHaloSize(1.55f);
+        HaloFBController.SetParticleHaloSize(.65f);
+        //HaloFBController.SetCircleHaloSize(1f);
         HaloFBController.SetCircleHaloIntensity(1.5f);
     }
 

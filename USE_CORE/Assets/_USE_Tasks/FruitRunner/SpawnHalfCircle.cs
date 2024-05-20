@@ -4,75 +4,49 @@ using UnityEngine;
 
 public class SpawnHalfCircle : MonoBehaviour
 {
-    private GameObject prefabToSpawn;
-    private int numberOfObjects = 6;
-    private float archRadius = 9;
+    private List<GameObject> prefabsToSpawn;
+    private float archRadius = 7;
     private float angleRange = 180;
+    private float zAdj = 9f;
 
-    private float zAdj = 10f;
 
-    void Start()
+    public void SetPrefabs(List<GameObject> prefabs)
     {
-        prefabToSpawn = Resources.Load<GameObject>("Prefabs/stimExample");
-        SpawnObjectsInArch();
+        prefabsToSpawn = prefabs;
     }
 
-    void SpawnObjectsInArch()
+    public void SpawnObjectsInArch()
     {
-        float angleStep = angleRange / (numberOfObjects - 1);
+        float angleStep = angleRange / (prefabsToSpawn.Count - 1);
 
-        for (int i = 0; i < numberOfObjects; i++)
+        for (int i = 0; i < prefabsToSpawn.Count; i++)
         {
-            float angle = i * angleStep; //36
+            float angle = i * angleStep;
             float radians = Mathf.Deg2Rad * angle;
 
             float x = archRadius * Mathf.Cos(radians);
             float z = archRadius * Mathf.Sin(radians);
 
-            Vector3 spawnPosition = new Vector3(x, -1f, z + zAdj) + transform.position;
+            float y = Session.UsingDefaultConfigs ? -2.25f : -1.75f;
 
-            GameObject instantiated = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
-            instantiated.AddComponent<BounceStim>();
-            instantiated.AddComponent<AnimateArms>();
-            instantiated.transform.localScale *= 3f;
+            Vector3 spawnPosition = new Vector3(x, y, z + zAdj) + transform.position;
+
+            GameObject instantiated = Instantiate(prefabsToSpawn[i], spawnPosition, Quaternion.identity);
+            instantiated.transform.parent = transform;
+            float scale = Session.UsingDefaultConfigs ? 3f : 2f;
+            instantiated.transform.localScale = new Vector3(scale, scale, scale);
             instantiated.transform.LookAt(GameObject.Find("Player").transform);
+            instantiated.SetActive(true);
+        }
+    }
+
+    public void DestroySpawnedObjects()
+    {
+        for(int i = transform.childCount - 1; i >= 0; i--)
+        {
+            Destroy(transform.GetChild(i).gameObject);
         }
     }
 }
 
 
-
-public class AnimateArms : MonoBehaviour
-{
-    public Transform leftArm;
-    public Transform rightArm;
-    public float waveFrequency = 5f;
-    public float waveAmplitude = 60f;
-
-    private float timeOffset;
-
-    void Start()
-    {
-        leftArm = transform.Find("Arm");
-        rightArm = transform.Find("Arm.001");
-
-        timeOffset = Random.Range(0f, 1f); // Add a random offset to avoid synchronized waving
-    }
-
-    void Update()
-    {
-        // Calculate the waving motion based on time
-        float waveOffset = Mathf.Sin((Time.time + timeOffset) * waveFrequency) * waveAmplitude;
-
-        // Apply the waving motion to the arms
-        if (leftArm != null)
-        {
-            leftArm.localRotation = Quaternion.Euler(waveOffset, 0f, 0f);
-        }
-
-        if (rightArm != null)
-        {
-            rightArm.localRotation = Quaternion.Euler(-waveOffset, 0f, 0f);
-        }
-    }
-}

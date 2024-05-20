@@ -102,6 +102,25 @@ public static class ServerManager //Used with the PHP scripts
         }
     }
 
+    public static IEnumerator LoadAudioFromServer(string filePath, Action<AudioClip> callback)
+    {
+        string url = $"{ServerURL}/{filePath}";
+
+        using UnityWebRequest request = UnityWebRequestMultimedia.GetAudioClip(url, AudioType.WAV);
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            AudioClip audioClip = DownloadHandlerAudioClip.GetContent(request);
+            callback?.Invoke(audioClip);
+        }
+        else
+        {
+            Debug.Log($"FAILED TO LOAD AUDIO FROM SERVER | ERROR: {request.error}");
+            callback?.Invoke(null);
+        }
+    }
+
     public static IEnumerator CreateFolder(string folderPath)
     {
         string url = $"{ServerURL}/createFolder.php?path={folderPath}";

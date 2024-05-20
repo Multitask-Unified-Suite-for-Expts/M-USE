@@ -73,7 +73,7 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
         if(SessionSummaryString.Length > 0)
         {
             sessionInfoPanelText.GetComponent<Text>().supportRichText = true;
-            sessionInfoPanelText.GetComponent<Text>().text = "<size=23><color=#2d3436ff>" + SessionSummaryString + "</color></size>";
+            sessionInfoPanelText.GetComponent<Text>().text = "<size=23><color=#d9d9d9>" + SessionSummaryString + "</color></size>";
         }
     }
 

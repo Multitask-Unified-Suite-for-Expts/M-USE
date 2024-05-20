@@ -35,11 +35,12 @@ public class MazeManager:MonoBehaviour
 
     [HideInInspector] private List<GameObject> selectedTilesInPathGO = new List<GameObject>();
     [HideInInspector] private List<GameObject> selectedTilesGO = new List<GameObject>();
+    [HideInInspector] private List<float> selectedTilesRxnTimes = new List<float>();
 
     [HideInInspector] private GameObject startTileGO;
     [HideInInspector] private GameObject finishTileGO;
 
-    [HideInInspector] private bool creatingSquareMaze;
+    [HideInInspector] private bool createGridMaze;
     [HideInInspector] private bool viewPath;
     [HideInInspector] private bool darkenNonPathTiles;
     [HideInInspector] private bool retouchCurrentTilePositionError;
@@ -53,6 +54,7 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] private bool finishedMaze;
     [HideInInspector] private bool backTrackError;
     [HideInInspector] private bool tileConnectorsLoaded;
+    [HideInInspector] private bool mazeManagerInitialized;
     [HideInInspector] private Maze currentMaze;
 
     [HideInInspector] private GameObject latestConnection;
@@ -60,12 +62,15 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] private GameObject selectedTileGO;
     [HideInInspector] private GameObject lastErrorTileGO;
 
-    [HideInInspector] public float mazeDuration;
-    [HideInInspector] public float choiceDuration;
-    [HideInInspector] public float mazeStartTime;
-    [HideInInspector] public float choiceStartTime;
+    [HideInInspector] private float mazeDuration;
+    [HideInInspector] private float choiceDuration;
+    [HideInInspector] private float mazeStartTime;
+    [HideInInspector] private float choiceStartTime;
 
-    public GridLayoutGroup tileContainerGridLayoutGroup; 
+    public GridLayoutGroup tileContainerGridLayoutGroup;
+    public Vector2 tileContainerInitialSpacing;
+    public Vector2 tileContainerInitialCellSizing;
+    private bool initializedGridLayoutDimensions;
 
 
     // Update is called once per frame
@@ -76,12 +81,18 @@ public class MazeManager:MonoBehaviour
         if (choiceStartTime != 0)
             choiceDuration = Time.unscaledTime - choiceStartTime;
     }
-
-    public void Initialize(MazeGame_TrialLevel trialLevel, MazeGame_TrialDef trialDef, MazeGame_TaskDef taskDef)
+    public void InitializeMazeManager(MazeGame_TrialLevel trialLevel, MazeGame_TrialDef trialDef, MazeGame_TaskDef taskDef)
     {
         mgTrialLevel = trialLevel;
         mgTrialDef = trialDef;
         mgTaskDef = taskDef;
+
+        if (!initializedGridLayoutDimensions)
+        {
+        tileContainerInitialSpacing = tileContainerGridLayoutGroup.spacing;
+        tileContainerInitialCellSizing = tileContainerGridLayoutGroup.cellSize;
+        initializedGridLayoutDimensions = true;
+        }
     }
     public StimGroup CreateMaze()
     {
@@ -92,24 +103,29 @@ public class MazeManager:MonoBehaviour
             tileSettings = ScriptableObject.CreateInstance<TileSettings>();
         
         SetTileSettings();
-        if (creatingSquareMaze)
+        if (createGridMaze)
         {
             tileContainerGridLayoutGroup.enabled = true;
             tileContainerGridLayoutGroup.constraintCount = (int)currentMaze.mDims.x; // Restrict the grid layout by number of columns
             for (var x = (int)currentMaze.mDims.x -1; x >= 0 ; x--)
             for (var y = (int)currentMaze.mDims.y -1; y >= 0; y--)
-            {
+            { 
                 GameObject tileGO = InitializeTile(x, y, tiles);
             }
-            
-            float mazeWidth = ((tileContainerGridLayoutGroup.cellSize.x + tileContainerGridLayoutGroup.spacing.x) * currentMaze.mDims.x) + tileContainerGridLayoutGroup.spacing.x;
-            float mazeHeight = ((tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y) * currentMaze.mDims.y) + tileContainerGridLayoutGroup.spacing.y;
+
+            tileContainerGridLayoutGroup.spacing = new Vector2(
+                mgTaskDef.SpaceBetweenTiles * tileContainerInitialSpacing.x,
+                mgTaskDef.SpaceBetweenTiles * tileContainerInitialSpacing.y);
+            float mazeWidth = ((tileContainerGridLayoutGroup.cellSize.x + tileContainerGridLayoutGroup.spacing.x) * currentMaze.mDims.x) - tileContainerGridLayoutGroup.spacing.x +
+                              (2*tileContainerInitialSpacing.x);
+            float mazeHeight = ((tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y) * currentMaze.mDims.y) - tileContainerGridLayoutGroup.spacing.y +
+                               (2* tileContainerInitialSpacing.y);
 
             InitializeMazeBackground(mazeWidth, mazeHeight);
             AssignAdjacentTiles(tiles, tileContainerGridLayoutGroup.cellSize.x + tileContainerGridLayoutGroup.spacing.x, tileContainerGridLayoutGroup.cellSize.y + tileContainerGridLayoutGroup.spacing.y);
 
         }
-        else
+        else if (currentMaze.mCustomDims != null)
         {
             tileContainerGridLayoutGroup.enabled = false;
             List<int> customMazeDims = currentMaze.mCustomDims;
@@ -118,8 +134,6 @@ public class MazeManager:MonoBehaviour
             
             float xOffset = tileContainerGO.GetComponent<RectTransform>().rect.width/(customMazeDims.Max()+1);
             float yOffset = tileContainerGO.GetComponent<RectTransform>().rect.height/(customMazeDims.Count+1);
-
-
 
             for (int row = 0; row < customMazeDims.Count; row++)
             {
@@ -152,6 +166,9 @@ public class MazeManager:MonoBehaviour
                 CreateLandmarks(mgTrialDef.Landmarks);
 
         }
+        
+        
+        
         currentMaze.mName = $"{currentMaze.mStart}_{currentMaze.mFinish}";
         AssignFlashingTiles(currentMaze, tiles);
         return tiles;
@@ -169,7 +186,7 @@ public class MazeManager:MonoBehaviour
         string tileName = GetChessCoordName(col, row);
         tileGO.name = tileName;
         
-        if (creatingSquareMaze)
+        if (createGridMaze)
             tileGO.GetComponent<Image>().sprite =  Resources.Load<Sprite>("Tile");
         else
         {
@@ -183,7 +200,8 @@ public class MazeManager:MonoBehaviour
         StimDef tileStimDef = new StimDef(tiles, tileGO);
         tile.SetCoord(new Coords(tileGO.name));
 
-        tileGO.AddComponent<HoverEffect>();
+        if(Session.SessionDef.IsHuman)
+            tileGO.AddComponent<HoverEffect>();
         AssignInitialTileColor(tile, currentMaze);
         AssignSliderValue(tile);
 
@@ -209,8 +227,9 @@ public class MazeManager:MonoBehaviour
     // Configure Tile Fields
     public void SetTileSettings()
     {
+        
         // Default - White
-        tileSettings.SetTileColor("default", new Color(mgTrialDef.DefaultTileColor[0], mgTrialDef.DefaultTileColor[1], mgTrialDef.DefaultTileColor[2], 1));
+        tileSettings.SetTileColor("default", mgTrialDef.DefaultTileColor != null ?  new Color(mgTrialDef.DefaultTileColor[0], mgTrialDef.DefaultTileColor[1], mgTrialDef.DefaultTileColor[2], 1) : new Color(mgTaskDef.DefaultTileColor[0], mgTaskDef.DefaultTileColor[1], mgTaskDef.DefaultTileColor[2], 1));
 
         // Start - Light yellow
         tileSettings.SetTileColor("start", new Color(mgTaskDef.StartColor[0], mgTaskDef.StartColor[1], mgTaskDef.StartColor[2], 1));
@@ -267,7 +286,7 @@ public class MazeManager:MonoBehaviour
             Tile tile = tileGO.GetComponent<Tile>();
             Vector2 tilePos = tileGO.transform.localPosition;
 
-            if (creatingSquareMaze)
+            if (createGridMaze)
             {
                 tile.SetAdjacentTiles(tiles.stimDefs
                     .Where(otherStimDef => otherStimDef != tileStimDef && otherStimDef.StimGameObject.GetComponent<Tile>().GetCoord().IsAdjacent(tile.GetCoord()))
@@ -297,7 +316,7 @@ public class MazeManager:MonoBehaviour
 
             }
 
-            if (creatingSquareMaze)
+            if (createGridMaze)
                 continue;
 
             foreach (GameObject adjTile in tile.GetAdjacentTiles())
@@ -325,7 +344,7 @@ public class MazeManager:MonoBehaviour
         {
             tile.SetColor(new Color(0,0,0));
             tile.initialTileColor = new Color(0, 0, 0);
-            tile.gameObject.GetComponent<BoxCollider>().enabled = false;
+            tile.gameObject.GetComponent<Image>().raycastTarget = false;
         }
         else if (!darkenNonPathTiles || maze.mPath.Contains(tile.GetChessCoord()))
         {
@@ -334,8 +353,9 @@ public class MazeManager:MonoBehaviour
         }
         else
         {
-            tile.SetColor(new Color(0.5f, 0.5f, 0.5f));
-            tile.initialTileColor = new Color(0.5f, 0.5f, 0.5f);
+            tile.SetColor(new Color(0.15f, 0.15f, 0.15f));
+            tile.initialTileColor = new Color(0.15f, 0.15f, 0.15f);
+            tile.GetComponent<Image>().raycastTarget = false;
         }
 
     }
@@ -357,7 +377,7 @@ public class MazeManager:MonoBehaviour
 
         if (freePlay)
         {
-            if(creatingSquareMaze)
+            if(createGridMaze)
                 tile.SetSliderValueChange(1f / (currentMaze.mDims.x * currentMaze.mDims.y));
             else
               tile.SetSliderValueChange(1f / currentMaze.mCustomDims.Sum());
@@ -453,8 +473,6 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 retouchCurrentTilePositionError = true;
-                consecutiveErrors++;
-
                 return 2;
             }
             
@@ -536,7 +554,6 @@ public class MazeManager:MonoBehaviour
             if (TileGO.Equals(currentTilePositionGO))
             {
                 retouchCurrentTilePositionError = true;
-                consecutiveErrors++;
                 return 2;
             }
             
@@ -604,7 +621,7 @@ public class MazeManager:MonoBehaviour
     {
         currentMaze = new Maze(mgBD.MazeDef);
         freePlay = currentMaze.freePlay;
-        creatingSquareMaze = currentMaze.loadingSquareMaze;
+        createGridMaze = currentMaze.loadingSquareMaze;
     }
     private void RemovePathProgressFollowingError()
     {
@@ -622,7 +639,7 @@ public class MazeManager:MonoBehaviour
         tileConnectorsContainerGO.SetActive(true);
         landmarksContainerGO.SetActive(true);
 
-        if (creatingSquareMaze)
+        if (createGridMaze)
             mazeBackgroundGO.SetActive(true);
         else
         {
@@ -661,8 +678,10 @@ public class MazeManager:MonoBehaviour
         consecutiveErrors = 0;
 
         selectedTilesInPathGO.Clear();
+        selectedTilesRxnTimes.Clear();
         selectedTilesGO.Clear();
-        
+
+        mazeManagerInitialized = false;
         startedMaze = false;
         finishedMaze = false;
         outOfMoves = false;
@@ -670,6 +689,7 @@ public class MazeManager:MonoBehaviour
         mazeDuration = 0;
         choiceDuration = 0;
         mazeStartTime = 0;
+        choiceStartTime = 0;
         
         correctNextTileChoice = false;
         retouchCurrentTilePositionCorrect = false;
@@ -677,8 +697,8 @@ public class MazeManager:MonoBehaviour
         backTrackError = false;
         ruleAbidingError = false;
         ruleBreakingError = false;
-    }
 
+    }
 
     public void ActivateMazeBackground()
     {
@@ -687,6 +707,10 @@ public class MazeManager:MonoBehaviour
     public void FlashNextCorrectTile(GameObject nextCorrectTile)
     {
         nextCorrectTile.GetComponent<Tile>().FlashTile();
+    }
+    public void TerminateNextCorrectTileFlashing(GameObject nextCorrectTile)
+    {
+        nextCorrectTile.GetComponent<Tile>().TerminateTileFlashing();
     }
     public Maze GetCurrentMaze()
     {
@@ -752,7 +776,10 @@ public class MazeManager:MonoBehaviour
     {
         return finishTileGO;
     }
-
+    public bool GetMazeManagerInitialized()
+    {
+        return mazeManagerInitialized;
+    }
     public void SetSelectedTileGO(GameObject? tileGO)
     {
         selectedTileGO = tileGO;
@@ -775,11 +802,47 @@ public class MazeManager:MonoBehaviour
         selectedTilesGO.Add(tileGO);
     }
 
+    public float GetChoiceDuration()
+    {
+        return choiceDuration;
+    }
+    public float GetMazeDuration()
+    {
+        return mazeDuration;
+    }
+
+    public void SetChoiceStartTime(float startTime)
+    {
+        choiceStartTime = startTime;
+    }
+    public void SetMazeStartTime(float startTime)
+    {
+        mazeStartTime = startTime;
+    }
+    public float GetMazeStartTime()
+    {
+        return mazeStartTime;
+    }
+    public float GetChoiceStartTime()
+    {
+        return choiceStartTime;
+    }
+
+    public void AddReactionTime()
+    {
+        selectedTilesRxnTimes.Add(choiceDuration);
+        choiceDuration = 0;
+        choiceStartTime = 0;
+    }
+
+    public List<float> GetAllSelectionRxnTimes()
+    {
+        return selectedTilesRxnTimes;
+    }
     public string DetermineErrorType()
     {
         string errorType = "";
-        Debug.LogWarning("LAST ERROR TILE: " + lastErrorTileGO?.name + "SELECTED TILE GO: " + selectedTileGO);
-        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO) // Checks for Perseverative Error
+        if (lastErrorTileGO != null && lastErrorTileGO == selectedTileGO && !correctNextTileChoice) // Checks for Perseverative Error
         {
             if (backTrackError)
                 errorType = "perseverativeBackTrackError";

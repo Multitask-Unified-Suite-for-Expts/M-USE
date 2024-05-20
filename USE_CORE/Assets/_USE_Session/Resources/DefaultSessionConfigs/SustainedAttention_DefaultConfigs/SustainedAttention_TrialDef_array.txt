@@ -1,5 +1,5 @@
-BlockCount	TrialID	TrialObjectIndices	DisplayTargetDuration	DisplayDistractorsDuration	SliderInitialValue	SliderGain	NumPulses	PulseSize
-1	T1	[0, 2, 2, 3]	1	1	1	[1, 1]	2	250
-1	T2	[0, 2, 2, 3, 3]	1	1	1	[1, 1]	2	250
-2	T1	[1, 2, 2, 3, 3, 3]	1	1	1	[1, 1]	2	250
-2	T2	[1, 2, 2, 2, 3, 3, 3]	1	1	1	[1, 1]	2	250
+BlockCount	TrialID	ParticleHaloActive	CircleHaloActive	TrialObjectIndices	DisplayTargetDuration	DisplayDistractorsDuration	SliderInitialValue	SliderGain	NumPulses	PulseSize
+1	T1	TRUE	FALSE	[0, 2, 2, 3]	1	1	1	[1, 1]	2	250
+1	T2	TRUE	FALSE	[0, 2, 2, 3, 3]	1	1	1	[1, 1]	2	250
+2	T1	TRUE	FALSE	[1, 2, 2, 3, 3, 3]	1	1	1	[1, 1]	2	250
+2	T2	TRUE	FALSE	[1, 2, 2, 2, 3, 3, 3]	1	1	1	[1, 1]	2	250

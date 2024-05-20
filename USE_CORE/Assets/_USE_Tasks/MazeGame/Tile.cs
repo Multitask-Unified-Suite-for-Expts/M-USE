@@ -1,16 +1,7 @@
-using System;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Timers;
 using HiddenMaze;
-using MazeGame_Namespace;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using USE_ExperimentTemplate_Task;
-using USE_ExperimentTemplate_Trial;
 
 
 public class Tile : MonoBehaviour
@@ -144,7 +135,6 @@ public class Tile : MonoBehaviour
                 FBDuration = incorrectRuleBreakingFeedbackDuration;
                 break;
         }
-        Debug.LogWarning("CHANGING FB COLOR: " + FBColor.ToString() + " || fb duration: " + FBDuration);
         gameObject.GetComponent<Image>().color = FBColor;
         FBStartTime = Time.unscaledTime;
         choiceFeedback = true;
@@ -165,7 +155,11 @@ public class Tile : MonoBehaviour
         // else
         //     initialTileColor = defaultTileColor;// before it starts flashing set color
      }
-
+    public void TerminateTileFlashing()
+    {
+        flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
+        isFlashing = false;
+    }
     void Update()
     {
         if(transform.hasChanged)
@@ -191,9 +185,8 @@ public class Tile : MonoBehaviour
             }
         
             if (iFlashes >= 2 * numBlinks)
-            { 
-                flashingTileGO.GetComponent<Image>().color = initialTileColor; // confirm it stops on original tile color
-                isFlashing = false;
+            {
+                TerminateTileFlashing();
             }
         }
 
@@ -202,8 +195,6 @@ public class Tile : MonoBehaviour
 
             float elapsed = Time.unscaledTime - FBStartTime;
             float interval = FBDuration;
-            Debug.Log("TILE FB DURATION: " + FBDuration);
-        
             if (elapsed >=  interval)
             {
                 if (!MazeManager.IsPathVisible() || (CorrectnessCode == 10 || (CorrectnessCode == 20 && !MazeManager.IsBacktrack())))

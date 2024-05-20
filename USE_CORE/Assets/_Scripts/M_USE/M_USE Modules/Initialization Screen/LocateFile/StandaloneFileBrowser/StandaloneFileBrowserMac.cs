@@ -12,21 +12,6 @@ namespace SFB {
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         public delegate void AsyncCallback(string path);
 
-        [AOT.MonoPInvokeCallback(typeof(AsyncCallback))]
-        private static void openFileCb(string result) {
-            _openFileCb.Invoke(result.Split((char)28));
-        }
-
-        [AOT.MonoPInvokeCallback(typeof(AsyncCallback))]
-        private static void openFolderCb(string result) {
-            _openFolderCb.Invoke(result.Split((char)28));
-        }
-
-        [AOT.MonoPInvokeCallback(typeof(AsyncCallback))]
-        private static void saveFileCb(string result) {
-            _saveFileCb.Invoke(result);
-        }
-
         [DllImport("StandaloneFileBrowser")]
         private static extern IntPtr DialogOpenFilePanel(string title, string directory, string extension, bool multiselect);
         [DllImport("StandaloneFileBrowser")]
@@ -56,7 +41,7 @@ namespace SFB {
                 directory,
                 GetFilterFromFileExtensionList(extensions),
                 multiselect,
-                openFileCb);
+                (string result) => { _openFileCb.Invoke(result.Split((char)28)); });
         }
 
         public string[] OpenFolderPanel(string title, string directory, bool multiselect) {
@@ -73,7 +58,7 @@ namespace SFB {
                 title,
                 directory,
                 multiselect,
-                openFolderCb);
+                (string result) => { _openFolderCb.Invoke(result.Split((char)28)); });
         }
 
         public string SaveFilePanel(string title, string directory, string defaultName, ExtensionFilter[] extensions) {
@@ -91,7 +76,7 @@ namespace SFB {
                 directory,
                 defaultName,
                 GetFilterFromFileExtensionList(extensions),
-                saveFileCb);
+                (string result) => { _saveFileCb.Invoke(result); });
         }
 
         private static string GetFilterFromFileExtensionList(ExtensionFilter[] extensions) {

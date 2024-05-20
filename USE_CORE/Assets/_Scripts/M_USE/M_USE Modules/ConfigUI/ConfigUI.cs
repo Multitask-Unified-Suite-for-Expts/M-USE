@@ -51,7 +51,8 @@ namespace ConfigDynamicUI
 		public GameObject prefabSlider3;
 		public GameObject prefabBoolean;
 
-		public void clear(){
+		public void clear()
+		{
 			store.clear();
 			foreach (GameObject g in this.listGeneratedObjects)
 			{

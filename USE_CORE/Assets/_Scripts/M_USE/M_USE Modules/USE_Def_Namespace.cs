@@ -177,9 +177,9 @@ namespace USE_Def_Namespace
         public int RewardHotKeyPulseSize = 250;
 
         /// <summary>
-        /// Duration of the block results, specific for human session configurations.
+        /// Duration of the task results, specific for human session configurations.
         /// </summary>
-        public float BlockResultsDuration;
+        public float TaskResultsDuration;
 
         /// <summary>
         /// Indicates if background music should be played.
@@ -248,6 +248,11 @@ namespace USE_Def_Namespace
             get { return maxStimLoadingDuration; }
             set { maxStimLoadingDuration = Mathf.Max(value, 1f); }
         }
+
+        /// <summary>
+        /// Duration of the SessionSummary screen before the session finishes.
+        /// </summary>
+        public float SessionSummaryDuration = 180f;
     }
 
     public class TaskDef
@@ -261,7 +266,12 @@ namespace USE_Def_Namespace
         /// Path to the external file associated with the context.
         /// </summary>
         public string ContextExternalFilePath;
-        
+
+        /// <summary>
+        /// Directory path where audio clips are stored.
+        /// </summary>
+        public string AudioClipsFolderPath;
+
         /// <summary>
         /// Directory path where external stimuli are stored.
         /// </summary>
@@ -348,6 +358,13 @@ namespace USE_Def_Namespace
         public bool NeutralITI;
         
         public string TrialDefSelectionStyle;
+
+        /// <summary>
+        /// The Task's Directional Light Intensity.
+        /// </summary>
+        public virtual float TaskDirectionalLightIntensity { get; set; } = 1.35f; //1.35 for new quaddles, 2 for old quaddles
+
+
     }
 
     public class BlockDef
@@ -460,6 +477,15 @@ namespace USE_Def_Namespace
         /// </summary>
         public int PerceptualSimilarity;
 
+        /// <summary>
+        /// Whether or not the particle halo will be created after a selection is made
+        /// </summary>
+        public bool ParticleHaloActive;
+
+        /// <summary>
+        /// Whether or not the circle halo will be created after a selection is made
+        /// </summary>
+        public bool CircleHaloActive = true;
 
         /// <summary>
         /// Generates trial definitions based on block definitions.
@@ -600,6 +626,16 @@ namespace USE_Def_Namespace
         /// The number of tokens that the token bar can hold.
         /// </summary>
         public int TokenBarCapacity;
+
+        /// <summary>
+        /// Whether or not the particle halo will be created after a selection is made
+        /// </summary>
+        public bool ParticleHaloActive;
+        
+        /// <summary>
+        /// Whether or not the circle halo will be created after a selection is made
+        /// </summary>
+        public bool CircleHaloActive = true;
 
         public int DifficultyLevel;
         public int posStep;

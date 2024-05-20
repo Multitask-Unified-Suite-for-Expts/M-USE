@@ -256,7 +256,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         {
             StateAfterDelay = SearchDisplay;
             DelayDuration = postSampleDelayDuration.value;
-
         });
 
 
@@ -343,14 +342,14 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
             if (CorrectSelection)
             {
-                HaloFBController.ShowPositive(selectedGO, depth);
+                HaloFBController.ShowPositive(selectedGO, depth: depth);
                 // HaloFBController.PositiveHaloPrefab.transform.SetParent(null);
                 // // Vector3 goWorldPos = TaskLevel.TaskCam.WorldToScreenPoint(selectedGO.transform.position);
                 // HaloFBController.PositiveHaloPrefab.transform.position = selectedGO.transform.position;
             }
             else
             {
-                HaloFBController.ShowNegative(selectedGO, depth);
+                HaloFBController.ShowNegative(selectedGO, depth:depth);
                 // HaloFBController.NegativeHaloPrefab.transform.SetParent(null);
                 // // Vector3 goWorldPos = TaskLevel.TaskCam.WorldToScreenPoint(selectedGO.transform.position);
                 // HaloFBController.NegativeHaloPrefab.transform.position = selectedGO.transform.position;
@@ -359,7 +358,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SelectionFeedback.AddTimer(() => selectionFbDuration.value, TokenFeedback, () =>
         {
-            HaloFBController.DestroyHalos();
+            HaloFBController.DestroyAllHalos();
         });
 
 
@@ -383,23 +382,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        TokenFeedback.AddTimer(() => tokenFbDuration, ITI, () =>
-        {
-            if (TokenFBController.IsTokenBarFull())
-            {
-                NumTokenBarFull_InBlock++;
-                CurrentTaskLevel.NumTokenBarFull_InTask++;
-                if (Session.SyncBoxController != null)
-                {
-                    Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
-                   // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", CurrentTrialDef.NumPulses)); moved to syncbox class
-                    NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
-                    RewardGiven = true;
-                    TokenFBController.ResetTokenBarFull();
-                }
-            }
-        });
+        TokenFeedback.AddTimer(() => tokenFbDuration, ITI);
 
         ITI.AddSpecificInitializationMethod(() =>
         {
@@ -444,6 +427,21 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         AssignFrameData();
         AssignTrialData();
     }
+    public override void OnTokenBarFull()
+    {
+        NumTokenBarFull_InBlock++;
+        CurrentTaskLevel.NumTokenBarFull_InTask++;
+        if (Session.SyncBoxController != null)
+        {
+            Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+            // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", CurrentTrialDef.NumPulses)); moved to syncbox class
+            NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+            RewardGiven = true;
+        }
+    }
+
+
     public void MakeStimFaceCamera()
     {
         foreach (StimGroup group in TrialStims)
@@ -471,8 +469,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
             CurrentTaskLevel.CurrentBlockSummaryString.AppendLine("");
         }
-
-        TokenFBController.ResetTokenBarFull();
     }
 
     public void ResetBlockVariables()

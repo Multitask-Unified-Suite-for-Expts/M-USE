@@ -1142,6 +1142,20 @@ namespace USE_States
 
 
 
+        public Color32 ConvertFloatArrayToColor(float[] floats)
+        {
+            if (floats.Length != 3)
+            {
+                Debug.LogError("TRYING TO CONVERT A COLOR FROM A FLOAT TO RGB BUT THE FLOAT ARRAY DOESNT CONTAIN 3 VALUES");
+            }
+
+            byte r = (byte)Mathf.Clamp(floats[0], 0, 255);
+            byte g = (byte)Mathf.Clamp(floats[1], 0, 255);
+            byte b = (byte)Mathf.Clamp(floats[2], 0, 255);
+
+            return new Color32(r, g, b, 255);
+        }
+
 
         public static Texture2D LoadExternalPNG(string filePath)
         {

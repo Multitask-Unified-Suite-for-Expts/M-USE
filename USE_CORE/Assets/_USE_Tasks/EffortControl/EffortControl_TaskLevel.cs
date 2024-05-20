@@ -49,7 +49,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public int BlockStringsAdded = 0;
-    EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
+    [HideInInspector] public EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
 
 
@@ -82,19 +82,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         }
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Total Touches"] = trialLevel.TotalTouches_Block,
-            ["Chose Higher Effort"] = trialLevel.NumHigherEffortChosen_Block,
-            ["Chose Lower Effort"] = trialLevel.NumLowerEffortChosen_Block,
-            ["Chose Higher Reward"] = trialLevel.NumHigherRewardChosen_Block,
-            ["Chose Lower Reward"] = trialLevel.NumLowerRewardChosen_Block
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
 
@@ -111,6 +98,17 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         data["Chose Lower Effort"] = NumLowerEffortChosen_Task;
         data["Chose Same Effort"] = NumSameEffortChosen_Task;
         data["Avg Inflation Duration"] = CalculateAverageDuration(InflationDurations_Task);
+
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskResultsData()
+    {
+        OrderedDictionary data = base.GetTaskResultsData();
+
+        data["Chose Higher Effort"] = $"{NumHigherEffortChosen_Task}/{NumHigherEffortChosen_Task + NumLowerEffortChosen_Task}" ;
+        data["Chose Higher Reward"] = $"{NumHigherRewardChosen_Task}/{NumHigherRewardChosen_Task + NumLowerRewardChosen_Task}";
+        data["Chose Left Side"] = $"{NumChosenLeft_Task}/{NumChosenLeft_Task + NumChosenRight_Task}";
 
         return data;
     }

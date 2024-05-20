@@ -47,8 +47,6 @@ namespace USE_UI
         [HideInInspector] public GameObject InstructionsButtonGO;
         [HideInInspector] public GameObject InstructionsGO;
         [HideInInspector] public GameObject TitleTextGO;
-        [HideInInspector] public GameObject HumanBackgroundGO;
-        [HideInInspector] public GameObject BackgroundPanelGO;
         [HideInInspector] public GameObject EndTaskButtonGO;
 
         [HideInInspector] public GameObject HumanStartPanelPrefab; //Set to Session In inspector, then passed down
@@ -86,7 +84,9 @@ namespace USE_UI
                 { "THR", "Learn touching and holding the square for the correct duration to earn your reward. Holding too short, holding too long, and moving outside the square will result in negative feedback." },
                 { "VisualSearch", "Each trial, a target object is displayed among distractor objects. Find the targeted object to earn your reward!" },
                 { "WhatWhenWhere", "Learn the sequential relationship between objects. Select the objects in the correct sequence to earn your reward!" },
-                { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" }
+                { "WorkingMemory", "Remember and identify the target object to earn your reward. Don't let the distractor objects fool you!" },
+                { "GazeCalibration", "Calibrate the Gaze Tracker by looking at the dots!" }
+
             };
             TaskNamesDict = new Dictionary<string, string>()
             {
@@ -98,7 +98,9 @@ namespace USE_UI
                 { "THR", "Touch Hold Release" },
                 { "VisualSearch", "Visual Search" },
                 { "WhatWhenWhere", "What When Where" },
-                { "WorkingMemory", "Working Memory" }
+                { "WorkingMemory", "Working Memory" },
+                { "GazeCalibration", "Gaze Calibration" }
+
             };
         }
 
@@ -140,20 +142,11 @@ namespace USE_UI
             StartButtonGO = HumanStartPanelGO.transform.Find("StartButton").gameObject;
             InitialStartButtonPosition = StartButtonGO.transform.localPosition;
 
-            HumanBackgroundGO = HumanStartPanelGO.transform.Find("HumanBackground").gameObject;
-            HumanBackgroundGO.transform.localPosition = new Vector3(0, 0, 1000f);
-
-            BackgroundPanelGO = HumanStartPanelGO.transform.Find("BackgroundPanel").gameObject;
-
             EndTaskButtonGO = HumanStartPanelGO.transform.Find("EndTaskButton").gameObject;
-            if (Session.UsingDefaultConfigs)
-                EndTaskButtonGO.AddComponent<ButtonHoverEffect>();
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
-            if(Session.UsingDefaultConfigs)
-                InstructionsButtonGO.AddComponent<ButtonHoverEffect>();
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
 
@@ -175,6 +168,9 @@ namespace USE_UI
                 if (Time.timeScale == 0) //if paused, unpause before ending task
                     Time.timeScale = 1;
 
+                //deactivate human panel since task is over 
+                HumanStartPanelGO.SetActive(false);
+
                 Session.TrialLevel.AbortCode = 5;
                 Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
                 Session.TrialLevel.ForceBlockEnd = true;
@@ -187,8 +183,16 @@ namespace USE_UI
         private void SetStartButtonChildren()
         {
             StartButtonChildren = new List<GameObject>();
-            foreach (Transform child in StartButtonGO.transform)
+            AddChildrenRecursively(StartButtonGO.transform);
+        }
+
+        private void AddChildrenRecursively(Transform parent)
+        {
+            foreach (Transform child in parent)
+            {
                 StartButtonChildren.Add(child.gameObject);
+                AddChildrenRecursively(child); // Recursive call to children/grandchildren
+            }
         }
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
@@ -203,22 +207,17 @@ namespace USE_UI
         {
             if (trialCountInTask == 0) //Show Full Human Panel With BlueBackground
             {
-                HumanBackgroundGO.SetActive(true);
                 TitleTextGO.GetComponent<TextMeshProUGUI>().text = TaskName;
                 TitleTextGO.SetActive(true);
-                BackgroundPanelGO.SetActive(false);
             }
             else
             {
-                BackgroundPanelGO.SetActive(true);
-                HumanBackgroundGO.SetActive(false);
-
-                if(trialCountInBlock > 0) //Mid block - show only playbutton and instructions
+                if (trialCountInBlock > 0) //Mid block - show only playbutton and instructions
                 {
                     TitleTextGO.SetActive(false);
                     StartButtonGO.transform.localPosition = new Vector3(InitialStartButtonPosition.x, InitialStartButtonPosition.y + 75f, InitialStartButtonPosition.z);
                 }
-                else if(trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
+                else if (trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
                 {
                     StartButtonGO.transform.localPosition = InitialStartButtonPosition;
                     TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Play Again?";
@@ -246,7 +245,7 @@ namespace USE_UI
         {
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
-            if(Session.SessionDef.EventCodesActive)
+            if (Session.SessionDef.EventCodesActive)
                 Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
@@ -265,7 +264,6 @@ namespace USE_UI
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
-        [HideInInspector] public Image CoverCircle_Image; //Child circle that can be used to "change circle color" by activating over top of startbutton.
         [HideInInspector] public GameObject PlayIconGO; //Child Play icon
         [HideInInspector] public List<GameObject> StartButtonChildren;
         [HideInInspector] public GameObject StartButtonPrefab;
@@ -276,12 +274,11 @@ namespace USE_UI
         public State SetInactiveOnTermination;
 
         public GameObject CreateStartButton(Canvas parent, Vector3? pos, float? scale, string name = null)
-        {            
+        {
             StartButtonGO = Instantiate(StartButtonPrefab);
             StartButtonGO.name = name ?? "StartButton";
             StartButtonGO.transform.SetParent(parent.transform, false);
-            StartButtonGO.transform.localPosition = pos.HasValue? pos.Value : Vector3.zero;
-            CoverCircle_Image = StartButtonGO.transform.Find("CoverCircle").gameObject.GetComponent<Image>();
+            StartButtonGO.transform.localPosition = pos.HasValue ? pos.Value : Vector3.zero;
             PlayIconGO = StartButtonGO.transform.Find("PlayIcon").gameObject;
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
@@ -298,19 +295,6 @@ namespace USE_UI
             return StartButtonGO;
         }
 
-        public void ActivateCoverCircle(Color32 color)
-        {
-            CoverCircle_Image.color = color;
-            PlayIconGO.SetActive(false);
-            CoverCircle_Image.gameObject.SetActive(true);
-        }
-
-        public void DeactivateCoverCircle()
-        {
-            PlayIconGO.SetActive(true);
-            CoverCircle_Image.gameObject.SetActive(false);
-        }
-
         public void SetButtonPosition(Vector3 pos)
         {
             StartButtonGO.transform.localPosition = pos;
@@ -321,8 +305,8 @@ namespace USE_UI
             PlayIconGO.GetComponent<SpriteRenderer>().color = color;
         }
 
-		public void SetButtonScale(float scale)
-		{
+        public void SetButtonScale(float scale)
+        {
             StartButtonGO.transform.localScale = new Vector3(scale, scale, 1);
             HoverEffect hoverComponent = StartButtonGO.GetComponent<HoverEffect>();
             if (hoverComponent != null)
@@ -372,7 +356,7 @@ namespace USE_UI
             image.sprite = originalSprite;
             IsGrating = false;
 
-            if(goToDeactivate != null)
+            if (goToDeactivate != null)
                 goToDeactivate.SetActive(false);
         }
 
@@ -384,16 +368,25 @@ namespace USE_UI
         [HideInInspector] public Image Image;
 
         //Used as backdrop for THR
-        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color) 
+        public GameObject CreateBackdrop(Canvas parent, string name, Color32 color, Vector2? size = null, Vector3? pos = null)
         {
             BackdropGO = new GameObject(name);
             Image = BackdropGO.AddComponent<Image>();
             BackdropGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
             RectTransform canvasRect = parent.GetComponent<RectTransform>();
-            Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
+
+            if (size != null)
+                Image.rectTransform.sizeDelta = size.Value;
+            else
+                Image.rectTransform.sizeDelta = new Vector2(canvasRect.rect.width, canvasRect.rect.height);
             Image.color = color;
-            BackdropGO.transform.localPosition = Vector3.zero;
+
+            if (pos != null)
+                BackdropGO.transform.localPosition = pos.Value;
+            else
+                BackdropGO.transform.localPosition = Vector3.zero;
+
             BackdropGO.SetActive(false);
             return BackdropGO;
         }
@@ -410,7 +403,7 @@ namespace USE_UI
             Image = StartButtonGO.AddComponent<Image>();
             StartButtonGO.transform.SetParent(parent.transform, false);
             Image.rectTransform.anchoredPosition = Vector2.zero;
-            Image.rectTransform.sizeDelta = scale.HasValue? new Vector2(scale.Value, scale.Value) : new Vector2(100f, 100f);
+            Image.rectTransform.sizeDelta = scale.HasValue ? new Vector2(scale.Value, scale.Value) : new Vector2(100f, 100f);
             StartButtonGO.transform.localPosition = localPos.HasValue ? localPos.Value : Vector3.zero;
             Image.color = color.HasValue ? color.Value : new Color32(0, 0, 128, 255);
             StartButtonGO.SetActive(false);
@@ -440,9 +433,9 @@ namespace USE_UI
             DebugTextGO = new GameObject("DebugText");
             DebugTextGO.transform.SetParent(parent.transform);
             DebugTextGO.transform.localScale = Vector3.one;
-            DebugTextGO.transform.localPosition = pos.HasValue? pos.Value : Vector3.zero;
+            DebugTextGO.transform.localPosition = pos.HasValue ? pos.Value : Vector3.zero;
             Rect = DebugTextGO.AddComponent<RectTransform>();
-            Rect.sizeDelta = scale.HasValue? scale.Value : new Vector2(800, 100);
+            Rect.sizeDelta = scale.HasValue ? scale.Value : new Vector2(800, 100);
             DebugText = DebugTextGO.AddComponent<TextMeshProUGUI>();
             DebugText.alignment = TextAlignmentOptions.Center;
             DebugText.color = Color.black;
@@ -506,12 +499,13 @@ namespace USE_UI
             var rect = CircleGO.GetComponent<RectTransform>();
 
             /*rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 1920);
-            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 1080)*/;
+            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 1080)*/
+            ;
             rect.sizeDelta = new Vector2(1920, 1080);
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.zero;
             rect.anchoredPosition = circleLocation;
-            
+
             CircleGO.SetActive(false);
         }
 
@@ -562,9 +556,9 @@ namespace USE_UI
             {
                 LineGO.GetComponent<RectTransform>().anchorMax = Vector2.zero;
                 LineGO.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-                LineGO.GetComponent<RectTransform>().anchoredPosition = Vector2.zero; 
+                LineGO.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             }
-            
+
             LineGO.GetComponent<RectTransform>().sizeDelta = new Vector2(LineSize, LineSize);
             LineRenderer = LineGO.GetComponent<UILineRenderer>();
             LineLength = Vector2.Distance(start, end);
@@ -574,9 +568,9 @@ namespace USE_UI
             LineRenderer.RelativeSize = false;
             LineRenderer.SetAllDirty();
         }
-        
-        
-        
+
+
+
         //----------------------------------------------------------------------
         public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
@@ -606,6 +600,111 @@ namespace USE_UI
     }
 
 
+
+    public class ProgressBar : MonoBehaviour
+    {
+        public float minHoldDuration = 1f;
+
+        public GameObject CorrespondingGO;
+
+        private GameObject progressBar;
+        private Slider progressBarSlider;
+        private RectTransform progressBarRectTransform;
+
+        private float holdTimer;
+        private bool isHolding;
+
+        private Transform ParentCanvas;
+
+
+        public void ManualStart(Transform parentCanvas, GameObject correspondingGO)
+        {
+            ParentCanvas = parentCanvas;
+            CorrespondingGO = correspondingGO;
+
+            progressBar = Instantiate(Resources.Load<GameObject>("Prefabs/ProgressBar"), ParentCanvas);
+            progressBarSlider = progressBar.GetComponentInChildren<Slider>();
+            progressBarRectTransform = progressBar.GetComponent<RectTransform>();
+
+            progressBarSlider.value = 0f;
+            progressBar.SetActive(false);
+        }
+
+
+        void Update()
+        {
+            if (CorrespondingGO != null)
+            {
+                Vector3 screenPos = Camera.main.WorldToScreenPoint(CorrespondingGO.transform.position);
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(ParentCanvas.GetComponent<RectTransform>(), screenPos, Camera.main, out Vector2 localPoint);
+                progressBarRectTransform.anchoredPosition = localPoint + new Vector2(0f, -175f);
+            }
+
+            if (isHolding)
+            {
+                holdTimer += Time.deltaTime;
+                progressBarSlider.value = holdTimer / minHoldDuration;
+
+                if (holdTimer >= minHoldDuration)
+                {
+                    OnHoldComplete();
+                }
+            }
+
+            // Check for both mouse and touch input
+            if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
+            {
+                StartHold();
+            }
+
+            if (Input.GetMouseButtonUp(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended))
+            {
+                StopHold();
+            }
+        }
+
+
+        public void SetProgressBarScale(Vector2 size)
+        {
+            progressBarRectTransform.sizeDelta = size;
+        }
+
+        public void ResetProgressBarValue()
+        {
+            progressBarSlider.value = 0f;
+        }
+
+        public void ActivateProgressBar()
+        {
+            progressBar.SetActive(true);
+        }
+
+        public void DeactivateProgressBar()
+        {
+            progressBar.SetActive(false);
+        }
+
+        void StartHold()
+        {
+            isHolding = true;
+            holdTimer = 0f;
+            progressBarSlider.gameObject.SetActive(true);
+        }
+
+        void StopHold()
+        {
+            isHolding = false;
+            progressBarSlider.gameObject.SetActive(false);
+        }
+
+        void OnHoldComplete()
+        {
+            // Do something when the minimum hold duration is reached
+            Debug.Log("Hold complete!");
+        }
+
+
+    }
 
 
 }

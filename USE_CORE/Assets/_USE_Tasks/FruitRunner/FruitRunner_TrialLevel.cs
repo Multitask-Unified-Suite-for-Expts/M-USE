@@ -1,11 +1,11 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using USE_ExperimentTemplate_Trial;
 using USE_StimulusManagement;
 using FruitRunner_Namespace;
 using ConfigDynamicUI;
+using UnityEngine.UI;
 
 
 public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
@@ -17,6 +17,10 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     //Set in Inspector:
     public GameObject FruitRunner_CanvasGO;
     public List<Material> SkyboxMaterials;
+    public List<Color> FogColors;
+    public FR_ScoreManager ScoreManager;
+    public GameObject SpeedSliderGO;
+    public Slider SpeedSlider;
 
     private GameObject StartButton;
 
@@ -29,18 +33,42 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
     public MovementCirclesController MovementCirclesController;
 
     public GameObject FloorManagerGO;
-    public FloorManager FloorManager;
+    public FR_FloorManager FloorManager;
 
-    public GameObject ItemSpawnerGO;
-    public FR_ItemSpawner ItemSpawner;
+    public GameObject ItemManagerGO;
+    public FR_ItemManager ItemManager;
+
+    public SpawnHalfCircle CircleSpawner;
+    public GameObject CircleSpawnerGO;
 
 
     private StimGroup trialStims;
 
+    private CameraIntroMovement CamMovement;
+
+    private bool UsingBananas;
+
+    //DATA:
+    [HideInInspector] public int TargetsHit_Trial;
+    [HideInInspector] public int TargetsMissed_Trial;
+    [HideInInspector] public int DistractorsHit_Trial;
+    [HideInInspector] public int DistractorsAvoided_Trial;
+    [HideInInspector] public int BlockadesHit_Trial;
+    [HideInInspector] public int BlockadesAvoided_Trial;
+
+    [HideInInspector] public int TargetsHit_Block;
+    [HideInInspector] public int TargetsMissed_Block;
+    [HideInInspector] public int DistractorsHit_Block;
+    [HideInInspector] public int DistractorsAvoided_Block;
+    [HideInInspector] public int BlockadesHit_Block;
+    [HideInInspector] public int BlockadesAvoided_Block;
+
+    [HideInInspector] public int Score_Block;
+
 
     public override void DefineControlLevel()
     {
-        State InitTrial = new State("IniTrial");
+        State InitTrial = new State("InitTrial");
         State Setup = new State("Setup");
         State Play = new State("Play");
         State Celebration = new State("Celebration");
@@ -49,6 +77,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            SubscribeToFrEvents();
+
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -68,6 +98,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             CurrentTaskLevel.TaskCam.fieldOfView = 50;
+
+            if (CircleSpawnerGO != null)
+                Destroy(CircleSpawnerGO);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -94,16 +127,18 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
         {
             TokenFBController.AdjustTokenBarSizing(100);
-            TokenFBController.SetRevealTime(.15f);
-            TokenFBController.SetUpdateTime(.25f);
+            TokenFBController.SetRevealTime(.1f);
+            TokenFBController.SetUpdateTime(.2f);
 
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)];
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/FS003_Night");
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/PT_Skybox");
-            //CurrentTaskLevel.TaskCam.GetComponent<Skybox>().material = Resources.Load<Material>("Materials/6sidedCosmicCoolCloud");
+            Skybox skybox = CurrentTaskLevel.TaskCam.GetComponent<Skybox>();
+            skybox.material = CurrentTrial.SkyboxName.ToLower() == "random" ? SkyboxMaterials[Random.Range(0, SkyboxMaterials.Count - 1)] : Resources.Load<Material>("Materials/" + CurrentTrial.SkyboxName);
+            skybox.enabled = true;
 
-            CurrentTaskLevel.TaskCam.GetComponent<Skybox>().enabled = true;
+            RenderSettings.fogColor = FogColors[SkyboxMaterials.IndexOf(skybox.material)];
+
             CurrentTaskLevel.TaskCam.fieldOfView = 60;
+
+            HaloFBController.SetPositiveParticleHaloColor(Color.green);
         });
 
         //Setup state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,36 +149,52 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerGO.tag = "Player";
             PlayerManager = PlayerGO.GetComponent<FR_PlayerManager>();
             PlayerManager.TokenFbController = TokenFBController;
-            PlayerManager.StartAnimation("idle");
             PlayerManager.DisableUserInput();
             PlayerManager.AllowItemPickupAnimations = CurrentTrial.AllowItemPickupAnimations;
+            PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
+
+            SetUsingBananas();
            
-            ItemSpawnerGO = new GameObject("ItemSpawner");
-            ItemSpawner = ItemSpawnerGO.AddComponent<FR_ItemSpawner>();
-            ItemSpawner.SetupQuaddleList(trialStims.stimDefs);
-            ItemSpawner.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
-            ItemSpawner.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
-            ItemSpawner.RandomSpawnLocations = CurrentTrial.RandomStimLocations;
-            ItemSpawner.gameObject.SetActive(true);
+            ItemManagerGO = new GameObject("ItemManager");
+            ItemManager = ItemManagerGO.AddComponent<FR_ItemManager>();
+            ItemManager.SetupQuaddleList(trialStims.stimDefs);
+            ItemManager.SetQuaddleGeneralPositions(CurrentTrial.TrialStimGeneralPositions);
+            ItemManager.SetSpawnOrder(CurrentTrial.TrialGroup_InSpawnOrder);
+            ItemManager.BananaTokenGain = CurrentTrial.BananaTokenGain;
+            ItemManager.BlockadeTokenLoss = CurrentTrial.BlockadeTokenLoss;
+            ItemManager.StimFaceCamera = CurrentTrial.StimFacingCamera;
+            ItemManager.gameObject.SetActive(true);
             
             FloorManagerGO = new GameObject("FloorManager");
-            FloorManager = FloorManagerGO.AddComponent<FloorManager>();
+            FloorManager = FloorManagerGO.AddComponent<FR_FloorManager>();
             FloorManager.SetTotalTiles(CurrentTrial.TrialGroup_InSpawnOrder.Length, CurrentTrial.NumGroups);
             FloorManager.FloorMovementSpeed = CurrentTrial.FloorMovementSpeed;
             FloorManager.TileScale_Z = CurrentTrial.FloorTileLength;
             FloorManager.gameObject.SetActive(true);
-            
+
+            CamMovement = Camera.main.gameObject.AddComponent<CameraIntroMovement>();
+            CamMovement.StartMovement(PlayerGO.transform, new Vector3(0f, 4f, -6f), new Vector3(0f, 2f, -3f));
         });
-        Setup.AddTimer(() => setupDuration.value, Play);
+        Setup.SpecifyTermination(() => !CamMovement.Move, Play);
+        //Setup.AddTimer(() => setupDuration.value, Play);
 
         //Play state ----------------------------------------------------------------------------------------------------------------------------------------------
         bool finishedPlaying = false;
         Play.AddSpecificInitializationMethod(() =>
         {
-            MovementCirclesControllerGO = new GameObject("MovementCirclesController");
-            MovementCirclesController = MovementCirclesControllerGO.AddComponent<MovementCirclesController>();
-            MovementCirclesController.SetupMovementCircles(FruitRunner_CanvasGO.GetComponent<Canvas>(), PlayerGO);
-            
+            //Determine next state depending on SkipCelebrationState boolean:
+            StateAfterDelay = CurrentTrial.SkipCelebrationState ? ITI : Celebration;
+            DelayDuration = 0;
+
+            if(CurrentTrial.ShowUI)
+            {
+                SpeedSliderGO.SetActive(true);
+                SpeedSlider.value = FloorManager.FloorMovementSpeed;
+
+                ScoreManager.Score = 0;
+                ScoreManager.ActivateScoreText();
+            }
+
             PlayerManager.StartAnimation("Run");
             PlayerManager.AllowUserInput();
 
@@ -159,17 +210,43 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         {
             if (FloorManager.NumTilesSpawned > 1 && FloorManager.ActiveTiles.Count == 1)
                 finishedPlaying = true;
+
+            if (CurrentTrial.ShowUI && SpeedSlider != null)
+                FloorManager.FloorMovementSpeed = SpeedSlider.value;
+
+            if(InputBroker.GetKeyDown(KeyCode.A))
+            {
+                PlayerManager.AllowItemPickupAnimations = !PlayerManager.AllowItemPickupAnimations;
+            }
+
+            if(InputBroker.GetKeyDown(KeyCode.Q))
+            {
+                ScoreManager.ToggleScoreText();
+                SpeedSliderGO.SetActive(!SpeedSliderGO.activeInHierarchy);
+            }
+
         });
-        Play.SpecifyTermination(() => finishedPlaying, Celebration);
-        Play.AddTimer(() => playDuration.value, Celebration);
+        Play.SpecifyTermination(() => finishedPlaying, Delay);
+        Play.AddTimer(() => playDuration.value, Delay);
+        Play.AddDefaultTerminationMethod(() =>
+        {
+            SpeedSliderGO.SetActive(false);
+            TokenFBController.enabled = false;
+            ScoreManager.DeactivateScoreText();
+        });
 
         //Celebration state ----------------------------------------------------------------------------------------------------------------------------------------------
         Celebration.AddSpecificInitializationMethod(() =>
         {
             PlayerManager.FinalCelebration();
-            TokenFBController.enabled = false;
+            SpawnQuaddleCircle();
         });
         Celebration.AddTimer(() => celebrationDuration.value, ITI);
+        Celebration.AddDefaultTerminationMethod(() =>
+        {
+            CircleSpawner.DestroySpawnedObjects();
+            PlayerManager.DestroyFinalPlane();
+        });
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -179,6 +256,108 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+    private void SpawnQuaddleCircle()
+    {
+        //Circle Spawner:
+        CircleSpawnerGO = new GameObject("CircleSpawner");
+        CircleSpawnerGO.transform.position = Vector3.zero;
+        CircleSpawnerGO.transform.localScale = Vector3.one;
+        CircleSpawner = CircleSpawnerGO.AddComponent<SpawnHalfCircle>();
+        List<GameObject> prefabList = new List<GameObject>() { };
+        foreach (var stim in trialStims.stimDefs)
+            prefabList.Add(stim.StimGameObject);
+        CircleSpawner.SetPrefabs(prefabList);
+        if (!UsingBananas)
+            CircleSpawner.SpawnObjectsInArch();
+    }
+
+    public void SetUsingBananas()
+    {
+        //If using bananas, mark the banana boolean true for the PlayerManager so it wont instantiate quaddles/finalPlane at the celebration
+        for (int i = 0; i < CurrentTrial.TrialGroup_InSpawnOrder.Length; i++)
+        {
+            for (int j = 0; j < CurrentTrial.TrialGroup_InSpawnOrder[i].Length; j++)
+            {
+                if (CurrentTrial.TrialGroup_InSpawnOrder[i][j] == -3)
+                {
+                    UsingBananas = true;
+                    PlayerManager.UsingBananas = true;
+                }
+            }
+        }
+    }
+
+    public override void OnTokenBarFull()
+    {
+        //GIVE REWARD:
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+    }
+
+    private void SubscribeToFrEvents()
+    {
+        FR_EventManager.OnPlayerShift += PlayerShift;
+        FR_EventManager.OnTargetHit += TargetHit;
+        FR_EventManager.OnTargetMissed += TargetMissed;
+        FR_EventManager.OnDistractorHit += DistractorHit;
+        FR_EventManager.OnDistractorAvoided += DistractorAvoided;
+        FR_EventManager.OnBlockadeAvoided += BlockadeAvoided;
+        FR_EventManager.OnBlockadeHit += BlockadeHit;
+    }
+
+
+    public void PlayerShift(string from, string to)
+    {
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["ShiftFrom" + from + "To" + to]);
+    }
+
+    public void TargetHit(string pos)
+    {
+        TargetsHit_Trial++;
+        TargetsHit_Block++;
+        CurrentTaskLevel.TargetsHit_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetHit" + pos]);
+
+    }
+    public void TargetMissed(string pos)
+    {
+        TargetsMissed_Trial++;
+        TargetsMissed_Block++;
+        CurrentTaskLevel.TargetsMissed_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetMissed" + pos]);
+
+    }
+    public void DistractorHit(string pos)
+    {
+        DistractorsHit_Trial++;
+        DistractorsHit_Block++;
+        CurrentTaskLevel.DistractorsHit_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorHit" + pos]);
+
+    }
+    public void DistractorAvoided(string pos)
+    {
+        DistractorsAvoided_Trial++;
+        DistractorsAvoided_Block++;
+        CurrentTaskLevel.DistractorsAvoided_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorAvoided" + pos]);
+    }
+    public void BlockadeHit(string pos)
+    {
+        BlockadesHit_Trial++;
+        BlockadesHit_Block++;
+        CurrentTaskLevel.BlockadesHit_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BlockadeHit" + pos]);
+
+    }
+    public void BlockadeAvoided(string pos)
+    {
+        BlockadesAvoided_Block++;
+        BlockadesAvoided_Trial++;
+        CurrentTaskLevel.BlockadesAvoided_Task++;
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BlockadeAvoided" + pos]);
+    }
 
     protected override void DefineTrialStims()
     {
@@ -199,19 +378,20 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 stim.QuaddleFeedbackType = "Positive";
             else if (stim.StimTokenRewardMag < 0)
                 stim.QuaddleFeedbackType = "Negative";
-            else
-                Debug.LogError("STIM TOKEN REWARD MAG IS SOMETHING OTHER THAN 1, 0, -1");
-
         }
     }
 
 
     public override void FinishTrialCleanup()
     {
+        Score_Block += ScoreManager.Score;
+
+        SpeedSliderGO.SetActive(false);
+        ScoreManager.DeactivateScoreText();
 
         Destroy(PlayerGO);
         Destroy(FloorManagerGO);
-        Destroy(ItemSpawnerGO);
+        Destroy(ItemManagerGO);
         Destroy(MovementCirclesControllerGO);
 
         if (AbortCode == 0)
@@ -229,34 +409,52 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
-
+        TargetsHit_Trial = 0;
+        TargetsMissed_Trial = 0;
+        DistractorsHit_Trial = 0;
+        DistractorsAvoided_Trial = 0;
+        BlockadesHit_Trial = 0;
+        BlockadesAvoided_Trial = 0;
     }
 
     public void ResetBlockVariables()
     {
-
+        TargetsHit_Block = 0;
+        TargetsMissed_Block = 0;
+        DistractorsHit_Block = 0;
+        DistractorsAvoided_Block = 0;
+        BlockadesHit_Block = 0;
+        BlockadesAvoided_Block = 0;
     }
 
-    void GiveReward()
-    {
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
-    }
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>";
+        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+            "\nTargetsHit: " + TargetsHit_Trial +
+            "\nTargetsMissed: " + TargetsMissed_Trial +
+            "\nDistractorsHit: " + DistractorsHit_Trial +
+            "\nDistractorsAvoided: " + DistractorsAvoided_Trial;
     }
 
     private void DefineTrialData()
     {
         TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
+
+        //Data values:
+        TrialData.AddDatum("TargetsHit", () => TargetsHit_Trial);
+        TrialData.AddDatum("TargetsMissed", () => TargetsMissed_Trial);
+        TrialData.AddDatum("DistractorsHit", () => DistractorsHit_Trial);
+        TrialData.AddDatum("DistractorsAvoided", () => DistractorsAvoided_Trial);
+        TrialData.AddDatum("BlockadesHit", () => BlockadesHit_Trial);
+        TrialData.AddDatum("BlockadesAvoided", () => BlockadesAvoided_Trial);
+
     }
 
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("PlayerPosition", () => PlayerGO == null ? "-" : PlayerGO.transform.position.ToString());
         //what else to track?
     }
 
@@ -270,5 +468,19 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         celebrationDuration = ConfigUiVariables.get<ConfigNumber>("celebrationDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
     }
+
+    private void OnDestroy()
+    {
+        //UnSubscribe from Events:
+        FR_EventManager.OnPlayerShift -= PlayerShift;
+        FR_EventManager.OnTargetHit -= TargetHit;
+        FR_EventManager.OnTargetMissed -= TargetMissed;
+        FR_EventManager.OnDistractorHit -= DistractorHit;
+        FR_EventManager.OnDistractorAvoided -= DistractorAvoided;
+        FR_EventManager.OnBlockadeAvoided -= BlockadeAvoided;
+        FR_EventManager.OnBlockadeHit -= BlockadeHit;
+        
+    }
+
 
 }

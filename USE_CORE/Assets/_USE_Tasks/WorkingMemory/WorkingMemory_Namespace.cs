@@ -32,6 +32,8 @@ namespace WorkingMemory_Namespace
 {
     public class WorkingMemory_TaskDef : TaskDef
     {
+        public override float TaskDirectionalLightIntensity { get; set; } = 2f;
+
     }
 
     public class WorkingMemory_BlockDef : BlockDef
@@ -50,6 +52,7 @@ namespace WorkingMemory_Namespace
         public float DisplayPostSampleDistractorsDuration;
         public float PreTargetDelayDuration;
 
+
         public override void AddToTrialDefsFromBlockDef()
         {
             for (int iTrial = 0; iTrial < TrialDefs.Count; iTrial++)
@@ -64,6 +67,8 @@ namespace WorkingMemory_Namespace
                 td.BlockEndThreshold = BlockEndThreshold;
                 td.BlockEndWindow = BlockEndWindow;
                 td.ContextName = ContextName;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;
             }
         }

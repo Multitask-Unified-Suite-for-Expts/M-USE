@@ -58,7 +58,6 @@ public class MouseTracker : InputTracker
             if (InputBroker.GetMouseButtonUp(iButton))
             {
                 ButtonCompletedClickCount[iButton]++;
-
                 if (target != null)
                     Session.EventCodeManager.CheckForAndSendEventCode(target, $"Button{iButton}ReleasedFrom", null);
             }
@@ -87,9 +86,9 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MouseButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
         frameData.AddDatum("SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
         frameData.AddDatum("ShotgunModalTarget", ()=> ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
-        //frameData.AddDatum("AnalogX", () => );
-        //frameData.AddDatum("AnalogY", () => );
-        //frameData.AddDatum("AnalogZ", () => );
+
+        frameData.AddDatum("JoystickInputX", () => Input.GetAxis("Horizontal"));
+        frameData.AddDatum("JoystickInputZ", () => Input.GetAxis("Vertical"));
     }
 
     //returns GO that is the current target

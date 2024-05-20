@@ -133,6 +133,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public List<GameObject> ObjectList;
 
     private GameObject PopParticles;
+    
+    // Variables for implementing MinTrialToTrialDuration
+    private float trialStartTime;
+    private float trialEndDelayDuration;
+    private float trialDuration;
 
 
     public override void DefineControlLevel()
@@ -142,8 +147,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         State CenterSelection = new State("CenterSelection");
         State InflateBalloon = new State("InflateBalloon");
         State Feedback = new State("Feedback");
+        State ConfirmMinTrialDuration = new State("ConfirmMinTrialDuration");
         State ITI = new State("ITI");
-        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ITI });
+        AddActiveStates(new List<State> { InitTrial, ChooseBalloon, CenterSelection, InflateBalloon, Feedback, ConfirmMinTrialDuration, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -216,6 +222,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
+            trialStartTime = Time.time;
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
@@ -352,9 +359,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             InflateAudioPlayed = false;
             InflationDuration = 0;
             ScaleTimer = 0;
-            Session.MouseTracker.ResetClicks();
             clickTimings = new List<float>();
-            timeTracker = 0;
+            timeTracker = Time.time;
 
             TrialTouches = 0;
             NumInflations = 0;
@@ -489,9 +495,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 InflationDurations_Block.Add(InflationDuration);
                 CurrentTaskLevel.InflationDurations_Task.Add(InflationDuration);
                 AudioFBController.Play(Session.SessionDef.IsHuman ? "BalloonPop" : "EC_NicePop");
-                PopParticles = Instantiate(Resources.Load<GameObject>(Session.SessionDef.IsHuman ? "Prefabs/BalloonPop_Effect" : "Prefabs/BalloonPop_Effect_Softer"));
+                if(Session.SessionDef.IsHuman)
+                {
+                    PopParticles = Instantiate(Resources.Load<GameObject>("Prefabs/BalloonPop_Effect"));
+                    PopParticles.name = "PopParticles";
+                }
 
-                PopParticles.name = "PopParticles";
             }
             else
             {
@@ -526,16 +535,38 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 AddTokenInflateAudioPlayed = true;
             }
         });
-        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ITI);
-        Feedback.SpecifyTermination(() => true && Response != 1, ITI);
+        Feedback.SpecifyTermination(() => AddTokenInflateAudioPlayed && !TokenFBController.IsAnimating(), ConfirmMinTrialDuration);
+        Feedback.SpecifyTermination(() => true && Response != 1, ConfirmMinTrialDuration);
         Feedback.AddUniversalTerminationMethod(() =>
         {
-            if(TokenFBController.IsTokenBarFull())
-                GiveReward();
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
         });
+        ConfirmMinTrialDuration.AddDefaultInitializationMethod(() =>
+        {
+            StateAfterDelay = ITI;
+            trialDuration = Time.time - trialStartTime;
+            if (CurrentTrial.RandomMinTrialDuration != null)
+            {
+                // Get the lowest and highest possible durations scaled by 100
+                int lowestPossibleDuration = (int)(CurrentTrial.RandomMinTrialDuration[0] * 100);
+                int highestPossibleDuration = (int)(CurrentTrial.RandomMinTrialDuration[1] * 100);
 
+                // Generate a random number between the scaled values
+                int randomDuration = CurrentTaskLevel.CurrentBlock.RandomNumGenerator.Next(lowestPossibleDuration, highestPossibleDuration);
+
+                // Convert the random duration back to its original scale by dividing by 100
+                CurrentTrial.MinTrialDuration = randomDuration / 100.0f; // Use float division to retain decimal precision
+
+                if (trialDuration > CurrentTrial.MinTrialDuration)
+                    trialEndDelayDuration = 0;
+                else
+                    trialEndDelayDuration = (float)CurrentTrial.MinTrialDuration - trialDuration;
+            }
+            else
+                trialEndDelayDuration = 0;
+        });
+        ConfirmMinTrialDuration.AddTimer(() => trialEndDelayDuration, ITI);
         //ITI state ------------------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(itiDuration.value, FinishTrial);
         
@@ -544,6 +575,23 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     }
 
     //HELPER FUNCTIONS ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public override void OnTokenBarFull()
+    {
+        if (SideChoice == "Left")
+        {
+            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
+        }
+        else
+        {
+            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
+        }
+    }
+
     public override void ResetTrialVariables()
     {
         NumInflations = 0;
@@ -597,7 +645,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         }
 
         ClearTrialSummaryString();
-        TokenFBController.ResetTokenBarFull();
     }
 
     public override void DefineCustomTrialDefSelection()
@@ -775,25 +822,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         StimRight.transform.position = RightStimOriginalPosition;
     }
 
-    private void GiveReward()
-    {
-        if (Session.SyncBoxController == null)
-            return;
-
-        if (SideChoice == "Left")
-        {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
-
-        }
-        else
-        {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
-        }
-    }
 
     private void DisableAllGameobjects()
     {
@@ -979,6 +1007,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("AverageClickTimes", () => AvgClickTime);
         TrialData.AddDatum("ClicksPerOutline", () => CurrentTrial.ClicksPerOutline);
         TrialData.AddDatum("TrialTouches", () => TrialTouches);
+        TrialData.AddDatum("TrialDuration", () => trialDuration);
     }
 
     private void DefineFrameData()

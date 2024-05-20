@@ -8,7 +8,10 @@ using SFB;
 
 [RequireComponent(typeof(Button))]
 public class CanvasSampleSaveFileImage : MonoBehaviour, IPointerDownHandler {
-    public Text output;
+    public string Title = "";
+    public string Directory = "";
+    public string FileName = "";
+    public string Extension = "";
 
     private byte[] _textureBytes;
 
@@ -32,16 +35,16 @@ public class CanvasSampleSaveFileImage : MonoBehaviour, IPointerDownHandler {
     // WebGL
     //
     [DllImport("__Internal")]
-    private static extern void DownloadFile(string gameObjectName, string methodName, string filename, byte[] byteArray, int byteArraySize);
+    private static extern void DownloadFile(string id, string filename, byte[] byteArray, int byteArraySize);
 
     // Broser plugin should be called in OnPointerDown.
     public void OnPointerDown(PointerEventData eventData) {
-        DownloadFile(gameObject.name, "OnFileDownload", "sample.png", _textureBytes, _textureBytes.Length);
+        DownloadFile(gameObject.name, FileName + "." + Extension, _textureBytes, _textureBytes.Length);
     }
 
     // Called from browser
-    public void OnFileDownload() {
-        output.text = "File Successfully Downloaded";
+    public void OnFileDownloaded() {
+        //
     }
 #else
     //
@@ -56,7 +59,7 @@ public class CanvasSampleSaveFileImage : MonoBehaviour, IPointerDownHandler {
     }
 
     public void OnClick() {
-        var path = StandaloneFileBrowser.SaveFilePanel("Title", "", "sample", "png");
+        var path = StandaloneFileBrowser.SaveFilePanel(Title, Directory, FileName, Extension);
         if (!string.IsNullOrEmpty(path)) {
             File.WriteAllBytes(path, _textureBytes);
         }

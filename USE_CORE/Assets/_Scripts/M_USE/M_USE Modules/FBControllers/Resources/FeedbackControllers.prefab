@@ -95,9 +95,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b9b0d55229496c40b881734b3d28261, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PositiveHaloPrefab: {fileID: 5037791256376228876, guid: c298de6b03e0a4aa39453b09991fa51a,
+  PositiveCircleHaloPrefab: {fileID: 5037791256376228876, guid: c298de6b03e0a4aa39453b09991fa51a,
     type: 3}
-  NegativeHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
+  NegativeCircleHaloPrefab: {fileID: 5037791256376228876, guid: 16e45646239064935a4dd461a06a784b,
+    type: 3}
+  PositiveParticleHaloPrefab: {fileID: 8146530953326796319, guid: 90b06cf83fb5f2a48aeb4992c098a270,
+    type: 3}
+  NegativeParticleHaloPrefab: {fileID: 6565023332562688939, guid: 44215ceaa6d78cc4d89d11e7efcbaec5,
     type: 3}
   IsFlashing: 0
 --- !u!114 &3953842124438570051

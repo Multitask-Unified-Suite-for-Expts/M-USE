@@ -21,12 +21,14 @@ public class GazeCalibrationController : MonoBehaviour
     {
         GazeCalibration_CanvasGO.SetActive(true);
         GazeCalibration_CameraGO.SetActive(true);
+
     }    
     public void DectivateGazeCalibrationComponents()
     {
         GazeCalibration_CanvasGO.SetActive(false);
         GazeCalibration_CameraGO.SetActive(false);
-    }  
+
+    }
     public void ReassignGazeCalibrationDataFolderPath(string newFolderPath)
     {
         GazeCalibrationTaskLevel.BlockData.folderPath = newFolderPath + Path.DirectorySeparatorChar + "BlockData";

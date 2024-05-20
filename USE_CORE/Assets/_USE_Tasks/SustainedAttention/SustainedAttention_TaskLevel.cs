@@ -63,13 +63,12 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
 
-        CurrentBlockString = "\nSuccessful Target Selections: " + trialLevel.SuccessfulTargetSelections_Block +
-                             "\nUnsuccessful Target Selections: " + trialLevel.UnsuccessfulTargetSelections_Block +
-                             "\nDistractor Selections: " + trialLevel.DistractorSelections_Block +
-                             "\nDistractor Rejections: " + trialLevel.DistractorRejections_Block +
-                             "\nAdditional Target Selections: " + trialLevel.AdditionalTargetSelections_Block +
-                             "\nIntervals Without A Selection: " + trialLevel.TargetAnimsWithoutSelection_Block +
-                             "\nTarget Selections Before First Anim: " + trialLevel.TargetSelectionsBeforeFirstAnim_Block +
+        CurrentBlockString = "\nSuccessful Target Sel: " + trialLevel.SuccessfulTargetSelections_Block +
+                             "\nUnsuccessful Target Sel: " + trialLevel.UnsuccessfulTargetSelections_Block +
+                             "\nDistractor Sel: " + trialLevel.DistractorSelections_Block +
+                             "\nDistractor Rej: " + trialLevel.DistractorRejections_Block +
+                             "\nAdditional Target Sel: " + trialLevel.AdditionalTargetSelections_Block +
+                             "\nIntervals w/o Sel: " + trialLevel.TargetAnimsWithoutSelection_Block +
                              "\nReward Pulses: " + NumRewardPulses_InBlock;
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
@@ -98,23 +97,17 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public override OrderedDictionary GetBlockResultsData()
+    public override OrderedDictionary GetTaskResultsData()
     {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = trialLevel.TrialCompletions_Block,
-            ["Successful Target Selections"] = trialLevel.SuccessfulTargetSelections_Block,
-            ["Unsuccessful Target Selections"] = trialLevel.UnsuccessfulTargetSelections_Block,
-            ["Distractor Selections"] = trialLevel.DistractorSelections_Block,
-            ["Distractor Rejections"] = trialLevel.DistractorRejections_Block,
-            ["Premature Target Selections"] = trialLevel.TargetSelectionsBeforeFirstAnim_Block,
-            ["Intervals Without A Selection"] = trialLevel.TargetAnimsWithoutSelection_Block,
-            ["Additional Target Selections"] = trialLevel.AdditionalTargetSelections_Block,
-            ["SliderBar Completions"] = trialLevel.SliderBarCompletions_Block,
+        OrderedDictionary data = base.GetTaskResultsData();
+        //data["Longest Streak"] = LongestStreak;
+        //data["Average Streak"] = GetAvgStreak();
+        //data["Trials Correct"] = TrialsCorrect_Task;
+        //data["TokenBar Completions"] = TokenBarCompletions_Task;
 
-        };
         return data;
     }
+
 
     private void DefineBlockData()
     {

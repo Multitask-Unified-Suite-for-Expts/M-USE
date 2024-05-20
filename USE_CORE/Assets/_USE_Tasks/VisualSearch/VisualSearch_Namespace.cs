@@ -33,6 +33,7 @@ namespace VisualSearch_Namespace
 {
     public class VisualSearch_TaskDef : TaskDef
     {
+        public override float TaskDirectionalLightIntensity { get; set; } = 2f;
     }
 
     public class VisualSearch_BlockDef : BlockDef
@@ -40,8 +41,8 @@ namespace VisualSearch_Namespace
         public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
         public bool RandomizedLocations;
-        public bool TokensWithStimOn = false;
-
+        public bool TokensWithStimOn;
+        public float? FeatureSimilarity;
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -71,6 +72,8 @@ namespace VisualSearch_Namespace
                 td.TokensWithStimOn = TokensWithStimOn;
                 td.MaxTrials = MaxTrials;
                 td.BlockCount = BlockCount;
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;             
                 TrialDefs.Add(td);
             }
@@ -91,7 +94,8 @@ namespace VisualSearch_Namespace
                 td.NumPulses = NumPulses;
                 td.PulseSize = PulseSize;
                 td.TokensWithStimOn = TokensWithStimOn;
-
+                td.ParticleHaloActive = ParticleHaloActive;
+                td.CircleHaloActive = CircleHaloActive;
                 TrialDefs[iTrial] = td;
             }
         }
@@ -106,10 +110,33 @@ namespace VisualSearch_Namespace
         public Reward[] ProbablisticNumPulses;
         public bool TokensWithStimOn;
         public bool RandomizedLocations;
+        public float? FeatureSimilarity;
     }
 
     public class VisualSearch_StimDef : StimDef
     {
         public bool IsTarget;
+    }
+
+    public class VisualSearch_TrialDataSummary
+    {
+        public float? FeatureSimilarity;
+        public float? ReactionTime;
+        public int NumDistractors;
+        public float? SelectionPrecision;
+        public int? CorrectSelection;
+
+    }
+    public class VisualSearch_TaskDataSummary
+    {
+        public float? AvgReactionTime;
+        public double? HighFeatureSimilarityAccuracy;
+        public double? LowFeatureSimilarityAccuracy;
+        public double? DistractorInterferenceAccuracy;
+        public double? DistractorInterferenceReactionTime;
+        public float? AvgSelectionPrecision;
+        public float? TotalAccuracy;
+        public float? MedianFeatureSimilarity;
+
     }
 }

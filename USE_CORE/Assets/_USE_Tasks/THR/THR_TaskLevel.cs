@@ -64,19 +64,6 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         });
     }
 
-    public override OrderedDictionary GetBlockResultsData()
-    {
-        OrderedDictionary data = new OrderedDictionary
-        {
-            ["Trials Completed"] = trialLevel.TrialCount_InBlock + 1,
-            ["Trials Correct"] = trialLevel.TrialsCorrect_Block,
-            ["Touches Released Early"] = trialLevel.NumReleasedEarly_Block,
-            ["Touches Released Late"] = trialLevel.NumReleasedLate_Block,
-            ["Touches Moved Outside"] = trialLevel.NumTouchesMovedOutside_Block
-        };
-        return data;
-    }
-
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
@@ -92,6 +79,17 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         data["Released Late"] = ReleasedLate_Task;
         data["Touches Moved Outside"] = TouchesMovedOutside_Task;
        
+        return data;
+    }
+
+    public override OrderedDictionary GetTaskResultsData()
+    {
+        OrderedDictionary data = base.GetTaskResultsData();
+        //data["Longest Streak"] = LongestStreak;
+        //data["Average Streak"] = GetAvgStreak();
+        //data["Trials Correct"] = TrialsCorrect_Task;
+        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
         return data;
     }
 

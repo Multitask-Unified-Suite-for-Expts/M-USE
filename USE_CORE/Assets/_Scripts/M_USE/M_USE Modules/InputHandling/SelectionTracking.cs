@@ -191,6 +191,7 @@ namespace SelectionTracking
             public StimDefPointer SelectedStimDefPointer;
             public bool WasSuccessful;
             public List<Vector3> InputLocations;
+            public float SelectionPrecision;
             public string ErrorType;
 
             public string ParentName;
@@ -207,7 +208,9 @@ namespace SelectionTracking
                 InputLocations = new List<Vector3>();
 
                 if(go != null)
+                {
                     ParentName = GetRootParentName(go);
+                }
             }
 
             public static string GetRootParentName(GameObject go)
@@ -233,6 +236,7 @@ namespace SelectionTracking
             {
                 EndTime = Time.time;
                 Duration = EndTime - StartTime;
+                //Debug.LogWarning("COMPLETE SELECTION DUR: " + Duration);
                 WasSuccessful = success;
                 //error handling?
             }
@@ -336,6 +340,17 @@ namespace SelectionTracking
                 LastSelection = new USE_Selection(null);
                 LastSuccessfulSelection = new USE_Selection(null);
                 LastUnsuccessfulSelection = new USE_Selection(null);
+            }
+
+            public bool LastSelectionMatches(GameObject go)
+            {
+                if(go != null && LastSelection != null && LastSelection.SelectedGameObject != null)
+                {
+                    if (ReferenceEquals(LastSelection.SelectedGameObject, go))
+                        return true;
+                }
+
+                return false;
             }
 
             public bool LastSuccessfulSelectionMatches(List<GameObject> gameObjects) //Used for startbutton since it has 3 children GO's
@@ -477,7 +492,9 @@ namespace SelectionTracking
                     if (initErrors == null)
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                     else
+                    {
                         SelectionErrorHandling(initErrors);
+                    }
                 }
             }
 
@@ -501,7 +518,6 @@ namespace SelectionTracking
                 }
                 else
                 {
-                    SelectionErrorHandling(updateErrors);
                     return false;
                 }
             }
@@ -512,13 +528,15 @@ namespace SelectionTracking
                 string? termErrors = CheckAllErrorTriggers("term");
 
                 if (term == null || term.Value)
-                {   
+                {
                     if (termErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
                         OngoingSelection.CompleteSelection(true);
                         OngoingSelection.WasSuccessful = true;
                         LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
+                        if(OngoingSelection.SelectedGameObject != null)
+                            LastSuccessfulSelection.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(OngoingSelection.SelectedGameObject.transform.root.position));
                         SuccessfulSelections.Add(OngoingSelection);
 
                         //For EventCodes:

@@ -9,6 +9,12 @@ using SFB;
 
 [RequireComponent(typeof(Button))]
 public class CanvasSampleOpenFileText : MonoBehaviour, IPointerDownHandler {
+    public string Title = "";
+    public string FileName = "";
+    public string Directory = "";
+    public string Extension = "";
+    public bool Multiselect = false;
+
     public Text output;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -16,14 +22,14 @@ public class CanvasSampleOpenFileText : MonoBehaviour, IPointerDownHandler {
     // WebGL
     //
     [DllImport("__Internal")]
-    private static extern void UploadFile(string gameObjectName, string methodName, string filter, bool multiple);
+    private static extern void UploadFile(string id);
 
     public void OnPointerDown(PointerEventData eventData) {
-        UploadFile(gameObject.name, "OnFileUpload", ".txt", false);
+        UploadFile(gameObject.name);
     }
 
     // Called from browser
-    public void OnFileUpload(string url) {
+    public void OnFileUploaded(string url) {
         StartCoroutine(OutputRoutine(url));
     }
 #else
@@ -38,7 +44,7 @@ public class CanvasSampleOpenFileText : MonoBehaviour, IPointerDownHandler {
     }
 
     private void OnClick() {
-        var paths = StandaloneFileBrowser.OpenFilePanel("Title", "", "txt", false);
+        var paths = StandaloneFileBrowser.OpenFilePanel(Title, Directory, Extension, Multiselect);
         if (paths.Length > 0) {
             StartCoroutine(OutputRoutine(new System.Uri(paths[0]).AbsoluteUri));
         }

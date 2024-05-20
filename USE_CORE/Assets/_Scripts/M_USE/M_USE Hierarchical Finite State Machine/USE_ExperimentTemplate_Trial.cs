@@ -75,7 +75,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public int blockAccuracy;
 
 
-        [HideInInspector] public bool ForceBlockEnd;
+        [HideInInspector] public bool ForceBlockEnd, ReachedCriterion;
         [HideInInspector] public string TaskDataPath, TrialSummaryString;
         protected State LoadTrialTextures, LoadTrialStims, SetupTrial, FinishTrial, Delay, GazeCalibration;
         
@@ -120,17 +120,9 @@ namespace USE_ExperimentTemplate_Trial
 
         public int CurrentTrialDefIndex;
 
-        //if anyone uses this test it!
-        public List<GameObject> AssignStimToList(StimGroup sg, List<GameObject> existingList = null)
-        {
-            if (existingList == null)
-                existingList = new List<GameObject>();
 
-            foreach (var stim in sg.stimDefs)
-                existingList.Add(stim.StimGameObject);
 
-            return existingList;
-        }
+
 
         public virtual void DefineCustomTrialDefSelection()
         {
@@ -176,6 +168,26 @@ namespace USE_ExperimentTemplate_Trial
 
         public Type TrialDefType, StimDefType;
 
+
+        public virtual void OnTokenBarFull()
+        {
+
+        }
+
+        public void SubscribeToEvents()
+        {
+            if(TokenFBController != null)
+                TokenFBController.OnTokenBarFilled += OnTokenBarFull;
+        }
+
+        private void OnDestroy()
+        {
+            if(TokenFBController != null)
+                TokenFBController.OnTokenBarFilled -= OnTokenBarFull;
+
+        }
+
+
         public void DefineTrialLevel()
         {
             Session.TrialLevel = this;
@@ -205,12 +217,11 @@ namespace USE_ExperimentTemplate_Trial
             //DefineTrial();
             Add_ControlLevel_InitializationMethod(() =>
             {
+                SubscribeToEvents();
 
                 TrialCount_InBlock = -1;
-                if (TrialCount_InBlock <= 0)
-                {
-                    DefineCustomTrialDefSelection();
-                }
+                DefineCustomTrialDefSelection();
+                
                 TrialStims = new List<StimGroup>();
                 AudioFBController?.UpdateAudioSource();
 
@@ -240,7 +251,6 @@ namespace USE_ExperimentTemplate_Trial
             LoadTrialTextures.SpecifyTermination(() => TrialFilesLoaded, LoadTrialStims);
 
 
-
             LoadTrialStims.AddUniversalInitializationMethod(() =>
             {
                 if(!Session.WebBuild && TrialCount_InTask != 0)
@@ -266,8 +276,6 @@ namespace USE_ExperimentTemplate_Trial
 
             SetupTrial.AddUniversalInitializationMethod(() =>
             {
-                Session.LoadingController.DeactivateLoadingCanvas();
-
                 if (Session.WebBuild)
                     Cursor.visible = true;
 
@@ -281,7 +289,8 @@ namespace USE_ExperimentTemplate_Trial
                 ResetRelativeStartTime();
 
                 ResetTrialVariables();
-
+                TouchFBController?.ClearErrorCounts();
+                Session.MouseTracker?.ResetClicks();
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>
@@ -293,7 +302,7 @@ namespace USE_ExperimentTemplate_Trial
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
                 //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
-                StartCoroutine(DisableTaskMainBackground());
+                StartCoroutine(TurnOffLoadingCanvas());
 
             });
 
@@ -312,8 +321,6 @@ namespace USE_ExperimentTemplate_Trial
                         }
                     }
                 }
-
-                
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -339,16 +346,17 @@ namespace USE_ExperimentTemplate_Trial
                     TrialStims.RemoveAt(0);
                 }
 
+                TaskLevel.TotalTouches_InBlock += Session.MouseTracker.GetClickCount()[0];
+                TaskLevel.TotalIncompleteTouches_InBlock += TouchFBController?.ErrorCount;
+
                 WriteDataFiles();
                 
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
                 
-                TouchFBController?.ClearErrorCounts();
                 Resources.UnloadUnusedAssets();
                 TrialSummaryString = "";
                 
-
                 Session.ClearStimLists();
             });
 
@@ -426,16 +434,12 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
-        private IEnumerator DisableTaskMainBackground()
+        private IEnumerator TurnOffLoadingCanvas()
         {
             yield return new WaitForEndOfFrame();
             yield return new WaitForEndOfFrame();
 
-            if (TaskLevel.TaskCam != null)
-            {
-                if (TaskLevel.TaskCam.gameObject.TryGetComponent<Skybox>(out var skyboxComponent))
-                    skyboxComponent.enabled = false;
-            }
+            Session.LoadingController.DeactivateLoadingCanvas();
         }
 
         private IEnumerator HandleLoadingStims()
@@ -654,20 +658,7 @@ namespace USE_ExperimentTemplate_Trial
             Vector2 pvPosition = new Vector2((position[0] / Screen.width) * playerViewParent.GetComponent<RectTransform>().sizeDelta.x, (position[1] / Screen.height) * playerViewParent.GetComponent<RectTransform>().sizeDelta.y);
             return pvPosition;
         }
-        // public GameObject CreateSquare(string name, Texture2D tex, Vector3 pos, Vector3 scale)
-        // {
-        //     GameObject SquareGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //
-        //     Renderer SquareRenderer = SquareGO.GetComponent<Renderer>();
-        //     SquareGO.name = name;
-        //     SquareRenderer.material.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
-        //     SquareRenderer.material.SetFloat("_SpecularHighlights",0f);
-        //     SquareRenderer.material.mainTexture = tex;
-        //     SquareGO.transform.position = pos;
-        //     SquareGO.transform.localScale = scale;
-        //     SquareGO.SetActive(false);
-        //     return SquareGO;
-        // }
+
         public int chooseReward(Reward[] rewards)
         {
             float totalProbability = 0;

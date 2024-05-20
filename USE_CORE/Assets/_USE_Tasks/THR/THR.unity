@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481676, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311915, g: 0.3807396, b: 0.35872662, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -213,7 +213,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -239,7 +238,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &222994814
 Light:
   m_ObjectHideFlags: 0
@@ -312,7 +311,6 @@ Transform:
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -360,6 +358,23 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  runningPerformance: 
+  difficultyLevel: 0
+  posStep: 0
+  negStep: 0
+  TrialDefSelectionStyle: 
+  maxDiffLevel: 0
+  avgDiffLevel: 0
+  diffLevelJitter: 0
+  NumReversalsUntilTerm: 0
+  MinTrialsBeforeTermProcedure: 0
+  TerminationWindowSize: 0
+  reversalsCount: 0
+  DiffLevelsAtReversals: 
+  DiffLevelsSummary: 
+  TimingValuesAtReversals: []
+  calculatedThreshold_timing: 0
+  blockAccuracy: 0
   ForceBlockEnd: 0
   TaskDataPath: 
   TrialSummaryString: 
@@ -384,11 +399,9 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
-  runCalibration: 0
-  InitialTokenAmount: 0
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
-  TrialDefSelectionStyle: 
+  SkyboxMaterial: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
   MovedTooFarTexture: {fileID: 0}
@@ -396,6 +409,7 @@ MonoBehaviour:
   HeldTooShortSquareTexture: {fileID: 0}
   HeldTooLongSquareTexture: {fileID: 0}
   TrialFilesLoaded: 0
+  CurrentTrialDefIndex: 0
   THR_CanvasGO: {fileID: 186084661}
   RunningAcc: 
   TrialsCompleted_Block: 0
@@ -438,7 +452,6 @@ MonoBehaviour:
   quitApplicationAtEnd: 0
   DebugActive: 1
   Paused: 1
-  PrefabPath: 
   ConfigFolderName: 
   TaskName: THR
   TaskProjectFolder: 
@@ -456,6 +469,7 @@ MonoBehaviour:
   TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
+  TaskDirectionalLight: {fileID: 222994813}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
   StimCanvas_2D: {fileID: 0}
@@ -473,12 +487,12 @@ MonoBehaviour:
     IsActive: 0
   PreloadedStimGameObjects: []
   PrefabStimPaths: []
+  configUI: {fileID: 0}
+  ActiveSceneElements: []
   DrawRenderTexture: {fileID: 0}
   TaskLevelDefined: 0
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
-  BlockResultsPrefab: {fileID: 0}
-  BlockResults_GridElementPrefab: {fileID: 0}
   BlockResults_AudioClip: {fileID: 0}
   BlockResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
@@ -504,7 +518,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -588,7 +601,6 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0

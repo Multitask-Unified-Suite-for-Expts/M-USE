@@ -31,12 +31,13 @@ using System.IO;
 using UnityEngine.UI;
 using System.Collections;
 
-
 public class InitScreen_Level : ControlLevel
 {
     public GameObject InitScreen_GO;
-    public GameObject StartPanel_GO;
+    private GameObject MuseTextParentGO;
+    private GameObject PlayBackgroundImageGO;
     public GameObject MainPanel_GO;
+    public GameObject QuaddlesGO;
 
     public GameObject InitScreenCanvas_GO;
 
@@ -75,7 +76,6 @@ public class InitScreen_Level : ControlLevel
     public GameObject LocalConfigsToggle_GreyPanel;
     public GameObject LocalDataToggle_GreyPanel;
 
-    private AudioSource AudioSource;
     [HideInInspector] public AudioClip ToggleChange_AudioClip;
     [HideInInspector] public AudioClip Error_AudioClip;
     [HideInInspector] public AudioClip Connected_AudioClip;
@@ -93,33 +93,61 @@ public class InitScreen_Level : ControlLevel
     public Toggle KeyboardToggle;
 
 
+
     public override void DefineControlLevel()
     {
         State Setup = new State("Setup");
-        State StartScreen = new State("StartScreen");
+        State FadeQuaddlesIn = new State("FadeQuaddlesIn");
+        State WaitForStartPressed = new State("WaitForStartPressed");
         State CollectInfoScreen = new State("CollectInfoScreen");
-        AddActiveStates(new List<State> { Setup, StartScreen, CollectInfoScreen });
+        AddActiveStates(new List<State> { Setup, FadeQuaddlesIn, WaitForStartPressed, CollectInfoScreen });
 
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
         Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
-        Setup.SpecifyTermination(() => true, StartScreen);
+        Setup.SpecifyTermination(() => true, FadeQuaddlesIn);
 
-        //StartScreen State-----------------------------------------------------------------------------------------------------------------------------------
-        StartScreen.AddSpecificInitializationMethod(() =>
+        //FadeQuaddlesIn State-----------------------------------------------------------------------------------------------------------------------------------
+        Vector3 startingPos = new Vector3();
+        float fadeInSpeed = 3f;
+        bool DoneFading = false;
+        FadeQuaddlesIn.AddSpecificInitializationMethod(() =>
         {
-            StartPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen
-            StartPanel_GO.SetActive(true);
+            DoneFading = false;
+
+            MuseTextParentGO = Instantiate(Resources.Load<GameObject>("TitleText"), InitScreenCanvas_GO.transform);
+            MuseTextParentGO.name = "TitleTextParent";
+            MuseTextParentGO.SetActive(true);
+
+            QuaddlesGO = Instantiate(Resources.Load<GameObject>("IntroStim"));
+            QuaddlesGO.name = "IntroStim";
+            QuaddlesGO.SetActive(true);
+
+            PlayBackgroundImageGO = MuseTextParentGO.transform.Find("BackgroundImage").gameObject;
+            PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
+            PlayBackgroundImageGO.SetActive(false);
+
+            PlayBackgroundImageGO.SetActive(true);
+
+            startingPos = QuaddlesGO.transform.position;
+            QuaddlesGO.transform.position = new Vector3(QuaddlesGO.transform.position.x, -3f, QuaddlesGO.transform.position.z);
         });
-        StartScreen.AddUpdateMethod(() =>
+        FadeQuaddlesIn.AddUpdateMethod(() =>
         {
-            if (StartPanel_GO.transform.localPosition != Vector3.zero)
-                StartPanel_GO.transform.localPosition = Vector3.MoveTowards(StartPanel_GO.transform.localPosition, Vector3.zero, 900 * Time.deltaTime);
+            if (QuaddlesGO.transform.position != startingPos)
+                QuaddlesGO.transform.position = Vector3.MoveTowards(QuaddlesGO.transform.position, startingPos, fadeInSpeed * Time.deltaTime);
+            else
+                DoneFading = true;
         });
-        StartScreen.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen, () =>
+        FadeQuaddlesIn.SpecifyTermination(() => DoneFading, WaitForStartPressed);
+
+        //WaitForStartPressed State-----------------------------------------------------------------------------------------------------------------------------------
+        WaitForStartPressed.SpecifyTermination(() => ConfirmButtonPressed, CollectInfoScreen);
+        WaitForStartPressed.AddUniversalTerminationMethod(() =>
         {
             ConfirmButtonPressed = false;
-            StartPanel_GO.SetActive(false);
+            MuseTextParentGO.SetActive(false);
+            QuaddlesGO.SetActive(false);
         });
 
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
@@ -149,14 +177,20 @@ public class InitScreen_Level : ControlLevel
             SetConfigInfo();
             SetDataInfo();
             InitScreenCanvas_GO.SetActive(false);
-            Session.LoadingController.ActivateLoadingCanvas(); //turn on loading canvas/circle so that it immedietely shows its loading!
+            Session.LoadingController.ActivateLoadingCanvas(Session.WebBuild ? 0 : 1); //turn on loading canvas/circle so that it immedietely shows its loading!
+
+            //Set Main cam rotation and position to that of the init cam:
+            Camera.main.transform.position = Session.InitCamGO.transform.position;
+            Camera.main.transform.rotation = Session.InitCamGO.transform.rotation;
+
         });
 
     }
 
+
     public void OnKeyboardTogglePressed()
     {
-        PlayAudio(ToggleChange_AudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
         KeyboardController.UsingKeyboard = KeyboardToggle.isOn;
     }
 
@@ -359,19 +393,27 @@ public class InitScreen_Level : ControlLevel
     public void OnToggleChange()
     {
         if (ValuesLoaded)
-            PlayAudio(ToggleChange_AudioClip);
+            Session.SessionAudioController.PlayAudioClip("ClickedButton");
 
         GameObject selectedGO = UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 
-        if (selectedGO.name.ToLower().Contains("config"))
-            HandleConfigToggle(selectedGO);
-
-        else if (selectedGO.name.ToLower().Contains("data"))
-            HandleDataToggle(selectedGO);
+        if(selectedGO != null)
+        {
+            if (selectedGO.name.ToLower().Contains("config"))
+                HandleConfigToggle(selectedGO);
+            else if (selectedGO.name.ToLower().Contains("data"))
+                HandleDataToggle(selectedGO);
+        }
     }
 
     private void SetupInitScreen()
     {
+        if (Session.WebBuild)
+        {
+            InitScreenCanvas_GO.GetComponent<Canvas>().targetDisplay = 0;
+            Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
+        }
+
         KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
 
         SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
@@ -413,13 +455,9 @@ public class InitScreen_Level : ControlLevel
             LocalDataToggle_GreyPanel.SetActive(false);
         }
 
-        AudioSource = gameObject.AddComponent<AudioSource>();
         ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
         Error_AudioClip = Resources.Load<AudioClip>("Error");
         Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
-
-        if (Session.WebBuild)
-            Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
     }
 
     public void HandleSettingButtonClicked()
@@ -429,7 +467,7 @@ public class InitScreen_Level : ControlLevel
 
     private void DisplayErrorMessage(string message, string errorType)
     {
-        PlayAudio(Error_AudioClip);
+        Session.SessionAudioController.PlayAudioClip("Error");
         ErrorType = errorType;
         ErrorHandling_GO.SetActive(true);
         ErrorHandling_GO.transform.Find("ErrorHandling_Text").GetComponent<TextMeshProUGUI>().text = message;
@@ -449,14 +487,14 @@ public class InitScreen_Level : ControlLevel
             DisplayErrorMessage("Input a Data Folder Path!", "EmptyDataFolder");
         else
         {
-            PlayAudio(ToggleChange_AudioClip);
+            Session.SessionAudioController.PlayAudioClip("ClickedButton");
             ConfirmButtonPressed = true;
         }
     }
 
     public void HandleStartSessionButtonPress()
     {
-        PlayAudio(ToggleChange_AudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
         ConfirmButtonPressed = true;
     }
 
@@ -476,7 +514,7 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
-                PlayAudio(Connected_AudioClip);
+                Session.SessionAudioController.PlayAudioClip("Connected");
                 ConnectedToServer = true;
                 if(ServerConfig_Toggle.isOn)
                     GreyOutPanels_Array[2].SetActive(false);
@@ -493,7 +531,7 @@ public class InitScreen_Level : ControlLevel
             else
             {
                 Debug.LogWarning("UNABLE TO CONNECT TO SERVER!");
-                PlayAudio(Error_AudioClip);
+                Session.SessionAudioController.PlayAudioClip("Error");
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
                 RedX_GO.SetActive(true);
             }
@@ -528,17 +566,6 @@ public class InitScreen_Level : ControlLevel
     {
         string datavalue = ServerData_GO.activeInHierarchy ? ServerData_Text.GetComponent<TextMeshProUGUI>().text : LocalData_Text.GetComponent<TextMeshProUGUI>().text;
         return datavalue.Remove(datavalue.Length - 1, 1);
-    }
-
-    public void PlayAudio(AudioClip clip)
-    {
-        if (clip != null)
-        {
-            AudioSource.clip = clip;
-            AudioSource.Play();
-        }
-        else
-            Debug.Log("CANT PLAY AUDIO CLIP BECAUSE IT IS NULL!");
     }
 
 

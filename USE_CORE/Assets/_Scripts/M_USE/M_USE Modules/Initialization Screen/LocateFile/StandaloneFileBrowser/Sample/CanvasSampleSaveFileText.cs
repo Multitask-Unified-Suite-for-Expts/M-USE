@@ -8,7 +8,10 @@ using SFB;
 
 [RequireComponent(typeof(Button))]
 public class CanvasSampleSaveFileText : MonoBehaviour, IPointerDownHandler {
-    public Text output;
+    public string Title = "";
+    public string Directory = "";
+    public string FileName = "";
+    public string Extension = "";
 
     // Sample text data
     private string _data = "Example text created by StandaloneFileBrowser";
@@ -18,17 +21,17 @@ public class CanvasSampleSaveFileText : MonoBehaviour, IPointerDownHandler {
     // WebGL
     //
     [DllImport("__Internal")]
-    private static extern void DownloadFile(string gameObjectName, string methodName, string filename, byte[] byteArray, int byteArraySize);
+    private static extern void DownloadFile(string id, string filename, byte[] byteArray, int byteArraySize);
 
     // Broser plugin should be called in OnPointerDown.
     public void OnPointerDown(PointerEventData eventData) {
         var bytes = Encoding.UTF8.GetBytes(_data);
-        DownloadFile(gameObject.name, "OnFileDownload", "sample.txt", bytes, bytes.Length);
+        DownloadFile(gameObject.name, FileName + "." + Extension, bytes, bytes.Length);
     }
 
     // Called from browser
-    public void OnFileDownload() {
-        output.text = "File Successfully Downloaded";
+    public void OnFileDownloaded() {
+        //
     }
 #else
     //
@@ -43,7 +46,7 @@ public class CanvasSampleSaveFileText : MonoBehaviour, IPointerDownHandler {
     }
 
     public void OnClick() {
-        var path = StandaloneFileBrowser.SaveFilePanel("Title", "", "sample", "txt");
+        var path = StandaloneFileBrowser.SaveFilePanel(Title, Directory, FileName, Extension);
         if (!string.IsNullOrEmpty(path)) {
             File.WriteAllText(path, _data);
         }

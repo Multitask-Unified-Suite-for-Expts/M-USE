@@ -57,10 +57,13 @@ namespace USE_ExperimentTemplate_Task
         
         // protected int NumBlocksInTask;
         [HideInInspector] public int NumAbortedTrials_InTask;
+        [HideInInspector] public int NumAbortedTrials_InBlock;
+
+        [HideInInspector] public int NumRewardPulses_InBlock;
         [HideInInspector] public int NumRewardPulses_InTask;
 
-        [HideInInspector] public int NumAbortedTrials_InBlock;
-        [HideInInspector] public int NumRewardPulses_InBlock;
+        [HideInInspector] public int? TotalTouches_InBlock;
+        [HideInInspector] public int? TotalIncompleteTouches_InBlock;
 
         [HideInInspector] public int MinTrials_InBlock;
         [HideInInspector] public int MaxTrials_InBlock;
@@ -75,6 +78,8 @@ namespace USE_ExperimentTemplate_Task
 
         [HideInInspector]
         public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
+
+        public GameObject TaskDirectionalLight;
 
         private int TaskStringsAdded = 0;
         public Camera TaskCam;
@@ -102,9 +107,8 @@ namespace USE_ExperimentTemplate_Task
         public Type TaskLevelType;
         public Type TrialLevelType, TaskDefType, BlockDefType, TrialDefType, StimDefType;
         protected State VerifyTask, SetupTask, RunBlock, BlockFeedback, FinishTask;
-        protected bool BlockFbFinished;
-        protected float BlockFbSimpleDuration;
-        protected TaskLevelTemplate_Methods TaskLevel_Methods;
+        protected bool TaskFbFinished;
+        public TaskLevelTemplate_Methods TaskLevel_Methods;
         public List<GameObject> ActiveSceneElements;
 
         // protected int? MinTrials, MaxTrials;
@@ -118,9 +122,9 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public bool StimsHandled;
 
         [HideInInspector] public AudioClip BlockResults_AudioClip; //Passed by SessionLevel
-        [HideInInspector] public GameObject BlockResultsGO;
+        [HideInInspector] public GameObject TaskResultsGO;
 
-        private bool ContinueButtonClicked;
+        private bool TaskResults_ContinueButtonClicked;
 
         //Passed by session level
         [HideInInspector] public ImportSettings_Level importSettings_Level;
@@ -158,10 +162,16 @@ namespace USE_ExperimentTemplate_Task
             TrialLevel.TrialDefType = TrialDefType;
             TrialLevel.StimDefType = StimDefType;
             TrialLevel.TaskLevel = this;
+            TaskLevel_Methods.TrialLevel = TrialLevel;
 
             Add_ControlLevel_InitializationMethod(() =>
             {
                 TaskCam.gameObject.SetActive(true);
+
+                if (TaskDirectionalLight != null)
+                {
+                    TaskDirectionalLight.GetComponent<Light>().intensity = TaskDef.TaskDirectionalLightIntensity; //Set light for the task. 
+                }
 
                 if (TaskCanvasses != null)
                     foreach (Canvas canvas in TaskCanvasses)
@@ -194,13 +204,15 @@ namespace USE_ExperimentTemplate_Task
                     GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
                     if (taskCanvasGO != null)
                     {
+                        Debug.LogWarning("CREATING HUMAN START PANEL ON FRAME " + Time.frameCount);
+
                         if (taskCanvasGO.TryGetComponent(out Canvas taskCanvas))
                             Session.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
                         else
-                            Debug.LogError("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
+                            Debug.LogWarning("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
                     }
                     else
-                        Debug.LogError("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
+                        Debug.LogWarning("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
                 }
 
                 if (Session.SessionDef.FlashPanelsActive)
@@ -211,10 +223,19 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues.
+                if (TaskDirectionalLight != null)
+                {
+                    TaskDirectionalLight.SetActive(true);  
+                }
+
                 BlockCount++;
 
                 NumAbortedTrials_InBlock = 0;
                 NumRewardPulses_InBlock = 0;
+                TotalTouches_InBlock = 0;
+                TotalIncompleteTouches_InBlock = 0;
+                Session.MouseTracker.ResetClicks();
 
                 CurrentBlockDef = BlockDefs[BlockCount];
                 TrialLevel.BlockCount = BlockCount;
@@ -230,6 +251,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ConfigUiVariables = ConfigUiVariables;
 
                 TrialLevel.ForceBlockEnd = false;
+                TrialLevel.ReachedCriterion = false;
 
                 Session.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
             });
@@ -253,57 +275,39 @@ namespace USE_ExperimentTemplate_Task
             RunBlock.SpecifyTermination(() => TrialLevel.Terminated, BlockFeedback);
             
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
-            float blockFeedbackDuration =  0; //Using this variable to control the fact that on web build they may use default configs which have value of 8s, but then they may switch to NPH verrsion, which would just show them blank blockresults screen for 8s. 
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                blockFeedbackDuration = Session.SessionDef.BlockResultsDuration;
-                if (blockFeedbackDuration > 0)
-                {
-                    OrderedDictionary taskBlockResults = GetBlockResultsData();
-                    if (taskBlockResults != null && taskBlockResults.Count > 0)
-                        DisplayBlockResults(taskBlockResults);
-                }
-                else
-                    blockFeedbackDuration = 0;
-
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
-            });
-            BlockFeedback.AddUpdateMethod(() =>
-            {
-                if (ContinueButtonClicked ||
-                    (Time.time - BlockFeedback.TimingInfo.StartTimeAbsolute >= blockFeedbackDuration))
-                    BlockFbFinished = true;
-                else
-                    BlockFbFinished = false;
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
                StartCoroutine(FrameData.AppendDataToBuffer());
             });
-            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount < BlockDefs.Length - 1, RunBlock);
-            BlockFeedback.SpecifyTermination(() => BlockFbFinished && BlockCount == BlockDefs.Length - 1, FinishTask);
+            BlockFeedback.SpecifyTermination(() => true && BlockCount < BlockDefs.Length - 1, RunBlock);
+            BlockFeedback.SpecifyTermination(() => true && BlockCount == BlockDefs.Length - 1, FinishTask);
             BlockFeedback.AddDefaultTerminationMethod(() =>
             {
                 SetTaskSummaryString();
-
-                if (ContinueButtonClicked)
-                    ContinueButtonClicked = false;
-
-                if (BlockResultsGO != null)
-                    BlockResultsGO.SetActive(false);
 
                 StartCoroutine(BlockData.AppendDataToBuffer());
                 StartCoroutine(BlockData.AppendDataToFile());
 
                 StartCoroutine(FrameData.AppendDataToBuffer());
                 StartCoroutine(FrameData.AppendDataToFile());
-
-
             });
 
             //FinishTask State-----------------------------------------------------------------------------------------------------
+            float taskFeedbackDuration = 0f;
             FinishTask.AddDefaultInitializationMethod(() =>
             {
+                taskFeedbackDuration = Session.SessionDef.TaskResultsDuration;
+
+                OrderedDictionary taskResults = GetTaskResultsData();
+                if (taskFeedbackDuration > 0 && taskResults != null && taskResults.Count > 0)
+                    DisplayTaskResults(taskResults);
+                else
+                    taskFeedbackDuration = 0f;
+
                 if (TrialLevel.TouchFBController != null && TrialLevel.TouchFBController.TouchFbEnabled)
                     TrialLevel.TouchFBController.DisableTouchFeedback();
 
@@ -329,8 +333,21 @@ namespace USE_ExperimentTemplate_Task
 
                 ClearActiveTaskHandlers();
             });
+            FinishTask.AddUpdateMethod(() =>
+            {
+                if (TaskResults_ContinueButtonClicked || (Time.time - FinishTask.TimingInfo.StartTimeAbsolute >= taskFeedbackDuration))
+                    TaskFbFinished = true;
+                else
+                    TaskFbFinished = false;
+            });
+            FinishTask.SpecifyTermination(() => TaskFbFinished, () => null);
+            FinishTask.AddDefaultTerminationMethod(() =>
+            {
+                TaskResults_ContinueButtonClicked = false;
 
-            FinishTask.SpecifyTermination(() => true, () => null);
+                if (TaskResultsGO != null)
+                    TaskResultsGO.SetActive(false);
+            });
 
             AddDefaultControlLevelTerminationMethod(() =>
             {
@@ -367,7 +384,6 @@ namespace USE_ExperimentTemplate_Task
 
                 }
 
-                Session.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = TaskCam.targetDisplay;
                 TaskCam.gameObject.SetActive(false);
 
                 NumAbortedTrials_InBlock = 0;
@@ -377,7 +393,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(false);
 
-                Destroy(GameObject.Find("FeedbackControllers"));
+                Destroy(GameObject.Find("InputManager").transform.Find("FeedbackControllers(Clone)").gameObject);
 
                 if (!Session.WebBuild)
                 {
@@ -493,47 +509,59 @@ namespace USE_ExperimentTemplate_Task
         }
 
 
-        private void HandleContinueButtonClick()
+        private void HandleTaskContinueButtonClicked()
         {
-            ContinueButtonClicked = true;
+            TaskResults_ContinueButtonClicked = true;
         }
 
-        private void DisplayBlockResults(OrderedDictionary taskBlockResults)
+        private void DisplayTaskResults(OrderedDictionary taskResults)
         {
+            if(taskResults == null)
+            {
+                Debug.LogWarning("NO TASK RESULTS");
+                return;
+            }
             GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
             if (taskCanvas != null)
             {
-                BlockResultsGO = Instantiate(Session.BlockResultsPrefab);
-                BlockResultsGO.name = "BlockResults";
-                BlockResultsGO.transform.SetParent(taskCanvas.transform);
-                BlockResultsGO.transform.localScale = Vector3.one;
-                BlockResultsGO.transform.localPosition = Vector3.zero;
+                TaskResultsGO = Instantiate(Resources.Load<GameObject>("BlockResults"));
+                TaskResultsGO.name = "TaskResults";
+                TaskResultsGO.transform.SetParent(taskCanvas.transform);
+                TaskResultsGO.transform.localScale = Vector3.one;
+                TaskResultsGO.transform.localPosition = Vector3.zero;
 
-                GameObject continueButtonGO = BlockResultsGO.transform.Find("ContinueButton").gameObject;
+                //Set rotation of TaskResults to same rotation as camera so its straight on:
+                TaskResultsGO.transform.rotation = Camera.main.transform.rotation;
+
+                TaskResultsGO.transform.Find("Background").transform.Find("HeaderPanel").GetComponentInChildren<TextMeshProUGUI>().text = "Task Results";
+
+                GameObject continueButtonGO = TaskResultsGO.transform.Find("Background").transform.Find("ContinueButton").gameObject;
                 if (continueButtonGO != null)
-                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleContinueButtonClick);
+                    continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleTaskContinueButtonClicked);
 
-                Transform gridParent = BlockResultsGO.transform.Find("Grid");
+                Transform gridParent = TaskResultsGO.transform.Find("Background").transform.Find("GridSection");
 
-                AudioSource blockResults_AudioSource = gameObject.AddComponent<AudioSource>();
-                blockResults_AudioSource.clip = BlockResults_AudioClip;
-                blockResults_AudioSource.volume = .9f;
-                blockResults_AudioSource.Play();
+                AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.clip = BlockResults_AudioClip;
+                audioSource.volume = .9f;
+                audioSource.Play();
 
                 int count = 0;
-                foreach (DictionaryEntry entry in taskBlockResults)
+                foreach (DictionaryEntry entry in taskResults)
                 {
-                    blockResults_AudioSource.Play();
-                    GameObject gridItem = Instantiate(Session.BlockResults_GridElementPrefab, gridParent);
-                    gridItem.name = "GridElement" + count;
+                    audioSource.Play();
+                    GameObject gridItem = Instantiate(Resources.Load<GameObject>("TaskResults_GridItem"), gridParent);
+                    gridItem.name = entry.Key.ToString();
                     TextMeshProUGUI itemText = gridItem.GetComponentInChildren<TextMeshProUGUI>();
-                    itemText.text = $"{entry.Key}: <b>{entry.Value}</b>";
+                    itemText.text = $"{entry.Key}:  <color=#0681B5><b>{entry.Value}</b></color>";
+
                     count++;
                 }
             }
             else
                 Debug.Log("Didn't find a Task Canvas named: " + TaskName + "_Canvas");
         }
+
 
         public void ClearActiveTaskHandlers()
         {
@@ -560,15 +588,20 @@ namespace USE_ExperimentTemplate_Task
         {
             return new OrderedDictionary
             {
-                ["Trial Count In Task"] = TrialLevel.TrialCount_InTask + 1,
-                ["Aborted Trials In Task"] = NumAbortedTrials_InTask,
-                ["Num Reward Pulses"] = NumRewardPulses_InTask
+                ["Total Trials"] = TrialLevel.TrialCount_InTask + 1,
+                ["Aborted Trials"] = NumAbortedTrials_InTask,
+                ["Reward Pulses"] = NumRewardPulses_InTask
             };
         }
 
-        public virtual OrderedDictionary GetBlockResultsData()
+        public virtual OrderedDictionary GetTaskResultsData()
         {
-            return new OrderedDictionary();
+            return new OrderedDictionary
+            {
+                //["--Total Trials"] = TrialLevel.TrialCount_InTask + 1,
+                //["--Aborted Trials"] = NumAbortedTrials_InTask,
+                //["--Reward Pulses"] = NumRewardPulses_InTask
+            };
         }
 
         public virtual List<CustomSettings> DefineCustomSettings()
@@ -904,7 +937,7 @@ namespace USE_ExperimentTemplate_Task
                 {
                     if (obj.name == $"{taskLevel.TaskName}_Scripts")
                     {
-                        // Skip the task level script
+                        // Skip the task level script and task level camera
                         continue;
                     }
 
@@ -927,6 +960,8 @@ namespace USE_ExperimentTemplate_Task
 
 public class TaskLevelTemplate_Methods
     {
+        public ControlLevel_Trial_Template TrialLevel;
+
         //CALCULATE ADPATIVE TRIAL DEF 
         public int DetermineTrialDefDifficultyLevel()
         {
@@ -950,10 +985,10 @@ public class TaskLevelTemplate_Methods
             switch (blockEndType)
             {
                 case "CurrentTrialPercentError":
-                    Debug.Log("CHECKING BLOCK END - rTrialPerformance.Count: " + rTrialPerformance.Count + ", PERCENT ERROR " + (rTrialPerformance[rTrialPerformance.Count - 1]));
-
+                    Debug.LogWarning("CHECKING BLOCK END - rTrialPerformance.Count: " + rTrialPerformance.Count + ", PERCENT ERROR " + (rTrialPerformance[rTrialPerformance.Count - 1]));
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;
                     }
@@ -963,6 +998,7 @@ public class TaskLevelTemplate_Methods
                     Debug.Log("CHECKING BLOCK END - ERROR COUNT: " + rTrialPerformance[rTrialPerformance.Count - 1] + "THRESHOLD: " + performanceThreshold);
                     if (rTrialPerformance[rTrialPerformance.Count - 1] != null && rTrialPerformance[rTrialPerformance.Count-1] <= performanceThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to trial performance below threshold.");
                         return true;
                     }
@@ -1018,6 +1054,7 @@ public class TaskLevelTemplate_Methods
                     Debug.Log("Immediate: " + immediateAvg + ", threshold: " + accThreshold);
                     if (immediateAvg >= accThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to performance above threshold.");
                         return true;
                     }
@@ -1026,6 +1063,7 @@ public class TaskLevelTemplate_Methods
                 case "ThresholdAndPeak":
                     if (immediateAvg >= accThreshold && immediateAvg <= prevAvg)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to performance above threshold and no continued improvement.");
                         return true;
                     }
@@ -1034,11 +1072,13 @@ public class TaskLevelTemplate_Methods
                 case "ThresholdOrAsymptote":
                     if (sumdif != null && sumdif.Value <= 1)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to asymptotic performance.");
                         return true;
                     }
                     else if (immediateAvg >= accThreshold)
                     {
+                        TrialLevel.ReachedCriterion = true;
                         Debug.Log("Block ending due to performance above threshold.");
                         return true;
                     }

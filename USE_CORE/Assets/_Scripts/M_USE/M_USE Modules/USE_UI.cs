@@ -183,8 +183,16 @@ namespace USE_UI
         private void SetStartButtonChildren()
         {
             StartButtonChildren = new List<GameObject>();
-            foreach (Transform child in StartButtonGO.transform)
+            AddChildrenRecursively(StartButtonGO.transform);
+        }
+
+        private void AddChildrenRecursively(Transform parent)
+        {
+            foreach (Transform child in parent)
+            {
                 StartButtonChildren.Add(child.gameObject);
+                AddChildrenRecursively(child); // Recursive call to children/grandchildren
+            }
         }
 
         public void ToggleInstructions() //Used by Subject/Player to toggle Instructions
@@ -256,7 +264,6 @@ namespace USE_UI
     public class USE_StartButton : MonoBehaviour
     {
         [HideInInspector] public GameObject StartButtonGO;
-        [HideInInspector] public Image CoverCircle_Image; //Child circle that can be used to "change circle color" by activating over top of startbutton.
         [HideInInspector] public GameObject PlayIconGO; //Child Play icon
         [HideInInspector] public List<GameObject> StartButtonChildren;
         [HideInInspector] public GameObject StartButtonPrefab;
@@ -272,7 +279,6 @@ namespace USE_UI
             StartButtonGO.name = name ?? "StartButton";
             StartButtonGO.transform.SetParent(parent.transform, false);
             StartButtonGO.transform.localPosition = pos.HasValue ? pos.Value : Vector3.zero;
-            CoverCircle_Image = StartButtonGO.transform.Find("CoverCircle").gameObject.GetComponent<Image>();
             PlayIconGO = StartButtonGO.transform.Find("PlayIcon").gameObject;
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
@@ -287,19 +293,6 @@ namespace USE_UI
             StartButtonGO.SetActive(false);
 
             return StartButtonGO;
-        }
-
-        public void ActivateCoverCircle(Color32 color)
-        {
-            CoverCircle_Image.color = color;
-            PlayIconGO.SetActive(false);
-            CoverCircle_Image.gameObject.SetActive(true);
-        }
-
-        public void DeactivateCoverCircle()
-        {
-            PlayIconGO.SetActive(true);
-            CoverCircle_Image.gameObject.SetActive(false);
         }
 
         public void SetButtonPosition(Vector3 pos)

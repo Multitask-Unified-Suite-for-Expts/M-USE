@@ -159,7 +159,9 @@ public class TokenFBController : MonoBehaviour
                 RenderTexture.active = Camera.main.targetTexture;
 
         if (totalTokensNum < 0)
+        {
             return;
+        }
 
         GUI.BeginGroup(tokenBoxRect);
 
@@ -340,10 +342,14 @@ public class TokenFBController : MonoBehaviour
 
         int tokensEndNum = numCollected;
         tokensChange = numTokens;
-        if (numTokens < 0) {
+
+        if (numTokens < 0)
+        {
             numTokens = Mathf.Min(-numTokens, numCollected);
             tokensEndNum -= numTokens;
-        } else {
+        }
+        else
+        {
             numTokens = Mathf.Min(numTokens, totalTokensNum - numCollected);
         }
 

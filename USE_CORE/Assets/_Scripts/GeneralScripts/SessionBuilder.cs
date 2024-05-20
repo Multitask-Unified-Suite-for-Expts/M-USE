@@ -18,15 +18,11 @@ public class SessionBuilder : MonoBehaviour
     private List<QueueItem> QueueItems = new List<QueueItem>();
     private List<TaskObject> Tasks = new List<TaskObject>();
 
-    AudioSource buttonAudioSource;
-    AudioClip buttonClickedAudioClip;
-
     GameObject ExpDisplay_TaskOrder_GridParent;
     GameObject RunButton;
 
     [HideInInspector] public bool RunButtonClicked;
 
-    private const string AudioClipName = "GridItemAudio";
     private const string RunButtonName = "RunButton";
 
     private Color32 InactiveTaskIconBorderColor = new Color32(65, 65, 65, 255);
@@ -49,6 +45,7 @@ public class SessionBuilder : MonoBehaviour
         TaskColors = new Dictionary<string, Color32>()
         {
             {"AntiSaccade", new Color32(47, 175, 166, 255) },
+            {"AudioVisual", new Color32(255, 85, 100, 255) },
             {"ContinuousRecognition", new Color32(246, 126, 125, 255) },
             {"EffortControl", new Color32(0, 107, 166, 255) },
             {"FlexLearning", new Color32(166, 111, 88, 255) },
@@ -60,6 +57,16 @@ public class SessionBuilder : MonoBehaviour
             {"WhatWhenWhere", new Color32(199, 199, 166, 255) },
             {"WorkingMemory", new Color32(5, 190, 251, 255) },
         };
+    }
+
+    public void AddTaskColor(string taskName, Color32 color)
+    {
+        if(TaskColors.ContainsKey(taskName))
+        {
+            Debug.LogWarning("COLOR FOR " + taskName + " ALREADY EXISTS IN THE TASKCOLORS DICTIONARY, NOT ADDING IT AGAIN");
+            return;
+        }
+        TaskColors.Add(taskName, color);
     }
 
     public Color32 GetTaskColor(string taskName)
@@ -75,7 +82,9 @@ public class SessionBuilder : MonoBehaviour
         else
         {
             Debug.LogWarning("TASK COLOR DOESNT EXIST FOR " + taskName + ", SO ITS BEING GIVEN A RANDOM COLOR");
-            return new Color32((byte)Random.value, (byte)Random.value, (byte)Random.value, 1);
+            Color32 newColor = new Color32((byte)(Random.value * 255), (byte)(Random.value * 255), (byte)(Random.value * 255), 255);
+            AddTaskColor(taskName, newColor);
+            return newColor;
         }
 
     }
@@ -179,7 +188,7 @@ public class SessionBuilder : MonoBehaviour
             Debug.LogError("ARROW PRESSED BUT QUEUE ITEM COMPONENT IS NULL");
             return;
         }
-        PlayAudio(buttonClickedAudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
     }
 
     public void OnMoveUpArrowPressed()
@@ -197,8 +206,6 @@ public class SessionBuilder : MonoBehaviour
     {
         try
         {
-            buttonAudioSource = gameObject.AddComponent<AudioSource>();
-            buttonClickedAudioClip = Resources.Load<AudioClip>(AudioClipName);
             RunButton = transform.Find(RunButtonName).gameObject;
             RunButton.AddComponent<Button>().onClick.AddListener(OnDoneButtonClicked);
 
@@ -217,7 +224,7 @@ public class SessionBuilder : MonoBehaviour
 
     private void OnDoneButtonClicked()
     {
-        PlayAudio(buttonClickedAudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
         RunButtonClicked = true;
     }
 
@@ -338,7 +345,7 @@ public class SessionBuilder : MonoBehaviour
 
     private void OnAddToQueueButtonPress()
     {
-        PlayAudio(buttonClickedAudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
 
         GameObject selectedObject = EventSystem.current.currentSelectedGameObject;
         Transform parent = selectedObject.transform.parent;
@@ -413,7 +420,7 @@ public class SessionBuilder : MonoBehaviour
 
     private void OnRemoveFromQueueButtonPress()
     {
-        PlayAudio(buttonClickedAudioClip);
+        Session.SessionAudioController.PlayAudioClip("ClickedButton");
 
         GameObject parent = EventSystem.current.currentSelectedGameObject.transform.parent.gameObject;
         QueueItem queueItem = parent.GetComponent<QueueItem>();
@@ -452,16 +459,6 @@ public class SessionBuilder : MonoBehaviour
         taskInitialsText.color = InactiveTaskIconTextColor;
     }
 
-    public void PlayAudio(AudioClip clip)
-    {
-        if (clip != null)
-        {
-            buttonAudioSource.clip = clip;
-            buttonAudioSource.Play();
-        }
-        else
-            Debug.LogWarning("CANT PLAY AUDIO CLIP BECAUSE IT IS NULL!");
-    }
 
     private string GetSplitName(string taskName)
     {

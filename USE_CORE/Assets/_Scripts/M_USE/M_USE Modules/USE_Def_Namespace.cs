@@ -266,7 +266,12 @@ namespace USE_Def_Namespace
         /// Path to the external file associated with the context.
         /// </summary>
         public string ContextExternalFilePath;
-        
+
+        /// <summary>
+        /// Directory path where audio clips are stored.
+        /// </summary>
+        public string AudioClipsFolderPath;
+
         /// <summary>
         /// Directory path where external stimuli are stored.
         /// </summary>

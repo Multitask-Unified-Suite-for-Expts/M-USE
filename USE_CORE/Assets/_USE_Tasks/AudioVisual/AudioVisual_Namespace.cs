@@ -18,18 +18,20 @@ namespace AudioVisual_Namespace
     {
         public string AudioClipName;
         public string CorrectObject;
-        public float AudioClipPlayDuration;
+        public float AudioClipLength;
 
-
+        public string WaitCueIcon;
         public float WaitCueSize;
         public float[] WaitCueColor;
 
+        public string LeftObjectIcon;
         public float LeftObjectSize;
-        public float LeftObjectPos;
+        public Vector3 LeftObjectPos;
         public float[] LeftObjectColor;
 
+        public string RightObjectIcon;
         public float RightObjectSize;
-        public float RightObjectPos;
+        public Vector3 RightObjectPos;
         public float[] RightObjectColor;
 
 

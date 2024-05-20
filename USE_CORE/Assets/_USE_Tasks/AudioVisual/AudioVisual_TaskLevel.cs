@@ -19,14 +19,14 @@ public class AudioVisual_TaskLevel : ControlLevel_Task_Template
     {
         trialLevel = (AudioVisual_TrialLevel) TrialLevel;
 
+        Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Audio Visual");
+        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Select the correct object based on the sound frequency you hear!");
+
         RunBlock.AddSpecificInitializationMethod(() =>
         {
-            //SetSkyBox(CurrentBlock.ContextName);
-            //trialLevel.ContextActive = true;
-            //trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.TokenBarCapacity);
-            //trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.NumInitialTokens);
+            SetSkyBox(CurrentBlock.ContextName.Trim());
+            CalculateBlockSummaryString();
             //trialLevel.ResetBlockVariables();
-            //CalculateBlockSummaryString();
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() =>

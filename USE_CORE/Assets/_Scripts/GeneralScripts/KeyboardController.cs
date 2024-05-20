@@ -86,7 +86,7 @@ public class KeyboardController : MonoBehaviour
     {
         if (CurrentInputField != null)
         {
-            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
+            Session.SessionAudioController.PlayAudioClip("ClickedButton");
             keyboardButtons.HandleGridButtonPress(eventSystem.currentSelectedGameObject);
         }
     }
@@ -95,7 +95,7 @@ public class KeyboardController : MonoBehaviour
     {
         if(CurrentInputField != null)
         {
-            InitScreen_Level.PlayAudio(InitScreen_Level.ToggleChange_AudioClip);
+            Session.SessionAudioController.PlayAudioClip("ClickedButton");
             keyboardButtons.HandleNonGridButtonPress(eventSystem.currentSelectedGameObject);
         }
     }
@@ -132,7 +132,7 @@ public class KeyboardController : MonoBehaviour
                 buttonName = "BackButton",
                 buttonAction = () =>
                 {
-                    keyboardController.InitScreen_Level.PlayAudio(keyboardController.InitScreen_Level.ToggleChange_AudioClip);
+                    Session.SessionAudioController.PlayAudioClip("ClickedButton");
                     string currentText = keyboardController.CurrentInputField.text;
                     keyboardController.CurrentInputField.text = currentText.Substring(0, currentText.Length - 1);
                 }

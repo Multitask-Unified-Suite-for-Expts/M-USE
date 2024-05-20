@@ -97,9 +97,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     // Player View Variables
     private PlayerViewPanel PlayerViewPanelController;
     private GameObject PlayerViewParent; // Helps set things onto the player view in the experimenter display
-    public List<GameObject> playerViewTextList;
     private GameObject playerViewText;
-    private Vector2 textLocation;
+    private Vector2 PlayerViewTextLocation;
     private bool playerViewTextLoaded;
 
     // Slider & Animation variables
@@ -605,9 +604,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                 
                 if (tileComponent.GetChessCoord() == MazeManager.GetCurrentMaze().mPath[i])
                 {
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint((Vector3)tileComponent.GetTilePosition()), PlayerViewParent.transform);
+                    PlayerViewTextLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint((Vector3)tileComponent.GetTilePosition()), PlayerViewParent.transform);
                     playerViewText = PlayerViewPanelController.CreateTextObject((i + 1).ToString(), (i + 1).ToString(),
-                        Color.red, textLocation, textSize, PlayerViewParent.transform);
+                        Color.red, PlayerViewTextLocation, textSize, PlayerViewParent.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewText.SetActive(true);
                 }

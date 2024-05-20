@@ -73,14 +73,10 @@ public class LoadingController : MonoBehaviour
     }
 
     //CALL THESE METHODS TO USE THIS CLASS--------------------------------------
-    public void ActivateLoadingCanvas()
+    public void ActivateLoadingCanvas(int displayNum)
     {
         gameObject.SetActive(true);
-
-        if (Session.WebBuild)
-        {
-            GetComponent<Canvas>().targetDisplay = 0;
-        }
+        GetComponent<Canvas>().targetDisplay = displayNum;
     }
 
     public void DeactivateLoadingCanvas()

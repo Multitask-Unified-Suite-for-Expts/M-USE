@@ -87,6 +87,9 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MouseButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
         frameData.AddDatum("SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
         frameData.AddDatum("ShotgunModalTarget", ()=> ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
+        //frameData.AddDatum("AnalogX", () => );
+        //frameData.AddDatum("AnalogY", () => );
+        //frameData.AddDatum("AnalogZ", () => );
     }
 
     //returns GO that is the current target

@@ -65,6 +65,7 @@ public static class Session
     public static FullScreenController FullScreenController;
     public static SessionAudioController SessionAudioController;
     public static LoadingController LoadingController;
+    public static TimerController TimerController;
 
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;

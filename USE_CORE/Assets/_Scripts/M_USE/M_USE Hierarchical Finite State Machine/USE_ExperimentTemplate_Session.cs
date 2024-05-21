@@ -1006,13 +1006,15 @@ namespace USE_ExperimentTemplate_Session
         {
             try
             {
-                Session.FullScreenController = GameObject.Find("MiscScripts").GetComponent<FullScreenController>();
+                GameObject miscScripts = GameObject.Find("MiscScripts");
+                Session.TimerController = miscScripts.GetComponent<TimerController>();
+                Session.LogWriter = miscScripts.GetComponent<LogWriter>();
+                Session.EventCodeManager = miscScripts.GetComponent<EventCodeManager>();
+                Session.FullScreenController = miscScripts.GetComponent<FullScreenController>();
                 Session.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 Session.InitCamGO = GameObject.Find("InitCamera");
                 Session.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
-                Session.LogWriter = GameObject.Find("MiscScripts").GetComponent<LogWriter>();
                 Session.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
-                Session.EventCodeManager = GameObject.Find("MiscScripts").GetComponent<EventCodeManager>();
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;

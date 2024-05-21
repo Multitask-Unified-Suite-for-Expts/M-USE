@@ -47,10 +47,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject StartButton;
 
-    public Image TimerFill;
-    public TextMeshProUGUI TimerText;
-    public GameObject TimerGO;
-
     public GameObject CR_CanvasGO;
     public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
@@ -109,8 +105,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public float TimeChosen_Trial, TimeToChoice_Trial;
     [HideInInspector] public string Locations_String, PC_String, New_String, PNC_String, PC_Percentage_String;
 
-    [HideInInspector] public AudioSource ClockAudioSource;
-    [HideInInspector] public AudioClip ClockAudioClip;
 
 
     public override void DefineControlLevel()
@@ -127,8 +121,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            OriginalTimerPosition = TimerGO.transform.position;
-
             if (!Session.WebBuild)
             {
                 playerView = gameObject.AddComponent<PlayerViewPanel>();
@@ -136,17 +128,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 playerViewTextList = new List<GameObject>();
             }
 
-            if (ClockAudioSource == null)
-            {
-                ClockAudioSource = gameObject.AddComponent<AudioSource>();
-                ClockAudioSource.volume = 1f;
-                ClockAudioSource.loop = true;
-                ClockAudioClip = Resources.Load<AudioClip>("ClockTicking");
-                if (ClockAudioClip == null)
-                    Debug.LogError("NULL LOADING CLOCK AUDIO CLIP");
-                else
-                    ClockAudioSource.clip = ClockAudioClip;
-            }
+            Session.TimerController.CreateTimer(CR_CanvasGO.transform);
 
             SetControllerBlockValues();
 
@@ -226,7 +208,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 SetScoreAndTrialsText();
                 ScoreTextGO.SetActive(true);
                 NumTrialsTextGO.SetActive(true);
-                TimerGO.SetActive(true);
             }
 
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
@@ -247,9 +228,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayStims.AddTimer(() => displayStimDuration.value, ChooseStim, () => TimeRemaining = chooseStimDuration.value);
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
-        float timerDuration = 0f;
         ChooseStim.AddSpecificInitializationMethod(() =>
         {
+            if(Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.StartTimer(chooseStimDuration.value);
+            }
+
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
@@ -260,29 +245,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
 
-            if (Session.SessionDef.IsHuman)
-            {
-                TimerGO.SetActive(true);
-                TimeRemaining = chooseStimDuration.value;
-                timerDuration = chooseStimDuration.value; //using this as well in case they change the value on the UI during the trial. 
-                ClockAudioSource.Play();
-                TimerText.text = TimeRemaining.ToString();
-                TimerFill.fillAmount = 1f;
-            }
-
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-            if (TimeRemaining > 0)
-            {
-                TimeRemaining -= Time.deltaTime;
-                TimerFill.fillAmount = TimeRemaining / timerDuration;
-            }
-
-            TimerText.text = TimeRemaining.ToString("0");
-
             ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
@@ -356,16 +323,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback, () =>
         {
             if (Session.SessionDef.IsHuman)
-                ClockAudioSource.Stop();
+                Session.TimerController.StopTimer();
         });
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
-            if (Session.SessionDef.IsHuman)
-                ClockAudioSource.Stop();
+            //if (Session.SessionDef.IsHuman)
+            //    ClockAudioSource.Stop();
             Session.EventCodeManager.SendCodeImmediate("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-            AudioFBController.Play("Negative");
+            AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
             EndBlock = true;
         });
 
@@ -421,7 +388,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (Session.SessionDef.IsHuman)
             {
-                TimerGO.SetActive(false);
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
@@ -632,9 +598,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         if (NumTrialsTextGO.activeInHierarchy)
             NumTrialsTextGO.SetActive(false);
-
-        if (TimerGO.activeInHierarchy)
-            TimerGO.SetActive(false);
     }
 
     void PopStimOut() //Method used to make the game easier for debugging purposes
@@ -649,11 +612,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void AdjustTextPosForMac() //When running a build instead of hitting play in editor:
     {
         TokenFBController.AdjustTokenBarSizing(200);
-
-        Vector3 Pos = OriginalTimerPosition;
-        Pos.y -= .02f;
-        TimerGO.transform.position = Pos;
-
         AdjustedPositionsForMac = true;
     }
 

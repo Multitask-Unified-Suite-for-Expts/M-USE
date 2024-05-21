@@ -57,7 +57,6 @@ public class HaloFBController : MonoBehaviour
 
         ParticleHalo particleHalo = null;
         CircleHalo circleHalo = null;
-        Debug.LogWarning("IS THE CIRCLE HALO ACTIVE? " + circleHaloActive);
 
         if (particleHaloActive)
         {

@@ -31,17 +31,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     private bool SelectionMade = false;
     private bool GotTrialCorrect;
 
-    [HideInInspector] public AudioSource SoundAudioSource;
+    [HideInInspector] public AudioSource NoiseAudioSource;
     [HideInInspector] public AudioClip SoundAudioClip;
-
-    [HideInInspector] public AudioSource ClockAudioSource;
-    [HideInInspector] public AudioClip ClockAudioClip;
-
-
-    //Set In Inspector:
-    public GameObject TimerGO;
-    public TextMeshProUGUI TimerText;
-    public Image TimerFill;
 
     //Config UI Variables:
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, touchFbDuration, tokenUpdateDuration, tokenRevealDuration, tokenFlashingDuration;
@@ -61,23 +52,13 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if (SoundAudioSource == null)
+            if (NoiseAudioSource == null)
             {
-                SoundAudioSource = gameObject.AddComponent<AudioSource>();
-                SoundAudioSource.volume = 1f;
+                NoiseAudioSource = gameObject.AddComponent<AudioSource>();
+                NoiseAudioSource.volume = 1f;
             }
 
-            if(ClockAudioSource == null)
-            {
-                ClockAudioSource = gameObject.AddComponent<AudioSource>();
-                ClockAudioSource.volume = 1f;
-                ClockAudioSource.loop = true;
-                ClockAudioClip = Resources.Load<AudioClip>("ClockTicking");
-                if (ClockAudioClip == null)
-                    Debug.LogError("NULL LOADING CLOCK AUDIO CLIP");
-                else
-                    ClockAudioSource.clip = ClockAudioClip;
-            }
+            Session.TimerController.CreateTimer(AV_CanvasGO.transform);
 
             if (StartButton == null)
             {
@@ -164,10 +145,10 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             if (SoundAudioClip == null)
                 Debug.LogError("SOUND CLIP IS NULL");
 
-            SoundAudioSource.Play();
+            NoiseAudioSource.Play();
         });
         PlayAudio.AddTimer(() => CurrentTrial.AudioClipLength, WaitPeriod);
-        PlayAudio.AddDefaultTerminationMethod(() => SoundAudioSource.Stop());
+        PlayAudio.AddDefaultTerminationMethod(() => NoiseAudioSource.Stop());
 
         //WaitPeriod state -------------------------------------------------------------------------------------------------------
         WaitPeriod.AddSpecificInitializationMethod(() =>
@@ -176,7 +157,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         WaitPeriod.AddTimer(() => CurrentTrial.WaitPeriodDuration, PlayerChoice);
 
         //PlayerChoice state -------------------------------------------------------------------------------------------------------
-        float timeRemaining = 0f;
         PlayerChoice.AddSpecificInitializationMethod(() =>
         {
             ChosenGO = null;
@@ -185,27 +165,14 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
             if(Session.SessionDef.IsHuman)
             {
-                TimerGO.SetActive(true);
-                timeRemaining = CurrentTrial.ChoiceDuration;
-                ClockAudioSource.Play();
-                TimerText.text = timeRemaining.ToString();
-                TimerFill.fillAmount = 1f;
+                Session.TimerController.StartTimer(CurrentTrial.ChoiceDuration);
             }
-
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
         PlayerChoice.AddUpdateMethod(() =>
         {
-            if(timeRemaining > 0)
-            {
-                timeRemaining -= Time.deltaTime;
-                TimerFill.fillAmount = timeRemaining / CurrentTrial.ChoiceDuration;
-            }
-
-            TimerText.text = timeRemaining.ToString("0");
-
             ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
             if(ChosenGO != null)
             {
@@ -243,10 +210,9 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             if (Session.SessionDef.IsHuman)
             {
-                TimerGO.SetActive(false);
-                ClockAudioSource.Stop();
+                Session.TimerController.StopTimer();
             }
-            
+
             if (ChosenGO == null)
             {
                 AudioFBController.Play("TimeRanOut");
@@ -341,7 +307,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 if (audioClipResult != null)
                 {
                     SoundAudioClip = audioClipResult;
-                    SoundAudioSource.clip = SoundAudioClip;
+                    NoiseAudioSource.clip = SoundAudioClip;
                 }
                 else
                     Debug.LogError("NULL GETTING AUDIO CLIP FROM SERVER!");
@@ -352,7 +318,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             SoundAudioClip = Session.SessionAudioController.LoadExternalWAV($"{CurrentTask.AudioClipsFolderPath}{Path.DirectorySeparatorChar}{CurrentTrial.AudioClipName}");
             if (SoundAudioClip == null)
                 Debug.LogError("SOUND AUDIO CLIP IS NULL");
-            SoundAudioSource.clip = SoundAudioClip;
+            NoiseAudioSource.clip = SoundAudioClip;
         }
         else if(Session.UsingDefaultConfigs)
         {

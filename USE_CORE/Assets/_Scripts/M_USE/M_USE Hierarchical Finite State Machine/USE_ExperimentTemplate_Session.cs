@@ -729,7 +729,6 @@ namespace USE_ExperimentTemplate_Session
             {
                 MainDirectionalLight.SetActive(false);
 
-                Debug.LogWarning("ACTIVATING LOADING CANVAS ON FRAME: " + Time.frameCount);
                 Session.LoadingController.ActivateLoadingCanvas(0); //0 for both web build and normal since monkeys on display 0;
 
                 TaskButtonsContainer.SetActive(false);

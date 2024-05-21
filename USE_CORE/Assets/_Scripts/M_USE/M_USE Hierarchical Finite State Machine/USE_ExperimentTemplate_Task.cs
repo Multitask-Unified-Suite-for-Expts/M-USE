@@ -204,8 +204,6 @@ namespace USE_ExperimentTemplate_Task
                     GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
                     if (taskCanvasGO != null)
                     {
-                        Debug.LogWarning("CREATING HUMAN START PANEL ON FRAME " + Time.frameCount);
-
                         if (taskCanvasGO.TryGetComponent(out Canvas taskCanvas))
                             Session.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
                         else

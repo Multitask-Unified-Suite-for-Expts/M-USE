@@ -34,10 +34,14 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public AudioSource SoundAudioSource;
     [HideInInspector] public AudioClip SoundAudioClip;
 
+    [HideInInspector] public AudioSource ClockAudioSource;
+    [HideInInspector] public AudioClip ClockAudioClip;
+
 
     //Set In Inspector:
     public GameObject TimerGO;
     public TextMeshProUGUI TimerText;
+    public Image TimerFill;
 
     //Config UI Variables:
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, touchFbDuration, tokenUpdateDuration, tokenRevealDuration, tokenFlashingDuration;
@@ -61,6 +65,18 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             {
                 SoundAudioSource = gameObject.AddComponent<AudioSource>();
                 SoundAudioSource.volume = 1f;
+            }
+
+            if(ClockAudioSource == null)
+            {
+                ClockAudioSource = gameObject.AddComponent<AudioSource>();
+                ClockAudioSource.volume = 1f;
+                ClockAudioSource.loop = true;
+                ClockAudioClip = Resources.Load<AudioClip>("ClockTicking");
+                if (ClockAudioClip == null)
+                    Debug.LogError("NULL LOADING CLOCK AUDIO CLIP");
+                else
+                    ClockAudioSource.clip = ClockAudioClip;
             }
 
             if (StartButton == null)
@@ -171,9 +187,10 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             {
                 TimerGO.SetActive(true);
                 timeRemaining = CurrentTrial.ChoiceDuration;
+                ClockAudioSource.Play();
+                TimerText.text = timeRemaining.ToString();
+                TimerFill.fillAmount = 1f;
             }
-
-            TimerText.text = timeRemaining.ToString();
 
 
             if (ShotgunHandler.AllSelections.Count > 0)
@@ -184,6 +201,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             if(timeRemaining > 0)
             {
                 timeRemaining -= Time.deltaTime;
+                TimerFill.fillAmount = timeRemaining / CurrentTrial.ChoiceDuration;
             }
 
             TimerText.text = timeRemaining.ToString("0");
@@ -217,7 +235,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        //PlayerChoice.AddTimer(() => CurrentTrial.ChoiceDuration, Feedback);
+        PlayerChoice.AddTimer(() => CurrentTrial.ChoiceDuration, Feedback);
         PlayerChoice.SpecifyTermination(() => SelectionMade, Feedback);
 
         //Feedback state -------------------------------------------------------------------------------------------------------
@@ -226,8 +244,9 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.IsHuman)
             {
                 TimerGO.SetActive(false);
+                ClockAudioSource.Stop();
             }
-
+            
             if (ChosenGO == null)
             {
                 AudioFBController.Play("TimeRanOut");

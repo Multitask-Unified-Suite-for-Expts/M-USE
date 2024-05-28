@@ -317,14 +317,21 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             SoundAudioClip = Session.SessionAudioController.LoadExternalWAV($"{CurrentTask.AudioClipsFolderPath}{Path.DirectorySeparatorChar}{CurrentTrial.AudioClipName}");
             if (SoundAudioClip == null)
-                Debug.LogError("SOUND AUDIO CLIP IS NULL");
-            NoiseAudioSource.clip = SoundAudioClip;
+                Debug.LogError("SOUND AUDIO CLIP IS NULL WHEN LOADING FROM LOCAL FOLDER");
+            else
+                NoiseAudioSource.clip = SoundAudioClip;
         }
         else if(Session.UsingDefaultConfigs)
         {
-            Debug.LogWarning("HAVENT IMPLMENTED LOADING AUDIO FOR DEFAULT CONFIGS YET!");
-            //SoundAudioClip = Resources.Load<AudioClip>($"{Session.SessionDef.AudioClipsFolderPath}/{CurrentTrial.AudioClipName}");
-            //SoundAudioSource.clip = SoundAudioClip;
+            //the .wav files inside unity resources folder dont contain .wav so remove it if its there:
+            if(CurrentTrial.AudioClipName.Contains("."))
+                CurrentTrial.AudioClipName = CurrentTrial.AudioClipName.Split('.')[0];
+            
+            SoundAudioClip = Resources.Load<AudioClip>($"{CurrentTask.AudioClipsFolderPath}/{CurrentTrial.AudioClipName}");
+            if (SoundAudioClip == null)
+                Debug.LogError("CLIP IS NULL WHEN LOADING FROM INTERNAL RESOURCES FOLDER");
+            else
+                NoiseAudioSource.clip = SoundAudioClip;
         }
 
     }

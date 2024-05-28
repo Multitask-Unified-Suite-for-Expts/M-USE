@@ -1,8 +1,7 @@
-OrderedDictionary<string,string>	TaskMappings	{FruitRunner:FruitRunner, SustainedAttention:SustainedAttention, ContinuousRecognition:ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
-Dictionary<string,string>	TaskIcons	{FruitRunner:FruitRunner, SustainedAttention:SustainedAttention, ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
+OrderedDictionary<string,string>	TaskMappings	{AudioVisual:AudioVisual, FruitRunner:FruitRunner, SustainedAttention:SustainedAttention, ContinuousRecognition:ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
+Dictionary<string,string>	TaskIcons	{AudioVisual:AudioVisual, FruitRunner:FruitRunner, SustainedAttention:SustainedAttention, ContinuousRecognition: ContinuousRecognition, EffortControl:EffortControl, FlexLearning:FlexLearning, MazeGame:MazeGame, THR:THR, VisualSearch:VisualSearch, WhatWhenWhere:WhatWhenWhere, WorkingMemory:WorkingMemory}
 string	ContextExternalFilePath	"DefaultResources/Contexts"
 string	TaskIconsFolderPath	"DefaultResources/TaskIcons"
-string	AudioClipsFolderPath	"DefaultResources/AudioClips"
 float	TaskSelectionTimeout	3000
 bool	IsHuman	true
 bool	PlayBackgroundMusic	true

@@ -204,7 +204,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     }
 
                     // Change display of the loading canvas which could be inactive
-                    Session.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay = 1 - Session.LoadingController.gameObject.GetComponent<Canvas>().targetDisplay;
+                    Session.LoadingController_Session.gameObject.GetComponent<Canvas>().targetDisplay = 1 - Session.LoadingController_Session.gameObject.GetComponent<Canvas>().targetDisplay;
                 }
             };
             //HotKeyList.Add(toggleDisplays);

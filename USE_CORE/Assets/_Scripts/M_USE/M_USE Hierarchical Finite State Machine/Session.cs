@@ -64,7 +64,7 @@ public static class Session
     public static CameraSyncController CameraSyncController;
     public static FullScreenController FullScreenController;
     public static SessionAudioController SessionAudioController;
-    public static LoadingController LoadingController;
+    public static LoadingController LoadingController_Session;
     public static TimerController TimerController;
 
     public static SessionInfoPanel SessionInfoPanel;

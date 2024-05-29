@@ -337,7 +337,7 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.AppendDataToFile());
 
                 // Deactivate TaskSelection scene elements
-                Session.LoadingController.DeactivateLoadingCanvas();
+                Session.LoadingController_Session.DeactivateLoadingCanvas();
                 FrameData.gameObject.SetActive(false);
                 SessionCam.gameObject.SetActive(false);
                 Session.TaskSelectionCanvasGO.SetActive(false);
@@ -440,7 +440,7 @@ namespace USE_ExperimentTemplate_Session
             //SessionBuilder State---------------------------------------------------------------------------------------------------------------
             sessionBuilder.AddUniversalInitializationMethod(() =>
             {
-                Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
+                Session.LoadingController_Session.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
 
                 AssignExperimenterDisplayRenderTexture(SessionCam);
 
@@ -463,7 +463,7 @@ namespace USE_ExperimentTemplate_Session
 
                 MainDirectionalLight.SetActive(true);
                 Session.TaskSelectionCanvasGO.SetActive(true);
-                Session.LoadingController.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
+                Session.LoadingController_Session.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
 
                 if(!Session.WebBuild)
                 {
@@ -729,7 +729,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 MainDirectionalLight.SetActive(false);
 
-                Session.LoadingController.ActivateLoadingCanvas(0); //0 for both web build and normal since monkeys on display 0;
+                Session.LoadingController_Session.ActivateLoadingCanvas(0); //0 for both web build and normal since monkeys on display 0;
 
                 TaskButtonsContainer.SetActive(false);
 
@@ -948,7 +948,7 @@ namespace USE_ExperimentTemplate_Session
             });
             finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
             finishSession.SpecifyTermination(() => skipSessionSummary, () => null);
-            finishSession.SpecifyTermination(() => SessionSummaryController.EndSessionButtonClicked, () => null);
+            finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);
             finishSession.AddTimer(() => Session.SessionDef.SessionSummaryDuration, () => null);
             finishSession.AddDefaultTerminationMethod(() =>
             {
@@ -1011,7 +1011,7 @@ namespace USE_ExperimentTemplate_Session
                 Session.LogWriter = miscScripts.GetComponent<LogWriter>();
                 Session.EventCodeManager = miscScripts.GetComponent<EventCodeManager>();
                 Session.FullScreenController = miscScripts.GetComponent<FullScreenController>();
-                Session.LoadingController = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
+                Session.LoadingController_Session = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 Session.InitCamGO = GameObject.Find("InitCamera");
                 Session.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
                 Session.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
@@ -1082,7 +1082,7 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("Materials/Skybox2");
+            //skybox.material = Resources.Load<Material>("Materials/Skybox2");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
 

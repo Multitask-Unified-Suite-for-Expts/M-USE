@@ -158,12 +158,12 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskResultsData();
 
         if (flTL.TrialCount_InTask != 0)
-            data["Accuracy"] = String.Format("{0:0.00}", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask));
+            data["Accuracy"] = String.Format("{0:0.0}" + "%", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask) * 100);
 
         if (SearchDurations_InTask.Count > 0)
-            data["Average Search Duration"] = String.Format("{0:0.000}", CalculateAverageDuration(SearchDurations_InTask));
+            data["Avg Search Duration"] = String.Format("{0:0.0} " + "Seconds", CalculateAverageDuration(SearchDurations_InTask));
 
-        data["Token Bar Completions"] = NumTokenBarFull_InTask;
+        data["TokenBar Completions"] = NumTokenBarFull_InTask;
 
         return data;
     }

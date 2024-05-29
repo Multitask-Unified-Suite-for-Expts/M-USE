@@ -43,8 +43,6 @@ public class LoadingController : MonoBehaviour
         if (Star_GO == null || DotsText == null)
             Debug.LogError("STARGO OR DOTSTEXT IS NULL!");
 
-        DeactivateLoadingCanvas();
-
         DotsText.text = ".";
         dotStartTime = Time.time;
     }

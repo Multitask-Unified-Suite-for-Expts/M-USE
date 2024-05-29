@@ -106,6 +106,13 @@ public class InitScreen_Level : ControlLevel
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
         Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
         Setup.SpecifyTermination(() => true, FadeQuaddlesIn);
+        Setup.AddDefaultTerminationMethod(() =>
+        {
+            if(Session.LoadingController_Session != null)
+            {
+                Session.LoadingController_Session.gameObject.SetActive(false);
+            }
+        });
 
         //FadeQuaddlesIn State-----------------------------------------------------------------------------------------------------------------------------------
         Vector3 startingPos = new Vector3();
@@ -177,7 +184,7 @@ public class InitScreen_Level : ControlLevel
             SetConfigInfo();
             SetDataInfo();
             InitScreenCanvas_GO.SetActive(false);
-            Session.LoadingController.ActivateLoadingCanvas(Session.WebBuild ? 0 : 1); //turn on loading canvas/circle so that it immedietely shows its loading!
+            Session.LoadingController_Session.ActivateLoadingCanvas(Session.WebBuild ? 0 : 1); //turn on loading canvas/circle so that it immedietely shows its loading!
 
             //Set Main cam rotation and position to that of the init cam:
             Camera.main.transform.position = Session.InitCamGO.transform.position;

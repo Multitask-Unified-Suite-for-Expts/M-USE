@@ -1157,6 +1157,7 @@ namespace USE_States
         }
 
 
+
         public static Texture2D LoadExternalPNG(string filePath)
         {
             Texture2D tex = null;
@@ -1198,7 +1199,9 @@ namespace USE_States
 			Texture2D tex = null;
 
 			if (Session.UsingDefaultConfigs)
-                tex = Resources.Load<Texture2D>(filePath);
+			{
+				tex = Resources.Load<Texture2D>(filePath);
+			}
 			else if (Session.UsingServerConfigs)
 			{
                 yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, result =>

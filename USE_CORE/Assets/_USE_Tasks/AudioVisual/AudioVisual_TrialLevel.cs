@@ -10,6 +10,7 @@ using ConfigDynamicUI;
 using UnityEngine.UI;
 using System.IO;
 using TMPro;
+using System;
 
 
 public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
@@ -23,9 +24,12 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     public GameObject AV_CanvasGO;
 
     [HideInInspector] public GameObject WaitCueGO;
-
     [HideInInspector] public GameObject LeftIconGO;
     [HideInInspector] public GameObject RightIconGO;
+
+    [HideInInspector] public Sprite WaitCue_Sprite;
+    [HideInInspector] public Sprite LeftIcon_Sprite;
+    [HideInInspector] public Sprite RightIcon_Sprite;
 
     private GameObject ChosenGO = null;
     private bool SelectionMade = false;
@@ -263,38 +267,58 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         rect.sizeDelta = new Vector2(size, size);
         Image image = icon.AddComponent<Image>();
 
-        Sprite sprite = Resources.Load<Sprite>(iconName);
+        string iconFilePath = $"{Session.SessionDef.ContextExternalFilePath}/{iconName}";
 
-        if (sprite == null)
-            Debug.LogError("SPRITE IS NULL FOR: " + iconName);
-        else
-            image.sprite = sprite;
-
-        image.sprite = Resources.Load<Sprite>(iconName);
-        image.color = ConvertFloatArrayToColor(color);
+        StartCoroutine(LoadIcon(iconFilePath, iconName, image, color));
 
         return icon;
+    }
+
+    private IEnumerator LoadIcon(string filePath, string iconName, Image image, float[] color)
+    {
+        Texture2D tex = null;
+
+        if(Session.UsingDefaultConfigs)
+        {
+            if (iconName.Contains(".")) //remove the .png if they included it in config
+                iconName = iconName.Split('.')[0];
+
+            Sprite sprite = Resources.Load<Sprite>(iconName);
+            if (sprite == null)
+                Debug.LogError("SPRITE IS NULL!");
+            else
+                image.sprite = sprite;
+        }
+        else
+        {
+            yield return LoadTexture(filePath, result =>
+            {
+                if (result != null)
+                {
+                    tex = result;
+                    image.sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                }
+                else
+                    Debug.LogWarning("TEX RESULT IS NULL!");
+            });
+        }
+
+        image.color = ConvertFloatArrayToColor(color);
     }
 
     private void CreateIcons()
     {
         if (WaitCueGO != null)
             Destroy(WaitCueGO);
-
         WaitCueGO = CreateIcon("WaitCue", CurrentTrial.WaitCueSize, Vector3.zero, CurrentTrial.WaitCueIcon, CurrentTrial.WaitCueColor);
-
 
         if (LeftIconGO != null)
             Destroy(LeftIconGO);
-
         LeftIconGO = CreateIcon("LeftIcon", CurrentTrial.LeftObjectSize, CurrentTrial.LeftObjectPos, CurrentTrial.LeftObjectIcon, CurrentTrial.LeftObjectColor);
-
 
         if (RightIconGO != null)
             Destroy(RightIconGO);
-
         RightIconGO = CreateIcon("RightIcon", CurrentTrial.RightObjectSize, CurrentTrial.RightObjectPos, CurrentTrial.RightObjectIcon, CurrentTrial.RightObjectColor);
-
     }
 
 
@@ -359,8 +383,10 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
     private void DefineFrameData()
     {
-        FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
-        //FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
+        FrameData.AddDatum("StartButtonActive", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("LeftIconActive", () => LeftIconGO != null && LeftIconGO.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("RightIconActive", () => RightIconGO != null && RightIconGO.activeInHierarchy ? "Active" : "NotActive");
+
     }
 
 }

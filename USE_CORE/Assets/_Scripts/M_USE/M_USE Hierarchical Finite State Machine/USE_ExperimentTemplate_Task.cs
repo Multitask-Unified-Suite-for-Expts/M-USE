@@ -131,6 +131,9 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public VerifyTask_Level verifyTask_Level;
 
 
+        private GameObject TaskLoadingControllerGO;
+
+
         public virtual void SpecifyTypes()
         {
             TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;
@@ -166,7 +169,23 @@ namespace USE_ExperimentTemplate_Task
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-                TaskCam.gameObject.SetActive(true);
+                if(TaskLoadingControllerGO == null)
+                {
+                    TaskLoadingControllerGO = Instantiate(Resources.Load<GameObject>("LoadingCanvas"));
+                    TaskLoadingControllerGO.name = "LoadingCanvas_Task";
+                    Canvas loadingCanvas = TaskLoadingControllerGO.GetComponent<Canvas>();
+                    if (loadingCanvas != null)
+                    {
+                        loadingCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+                        loadingCanvas.worldCamera = TaskCam;
+                    }
+                    else
+                        Debug.LogError("CANVAS IS NULL");
+
+                }
+
+                TaskLoadingControllerGO.SetActive(true);
+
 
                 if (TaskDirectionalLight != null)
                 {
@@ -221,6 +240,11 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                StartCoroutine(TurnOffLoadingCanvas());
+
+                //moving here to try and fix the problem
+                TaskCam.gameObject.SetActive(true);
+
                 //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues.
                 if (TaskDirectionalLight != null)
                 {
@@ -411,6 +435,16 @@ namespace USE_ExperimentTemplate_Task
             }
             return false;
         }
+
+
+        private IEnumerator TurnOffLoadingCanvas()
+        {
+            yield return new WaitForSeconds(0.75f);
+
+            TaskLoadingControllerGO.SetActive(false);
+        }
+
+
         public void SetSkyBox(string contextName)
         {
             string contextFilePath = "";
@@ -519,10 +553,11 @@ namespace USE_ExperimentTemplate_Task
                 Debug.LogWarning("NO TASK RESULTS");
                 return;
             }
+            
             GameObject taskCanvas = GameObject.Find(TaskName + "_Canvas");
             if (taskCanvas != null)
             {
-                TaskResultsGO = Instantiate(Resources.Load<GameObject>("BlockResults"));
+                TaskResultsGO = Instantiate(Resources.Load<GameObject>("TaskResults"));
                 TaskResultsGO.name = "TaskResults";
                 TaskResultsGO.transform.SetParent(taskCanvas.transform);
                 TaskResultsGO.transform.localScale = Vector3.one;
@@ -538,6 +573,12 @@ namespace USE_ExperimentTemplate_Task
                     continueButtonGO.AddComponent<Button>().onClick.AddListener(HandleTaskContinueButtonClicked);
 
                 Transform gridParent = TaskResultsGO.transform.Find("Background").transform.Find("GridSection");
+
+                float height = 150f * taskResults.Count;
+                if (height > 750f)
+                    height = 750f;
+
+                gridParent.GetComponent<RectTransform>().sizeDelta = new Vector2(1050f, height);
 
                 AudioSource audioSource = gameObject.AddComponent<AudioSource>();
                 audioSource.clip = BlockResults_AudioClip;

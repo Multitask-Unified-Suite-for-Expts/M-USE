@@ -305,11 +305,6 @@ MonoBehaviour:
   RightIconGO: {fileID: 0}
   NoiseAudioSource: {fileID: 0}
   SoundAudioClip: {fileID: 0}
-  ClockAudioSource: {fileID: 0}
-  ClockAudioClip: {fileID: 0}
-  TimerGO: {fileID: 0}
-  TimerText: {fileID: 0}
-  TimerFill: {fileID: 0}
   minObjectTouchDuration:
     name: 
     hidden: 0

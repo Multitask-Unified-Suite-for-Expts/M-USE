@@ -79,10 +79,10 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = base.GetTaskResultsData();
 
-        data["TokenBar Filled"] = NumTokenBarFull_InTask;
+        data["TokenBar Completions"] = NumTokenBarFull_InTask;
 
         if (SearchDurations_InTask.Count > 0)
-            data["Average Search Duration"] = String.Format("{0:0.000}", CalculateAverageDuration(SearchDurations_InTask));
+            data["Average Search Duration"] = String.Format("{0:0.0} " + "Seconds", CalculateAverageDuration(SearchDurations_InTask));
 
         return data;
     }

@@ -1,5 +1,5 @@
 BlockCount	TrialID	AudioClipName	CorrectObject	AudioClipLength	WaitCueIcon	WaitCueSize	WaitCueColor	LeftObjectIcon	LeftObjectSize	LeftObjectPos	LeftObjectColor	RightObjectIcon	RightObjectSize	RightObjectPos	RightObjectColor	ParticleHaloActive	CircleHaloActive	TokenBarCapacity	NumInitialTokens	TokenGain	TokenLoss	PreparationDuration	DisplayOptionsDuration	WaitPeriodDuration	ChoiceDuration	FeedbackDuration	ItiDuration
-1	Trial1	filtered_noise_4634Hz.wav	LeftObject	0.5	x	75	[255, 139, 139]	Circle	300	[-500, 0, 0]	[17, 106, 239]	Circle	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	0.5	1	0.5	5	1.5	0.005
-1	Trial2	filtered_noise_4634Hz.wav	LeftObject	0.5	x	75	[255, 139, 139]	Circle	300	[-500, 0, 0]	[17, 106, 239]	Circle	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	1	1	0.5	5	1.5	0.005
-2	Trial1	filtered_noise_4634Hz.wav	LeftObject	0.5	x	75	[255, 139, 139]	Circle	300	[-500, 0, 0]	[17, 106, 239]	Circle	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	1	1	0.5	5	1.5	0.005
-2	Trial2	filtered_noise_4634Hz.wav	LeftObject	0.5	x	75	[255, 139, 139]	Circle	300	[-500, 0, 0]	[17, 106, 239]	Circle	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	1	1	0.5	5	1.5	0.005
+1	Trial1	filtered_noise_4634Hz.wav	LeftObject	0.5	X.png	75	[255, 139, 139]	Star.png	300	[-500, 0, 0]	[17, 106, 239]	Star.png	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	0.5	1	0.5	5	1.5	0.005
+1	Trial2	filtered_noise_4634Hz.wav	LeftObject	0.5	X.png	75	[255, 139, 139]	Star.png	300	[-500, 0, 0]	[17, 106, 239]	Star.png	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	1	1	0.5	5	1.5	0.005
+2	Trial1	filtered_noise_4634Hz.wav	LeftObject	0.5	X.png	75	[255, 139, 139]	Star.png	300	[-500, 0, 0]	[17, 106, 239]	Star.png	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	1	1	0.5	5	1.5	0.005
+2	Trial2	filtered_noise_4634Hz.wav	LeftObject	0.5	X.png	75	[255, 139, 139]	Star.png	300	[-500, 0, 0]	[17, 106, 239]	Star.png	300	[500, 0, 0]	[255, 0, 255]	TRUE	FALSE	6	0	3	1	1	1	0.5	5	1.5	0.005

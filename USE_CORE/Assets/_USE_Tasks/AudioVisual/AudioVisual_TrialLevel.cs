@@ -255,6 +255,22 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         SelectionMade = false;
     }
 
+
+    private void CreateIcons()
+    {
+        if (WaitCueGO != null)
+            Destroy(WaitCueGO);
+        WaitCueGO = CreateIcon("WaitCue", CurrentTrial.WaitCueSize, Vector3.zero, CurrentTrial.WaitCueIcon, CurrentTrial.WaitCueColor);
+
+        if (LeftIconGO != null)
+            Destroy(LeftIconGO);
+        LeftIconGO = CreateIcon("LeftIcon", CurrentTrial.LeftObjectSize, CurrentTrial.LeftObjectPos, CurrentTrial.LeftObjectIcon, CurrentTrial.LeftObjectColor);
+
+        if (RightIconGO != null)
+            Destroy(RightIconGO);
+        RightIconGO = CreateIcon("RightIcon", CurrentTrial.RightObjectSize, CurrentTrial.RightObjectPos, CurrentTrial.RightObjectIcon, CurrentTrial.RightObjectColor);
+    }
+
     private GameObject CreateIcon(string name, float size, Vector3 pos, string iconName, float[] color)
     {
         GameObject icon = new GameObject(name);
@@ -278,7 +294,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     {
         Texture2D tex = null;
 
-        if(Session.UsingDefaultConfigs)
+        if(Session.UsingDefaultConfigs) //For default configs, need to load sprite directly, not a texture
         {
             if (iconName.Contains(".")) //remove the .png if they included it in config
                 iconName = iconName.Split('.')[0];
@@ -304,21 +320,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         }
 
         image.color = ConvertFloatArrayToColor(color);
-    }
-
-    private void CreateIcons()
-    {
-        if (WaitCueGO != null)
-            Destroy(WaitCueGO);
-        WaitCueGO = CreateIcon("WaitCue", CurrentTrial.WaitCueSize, Vector3.zero, CurrentTrial.WaitCueIcon, CurrentTrial.WaitCueColor);
-
-        if (LeftIconGO != null)
-            Destroy(LeftIconGO);
-        LeftIconGO = CreateIcon("LeftIcon", CurrentTrial.LeftObjectSize, CurrentTrial.LeftObjectPos, CurrentTrial.LeftObjectIcon, CurrentTrial.LeftObjectColor);
-
-        if (RightIconGO != null)
-            Destroy(RightIconGO);
-        RightIconGO = CreateIcon("RightIcon", CurrentTrial.RightObjectSize, CurrentTrial.RightObjectPos, CurrentTrial.RightObjectIcon, CurrentTrial.RightObjectColor);
     }
 
 

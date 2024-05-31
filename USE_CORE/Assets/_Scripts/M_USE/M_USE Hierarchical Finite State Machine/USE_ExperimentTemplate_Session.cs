@@ -349,6 +349,7 @@ namespace USE_ExperimentTemplate_Session
                 // Assign experimenter display render texture to the GazeCalibrationTaskLevel.TaskCam
                 if (CameraRenderTexture != null)
                     CameraRenderTexture.Release();
+
                 AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.GazeCalibrationTaskLevel.TaskCam);
 
                 // Set the current task and trial levels 
@@ -421,6 +422,7 @@ namespace USE_ExperimentTemplate_Session
                 // Assign experimenter display render texture to the SessionCam
                 if (CameraRenderTexture != null)
                     CameraRenderTexture.Release();
+
                 AssignExperimenterDisplayRenderTexture(SessionCam);
 
                 if (PreviousTaskSummaryString != null && Session.TaskLevel.CurrentTaskSummaryString != null)
@@ -465,13 +467,13 @@ namespace USE_ExperimentTemplate_Session
                 Session.TaskSelectionCanvasGO.SetActive(true);
                 Session.LoadingController_Session.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
 
+                AssignExperimenterDisplayRenderTexture(SessionCam);
+
                 if(!Session.WebBuild)
                 {
-                    AssignExperimenterDisplayRenderTexture(SessionCam);
                     ExperimenterDisplayCanvas.gameObject.SetActive(true);
                     ExperimenterDisplayGO.SetActive(true);
-                    //Turn off the spinning background on the Exp Display now that session builder is done:
-                    ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false);
+                    ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false); //Turn off the spinning background on the Exp Display now that session builder is done:
                 }
                 else
                     ExperimenterDisplayCanvas.gameObject.SetActive(false);
@@ -851,7 +853,9 @@ namespace USE_ExperimentTemplate_Session
                 Session.SessionAudioController.StopBackgroundMusic();
 
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
-                AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
+
+                if(!Session.WebBuild)
+                    AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
 
             });
             
@@ -1082,11 +1086,13 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            //skybox.material = Resources.Load<Material>("Materials/Skybox2");
+            skybox.material = Resources.Load<Material>("Materials/Skybox2");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
 
             ExpDisplayRenderImage = ExperimenterDisplayGO.transform.Find("TopRightSection_Background").transform.Find("MainCameraCopy").gameObject.GetComponent<RawImage>();
+            if (ExpDisplayRenderImage == null)
+                Debug.LogError("EXP DISPLAY RENDER IMAGE IS NULL");
         }
         
         private void CreateSessionSettingsFolder()
@@ -1213,6 +1219,9 @@ namespace USE_ExperimentTemplate_Session
 
         public void AssignExperimenterDisplayRenderTexture(Camera cam)
         {
+            if (Session.WebBuild)
+                return;
+
             CameraRenderTexture = new RenderTexture(Screen.width, Screen.height, 24);
             CameraRenderTexture.Create();
             cam.targetTexture = CameraRenderTexture;

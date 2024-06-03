@@ -139,7 +139,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             // Initialize FB Controller Values
             HaloFBController.SetCircleHaloSize(3);
             HaloFBController.SetCircleHaloIntensity(5);
-            
+
+            //if (Session.SessionDef.IsHuman)
+            //{
+            //    Session.TimerController.CreateTimer(WWW_CanvasGO.transform);
+            //    Session.TimerController.SetVisibilityOnOffStates(ChooseStimulus, ChooseStimulus);
+            //}
+
             if (StartButton == null)
                 InitializeStartButton(InitTrial, InitTrial);
 
@@ -186,7 +192,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
             PrepareSliderForTrial();
-            
+
+            //Set timer duration for the trial:
+            //if (Session.SessionDef.IsHuman)
+            //    Session.TimerController.SetDuration(selectObjectDuration.value);
+
+
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
                 StateAfterDelay = FlashNextCorrectStim;

@@ -38,6 +38,9 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public AudioSource NoiseAudioSource;
     [HideInInspector] public AudioClip SoundAudioClip;
 
+    public GameObject FeedbackPanelGO;
+    public TextMeshProUGUI FeedbackText;
+
     //Config UI Variables:
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, touchFbDuration, tokenUpdateDuration, tokenRevealDuration, tokenFlashingDuration;
 
@@ -62,7 +65,12 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 NoiseAudioSource.volume = 1f;
             }
 
-            Session.TimerController.CreateTimer(AV_CanvasGO.transform);
+
+            if(Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.CreateTimer(AV_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(PlayerChoice, PlayerChoice);
+            }
 
             if (StartButton == null)
             {
@@ -85,6 +93,10 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             LoadAudioClip();
             CreateIcons();
+
+            //Set timer duration for the trial:
+            if(Session.SessionDef.IsHuman)
+                Session.TimerController.SetDuration(CurrentTrial.ChoiceDuration);
 
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
@@ -141,7 +153,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             LeftIconGO.SetActive(true);
             RightIconGO.SetActive(true);
         });
-       DisplayOptions.AddTimer(() => CurrentTrial.DisplayOptionsDuration, PlayAudio);
+        DisplayOptions.AddTimer(() => CurrentTrial.DisplayOptionsDuration, PlayAudio);
 
         //PlayAudio state -------------------------------------------------------------------------------------------------------
         PlayAudio.AddSpecificInitializationMethod(() =>
@@ -166,11 +178,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             ChosenGO = null;
             SelectionMade = false;
             WaitCueGO.SetActive(false);
-
-            if(Session.SessionDef.IsHuman)
-            {
-                Session.TimerController.StartTimer(CurrentTrial.ChoiceDuration);
-            }
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -212,32 +219,34 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
-            if (Session.SessionDef.IsHuman)
-            {
-                Session.TimerController.StopTimer();
-            }
-
+            if (CurrentTrial.ShowTextFeedback)
+                FeedbackPanelGO.SetActive(true);
+            
             if (ChosenGO == null)
             {
-                AudioFBController.Play("TimeRanOut");
+                FeedbackText.text = "Time Ran Out!";
+                AudioFBController.Play("NegativeShow");
                 return;
             }
 
             if (GotTrialCorrect)
             {
+                FeedbackText.text = "You Got It!";
                 HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: 10f); //may need to adjust depth
                 TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain, -3f);
             }
             else //Got wrong
             {
+                FeedbackText.text = "Wrong Choice!";
                 HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: 10f); //may need to adjust depth
                 TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.TokenLoss, -3f);
             }
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);
-        Feedback.SpecifyTermination(() => ChosenGO == null, ITI);
+        //Feedback.SpecifyTermination(() => ChosenGO == null, ITI);
         Feedback.AddDefaultTerminationMethod(() =>
         {
+            FeedbackPanelGO.SetActive(false);
             HaloFBController.DestroyAllHalos();
         });
 

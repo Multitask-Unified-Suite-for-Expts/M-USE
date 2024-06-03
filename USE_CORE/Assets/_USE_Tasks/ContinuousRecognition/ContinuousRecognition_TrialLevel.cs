@@ -128,7 +128,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 playerViewTextList = new List<GameObject>();
             }
 
-            Session.TimerController.CreateTimer(CR_CanvasGO.transform);
+            if(Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.CreateTimer(CR_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
+            }
 
             SetControllerBlockValues();
 
@@ -163,6 +167,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            if (!VariablesLoaded)
+                LoadConfigUIVariables();
+
+            //Set timer duration for the trial:
+            if (Session.SessionDef.IsHuman)
+                Session.TimerController.SetDuration(chooseStimDuration.value);
+            
             if (TrialCount_InBlock == 0)
                 CalculateBlockFeedbackLocations();
 
@@ -171,8 +182,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
                 AdjustTextPosForMac();
 
-            if (!VariablesLoaded)
-                LoadConfigUIVariables();
+
             
             SetTrialSummaryString();
 
@@ -230,11 +240,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddSpecificInitializationMethod(() =>
         {
-            if(Session.SessionDef.IsHuman)
-            {
-                Session.TimerController.StartTimer(chooseStimDuration.value);
-            }
-
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
@@ -320,15 +325,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback, () =>
-        {
-            if (Session.SessionDef.IsHuman)
-                Session.TimerController.StopTimer();
-        });
+        ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
-            //if (Session.SessionDef.IsHuman)
-            //    ClockAudioSource.Stop();
             Session.EventCodeManager.SendCodeImmediate("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;

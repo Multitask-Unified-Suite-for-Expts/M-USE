@@ -353,7 +353,12 @@ namespace USE_ExperimentTemplate_Trial
                 TaskLevel.TotalIncompleteTouches_InBlock += TouchFBController?.ErrorCount;
 
                 WriteDataFiles();
-                
+
+                if (Session.TimerController.TimerGO != null)
+                {
+                    Destroy(Session.TimerController.TimerGO);
+                }
+
                 FinishTrialCleanup();
                 ClearActiveTrialHandlers();
                 
@@ -435,14 +440,6 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.AddStateTimingData(this);
             StartCoroutine(TrialData.CreateFile());
 
-        }
-
-        private IEnumerator TurnOffLoadingCanvas()
-        {
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForEndOfFrame();
-
-            Session.LoadingController_Session.DeactivateLoadingCanvas();
         }
 
         private IEnumerator HandleLoadingStims()

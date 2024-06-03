@@ -19,6 +19,7 @@ namespace AudioVisual_Namespace
         public string AudioClipName;
         public string CorrectObject;
         public float AudioClipLength;
+        public bool ShowTextFeedback;
 
         public string WaitCueIcon;
         public float WaitCueSize;

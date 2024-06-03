@@ -1086,7 +1086,7 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            skybox.material = Resources.Load<Material>("Materials/Skybox2");
+            //skybox.material = Resources.Load<Material>("Materials/Skybox2");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
 

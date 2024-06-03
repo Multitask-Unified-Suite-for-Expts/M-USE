@@ -103,20 +103,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 playerViewParent = GameObject.Find("MainCameraCopy");
             }
 
-            // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloRange(2.5f);
-            HaloFBController.SetCircleHaloIntensity(3f);
-        });
-
-        SetupTrial.AddSpecificInitializationMethod(() =>
-        {
-            TrialDataSummary = new VisualSearch_TrialDataSummary();
-            CurrentTaskLevel.AllTrialDataSummaries.Add(TrialDataSummary);
-            TrialDataSummary.FeatureSimilarity = CurrentTrialDef.FeatureSimilarity;
-            //Set the Stimuli Light/Shadow settings
-            SetShadowType(currentTaskDef.ShadowType, "VisualSearch_DirectionalLight");
-            if (currentTaskDef.StimFacingCamera)
-                MakeStimFaceCamera();
+            if (Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.CreateTimer(VS_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
+            }
 
             if (StartButton == null)
             {
@@ -131,6 +122,21 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
+
+            // Initialize FB Controller Values
+            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
+        });
+
+        SetupTrial.AddSpecificInitializationMethod(() =>
+        {
+            TrialDataSummary = new VisualSearch_TrialDataSummary();
+            CurrentTaskLevel.AllTrialDataSummaries.Add(TrialDataSummary);
+            TrialDataSummary.FeatureSimilarity = CurrentTrialDef.FeatureSimilarity;
+            //Set the Stimuli Light/Shadow settings
+            SetShadowType(currentTaskDef.ShadowType, "VisualSearch_DirectionalLight");
+            if (currentTaskDef.StimFacingCamera)
+                MakeStimFaceCamera();
 
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
@@ -152,6 +158,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
+
+            //Set timer duration for the trial:
+            if (Session.SessionDef.IsHuman)
+                Session.TimerController.SetDuration(selectObjectDuration.value);
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);

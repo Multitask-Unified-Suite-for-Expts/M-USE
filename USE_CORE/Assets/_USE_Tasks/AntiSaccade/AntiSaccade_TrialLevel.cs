@@ -455,7 +455,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;
         calculatedThreshold_timing = 0;
-        calculatedThreshold_timing = 0;
         reversalsCount = 0;
         blockAccuracy = 0;
         
@@ -611,6 +610,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
         //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
         Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+        Debug.Log("SpatialCueDelayDuration: " + CurrentTrial.SpatialCueDelayDuration + " / DisplayTargetDuration: " + CurrentTrial.DisplayTargetDuration);
         if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
         {
             List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();

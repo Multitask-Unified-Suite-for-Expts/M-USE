@@ -378,7 +378,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             preCueRect.sizeDelta = new Vector2(75, 75);
             Image preCueImage = PreCue_GO.AddComponent<Image>();
             preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
-            preCueImage.color = new Color32(24, 255, 0, 255);
+            preCueImage.color = new Color32(255, 255, 185, 255);
         }
         
         SpatialCue_GO = Instantiate(Resources.Load<GameObject>("asterisk_black"));
@@ -409,6 +409,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             spatialCueRect.sizeDelta = new Vector2(200, 200);
             Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
             spatialCueImage.sprite = Resources.Load<Sprite>("Star"); //initially using Star as default
+            spatialCueImage.color = Color.black;
         }
 
         if (Mask_GO == null)

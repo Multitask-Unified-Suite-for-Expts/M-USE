@@ -378,7 +378,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             preCueRect.sizeDelta = new Vector2(75, 75);
             Image preCueImage = PreCue_GO.AddComponent<Image>();
             preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
-            preCueImage.color = new Color32(24, 255, 0, 255);
+            preCueImage.color = new Color32(255, 255, 185, 255);
         }
         
         SpatialCue_GO = Instantiate(Resources.Load<GameObject>("asterisk_black"));
@@ -391,7 +391,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         Mask_GO.name = "Mask";
         Mask_GO.SetActive(false);
         Mask_GO.transform.localPosition = Vector3.zero;
-        SpatialCue_GO.AddComponent<FaceCamera>();
+        Mask_GO.AddComponent<FaceCamera>();
         //Mask_GO.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
     }
 
@@ -408,7 +408,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             RectTransform spatialCueRect = SpatialCue_GO.AddComponent<RectTransform>();
             spatialCueRect.sizeDelta = new Vector2(200, 200);
             Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
-            spatialCueImage.sprite = Resources.Load<Sprite>("Star"); //initially using Star as default
+            spatialCueImage.sprite = Resources.Load<Sprite>("asterisk_black");
+            spatialCueImage.color = Color.black;
         }
 
         if (Mask_GO == null)
@@ -420,7 +421,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             RectTransform maskRect = Mask_GO.AddComponent<RectTransform>();
             maskRect.sizeDelta = new Vector2(200, 200);
             Image maskImage = Mask_GO.AddComponent<Image>();
-            maskImage.sprite = Resources.Load<Sprite>("QuestionMark");
+
+            maskImage.sprite = Resources.Load<Sprite>("hashtag_black");
             maskImage.color = Color.black;
         }
     }

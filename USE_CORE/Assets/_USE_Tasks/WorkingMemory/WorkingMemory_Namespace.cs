@@ -32,8 +32,6 @@ namespace WorkingMemory_Namespace
 {
     public class WorkingMemory_TaskDef : TaskDef
     {
-        public override float TaskDirectionalLightIntensity { get; set; } = 2f;
-
     }
 
     public class WorkingMemory_BlockDef : BlockDef

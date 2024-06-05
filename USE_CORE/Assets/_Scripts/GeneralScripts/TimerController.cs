@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using System;
+using USE_States;
+using USE_UI;
 
 
 //Script is attached to the Scripts/MiscScripts GameObject.
@@ -16,6 +16,11 @@ public class TimerController : MonoBehaviour
 
     [HideInInspector] public GameObject TimerGO;
     [HideInInspector] public Timer Timer;
+
+    private float Duration = 5f; //Default is 5, but the task's trial level will set it every trial.
+
+    private State SetActiveOnInitialization;
+    private State SetInactiveOnTermination;
 
 
     private void Start()
@@ -46,13 +51,17 @@ public class TimerController : MonoBehaviour
         }
     }
 
+    public void SetDuration(float duration)
+    {
+        Duration = duration;
+        Timer.TimerText.text = duration.ToString("0");
+    }
+
     public void CreateTimer(Transform parent)
     {
         if(TimerGO != null)
-        {
             Destroy(TimerGO);
-        }
-
+       
         try
         {
             TimerGO = Instantiate(Resources.Load<GameObject>("Timer"));
@@ -84,21 +93,21 @@ public class TimerController : MonoBehaviour
 
     }
 
-    public void StartTimer(float duration)
+    public void StartTimer()
     {
         StopAllCoroutines();
-        StartCoroutine(TimerRoutine(duration));
+        StartCoroutine(TimerRoutine(Duration));
     }
 
     public void StopTimer()
     {
         StopAllCoroutines();
         ClockAudioSource.Stop();
-        if(Timer.TimerFillImage != null)
+        if (Timer.TimerFillImage != null)
             Timer.TimerFillImage.fillAmount = 0f;
-        if(Timer.TimerText != null)
+        if (Timer.TimerText != null)
             Timer.TimerText.text = "0";
-        if(TimerGO != null)
+        if (TimerGO != null)
             TimerGO.SetActive(false);
     }
 
@@ -106,9 +115,11 @@ public class TimerController : MonoBehaviour
     {
         float timeRemaining = duration;
         Timer.TimerFillImage.fillAmount = 1f;
-        ClockAudioSource.Play();
+        Timer.TimerText.text = timeRemaining.ToString("0");
+        //ClockAudioSource.Play();
 
-        TimerGO.SetActive(true);
+        if(TimerGO != null)
+            TimerGO.SetActive(true);
 
         while (timeRemaining > 0 && Timer.TimerText != null && Timer.TimerFillImage != null)
         {
@@ -117,21 +128,33 @@ public class TimerController : MonoBehaviour
             Timer.TimerFillImage.fillAmount = timeRemaining / duration;
             yield return null;
         }
-
         StopTimer();
     }
 
 
-    public void ActivateTimer()
+    private void ActivateOnStateInit(object sender, EventArgs e)
     {
-        if (TimerGO != null)
-            TimerGO.SetActive(true);
+        StartTimer();
     }
 
-    public void DeactivateTimer()
+    private void DeactivateOnStateTerm(object sender, EventArgs e)
     {
-        if (TimerGO != null)
-            TimerGO.SetActive(false);
+        StopTimer();
     }
+
+    public void SetVisibilityOnOffStates(State setActiveOnInit = null, State setInactiveOnTerm = null)
+    {
+        if (setActiveOnInit != null)
+        {
+            SetActiveOnInitialization = setActiveOnInit;
+            SetActiveOnInitialization.StateInitializationFinished += ActivateOnStateInit;
+        }
+        if (setInactiveOnTerm != null)
+        {
+            SetInactiveOnTermination = setInactiveOnTerm;
+            SetInactiveOnTermination.StateTerminationFinished += DeactivateOnStateTerm;
+        }
+    }
+
 
 }

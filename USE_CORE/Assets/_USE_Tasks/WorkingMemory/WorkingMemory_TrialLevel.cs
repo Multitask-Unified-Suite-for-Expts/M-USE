@@ -113,18 +113,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 playerViewParent = GameObject.Find("MainCameraCopy");
             }
 
-            // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloRange(2.5f);
-            HaloFBController.SetCircleHaloIntensity(3f);
-        });
-        SetupTrial.AddSpecificInitializationMethod(() =>
-        {
-            //Set the Stimuli Light/Shadow settings
-            SetShadowType(currentTaskDef.ShadowType, "WorkingMemory_DirectionalLight");
-            if (currentTaskDef.StimFacingCamera)
-                MakeStimFaceCamera();
+            if (Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.CreateTimer(WM_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
+            }
 
-            if(StartButton == null)
+            if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
                 {
@@ -137,6 +132,19 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
+
+            // Initialize FB Controller Values
+            HaloFBController.SetCircleHaloRange(2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
+        });
+        SetupTrial.AddSpecificInitializationMethod(() =>
+        {
+            //Set the Stimuli Light/Shadow settings
+            SetShadowType(currentTaskDef.ShadowType, "WorkingMemory_DirectionalLight");
+            if (currentTaskDef.StimFacingCamera)
+                MakeStimFaceCamera();
+
+
                         
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();
@@ -151,6 +159,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            //Set timer duration for the trial:
+            if (Session.SessionDef.IsHuman)
+                Session.TimerController.SetDuration(selectObjectDuration.value);
+
+
             if (Session.WebBuild)
                 TokenFBController.AdjustTokenBarSizing(110);
 

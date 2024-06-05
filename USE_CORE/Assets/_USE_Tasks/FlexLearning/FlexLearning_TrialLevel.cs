@@ -117,19 +117,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 playerView = gameObject.AddComponent<PlayerViewPanel>();
                 playerViewParent = GameObject.Find("MainCameraCopy");     
             }
-            
-            // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloRange(Session.UsingDefaultConfigs ? 1.75f: 2.5f);
-            HaloFBController.SetCircleHaloIntensity(3f);
-        });
-        
-        SetupTrial.AddSpecificInitializationMethod(() =>
-        {
-            //Set the Stimuli Light/Shadow settings
-            SetShadowType(currentTaskDef.ShadowType, "FlexLearning_DirectionalLight");
-            if (currentTaskDef.StimFacingCamera)
-                MakeStimFaceCamera();
-            
+
+            if (Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.CreateTimer(FL_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
+            }
+
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -144,6 +138,18 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
+            // Initialize FB Controller Values
+            HaloFBController.SetCircleHaloRange(Session.UsingDefaultConfigs ? 1.75f: 2.5f);
+            HaloFBController.SetCircleHaloIntensity(3f);
+        });
+        
+        SetupTrial.AddSpecificInitializationMethod(() =>
+        {
+            //Set the Stimuli Light/Shadow settings
+            SetShadowType(currentTaskDef.ShadowType, "FlexLearning_DirectionalLight");
+            if (currentTaskDef.StimFacingCamera)
+                MakeStimFaceCamera();
+            
             if (!configUIVariablesLoaded)
                 LoadConfigUIVariables();
 
@@ -158,6 +164,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
+
+            //Set timer duration for the trial:
+            if (Session.SessionDef.IsHuman)
+                Session.TimerController.SetDuration(selectObjectDuration.value);
+
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);

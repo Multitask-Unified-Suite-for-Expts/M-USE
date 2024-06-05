@@ -151,6 +151,7 @@ namespace USE_ExperimentTemplate_Trial
                     return tieIndices[Random.Range(0, tieIndices.Count)];
 
                 default:
+                    Debug.Log("trial #: " + TrialCount_InBlock + " /cur difficulty level: " + difficultyLevel);
                     return TrialCount_InBlock;
             }
         }

@@ -378,7 +378,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             preCueRect.sizeDelta = new Vector2(75, 75);
             Image preCueImage = PreCue_GO.AddComponent<Image>();
             preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
-            preCueImage.color = new Color32(24, 255, 0, 255);
+            preCueImage.color = new Color32(255, 255, 185, 255);
         }
         
         SpatialCue_GO = Instantiate(Resources.Load<GameObject>("asterisk_black"));
@@ -409,6 +409,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             spatialCueRect.sizeDelta = new Vector2(200, 200);
             Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
             spatialCueImage.sprite = Resources.Load<Sprite>("Star"); //initially using Star as default
+            spatialCueImage.color = Color.black;
         }
 
         if (Mask_GO == null)
@@ -420,7 +421,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             RectTransform maskRect = Mask_GO.AddComponent<RectTransform>();
             maskRect.sizeDelta = new Vector2(200, 200);
             Image maskImage = Mask_GO.AddComponent<Image>();
-            maskImage.sprite = Resources.Load<Sprite>("QuestionMark");
+            maskImage.sprite = Resources.Load<Sprite>("hashtag_black");
             maskImage.color = Color.black;
         }
     }
@@ -568,64 +569,74 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         MinTrialsBeforeTermProcedure = CurrentTrial.MinTrialsBeforeTermProcedure;
         TerminationWindowSize = CurrentTrial.TerminationWindowSize;
         //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
-        
-        int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
-        difficultyLevel = randomDouble;
+
+        if (TrialDefSelectionStyle == "adaptive")
+        {
+            int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
+            difficultyLevel = randomDouble;
+        }
+        else if (TrialDefSelectionStyle == "default")
+        {
+            difficultyLevel = 0;
+        }
     }
     
     protected override bool CheckBlockEnd()
     {
-        int prevResult = -1;
-        DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
-
-        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
-        if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
-            return false;
-
-        if (runningPerformance.Count > 1)
+        switch (TrialDefSelectionStyle)
         {
-            prevResult = runningPerformance[runningPerformance.Count - 2];
-            //prevResult = runningPerformance[^2];
-        }
+            case "adaptive":
+                int prevResult = -1;
+                DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
 
-        if (runningPerformance.Last() == 1)
-        {
-            if (prevResult == 0)
-            {
-                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
+                Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
+                if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
+                    return false;
+
+                if (runningPerformance.Count > 1) {
+                    prevResult = runningPerformance[runningPerformance.Count - 2];
+                    //prevResult = runningPerformance[^2];
+                }
+
+                if (runningPerformance.Last() == 1) {
+                    if (prevResult == 0) {
+                        DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                        TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
                 
-                reversalsCount++;
-            }
-        }
-        else if (runningPerformance.Last() == 0)
-        {
-            if (prevResult == 1)
-            {
-                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
-                reversalsCount++;
-            }
-        }
+                        reversalsCount++;
+                    }
+                }
+                else if (runningPerformance.Last() == 0) {
+                    if (prevResult == 1) {
+                        DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                        TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
+                        reversalsCount++;
+                    }
+                }
 
-        //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
-        Debug.Log("SpatialCueDelayDuration: " + CurrentTrial.SpatialCueDelayDuration + " / DisplayTargetDuration: " + CurrentTrial.DisplayTargetDuration);
-        if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
-        {
-            List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
-            calculatedThreshold_timing = (int)lastElements.Average();
-            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
+                //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+                Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+                Debug.Log("SpatialCueDelayDuration: " + CurrentTrial.SpatialCueDelayDuration + " / DisplayTargetDuration: " + CurrentTrial.DisplayTargetDuration);
+                if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm) {
+                    List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
+                    calculatedThreshold_timing = (int)lastElements.Average();
+                    Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
             
-            List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
-            Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));
+                    List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
+                    Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));
             
-            calculatedThreshold_timing = lastElements_timing.Average();
-            Debug.Log("calculatedThreshold_timing: " + calculatedThreshold_timing);
+                    calculatedThreshold_timing = lastElements_timing.Average();
+                    Debug.Log("calculatedThreshold_timing: " + calculatedThreshold_timing);
             
-            return true;
+                    return true;
+                }
+                return false;
+            
+            default:
+                if (TrialCount_InBlock == maxDiffLevel - 1)
+                    return true;
+                return false;
         }
-        return false;
     }
 
 }

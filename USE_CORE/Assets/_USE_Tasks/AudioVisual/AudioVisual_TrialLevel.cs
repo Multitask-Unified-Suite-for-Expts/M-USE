@@ -106,11 +106,13 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
         //------------------------------------------------------------------------------------------------------------------------
         var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, PlayerChoice);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, AV_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 20, AV_CanvasGO, false);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            ShotgunHandler.SelectablePeriod = true;
+
             LoadConfigUIVariables();
 
             SetTrialSummaryString();
@@ -143,6 +145,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         //Preparation state -------------------------------------------------------------------------------------------------------
         Preparation.AddSpecificInitializationMethod(() =>
         {
+            ShotgunHandler.SelectablePeriod = false;
+
             WaitCueGO.SetActive(true);
         });
         Preparation.AddTimer(() => CurrentTrial.PreparationDuration, DisplayOptions);
@@ -175,6 +179,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         //PlayerChoice state -------------------------------------------------------------------------------------------------------
         PlayerChoice.AddSpecificInitializationMethod(() =>
         {
+            ShotgunHandler.SelectablePeriod = true;
+
             ChosenGO = null;
             SelectionMade = false;
             WaitCueGO.SetActive(false);

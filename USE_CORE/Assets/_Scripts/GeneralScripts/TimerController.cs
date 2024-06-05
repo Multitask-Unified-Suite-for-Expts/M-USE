@@ -114,8 +114,10 @@ public class TimerController : MonoBehaviour
     private IEnumerator TimerRoutine(float duration)
     {
         float timeRemaining = duration;
-        Timer.TimerFillImage.fillAmount = 1f;
-        Timer.TimerText.text = timeRemaining.ToString("0");
+        if(Timer.TimerFillImage != null)
+            Timer.TimerFillImage.fillAmount = 1f;
+        if(Timer.TimerText != null)
+            Timer.TimerText.text = timeRemaining.ToString("0");
         //ClockAudioSource.Play();
 
         if(TimerGO != null)

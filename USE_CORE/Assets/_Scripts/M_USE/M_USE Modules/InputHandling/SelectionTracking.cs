@@ -105,6 +105,9 @@ namespace SelectionTracking
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
             //Update Error Triggers: Moving too far, holding for too long
             mouseClick.UpdateErrorTriggers.Add("MovedTooFar", mouseClick.DefaultConditions("MovedTooFar"));
+
+            mouseClick.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseClick.DefaultConditions("NotSelectablePeriod"));
+
             mouseClick.UpdateErrorTriggers.Add("DurationTooLong", mouseClick.DefaultConditions("DurationTooLong"));
             //Termination Conditions: Releasing mouse click
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
@@ -124,10 +127,12 @@ namespace SelectionTracking
             mouseHover.UpdateConditions.Add(mouseHover.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
             //Update Error Triggers: Moving too far, holding for too long
             mouseHover.UpdateErrorTriggers.Add("MovedTooFar", mouseHover.DefaultConditions("MovedTooFar"));
+            mouseHover.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseHover.DefaultConditions("NotSelectablePeriod"));
             //Termination Conditions: Hovered above object for long enough
             mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("DurationSufficient"));
             //Termination Error Triggers: HoldingTooShort
             mouseHover.TerminationErrorTriggers.Add("DurationTooShort", mouseHover.DefaultConditions("DurationTooShort"));
+
 
             mouseHover.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseHover", mouseHover);
@@ -142,6 +147,9 @@ namespace SelectionTracking
 
             touchShotgun.UpdateErrorTriggers.Add("MovedTooFar", touchShotgun.DefaultConditions("MovedTooFar"));
             touchShotgun.UpdateErrorTriggers.Add("DurationTooLong", touchShotgun.DefaultConditions("DurationTooLong"));
+
+            touchShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", touchShotgun.DefaultConditions("NotSelectablePeriod"));
+
 
             touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("MouseButton0Up"));
 
@@ -158,6 +166,8 @@ namespace SelectionTracking
 
             gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
 
+            gazeSelection.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeSelection.DefaultConditions("NotSelectablePeriod"));
+
             gazeSelection.TerminationConditions.Add(gazeSelection.DefaultConditions("DurationSufficient"));
 
             gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
@@ -169,6 +179,8 @@ namespace SelectionTracking
             gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsProportion"));
 
             gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
+
+            gazeShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeShotgun.DefaultConditions("NotSelectablePeriod"));
 
             gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
 
@@ -261,6 +273,7 @@ namespace SelectionTracking
             public string HandlerName;
             public string HandlerLevel;
             public bool HandlerActive;
+            public bool SelectablePeriod = true; //Set to true, then trial level's can turn off for certain states to get fb for selecting prematurely
 
             private bool HoverOnEventCodeSent; //used so that hover event code is only sent on first frame of hovering. 
 
@@ -397,6 +410,7 @@ namespace SelectionTracking
                 if (OngoingSelection != null)
                 {
                     OngoingSelection.ErrorType = error;
+                    Debug.LogWarning("ERROR: " + error);
                     TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection));
                 }
                 else
@@ -628,6 +642,9 @@ namespace SelectionTracking
                            && OngoingSelection.InputLocations.Count > 0
                            && Vector3.Distance(OngoingSelection.InputLocations[0], CurrentInputLocation()) > MaxPixelDisplacement;
                 });
+
+                DefaultConditions.Add("NotSelectablePeriod", () => OngoingSelection != null && !SelectablePeriod);
+
                 DefaultConditions.Add("MouseButton0", () => InputBroker.GetMouseButton(0));
                 DefaultConditions.Add("MouseButton0Down", () => InputBroker.GetMouseButtonDown(0));
                 DefaultConditions.Add("MouseButton0Up", () => InputBroker.GetMouseButtonUp(0));

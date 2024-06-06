@@ -43,6 +43,7 @@ public class TouchFBController : MonoBehaviour
     private static GameObject HeldTooLong_Prefab;
     private static GameObject HeldTooShort_Prefab;
     private static GameObject MovedTooFar_Prefab;
+    private static GameObject NotSelectablePeriod_Prefab;
     private static List<GameObject> PrefabList;
     public float FeedbackSize = 150f; //Default is 150;
     public float FeedbackDuration = .3f; //Default is .3
@@ -56,6 +57,7 @@ public class TouchFBController : MonoBehaviour
     public static Texture2D HeldTooLong_Texture;
     public static Texture2D HeldTooShort_Texture;
     public static Texture2D MovedTooFar_Texture;
+    public static Texture2D NotSelectablePeriod_Texture;
 
     private Dictionary<string, int> Error_Dict;
 
@@ -78,6 +80,8 @@ public class TouchFBController : MonoBehaviour
         trialData.AddDatum("HeldTooLong", () => Error_Dict["HeldTooLong"]);
         trialData.AddDatum("HeldTooShort", () => Error_Dict["HeldTooShort"]);
         trialData.AddDatum("MovedTooFar", () => Error_Dict["MovedTooFar"]);
+        trialData.AddDatum("NotSelectablePeriod", () => Error_Dict["NotSelectablePeriod"]);
+
         frameData.AddDatum("FeedbackOn", () => FeedbackOn.ToString());
         if (InstantiatedGO != null)
             Destroy(InstantiatedGO);
@@ -90,7 +94,8 @@ public class TouchFBController : MonoBehaviour
         {
             { "HeldTooLong", 0 },
             { "HeldTooShort", 0 },
-            { "MovedTooFar", 0 }
+            { "MovedTooFar", 0 },
+            { "NotSelectablePeriod", 0 }
         };
     }
 
@@ -110,7 +115,7 @@ public class TouchFBController : MonoBehaviour
         TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
         UseRootGoPos = useRootPosition;
 
-        if (HeldTooShort_Prefab == null || HeldTooLong_Prefab == null || MovedTooFar_Prefab == null) //If null, create the prefabs
+        if (HeldTooShort_Prefab == null || HeldTooLong_Prefab == null || MovedTooFar_Prefab == null || NotSelectablePeriod_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
         else //If not null, check if existing prefab's size is same as new size. If not, update the prefab size
             if (HeldTooShort_Prefab.transform.localScale != new Vector3(fbSize, fbSize, 1f))
@@ -159,6 +164,11 @@ public class TouchFBController : MonoBehaviour
                     Error_Dict["MovedTooFar"]++;
                     Debug.Log("SHOWING TOUCH FEEDBACK FOR MOVING TOO FAR!");
                     ShowTouchFeedback(new TouchFeedback(e.Selection, MovedTooFar_Prefab, this));
+                    break;
+                case "NotSelectablePeriod":
+                    Error_Dict["NotSelectablePeriod"]++;
+                    Debug.Log("SHOWING TOUCH FEEDBACK FOR SELECTING DURING A NON SELECTABLE PERIOD!");
+                    ShowTouchFeedback(new TouchFeedback(e.Selection, NotSelectablePeriod_Prefab, this));
                     break;
                 default:
                     break;
@@ -214,8 +224,9 @@ public class TouchFBController : MonoBehaviour
             HeldTooLong_Prefab = CreatePrefab("HeldTooLongGO", HeldTooLong_Texture);
             HeldTooShort_Prefab = CreatePrefab("HeldTooShortGO", HeldTooShort_Texture);
             MovedTooFar_Prefab = CreatePrefab("MovedTooFarGO", MovedTooFar_Texture);
+            NotSelectablePeriod_Prefab = CreatePrefab("NotSelectablePeriodGO", NotSelectablePeriod_Texture);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Debug.LogWarning("FAILED TO CREATE TOUCHFBCONTROLLER PREFABS! " + e.ToString());
         }

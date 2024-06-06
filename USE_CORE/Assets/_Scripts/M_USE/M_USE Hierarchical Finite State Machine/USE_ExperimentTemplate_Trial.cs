@@ -111,7 +111,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public bool TrialStimsLoaded;
         public Material SkyboxMaterial;
         // Texture Variables
-        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, MovedTooFarSquareTexture, HeldTooShortSquareTexture, HeldTooLongSquareTexture;
+        [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, MovedTooFarSquareTexture, HeldTooShortSquareTexture, HeldTooLongSquareTexture, NotSelectablePeriodTexture;
 
 
         public delegate IEnumerator FileLoadingMethod();
@@ -741,14 +741,20 @@ namespace USE_ExperimentTemplate_Trial
                 HeldTooLongTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooLong");
                 HeldTooShortTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooShort");
                 MovedTooFarTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/MovedTooFar");
+                NotSelectablePeriodTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/NotSelectablePeriod");
+
                 TouchFBController.HeldTooLong_Texture = HeldTooLongTexture;
                 TouchFBController.HeldTooShort_Texture = HeldTooShortTexture;
                 TouchFBController.MovedTooFar_Texture = MovedTooFarTexture;
+                TouchFBController.NotSelectablePeriod_Texture = NotSelectablePeriodTexture;
+
                 HeldTooLongSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooLong_Square");
                 HeldTooShortSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/HeldTooShort_Square");
                 MovedTooFarSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/MovedTooFar_Square");
+                MovedTooFarSquareTexture = Resources.Load<Texture2D>($"{Session.DefaultContextFolderPath}/MovedTooFar_Square");
+
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Debug.LogError("FAILED LOADING SHARED TRIAL TEXTURES FROM RESOURCES! " + e.Message.ToString());
             }

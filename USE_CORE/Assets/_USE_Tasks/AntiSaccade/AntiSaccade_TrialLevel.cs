@@ -125,6 +125,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SetDataStrings();
             
             CreateIcons();
+            //CreateGameObjects();
 
 
             //***** SET TARGET STIM *****
@@ -387,12 +388,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SpatialCue_GO.transform.localPosition = Vector3.zero;
         SpatialCue_GO.AddComponent<FaceCamera>();
         
-        Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black"));
+        Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black_old"));
         Mask_GO.name = "Mask";
         Mask_GO.SetActive(false);
         Mask_GO.transform.localPosition = Vector3.zero;
         SpatialCue_GO.AddComponent<FaceCamera>();
-        //Mask_GO.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        if (CurrentTrial.SpatialCue_Pos[0] < 0)
+            Mask_GO.transform.localRotation = Quaternion.Euler(0f, 85f, 0f);
+        else
+            Mask_GO.transform.localRotation = Quaternion.Euler(0f, 95f, 0f);
     }
 
     private void CreateGameObjects()

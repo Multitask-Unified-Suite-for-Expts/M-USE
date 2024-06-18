@@ -143,7 +143,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("BlockAccuracy", () => (float)trialLevel.TrialsCorrect_Block / trialLevel.TrialCompletions_Block);
         BlockData.AddDatum("AvgReactionTime", () => CalculateAverageDuration(trialLevel.ReactionTimes_InBlock));
         BlockData.AddDatum("StdDevReactionTime", () => CalculateStdDevDuration(trialLevel.ReactionTimes_InBlock));
-
     }
 
     public void CalculateBlockSummaryString()

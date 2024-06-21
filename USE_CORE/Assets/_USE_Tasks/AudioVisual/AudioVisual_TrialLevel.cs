@@ -2,9 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using USE_States;
-using USE_Settings;
 using USE_ExperimentTemplate_Trial;
-using USE_StimulusManagement;
 using AudioVisual_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
@@ -22,6 +20,10 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     public GameObject AV_CanvasGO;
+
+    //Set In Inspector:
+    public GameObject ScoreTextGO;
+    public GameObject NumCorrectTextGO;
 
     [HideInInspector] public GameObject WaitCueGO;
     [HideInInspector] public GameObject LeftIconGO;
@@ -43,6 +45,26 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
     //Config UI Variables:
     public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, touchFbDuration, tokenUpdateDuration, tokenRevealDuration, tokenFlashingDuration;
+
+
+    [HideInInspector] public int NumCorrect_Block, NumTbCompletions_Block; //DONE
+    [HideInInspector] public float AvgTimeToChoice_Block, TimeToCompletion_Block, TimeToCompletion_StartTime;
+    [HideInInspector] public List<float> TimeToChoice_Block;
+
+    private int score;
+    [HideInInspector]
+    public int Score
+    {
+        get
+        {
+            return score;
+        }
+    }
+
+    //internal data:
+    private int Correct_Block;
+    private int Completed_Block;
+
 
 
     public override void DefineControlLevel()
@@ -97,10 +119,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             //Set timer duration for the trial:
             if(Session.SessionDef.IsHuman)
                 Session.TimerController.SetDuration(CurrentTrial.ChoiceDuration);
-
-            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
-            TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
-            TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -123,9 +141,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetTaskSummaryString();
 
             TokenFBController.enabled = false;
-            TokenFBController.SetRevealTime(tokenRevealDuration.value);
-            TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
-            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
+            SetTokenValues();
 
             SetShadowType(CurrentTask.ShadowType, "AudioVisual_DirectionalLight");
 
@@ -140,6 +156,13 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = true;
             Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+
+            if(Session.SessionDef.IsHuman)
+            {
+                SetText();
+                ScoreTextGO.SetActive(true);
+                NumCorrectTextGO.SetActive(true);
+            }
         });
 
         //Preparation state -------------------------------------------------------------------------------------------------------
@@ -148,6 +171,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.SelectablePeriod = false;
 
             WaitCueGO.SetActive(true);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["WaitCueActive"]);
+
         });
         Preparation.AddTimer(() => CurrentTrial.PreparationDuration, DisplayOptions);
 
@@ -156,6 +181,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             LeftIconGO.SetActive(true);
             RightIconGO.SetActive(true);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LeftObjectActive"]);
+            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RightObjectActive"]);
         });
         DisplayOptions.AddTimer(() => CurrentTrial.DisplayOptionsDuration, PlayAudio);
 
@@ -171,9 +198,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         PlayAudio.AddDefaultTerminationMethod(() => NoiseAudioSource.Stop());
 
         //WaitPeriod state -------------------------------------------------------------------------------------------------------
-        WaitPeriod.AddSpecificInitializationMethod(() =>
-        {
-        });
         WaitPeriod.AddTimer(() => CurrentTrial.WaitPeriodDuration, PlayerChoice);
 
         //PlayerChoice state -------------------------------------------------------------------------------------------------------
@@ -197,11 +221,12 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (CurrentTrial.CorrectObject.ToLower().Contains("left"))
                     {
-                        Debug.LogWarning("CORRECTLY CHOSE LEFT SIDE!");
+                        UpdateScore(true);
                         GotTrialCorrect = true;
                     }
                     else
-                        Debug.LogWarning("INCORRECTLY CHOSE LEFT SIDE");
+                        UpdateScore(false);
+                    
 
                     SelectionMade = true;
                 }
@@ -209,11 +234,11 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (CurrentTrial.CorrectObject.ToLower().Contains("right"))
                     {
-                        Debug.LogWarning("CORRECTLY CHOSE RIGHT SIDE!");
+                        UpdateScore(true);
                         GotTrialCorrect = true;
                     }
                     else
-                        Debug.LogWarning("INCORRECTLY CHOSE RIGHT SIDE");
+                        UpdateScore(false);
 
                     SelectionMade = true;
                 }
@@ -254,6 +279,12 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             FeedbackPanelGO.SetActive(false);
             HaloFBController.DestroyAllHalos();
+
+            if(Session.SessionDef.IsHuman)
+            {
+                ScoreTextGO.SetActive(false);
+                NumCorrectTextGO.SetActive(false);
+            }
         });
 
         //ITI state -------------------------------------------------------------------------------------------------------
@@ -264,10 +295,93 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+    private void SetText()
+    {
+        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE:  {score}";
+        NumCorrectTextGO.GetComponent<TextMeshProUGUI>().text = $"CORRECT: {Correct_Block}/{Completed_Block}";
+    }
+
+    private void UpdateScore(bool increase)
+    {
+        //Score
+        int change = (TrialCount_InBlock + 1) * 100;
+        if (!increase)
+            change = -change;
+        score += change;
+
+        //Correct
+        if (increase)
+            Correct_Block++;
+
+        Completed_Block++;
+
+        SetText();
+    }
+
+    public override void FinishTrialCleanup()
+    {
+        ScoreTextGO.SetActive(false);
+        NumCorrectTextGO.SetActive(false);
+
+        if (AbortCode == 0)
+        {
+            CurrentTaskLevel.TrialsCompleted_Task++;
+
+            if (GotTrialCorrect)
+            {
+                NumCorrect_Block++;
+                CurrentTaskLevel.TrialsCorrect_Task++;
+            }
+
+            CurrentTaskLevel.CalculateBlockSummaryString();
+        }
+        else
+        {
+            CurrentTaskLevel.NumAbortedTrials_InBlock++;
+            CurrentTaskLevel.NumAbortedTrials_InTask++;
+        }
+    }
+
     public override void ResetTrialVariables()
     {
         GotTrialCorrect = false;
         SelectionMade = false;
+    }
+
+    public void ResetBlockVariables()
+    {
+        //internal:
+        Completed_Block = 0;
+        Correct_Block = 0;
+        score = 0;
+
+        NumCorrect_Block = 0;
+        NumTbCompletions_Block = 0;
+        TimeToChoice_Block.Clear();
+        AvgTimeToChoice_Block = 0;
+        TimeToCompletion_Block = 0;
+    }
+
+    private void SetTokenValues()
+    {
+        TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
+        TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
+        TokenFBController.SetRevealTime(tokenRevealDuration.value);
+        TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
+        TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
+    }
+
+    public override void OnTokenBarFull()
+    {
+        Debug.LogWarning("TOKEN BAR FULL!");
+
+        NumTbCompletions_Block++;
+        CurrentTaskLevel.TokenBarCompletions_Task++;
+
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
+        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
     }
 
 
@@ -383,23 +497,28 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         touchFbDuration = ConfigUiVariables.get<ConfigNumber>("touchFbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
+        tokenFlashingDuration = ConfigUiVariables.get<ConfigNumber>("tokenFlashingDuration");
     }
 
     void SetTrialSummaryString()
     {
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
-                             "\nCorrect Object: " + CurrentTrial.CorrectObject;
+                             "\nCorrect Object: " + CurrentTrial.CorrectObject +
+                             "\nDifficulty Level: " + CurrentTrial.DifficultyLevel;
     }
 
 
     private void DefineTrialData()
     {
         TrialData.AddDatum("ChoseCorrectly", () => GotTrialCorrect);
+        TrialData.AddDatum("DifficultyLevel", () => CurrentTrial.DifficultyLevel);
+
     }
 
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButtonActive", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
+        FrameData.AddDatum("WaitCueActive", () => WaitCueGO != null && WaitCueGO.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("LeftIconActive", () => LeftIconGO != null && LeftIconGO.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("RightIconActive", () => RightIconGO != null && RightIconGO.activeInHierarchy ? "Active" : "NotActive");
 

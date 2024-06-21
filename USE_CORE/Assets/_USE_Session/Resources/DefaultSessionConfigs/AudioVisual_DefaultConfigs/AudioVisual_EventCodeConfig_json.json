@@ -1,0 +1,14 @@
+{
+    "WaitCueActive": {
+        "Value": 15026,
+        "Description": "WaitCue Object Appears"
+    },
+    "LeftObjectActive": {
+        "Value": 15027,
+        "Description": "Left Object Appears"
+    },
+    "RightObjectActive": {
+        "Value": 15028,
+        "Description": "Right Object Appears"
+    }
+}

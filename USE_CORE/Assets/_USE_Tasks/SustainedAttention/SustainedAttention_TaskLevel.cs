@@ -36,7 +36,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         DefineBlockData();
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Sustained Attention");
-        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object. When it animates (closes its mouth), select it as quickly as you can!");
+        Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object. Select the object as quickly as you can once it animates (closes its mouth)!");
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {

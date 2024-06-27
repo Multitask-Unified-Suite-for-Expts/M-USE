@@ -105,6 +105,7 @@ namespace ContinuousRecognition_Namespace
                     }
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
+
                 trial.BlockStimIndices = BlockStimIndices;
                 trial.TrialStimLocations = trialStimLocations;
                 trial.NumObjectsMinMax = NumObjectsMinMax;

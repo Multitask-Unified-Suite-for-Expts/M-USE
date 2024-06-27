@@ -373,8 +373,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
     public override void OnTokenBarFull()
     {
-        Debug.LogWarning("TOKEN BAR FULL!");
-
         NumTbCompletions_Block++;
         CurrentTaskLevel.TokenBarCompletions_Task++;
 

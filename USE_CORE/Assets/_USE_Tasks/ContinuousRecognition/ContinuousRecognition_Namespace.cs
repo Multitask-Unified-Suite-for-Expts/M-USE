@@ -45,8 +45,6 @@ namespace ContinuousRecognition_Namespace
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
-        public float[] ss_loBounds;
-        public float[] ss_upBounds;
         public float[] X_Locations;
         public float[] Y_Locations;
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
@@ -107,9 +105,8 @@ namespace ContinuousRecognition_Namespace
                     }
                     trialStimLocations[i] = BlockStimLocations[randomIndex];
                 }
+
                 trial.BlockStimIndices = BlockStimIndices;
-                trial.ss_loBounds = ss_loBounds;
-                trial.ss_upBounds = ss_upBounds;
                 trial.TrialStimLocations = trialStimLocations;
                 trial.NumObjectsMinMax = NumObjectsMinMax;
                 trial.InitialStimRatio = InitialStimRatio;
@@ -221,8 +218,6 @@ namespace ContinuousRecognition_Namespace
     {
         //FROM BLOCK CONFIG & PASSED:
         public int[] BlockStimIndices;
-        public float[] ss_loBounds;
-        public float[] ss_upBounds;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
         public float[] X_FbLocations = new float[] {-3f, -1.8f, -.6f, .6f, 1.8f, 3f};

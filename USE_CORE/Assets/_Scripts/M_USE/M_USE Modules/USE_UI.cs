@@ -287,13 +287,21 @@ namespace USE_UI
             PlayIconGO.GetComponent<SpriteRenderer>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
 
             StartButtonChildren = new List<GameObject>();
-            foreach (Transform child in StartButtonGO.transform)
-            {
-                StartButtonChildren.Add(child.gameObject);
-            }
+
+            AddChildrenRecursively(StartButtonGO.transform, StartButtonChildren);
+
             StartButtonGO.SetActive(false);
 
             return StartButtonGO;
+        }
+
+        private void AddChildrenRecursively(Transform parent, List<GameObject> childrenList)
+        {
+            foreach (Transform child in parent)
+            {
+                childrenList.Add(child.gameObject);
+                AddChildrenRecursively(child, childrenList);
+            }
         }
 
         public void SetButtonPosition(Vector3 pos)

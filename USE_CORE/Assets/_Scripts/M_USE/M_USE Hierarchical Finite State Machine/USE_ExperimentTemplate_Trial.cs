@@ -215,10 +215,12 @@ namespace USE_ExperimentTemplate_Trial
 
             Debugger = new UI_Debugger();
 
+            SubscribeToEvents();
+
             //DefineTrial();
+
             Add_ControlLevel_InitializationMethod(() =>
             {
-                SubscribeToEvents();
 
                 TrialCount_InBlock = -1;
                 DefineCustomTrialDefSelection();

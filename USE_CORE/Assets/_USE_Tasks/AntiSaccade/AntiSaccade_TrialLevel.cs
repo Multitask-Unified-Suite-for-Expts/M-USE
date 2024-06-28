@@ -387,7 +387,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SpatialCue_GO.name = "SpatialCue";
         SpatialCue_GO.SetActive(false);
         SpatialCue_GO.transform.localPosition = Vector3.zero;
-        SpatialCue_GO.transform.localScale *= 0.75f;
+        SpatialCue_GO.transform.localScale *= 0.75f; // adjusting to match scale to 0.6 externalstimscale
         SpatialCue_GO.AddComponent<FaceCamera>();
         
         Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black_old"));
@@ -395,7 +395,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         Mask_GO.SetActive(false);
         Mask_GO.transform.localPosition = Vector3.zero;
         SpatialCue_GO.AddComponent<FaceCamera>();
-        Mask_GO.transform.localScale *= 0.75f;
+        Mask_GO.transform.localScale *= 0.75f; // adjusting to match scale to 0.6 externalstimscale
         if (CurrentTrial.SpatialCue_Pos[0] < 0)
             Mask_GO.transform.localRotation = Quaternion.Euler(0f, 85f, 0f);
         else

@@ -110,8 +110,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            HaloFBController.SetCircleHaloIntensity(2f);
-            HaloFBController.SetCircleHaloIntensity(.75f);
+            HaloFBController.SetPositiveHaloColor(Color.yellow);
+            HaloFBController.SetNegativeHaloColor(Color.gray);
+            HaloFBController.SetCircleHaloIntensity(3f);
         });
 
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------

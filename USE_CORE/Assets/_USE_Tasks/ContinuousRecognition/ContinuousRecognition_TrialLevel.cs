@@ -66,6 +66,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public  List<int> ChosenStimIndices;
 
     [HideInInspector] public int NonStimTouches_Block, NumCorrect_Block, NumTbCompletions_Block;
+    [HideInInspector] public int SliderBarCompletions_Block = 0;
+
     [HideInInspector] public float AvgTimeToChoice_Block, TimeToCompletion_Block, TimeToCompletion_StartTime, TokenUpdateStartTime, TimeRemaining;
     [HideInInspector] public List <float> TimeToChoice_Block;
 
@@ -96,7 +98,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     
     //Config Variables
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, itiDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration;
+    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
     public GameObject DisplayResults2DContainerGO, DisplayResultsPanelGO;
 
@@ -121,6 +123,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
+            SliderFBController.InitializeSlider();
+
             if (!Session.WebBuild)
             {
                 playerView = gameObject.AddComponent<PlayerViewPanel>();
@@ -220,10 +224,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 NumTrialsTextGO.SetActive(true);
             }
 
-            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
-            TokenFBController.enabled = true;
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
-
             if (CurrentTask.StimFacingCamera)
                 MakeStimsFaceCamera(trialStims);
 
@@ -232,6 +232,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
+
+            //TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
+            //TokenFBController.enabled = true;
+            //Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+
+            SetupSlider();
+            SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
+            SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
+            SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
+            SliderFBController.SliderGO.SetActive(true);
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -252,6 +262,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
+
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -362,21 +373,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (GotTrialCorrect)
             {
-                if(TrialCount_InBlock == CurrentTrial.MaxTrials-1 || PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
-                {
-                    int numToFillBar = CurrentTrial.TokenBarCapacity - TokenFBController.GetTokenBarValue();
-                    TokenFBController.AddTokens(ChosenGO, numToFillBar);
-                }
-                else
-                    TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
+                SliderFBController.UpdateSliderValue((float)(CurrentTrial.SliderChange / 100f));
+
+                //if(TrialCount_InBlock == CurrentTrial.MaxTrials-1 || PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
+                //{
+                //    int numToFillBar = CurrentTrial.TokenBarCapacity - TokenFBController.GetTokenBarValue();
+                //    TokenFBController.AddTokens(ChosenGO, numToFillBar);
+
+                //}
+                //else
+                //    TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
             }
             else //Got wrong
             {
-                TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
+                //TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
+                SliderFBController.UpdateSliderValue(-(float)(CurrentTrial.SliderChange / 100f));
+
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value) && !TokenFBController.IsAnimating(), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (sliderFlashingDuration.value + sliderUpdateDuration.value), DisplayResults); //added .1f for wiggle room
+        //TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value) && !TokenFBController.IsAnimating(), DisplayResults);
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
@@ -390,23 +407,29 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
             }
+
+            SliderFull();
         });
 
         //DISPLAY RESULTS state --------------------------------------------------------------------------------------------------------
         DisplayResults.AddSpecificInitializationMethod(() =>
         {
-            if (displayResultsDuration.value == 0 || ChosenStimIndices.Count < 1) 
+            if (!Session.SessionDef.IsHuman || displayResultsDuration.value == 0 || ChosenStimIndices.Count < 1) 
                 return;
 
             if (EndBlock || CompletedAllTrials)
             {
                 StartCoroutine(GenerateBlockFeedback());
 
-                if (Session.SessionDef.IsHuman)
-                    AudioFBController.Play(CompletedAllTrials ? "CR_BlockCompleted" : "CR_BlockFailed");
+                if (Session.SessionDef.IsHuman && CompletedAllTrials)
+                    AudioFBController.Play("CR_BlockCompleted");
+
+                //if (Session.SessionDef.IsHuman)
+                //    AudioFBController.Play(CompletedAllTrials ? "CR_BlockCompleted" : "CR_BlockFailed");
             }
         });
         DisplayResults.AddTimer(() => displayResultsDuration.value, ITI); //If EndBlock or CompletedAllTrials
+        DisplayResults.SpecifyTermination(() => !Session.SessionDef.IsHuman, ITI); //ADDED SO MONKEYS DONT SEE RESULTS
         DisplayResults.SpecifyTermination(() => displayResultsDuration.value == 0 || ChosenStimIndices.Count < 1, ITI); //If want to skip results, or they didnt make a single selection
         DisplayResults.SpecifyTermination(() => !EndBlock && !CompletedAllTrials, ITI); //Most trials (If not endblock or all trials completed, skip results)
         DisplayResults.AddDefaultTerminationMethod(() =>
@@ -421,7 +444,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
-        ITI.AddTimer(() => itiDuration.value, FinishTrial);
+        ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
         //---------------------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
         DefineFrameData();
@@ -429,8 +452,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
+
     public override void FinishTrialCleanup()
     {
+        SliderFBController.SliderGO.SetActive(false);
+        SliderFBController.SliderHaloGO.SetActive(false);
+
         if (GotTrialCorrect)
             score += (TrialCount_InBlock + 1) * 100;
 
@@ -466,6 +493,23 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
+    private void SliderFull()
+    {
+        if (SliderFBController.isSliderBarFull())
+        {
+            GiveReward();
+            SliderBarCompletions_Block++;
+            CurrentTaskLevel.SliderBarCompletions_Task++;
+        }
+    }
+
+    private void SetupSlider()
+    {
+        SliderFBController.ResetSliderBarFull();
+        SliderFBController.ConfigureSlider(sliderSize.value, (float)(CurrentTrial.SliderInitialValue / 100f), new Vector3(0f, -25f, 0f));
+    }
+
+
     public override void OnTokenBarFull()
     {
         NumTbCompletions_Block++;
@@ -474,6 +518,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
+        GiveReward();
+    }
+
+    private void GiveReward()
+    {
         Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
     }
 
@@ -544,6 +593,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         CompletedAllTrials = false;
         EndBlock = false;
         StimIsChosen = false;
+
+        SliderFBController.ResetSliderBarFull();
+
     }
 
     public void ResetBlockVariables()
@@ -558,6 +610,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TimeToCompletion_Block = 0;
         RecencyInterference_Block = 0;
         score = 0;
+
+        SliderBarCompletions_Block = 0;
+
     }
 
     public void SetControllerBlockValues()
@@ -992,6 +1047,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResultsPanelGO.SetActive(true);
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
+        SliderFBController.SliderGO.SetActive(false);
 
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             yield break;
@@ -1190,6 +1246,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ChoseCorrectly", () => GotTrialCorrect);
         TrialData.AddDatum("CurrentTrialStims", () => TrialStimIndices);
         TrialData.AddDatum("PC_Percentage", () => CalculatePercentagePC());
+
+        TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
+        TrialData.AddDatum("SliderGain", () => CurrentTrial.SliderChange);
     }
 
     private void DefineFrameData()
@@ -1292,7 +1351,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");
         displayResultsDuration = ConfigUiVariables.get<ConfigNumber>("displayResultsDuration");
-        itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
+        sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
+        sliderFlashingDuration = ConfigUiVariables.get<ConfigNumber>("sliderFlashingDuration");
+        sliderUpdateDuration = ConfigUiVariables.get<ConfigNumber>("sliderUpdateDuration");
+
         VariablesLoaded = true;
     }
 

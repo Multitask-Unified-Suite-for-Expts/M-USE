@@ -42,6 +42,8 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_BlockDef : BlockDef
     {
         //FROM BLOCK CONFIG:
+        public int SliderChange;
+        public float ItiDuration;
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;
@@ -125,6 +127,9 @@ namespace ContinuousRecognition_Namespace
 
                 trial.ParticleHaloActive = ParticleHaloActive;
                 trial.CircleHaloActive = CircleHaloActive;
+
+                trial.SliderInitialValue = SliderInitialValue;
+                trial.SliderChange = SliderChange;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -217,6 +222,8 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_TrialDef : TrialDef
     {
         //FROM BLOCK CONFIG & PASSED:
+        public int SliderChange;
+        public float ItiDuration;
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
         public int[] InitialStimRatio;

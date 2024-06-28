@@ -39,10 +39,10 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private SA_Object ChosenObject = null;
 
     private int SliderGainSteps;
+    private bool GiveRewardIfSliderFull = false;
 
     [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
-    private bool GiveRewardIfSliderFull = false;
 
     private readonly float HaloDepth = 10f;
     private float HaloDuration = .15f; //make configurable later

@@ -204,7 +204,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TokenFBController.enabled = false;
 
-            SetTokenFeedbackTimes();
+            //SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 

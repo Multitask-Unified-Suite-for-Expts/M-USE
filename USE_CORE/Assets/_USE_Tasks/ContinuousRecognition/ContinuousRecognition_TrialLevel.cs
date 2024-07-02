@@ -38,7 +38,6 @@ using TMPro;
 using System.Collections;
 using UnityEngine.UI;
 
-
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef CurrentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
@@ -497,9 +496,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         if (SliderFBController.isSliderBarFull())
         {
-            GiveReward();
+            int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1);
+            GiveReward(numPulses);
+        
             SliderBarCompletions_Block++;
             CurrentTaskLevel.SliderBarCompletions_Task++;
+            CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
+            CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
         }
     }
 
@@ -515,15 +518,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumTbCompletions_Block++;
         CurrentTaskLevel.TokenBarCompletions_Task++;
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1);
 
-        GiveReward();
+        CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
+        CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
+
+        GiveReward(numPulses);
     }
 
-    private void GiveReward()
+    private void GiveReward(int numPulses)
     {
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+        Session.SyncBoxController?.SendRewardPulses(numPulses, CurrentTrial.PulseSize); // CurrentTrial.NumPulses
     }
 
 
@@ -1364,4 +1369,65 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
     }
 
+    private int getProbabilisticNumPulsesTrial(int trial)
+    {
+        if (trial == 1)
+        {
+            return 0;
+        }
+        // defining the normal distributions
+        double[] mus = {2, 4, 6, 8, 10};
+        double[] sigmas = {1, 1, 1.25, 1.25, 1.5};
+        // calculate  probability density for each normal distribution at trial
+        double[] pdfValues = new double[mus.Length];
+        for (int i = 0; i < mus.Length; i++)
+        {
+            pdfValues[i] = NormalPDF(trial, mus[i], sigmas[i]);
+        }
+        // Normalize the probabilities
+        double totalPdf = 0;
+        foreach (var pdf in pdfValues)
+        {
+            totalPdf += pdf;
+        }
+        double[] probabilities = new double[pdfValues.Length];
+        for (int i = 0; i < pdfValues.Length; i++)
+        {
+            probabilities[i] = pdfValues[i] / totalPdf;
+        }
+        // Display the probabilities
+        for (int i = 0; i < probabilities.Length; i++)
+        {
+            Debug.Log($"Probability of {i + 2} reward pulses at trial {trial}: {probabilities[i]:F4}");
+        }
+        // Randomly choose a pulse quantity based on the probabilities
+        int chosenPulse = ChooseBasedOnProbability(probabilities);
+        Debug.Log($"Chosen reward pulse quantity for trial {trial}: {chosenPulse}");
+        
+        return chosenPulse;
+    }
+    
+    private double NormalPDF(double x, double mean, double stdDev)
+    {
+        double exponent = Math.Exp(-Math.Pow(x - mean, 2) / (2 * Math.Pow(stdDev, 2)));
+        return (1 / (stdDev * Math.Sqrt(2 * Math.PI))) * exponent;
+    }
+
+    private int ChooseBasedOnProbability(double[] probabilities)
+    {
+        System.Random random = new System.Random();
+        double randomValue = random.NextDouble();
+        double cumulativeProbability = 0.0;
+
+        for (int i = 0; i < probabilities.Length; i++)
+        {
+            cumulativeProbability += probabilities[i];
+            if (randomValue < cumulativeProbability)
+            {
+                return i + 2; // adding 2 because we're starting at 2 pulses
+            }
+        }
+
+        return probabilities.Length - 1; // Fallback in case of rounding errors
+    }
 }

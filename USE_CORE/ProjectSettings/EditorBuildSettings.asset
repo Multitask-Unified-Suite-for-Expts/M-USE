@@ -14,7 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/ContinuousRecognition/ContinuousRecognition.unity
     guid: ed6c79a08bbf34d64924e0aee5ec787e
-  - enabled: 0
+  - enabled: 1
     path: Assets/_USE_Tasks/StimHandling/StimHandling.unity
     guid: 2e148fd03348e46f1b8b00dda1da7b4c
   - enabled: 1
@@ -38,9 +38,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_USE_Tasks/FeatureUncertaintyWM/FeatureUncertaintyWM.unity
     guid: cee0eaf9eb6ba496189bfd870161f1fa
-  - enabled: 0
-    path: 
-    guid: f95a2d16a11db7846854768b108fbfe2
   - enabled: 1
     path: Assets/_USE_Tasks/AntiSaccade/AntiSaccade.unity
     guid: 15cba97e398964a13aabd8a4d07ec48e

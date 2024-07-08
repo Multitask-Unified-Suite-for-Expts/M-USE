@@ -125,7 +125,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = false;
             LoadConfigUIVariables();
-            TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
 
             SetDataStrings();
             
@@ -374,9 +373,14 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-        //Reset tokenbar to numInitialTokens
-        TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
+        StartCoroutine(ResetTbAfterFilled());
 
+    }
+
+    private IEnumerator ResetTbAfterFilled()
+    {
+        yield return new WaitForSeconds(1.5f); //reset tb after waiting a second
+        TokenFBController.SetTokenBarValue(CurrentTaskLevel.currentBlockDef.NumInitialTokens);
     }
 
     private void MakeStimFaceCamera(StimGroup stims)

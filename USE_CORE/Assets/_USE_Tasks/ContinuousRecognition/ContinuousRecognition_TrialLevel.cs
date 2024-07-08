@@ -237,6 +237,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             //Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
 
             SetupSlider();
+            Debug.LogWarning("setup slider being called");
             SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
             SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
             SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
@@ -510,7 +511,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void SetupSlider()
     {
         SliderFBController.ResetSliderBarFull();
-        SliderFBController.ConfigureSlider(sliderSize.value, (float)(CurrentTrial.SliderInitialValue / 100f), new Vector3(0f, -25f, 0f));
+        if (CurrentTrial.NumTrialStims - 1 == 1) // if first trial, set slider to 0
+        {
+            SliderFBController.ConfigureSlider(sliderSize.value, (float)(0), new Vector3(0f, -25f, 0f));
+
+        }
+        else // if not first trial, set slider to SliderInitialValue
+        {
+            SliderFBController.ConfigureSlider(sliderSize.value, (float)(CurrentTrial.SliderInitialValue / 100f), new Vector3(0f, -25f, 0f));
+
+        }
     }
 
 

@@ -496,7 +496,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         if (SliderFBController.isSliderBarFull())
         {
-            int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1);
+            //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
+            int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1); // using single Gaussian
             GiveReward(numPulses);
         
             SliderBarCompletions_Block++;
@@ -518,7 +519,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumTbCompletions_Block++;
         CurrentTaskLevel.TokenBarCompletions_Task++;
 
-        int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1);
+        //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
+        int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1); // using single Gaussian
 
         CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
         CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
@@ -1430,4 +1432,42 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         return probabilities.Length - 1; // Fallback in case of rounding errors
     }
+    private int getProbabilisticPulsesUsingRewardProb(int trial)
+    {
+        if (trial == 1)
+        {
+            return 0;
+        }
+        if (trial >= 9)
+        {
+            return 5;
+        }
+        double baseProb = 0.1;
+        double stepSize = (1.0 - baseProb) / 19; // Reaches 1.0 at trial 20
+        // Calculate reward probability based on trial number
+        double rewardProb = baseProb + stepSize * (trial - 1);
+        int chosenPulse = (int)Math.Round(rewardProb * 10);
+        // Adding randomness with a Gaussian distribution
+        double mu = chosenPulse;  // Mean centered around chosenPulse
+        double sigma = 0.45;     // Adjust the standard deviation as needed
+        double sampledValue = mu + BoxMullerTransform() * sigma;
+        int randomizedPulse = (int)Math.Round(sampledValue);
+        // Ensure the randomized pulse is within valid bounds
+        randomizedPulse = Math.Max(0, Math.Min(randomizedPulse, 10));
+        Debug.Log($"Chosen reward pulse quantity for trial {trial}: {randomizedPulse}");
+        if (randomizedPulse == 0)
+        {
+            return 1; // can't get 0 reward on trial 2
+        }
+        return randomizedPulse;
+    }
+// Box-Muller transform for generating Gaussian-distributed values
+    private double BoxMullerTransform()
+    {
+        double u1 = 1.0 - UnityEngine.Random.value; // Uniform(0,1] random doubles
+        double u2 = 1.0 - UnityEngine.Random.value;
+        double stdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2); // Box-Muller transform
+        return stdNormal;
+    }
+    
 }

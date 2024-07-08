@@ -65,7 +65,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public  List<int> ChosenStimIndices;
 
-    [HideInInspector] public int NonStimTouches_Block, NumCorrect_Block, NumTbCompletions_Block;
+    [HideInInspector] public int NonStimTouches_Block, NumCorrect_Block, NumTbCompletions_Block, NumNew_Picked_Block, NumPNC_Picked_Block;
     [HideInInspector] public int SliderBarCompletions_Block = 0;
 
     [HideInInspector] public float AvgTimeToChoice_Block, TimeToCompletion_Block, TimeToCompletion_StartTime, TokenUpdateStartTime, TimeRemaining;
@@ -81,8 +81,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             return score;
         }
     }
-
-    private Vector3 OriginalTimerPosition;
 
 
     private StimGroup trialStims, RightGroup, WrongGroup;
@@ -186,8 +184,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
                 AdjustTextPosForMac();
 
-
-            
             SetTrialSummaryString();
 
             CurrentTaskLevel.CalculateBlockSummaryString();
@@ -233,15 +229,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
 
-            //TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
-            //TokenFBController.enabled = true;
-            //Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            if(Session.SessionDef.IsHuman)
+            {
+                TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
+                TokenFBController.enabled = true;
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            }
+            else
+            {
+                SetupSlider();
+                SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
+                SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
+                SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
+                SliderFBController.SliderGO.SetActive(true);
+            }
 
-            SetupSlider();
-            SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
-            SliderFBController.SetUpdateDuration(sliderUpdateDuration.value);
-            SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
-            SliderFBController.SliderGO.SetActive(true);
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -284,10 +286,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (PNC_Stim.Contains(ChosenStim.StimIndex))
+                    {
                         PNC_Stim.Remove(ChosenStim.StimIndex);
+                        //Increment Data:
+                        NumPNC_Picked_Block++;
+                        CurrentTaskLevel.NumPNC_Picked_Task++;
+                    }
                     //If Chose a New Stim, remove it from New list.
                     if (New_Stim.Contains(ChosenStim.StimIndex))
+                    {
                         New_Stim.Remove(ChosenStim.StimIndex);
+                        //Increment Data:
+                        NumNew_Picked_Block++;
+                        CurrentTaskLevel.NumNew_Picked_Task++;
+                    }
 
                     ChosenStim.PreviouslyChosen = true;
                     PC_Stim.Add(ChosenStim.StimIndex);
@@ -373,27 +385,32 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (GotTrialCorrect)
             {
-                SliderFBController.UpdateSliderValue((float)(CurrentTrial.SliderChange / 100f));
+                if(Session.SessionDef.IsHuman)
+                {
+                    if (TrialCount_InBlock == CurrentTrial.MaxTrials - 1 || PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
+                    {
+                        int numToFillBar = CurrentTrial.TokenBarCapacity - TokenFBController.GetTokenBarValue();
+                        TokenFBController.AddTokens(ChosenGO, numToFillBar);
 
-                //if(TrialCount_InBlock == CurrentTrial.MaxTrials-1 || PNC_Stim.Count == 0) //If they get the last trial right (or find all stim), fill up bar!
-                //{
-                //    int numToFillBar = CurrentTrial.TokenBarCapacity - TokenFBController.GetTokenBarValue();
-                //    TokenFBController.AddTokens(ChosenGO, numToFillBar);
-
-                //}
-                //else
-                //    TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
+                    }
+                    else
+                        TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
+                }
+                else
+                    SliderFBController.UpdateSliderValue((float)(CurrentTrial.SliderChange / 100f));
             }
             else //Got wrong
             {
-                //TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
-                SliderFBController.UpdateSliderValue(-(float)(CurrentTrial.SliderChange / 100f));
+                if(Session.SessionDef.IsHuman)
+                    TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
+                else
+                    SliderFBController.UpdateSliderValue(-(float)(CurrentTrial.SliderChange / 100f));
 
                 EndBlock = true;
             }
         });
-        TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (sliderFlashingDuration.value + sliderUpdateDuration.value), DisplayResults); //added .1f for wiggle room
-        //TokenUpdate.SpecifyTermination(() => Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value) && !TokenFBController.IsAnimating(), DisplayResults);
+        TokenUpdate.SpecifyTermination(() => !Session.SessionDef.IsHuman && Time.time - TokenUpdateStartTime > (sliderFlashingDuration.value + sliderUpdateDuration.value + .5f), DisplayResults); //added .1f for wiggle room
+        TokenUpdate.SpecifyTermination(() => Session.SessionDef.IsHuman && Time.time - TokenUpdateStartTime > (tokenRevealDuration.value + tokenUpdateDuration.value + .5f) && !TokenFBController.IsAnimating(), DisplayResults);
         TokenUpdate.SpecifyTermination(() => !StimIsChosen, DisplayResults);
         TokenUpdate.AddDefaultTerminationMethod(() =>
         {
@@ -612,6 +629,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         score = 0;
 
         SliderBarCompletions_Block = 0;
+
+        NumNew_Picked_Block = 0;
+        NumPNC_Picked_Block = 0;
 
     }
 

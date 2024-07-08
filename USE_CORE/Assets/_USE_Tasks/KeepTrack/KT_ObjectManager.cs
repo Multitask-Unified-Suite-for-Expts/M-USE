@@ -8,10 +8,10 @@ using USE_ExperimentTemplate_Classes;
 using Random = UnityEngine.Random;
 
 
-public class SA_ObjectManager : MonoBehaviour
+public class KT_ObjectManager : MonoBehaviour
 {
-    public List<SA_Object> TargetList;
-    public List<SA_Object> DistractorList;
+    public List<KT_Object> TargetList;
+    public List<KT_Object> DistractorList;
 
     public static List<Vector3> StartingPositions;
     public static List<Vector3> StartingPositionsUsed;
@@ -30,7 +30,7 @@ public class SA_ObjectManager : MonoBehaviour
     public float MaxTouchDuration;
 
 
-    public void NoSelectionDuringInterval(SA_Object obj)
+    public void NoSelectionDuringInterval(KT_Object obj)
     {
         if (obj.IsTarget)
             OnTargetIntervalMissed?.Invoke();
@@ -40,8 +40,8 @@ public class SA_ObjectManager : MonoBehaviour
 
     private void Awake()
     {
-        TargetList = new List<SA_Object>();
-        DistractorList = new List<SA_Object>();
+        TargetList = new List<KT_Object>();
+        DistractorList = new List<KT_Object>();
         StartingPositions = new List<Vector3>();
         StartingPositionsUsed = new List<Vector3>();
 
@@ -53,7 +53,7 @@ public class SA_ObjectManager : MonoBehaviour
         ObjectParent = parentTransform;
     }
 
-    public void RemoveFromObjectList(SA_Object obj)
+    public void RemoveFromObjectList(KT_Object obj)
     {
         if (obj.IsTarget)
             TargetList.Remove(obj);
@@ -61,26 +61,32 @@ public class SA_ObjectManager : MonoBehaviour
             DistractorList.Remove(obj);
     }
 
-    public void ActivateObjectMovement()
+    public void ActivateInitialObjectsMovement()
     {
         if (TargetList.Count > 0)
         {
-            foreach (SA_Object target in TargetList)
-                target.ActivateMovement();
+            foreach (KT_Object target in TargetList)
+            {
+                if(target.ActivateDelay == 0)
+                    target.ActivateMovement();
+            }
         }
 
         if (DistractorList.Count > 0)
         {
-            foreach (SA_Object distractor in DistractorList)
-                distractor.ActivateMovement();
+            foreach (KT_Object distractor in DistractorList)
+            {
+                if(distractor.ActivateDelay == 0)
+                    distractor.ActivateMovement();
+            }
         }
     }
 
-    public List<SA_Object> CreateObjects(List<SA_Object_ConfigValues> objects)
+    public List<KT_Object> CreateObjects(List<KT_Object_ConfigValues> objects)
     {
-        List<SA_Object> trialObjects = new List<SA_Object>();
+        List<KT_Object> trialObjects = new List<KT_Object>();
 
-        foreach(SA_Object_ConfigValues configValues in objects)
+        foreach(KT_Object_ConfigValues configValues in objects)
         {
             GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
 
@@ -95,7 +101,7 @@ public class SA_ObjectManager : MonoBehaviour
             go.GetComponent<Image>().color = new Color(configValues.ObjectColor[0], configValues.ObjectColor[1], configValues.ObjectColor[2]);
             go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
 
-            SA_Object obj = go.AddComponent<SA_Object>();
+            KT_Object obj = go.AddComponent<KT_Object>();
             obj.SetupObject(this, configValues);
 
             if (obj.IsTarget)
@@ -125,7 +131,7 @@ public class SA_ObjectManager : MonoBehaviour
         }
     }
 
-    public void AddToList(SA_Object obj)
+    public void AddToList(KT_Object obj)
     {
         if (obj.IsTarget)
             TargetList.Add(obj);
@@ -135,16 +141,16 @@ public class SA_ObjectManager : MonoBehaviour
 
     public void DestroyExistingObjects()
     {
-        List<SA_Object> targetListCopy = new List<SA_Object>(TargetList);
-        List<SA_Object> distractorListCopy = new List<SA_Object>(DistractorList);
+        List<KT_Object> targetListCopy = new List<KT_Object>(TargetList);
+        List<KT_Object> distractorListCopy = new List<KT_Object>(DistractorList);
 
-        foreach(SA_Object obj in targetListCopy)
+        foreach(KT_Object obj in targetListCopy)
         {
             if (obj != null)
                 obj.DestroyObj();
         }
 
-        foreach (SA_Object obj in distractorListCopy)
+        foreach (KT_Object obj in distractorListCopy)
         {
             if (obj != null)
                 obj.DestroyObj();
@@ -154,28 +160,61 @@ public class SA_ObjectManager : MonoBehaviour
         DistractorList.Clear();
     }
 
-    public void ActivateTargets()
+
+
+    public void ActivateInitialTargets()
     {
         foreach (var target in TargetList)
         {
-            target.gameObject.SetActive(true);
+            if(target.ActivateDelay == 0)
+                target.gameObject.SetActive(true);
         }
     }
 
+    public void ActivateInitialDistractors()
+    {
+        foreach (var distractor in DistractorList)
+        {
+            if (distractor.ActivateDelay == 0)
+                distractor.gameObject.SetActive(true);
+        }
+    }
+
+    public void ActivateRemainingObjects()
+    {
+        foreach(var target in TargetList)
+        {
+            if (target.ActivateDelay == 0)
+                continue;
+
+            StartCoroutine(ActivateObjectCoroutine(target));
+        }
+
+        foreach (var distractor in DistractorList)
+        {
+            if (distractor.ActivateDelay == 0)
+                continue;
+
+            StartCoroutine(ActivateObjectCoroutine(distractor));
+        }
+    }
+
+    public IEnumerator ActivateObjectCoroutine(KT_Object obj)
+    {
+        yield return new WaitForSeconds(obj.ActivateDelay);
+        obj.gameObject.SetActive(true);
+        obj.ActivateMovement();
+
+    }
+
+    //Not Used:
     public void DeactivateTargets()
     {
         foreach (var target in TargetList)
             target.gameObject.SetActive(false);
     }
 
-    public void ActivateDistractors()
-    {
-        foreach (var distractor in DistractorList)
-        {
-            distractor.gameObject.SetActive(true);
-        }
-    }
-
+    //Not Used:
     public void DeactivateDistractors()
     {
         foreach (var target in DistractorList)
@@ -185,9 +224,9 @@ public class SA_ObjectManager : MonoBehaviour
 
 }
 
-public class SA_Object : MonoBehaviour
+public class KT_Object : MonoBehaviour
 {
-    public SA_ObjectManager ObjManager;
+    public KT_ObjectManager ObjManager;
 
     public PacmanDrawer PacmanDrawer;
 
@@ -211,6 +250,8 @@ public class SA_Object : MonoBehaviour
     public float[] ObjectColor;
     public int SliderChange;
 
+    public float ActivateDelay;
+
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool MoveAroundScreen;
@@ -227,13 +268,13 @@ public class SA_Object : MonoBehaviour
     public Cycle CurrentCycle;
 
 
-    public SA_Object()
+    public KT_Object()
     {
         Cycles = new List<Cycle>();
     }
 
 
-    public void SetupObject(SA_ObjectManager objManager, SA_Object_ConfigValues configValue)
+    public void SetupObject(KT_ObjectManager objManager, KT_Object_ConfigValues configValue)
     {
         ObjManager = objManager;
         Index = configValue.Index;
@@ -254,6 +295,8 @@ public class SA_Object : MonoBehaviour
         SliderChange = configValue.SliderChange;
         AngleRanges = configValue.AngleRanges;
         NumDestWithoutBigTurn = configValue.NumDestWithoutBigTurn;
+
+        ActivateDelay = configValue.ActivateDelay;
 
         foreach (var rateAndDur in RatesAndDurations)
         {
@@ -466,8 +509,8 @@ public class SA_Object : MonoBehaviour
         float newY = Mathf.Sin(radianAngle);
         Vector3 change = new Vector3(newX, newY, 0);
         Vector3 destination = transform.localPosition + change * NextDestDist;
-        float xDiff = Mathf.Clamp(destination.x, SA_ObjectManager.xRange.x, SA_ObjectManager.xRange.y) - destination.x;
-        float yDiff = Mathf.Clamp(destination.y, SA_ObjectManager.yRange.x, SA_ObjectManager.yRange.y) - destination.y;
+        float xDiff = Mathf.Clamp(destination.x, KT_ObjectManager.xRange.x, KT_ObjectManager.xRange.y) - destination.x;
+        float yDiff = Mathf.Clamp(destination.y, KT_ObjectManager.yRange.x, KT_ObjectManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
 
         CurrentDestination = destination;
@@ -482,12 +525,12 @@ public class SA_Object : MonoBehaviour
 
         do
         {
-            randomIndex = Random.Range(0, SA_ObjectManager.StartingPositions.Count);
-            newRandomPos = SA_ObjectManager.StartingPositions[randomIndex];
+            randomIndex = Random.Range(0, KT_ObjectManager.StartingPositions.Count);
+            newRandomPos = KT_ObjectManager.StartingPositions[randomIndex];
         }
-        while (SA_ObjectManager.StartingPositionsUsed.Contains(newRandomPos));
+        while (KT_ObjectManager.StartingPositionsUsed.Contains(newRandomPos));
 
-        SA_ObjectManager.StartingPositionsUsed.Add(newRandomPos);
+        KT_ObjectManager.StartingPositionsUsed.Add(newRandomPos);
 
         StartingPosition = newRandomPos;
         transform.localPosition = newRandomPos;
@@ -539,7 +582,7 @@ public class SA_Object : MonoBehaviour
             Destroy(Marker);
         Marker = Instantiate(Resources.Load<GameObject>("DestinationMarker"));
         Marker.name = gameObject.name + "_Marker";
-        Marker.transform.SetParent(GameObject.Find("SustainedAttention_Canvas").transform);
+        Marker.transform.SetParent(GameObject.Find("KeepTrack_Canvas").transform);
         Marker.transform.localScale = new Vector3(.3f, .3f, .3f);
         Marker.transform.localPosition = CurrentDestination;
         Marker.GetComponent<Image>().color = new Color(ObjectColor[0], ObjectColor[1], ObjectColor[2]);
@@ -552,8 +595,8 @@ public class SA_Object : MonoBehaviour
     }
 }
 
-//Class is used to read in SA Object Config values. Can't read in directly to SA_Object because that creates the gameobject. We need to create the gameobject after getting the object values.
-public class SA_Object_ConfigValues
+//Class is used to read in KT Object Config values. Can't read in directly to KT_Object because that creates the gameobject. We need to create the gameobject after getting the object values.
+public class KT_Object_ConfigValues
 {
     //From Object Config:
     public int Index;
@@ -575,11 +618,13 @@ public class SA_Object_ConfigValues
     public float[] ObjectColor;
     public int SliderChange;
 
+    public float ActivateDelay;
+
 }
 
 public class Cycle
 {
-    public SA_Object sa_Object;
+    public KT_Object sa_Object;
 
     public float duration;
     public List<float> intervals;

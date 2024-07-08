@@ -3,18 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using USE_States;
 using USE_ExperimentTemplate_Trial;
-using SustainedAttention_Namespace;
+using KeepTrack_Namespace;
 using ConfigDynamicUI;
 using System.Linq;
 using System;
 using UnityEditor;
-using UnityEngine.UIElements;
 
-public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
+
+public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 {
-    public SustainedAttention_TrialDef CurrentTrial => GetCurrentTrialDef<SustainedAttention_TrialDef>();
-    public SustainedAttention_TaskLevel CurrentTaskLevel => GetTaskLevel<SustainedAttention_TaskLevel>();
-    public SustainedAttention_TaskDef CurrentTask => GetTaskDef<SustainedAttention_TaskDef>();
+    public KeepTrack_TrialDef CurrentTrial => GetCurrentTrialDef<KeepTrack_TrialDef>();
+    public KeepTrack_TaskLevel CurrentTaskLevel => GetTaskLevel<KeepTrack_TaskLevel>();
+    public KeepTrack_TaskDef CurrentTask => GetTaskDef<KeepTrack_TaskDef>();
 
     //DATA:
     [HideInInspector] public int TrialCompletions_Block;
@@ -28,15 +28,15 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int SliderBarCompletions_Block = 0;
 
     //Set in Inspector:
-    public GameObject SustainedAttention_CanvasGO;
+    public GameObject KeepTrack_CanvasGO;
     public GameObject BordersGO;
 
-    private SA_ObjectManager ObjManager;
+    private KT_ObjectManager ObjManager;
 
     private GameObject StartButton;
 
     private GameObject ChosenGO = null;
-    private SA_Object ChosenObject = null;
+    private KT_Object ChosenObject = null;
 
     private int SliderGainSteps;
     private bool GiveRewardIfSliderFull = false;
@@ -47,7 +47,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
     private readonly float HaloDepth = 10f;
     private float HaloDuration = .15f; //make configurable later
 
-    List<SA_Object> TrialObjects;
+    List<KT_Object> TrialObjects;
 
 
 
@@ -75,7 +75,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = Session.USE_StartButton.CreateStartButton(SustainedAttention_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
+                    StartButton = Session.USE_StartButton.CreateStartButton(KeepTrack_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -90,17 +90,17 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             if (ObjManager != null)
                 Destroy(ObjManager);
 
-            ObjManager = gameObject.AddComponent<SA_ObjectManager>();
+            ObjManager = gameObject.AddComponent<KT_ObjectManager>();
             ObjManager.MaxTouchDuration = maxObjectTouchDuration.value;
             ObjManager.TaskEventCodes = TaskEventCodes;
-            ObjManager.SetObjectParent(SustainedAttention_CanvasGO.transform);
+            ObjManager.SetObjectParent(KeepTrack_CanvasGO.transform);
             ObjManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
             ObjManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
 
-            List<SA_Object_ConfigValues> trialObjectsConfigValues = new List<SA_Object_ConfigValues>();
+            List<KT_Object_ConfigValues> trialObjectsConfigValues = new List<KT_Object_ConfigValues>();
 
             foreach (int objIndex in CurrentTrial.TrialObjectIndices)
-                trialObjectsConfigValues.Add(CurrentTaskLevel.SA_Objects_ConfigValues[objIndex]);
+                trialObjectsConfigValues.Add(CurrentTaskLevel.KT_Objects_ConfigValues[objIndex]);
             
             TrialObjects = ObjManager.CreateObjects(trialObjectsConfigValues);
 
@@ -108,7 +108,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play); //Setup Handler
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, SustainedAttention_CanvasGO, false); //Enable Touch Feedback
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, KeepTrack_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -135,7 +135,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() =>
         {
-            ObjManager.ActivateTargets();
+            ObjManager.ActivateInitialTargets();
             AudioFBController.Play("ContinueBeep");
         });
         DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, DisplayDistractors);
@@ -143,7 +143,7 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
         //DisplayDistractors state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayDistractors.AddSpecificInitializationMethod(() =>
         {
-            ObjManager.ActivateDistractors();
+            ObjManager.ActivateInitialDistractors();
             AudioFBController.Play("ContinueBeep");
         });
         DisplayDistractors.AddTimer(() => CurrentTrial.DisplayDistractorsDuration, Play);
@@ -155,14 +155,17 @@ public class SustainedAttention_TrialLevel : ControlLevel_Trial_Template
             if (Handler.AllSelections.Count > 0)
                 Handler.ClearSelections();
 
-            ObjManager.ActivateObjectMovement();
+
+            ObjManager.ActivateInitialObjectsMovement();
+            ObjManager.ActivateRemainingObjects();
+
         });
         Play.AddUpdateMethod(() =>
         {
             ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
             {
-                ChosenObject = ChosenGO.GetComponent<SA_Object>();
+                ChosenObject = ChosenGO.GetComponent<KT_Object>();
                 if(ChosenObject != null)
                 {
                     HaloFBController.SetParticleHaloSize(.5f);

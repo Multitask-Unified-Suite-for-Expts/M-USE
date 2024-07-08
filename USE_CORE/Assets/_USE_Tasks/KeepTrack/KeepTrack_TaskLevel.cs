@@ -1,15 +1,15 @@
 using USE_ExperimentTemplate_Task;
-using SustainedAttention_Namespace;
+using KeepTrack_Namespace;
 using UnityEngine;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Linq;
 
 
-public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
+public class KeepTrack_TaskLevel : ControlLevel_Task_Template
 {
-    SustainedAttention_BlockDef CurrentBlock => GetCurrentBlockDef<SustainedAttention_BlockDef>();
-    SustainedAttention_TrialLevel trialLevel;
+    KeepTrack_BlockDef CurrentBlock => GetCurrentBlockDef<KeepTrack_BlockDef>();
+    KeepTrack_TrialLevel trialLevel;
 
     [HideInInspector] public string CurrentBlockString;
     [HideInInspector] public int BlockStringsAdded = 0;
@@ -27,21 +27,21 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
 
     //OBJECTS LOADED FROM OBJECT CONFIG:
-    public SA_Object_ConfigValues[] SA_Objects_ConfigValues;
+    public KT_Object_ConfigValues[] KT_Objects_ConfigValues;
 
 
     public override void DefineControlLevel()
     {
-        trialLevel = (SustainedAttention_TrialLevel)TrialLevel;
+        trialLevel = (KeepTrack_TrialLevel)TrialLevel;
         CurrentBlockString = "";
         DefineBlockData();
-        Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Sustained Attention");
+        Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Keep Track");
         Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object. Select the object as quickly as you can once it animates (closes its mouth)!");
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             //Grab custom settings from Object Config that are read in:
-            SA_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "SustainedAttention_ObjectsDef").AssignCustomSetting<SA_Object_ConfigValues[]>();
+            KT_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "KeepTrack_ObjectsDef").AssignCustomSetting<KT_Object_ConfigValues[]>();
 
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
@@ -55,7 +55,7 @@ public class SustainedAttention_TaskLevel : ControlLevel_Task_Template
 
     public override List<CustomSettings> DefineCustomSettings()
     {
-        customSettings.Add(new CustomSettings("SustainedAttention_ObjectsDef", typeof(SA_Object_ConfigValues), "array", SA_Objects_ConfigValues));
+        customSettings.Add(new CustomSettings("KeepTrack_ObjectsDef", typeof(KT_Object_ConfigValues), "array", KT_Objects_ConfigValues));
         return customSettings;
     }
 

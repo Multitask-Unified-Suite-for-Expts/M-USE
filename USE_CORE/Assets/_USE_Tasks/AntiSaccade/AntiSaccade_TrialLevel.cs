@@ -34,6 +34,8 @@ using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using System.Linq;
+using Newtonsoft.Json;
+using System.Globalization;
 
 
 
@@ -53,6 +55,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup targetStim;
     private StimGroup distractorStims;
+
+    private float ChosenDisplayTargetDuration;
+    private float ChosenSpatialCueDelayDuration;
 
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration;
 
@@ -195,17 +200,22 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 SpatialCue_GO.SetActive(false);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOff"]);
             }
+
+            CalculateDelayAndDuration();
         });
 
         //SpatialCueDELAY state ----------------------------------------------------------------------------------------------------------------------------------------------
-        SpatialCueDelay.AddTimer(() => CurrentTrial.SpatialCueDelayDuration, DisplayTarget);
+        SpatialCueDelay.AddTimer(() => ChosenSpatialCueDelayDuration, DisplayTarget);
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() =>
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOn"]);
         });
-        DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, Mask, () =>
+
+
+
+            DisplayTarget.AddTimer(() => ChosenDisplayTargetDuration, Mask, () =>
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOff"]);
 
@@ -343,7 +353,18 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
-
+    private void CalculateDelayAndDuration()
+    {
+        System.Random random = new System.Random();
+        
+        int randomIndex = random.Next(CurrentTrial.SpatialCueDelayDuration.Length);
+        ChosenSpatialCueDelayDuration = CurrentTrial.SpatialCueDelayDuration[randomIndex];
+        Debug.Log(("CHOSEN SPATIALCUEDELAYDURATION: " + ChosenSpatialCueDelayDuration));
+        
+        int randomIndex2 = random.Next(CurrentTrial.DisplayTargetDuration.Length);
+        ChosenDisplayTargetDuration = CurrentTrial.DisplayTargetDuration[randomIndex2];
+        Debug.Log(("CHOSEN DISPLAYTARGETDURATION: " + ChosenDisplayTargetDuration));
+    }
     public override void OnTokenBarFull()
     {
         TokenBarCompletions_Block++;
@@ -506,8 +527,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
                              "\nDifficulty Level: " + difficultyLevel +
-                             "\nDisplay Target Duration (sec): " + CurrentTrial.DisplayTargetDuration +
-                             "\nSpatial Cue Delay Duration (sec): " + CurrentTrial.SpatialCueDelayDuration;
+                             "\nDisplay Target Duration (sec): " + ChosenDisplayTargetDuration +
+                             "\nSpatial Cue Delay Duration (sec): " + ChosenSpatialCueDelayDuration;
     }
 
     private void LoadConfigUIVariables()
@@ -613,7 +634,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (runningPerformance.Last() == 1) {
                     if (prevResult == 0) {
                         DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                        TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
+                        TimingValuesAtReversals.Add(ChosenSpatialCueDelayDuration);
                 
                         reversalsCount++;
                     }
@@ -621,14 +642,14 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 else if (runningPerformance.Last() == 0) {
                     if (prevResult == 1) {
                         DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                        TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
+                        TimingValuesAtReversals.Add(ChosenSpatialCueDelayDuration);
                         reversalsCount++;
                     }
                 }
 
                 //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
                 Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
-                Debug.Log("SpatialCueDelayDuration: " + CurrentTrial.SpatialCueDelayDuration + " / DisplayTargetDuration: " + CurrentTrial.DisplayTargetDuration);
+                Debug.Log("SpatialCueDelayDuration: " + ChosenSpatialCueDelayDuration + " / DisplayTargetDuration: " + ChosenDisplayTargetDuration);
                 if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm) { //ensure that early reversals don't mess with termination
                     List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
                     calculatedThreshold_timing = (int)lastElements.Average();

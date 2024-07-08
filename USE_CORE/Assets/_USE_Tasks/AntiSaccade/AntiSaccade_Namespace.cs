@@ -114,8 +114,8 @@ namespace AntiSaccade_Namespace
         public float AlertCueDuration;
         public float AlertCueDelayDuration;
         public float SpatialCueDuration;
-        public float SpatialCueDelayDuration;
-        public float DisplayTargetDuration;
+        public float[] SpatialCueDelayDuration; // FIXME: we must handle both lists and floats (for adaptive vs default)
+        public float[] DisplayTargetDuration; // FIXME: we must handle both lists and floats (for adaptive vs default)
         public float MaskDuration;
         public float PostMaskDelayDuration;
         public float ChooseStimDuration;

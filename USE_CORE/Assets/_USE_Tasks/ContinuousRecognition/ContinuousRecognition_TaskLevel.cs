@@ -45,6 +45,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public float NonStimTouches_Task;
     [HideInInspector] public int SliderBarCompletions_Task = 0;
 
+    [HideInInspector] public int NumNew_Picked_Task;
+    [HideInInspector] public int NumPNC_Picked_Task;
 
     [HideInInspector] public List<int> RecencyInterference_Task;
 
@@ -54,12 +56,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     public int blocksAdded;
 
-
     //Data for Task Summary at end of session:
     [HideInInspector] public int LongestStreak = 0;
     [HideInInspector] public float AverageStreak = 0f;
-
-
 
 
 
@@ -134,12 +133,17 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskSummaryData();
         
         data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
+
+        data["TokenBar Completions"] = TokenBarCompletions_Task;
         data["SliderBar Completions"] = SliderBarCompletions_Task;
 
         data["Perceptual Interference"] = GetPerceptualInterferanceString();
         if(RecencyInterference_Task.Count > 0)
             data["Avg RecencyInterference"] = RecencyInterference_Task.Average();
+
+        data["New Objects Picked"] = NumNew_Picked_Task;
+        data["PNC Objects Picked"] = NumPNC_Picked_Task;
+
 
         return data;
     }
@@ -150,8 +154,14 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         data["Longest Streak"] = LongestStreak;
         data["Average Streak"] = GetAvgStreak();
         data["Trials Correct"] = TrialsCorrect_Task;
-        //data["TokenBar Completions"] = TokenBarCompletions_Task;
-        data["SliderBar Completions"] = SliderBarCompletions_Task;
+
+        if (Session.SessionDef.IsHuman)
+            data["TokenBar Completions"] = TokenBarCompletions_Task;
+        else
+            data["SliderBar Completions"] = SliderBarCompletions_Task;
+
+        data["New Objects Picked"] = NumNew_Picked_Task;
+        data["PNC Objects Picked"] = NumPNC_Picked_Task;
 
         return data;
     }
@@ -175,11 +185,17 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("BlockName", () => CurrentBlock.BlockName);
         BlockData.AddDatum("NonStimTouches", () => trialLevel.NonStimTouches_Block);
         BlockData.AddDatum("NumCorrect", () => trialLevel.NumCorrect_Block);
-        //BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
+
+        BlockData.AddDatum("TokenBarCompletions", () => trialLevel.NumTbCompletions_Block);
         BlockData.AddDatum("SliderBarCompletions", () => trialLevel.SliderBarCompletions_Block);
+
         BlockData.AddDatum("TimeToChoice", () => trialLevel.AvgTimeToChoice_Block);
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
         BlockData.AddDatum("MaxTrials", () => CurrentBlock.MaxTrials);
+
+        BlockData.AddDatum("New_Objects_Picked", () => trialLevel.NumNew_Picked_Block);
+        BlockData.AddDatum("PNC_Objects_Picked", () => trialLevel.NumPNC_Picked_Block);
+
     }
 
     public void CalculateBlockSummaryString()
@@ -189,8 +205,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = 
                 "\nCorrect: " + trialLevel.NumCorrect_Block +
-                "\nSliderCompletions: " + trialLevel.SliderBarCompletions_Block +
-                //"\nTbCompletions: " + trialLevel.NumTbCompletions_Block +
+                (Session.SessionDef.IsHuman ? ("\nTbCompletions: " + trialLevel.NumTbCompletions_Block) : ("\nSliderCompletions: " + trialLevel.SliderBarCompletions_Block)) + 
                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
                 "\nReward Pulses: " + NumRewardPulses_InBlock + 

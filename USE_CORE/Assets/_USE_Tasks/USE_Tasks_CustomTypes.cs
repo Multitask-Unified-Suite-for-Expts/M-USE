@@ -39,7 +39,7 @@ using GazeCalibration_Namespace;
 using FeatureUncertaintyWM_Namespace;
 using AntiSaccade_Namespace;
 using TemporalOrderJudgement_Namespace;
-using SustainedAttention_Namespace;
+using KeepTrack_Namespace;
 using FruitRunner_Namespace;
 using THRQ_Namespace;
 using AudioVisual_Namespace;
@@ -198,14 +198,14 @@ static public class USE_Tasks_CustomTypes
             }
         }
         ,{
-            "SustainedAttention", new TaskTypes
+            "KeepTrack", new TaskTypes
             {
-                TaskLevelType = typeof(SustainedAttention_TaskLevel),
-                TrialLevelType = typeof(SustainedAttention_TrialLevel),
-                TaskDefType = typeof(SustainedAttention_TaskDef),
-                BlockDefType = typeof(SustainedAttention_BlockDef),
-                TrialDefType = typeof(SustainedAttention_TrialDef),
-                StimDefType = typeof(SustainedAttention_StimDef)
+                TaskLevelType = typeof(KeepTrack_TaskLevel),
+                TrialLevelType = typeof(KeepTrack_TrialLevel),
+                TaskDefType = typeof(KeepTrack_TaskDef),
+                BlockDefType = typeof(KeepTrack_BlockDef),
+                TrialDefType = typeof(KeepTrack_TrialDef),
+                StimDefType = typeof(KeepTrack_StimDef)
             }
         }
         ,{

@@ -121,13 +121,11 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
             LoadConfigUIVariables();
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
-            TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
 
             SetDataStrings();
             
             CreateIcons();
             //CreateGameObjects();
-
 
             //***** SET TARGET STIM *****
             TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
@@ -354,6 +352,10 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
+        //Reset tokenbar to numInitialTokens
+        TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
+
     }
 
     private void MakeStimFaceCamera(StimGroup stims)
@@ -460,6 +462,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     public void ResetBlockVariables()
     {
+
+
         TrialsCorrect_Block = 0;
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;

@@ -51,7 +51,7 @@ public class SessionBuilder : MonoBehaviour
             {"FlexLearning", new Color32(166, 111, 88, 255) },
             {"FruitRunner", new Color32(248, 152, 29, 255) },
             {"MazeGame", new Color32(164, 153, 102, 255) },
-            {"SustainedAttention", new Color32(136, 137, 237, 255) },
+            {"KeepTrack", new Color32(136, 137, 237, 255) },
             {"THR", new Color32(158, 84, 97, 255) },
             {"VisualSearch", new Color32(27, 185, 20, 255) },
             {"WhatWhenWhere", new Color32(199, 199, 166, 255) },

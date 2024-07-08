@@ -4,24 +4,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace SustainedAttention_Namespace
+namespace KeepTrack_Namespace
 {
-    public class SustainedAttention_TaskDef : TaskDef
+    public class KeepTrack_TaskDef : TaskDef
     {
     }
 
-    public class SustainedAttention_BlockDef : BlockDef
+    public class KeepTrack_BlockDef : BlockDef
     {
     }
 
-    public class SustainedAttention_TrialDef : TrialDef
+    public class KeepTrack_TrialDef : TrialDef
     {
         public int[] TrialObjectIndices; //Where you will specify the ObjectNames you wish to use in the trial
         public float DisplayTargetDuration;
         public float DisplayDistractorsDuration;
     }
 
-    public class SustainedAttention_StimDef : StimDef
+    public class KeepTrack_StimDef : StimDef
     {
     }
 }

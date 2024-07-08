@@ -410,7 +410,6 @@ namespace SelectionTracking
                 if (OngoingSelection != null)
                 {
                     OngoingSelection.ErrorType = error;
-                    Debug.LogWarning("ERROR: " + error);
                     TouchErrorFeedback?.Invoke(this, new TouchFBController.TouchFeedbackArgs(OngoingSelection));
                 }
                 else

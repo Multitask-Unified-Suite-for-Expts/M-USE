@@ -65,8 +65,8 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         {
             trialLevel.ResetBlockVariables();
 
-            trialLevel.TokenFBController.SetTokenBarValue(trialLevel.CurrentTrial.NumInitialTokens);
-
+            trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.TokenBarCapacity);
+            trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.NumInitialTokens);
 
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);

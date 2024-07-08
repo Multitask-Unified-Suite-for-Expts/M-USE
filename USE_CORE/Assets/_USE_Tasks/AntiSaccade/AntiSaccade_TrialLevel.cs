@@ -34,6 +34,8 @@ using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using System.Linq;
+using Newtonsoft.Json;
+using System.Globalization;
 
 
 
@@ -53,6 +55,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private StimGroup targetStim;
     private StimGroup distractorStims;
+
+    private float ChosenDisplayTargetDuration;
+    private float ChosenSpatialCueDelayDuration;
 
     [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration;
 
@@ -110,8 +115,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            HaloFBController.SetCircleHaloIntensity(2f);
-            HaloFBController.SetCircleHaloIntensity(.75f);
+            HaloFBController.SetPositiveHaloColor(Color.yellow);
+            HaloFBController.SetNegativeHaloColor(Color.gray);
+            HaloFBController.SetCircleHaloIntensity(3f);
         });
 
         //SetupTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -123,13 +129,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             SetDataStrings();
             
             CreateIcons();
+            //CreateGameObjects();
 
             //***** SET TARGET STIM *****
             TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
+        
+        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
+        //var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -191,17 +199,22 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 SpatialCue_GO.SetActive(false);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SpatialCueOff"]);
             }
+
+            CalculateDelayAndDuration();
         });
 
         //SpatialCueDELAY state ----------------------------------------------------------------------------------------------------------------------------------------------
-        SpatialCueDelay.AddTimer(() => CurrentTrial.SpatialCueDelayDuration, DisplayTarget);
+        SpatialCueDelay.AddTimer(() => ChosenSpatialCueDelayDuration, DisplayTarget);
 
         //DisplayTarget state ----------------------------------------------------------------------------------------------------------------------------------------------
         DisplayTarget.AddSpecificInitializationMethod(() =>
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOn"]);
         });
-        DisplayTarget.AddTimer(() => CurrentTrial.DisplayTargetDuration, Mask, () =>
+
+
+
+            DisplayTarget.AddTimer(() => ChosenDisplayTargetDuration, Mask, () =>
         {
             Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetOff"]);
 
@@ -339,7 +352,18 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     }
 
     //--------------Helper Methods--------------------------------------------------------------------------------------------------------------------
-
+    private void CalculateDelayAndDuration()
+    {
+        System.Random random = new System.Random();
+        
+        int randomIndex = random.Next(CurrentTrial.SpatialCueDelayDuration.Length);
+        ChosenSpatialCueDelayDuration = CurrentTrial.SpatialCueDelayDuration[randomIndex];
+        Debug.Log(("CHOSEN SPATIALCUEDELAYDURATION: " + ChosenSpatialCueDelayDuration));
+        
+        int randomIndex2 = random.Next(CurrentTrial.DisplayTargetDuration.Length);
+        ChosenDisplayTargetDuration = CurrentTrial.DisplayTargetDuration[randomIndex2];
+        Debug.Log(("CHOSEN DISPLAYTARGETDURATION: " + ChosenDisplayTargetDuration));
+    }
     public override void OnTokenBarFull()
     {
         TokenBarCompletions_Block++;
@@ -384,21 +408,26 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             preCueRect.sizeDelta = new Vector2(75, 75);
             Image preCueImage = PreCue_GO.AddComponent<Image>();
             preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
-            preCueImage.color = new Color32(24, 255, 0, 255);
+            preCueImage.color = new Color32(255, 255, 185, 255);
         }
         
         SpatialCue_GO = Instantiate(Resources.Load<GameObject>("asterisk_black"));
         SpatialCue_GO.name = "SpatialCue";
         SpatialCue_GO.SetActive(false);
         SpatialCue_GO.transform.localPosition = Vector3.zero;
+        SpatialCue_GO.transform.localScale *= 0.75f; // adjusting to match scale to 0.6 externalstimscale
         SpatialCue_GO.AddComponent<FaceCamera>();
         
-        Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black"));
+        Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black_old"));
         Mask_GO.name = "Mask";
         Mask_GO.SetActive(false);
         Mask_GO.transform.localPosition = Vector3.zero;
         SpatialCue_GO.AddComponent<FaceCamera>();
-        //Mask_GO.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        Mask_GO.transform.localScale *= 0.75f; // adjusting to match scale to 0.6 externalstimscale
+        if (CurrentTrial.SpatialCue_Pos[0] < 0)
+            Mask_GO.transform.localRotation = Quaternion.Euler(0f, 85f, 0f);
+        else
+            Mask_GO.transform.localRotation = Quaternion.Euler(0f, 95f, 0f);
     }
 
     private void CreateGameObjects()
@@ -415,6 +444,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             spatialCueRect.sizeDelta = new Vector2(200, 200);
             Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
             spatialCueImage.sprite = Resources.Load<Sprite>("Star"); //initially using Star as default
+            spatialCueImage.color = Color.black;
         }
 
         if (Mask_GO == null)
@@ -422,11 +452,11 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             Mask_GO = new GameObject("Mask");
             Mask_GO.SetActive(false);
             Mask_GO.transform.parent = AntiSaccade_CanvasGO.transform;
-            Mask_GO.transform.localScale = Vector3.one;
+            Mask_GO.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
             RectTransform maskRect = Mask_GO.AddComponent<RectTransform>();
             maskRect.sizeDelta = new Vector2(200, 200);
             Image maskImage = Mask_GO.AddComponent<Image>();
-            maskImage.sprite = Resources.Load<Sprite>("QuestionMark");
+            maskImage.sprite = Resources.Load<Sprite>("hashtag_black");
             maskImage.color = Color.black;
         }
     }
@@ -462,7 +492,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialsCorrect_Block = 0;
         TrialCompletions_Block = 0;
         TokenBarCompletions_Block = 0;
-        calculatedThreshold_timing = 0;
         calculatedThreshold_timing = 0;
         reversalsCount = 0;
         blockAccuracy = 0;
@@ -502,8 +531,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
                              "\nDifficulty Level: " + difficultyLevel +
-                             "\nDisplay Target Duration (sec): " + CurrentTrial.DisplayTargetDuration +
-                             "\nSpatial Cue Delay Duration (sec): " + CurrentTrial.SpatialCueDelayDuration;
+                             "\nDisplay Target Duration (sec): " + ChosenDisplayTargetDuration +
+                             "\nSpatial Cue Delay Duration (sec): " + ChosenSpatialCueDelayDuration;
     }
 
     private void LoadConfigUIVariables()
@@ -577,63 +606,74 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         MinTrialsBeforeTermProcedure = CurrentTrial.MinTrialsBeforeTermProcedure;
         TerminationWindowSize = CurrentTrial.TerminationWindowSize;
         //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
-        
-        int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
-        difficultyLevel = randomDouble;
+
+        if (TrialDefSelectionStyle == "adaptive")
+        {
+            int randomDouble = avgDiffLevel + Random.Range(-diffLevelJitter, diffLevelJitter);
+            difficultyLevel = randomDouble;
+        }
+        else if (TrialDefSelectionStyle == "default")
+        {
+            difficultyLevel = 0;
+        }
     }
     
     protected override bool CheckBlockEnd()
     {
-        int prevResult = -1;
-        DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
-
-        Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
-        if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
-            return false;
-
-        if (runningPerformance.Count > 1)
+        switch (TrialDefSelectionStyle)
         {
-            prevResult = runningPerformance[runningPerformance.Count - 2];
-            //prevResult = runningPerformance[^2];
-        }
+            case "adaptive":
+                int prevResult = -1;
+                DiffLevelsSummary.Add(CurrentTrial.DifficultyLevel);
 
-        if (runningPerformance.Last() == 1)
-        {
-            if (prevResult == 0)
-            {
-                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
+                Debug.Log("runningPerformance.Count: " + runningPerformance.Count + "/ mintrialsbeforeterm: " + MinTrialsBeforeTermProcedure);
+                if (MinTrialsBeforeTermProcedure < 0 || runningPerformance.Count < MinTrialsBeforeTermProcedure + 1)
+                    return false;
+
+                if (runningPerformance.Count > 1) {
+                    prevResult = runningPerformance[runningPerformance.Count - 2];
+                    //prevResult = runningPerformance[^2];
+                }
+
+                if (runningPerformance.Last() == 1) {
+                    if (prevResult == 0) {
+                        DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                        TimingValuesAtReversals.Add(ChosenSpatialCueDelayDuration);
                 
-                reversalsCount++;
-            }
-        }
-        else if (runningPerformance.Last() == 0)
-        {
-            if (prevResult == 1)
-            {
-                DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                TimingValuesAtReversals.Add(CurrentTrial.SpatialCueDelayDuration);
-                reversalsCount++;
-            }
-        }
+                        reversalsCount++;
+                    }
+                }
+                else if (runningPerformance.Last() == 0) {
+                    if (prevResult == 1) {
+                        DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
+                        TimingValuesAtReversals.Add(ChosenSpatialCueDelayDuration);
+                        reversalsCount++;
+                    }
+                }
 
-        //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
-        Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
-        if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm)
-        {
-            List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
-            calculatedThreshold_timing = (int)lastElements.Average();
-            Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
+                //TaskLevelTemplate_Methods TaskLevel_Methods = new TaskLevelTemplate_Methods();
+                Debug.Log("reversalsCount: " + reversalsCount + " / NumReversalsUntilTerm: " + NumReversalsUntilTerm);
+                Debug.Log("SpatialCueDelayDuration: " + ChosenSpatialCueDelayDuration + " / DisplayTargetDuration: " + ChosenDisplayTargetDuration);
+                if (NumReversalsUntilTerm != -1 && reversalsCount >= NumReversalsUntilTerm) { //ensure that early reversals don't mess with termination
+                    List<int> lastElements = DiffLevelsAtReversals.Skip(DiffLevelsAtReversals.Count - NumReversalsUntilTerm).ToList();
+                    calculatedThreshold_timing = (int)lastElements.Average();
+                    Debug.Log("The average DL at the last " + NumReversalsUntilTerm + " reversals is " + calculatedThreshold_timing);
             
-            List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
-            Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));
+                    List<float> lastElements_timing = TimingValuesAtReversals.Skip(TimingValuesAtReversals.Count - NumReversalsUntilTerm).ToList();
+                    Debug.Log("lastElements_timing: " + string.Join(", ", lastElements_timing));
             
-            calculatedThreshold_timing = lastElements_timing.Average();
-            Debug.Log("calculatedThreshold_timing: " + calculatedThreshold_timing);
+                    calculatedThreshold_timing = lastElements_timing.Average();
+                    Debug.Log("calculatedThreshold_timing: " + calculatedThreshold_timing);
             
-            return true;
+                    return true;
+                }
+                return false;
+            
+            default:
+                if (TrialCount_InBlock == maxDiffLevel - 1)
+                    return true;
+                return false;
         }
-        return false;
     }
 
 }

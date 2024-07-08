@@ -38,7 +38,6 @@ using TMPro;
 using System.Collections;
 using UnityEngine.UI;
 
-
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef CurrentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
@@ -200,7 +199,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             TokenFBController.enabled = false;
 
-            SetTokenFeedbackTimes();
+            //SetTokenFeedbackTimes();
             SetStimStrings();
             SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 
@@ -243,7 +242,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 SliderFBController.SetFlashingDuration(sliderFlashingDuration.value);
                 SliderFBController.SliderGO.SetActive(true);
             }
-
         });
 
         //DISPLAY STIMs state -----------------------------------------------------------------------------------------------------
@@ -514,16 +512,30 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         if (SliderFBController.isSliderBarFull())
         {
-            GiveReward();
+            //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
+            int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1); // using single Gaussian
+            GiveReward(numPulses);
+        
             SliderBarCompletions_Block++;
             CurrentTaskLevel.SliderBarCompletions_Task++;
+            CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
+            CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
         }
     }
 
     private void SetupSlider()
     {
         SliderFBController.ResetSliderBarFull();
-        SliderFBController.ConfigureSlider(sliderSize.value, (float)(CurrentTrial.SliderInitialValue / 100f), new Vector3(0f, -25f, 0f));
+        if (CurrentTrial.NumTrialStims - 1 == 1) // if first trial, set slider to 0
+        {
+            SliderFBController.ConfigureSlider(sliderSize.value, (float)(0), new Vector3(0f, -25f, 0f));
+
+        }
+        else // if not first trial, set slider to SliderInitialValue
+        {
+            SliderFBController.ConfigureSlider(sliderSize.value, (float)(CurrentTrial.SliderInitialValue / 100f), new Vector3(0f, -25f, 0f));
+
+        }
     }
 
 
@@ -532,15 +544,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NumTbCompletions_Block++;
         CurrentTaskLevel.TokenBarCompletions_Task++;
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+        //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
+        int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1); // using single Gaussian
 
-        GiveReward();
+        CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
+        CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
+
+        GiveReward(numPulses);
     }
 
-    private void GiveReward()
+    private void GiveReward(int numPulses)
     {
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+        Session.SyncBoxController?.SendRewardPulses(numPulses, CurrentTrial.PulseSize); // CurrentTrial.NumPulses
     }
 
 
@@ -1384,4 +1399,103 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
     }
 
+    private int getProbabilisticNumPulsesTrial(int trial)
+    {
+        if (trial == 1)
+        {
+            return 0;
+        }
+        // defining the normal distributions
+        double[] mus = {2, 4, 6, 8, 10};
+        double[] sigmas = {1, 1, 1.25, 1.25, 1.5};
+        // calculate  probability density for each normal distribution at trial
+        double[] pdfValues = new double[mus.Length];
+        for (int i = 0; i < mus.Length; i++)
+        {
+            pdfValues[i] = NormalPDF(trial, mus[i], sigmas[i]);
+        }
+        // Normalize the probabilities
+        double totalPdf = 0;
+        foreach (var pdf in pdfValues)
+        {
+            totalPdf += pdf;
+        }
+        double[] probabilities = new double[pdfValues.Length];
+        for (int i = 0; i < pdfValues.Length; i++)
+        {
+            probabilities[i] = pdfValues[i] / totalPdf;
+        }
+        // Display the probabilities
+        for (int i = 0; i < probabilities.Length; i++)
+        {
+            Debug.Log($"Probability of {i + 2} reward pulses at trial {trial}: {probabilities[i]:F4}");
+        }
+        // Randomly choose a pulse quantity based on the probabilities
+        int chosenPulse = ChooseBasedOnProbability(probabilities);
+        Debug.Log($"Chosen reward pulse quantity for trial {trial}: {chosenPulse}");
+        
+        return chosenPulse;
+    }
+    
+    private double NormalPDF(double x, double mean, double stdDev)
+    {
+        double exponent = Math.Exp(-Math.Pow(x - mean, 2) / (2 * Math.Pow(stdDev, 2)));
+        return (1 / (stdDev * Math.Sqrt(2 * Math.PI))) * exponent;
+    }
+
+    private int ChooseBasedOnProbability(double[] probabilities)
+    {
+        System.Random random = new System.Random();
+        double randomValue = random.NextDouble();
+        double cumulativeProbability = 0.0;
+
+        for (int i = 0; i < probabilities.Length; i++)
+        {
+            cumulativeProbability += probabilities[i];
+            if (randomValue < cumulativeProbability)
+            {
+                return i + 2; // adding 2 because we're starting at 2 pulses
+            }
+        }
+
+        return probabilities.Length - 1; // Fallback in case of rounding errors
+    }
+    private int getProbabilisticPulsesUsingRewardProb(int trial)
+    {
+        if (trial == 1)
+        {
+            return 0;
+        }
+        if (trial >= 9)
+        {
+            return 5;
+        }
+        double baseProb = 0.1;
+        double stepSize = (1.0 - baseProb) / 19; // Reaches 1.0 at trial 20
+        // Calculate reward probability based on trial number
+        double rewardProb = baseProb + stepSize * (trial - 1);
+        int chosenPulse = (int)Math.Round(rewardProb * 10);
+        // Adding randomness with a Gaussian distribution
+        double mu = chosenPulse;  // Mean centered around chosenPulse
+        double sigma = 0.45;     // Adjust the standard deviation as needed
+        double sampledValue = mu + BoxMullerTransform() * sigma;
+        int randomizedPulse = (int)Math.Round(sampledValue);
+        // Ensure the randomized pulse is within valid bounds
+        randomizedPulse = Math.Max(0, Math.Min(randomizedPulse, 10));
+        Debug.Log($"Chosen reward pulse quantity for trial {trial}: {randomizedPulse}");
+        if (randomizedPulse == 0)
+        {
+            return 1; // can't get 0 reward on trial 2
+        }
+        return randomizedPulse;
+    }
+// Box-Muller transform for generating Gaussian-distributed values
+    private double BoxMullerTransform()
+    {
+        double u1 = 1.0 - UnityEngine.Random.value; // Uniform(0,1] random doubles
+        double u2 = 1.0 - UnityEngine.Random.value;
+        double stdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2); // Box-Muller transform
+        return stdNormal;
+    }
+    
 }

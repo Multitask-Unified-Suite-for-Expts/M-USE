@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 542748421}
   - component: {fileID: 542748420}
   m_Layer: 5
-  m_Name: SustainedAttention_Canvas
+  m_Name: KeepTrack_Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -517,7 +517,7 @@ GameObject:
   - component: {fileID: 1671599252}
   - component: {fileID: 1671599253}
   m_Layer: 0
-  m_Name: SustainedAttention_Scripts
+  m_Name: KeepTrack_Scripts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -549,7 +549,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b42a5bd21290d413182c40fe765bf579, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: SustainedAttention_TaskLevel
+  ControlLevelName: KeepTrack_TaskLevel
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -557,13 +557,13 @@ MonoBehaviour:
   DebugActive: 1
   Paused: 1
   ConfigFolderName: 
-  TaskName: SustainedAttention
+  TaskName: KeepTrack
   TaskProjectFolder: 
   BlockCount: 0
   NumAbortedTrials_InTask: 0
-  NumRewardPulses_InTask: 0
   NumAbortedTrials_InBlock: 0
   NumRewardPulses_InBlock: 0
+  NumRewardPulses_InTask: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
   ForceTaskEnd: 0
@@ -598,7 +598,7 @@ MonoBehaviour:
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
   BlockResults_AudioClip: {fileID: 0}
-  BlockResultsGO: {fileID: 0}
+  TaskResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
   CurrentBlockString: 
@@ -624,7 +624,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06baeab78abe84f3d885fca790fe78b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ControlLevelName: SustainedAttention_TrialLevel
+  ControlLevelName: KeepTrack_TrialLevel
   Terminated: 0
   isMainLevel: 0
   CallDefineLevelAutomatically: 0
@@ -655,6 +655,7 @@ MonoBehaviour:
   calculatedThreshold_timing: 0
   blockAccuracy: 0
   ForceBlockEnd: 0
+  ReachedCriterion: 0
   TaskDataPath: 
   TrialSummaryString: 
   TaskLevel: {fileID: 0}
@@ -687,6 +688,7 @@ MonoBehaviour:
   MovedTooFarSquareTexture: {fileID: 0}
   HeldTooShortSquareTexture: {fileID: 0}
   HeldTooLongSquareTexture: {fileID: 0}
+  NotSelectablePeriodTexture: {fileID: 0}
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
   TrialCompletions_Block: 0
@@ -698,7 +700,7 @@ MonoBehaviour:
   DistractorSelections_Block: 0
   DistractorRejections_Block: 0
   SliderBarCompletions_Block: 0
-  SustainedAttention_CanvasGO: {fileID: 542748419}
+  KeepTrack_CanvasGO: {fileID: 542748419}
   BordersGO: {fileID: 1051536200}
   itiDuration:
     name: 
@@ -761,7 +763,7 @@ GameObject:
   - component: {fileID: 1944600068}
   - component: {fileID: 1944600071}
   m_Layer: 0
-  m_Name: SustainedAttention_Camera
+  m_Name: KeepTrack_Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -984,7 +986,7 @@ GameObject:
   - component: {fileID: 2032822624}
   - component: {fileID: 2032822623}
   m_Layer: 0
-  m_Name: SustainedAttention_Directional Light
+  m_Name: KeepTrack_Directional Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

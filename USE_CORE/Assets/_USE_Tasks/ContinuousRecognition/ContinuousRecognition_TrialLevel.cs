@@ -1466,15 +1466,19 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             return 0;
         }
-        if (trial >= 9)
+        if (trial == 2)
         {
-            return 5;
+            return 1;
+        }
+        if (trial >= 12)
+        {
+            return 6;
         }
         double baseProb = 0.1;
         double stepSize = (1.0 - baseProb) / 19; // Reaches 1.0 at trial 20
         // Calculate reward probability based on trial number
         double rewardProb = baseProb + stepSize * (trial - 1);
-        int chosenPulse = (int)Math.Round(rewardProb * 10);
+        int chosenPulse = (int)Math.Round(rewardProb * 10) - 1;
         // Adding randomness with a Gaussian distribution
         double mu = chosenPulse;  // Mean centered around chosenPulse
         double sigma = 0.45;     // Adjust the standard deviation as needed
@@ -1485,8 +1489,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Debug.Log($"Chosen reward pulse quantity for trial {trial}: {randomizedPulse}");
         if (randomizedPulse == 0)
         {
-            return 1; // can't get 0 reward on trial 2
+            return 1; // can't get 0 reward
         }
+        Debug.Log("most likely pulse for trial " + trial + ": " + mu);
         return randomizedPulse;
     }
 // Box-Muller transform for generating Gaussian-distributed values

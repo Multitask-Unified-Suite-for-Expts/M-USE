@@ -446,9 +446,19 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+
+
         private IEnumerator HandleLoadingStims()
         {
-            foreach (StimGroup sg in TrialStims)
+            if (TrialStims == null)
+            {
+                Debug.LogError("TRIAL STIMS IS NULL!");
+                yield break;
+            }
+
+            var trialStimsCopy = new List<StimGroup>(TrialStims);
+
+            foreach (StimGroup sg in trialStimsCopy)
             {
                 yield return StartCoroutine(sg.LoadStims());
             }

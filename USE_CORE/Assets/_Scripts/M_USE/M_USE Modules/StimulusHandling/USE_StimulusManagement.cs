@@ -878,24 +878,33 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		public IEnumerator LoadStims()
-		{
-			foreach (StimDef sd in stimDefs)
-			{
-				if (sd.StimGameObject == null)
-				{
-					yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
-					{
-						if (stimResultGO != null)
-							sd.StimGameObject = stimResultGO;
-						else
-							Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
-					}));
-				}
-			}
-		}
 
-		public void LoadPrefabStimFromResources()
+        public IEnumerator LoadStims()
+        {
+            if (stimDefs == null)
+            {
+                Debug.LogError("STIMDEFS IS NULL!");
+                yield break;
+            }
+
+            var stimDefsCopy = new List<StimDef>(stimDefs);
+
+            foreach (StimDef sd in stimDefsCopy)
+            {
+                if (sd.StimGameObject == null)
+                {
+                    yield return CoroutineHelper.StartCoroutine(sd.Load(stimResultGO =>
+                    {
+                        if (stimResultGO != null)
+                            sd.StimGameObject = stimResultGO;
+                        else
+                            Debug.Log("LOAD COROUTINE - STIM RESULT GAMEOBJECT IS NULL!!!!!!!!!!!!");
+                    }));
+                }
+            }
+        }
+
+        public void LoadPrefabStimFromResources()
 		{
 			foreach (StimDef sd in stimDefs)
 				sd.LoadPrefabFromResources();

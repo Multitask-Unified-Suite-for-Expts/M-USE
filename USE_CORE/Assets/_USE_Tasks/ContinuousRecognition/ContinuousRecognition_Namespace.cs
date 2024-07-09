@@ -51,6 +51,7 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_Locations;
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
+        public float slopeOfRewardIncreaseOverTrials;
 
         //Calculated below (DONT SET IN CONFIG!!!):
         public int MaxNumTrials;
@@ -130,6 +131,8 @@ namespace ContinuousRecognition_Namespace
 
                 trial.SliderInitialValue = SliderInitialValue;
                 trial.SliderChange = SliderChange;
+
+                trial.slopeOfRewardIncreaseOverTrials = slopeOfRewardIncreaseOverTrials;
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -230,6 +233,7 @@ namespace ContinuousRecognition_Namespace
         public float[] X_FbLocations = new float[] {-3f, -1.8f, -.6f, .6f, 1.8f, 3f};
         public float[] Y_FbLocations = new float[] {2.1f, 1.05f, 0f, -1.05f, -2.1f};
         public bool ShakeStim, FindAllStim, UseStarfield;
+        public float slopeOfRewardIncreaseOverTrials;
 
         //Not in block config BUT STILL PASSED DOWN:
         public Vector3[] TrialStimLocations;

@@ -300,7 +300,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                     SpinCorrectSelection = true;
 
                 HaloFBController.ShowPositive(ChosenGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: haloDepth);
-                TokenFBController.AddTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
+                TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
                 
                 runningPerformance.Add(0);
@@ -308,7 +308,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 HaloFBController.ShowNegative(ChosenGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: haloDepth);
-                TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.RewardMag, tokenYAdjustment);
+                TokenFBController.RemoveTokens(ChosenGO, CurrentTrial.TokenLoss, tokenYAdjustment);
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                 
                 runningPerformance.Add(1);

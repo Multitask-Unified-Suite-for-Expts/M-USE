@@ -58,6 +58,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<int> PC_Stim, PNC_Stim, New_Stim, Unseen_Stim, TrialStimIndices;
 
+    [HideInInspector] public string ChosenStimCategory;
+
+    [HideInInspector] public string NonChosenStimIndices;
+    [HideInInspector] public string NonChosenStimLocations;
+
     [HideInInspector] public int numPulsesTrial;
 
     [HideInInspector] public Vector3[] BlockFeedbackLocations;
@@ -291,6 +296,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         //Increment Data:
                         NumPNC_Picked_Block++;
                         CurrentTaskLevel.NumPNC_Picked_Task++;
+                        ChosenStimCategory = "PNC";
                     }
                     //If Chose a New Stim, remove it from New list.
                     if (New_Stim.Contains(ChosenStim.StimIndex))
@@ -299,6 +305,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         //Increment Data:
                         NumNew_Picked_Block++;
                         CurrentTaskLevel.NumNew_Picked_Task++;
+                        ChosenStimCategory = "New";
                     }
 
                     ChosenStim.PreviouslyChosen = true;
@@ -332,7 +339,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                     Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
+                    ChosenStimCategory = "PC";
                 }
+                if (TrialStimIndices.Count > 0)
+                    NonChosenStimIndices = $"[{string.Join(", ", TrialStimIndices.Where(index => index != ChosenStim.StimIndex))}]";
+                if (CurrentTrial.TrialStimLocations.Length > 0)
+                    NonChosenStimLocations = $"[{string.Join(", ", CurrentTrial.TrialStimLocations.Where(location => location != ChosenStim.StimLocation))}]";
             }
 
             if (ChosenGO != null && ChosenStim != null && ShotgunHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
@@ -1288,6 +1300,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("ChoseCorrectly", () => GotTrialCorrect);
         TrialData.AddDatum("CurrentTrialStims", () => TrialStimIndices);
         TrialData.AddDatum("PC_Percentage", () => CalculatePercentagePC());
+        
+        TrialData.AddDatum("ReactionTime", () => TimeToChoice_Trial);
+        TrialData.AddDatum("ChosenObjectCategory", () => ChosenStimCategory);
+        TrialData.AddDatum("ChosenObjectLocation", () => ChosenStim.StimLocation);
+        TrialData.AddDatum("NonChosenObjectLocations", () => NonChosenStimLocations);
+        TrialData.AddDatum("ChosenObjectIndex", () => ChosenStim.StimIndex);
+        TrialData.AddDatum("NonChosenObjectIndices", () => NonChosenStimIndices);
 
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
         TrialData.AddDatum("SliderGain", () => CurrentTrial.SliderChange);

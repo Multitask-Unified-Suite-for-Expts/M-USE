@@ -58,6 +58,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<int> PC_Stim, PNC_Stim, New_Stim, Unseen_Stim, TrialStimIndices;
 
+    [HideInInspector] public int numPulsesTrial;
+
     [HideInInspector] public Vector3[] BlockFeedbackLocations;
 
     [HideInInspector] public bool CompletedAllTrials, EndBlock, StimIsChosen, AdjustedPositionsForMac, ContextActive, VariablesLoaded;
@@ -319,6 +321,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
+                        numPulsesTrial = 0;
                         EndBlock = true;
                     }
                 }
@@ -353,6 +356,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
             AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
+            numPulsesTrial = 0;
             EndBlock = true;
         });
 
@@ -403,7 +407,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
                 else
                     SliderFBController.UpdateSliderValue(-(float)(CurrentTrial.SliderChange / 100f));
-
+                numPulsesTrial = 0;
                 EndBlock = true;
             }
         });
@@ -504,6 +508,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumAbortedTrials_InTask++;
 
             if (AbortCode == AbortCodeDict["EndTrial"])
+                numPulsesTrial = 0;
                 EndBlock = true;
         }
     }
@@ -513,11 +518,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (SliderFBController.isSliderBarFull())
         {
             //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
-            int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1); // using single Gaussian
+            int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1, CurrentTrial.slopeOfRewardIncreaseOverTrials); // using single Gaussian
             GiveReward(numPulses);
-        
+            
             SliderBarCompletions_Block++;
             CurrentTaskLevel.SliderBarCompletions_Task++;
+            numPulsesTrial = numPulses;
             CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
             CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
         }
@@ -529,6 +535,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (CurrentTrial.NumTrialStims - 1 == 1) // if first trial, set slider to 0
         {
             SliderFBController.ConfigureSlider(sliderSize.value, (float)(0), new Vector3(0f, -25f, 0f));
+            numPulsesTrial = 0;
 
         }
         else // if not first trial, set slider to SliderInitialValue
@@ -545,7 +552,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.TokenBarCompletions_Task++;
 
         //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
-        int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1); // using single Gaussian
+        int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1, CurrentTrial.slopeOfRewardIncreaseOverTrials); // using single Gaussian
 
         CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
         CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
@@ -1284,6 +1291,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
         TrialData.AddDatum("SliderGain", () => CurrentTrial.SliderChange);
+        TrialData.AddDatum("RewardPulses", () => numPulsesTrial);
     }
 
     private void DefineFrameData()
@@ -1460,22 +1468,21 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         return probabilities.Length - 1; // Fallback in case of rounding errors
     }
-    private int getProbabilisticPulsesUsingRewardProb(int trial)
+    private int getProbabilisticPulsesUsingRewardProb(int trial, double slopeOfRewardIncreaseOverTrials)
     {
         if (trial == 1)
         {
+            Debug.Log("First trial always yields 0 pulses");
+            numPulsesTrial = 0;
             return 0;
         }
         if (trial == 2)
         {
+            Debug.Log("Second trial always yields 1 pulse");
             return 1;
         }
-        if (trial >= 12)
-        {
-            return 6;
-        }
         double baseProb = 0.1;
-        double stepSize = (1.0 - baseProb) / 19; // Reaches 1.0 at trial 20
+        double stepSize = slopeOfRewardIncreaseOverTrials * ((1.0 - baseProb) / 19); // Reaches 1.0 at trial 20
         // Calculate reward probability based on trial number
         double rewardProb = baseProb + stepSize * (trial - 1);
         int chosenPulse = (int)Math.Round(rewardProb * 10) - 1;
@@ -1486,12 +1493,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         int randomizedPulse = (int)Math.Round(sampledValue);
         // Ensure the randomized pulse is within valid bounds
         randomizedPulse = Math.Max(0, Math.Min(randomizedPulse, 10));
-        Debug.Log($"Chosen reward pulse quantity for trial {trial}: {randomizedPulse}");
         if (randomizedPulse == 0)
         {
-            return 1; // can't get 0 reward
+            randomizedPulse = 1; // can't get 0 reward
         }
-        Debug.Log("most likely pulse for trial " + trial + ": " + mu);
+        if (randomizedPulse > 6) // don't go above 6 pulses
+        {
+            randomizedPulse = 6;
+        }
+        Debug.Log("Most likely pulse for trial " + trial + ": " + mu);
+        Debug.Log($"Chosen reward pulse quantity for trial {trial}: {randomizedPulse}");
         return randomizedPulse;
     }
 // Box-Muller transform for generating Gaussian-distributed values

@@ -58,6 +58,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public List<int> PC_Stim, PNC_Stim, New_Stim, Unseen_Stim, TrialStimIndices;
 
+    [HideInInspector] public int numPulsesTrial;
+
     [HideInInspector] public Vector3[] BlockFeedbackLocations;
 
     [HideInInspector] public bool CompletedAllTrials, EndBlock, StimIsChosen, AdjustedPositionsForMac, ContextActive, VariablesLoaded;
@@ -319,6 +321,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
                         CompletedAllTrials = true;
+                        numPulsesTrial = 0;
                         EndBlock = true;
                     }
                 }
@@ -353,6 +356,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
             AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
+            numPulsesTrial = 0;
             EndBlock = true;
         });
 
@@ -403,7 +407,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
                 else
                     SliderFBController.UpdateSliderValue(-(float)(CurrentTrial.SliderChange / 100f));
-
+                numPulsesTrial = 0;
                 EndBlock = true;
             }
         });
@@ -504,6 +508,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.NumAbortedTrials_InTask++;
 
             if (AbortCode == AbortCodeDict["EndTrial"])
+                numPulsesTrial = 0;
                 EndBlock = true;
         }
     }
@@ -515,9 +520,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
             int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1, CurrentTrial.slopeOfRewardIncreaseOverTrials); // using single Gaussian
             GiveReward(numPulses);
-        
+            
             SliderBarCompletions_Block++;
             CurrentTaskLevel.SliderBarCompletions_Task++;
+            numPulsesTrial = numPulses;
             CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
             CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
         }
@@ -529,6 +535,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (CurrentTrial.NumTrialStims - 1 == 1) // if first trial, set slider to 0
         {
             SliderFBController.ConfigureSlider(sliderSize.value, (float)(0), new Vector3(0f, -25f, 0f));
+            numPulsesTrial = 0;
 
         }
         else // if not first trial, set slider to SliderInitialValue
@@ -1284,6 +1291,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
         TrialData.AddDatum("SliderGain", () => CurrentTrial.SliderChange);
+        TrialData.AddDatum("RewardPulses", () => numPulsesTrial);
     }
 
     private void DefineFrameData()
@@ -1465,6 +1473,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (trial == 1)
         {
             Debug.Log("First trial always yields 0 pulses");
+            numPulsesTrial = 0;
             return 0;
         }
         if (trial == 2)

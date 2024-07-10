@@ -182,7 +182,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'SCORE: <SCORE>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 197a61983a1054977a6d7d4699fdfa28, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
   m_sharedMaterial: {fileID: 4054686679257504613, guid: 197a61983a1054977a6d7d4699fdfa28,
     type: 2}
   m_fontSharedMaterials: []
@@ -247,7 +247,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
+  m_hasFontAssetChanged: 1
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &208675868
@@ -1093,6 +1093,8 @@ MonoBehaviour:
   TokenBarCompletions_Task: 0
   NonStimTouches_Task: 0
   SliderBarCompletions_Task: 0
+  NumNew_Picked_Task: 0
+  NumPNC_Picked_Task: 0
   RecencyInterference_Task: 
   CurrentBlockString: 
   blocksAdded: 0
@@ -1206,6 +1208,8 @@ MonoBehaviour:
   NonStimTouches_Block: 0
   NumCorrect_Block: 0
   NumTbCompletions_Block: 0
+  NumNew_Picked_Block: 0
+  NumPNC_Picked_Block: 0
   SliderBarCompletions_Block: 0
   AvgTimeToChoice_Block: 0
   TimeToCompletion_Block: 0
@@ -1373,7 +1377,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'TRIALS: <TRIALS>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 197a61983a1054977a6d7d4699fdfa28, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
   m_sharedMaterial: {fileID: 3760565098222212243, guid: 87a725ad2b107470ab8144534fa584f1,
     type: 2}
   m_fontSharedMaterials: []

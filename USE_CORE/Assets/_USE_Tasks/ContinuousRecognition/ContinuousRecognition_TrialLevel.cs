@@ -650,6 +650,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         EndBlock = false;
         StimIsChosen = false;
 
+        // for time outs
         ChosenStimCategory = "No Stim Chosen";
         NonChosenStimLocations = "No Stim Chosen";
         NonChosenStimIndices = "No Stim Chosen";

@@ -60,6 +60,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public string ChosenStimCategory;
 
+    [HideInInspector] public string ChosenObjectLocation;
+    [HideInInspector] public string ChosenObjectIndex;
     [HideInInspector] public string NonChosenStimIndices;
     [HideInInspector] public string NonChosenStimLocations;
 
@@ -341,6 +343,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
                     ChosenStimCategory = "PC";
                 }
+
+                ChosenObjectIndex = ChosenStim.StimIndex.ToString();
+                ChosenObjectLocation = ChosenStim.StimLocation.ToString();
                 if (TrialStimIndices.Count > 0)
                     NonChosenStimIndices = $"[{string.Join(", ", TrialStimIndices.Where(index => index != ChosenStim.StimIndex))}]";
                 if (CurrentTrial.TrialStimLocations.Length > 0)
@@ -644,6 +649,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         CompletedAllTrials = false;
         EndBlock = false;
         StimIsChosen = false;
+
+        ChosenStimCategory = "No Stim Chosen";
+        NonChosenStimLocations = "No Stim Chosen";
+        NonChosenStimIndices = "No Stim Chosen";
+        ChosenObjectLocation = "No Stim Chosen";
+        ChosenObjectIndex = "No Stim Chosen";
 
         SliderFBController.ResetSliderBarFull();
 
@@ -1303,9 +1314,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         
         TrialData.AddDatum("ReactionTime", () => TimeToChoice_Trial);
         TrialData.AddDatum("ChosenObjectCategory", () => ChosenStimCategory);
-        TrialData.AddDatum("ChosenObjectLocation", () => ChosenStim.StimLocation);
+        TrialData.AddDatum("ChosenObjectLocation", () => ChosenObjectLocation);
         TrialData.AddDatum("NonChosenObjectLocations", () => NonChosenStimLocations);
-        TrialData.AddDatum("ChosenObjectIndex", () => ChosenStim.StimIndex);
+        TrialData.AddDatum("ChosenObjectIndex", () => ChosenObjectIndex);
         TrialData.AddDatum("NonChosenObjectIndices", () => NonChosenStimIndices);
 
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);

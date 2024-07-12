@@ -74,10 +74,6 @@ public class InitScreen_Level : ControlLevel
     public GameObject LocalConfigsToggle_GreyPanel;
     public GameObject LocalDataToggle_GreyPanel;
 
-    [HideInInspector] public AudioClip ToggleChange_AudioClip;
-    [HideInInspector] public AudioClip Error_AudioClip;
-    [HideInInspector] public AudioClip Connected_AudioClip;
-
     public FolderDropdown FolderDropdown;
 
     private bool ValuesLoaded;
@@ -448,11 +444,6 @@ public class InitScreen_Level : ControlLevel
                 LocalConfigsToggle_GreyPanel.SetActive(false);
                 LocalDataToggle_GreyPanel.SetActive(false);
             }
-
-            ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
-            Error_AudioClip = Resources.Load<AudioClip>("Error");
-            Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
-
         }
         catch(Exception e)
         {

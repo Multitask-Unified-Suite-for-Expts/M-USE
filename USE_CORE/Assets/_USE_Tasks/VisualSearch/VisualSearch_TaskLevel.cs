@@ -95,9 +95,14 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     {
         OrderedDictionary data = base.GetTaskResultsData();
 
-        data["Accuracy"] = String.Format("{0:0.0}" + "%", NumCorrect_InTask / (NumCorrect_InTask + NumErrors_InTask));
+        int totalAttempts = NumCorrect_InTask + NumErrors_InTask;
+        if (totalAttempts != 0)
+            data["Accuracy"] = String.Format("{0:0.0}%", (float)NumCorrect_InTask / totalAttempts * 100);
+        else
+            data["Accuracy"] = "N/A"; // or "0.0%" or any other default value you prefer
+
         data["TokenBar Completions"] = NumTokenBarFull_InTask;
-        data["Avg Search Duration"] = String.Format("{0:0.0} " + "Seconds", SearchDurations_InTask.Average());
+        data["Avg Search Duration"] = String.Format("{0:0.0} Seconds", SearchDurations_InTask.Average());
 
         return data;
     }

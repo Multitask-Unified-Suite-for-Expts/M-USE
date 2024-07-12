@@ -337,7 +337,11 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.AppendDataToFile());
 
                 // Deactivate TaskSelection scene elements
-                Session.LoadingController_Session.DeactivateLoadingCanvas();
+
+                Session.ParticipantCanvas_GO.SetActive(false);
+                //Session.LoadingTextGO_Display1.SetActive(false);
+                Session.MainExperimenterCanvas_LoadingText_GO.SetActive(false);
+
                 FrameData.gameObject.SetActive(false);
                 SessionCam.gameObject.SetActive(false);
                 Session.TaskSelectionCanvasGO.SetActive(false);
@@ -442,9 +446,9 @@ namespace USE_ExperimentTemplate_Session
             //SessionBuilder State---------------------------------------------------------------------------------------------------------------
             sessionBuilder.AddUniversalInitializationMethod(() =>
             {
-                Session.LoadingController_Session.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
+                Session.MainExperimenterCanvas_LoadingText_GO.SetActive(false);
 
-                AssignExperimenterDisplayRenderTexture(SessionCam);
+                //AssignExperimenterDisplayRenderTexture(SessionCam);
 
                 ExperimenterDisplayGO.SetActive(false);
 
@@ -465,7 +469,13 @@ namespace USE_ExperimentTemplate_Session
 
                 MainDirectionalLight.SetActive(true);
                 Session.TaskSelectionCanvasGO.SetActive(true);
-                Session.LoadingController_Session.DeactivateLoadingCanvas(); //Turn off loading circle now that about to set taskselection canvas active!
+
+                if(Session.WebBuild)
+                {
+                    Session.MainExperimenterCanvas_GO.SetActive(false);
+                }
+
+                Session.ParticipantCanvas_GO.SetActive(false);
 
                 AssignExperimenterDisplayRenderTexture(SessionCam);
 
@@ -731,7 +741,8 @@ namespace USE_ExperimentTemplate_Session
             {
                 MainDirectionalLight.SetActive(false);
 
-                Session.LoadingController_Session.ActivateLoadingCanvas(0); //0 for both web build and normal since monkeys on display 0;
+                Session.ParticipantCanvas_GO.SetActive(true);
+                Session.ParticipantCanvas_LoadingText_GO.SetActive(true);
 
                 TaskButtonsContainer.SetActive(false);
 
@@ -932,7 +943,9 @@ namespace USE_ExperimentTemplate_Session
             bool skipSessionSummary = false;
             finishSession.AddSpecificInitializationMethod(() =>
             {
-                skipSessionSummary = false;
+                Debug.LogWarning("INIT METHOD");
+                skipSessionSummary = Session.SessionDef.IsHuman ? false : true;
+                //skipSessionSummary = false;
 
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishSessionStarts");
 
@@ -1015,9 +1028,15 @@ namespace USE_ExperimentTemplate_Session
                 Session.LogWriter = miscScripts.GetComponent<LogWriter>();
                 Session.EventCodeManager = miscScripts.GetComponent<EventCodeManager>();
                 Session.FullScreenController = miscScripts.GetComponent<FullScreenController>();
-                Session.LoadingController_Session = GameObject.Find("LoadingCanvas").GetComponent<LoadingController>();
                 Session.InitCamGO = GameObject.Find("InitCamera");
                 Session.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
+
+                Session.ParticipantCanvas_GO = GameObject.Find("ParticipantCanvas");
+                Session.ParticipantCanvas_LoadingText_GO = Session.ParticipantCanvas_GO.transform.Find("LoadingText").gameObject;
+
+                Session.MainExperimenterCanvas_GO = GameObject.Find("ExperimenterMainCanvas");
+                Session.MainExperimenterCanvas_LoadingText_GO = Session.MainExperimenterCanvas_GO.transform.Find("LoadingText").gameObject;
+
                 Session.SessionDataControllers = new SessionDataControllers(GameObject.Find("DataControllers"));
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");
@@ -1086,7 +1105,6 @@ namespace USE_ExperimentTemplate_Session
             MirrorCamGO = new GameObject("MirrorCamera");
             MirrorCam = MirrorCamGO.AddComponent<Camera>();
             Skybox skybox = MirrorCamGO.AddComponent<Skybox>();
-            //skybox.material = Resources.Load<Material>("Materials/Skybox2");
             MirrorCam.CopyFrom(Camera.main);
             MirrorCam.cullingMask = 0;
 

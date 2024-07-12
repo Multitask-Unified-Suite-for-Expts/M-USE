@@ -8,19 +8,28 @@ using TMPro;
 
 public class ImageHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public Image backgroundPanelImage;
-    public TextMeshProUGUI PlayText;
+    private Image backgroundImage;
+    private Color originalBackgroundColor;
 
-    public Color HoverPlayTextColor; //Set in inspector
+    //Set in inspector:
+    public Color backgroundHoverColor;
 
+
+    private void Start()
+    {
+        backgroundImage = GetComponent<Image>();
+        if (backgroundImage == null)
+            Debug.LogError("IMAGE IS NULL");
+        originalBackgroundColor = backgroundImage.color;
+    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        backgroundPanelImage.color = new Color(0f, 0f, 0f, .4f);
+        backgroundImage.color = backgroundHoverColor;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        backgroundPanelImage.color = new Color(0f, 0f, 0f, 0f);
+        backgroundImage.color = originalBackgroundColor;
     }
 }

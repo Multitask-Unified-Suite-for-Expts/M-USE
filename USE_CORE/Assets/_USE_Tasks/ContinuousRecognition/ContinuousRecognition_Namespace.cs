@@ -46,7 +46,6 @@ namespace ContinuousRecognition_Namespace
         public float ItiDuration;
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
-        public int[] InitialStimRatio;
         public float[] X_Locations;
         public float[] Y_Locations;
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
@@ -60,14 +59,18 @@ namespace ContinuousRecognition_Namespace
         public override void GenerateTrialDefsFromBlockDef()
         {
             int maxNumStim = NumObjectsMinMax[1];
+
             if (FindAllStim)
-                MaxNumTrials = CalculateMaxNumTrials(maxNumStim);
+            {
+                MaxNumTrials = NumObjectsMinMax[1];
+                //MaxNumTrials = CalculateMaxNumTrials(maxNumStim);
+            }
             else
                 MaxNumTrials = NumObjectsMinMax[1] - NumObjectsMinMax[0] + 1;
 
 
             //Calculate STIM Locations:
-            if(!ManuallySpecifyLocation)
+            if (!ManuallySpecifyLocation)
             {
                 BlockStimLocations = new Vector3[X_Locations.Length * Y_Locations.Length];
                 int stimIndex = 0;
@@ -112,7 +115,6 @@ namespace ContinuousRecognition_Namespace
                 trial.BlockStimIndices = BlockStimIndices;
                 trial.TrialStimLocations = trialStimLocations;
                 trial.NumObjectsMinMax = NumObjectsMinMax;
-                trial.InitialStimRatio = InitialStimRatio;
                 trial.NumTrialStims = numTrialStims;
                 trial.MaxNumTrials = MaxNumTrials;
                 trial.ContextName = ContextName;
@@ -139,87 +141,6 @@ namespace ContinuousRecognition_Namespace
             }
         }
 
-
-        int CalculateMaxNumTrials(int maxNumStim)
-        {
-            return maxNumStim + CalculateNumRemaining_EOT(maxNumStim);
-        }
-
-        int CalculateNumRemaining_EOT(int totalTrialStim)
-        {
-            int NumRemaining_BEG = 0;
-            int NumRemaining_END = 0;
-            for(int i = 0; i <= totalTrialStim-2; i++)
-            {
-                int num_New = GetNumNewStim_Trial(i+2);
-               
-                NumRemaining_END = NumRemaining_BEG + num_New - 1;
-                NumRemaining_BEG = NumRemaining_END;
-            }
-            return NumRemaining_END;
-        }
-
-        int GetNumNewStim_Trial(int totalTrialStim)
-        {
-            float[] stimPercentages = GetStimPercentages();
-
-            int Num_PC = (int)Math.Floor((double)stimPercentages[0] * totalTrialStim);
-            int Num_New = (int)Math.Floor((double)stimPercentages[1] * totalTrialStim);
-            int Num_PNC = (int)Math.Floor((double)stimPercentages[2] * totalTrialStim);
-            if (Num_PC == 0) Num_PC = 1;
-            if (Num_New == 0) Num_New = 1;
-            if (Num_PNC == 0) Num_PNC = 1;
-
-            float PC_TargetPerc = stimPercentages[0];
-            while ((Num_PC + Num_New + Num_PNC) < totalTrialStim)
-            {
-                float PC_AddPerc = (Num_PC + 1) / (Num_PC + 1 + Num_New + Num_PNC);
-                float PC_AddDiff = PC_AddPerc - PC_TargetPerc;
-
-                float NonPC_AddPerc = Num_PC / (Num_PC + 1 + Num_New + Num_PNC);
-                float NonPC_AddDiff = NonPC_AddPerc - PC_TargetPerc;
-
-                if (PC_AddDiff < NonPC_AddDiff)
-                    Num_PC++;
-                else
-                {
-                    if (Num_PNC < Num_New)
-                        Num_PNC++;
-                    else
-                        Num_New++;
-                }
-            }
-
-            while(Num_PC + Num_New + Num_PNC > totalTrialStim)
-            {
-                if (Num_New > 1)
-                    Num_New--;
-                else
-                {
-                    if (Num_PC > Num_PNC || Num_PC == Num_PNC)
-                        Num_PC--;
-                    else
-                        Num_PNC--;
-                }
-            }
-
-            return Num_New;
-        }
-
-        float[] GetStimPercentages()
-        {
-            var ratio = InitialStimRatio;
-            float sum = 0;
-            float[] stimPercentages = new float[ratio.Length];
-
-            foreach (var num in ratio)
-                sum += num;
-            for (int i = 0; i < ratio.Length; i++)
-                stimPercentages[i] = ratio[i] / sum;
-            
-            return stimPercentages;
-        }
-
     }
 
     public class ContinuousRecognition_TrialDef : TrialDef
@@ -229,7 +150,6 @@ namespace ContinuousRecognition_Namespace
         public float ItiDuration;
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
-        public int[] InitialStimRatio;
         public float[] X_FbLocations = new float[] {-3f, -1.8f, -.6f, .6f, 1.8f, 3f};
         public float[] Y_FbLocations = new float[] {2.1f, 1.05f, 0f, -1.05f, -2.1f};
         public bool ShakeStim, FindAllStim, UseStarfield;

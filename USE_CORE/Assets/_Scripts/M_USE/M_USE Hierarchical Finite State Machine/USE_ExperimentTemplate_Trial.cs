@@ -305,11 +305,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 AddToStimLists(); //Seems to work here instead of each task having to call it themselves from InitTrial.
 
-                //Disable the Task's MUSE Background that's set in Session Level's SetTasksMainBackground() method:
-                //StartCoroutine(TurnOffLoadingCanvas());
-
-                Session.LoadingController_Session.DeactivateLoadingCanvas();
-
+                Session.ParticipantCanvas_GO.SetActive(false);
 
             });
 

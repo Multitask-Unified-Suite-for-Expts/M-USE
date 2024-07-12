@@ -171,7 +171,7 @@ namespace USE_ExperimentTemplate_Task
             {
                 if(TaskLoadingControllerGO == null)
                 {
-                    TaskLoadingControllerGO = Instantiate(Resources.Load<GameObject>("LoadingCanvas"));
+                    TaskLoadingControllerGO = Instantiate(Resources.Load<GameObject>("LoadingCanvas_New"));
                     TaskLoadingControllerGO.name = "LoadingCanvas_Task";
                     Canvas loadingCanvas = TaskLoadingControllerGO.GetComponent<Canvas>();
                     if (loadingCanvas != null)
@@ -240,10 +240,10 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
+                TaskCam.gameObject.SetActive(true);
+
                 StartCoroutine(TurnOffLoadingCanvas());
 
-                //moving here to try and fix the problem
-                TaskCam.gameObject.SetActive(true);
 
                 //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues.
                 if (TaskDirectionalLight != null)
@@ -439,8 +439,7 @@ namespace USE_ExperimentTemplate_Task
 
         private IEnumerator TurnOffLoadingCanvas()
         {
-            yield return new WaitForSeconds(0.75f);
-
+            yield return new WaitForSeconds(0.5f);
             TaskLoadingControllerGO.SetActive(false);
         }
 

@@ -64,13 +64,20 @@ public static class Session
     public static CameraSyncController CameraSyncController;
     public static FullScreenController FullScreenController;
     public static SessionAudioController SessionAudioController;
-    public static LoadingController LoadingController_Session;
     public static TimerController TimerController;
 
     public static SessionInfoPanel SessionInfoPanel;
     public static USE_StartButton USE_StartButton;
     public static GameObject TaskSelectionCanvasGO;
     public static GameObject InitCamGO;
+
+
+    //New main canvas:
+    public static GameObject MainExperimenterCanvas_GO;
+    public static GameObject MainExperimenterCanvas_LoadingText_GO;
+
+    public static GameObject ParticipantCanvas_GO;
+    public static GameObject ParticipantCanvas_LoadingText_GO;
 
     public static HumanStartPanel HumanStartPanel;
     public static ExperimenterDisplayController ExperimenterDisplayController;

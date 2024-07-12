@@ -986,12 +986,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             TrialStimIndices.Clear();
 
-            float[] stimPercentages = GetStimRatioPercentages(CurrentTrial.InitialStimRatio);
-            int[] stimNumbers = GetStimNumbers(stimPercentages);
-
-            int PC_Num = stimNumbers[0];
-            int New_Num = stimNumbers[1];
-            int PNC_Num = stimNumbers[2];
+            int New_Num = 1;
+            int PNC_Num = 1;
+            int PC_Num = TrialCount_InBlock;
 
             List<int> NewStim;
 
@@ -1037,6 +1034,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         else //The Non-Increasing trials
         {
+            Debug.LogWarning("NON INCREASING TRIALS SECTION!!!!!!!");
             TrialStimIndices.Clear();
 
             var totalNeeded = CurrentTrial.NumObjectsMinMax[1];
@@ -1252,21 +1250,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private string CalculatePercentagePC()
     {
-        return (GetStimPercentages()[0] * 100).ToString() + "%";
-    }
-
-    private float[] GetStimPercentages()
-    {
-        var ratio = CurrentTrial.InitialStimRatio;
-        float sum = 0;
-        float[] stimPercentages = new float[ratio.Length];
-
-        foreach (var num in ratio)
-            sum += num;
-        for (int i = 0; i < ratio.Length; i++)
-            stimPercentages[i] = ratio[i] / sum;
-
-        return stimPercentages;
+        return (TrialCount_InBlock / (TrialCount_InBlock + 2)).ToString() + "%";
     }
 
     private void DefineTrialData()
@@ -1303,77 +1287,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         PC_Stim.Clear();
         Unseen_Stim.Clear();
 
-    }
-
-
-    private float[] GetStimRatioPercentages(int[] ratioArray)
-    {
-        //Takes the initial stim ratio (ex: 2PC, 1New, 2PNC), and
-        //outputs their percentages of the total 
-        float sum = 0;
-        float[] stimPercentages = new float[ratioArray.Length];
-
-        foreach(var num in ratioArray)
-            sum += num;
-        for(int i = 0; i < ratioArray.Length; i++)
-            stimPercentages[i] = ratioArray[i] / sum;
-      
-        return stimPercentages;
-    }
-
-    private int[] GetStimNumbers(float[] stimPercentages)
-    {
-        //Function to calculate the correct num of stim for a trial.
-        //Starts by understating each num, then it makes sure there are enough available (some ratios could overstate the stim),
-        //then it adjusts the stim category that will make the PC% the closest to its supposed percentage. 
-        int PC_Num = (int)Math.Floor(stimPercentages[0] * CurrentTrial.NumTrialStims);
-        int New_Num = (int)Math.Floor(stimPercentages[1] * CurrentTrial.NumTrialStims);
-        int PNC_Num = (int)Math.Floor(stimPercentages[2] * CurrentTrial.NumTrialStims);
-        if (PC_Num == 0) PC_Num = 1;
-        if (New_Num == 0) New_Num = 1;
-        if (PNC_Num == 0) PNC_Num = 1;
-
-        int[] available = new int[3] { PC_Stim.Count, Unseen_Stim.Count, PNC_Stim.Count };
-
-        //Ensure a crazy stim ratio doesn't calculate more stim than available in that category.
-        while (PC_Num > available[0]) PC_Num--;
-        while (New_Num > available[1]) New_Num--;
-        while (PNC_Num > available[2]) PNC_Num--;
-
-        float PC_TargetPerc = stimPercentages[0];
-        while((PC_Num + New_Num + PNC_Num) < CurrentTrial.NumTrialStims)
-        {
-            //determine whether 1)Adding to PC, or 2)Adding to New/PNC makes the PercDiff smaller.
-            float PC_AddPerc = (PC_Num + 1) / (PC_Num + 1 + New_Num + PNC_Num);
-            float PC_AddDiff = PC_AddPerc - PC_TargetPerc;
-
-            float NonPC_AddPerc = PC_Num / (PC_Num + 1 + New_Num + PNC_Num);
-            float NonPC_AddDiff = NonPC_AddPerc - PC_TargetPerc;
-
-            if(PC_AddDiff < NonPC_AddDiff)
-                PC_Num++;
-            else
-            {
-                if (PNC_Num < New_Num)
-                    PNC_Num++;
-                else
-                    New_Num++;
-            }
-        }
-
-        while(PC_Num + New_Num + PNC_Num > CurrentTrial.NumTrialStims)
-        {
-            if (New_Num > 1)
-                New_Num--;
-            else
-            {
-                if (PC_Num > PNC_Num || PC_Num == PNC_Num)
-                    PC_Num--;
-                else
-                    PNC_Num--;
-            }
-        }
-        return new[] { PC_Num, New_Num, PNC_Num };
     }
 
     private void LoadConfigUIVariables()

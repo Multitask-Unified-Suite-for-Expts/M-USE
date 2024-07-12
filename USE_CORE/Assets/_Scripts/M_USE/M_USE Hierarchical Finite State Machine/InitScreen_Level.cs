@@ -30,6 +30,7 @@ using TMPro;
 using System.IO;
 using UnityEngine.UI;
 using System.Collections;
+using System;
 
 public class InitScreen_Level : ControlLevel
 {
@@ -37,8 +38,6 @@ public class InitScreen_Level : ControlLevel
     private GameObject MuseTextParentGO;
     private GameObject PlayBackgroundImageGO;
     public GameObject MainPanel_GO;
-
-    public GameObject InitScreenCanvas_GO;
 
     public TextMeshProUGUI SubjectID_Text;
     public TextMeshProUGUI SubjectAge_Text;
@@ -103,21 +102,11 @@ public class InitScreen_Level : ControlLevel
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
         Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
-        Setup.SpecifyTermination(() => true, WaitForStartPressed);
-        Setup.AddDefaultTerminationMethod(() =>
+        Setup.SpecifyTermination(() => true, WaitForStartPressed, () =>
         {
-            if(Session.LoadingController_Session != null)
-            {
-                Session.LoadingController_Session.gameObject.SetActive(false);
-            }
-
-            MuseTextParentGO = Instantiate(Resources.Load<GameObject>("TitleText"), InitScreenCanvas_GO.transform);
-            MuseTextParentGO.name = "TitleTextParent";
             MuseTextParentGO.SetActive(true);
 
-            PlayBackgroundImageGO = MuseTextParentGO.transform.Find("BackgroundImage").gameObject;
-            PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
-            PlayBackgroundImageGO.SetActive(true);
+            StartCoroutine(FadeScreenInCoroutine());
         });
 
         //WaitForStartPressed State-----------------------------------------------------------------------------------------------------------------------------------
@@ -135,6 +124,7 @@ public class InitScreen_Level : ControlLevel
             MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen  
             MainPanel_GO.SetActive(true);
             Settings_GO.SetActive(true);
+            InitScreen_GO.SetActive(true);
         });
         CollectInfoScreen.AddUpdateMethod(() =>
         {
@@ -154,15 +144,33 @@ public class InitScreen_Level : ControlLevel
             Session.SubjectAge = GetSubjectAge();
             SetConfigInfo();
             SetDataInfo();
-            InitScreenCanvas_GO.SetActive(false);
-            Session.LoadingController_Session.ActivateLoadingCanvas(Session.WebBuild ? 0 : 1); //turn on loading canvas/circle so that it immedietely shows its loading!
 
-            //Set Main cam rotation and position to that of the init cam:
-            Camera.main.transform.position = Session.InitCamGO.transform.position;
-            Camera.main.transform.rotation = Session.InitCamGO.transform.rotation;
+            InitScreen_GO.SetActive(false);
+
+            Session.MainExperimenterCanvas_LoadingText_GO.SetActive(true);
 
         });
 
+    }
+
+    private IEnumerator FadeScreenInCoroutine()
+    {
+        Image coverImage = Session.MainExperimenterCanvas_GO.transform.Find("Cover").GetComponent<Image>();
+
+        Color originalColor = coverImage.color;
+        float elapsedTime = 0f;
+        float fadeDuration = 1.25f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeDuration);
+            coverImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, alpha);
+            yield return null;
+        }
+
+        coverImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, 0f);
+        coverImage.gameObject.SetActive(false);
     }
 
 
@@ -386,56 +394,70 @@ public class InitScreen_Level : ControlLevel
 
     private void SetupInitScreen()
     {
-        if (Session.WebBuild)
+        try
         {
-            InitScreenCanvas_GO.GetComponent<Canvas>().targetDisplay = 0;
-            Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
+            if (Session.WebBuild)
+            {
+                Session.MainExperimenterCanvas_GO.GetComponent<Canvas>().targetDisplay = 0;
+                Session.ParticipantCanvas_GO.SetActive(false);
+                Session.InitCamGO.GetComponent<Camera>().targetDisplay = 0;
+            }
+
+            MuseTextParentGO = Session.MainExperimenterCanvas_GO.transform.Find("TitleText").gameObject;
+
+            PlayBackgroundImageGO = MuseTextParentGO.transform.Find("Back").gameObject;
+            PlayBackgroundImageGO.gameObject.AddComponent<Button>().onClick.AddListener(HandleStartSessionButtonPress);
+
+            KeyboardController = Session.MainExperimenterCanvas_GO.GetComponent<KeyboardController>();
+
+            SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
+
+            //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
+            FileSpec configFileSpec = new FileSpec
+            {
+                name = "Config Folder",
+                isFolder = true
+            };
+            Session.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
+            TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
+            FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
+            configFileItem.ManualStart(configFileSpec, configInputField, LocalConfigText);
+            LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
+
+            FileSpec dataFileSpec = new FileSpec
+            {
+                name = "Data Folder",
+                isFolder = true
+            };
+            Session.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
+            TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
+            FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();
+            dataFileItem.ManualStart(dataFileSpec, dataInputField, LocalDataText);
+            LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
+
+            if (Session.WebBuild)
+            {
+                LocalData_GO.SetActive(false);
+                LocalConfig_GO.SetActive(false);
+            }
+            else
+            {
+                ServerData_GO.SetActive(false);
+                ServerConfig_GO.SetActive(false);
+                //Un-Block out local toggle options if not web build:
+                LocalConfigsToggle_GreyPanel.SetActive(false);
+                LocalDataToggle_GreyPanel.SetActive(false);
+            }
+
+            ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
+            Error_AudioClip = Resources.Load<AudioClip>("Error");
+            Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
+
         }
-
-        KeyboardController = InitScreenCanvas_GO.GetComponent<KeyboardController>();
-
-        SettingsButton_GO.GetComponent<Button>().onClick.AddListener(HandleSettingButtonClicked);
-
-        //SETUP FILE ITEMS FOR BOTH ConfigFolder & DataFolder:
-        FileSpec configFileSpec = new FileSpec
+        catch(Exception e)
         {
-            name = "Config Folder",
-            isFolder = true
-        };
-        Session.LocateFile.AddToFilesDict(configFileSpec); //add to locatefile files dict
-        TMP_InputField configInputField = LocalConfig_GO.GetComponentInChildren<TMP_InputField>();
-        FileItem_TMP configFileItem = LocalConfig_GO.AddComponent<FileItem_TMP>();
-        configFileItem.ManualStart(configFileSpec, configInputField, LocalConfigText);
-        LocalConfig_GO.GetComponentInChildren<Button>().onClick.AddListener(configFileItem.Locate);
-
-        FileSpec dataFileSpec = new FileSpec
-        {
-            name = "Data Folder",
-            isFolder = true
-        };
-        Session.LocateFile.AddToFilesDict(dataFileSpec); //add to locatefile files dict
-        TMP_InputField dataInputField = LocalData_GO.GetComponentInChildren<TMP_InputField>();
-        FileItem_TMP dataFileItem = LocalData_GO.AddComponent<FileItem_TMP>();
-        dataFileItem.ManualStart(dataFileSpec, dataInputField, LocalDataText);
-        LocalData_GO.GetComponentInChildren<Button>().onClick.AddListener(dataFileItem.Locate);
-
-        if (Session.WebBuild)
-        {
-            LocalData_GO.SetActive(false);
-            LocalConfig_GO.SetActive(false);
+            Debug.LogError("FAILING SETTING UP INIT SCREEN! Error: " + e.Message);
         }
-        else
-        {
-            ServerData_GO.SetActive(false);
-            ServerConfig_GO.SetActive(false);
-            //Un-Block out local toggle options if not web build:
-            LocalConfigsToggle_GreyPanel.SetActive(false);
-            LocalDataToggle_GreyPanel.SetActive(false);
-        }
-
-        ToggleChange_AudioClip = Resources.Load<AudioClip>("GridItemAudio");
-        Error_AudioClip = Resources.Load<AudioClip>("Error");
-        Connected_AudioClip = Resources.Load<AudioClip>("DoubleBeep");
     }
 
     public void HandleSettingButtonClicked()

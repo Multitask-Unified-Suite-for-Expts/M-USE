@@ -284,7 +284,7 @@ namespace USE_UI
 
             StartButtonGO.transform.localScale = scale.HasValue ? new Vector3(scale.Value, scale.Value, 1) : new Vector3(1.2f, 1.2f, 0);
 
-            PlayIconGO.GetComponent<SpriteRenderer>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
+            PlayIconGO.GetComponent<Image>().color = new Color32(38, 188, 250, 255); //LightBlue PlayIcon for non-human version
 
             StartButtonChildren = new List<GameObject>();
 
@@ -311,7 +311,7 @@ namespace USE_UI
 
         public void SetPlayIconColor(Color32 color)
         {
-            PlayIconGO.GetComponent<SpriteRenderer>().color = color;
+            PlayIconGO.GetComponent<Image>().color = color;
         }
 
         public void SetButtonScale(float scale)

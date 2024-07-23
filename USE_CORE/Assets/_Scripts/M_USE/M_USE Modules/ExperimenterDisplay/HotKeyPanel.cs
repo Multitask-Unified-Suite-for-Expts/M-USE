@@ -60,7 +60,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         hotKeyText.GetComponent<Text>().supportRichText = true;
         hotKeyText.GetComponent<Text>().alignment = TextAnchor.UpperCenter;
 
-        hotKeyText.GetComponent<Text>().text = "<size=20>" + HKList.GenerateHotKeyDescriptions() + "</size>";
+        hotKeyText.GetComponent<Text>().text = HKList.GenerateHotKeyDescriptions();
     }
     public override void CustomPanelUpdate()
     {
@@ -107,7 +107,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
-            // Debug.Log("ConfigUIHotKeyDescriptions: " + completeString);
 
             return completeString;
         }

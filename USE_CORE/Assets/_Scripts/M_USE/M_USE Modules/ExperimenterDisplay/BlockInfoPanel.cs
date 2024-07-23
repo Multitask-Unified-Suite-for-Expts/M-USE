@@ -54,20 +54,20 @@ public class BlockInfoPanel : ExperimenterDisplayPanel
 
             if (Session.TaskLevel.CurrentBlockSummaryString?.Length > 0)
             {
-                blockInfoPanelText.GetComponent<Text>().text = "<size=23><color=#d9d9d9>" + 
-                                                               "<b>\nBlock Count:</b> " + (Session.TaskLevel.BlockCount + 1) +
-                                                               "<b>\nTrial Count in Block:</b> " + (Session.TrialLevel.TrialCount_InBlock + 1) + 
+                blockInfoPanelText.GetComponent<Text>().text = "<color=#d9d9d9>" + 
+                                                               "\nBlock Count: " + (Session.TaskLevel.BlockCount + 1) +
+                                                               "\nTrial Count in Block: " + (Session.TrialLevel.TrialCount_InBlock + 1) + 
                                                                "\n" + Session.TaskLevel.CurrentBlockSummaryString + 
                                                                "\n" + Session.TaskLevel.PreviousBlockSummaryString +
-                                                               "</color></size>";
+                                                               "</color>";
                                                                
             }
             else
             {
-                blockInfoPanelText.GetComponent<Text>().text = "<size=23><color=#d9d9d9>" +
-                                                               "<b>\nBlock Count:</b> " + (Session.TaskLevel.BlockCount + 1) +
-                                                               "<b>\nTrial Count in Block:</b> " + (Session.TrialLevel.TrialCount_InBlock + 1) +
-                                                               "</color></size>";
+                blockInfoPanelText.GetComponent<Text>().text = "<color=#d9d9d9>" +
+                                                               "\nBlock Count: " + (Session.TaskLevel.BlockCount + 1) +
+                                                               "\nTrial Count in Block: " + (Session.TrialLevel.TrialCount_InBlock + 1) +
+                                                               "</color>";
             }
         }
             

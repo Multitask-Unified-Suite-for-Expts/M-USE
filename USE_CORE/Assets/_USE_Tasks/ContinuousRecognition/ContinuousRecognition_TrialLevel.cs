@@ -713,7 +713,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nPC_Stim: " + NumPC_Trial +
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial;
@@ -1034,7 +1034,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         else //The Non-Increasing trials
         {
-            Debug.LogWarning("NON INCREASING TRIALS SECTION!!!!!!!");
             TrialStimIndices.Clear();
 
             var totalNeeded = CurrentTrial.NumObjectsMinMax[1];

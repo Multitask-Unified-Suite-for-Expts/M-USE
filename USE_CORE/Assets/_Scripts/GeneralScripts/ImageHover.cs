@@ -9,10 +9,10 @@ using TMPro;
 public class ImageHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     private Image backgroundImage;
-    private Color originalBackgroundColor;
+    private Color originalImageColor;
 
     //Set in inspector:
-    public Color backgroundHoverColor;
+    public Color hoverImageColor;
 
 
     private void Start()
@@ -20,16 +20,16 @@ public class ImageHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         backgroundImage = GetComponent<Image>();
         if (backgroundImage == null)
             Debug.LogError("IMAGE IS NULL");
-        originalBackgroundColor = backgroundImage.color;
+        originalImageColor = backgroundImage.color;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        backgroundImage.color = backgroundHoverColor;
+        backgroundImage.color = hoverImageColor;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        backgroundImage.color = originalBackgroundColor;
+        backgroundImage.color = originalImageColor;
     }
 }

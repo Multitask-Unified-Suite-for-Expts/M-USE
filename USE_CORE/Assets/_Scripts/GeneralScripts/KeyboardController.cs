@@ -43,17 +43,15 @@ public class KeyboardController : MonoBehaviour
 
     [HideInInspector] public bool UsingKeyboard;
 
-    InitScreen_Level InitScreen_Level;
-
     private KeyboardButtons keyboardButtons;
    
 
     private void Start()
     {
-        InitScreen_Level = GameObject.Find("ControlLevels").GetComponent<InitScreen_Level>();
         eventSystem = EventSystem.current;
         if (Keyboard_GO == null)
             Debug.LogError("KEYBOARD GAMEOBJECT IS NULL!");
+
         keyboardButtons = new KeyboardButtons(this);
     }
 
@@ -93,11 +91,13 @@ public class KeyboardController : MonoBehaviour
 
     public void OnNonGridButtonPress()
     {
-        if(CurrentInputField != null)
+        if (CurrentInputField != null)
         {
             Session.SessionAudioController.PlayAudioClip("ClickedButton");
             keyboardButtons.HandleNonGridButtonPress(eventSystem.currentSelectedGameObject);
         }
+        else
+            Debug.LogWarning("CURRENT INPUT FIELD IS NULL");
     }
 
     public class KeyboardButtons
@@ -123,7 +123,11 @@ public class KeyboardController : MonoBehaviour
             NonGridKeyboardButton hideButton = new NonGridKeyboardButton
             {
                 buttonName = "HideButton",
-                buttonAction = () => keyboardController.Keyboard_GO.SetActive(false)
+                buttonAction = () =>
+                {
+                    Debug.LogWarning("PRESSED HIDE BUTTON");
+                    keyboardController.Keyboard_GO.SetActive(false);
+                }
             };
             nonGridButtonList.Add(hideButton);
 
@@ -217,10 +221,12 @@ public class KeyboardController : MonoBehaviour
 
         public void HandleNonGridButtonPress(GameObject buttonPressed)
         {
+            Debug.LogWarning("HANDLING");
             foreach (NonGridKeyboardButton button in nonGridButtonList)
             {
                 if (button.buttonName == buttonPressed.name)
                 {
+                    Debug.LogWarning("ACTION!");
                     button.buttonAction();
                     break;
                 }

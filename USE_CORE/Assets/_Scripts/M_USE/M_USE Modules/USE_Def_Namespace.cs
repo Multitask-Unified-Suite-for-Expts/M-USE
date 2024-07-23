@@ -117,9 +117,9 @@ namespace USE_Def_Namespace
         public List<string> SyncBoxInitCommands;
 
         /// <summary>
-        /// Number of bytes to be split.
+        /// Number of bytes to be split. Default value of 2.
         /// </summary>
-        public int SplitBytes;
+        public int SplitBytes = 2;
 
         /// <summary>
         /// Type of eye tracker being used.

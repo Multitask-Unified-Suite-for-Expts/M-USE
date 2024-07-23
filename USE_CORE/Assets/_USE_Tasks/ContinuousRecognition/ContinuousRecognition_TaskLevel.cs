@@ -124,7 +124,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentTaskSummaryString.Clear();
         base.SetTaskSummaryString();
         
-        CurrentTaskSummaryString.Append($"\t<b># TbFilled:</b> {TokenBarCompletions_Task}");
+        CurrentTaskSummaryString.Append($"\t# TbFilled: {TokenBarCompletions_Task}");
         
     }
 

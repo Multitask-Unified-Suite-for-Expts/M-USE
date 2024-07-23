@@ -943,24 +943,25 @@ namespace USE_ExperimentTemplate_Session
             bool skipSessionSummary = false;
             finishSession.AddSpecificInitializationMethod(() =>
             {
-                Debug.LogWarning("INIT METHOD");
-                skipSessionSummary = Session.SessionDef.IsHuman ? false : true;
-                //skipSessionSummary = false;
-
                 Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishSessionStarts");
 
                 ToggleAudioButton.SetActive(false);
                 HumanVersionToggleButton.SetActive(false);
 
-                List<TaskObject> tasks = SessionBuilder.GetTasks();
-                if (tasks != null)
+                skipSessionSummary = Session.SessionDef.IsHuman ? false : true;
+
+                if(!skipSessionSummary)
                 {
-                    tasks = tasks.Where(task => task.TrialsCompleted > 0).ToList();
-                    if (tasks.Count > 0)
-                        CreateSessionSummaryPanel(tasks);
+                    List<TaskObject> tasks = SessionBuilder.GetTasks();
+                    if (tasks != null)
+                    {
+                        tasks = tasks.Where(task => task.TrialsCompleted > 0).ToList();
+                        if (tasks.Count > 0)
+                            CreateSessionSummaryPanel(tasks);
+                    }
+                    else
+                        Debug.LogWarning("NOT SKIPPING SESSION SUMMARY, BUT THE TASKS ARE NULL!");
                 }
-                else
-                    skipSessionSummary = true;
 
             });
             finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });

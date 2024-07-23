@@ -255,7 +255,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         CompletedSequences_InBlock = 0;
         SearchDurations_InBlock.Clear();
 
-        wwwTL.SequenceManager?.SetConsecutiveErrorCount(0);
+        wwwTL.SequenceManager?.SetBlockSpecificConsecutiveErrorCount(0);
 
         SearchDurations_InBlock.Clear();
         wwwTL.runningAcc.Clear();

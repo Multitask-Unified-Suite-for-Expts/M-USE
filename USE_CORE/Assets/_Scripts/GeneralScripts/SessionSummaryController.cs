@@ -77,7 +77,6 @@ public class SessionSummaryController : MonoBehaviour
                 go.transform.SetParent(TaskResults_GridParent.transform);
                 go.transform.localScale = Vector3.one;
                 go.transform.localPosition = Vector3.zero;
-                go.transform.rotation = Quaternion.Euler(5f, 0f, 0f); //adjust rotation
 
                 TextMeshProUGUI itemText = go.GetComponentInChildren<TextMeshProUGUI>();
                 itemText.text = $"{entry.Key}:  <color=#0681B5><b>{entry.Value}</b></color>";
@@ -107,7 +106,6 @@ public class SessionSummaryController : MonoBehaviour
                 go.transform.SetParent(GridParent);
                 go.transform.localPosition = Vector3.zero;
                 go.transform.localScale = Vector3.one;
-                //go.transform.rotation = Quaternion.Euler(5f, 0f, 0f); //adjust rotation
 
                 Color32 taskColor = task.TaskColor;
 

@@ -67,8 +67,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'TokenBar Completions:  <color=#0681B5><b>0</b></color>'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
-  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
+  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
+  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 16
-  m_fontSizeMax: 33
+  m_fontSizeMax: 38
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512

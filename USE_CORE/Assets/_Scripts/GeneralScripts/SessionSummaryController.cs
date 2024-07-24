@@ -107,7 +107,7 @@ public class SessionSummaryController : MonoBehaviour
                 go.transform.SetParent(GridParent);
                 go.transform.localPosition = Vector3.zero;
                 go.transform.localScale = Vector3.one;
-                go.transform.rotation = Quaternion.Euler(5f, 0f, 0f); //adjust rotation
+                //go.transform.rotation = Quaternion.Euler(5f, 0f, 0f); //adjust rotation
 
                 Color32 taskColor = task.TaskColor;
 
@@ -124,7 +124,7 @@ public class SessionSummaryController : MonoBehaviour
                 taskNameText.color = taskColor;
                 taskNameText.text = task.SplitTaskName;
 
-                go.transform.Find("NumTrials").GetComponent<TextMeshProUGUI>().text = $"{task.TrialsCompleted} Trials";
+                go.transform.Find("NumTrials").GetComponent<TextMeshProUGUI>().text = task.TrialsCompleted == 1 ? $"{task.TrialsCompleted} Trial" : $"{task.TrialsCompleted} Trials";
                 go.transform.Find("Duration").GetComponent<TextMeshProUGUI>().text = task.TaskDurationInMin == 1 ? $"{task.TaskDurationInMin:0} Minute" : $"{task.TaskDurationInMin:0} Minutes";
             }
         }

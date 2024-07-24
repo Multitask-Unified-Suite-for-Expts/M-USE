@@ -278,11 +278,6 @@ namespace USE_Def_Namespace
         public string ExternalStimFolderPath;
 
         /// <summary>
-        /// Directory path where prefab stimuli are stored.
-        /// </summary>
-        public string PrefabStimFolderPath;
-
-        /// <summary>
         /// File extension used for the external stimuli.
         /// </summary>
         public string ExternalStimExtension;

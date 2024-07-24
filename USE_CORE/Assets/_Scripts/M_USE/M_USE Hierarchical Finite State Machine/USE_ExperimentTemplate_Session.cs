@@ -948,21 +948,26 @@ namespace USE_ExperimentTemplate_Session
                 ToggleAudioButton.SetActive(false);
                 HumanVersionToggleButton.SetActive(false);
 
-                skipSessionSummary = Session.SessionDef.IsHuman ? false : true;
+                skipSessionSummary = !Session.SessionDef.IsHuman;
 
-                if(!skipSessionSummary)
+                if (skipSessionSummary)
+                    return;
+
+                List<TaskObject> tasks = SessionBuilder.GetTasks();
+                if (tasks != null)
                 {
-                    List<TaskObject> tasks = SessionBuilder.GetTasks();
-                    if (tasks != null)
-                    {
-                        tasks = tasks.Where(task => task.TrialsCompleted > 0).ToList();
-                        if (tasks.Count > 0)
-                            CreateSessionSummaryPanel(tasks);
-                    }
+                    tasks = tasks.Where(task => task.TrialsCompleted > 0).ToList();
+                    if (tasks.Count > 0)
+                        CreateSessionSummaryPanel(tasks);
                     else
-                        Debug.LogWarning("NOT SKIPPING SESSION SUMMARY, BUT THE TASKS ARE NULL!");
+                    {
+                        Debug.Log("No trials were completed for any tasks!");
+                        skipSessionSummary = true; //didnt actually complete any trials, so also skip
+                    }
                 }
-
+                else
+                    Debug.LogWarning("TASKS ARE NULL!");
+                
             });
             finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
             finishSession.SpecifyTermination(() => skipSessionSummary, () => null);

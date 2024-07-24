@@ -74,7 +74,20 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public BlockData BlockData;
         [HideInInspector] public FrameData FrameData;
         [HideInInspector] public TrialData TrialData;
+
         [HideInInspector] public string TaskConfigPath, TaskDataPath;
+
+        [HideInInspector]
+        public string TaskResourcesPath
+        {
+            get
+            {
+                if (TaskConfigPath == null)
+                    Debug.LogError("TASK CONFIG PATH IS NULL WHEN TRYING TO GET TASK RESOURCES PATH");
+                Debug.LogWarning("TASK RESOURCES PATH = " + TaskConfigPath + "/TaskResources");
+                return TaskConfigPath + "/TaskResources";
+            }
+        }
 
         [HideInInspector]
         public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;

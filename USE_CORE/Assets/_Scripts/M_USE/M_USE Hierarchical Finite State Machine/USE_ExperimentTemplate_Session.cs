@@ -569,9 +569,6 @@ namespace USE_ExperimentTemplate_Session
                 int spacing = Session.SessionDef.TaskButtonSpacing; //was 45 for web build
                 gridLayout.spacing = new Vector2(spacing, spacing);
 
-                //Set rotation to that of main camera:
-                TaskButtonsContainer.transform.eulerAngles = Camera.main.transform.eulerAngles;
-
                 List<GameObject> gridList = new List<GameObject>();
 
                 if (Session.SessionDef.TaskButtonGridSpots != null)

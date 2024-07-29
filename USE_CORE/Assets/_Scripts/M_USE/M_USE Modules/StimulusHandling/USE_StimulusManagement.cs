@@ -381,7 +381,6 @@ namespace USE_StimulusManagement
 		public async void LoadExternalStimFromFile()
 		{
 			StimExtension = "." + FileName.Split('.')[1];
-            //StimExtension = "." + FileName.Split(".")[1];
 
 			if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
 			{
@@ -423,8 +422,26 @@ namespace USE_StimulusManagement
 		{
             try
             {
+				//Need the path to the file inside Task/TaskResources folder (if it exists)
+                string[] split = FileName.Split('/');
+                string splitFileName;
+
+                if (split.Length == 0 || (split.Length == 1 && string.IsNullOrEmpty(split[0])))
+					split = FileName.Split(new string[] { "//" }, StringSplitOptions.None);
+              
+                splitFileName = split[split.Length - 1];
+                string path = Session.TaskLevel.TaskResourcesPath + "/" + splitFileName;
+
 				var gltf = new GltfImport();
-				var success = await gltf.Load(filePath);
+
+				//First try the Task/TaskResources folder:
+				var success = await gltf.Load(path);
+
+				//If didnt find it in taskResources folder, try normal ExternalStimFolderPath
+				if(!success)			
+					success = await gltf.Load(filePath);
+				
+
 				if (success)
 				{
 					LoadingAsync = true;
@@ -434,7 +451,9 @@ namespace USE_StimulusManagement
 					LoadingAsync = false;
 				}
 				else
-					Debug.LogError("UNSUCCESFUL LOADING GLTF FROM PATH: " + filePath);
+				{
+                    Debug.LogError("UNSUCCESFUL LOADING GLTF FROM PATH: " + filePath);
+				}
 			}
 			catch(Exception e)
 			{

@@ -84,7 +84,6 @@ namespace USE_ExperimentTemplate_Task
             {
                 if (TaskConfigPath == null)
                     Debug.LogError("TASK CONFIG PATH IS NULL WHEN TRYING TO GET TASK RESOURCES PATH");
-                Debug.LogWarning("TASK RESOURCES PATH = " + TaskConfigPath + "/TaskResources");
                 return TaskConfigPath + "/TaskResources";
             }
         }
@@ -826,7 +825,7 @@ namespace USE_ExperimentTemplate_Task
                         {
                             if (Path.GetFileName(filenames[iFile]) == firstFilename)
                             {
-                                Debug.LogWarning("During task setup for " + TaskName + " attempted to find stimulus " +
+                                Debug.Log("During task setup for " + TaskName + " attempted to find stimulus " +
                                                  sd.FileName + " in folder " + sd.StimFolderPath +
                                                  ", but files with this name are found at both " + firstFilename +
                                                  " and "
@@ -837,7 +836,9 @@ namespace USE_ExperimentTemplate_Task
                     }
 
                     if (filenames.Count == 1)
+                    {
                         sd.FileName = filenames[0];
+                    }
                     else if (filenames.Count == 0)
                         Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
                                        sd.FileName + " in folder " +

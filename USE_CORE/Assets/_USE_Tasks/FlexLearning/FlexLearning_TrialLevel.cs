@@ -102,8 +102,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
-        State SearchDisplay = new State("SearchDisplay");
         State SearchDisplayDelay = new State("SearchDisplayDelay");
+        State SearchDisplay = new State("SearchDisplay");
         State SelectionFeedback = new State("SelectionFeedback");
         State TokenFeedback = new State("TokenFeedback");
         State ITI = new State("ITI");

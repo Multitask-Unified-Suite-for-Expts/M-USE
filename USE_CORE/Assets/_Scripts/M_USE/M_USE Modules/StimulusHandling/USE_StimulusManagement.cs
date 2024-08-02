@@ -175,6 +175,7 @@ namespace USE_StimulusManagement
 				sd.BaseTokenLoss = BaseTokenLoss;
 			sd.TimesUsedInBlock = TimesUsedInBlock;
 			sd.isRelevant = isRelevant;
+
 			return sd;
 		}
 		
@@ -231,7 +232,7 @@ namespace USE_StimulusManagement
 		}
 
 		public void AddToStimGroup(StimGroup sg)
-		{
+		{			
 			if (!StimGroups.ContainsValue(sg))
 			{
 				sg.stimDefs.Add(this);
@@ -240,8 +241,8 @@ namespace USE_StimulusManagement
 			else
 			{
 				Debug.LogWarning("Attempted to add stim " + StimName + " to StimGroup " + sg.stimGroupName + " but this stimulus is already a member of this StimGroup.");
-			}
-		}
+            }
+        }
 
 		public void AddToStimGroup(IEnumerable<StimGroup> stimGroups)
 		{

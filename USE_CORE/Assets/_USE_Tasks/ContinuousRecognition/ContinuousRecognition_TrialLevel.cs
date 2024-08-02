@@ -727,6 +727,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         int MaxNumPerRow = 6;
         float max = 2.25f;
 
+
         float horizontalMax = 4;
 
         int numRows = 1;
@@ -1142,8 +1143,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         foreach (var stim in group.stimDefs)
             stim.StimGameObject.transform.localPosition = stim.StimLocation; //Manually setting pos since stimLocation isn't doing anything
         Generate3DBorders(group);
-        if (CurrentTask.StimFacingCamera)
-            MakeStimsFaceCamera(group);
         group.ToggleVisibility(true);
     }
 

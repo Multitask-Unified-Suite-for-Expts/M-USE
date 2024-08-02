@@ -500,7 +500,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
     void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nCorrect Object: " + CurrentTrial.CorrectObject +
                              "\nDifficulty Level: " + CurrentTrial.DifficultyLevel;
     }

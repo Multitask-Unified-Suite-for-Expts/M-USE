@@ -232,27 +232,22 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     public void AssignStimClassifiers(int[] correctObjectTouchOrder, StimGroup searchStims, StimGroup distractorStims)
     {
         targetStimGO = null;
-        //find which stimulus is currently target
-        int correctIndex = correctObjectTouchOrder[sequenceIdx] - 1;
 
-        for (int iStim = 0; iStim < searchStims.stimDefs.Count; iStim++)
+        int correctIndex = correctObjectTouchOrder[sequenceIdx];
+
+        foreach(WhatWhenWhere_StimDef stim in searchStims.stimDefs.Cast<WhatWhenWhere_StimDef>())
         {
-            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[iStim];
-            if (iStim == correctIndex)
+            if (stim.StimIndex == correctIndex)
             {
-                sd.IsCurrentTarget = true;
-                targetStimGO = sd.StimGameObject;
+                stim.IsCurrentTarget = true;
+                targetStimGO = stim.StimGameObject;
             }
             else
-                sd.IsCurrentTarget = false;
+                stim.IsCurrentTarget = false;
         }
 
-
-        for (int iDist = 0; iDist < distractorStims.stimDefs.Count; ++iDist)
-        {
-            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)distractorStims.stimDefs[iDist];
-            sd.IsDistractor = true;
-        }
+        foreach (WhatWhenWhere_StimDef stim in distractorStims.stimDefs.Cast<WhatWhenWhere_StimDef>())
+            stim.IsDistractor = true;
 
         totalStimInSequence = correctObjectTouchOrder.Length;
 

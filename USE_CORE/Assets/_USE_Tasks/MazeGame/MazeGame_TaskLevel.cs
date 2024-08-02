@@ -234,9 +234,9 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         {
             latestPercentError = (mgTL.runningPercentError[mgTL.runningPercentError.Count - 1]) * 100;
         }
-        CurrentBlockString = "<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
-                             "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
-                             "<b>\nLearning Criterion: </b>" + String.Format("{0:0.00}%", mgBD.BlockEndThreshold*100) +
+        CurrentBlockString = "\nMin Trials in Block: " + MinTrials_InBlock +
+                             "\nMax Trials in Block: " + MaxTrials_InBlock +
+                             "\nLearning Criterion: " + String.Format("{0:0.00}%", mgBD.BlockEndThreshold*100) +
                              "\n\nLast Trial's Percent Error: " + (latestPercentError == null ?
                                  ("N/A"):String.Format("{0:0.00}%", latestPercentError)) +
                              "\nTotal Errors: " + TotalErrors_InBlock +

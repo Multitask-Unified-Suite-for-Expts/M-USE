@@ -43,6 +43,17 @@ public class StimDefPointer: MonoBehaviour
 
     public T GetStimDef<T>() where T : StimDef
     {
-        return (T) StimDef;
+        if (StimDef == null)
+            Debug.LogError("STIMDEF IS NULL!");
+
+        if (StimDef is T typedStimDef)
+        {
+            return typedStimDef;
+        }
+        else
+        {
+            Debug.LogError($"STIMDEF IS NOT OF TYPE: {typeof(T)}.");
+            return null;
+        }
     }
 }

@@ -641,7 +641,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent.transform);
             textLocation.y += 75;
             playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
-                CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
+                (CurrentTrialDef.CorrectObjectTouchOrder[iStim] + 1).ToString(),
                 Color.red, textLocation, new Vector2(200, 200), playerViewParent.transform);
             playerViewText.SetActive(true);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
@@ -663,52 +663,38 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         startButtonDelay = ConfigUiVariables.get<ConfigNumber>("startButtonDelay");
     }
     //-----------------------------------------------------DEFINE QUADDLES-------------------------------------------------------------------------------------
+
     protected override void DefineTrialStims()
     {
-        StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
+        searchStims = SetupStimGroup("SearchStims", CurrentTrialDef.SearchStimIndices);
+        distractorStims = SetupStimGroup("DistractorStims", CurrentTrialDef.DistractorStimIndices);
 
-        //Define StimGroups consisting of StimDefs whose gameobjects will be loaded at TrialLevel_SetupTrial and 
-        //destroyed at TrialLevel_Finish
-        //StimGroup constructor which creates a subset of an already-existing StimGroup 
-        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
-        distractorStims = new StimGroup("DistractorStims", group, CurrentTrialDef.DistractorStimIndices);
-
-        if (CurrentTrialDef.GuidedSequenceLearning)
-        {
-            searchStims.SetVisibilityOnOffStates(GetStateFromName("FlashNextCorrectStim"), GetStateFromName("ITI"));
-            distractorStims.SetVisibilityOnOffStates(GetStateFromName("FlashNextCorrectStim"), GetStateFromName("ITI"));
-        }
-        else
-        {
-            searchStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
-            distractorStims.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
-        }
-        
-        TrialStims.Add(searchStims);
-        TrialStims.Add(distractorStims);
-        
         if (CurrentTrialDef.RandomizedLocations)
         {
-            var totalStims = searchStims.stimDefs.Concat(distractorStims.stimDefs);
-            var stimLocations = CurrentTrialDef.SearchStimLocations.Concat(CurrentTrialDef.DistractorStimLocations);
-
-            int[] positionIndexArray = Enumerable.Range(0, stimLocations.Count()).ToArray();
-            System.Random random = new System.Random();
-            positionIndexArray = positionIndexArray.OrderBy(x => random.Next()).ToArray();
-
-            for (int i = 0; i < totalStims.Count(); i++)
-            {
-                totalStims.ElementAt(i).StimLocation = stimLocations.ElementAt(positionIndexArray[i]);
-            }
+            CurrentTrialDef.SearchStimLocations = CurrentTrialDef.SearchStimLocations.OrderBy(x => Guid.NewGuid()).ToArray();
+            CurrentTrialDef.DistractorStimLocations = CurrentTrialDef.DistractorStimLocations.OrderBy(x => Guid.NewGuid()).ToArray();
         }
+
+        searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
+        distractorStims.SetLocations(CurrentTrialDef.DistractorStimLocations);
+
+        TrialStims.Add(searchStims);
+        TrialStims.Add(distractorStims);
+
+        searchStimsLocations = string.Join(",", searchStims.stimDefs.Select(s => s.StimLocation));
+        distractorStimsLocations = string.Join(",", distractorStims.stimDefs.Select(d => d.StimLocation));
+    }
+
+    private StimGroup SetupStimGroup(string name, IEnumerable<int> indices)
+    {
+        var stimGroup = new StimGroup(name, Session.UsingDefaultConfigs ? PrefabStims : ExternalStims, indices);
+
+        if (CurrentTrialDef.GuidedSequenceLearning)
+            stimGroup.SetVisibilityOnOffStates(GetStateFromName("FlashNextCorrectStim"), GetStateFromName("ITI"));
         else
-        {
-            searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
-            distractorStims.SetLocations(CurrentTrialDef.DistractorStimLocations);
-        }
-
-        searchStimsLocations = String.Join(",", searchStims.stimDefs.Select(s => s.StimLocation));
-        distractorStimsLocations = String.Join(",", distractorStims.stimDefs.Select(d => d.StimLocation));
+            stimGroup.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
+       
+        return stimGroup;
     }
     
     //-------------------------------------------------------------MISCELLANEOUS METHODS--------------------------------------------------------------------------

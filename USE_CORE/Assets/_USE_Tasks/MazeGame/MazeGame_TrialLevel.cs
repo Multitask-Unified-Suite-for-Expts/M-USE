@@ -645,21 +645,21 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Maze Name: </b>" + CurrentTrialDef.MazeName +
-                             "\n<b>Tile Flashing ratio: </b>" + CurrentTrialDef.TileFlashingRatio +
+        TrialSummaryString = "Maze Name: " + CurrentTrialDef.MazeName +
+                             "\nTile Flashing ratio: " + CurrentTrialDef.TileFlashingRatio +
                              "\n" +
-                             "\n<b>Percent Error: </b>" + String.Format("{0:0.00}%", percentError * 100) +
-                             "\n<b>Total Errors: </b>" + totalErrors_InTrial +
+                             "\nPercent Error: " + String.Format("{0:0.00}%", percentError * 100) +
+                             "\nTotal Errors: " + totalErrors_InTrial +
                              "\n" +
-                             "\n<b>Rule-Abiding Errors: </b>" + ruleAbidingErrors_InTrial +
-                             "\n<b>Rule-Breaking Errors: </b>" + ruleBreakingErrors_InTrial +
-                             "\n<b>Backtrack Errors: </b>" + backtrackErrors_InTrial +
-                             "\n<b>Retouch Correct: </b>" + retouchCorrect_InTrial +
-                             "\n<b>Retouch Erroneous: </b>" + retouchErroneous_InTrial +
+                             "\nRule-Abiding Errors: " + ruleAbidingErrors_InTrial +
+                             "\nRule-Breaking Errors: " + ruleBreakingErrors_InTrial +
+                             "\nBacktrack Errors: " + backtrackErrors_InTrial +
+                             "\nRetouch Correct: " + retouchCorrect_InTrial +
+                             "\nRetouch Erroneous: " + retouchErroneous_InTrial +
                              "\n" +
-                             "\n<b>Choice Duration: </b>" + String.Format("{0:0.0}", MazeManager.GetChoiceDuration()) +
-                             "\n<b>Maze Duration: </b>" + String.Format("{0:0.0}", MazeManager.GetMazeDuration()) +
-                             "\n<b>Slider Value: </b>" + String.Format("{0:0.00}", SliderFBController.Slider.value);
+                             "\nChoice Duration: " + String.Format("{0:0.0}", MazeManager.GetChoiceDuration()) +
+                             "\nMaze Duration: " + String.Format("{0:0.0}", MazeManager.GetMazeDuration()) +
+                             "\nSlider Value: " + String.Format("{0:0.00}", SliderFBController.Slider.value);
 
     }
 

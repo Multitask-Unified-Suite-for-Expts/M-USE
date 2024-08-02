@@ -110,8 +110,8 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
-                                            "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
+        CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +
+                                            "\nMax Trials in Block: " + MaxTrials_InBlock +
                                             "\n\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\nAvg Search Duration: " + string.Format("{0:0.00}", CalculateAverageDuration(vsTL.SearchDurations_InBlock)) +
                                       "\nNum Aborted Trials: " + + NumAbortedTrials_InBlock + 

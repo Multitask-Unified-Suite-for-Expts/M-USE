@@ -351,7 +351,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nNum Targets: " + TrialObjects.Where(obj => obj.IsTarget).Count() +
                              "\nNum Distractors: " + TrialObjects.Where(obj => !obj.IsTarget).Count();
 

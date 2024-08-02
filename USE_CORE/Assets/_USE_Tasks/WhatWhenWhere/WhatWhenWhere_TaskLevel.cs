@@ -148,8 +148,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
-                                            "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
+        CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +
+                                            "\nMax Trials in Block: " + MaxTrials_InBlock +
                                       "\n\nAverage Search Duration: " + CalculateAverageDuration(SearchDurations_InBlock) +
                                       "\n" +
                                       "\nCorrect Selections: " + CorrectSelections_InBlock +

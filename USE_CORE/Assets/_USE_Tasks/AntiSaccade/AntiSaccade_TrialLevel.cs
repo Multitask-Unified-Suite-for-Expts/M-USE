@@ -528,7 +528,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "<b>Trial #" + (TrialCount_InBlock + 1) + " In Block" + "</b>" +
+        TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
                              "\nDifficulty Level: " + difficultyLevel +
                              "\nDisplay Target Duration (sec): " + ChosenDisplayTargetDuration +

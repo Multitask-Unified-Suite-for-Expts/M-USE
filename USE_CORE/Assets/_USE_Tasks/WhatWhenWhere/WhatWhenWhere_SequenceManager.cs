@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using USE_StimulusManagement;
@@ -24,7 +25,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     private int totalStimInSequence;
     private float sequenceStartTime;
     private float sequenceDuration;
-    private int consecutiveErrors;
+    private int blockSpecificConsecutiveErrors;
+    private int trialSpecificConsecutiveErrors;
 
     private bool selectedFirstStimInSequence;
     private bool correctSelection;
@@ -51,7 +53,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
             if (selectedSD == lastCorrectStimSD)
                 retouchCorrect = true;
 
-            consecutiveErrors = 0;
+            blockSpecificConsecutiveErrors = 0;
+            trialSpecificConsecutiveErrors = 0;
             sequenceIdx++;
 
             lastCorrectStimSD = selectedSD;
@@ -76,7 +79,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
                 else
                     backTrackError = true;
             }
-            else if (consecutiveErrors > 0)
+            else if (trialSpecificConsecutiveErrors > 0 && selectedFirstStimInSequence)
                 ruleBreakingError = true;
             else
             {
@@ -85,10 +88,13 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
                 else
                     ruleAbidingError = true;
             }
-            
-            if(!retouchError)
-                consecutiveErrors++;
-            if(consecutiveErrors == 1 && sequenceIdx != 0)
+
+            if (!retouchError)
+            {
+                blockSpecificConsecutiveErrors++;
+                trialSpecificConsecutiveErrors++;
+            }
+            if(trialSpecificConsecutiveErrors == 1 && sequenceIdx != 0)
                 sequenceIdx--;
 
 
@@ -136,6 +142,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
             lastErrorStimGO = selectedGO;
 
         selectionClassifications_All.Add(selectionType);
+        UnityEngine.Debug.LogWarning("SELECTION TYPE : " + selectionType);
         return selectionType;
     }
     public void SetSelectedGO(GameObject go)
@@ -180,10 +187,14 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     {
         sequenceStartTime = time;
     }
-    public int GetConsecutiveErrorCount()
+    public int GetBlockSpecificConsecutiveErrorCount()
     {
-        return consecutiveErrors;
-    }    
+        return blockSpecificConsecutiveErrors;
+    }
+    public int GetTrialSpecificConsecutiveErrorCount()
+    {
+        return trialSpecificConsecutiveErrors;
+    }
     public bool GetSelectedFirstStimInSequence()
     {
         return selectedFirstStimInSequence;
@@ -221,6 +232,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
         totalStimInSequence = 0;
         sequenceStartTime = 0;
         sequenceDuration = 0;
+
+        trialSpecificConsecutiveErrors = 0;
 
         startedSequence = false;
         finishedSequence = false;
@@ -278,8 +291,12 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     {
         sequenceIdx = seqIdx;
     }
-    public void SetConsecutiveErrorCount(int count)
+    public void SetBlockSpecificConsecutiveErrorCount(int count)
     {
-        consecutiveErrors = count;
+        blockSpecificConsecutiveErrors = count;
+    }
+    public void SetTrialSpecificConsecutiveErrorCount(int count)
+    {
+        trialSpecificConsecutiveErrors = count;
     }
 }

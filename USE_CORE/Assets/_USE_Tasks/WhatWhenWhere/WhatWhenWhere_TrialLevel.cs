@@ -176,7 +176,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             UpdateExperimenterDisplaySummaryStrings();
 
             // Determine Start Button onset if the participant has made consecutive errors that exceed the error threshold
-            if (SequenceManager.GetConsecutiveErrorCount() >= CurrentTrialDef.ErrorThreshold)
+            if (SequenceManager.GetBlockSpecificConsecutiveErrorCount() >= CurrentTrialDef.ErrorThreshold)
                 startButtonPresentationDelay = timeoutDuration.value;
             else
                 startButtonPresentationDelay = startButtonDelay.value;
@@ -310,10 +310,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
 
 
-                if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
+                if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetTrialSpecificConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
                     SequenceManager.GetLastCorrectStimGO().GetComponent<CircleHalo>()?.DeactivateInstantiatedCircleHalo();
 
-                if (SliderFBController.GetSliderValue() != 0 && SequenceManager.GetConsecutiveErrorCount() == 1)
+                if (SliderFBController.GetSliderValue() != 0 && SequenceManager.GetTrialSpecificConsecutiveErrorCount() == 1)
                 {
                     SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
                     
@@ -360,7 +360,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
                 else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (SequenceManager.GetConsecutiveErrorCount() >= 2 && SequenceManager.GetSelectedFirstStimInSequence()))
+                    if (CurrentTrialDef.GuidedSequenceLearning || (SequenceManager.GetTrialSpecificConsecutiveErrorCount() >= 2 && SequenceManager.GetSelectedFirstStimInSequence()))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;

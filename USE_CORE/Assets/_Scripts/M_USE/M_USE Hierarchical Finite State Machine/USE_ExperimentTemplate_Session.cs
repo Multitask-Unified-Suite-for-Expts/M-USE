@@ -632,12 +632,12 @@ namespace USE_ExperimentTemplate_Session
 
                     if (Session.UsingServerConfigs)
                     {
-                        StartCoroutine(ServerManager.LoadTextureFromServer($"{Session.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
+                        StartCoroutine(ServerManager.LoadTextureFromServer($"{ServerManager.ServerURL}/{Session.SessionDef.TaskIconsFolderPath}/{taskName}.png", imageResult =>
                         {
                             if (imageResult != null)
                                 image.texture = imageResult;
                             else
-                                Debug.Log("NULL GETTING TASK ICON TEXTURE FROM SERVER!");
+                                Debug.LogError("NULL GETTING TASK ICON TEXTURE FROM SERVER!");
                         }));
                     }
                     else if(Session.UsingDefaultConfigs)

@@ -462,10 +462,9 @@ namespace USE_ExperimentTemplate_Task
             if (Session.UsingDefaultConfigs)
                 contextFilePath = $"{Session.SessionDef.ContextExternalFilePath}/{contextName}";
             else if (Session.UsingServerConfigs)
-                contextFilePath = $"{Session.SessionDef.ContextExternalFilePath}/{contextName}.png";
+                contextFilePath = $"{ServerManager.ServerURL}/{Session.SessionDef.ContextExternalFilePath}/{contextName}.png";
             else if (Session.UsingLocalConfigs)
-                contextFilePath = TrialLevel.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath,
-                    contextName, "LinearDark");
+                contextFilePath = TrialLevel.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, contextName, "LinearDark");
 
             StartCoroutine(HandleSkybox(contextFilePath));
         }
@@ -811,49 +810,6 @@ namespace USE_ExperimentTemplate_Task
                 sd.FileName = sd.FileName.Trim();
                 sd.StimExtension = "." + sd.FileName.Split('.')[1];
                 //sd.StimExtension = "." + sd.FileName.Split(".")[1];
-
-                //we will only use StimFolderPath if ExternalFilePath doesn't already contain it
-                if (!string.IsNullOrEmpty(sd.StimFolderPath) && !sd.FileName.StartsWith(sd.StimFolderPath))
-                {
-                    List<string> filenames =
-                        RecursiveFileFinder.FindFile(sd.StimFolderPath, sd.FileName, sd.StimExtension);
-
-                    if (filenames.Count > 1)
-                    {
-                        string firstFilename = Path.GetFileName(filenames[0]);
-                        for (int iFile = filenames.Count - 1; iFile > 0; iFile--)
-                        {
-                            if (Path.GetFileName(filenames[iFile]) == firstFilename)
-                            {
-                                Debug.Log("During task setup for " + TaskName + " attempted to find stimulus " +
-                                                 sd.FileName + " in folder " + sd.StimFolderPath +
-                                                 ", but files with this name are found at both " + firstFilename +
-                                                 " and "
-                                                 + filenames[iFile] + ".  Only the first will be used.");
-                                filenames.RemoveAt(iFile);
-                            }
-                        }
-                    }
-
-                    if (filenames.Count == 1)
-                    {
-                        sd.FileName = filenames[0];
-                    }
-                    else if (filenames.Count == 0)
-                        Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
-                                       sd.FileName + " in folder " +
-                                       sd.StimFolderPath +
-                                       " but no file matching this pattern was found in this folder or subdirectories.");
-                    else
-                    {
-                        Debug.LogError("During task setup for " + TaskName + " attempted to find stimulus " +
-                                       sd.FileName + " in folder " +
-                                       sd.StimFolderPath +
-                                       " but multiple non-identical files matching this pattern were found in this folder or subdirectories.");
-                    }
-                }
-
-
             }
         }
 
@@ -1170,12 +1126,6 @@ public class TaskLevelTemplate_Methods
             CheckPathAndDuplicate(sd);
         }
 
-        public void CreateStimDef(StimGroup sg, int[] dimVals)
-        {
-            StimDef sd = new StimDef(sg, dimVals);
-            CheckPathAndDuplicate(sd);
-        }
-
         public void CreateStimDef(StimGroup sg, GameObject obj)
         {
             StimDef sd = new StimDef(sg, obj);
@@ -1192,15 +1142,6 @@ public class TaskLevelTemplate_Methods
         public StimGroup CreateStimGroup(string groupName, IEnumerable<StimDef> stims, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             StimGroup sg = new StimGroup(groupName, stims, setActiveOnInit, setInactiveOnTerm);
-            AllTaskStimGroups.Add(groupName, sg);
-            AddNewStims(sg.stimDefs);
-            return sg;
-        }
-
-        public StimGroup CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath,
-            IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null)
-        {
-            StimGroup sg = new StimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam, scale, setActiveOnInit, setInactiveOnTerm);
             AllTaskStimGroups.Add(groupName, sg);
             AddNewStims(sg.stimDefs);
             return sg;

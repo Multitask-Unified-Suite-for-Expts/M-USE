@@ -266,9 +266,7 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
     {
-        string url = $"{ServerURL}/{filePath}";
-
-        using UnityWebRequest request = UnityWebRequestTexture.GetTexture(url);
+        using UnityWebRequest request = UnityWebRequestTexture.GetTexture(filePath);
         yield return request.SendWebRequest();
 
         if (request.result == UnityWebRequest.Result.Success)

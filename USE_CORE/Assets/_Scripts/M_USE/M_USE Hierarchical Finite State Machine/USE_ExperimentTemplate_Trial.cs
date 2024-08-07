@@ -622,14 +622,6 @@ namespace USE_ExperimentTemplate_Trial
             return TaskStims.AllTaskStimGroups[groupName];
         }
 
-        public StimGroup CreateStimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath,
-            IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null)
-        {
-            TaskStims.CreateStimGroup(groupName, dimValGroup, folderPath, featureNames, neutralPatternedColorName, cam,
-                scale, setActiveOnInit, setInactiveOnTerm);
-            return TaskStims.AllTaskStimGroups[groupName];
-        }
-
         public StimGroup CreateStimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
         {
             TaskStims.CreateStimGroup(groupName, TaskName, stimDefFilePath, setActiveOnInit, setInactiveOnTerm);

@@ -7,7 +7,6 @@ using KeepTrack_Namespace;
 using ConfigDynamicUI;
 using System.Linq;
 using System;
-using UnityEditor;
 
 
 public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
@@ -45,7 +44,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
 
     private readonly float HaloDepth = 10f;
-    private float HaloDuration = .15f; //make configurable later
+    private float HaloDuration = .15f;
 
     List<KT_Object> TrialObjects;
 
@@ -100,7 +99,9 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             List<KT_Object_ConfigValues> trialObjectsConfigValues = new List<KT_Object_ConfigValues>();
 
             foreach (int objIndex in CurrentTrial.TrialObjectIndices)
+            {
                 trialObjectsConfigValues.Add(CurrentTaskLevel.KT_Objects_ConfigValues[objIndex]);
+            }
             
             TrialObjects = ObjManager.CreateObjects(trialObjectsConfigValues);
 
@@ -165,8 +166,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
             {
-                ChosenObject = ChosenGO.GetComponent<KT_Object>();
-                if(ChosenObject != null)
+                if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
                 {
                     HaloFBController.SetParticleHaloSize(.5f);
                     HaloFBController.SetCircleHaloSize(.01f * ChosenObject.Size);

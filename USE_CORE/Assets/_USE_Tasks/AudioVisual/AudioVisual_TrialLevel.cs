@@ -434,6 +434,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
+            Debug.LogWarning("LOADING TEX FROM FILEPATH: " + filePath);
             yield return LoadTexture(filePath, result =>
             {
                 if (result != null)

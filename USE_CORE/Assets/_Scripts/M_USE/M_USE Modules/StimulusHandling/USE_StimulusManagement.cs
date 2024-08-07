@@ -45,14 +45,60 @@ namespace USE_StimulusManagement
 	{
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
-		public string StimPath;
-		public string FileName;
+		public string FileName; //name of file
 		public string StimFolderPath;
+
+		public string StimFilePath
+		{
+			get
+			{
+				string path = "";
+
+				if (Session.UsingDefaultConfigs)
+				{
+					path = $"{Session.DefaultStimFolderPath}/{FileName}";
+                }
+				else if (Session.UsingLocalConfigs)
+				{
+					path = $"{StimFolderPath}/{FileName}";
+				}
+				else if (Session.UsingServerConfigs)
+				{
+					path = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
+                }
+				else
+					Debug.LogError("NOT USING DEFAULT, LOCAL, OR SERVER CONFIGS WHILE TRYING TO GET STIMFILEPATH!");
+
+
+				return path;
+			}
+		}
+
+		public string StimFilePathIfInTaskResourcesFolder
+		{
+			get
+			{
+                string path = "";
+
+				if (Session.UsingLocalConfigs)
+				{
+					path = $"{Session.TaskLevel.TaskResourcesPath}/{FileName}";
+				}
+				else if (Session.UsingServerConfigs)
+				{
+					path = $"{ServerManager.ServerURL}/{Session.TaskLevel.TaskResourcesPath}/{FileName}"; //trying
+				}
+				else
+					Debug.LogError("TRIED TO GET STIM PATH IN TASK RESOURCES FOLDER BUT NOT USING LOCAL OR SERVER CONFIGS!");
+
+				return path;
+            }
+		}
+
 		public string StimExtension;
 		public int StimCode; //optional, for analysis purposes
 		public int StimIndex;
 		public string StimID;
-		public int[] StimDimVals; //only if this is parametrically-defined stim
 		[System.NonSerialized] public GameObject StimGameObject; //not in config, generated at runtime
 		public GameObject CanvasGameObject;
 		public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
@@ -83,18 +129,6 @@ namespace USE_StimulusManagement
 
 		public StimDef(StimGroup sg, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
-			sg.stimDefs.Add(this);
-            StimGroups = new Dictionary<string, StimGroup>
-            {
-                { sg.stimGroupName, sg }
-            };
-            SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
-		}
-
-		public StimDef(StimGroup sg, int[] dimVals, State setActiveOnInit = null, State setInactiveOnTerm = null)
-		{
-			StimDimVals = dimVals;
-			StimPath = "placeholder";
 			sg.stimDefs.Add(this);
             StimGroups = new Dictionary<string, StimGroup>
             {
@@ -143,16 +177,12 @@ namespace USE_StimulusManagement
 			StimDef sd = new StimDef();
 			if (StimName != null)
 				sd.StimName = StimName;
-			if (StimPath != null)
-				sd.StimPath = StimPath;
 			if (FileName != null)
 				sd.FileName = FileName;
 			if (StimFolderPath != null)
 				sd.StimFolderPath = StimFolderPath;
 			if (StimID != null)
 				sd.StimID = StimID;
-			if (StimDimVals != null)
-				sd.StimDimVals = StimDimVals;
 
 			if (CanvasGameObject != null)
 				sd.CanvasGameObject = CanvasGameObject;
@@ -191,16 +221,12 @@ namespace USE_StimulusManagement
 			T sd = new T();
 			if (StimName != null)
 				sd.StimName = StimName;
-			if (StimPath != null)
-				sd.StimPath = StimPath;
 			if (FileName != null)
 				sd.FileName = FileName;
 			if (StimFolderPath != null)
 				sd.StimFolderPath = StimFolderPath;
 			if (StimID != null)
 				sd.StimID = StimID;
-			if (StimDimVals != null)
-				sd.StimDimVals = StimDimVals;
 
 			if (CanvasGameObject != null)
 				sd.CanvasGameObject = CanvasGameObject;
@@ -303,28 +329,15 @@ namespace USE_StimulusManagement
 				LoadPrefabFromResources();
             else
             {
-                if (!string.IsNullOrEmpty(FileName))
+                if (Session.UsingServerConfigs)
                 {
-					if (Session.UsingServerConfigs)
-					{
-                        if (Session.Using2DStim)
-							yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
-						else
-							Load3DStimFromServer();
-					}
-					else if(Session.UsingLocalConfigs)
-						LoadExternalStimFromFile(); //Call should be awaited, but we cant cuz this is coroutine not async. Resolved with "yield return waitUntil" line below
+                    if (Session.Using2DStim)
+                        yield return CoroutineHelper.StartCoroutine(Load2DStimFromServer());
+                    else
+                        LoadExternalStimFromFile();
                 }
-                else if (StimDimVals != null)
-                {
-                    FileName = FilePathFromDims("placeholder1", new List<string[]>(), "placeholder3");
-                    LoadExternalStimFromFile();
-                }
-                else
-                {
-                    Debug.LogWarning("Attempting to load stimulus " + StimName + ", but no FileName or Dimensional Values have been provided!");
-					callback?.Invoke(null);
-                }
+                else if (Session.UsingLocalConfigs)
+                    LoadExternalStimFromFile(); //Call should be awaited, but we cant cuz this is coroutine not async. Resolved with "yield return waitUntil" line below
             }
 
 			//HAVE TO WAIT UNTIL LOADFROMEXTERNALFILE() FINISHES LOADING THE STIMGAMEOBJECT!
@@ -349,23 +362,22 @@ namespace USE_StimulusManagement
 		
 		public void LoadPrefabFromResources()
 		{
-			string fullPath = $"{Session.DefaultStimFolderPath}/{FileName}";
 			try
 			{
-				StimGameObject = Object.Instantiate(Resources.Load(fullPath) as GameObject);
+				StimGameObject = Object.Instantiate(Resources.Load(StimFilePath) as GameObject);
 				StimGameObject.SetActive(false);
 			}
 			catch(Exception e)
 			{
-                Debug.LogError($"ERROR LOADING STIM FROM RESOURCES PATH: " + fullPath + " | Error: "+ e.Message);
+                Debug.LogError($"ERROR LOADING STIM FROM RESOURCES PATH: " + StimFilePath + " | Error: "+ e.Message);
             }
         }
 
         public IEnumerator Load2DStimFromServer()
 		{
-            string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
+            //string filePath = $"{ServerManager.ServerStimFolderPath}/{FileName}";
 
-            yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(filePath, textureResult =>
+            yield return CoroutineHelper.StartCoroutine(ServerManager.LoadTextureFromServer(StimFilePath, textureResult =>
 			{
 				if (textureResult != null)
 				{
@@ -379,70 +391,36 @@ namespace USE_StimulusManagement
 			}));
 		}
 
-		public async void LoadExternalStimFromFile()
+        public async void LoadExternalStimFromFile()
 		{
 			StimExtension = "." + FileName.Split('.')[1];
-
-			if (!string.IsNullOrEmpty(StimFolderPath) && !FileName.StartsWith(StimFolderPath))
-			{
-				List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, FileName, StimExtension);
-				if (filenames.Count == 1)
-					FileName = filenames[0];
-				else if (filenames.Count == 0)
-					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + StimFolderPath + "but no file matching this pattern was found in this folder or subdirectories.");
-				else
-					Debug.LogError("Attempted to load stimulus " + FileName + " in folder " + StimFolderPath + "but multiple files matching this pattern were found in this folder or subdirectories.");
-			}
 
 			switch (StimExtension.ToLower())
 			{
 				case ".png":
-					LoadExternalPNG(FileName);
-					break;
-				case ".glb":
-					await LoadExternalGLTF(FileName);
+					LoadExternalPNG();
 					break;
                 case ".gltf":
-                    await LoadExternalGLTF(FileName);
-                    break;
-                case ".fbx":
-                    //LoadModel_Trilib(FileName);
+                    await LoadExternalGLTF();
                     break;
                 default:
 					break;
 			}
 		}
 
-		public async void Load3DStimFromServer()
-		{
-            string filePath = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
-			await LoadExternalGLTF(filePath);
-		}
-
-		public async Task LoadExternalGLTF(string filePath)
+		public async Task LoadExternalGLTF()
 		{
             try
             {
-				//Need the path to the file inside Task/TaskResources folder (if it exists)
-                string[] split = FileName.Split('/');
-                string splitFileName;
-
-                if (split.Length == 0 || (split.Length == 1 && string.IsNullOrEmpty(split[0])))
-					split = FileName.Split(new string[] { "//" }, StringSplitOptions.None);
-              
-                splitFileName = split[split.Length - 1];
-                string path = Session.TaskLevel.TaskResourcesPath + "/" + splitFileName;
-
 				var gltf = new GltfImport();
 
 				//First try the Task/TaskResources folder:
-				var success = await gltf.Load(path);
+				var success = await gltf.Load(StimFilePathIfInTaskResourcesFolder);
 
-				//If didnt find it in taskResources folder, try normal ExternalStimFolderPath
+				//If didnt find it in taskResources folder, try normal stim file path:
 				if(!success)			
-					success = await gltf.Load(filePath);
+					success = await gltf.Load(StimFilePath);
 				
-
 				if (success)
 				{
 					LoadingAsync = true;
@@ -453,7 +431,7 @@ namespace USE_StimulusManagement
 				}
 				else
 				{
-                    Debug.LogError("UNSUCCESFUL LOADING GLTF FROM PATH: " + filePath);
+                    Debug.LogError("UNSUCCESFUL LOADING GLTF FROM BOTH TASK RESOURCES FOLDER AND EXTERNAL FILE PATH");
 				}
 			}
 			catch(Exception e)
@@ -462,41 +440,32 @@ namespace USE_StimulusManagement
 			}
         }
 
-		public void LoadExternalPNG(string filePath)
+		public void LoadExternalPNG()
         {
 			StimGameObject = new GameObject();
             RawImage stimGOImage = StimGameObject.AddComponent<RawImage>();
 
-            if (File.Exists(filePath))
-            {
-                byte[] fileData = File.ReadAllBytes(filePath);
-                Texture2D tex = new Texture2D(2, 2);
-                tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
+			string path = "";
+
+			if (File.Exists(StimFilePathIfInTaskResourcesFolder))
+				path = StimFilePathIfInTaskResourcesFolder;
+			else
+			{
+				if (File.Exists(StimFilePath))
+					path = StimFilePath;
+			}
+
+			if (path.Length > 0)
+			{
+				byte[] fileData = File.ReadAllBytes(path);
+				Texture2D tex = new Texture2D(2, 2);
+				tex.LoadImage(fileData); //..this will auto-resize the texture dimensions.
 				stimGOImage.texture = tex;
-            }
-            else
-                Debug.LogError("FAILED LOADING EXTERNAL PNG FROM LOCAL PATH: " + filePath);
+			}
+			else
+				Debug.LogError("COULDNT FIND THE FILE AT TASK RESOURCES FOLDER OR NORMAL STIM FILE PATH!");
         }
 
-
-		//TRILIB METHOD:
-		//public void LoadModel_Trilib(string filePath)
-		//{
-		//	using (var assetLoader = new AssetLoader())
-		//	{
-		//		try
-		//		{
-		//			var assetLoaderOptions = AssetLoaderOptions.CreateInstance();
-		//			assetLoaderOptions.AutoPlayAnimations = true;
-		//			assetLoaderOptions.AddAssetUnloader = true;
-		//			StimGameObject = assetLoader.LoadFromFile(filePath);
-		//		}
-		//		catch (Exception e)
-		//		{
-		//			Debug.LogError(e.ToString());
-		//		}
-		//	}
-		//}
 
 		private void PositionRotationScale()
         {
@@ -660,37 +629,6 @@ namespace USE_StimulusManagement
         }
         
 
-        public string FilePathFromDims(string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName)
-		{
-			//UnityEngine.Debug.Log(featureVals);
-			string filename = "";
-			for (int iDim = 0; iDim < featureNames.Count(); iDim++)
-			{
-				filename += featureNames.ElementAt(iDim)[StimDimVals[iDim]];
-				if (iDim < 4)
-					filename = filename + "_";
-			}
-
-			if (StimDimVals[1] != 0 && StimDimVals[2] == 0)
-			{
-				//special case for patterned Quaddle without color
-				int colour = filename.IndexOf('C');
-				string c1 = filename.Substring(colour, 16);
-				filename = filename.Replace(c1, neutralPatternedColorName);
-			}
-			else if (StimDimVals[1] == 0)
-			{
-				//special case where colours are solid for neutral pattern
-				int colour = filename.IndexOf('C');
-				string c1 = filename.Substring(colour + 1, 7);
-				string c2 = filename.Substring(colour + 9, 7);
-				filename = filename.Replace(c2, c1);
-			}
-
-			return filename;
-
-			//return CheckFileName(folderPath, filename);
-		}
 	}
 
 
@@ -726,13 +664,6 @@ namespace USE_StimulusManagement
 			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
 		}
 
-		public StimGroup(string groupName, IEnumerable<int[]> dimValGroup, string folderPath, IEnumerable<string[]> featureNames, string neutralPatternedColorName, Camera cam, float scale = 1, State setActiveOnInit = null, State setInactiveOnTerm = null) 
-		{
-			stimGroupName = groupName;
-			stimDefs = new List<StimDef>();
-			AddStims(dimValGroup);
-			SetVisibilityOnOffStates(setActiveOnInit, setInactiveOnTerm);
-		}
 
 		public StimGroup(string groupName, string TaskName, string stimDefFilePath, State setActiveOnInit = null, State setInactiveOnTerm = null)
 		{
@@ -821,21 +752,6 @@ namespace USE_StimulusManagement
 			}
 		}
 
-		public void AddStims(int[] dimVals)
-		{
-			StimDef stim = new StimDef(this, dimVals);
-			// stim.ToggleVisibility(false);
-		}
-
-		public void AddStims(IEnumerable<int[]> dimValGroup)
-		{
-			foreach (int[] dimVals in dimValGroup)
-			{
-				StimDef stim = new StimDef(this, dimVals);
-				// stim.ToggleVisibility(false);
-			}
-		}
-
 		public void AddStims(string TaskName, string stimDefFilePath)
 		{
 			SessionSettings.ImportSettings_SingleTypeArray<StimDef>(TaskName + "_StimDefs", stimDefFilePath);
@@ -867,28 +783,6 @@ namespace USE_StimulusManagement
 			}
 		}
 		
-		
-		public void RemoveStims(int[] dimVals)
-		{
-			foreach (StimDef sd in stimDefs)
-			{
-				if (sd.StimDimVals == dimVals)
-				{
-					sd.RemoveFromStimGroup(this);
-					return;
-				}
-			}
-			Debug.LogWarning("Attempted to remove StimDef with dimensional values " + dimVals + " from StimGroup " + stimGroupName + 
-			                 ", but this StimGroup does not include a StimDef with these dimensional values.");
-		}
-
-		public void RemoveStims(IEnumerable<int[]> dimValGroup)
-		{
-			foreach (int[] dimVals in dimValGroup)
-			{
-				RemoveStims(dimVals);
-			}
-		}
 
 		public void RemoveStims(StimGroup sgOrig, IEnumerable<int> stimSubsetIndices)
 		{

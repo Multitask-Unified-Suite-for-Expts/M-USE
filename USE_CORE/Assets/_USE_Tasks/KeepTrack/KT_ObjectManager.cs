@@ -267,6 +267,9 @@ public class KT_Object : MonoBehaviour
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
 
+    public enum AnimationStatus { Open, Closed };
+    public AnimationStatus CurrentAnimationStatus = AnimationStatus.Open; //start as closed
+
 
     public KT_Object()
     {
@@ -396,10 +399,17 @@ public class KT_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
+
         Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
+
         gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
+
+        CurrentAnimationStatus = AnimationStatus.Closed;
+
         yield return new WaitForSeconds(CloseDuration);
         gameObject.GetComponent<PacmanDrawer>().DrawMouth(OpenAngle);
+
+        CurrentAnimationStatus = AnimationStatus.Open;
     }
 
     private void HandlePausingWhileBeingSelected()

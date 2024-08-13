@@ -373,6 +373,26 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
         FrameData.AddDatum("ObjectNames", () => GetObjNamesString());
         FrameData.AddDatum("ObjectPositions", () => GetObjPositionsString());
+
+        FrameData.AddDatum("ObjectAnimStatus", () => GetObjAnimStatus());
+
+    }
+
+    private string GetObjAnimStatus()
+    {
+        if (TrialObjects == null)
+            return "[]";
+
+        List<string> statuses = new List<string>();
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null && obj.gameObject.activeInHierarchy)
+            {
+                statuses.Add(obj.CurrentAnimationStatus.ToString());
+            }
+        }
+        return statuses.Count < 1 ? "[]" : $"[{string.Join(", ", statuses)}]";
     }
 
     private string GetObjNamesString()

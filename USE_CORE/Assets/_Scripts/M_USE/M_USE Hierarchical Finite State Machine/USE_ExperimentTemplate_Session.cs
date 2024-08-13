@@ -581,7 +581,6 @@ namespace USE_ExperimentTemplate_Session
                         gridItem.transform.SetParent(TaskButtonsContainer.transform);
                         gridItem.transform.localPosition = Vector3.zero;
                         gridItem.transform.localScale = Vector3.one;
-                        gridItem.transform.eulerAngles = Camera.main.transform.eulerAngles;
                         gridList.Add(gridItem);
                     }
                 }
@@ -615,8 +614,6 @@ namespace USE_ExperimentTemplate_Session
                         taskButtonGO.transform.SetParent(TaskButtonsContainer.transform);
                         taskButtonGO.transform.localPosition = Vector3.zero;
                         taskButtonGO.transform.localScale = Vector3.one;
-                        //This evens out the icons in relation to the camera so they appear straight
-                        taskButtonGO.transform.eulerAngles = Camera.main.transform.eulerAngles;
                     }
 
                     string taskFolderPath = GetConfigFolderPath(configName);
@@ -1001,7 +998,6 @@ namespace USE_ExperimentTemplate_Session
             SessionSummaryGO.transform.SetParent(Session.TaskSelectionCanvasGO.transform);
             SessionSummaryGO.transform.localPosition = Vector3.zero;
             SessionSummaryGO.transform.localScale = Vector3.one;
-            SessionSummaryGO.transform.eulerAngles = Camera.main.transform.eulerAngles;
 
             if (tasks != null)
                 SessionSummaryController.CreateTaskSummaryGridItems(tasks);

@@ -246,6 +246,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+    //Helper Method:
     private void OnDestroy()
     {
         if(ObjManager != null)

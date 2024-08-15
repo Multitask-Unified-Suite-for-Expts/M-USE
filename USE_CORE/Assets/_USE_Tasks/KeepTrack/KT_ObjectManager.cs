@@ -233,7 +233,7 @@ public class KT_Object : MonoBehaviour
     //From Object Config:
     public int Index;
     public string ObjectName;
-    public float OpenAngle; //90 or 75 as of now
+    public float OpenAngle;
     public int ClosedLineThickness;
     public float MinAnimGap;
     public bool IsTarget;
@@ -249,8 +249,8 @@ public class KT_Object : MonoBehaviour
     public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
-
     public float ActivateDelay;
+    public Vector2[] MouthAngles;
 
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
@@ -298,6 +298,7 @@ public class KT_Object : MonoBehaviour
         SliderChange = configValue.SliderChange;
         AngleRanges = configValue.AngleRanges;
         NumDestWithoutBigTurn = configValue.NumDestWithoutBigTurn;
+        MouthAngles = configValue.MouthAngles;
 
         ActivateDelay = configValue.ActivateDelay;
 
@@ -320,7 +321,6 @@ public class KT_Object : MonoBehaviour
         PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
         PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
         PacmanDrawer.DrawMouth(OpenAngle);
-
     }
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
@@ -337,10 +337,6 @@ public class KT_Object : MonoBehaviour
             randomFloats.Add(randomValue);
         }
         randomFloats.Sort();
-
-        //if (IsTarget)
-        //    foreach (var num in randomFloats)
-        //        Debug.LogWarning("INTERVAL: " + num);
 
         return randomFloats;
     }
@@ -396,19 +392,32 @@ public class KT_Object : MonoBehaviour
         }
     }
 
+    private float SetOpenAngle()
+    {
+        if (MouthAngles == null || MouthAngles.Count() < 1)
+            Debug.LogError("MOUTH ANGLES iS NULL OR EMPTY!");
+
+        float randomValue = Random.value;
+        float cumulative = 0f;
+
+        foreach (Vector2 angleProb in MouthAngles)
+        {
+            cumulative += angleProb.y;
+            if (randomValue <= cumulative)
+                return angleProb.x;
+        }
+        return MouthAngles[MouthAngles.Length - 1].x; //If somehow no angle was selected(due to precision issues), return the last angle as a fallback
+    }
+
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-
         Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
-
         gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
-
         CurrentAnimationStatus = AnimationStatus.Closed;
-
         yield return new WaitForSeconds(CloseDuration);
-        gameObject.GetComponent<PacmanDrawer>().DrawMouth(OpenAngle);
-
+        float openAngle = SetOpenAngle();
+        gameObject.GetComponent<PacmanDrawer>().DrawMouth(openAngle);
         CurrentAnimationStatus = AnimationStatus.Open;
     }
 
@@ -627,8 +636,9 @@ public class KT_Object_ConfigValues
     public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
-
     public float ActivateDelay;
+    public Vector2[] MouthAngles;
+
 
 }
 

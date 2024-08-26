@@ -53,7 +53,7 @@ public class CircleHalo : MonoBehaviour
         InstantiatedCircleHaloGO.SetActive(true);
         if (use2D)
         {
-            Vector3 pos3d = gameObj.transform.root.transform.position;
+            Vector3 pos3d = gameObj.transform.position;
             Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth.Value));
             InstantiatedCircleHaloGO.transform.position = worldPos;

@@ -109,9 +109,13 @@ public class HaloFBController : MonoBehaviour
             NegativeCircleHalos.Add(circleHalo);
 
             if (depth == null)
+            {
                 StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, false, particleHalo?.GetParticleEffectDuration(), destroyTime, null));
+            }
             else
+            {
                 StartCoroutine(circleHalo.CreateCircleHalo("negative", gameObj, true, particleHalo?.GetParticleEffectDuration(), destroyTime, depth.Value));
+            }
 
         }
 

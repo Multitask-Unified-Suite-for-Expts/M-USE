@@ -267,6 +267,8 @@ public class KT_Object : MonoBehaviour
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
 
+    public float CurrentMouthAngle;
+
     public enum AnimationStatus { Open, Closed };
     public AnimationStatus CurrentAnimationStatus = AnimationStatus.Open; //start as closed
 
@@ -392,7 +394,7 @@ public class KT_Object : MonoBehaviour
         }
     }
 
-    private float SetOpenAngle()
+    private void SetCurrentOpenAngle()
     {
         if (MouthAngles == null || MouthAngles.Count() < 1)
             Debug.LogError("MOUTH ANGLES iS NULL OR EMPTY!");
@@ -404,9 +406,12 @@ public class KT_Object : MonoBehaviour
         {
             cumulative += angleProb.y;
             if (randomValue <= cumulative)
-                return angleProb.x;
+            {
+                CurrentMouthAngle = angleProb.x;
+                return;
+            }
         }
-        return MouthAngles[MouthAngles.Length - 1].x; //If somehow no angle was selected(due to precision issues), return the last angle as a fallback
+        CurrentMouthAngle = MouthAngles[MouthAngles.Length - 1].x; //If somehow no angle was selected(due to precision issues), return the last angle as a fallback
     }
 
     private IEnumerator AnimationCoroutine()
@@ -416,8 +421,8 @@ public class KT_Object : MonoBehaviour
         gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
         CurrentAnimationStatus = AnimationStatus.Closed;
         yield return new WaitForSeconds(CloseDuration);
-        float openAngle = SetOpenAngle();
-        gameObject.GetComponent<PacmanDrawer>().DrawMouth(openAngle);
+        SetCurrentOpenAngle();
+        gameObject.GetComponent<PacmanDrawer>().DrawMouth(CurrentMouthAngle);
         CurrentAnimationStatus = AnimationStatus.Open;
     }
 

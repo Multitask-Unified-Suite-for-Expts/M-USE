@@ -374,10 +374,27 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
         FrameData.AddDatum("ObjectNames", () => GetObjNamesString());
         FrameData.AddDatum("ObjectPositions", () => GetObjPositionsString());
-
         FrameData.AddDatum("ObjectAnimStatus", () => GetObjAnimStatus());
-
+        FrameData.AddDatum("ObjectMouthAngles", () => GetMouthAnglesString());
     }
+
+    private string GetMouthAnglesString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+
+        List<string> angles = new List<string>();
+
+        foreach(KT_Object obj in TrialObjects)
+        {
+            if(obj != null && obj.gameObject.activeInHierarchy)
+            {
+                angles.Add(obj.CurrentMouthAngle.ToString());
+            }
+        }
+        return angles.Count < 1 ? "[]" : $"[{string.Join(", ", angles)}]";
+    }
+
 
     private string GetObjAnimStatus()
     {

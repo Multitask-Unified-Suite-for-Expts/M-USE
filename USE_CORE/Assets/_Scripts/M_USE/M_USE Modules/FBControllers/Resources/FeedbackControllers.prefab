@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3953842124438570051}
   - component: {fileID: 6580703731986309559}
   - component: {fileID: -7043470597752192310}
+  - component: {fileID: 8571750412147170170}
   m_Layer: 0
   m_Name: FeedbackControllers
   m_TagString: Untagged
@@ -103,7 +104,6 @@ MonoBehaviour:
     type: 3}
   NegativeParticleHaloPrefab: {fileID: 6565023332562688939, guid: 44215ceaa6d78cc4d89d11e7efcbaec5,
     type: 3}
-  IsFlashing: 0
 --- !u!114 &3953842124438570051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,3 +167,17 @@ MonoBehaviour:
   FeedbackDuration: 0.3
   FeedbackOn: 0
   TouchFbEnabled: 0
+--- !u!114 &8571750412147170170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3175057839943392719}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 974d74f6126eb45bba6e940809277761, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaskSprite: {fileID: 21300000, guid: b0f6295723fcd9545a3cd7ad2864853b, type: 3}
+  TaskMainCamera: {fileID: 0}

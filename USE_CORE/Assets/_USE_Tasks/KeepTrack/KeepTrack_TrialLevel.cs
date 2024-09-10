@@ -43,7 +43,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
 
-    private readonly float HaloDepth = 10f;
+    private float HaloDepth = 15f;
     private float HaloDuration = .15f;
 
     List<KT_Object> TrialObjects;
@@ -168,8 +168,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             {
                 if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
                 {
-                    HaloFBController.SetParticleHaloSize(.5f);
-                    HaloFBController.SetCircleHaloSize(.01f * ChosenObject.Size);
+                    //HaloDepth = .1f * ChosenObject.Size;
 
                     if (ChosenObject.IsTarget)
                     {

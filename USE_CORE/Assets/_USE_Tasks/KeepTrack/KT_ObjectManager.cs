@@ -224,6 +224,8 @@ public class KT_ObjectManager : MonoBehaviour
 
 }
 
+
+
 public class KT_Object : MonoBehaviour
 {
     public KT_ObjectManager ObjManager;

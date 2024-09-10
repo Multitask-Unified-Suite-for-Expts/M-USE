@@ -382,7 +382,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (!StimIsChosen)
                 return;
-            
+
             int? depth = Session.Using2DStim ? 10 : (int?)null;
 
             if (GotTrialCorrect)
@@ -686,8 +686,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TokenFBController.SetFlashingTime(1f);
         HaloFBController.SetPositiveHaloColor(Color.yellow);
         HaloFBController.SetNegativeHaloColor(Color.gray);
-        HaloFBController.SetParticleHaloSize(.65f);
-        //HaloFBController.SetCircleHaloSize(1f);
         HaloFBController.SetCircleHaloIntensity(1.5f);
     }
 

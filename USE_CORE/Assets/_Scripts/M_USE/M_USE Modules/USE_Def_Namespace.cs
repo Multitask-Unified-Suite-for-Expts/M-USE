@@ -483,6 +483,12 @@ namespace USE_Def_Namespace
         public bool CircleHaloActive = true;
 
         /// <summary>
+        /// MaskValues for the block. [TrialNum, MaskNum, Transparency]
+        /// </summary>
+        public Vector3[] MaskValues;
+
+
+        /// <summary>
         /// Generates trial definitions based on block definitions.
         /// </summary>
         public virtual void GenerateTrialDefsFromBlockDef()
@@ -631,6 +637,7 @@ namespace USE_Def_Namespace
         /// Whether or not the circle halo will be created after a selection is made
         /// </summary>
         public bool CircleHaloActive = true;
+
 
         public int DifficultyLevel;
         public int posStep;

@@ -11,6 +11,7 @@ public class ParticleHalo : MonoBehaviour
 
     private float ParticleEffectDuration;
 
+
     public void Initialize(GameObject posParticleHaloPrefab, GameObject negParticleHaloPrefab)
     {
         PositiveParticleHaloPrefab = posParticleHaloPrefab;
@@ -18,13 +19,13 @@ public class ParticleHalo : MonoBehaviour
         ParticleEffectDuration = PositiveParticleHaloPrefab.GetComponent<ParticleSystem>().main.duration;
     }
 
-    public void ShowParticleHalo(string feedbackType, GameObject gameObj)
+    public void ShowParticleHalo(string feedbackType, GameObject go)
     {
         GameObject particlePrefab = (feedbackType.ToLower() == "positive") ? PositiveParticleHaloPrefab : NegativeParticleHaloPrefab;
 
-        GameObject rootObj = gameObj.transform.root.gameObject;
+        GameObject rootObj = go.transform.root.gameObject;
         InstantiatedParticleHaloGO = Instantiate(particlePrefab, rootObj.transform);
-
+        InstantiatedParticleHaloGO.transform.localScale = go.transform.localScale;
         // Position the haloPrefab behind the game object
         float distanceBehind = 1.5f; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
@@ -36,14 +37,16 @@ public class ParticleHalo : MonoBehaviour
         Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration);
     }
 
-    public void ShowParticleHalo2D(string feedbackType, GameObject gameObj, float depth = 10)
+    public void ShowParticleHalo2D(string feedbackType, GameObject go, float depth = 10)
     {
         GameObject particlePrefab = (feedbackType.ToLower() == "positive") ? PositiveParticleHaloPrefab : NegativeParticleHaloPrefab;
 
         InstantiatedParticleHaloGO = Instantiate(particlePrefab, null);
-        Vector2 pos2d = Camera.main.WorldToScreenPoint(gameObj.transform.position);
+        Vector2 pos2d = Camera.main.WorldToScreenPoint(go.transform.position);
         Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth));
         InstantiatedParticleHaloGO.transform.position = worldPos;
+        InstantiatedParticleHaloGO.transform.localScale = InstantiatedParticleHaloGO.transform.localScale = go.transform.localScale * .5f;
+
 
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);

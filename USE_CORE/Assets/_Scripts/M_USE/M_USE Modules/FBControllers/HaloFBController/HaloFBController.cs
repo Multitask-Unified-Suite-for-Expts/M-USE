@@ -83,7 +83,7 @@ public class HaloFBController : MonoBehaviour
             Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
     }
-    public void ShowNegative(GameObject gameObj,  bool particleHaloActive = false, bool circleHaloActive = true, float? destroyTime = null, float? depth = null)
+    public void ShowNegative(GameObject gameObj, bool particleHaloActive = false, bool circleHaloActive = true, float? destroyTime = null, float? depth = null)
     {
         state = State.Negative;
 
@@ -183,12 +183,6 @@ public class HaloFBController : MonoBehaviour
     }
 
 
-    public void SetCircleHaloSize(float size)
-    {
-        PositiveCircleHaloPrefab.transform.localScale = new Vector3(size, size, size);
-        NegativeCircleHaloPrefab.transform.localScale = new Vector3(size, size, size);
-    }
-
     public void SetCircleHaloIntensity(float newIntensity)
     {
         PositiveCircleHaloPrefab.GetComponent<Light>().intensity = newIntensity;
@@ -209,11 +203,7 @@ public class HaloFBController : MonoBehaviour
     {
         NegativeCircleHaloPrefab.GetComponent<Light>().color = color;
     }
-    public void SetParticleHaloSize(float size)
-    {
-        PositiveParticleHaloPrefab.transform.localScale = new Vector3(size, size, size);
-        NegativeParticleHaloPrefab.transform.localScale = new Vector3(size, size, size);
-    }
+
     public void SetPositiveParticleHaloColor(Color color)
     {
         var mainModule = PositiveParticleHaloPrefab.GetComponent<ParticleSystem>().main;

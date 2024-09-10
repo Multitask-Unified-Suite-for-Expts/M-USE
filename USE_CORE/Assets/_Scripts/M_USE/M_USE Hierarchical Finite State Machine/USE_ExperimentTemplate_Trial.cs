@@ -99,7 +99,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public HaloFBController HaloFBController;
         [HideInInspector] public TokenFBController TokenFBController;
         [HideInInspector] public SliderFBController SliderFBController;
-        
+        [HideInInspector] public MaskController MaskController;
 
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
         
@@ -119,6 +119,9 @@ namespace USE_ExperimentTemplate_Trial
         public bool TrialFilesLoaded;
 
         public int CurrentTrialDefIndex;
+
+        //Needs to be passed in individually by each task inside their taskLevel script
+        [HideInInspector] public Vector3[] MaskValues_Block;
 
 
 

@@ -60,15 +60,20 @@ namespace USE_StimulusManagement
                 }
 				else if (Session.UsingLocalConfigs)
 				{
-					path = $"{StimFolderPath}/{FileName}";
+                    List<string> filenames = RecursiveFileFinder.FindFile(StimFolderPath, FileName, StimExtension);
+					if (filenames.Count < 1)
+						Debug.LogError("COULDNT FIND THE STIM!");
+					else
+						path = filenames[0];
 				}
 				else if (Session.UsingServerConfigs)
 				{
 					path = $"{ServerManager.ServerURL}/{ServerManager.ServerStimFolderPath}/{FileName}";
                 }
 				else
+				{
 					Debug.LogError("NOT USING DEFAULT, LOCAL, OR SERVER CONFIGS WHILE TRYING TO GET STIMFILEPATH!");
-
+				}
 
 				return path;
 			}

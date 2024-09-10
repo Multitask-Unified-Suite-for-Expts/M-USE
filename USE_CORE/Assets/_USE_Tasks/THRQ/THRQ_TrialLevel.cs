@@ -137,9 +137,6 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
         SetupTrial.AddDefaultTerminationMethod(() =>
         {
-            HaloFBController.SetParticleHaloSize(CurrentTrial.ObjectSize * .35f);
-
-            //SEEMA HOW DO WE DESTROY PARTICLE HALOS NOW??
             //HaloFBController.DestroyHalos();
         });
 

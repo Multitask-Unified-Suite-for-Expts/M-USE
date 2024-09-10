@@ -27,7 +27,10 @@ public class CircleHalo : MonoBehaviour
         for (int i = 0; i < numFlashes; i++)
         {
             if(InstantiatedCircleHaloGO == null)
+            {
                 InstantiatedCircleHaloGO = Instantiate(PositiveCircleHaloPrefab, go.transform.root.transform);
+                InstantiatedCircleHaloGO.transform.localScale = go.transform.localScale * .5f;
+            }
             else    
                 InstantiatedCircleHaloGO.SetActive(true);
             
@@ -40,27 +43,32 @@ public class CircleHalo : MonoBehaviour
 
     }
 
-    public IEnumerator CreateCircleHalo(string feedbackType, GameObject gameObj, bool use2D, float? particleEffectDuration, float? circleEffectDuration = null, float? depth = null)
+    public IEnumerator CreateCircleHalo(string feedbackType, GameObject go, bool use2D, float? particleEffectDuration, float? circleEffectDuration = null, float? depth = null)
     {
         if(particleEffectDuration != null)
             yield return new WaitForSeconds((float)particleEffectDuration * .5f);
 
         GameObject circleHaloPrefab = (feedbackType.ToLower() == "positive") ? PositiveCircleHaloPrefab : NegativeCircleHaloPrefab;
 
-        if(InstantiatedCircleHaloGO == null)
-            InstantiatedCircleHaloGO = Instantiate(circleHaloPrefab, gameObj.transform.root.transform);
+        if (InstantiatedCircleHaloGO == null)
+        {
+            InstantiatedCircleHaloGO = Instantiate(circleHaloPrefab, go.transform.root.transform);
+            InstantiatedCircleHaloGO.transform.localScale = go.transform.localScale;
+
+        }
 
         InstantiatedCircleHaloGO.SetActive(true);
+
         if (use2D)
         {
-            Vector3 pos3d = gameObj.transform.position;
+            Vector3 pos3d = go.transform.position;
             Vector2 pos2d = Camera.main.WorldToScreenPoint(pos3d);
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(new Vector3(pos2d.x, pos2d.y, depth.Value));
             InstantiatedCircleHaloGO.transform.position = worldPos;
         }
         else
         {
-            InstantiatedCircleHaloGO.transform.SetParent(gameObj.transform.root.transform);
+            InstantiatedCircleHaloGO.transform.SetParent(go.transform.root.transform);
         }
 
         if (circleEffectDuration != null)

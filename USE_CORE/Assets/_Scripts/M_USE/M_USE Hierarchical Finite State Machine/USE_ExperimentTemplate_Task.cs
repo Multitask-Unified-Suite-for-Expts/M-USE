@@ -230,19 +230,23 @@ namespace USE_ExperimentTemplate_Task
 
                 Session.InputManager.SetActive(true);
 
-                if (Session.SessionDef.IsHuman)
+
+                GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
+                if(taskCanvasGO != null)
                 {
-                    GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
-                    if (taskCanvasGO != null)
+                    TrialLevel.MaskController.Canvas = taskCanvasGO.GetComponent<Canvas>();
+
+                    if(Session.SessionDef.IsHuman)
                     {
                         if (taskCanvasGO.TryGetComponent(out Canvas taskCanvas))
                             Session.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
                         else
                             Debug.LogWarning("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
                     }
-                    else
-                        Debug.LogWarning("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
                 }
+                else
+                    Debug.LogWarning("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");
+
 
                 if (Session.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
@@ -800,16 +804,16 @@ namespace USE_ExperimentTemplate_Task
         protected virtual void DefineExternalStims()
         {
             GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
+            if (taskCanvasGO == null)
+                Debug.LogError("COULDNT FIND A CANVAS CALLED: " + TaskName + "_Canvas");
 
             foreach (StimDef sd in ExternalStims.stimDefs)
             {
                 sd.StimFolderPath = TaskDef.ExternalStimFolderPath;
                 sd.StimScale = TaskDef.ExternalStimScale;
                 sd.CanvasGameObject = taskCanvasGO;
-
                 sd.FileName = sd.FileName.Trim();
                 sd.StimExtension = "." + sd.FileName.Split('.')[1];
-                //sd.StimExtension = "." + sd.FileName.Split(".")[1];
             }
         }
 

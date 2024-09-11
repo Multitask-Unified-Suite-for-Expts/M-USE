@@ -32,6 +32,7 @@ namespace WhatWhenWhere_Namespace
 {
     public class WhatWhenWhere_BlockDef : BlockDef
     {
+
         // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
         public int ErrorThreshold;
@@ -43,7 +44,6 @@ namespace WhatWhenWhere_Namespace
         // Configuration of Stimuli
         public bool RandomizedLocations;
         public bool LeaveFeedbackOn;
-        public bool ParticleHaloActive;
 
         // Slider Variables
         public int[] SliderGain;
@@ -122,8 +122,6 @@ namespace WhatWhenWhere_Namespace
         public bool GuidedSequenceLearning;
         public int MaxCorrectTrials;
         public int? MaxTrialErrors;
-
-        public bool ParticleHaloActive;
     }
 
     public class WhatWhenWhere_StimDef : StimDef

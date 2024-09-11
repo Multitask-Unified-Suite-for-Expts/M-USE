@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
 using USE_StimulusManagement;
@@ -41,11 +40,24 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 
     private string selectionClassification;
 
+
+    [HideInInspector] public int NumCorrectChoicesInTrial;
+
+    public void ResetNumSelected()
+    {
+        NumCorrectChoicesInTrial = 0;
+    }
+
+
     public void ManageSelection()
     {
+
+
         correctSelection = selectedSD.IsCurrentTarget;
         if (correctSelection)
         {
+            NumCorrectChoicesInTrial++;
+
             // could be selection of the next correct object in the sequence OR return to last correctly selected object after an error
             if (!selectedFirstStimInSequence)
                 selectedFirstStimInSequence = true;
@@ -142,7 +154,7 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
             lastErrorStimGO = selectedGO;
 
         selectionClassifications_All.Add(selectionType);
-        UnityEngine.Debug.LogWarning("SELECTION TYPE : " + selectionType);
+        Debug.Log("SELECTION TYPE : " + selectionType);
         return selectionType;
     }
     public void SetSelectedGO(GameObject go)

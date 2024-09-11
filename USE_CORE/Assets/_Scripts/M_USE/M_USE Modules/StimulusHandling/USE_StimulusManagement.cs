@@ -126,8 +126,11 @@ namespace USE_StimulusManagement
 
 		private bool LoadingAsync;
 
+        public GameObject MaskGameObject; //Mask Gameobject for the stim, if instantiated by the MaskController class. 
 
-		public StimDef()
+
+
+        public StimDef()
 		{
 			StimGroups = new Dictionary<string, StimGroup>();
 		}

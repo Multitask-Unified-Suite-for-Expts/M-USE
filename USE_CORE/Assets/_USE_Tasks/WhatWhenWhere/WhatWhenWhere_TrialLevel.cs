@@ -112,7 +112,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
     private float startButtonPresentationDelay;
 
-
+    private Vector3? MaskValues_CurrentTrial;
 
 
     public override void DefineControlLevel()
@@ -136,8 +136,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             SliderFBController.InitializeSlider();
             
-            // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloSize(3);
             HaloFBController.SetCircleHaloIntensity(5);
 
             //if (Session.SessionDef.IsHuman)
@@ -159,6 +157,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            SequenceManager.ResetNumSelected();
+
             if (!variablesLoaded)
             {
                 variablesLoaded = true;
@@ -180,6 +180,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 startButtonPresentationDelay = timeoutDuration.value;
             else
                 startButtonPresentationDelay = startButtonDelay.value;
+
+            //Vector3 val = MaskValues_Block.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
+            //if (val != null)
+            //    MaskValues_CurrentTrial = val;
+            //else
+            //    MaskValues_CurrentTrial = null;
         });
 
         SetupTrial.AddTimer(()=> startButtonPresentationDelay, InitTrial);
@@ -236,6 +242,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                     CreateTextOnExperimenterDisplay();
             }
+
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
@@ -257,7 +264,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
         });
-        ChooseStimulus.SpecifyTermination(()=> choiceMade, SelectionFeedback, () =>
+        ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
             HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
@@ -283,6 +290,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
             else
                 stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
+
+            //Destroy the mask once they click it so that they can see their choice (and the pos/neg halo)
+            //if(selectedSD.MaskGameObject != null)
+            //    Destroy(selectedSD.MaskGameObject);
 
             if (selectionType.ToLower().Contains("correct"))
             {
@@ -319,6 +330,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     
                 }
             }
+
+
+            //if (MaskValues_CurrentTrial != null)
+            //{
+            //    if (SequenceManager.NumCorrectChoicesInTrial > 0 && SequenceManager.NumCorrectChoicesInTrial == MaskValues_CurrentTrial.Value.y - 1)
+            //    {
+            //        List<WhatWhenWhere_StimDef> selectedStims = SequenceManager.GetAllSelectedSDs();
+
+            //        foreach (var stim in searchStims.stimDefs)
+            //        {
+            //            if(!selectedStims.Contains(stim))
+            //                MaskController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+            //        }
+            //    }
+            //}
+
 
 
             SequenceManager.ResetSelectionClassifications();

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UI;
 using USE_ExperimentTemplate_Classes;
 using Random = UnityEngine.Random;
@@ -257,6 +258,7 @@ public class KT_Object : MonoBehaviour
     public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool MoveAroundScreen;
+    public bool ObjectSelected;
     public bool ObjectPaused;
     public float TimeOfPause;
     public GameObject Marker;
@@ -435,6 +437,7 @@ public class KT_Object : MonoBehaviour
             GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
             {
+                ObjectSelected = true;
                 ObjectPaused = true;
                 TimeOfPause = Time.time;
             }
@@ -444,6 +447,11 @@ public class KT_Object : MonoBehaviour
 
         if(ObjectPaused && InputBroker.GetMouseButton(0))
             CurrentCycle.cycleStartTime += Time.deltaTime; //Push the cycle start time back while they're selecting.
+        
+        if (ObjectSelected && InputBroker.GetMouseButtonUp(0))
+        {
+            ObjectSelected = false;
+        }
     }
 
     private void HandleInput()

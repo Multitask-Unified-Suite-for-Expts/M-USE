@@ -7,6 +7,8 @@ using KeepTrack_Namespace;
 using ConfigDynamicUI;
 using System.Linq;
 using System;
+using SelectionTracking;
+using TMPro.SpriteAssetUtilities;
 
 
 public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
@@ -168,7 +170,6 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             {
                 if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
                 {
-                    //HaloDepth = .1f * ChosenObject.Size;
 
                     if (ChosenObject.IsTarget)
                     {
@@ -208,7 +209,6 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                                     TargetSelectionsBeforeFirstAnim_Block++;
                                     CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
                                     Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
-
                                 }
                             }
                         }
@@ -375,6 +375,26 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ObjectPositions", () => GetObjPositionsString());
         FrameData.AddDatum("ObjectAnimStatus", () => GetObjAnimStatus());
         FrameData.AddDatum("ObjectMouthAngles", () => GetMouthAnglesString());
+        FrameData.AddDatum("ObjectSelections", () => GetObjSelectionString());
+    }
+
+    private string GetObjSelectionString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+        
+        List<string> selections = new List<string>();
+        
+        // instead of obj.transform.position, get obj.selectionstatus (add this field in KT_objectmanager!)
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (obj.gameObject.activeInHierarchy)
+                    selections.Add(obj.ObjectSelected.ToString());
+            }
+        }
+        return selections.Count < 1 ? "[]" : $"[{string.Join(", ", selections)}]";
     }
 
     private string GetMouthAnglesString()

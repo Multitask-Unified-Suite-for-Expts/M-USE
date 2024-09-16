@@ -17,12 +17,20 @@ public class MaskController : MonoBehaviour
         Masks = new Dictionary<GameObject, GameObject>();
     }
 
+    public void RemoveMaskFromDict(GameObject searchKey)
+    {
+        if (Masks.ContainsKey(searchKey))
+            Masks.Remove(searchKey);
+    }
+
     public void CreateMask(GameObject targetObject, float transparency)
     {
         if (!Masks.ContainsKey(targetObject))
         {
-            GameObject maskObject = new GameObject("Mask_" + targetObject.name);
-            maskObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+            GameObject maskObject = new GameObject("Mask_" + targetObject.name)
+            {
+                layer = LayerMask.NameToLayer("Ignore Raycast")
+            };
 
             StimDefPointer pointer = targetObject?.GetComponent<StimDefPointer>();
             if (pointer != null)
@@ -84,12 +92,12 @@ public class MaskController : MonoBehaviour
             Masks[targetObject] = maskObject;
         }
         else
-            Debug.LogError("ALREADY HAVE A MASK FOR TARGET OBJECT: " + targetObject.name);
+            Debug.LogWarning("ALREADY HAVE A MASK FOR TARGET OBJECT: " + targetObject.name);
     }
 
 
 
-    public void RemoveMask(GameObject targetObject)
+    public void DestroyMask(GameObject targetObject)
     {
         if (Masks.ContainsKey(targetObject))
         {
@@ -98,7 +106,7 @@ public class MaskController : MonoBehaviour
         }
     }
 
-    public void RemoveAllMasks()
+    public void DestroyAllMasks()
     {
         foreach (var mask in Masks.Values)
         {

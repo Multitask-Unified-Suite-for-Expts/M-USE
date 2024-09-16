@@ -234,7 +234,7 @@ namespace USE_ExperimentTemplate_Task
                 GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
                 if(taskCanvasGO != null)
                 {
-                    TrialLevel.MaskController.Canvas = taskCanvasGO.GetComponent<Canvas>();
+                    TrialLevel.MaskFBController.Canvas = taskCanvasGO.GetComponent<Canvas>();
 
                     if(Session.SessionDef.IsHuman)
                     {

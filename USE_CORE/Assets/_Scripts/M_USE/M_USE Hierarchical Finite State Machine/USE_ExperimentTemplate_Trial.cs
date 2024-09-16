@@ -99,7 +99,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public HaloFBController HaloFBController;
         [HideInInspector] public TokenFBController TokenFBController;
         [HideInInspector] public SliderFBController SliderFBController;
-        [HideInInspector] public MaskController MaskController;
+        [HideInInspector] public MaskController MaskFBController;
 
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
         

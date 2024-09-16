@@ -181,11 +181,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
                 startButtonPresentationDelay = startButtonDelay.value;
 
-            //Vector3 val = MaskValues_Block.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
-            //if (val != null)
-            //    MaskValues_CurrentTrial = val;
-            //else
-            //    MaskValues_CurrentTrial = null;
+            Vector3 val = MaskValues_Block.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
+            if (val != null)
+                MaskValues_CurrentTrial = val;
+            else
+                MaskValues_CurrentTrial = null;
         });
 
         SetupTrial.AddTimer(()=> startButtonPresentationDelay, InitTrial);
@@ -292,8 +292,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
             //Destroy the mask once they click it so that they can see their choice (and the pos/neg halo)
-            //if(selectedSD.MaskGameObject != null)
-            //    Destroy(selectedSD.MaskGameObject);
+            if (selectedSD.MaskGameObject != null)
+            {
+                MaskFBController.RemoveMaskFromDict(selectedSD.MaskGameObject);
+                Destroy(selectedSD.MaskGameObject);
+            }
 
             if (selectionType.ToLower().Contains("correct"))
             {
@@ -331,20 +334,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
+            //Create the masks if neccessary:
+            if (MaskValues_CurrentTrial != null)
+            {
+                if (SequenceManager.NumCorrectChoicesInTrial > 0 && SequenceManager.NumCorrectChoicesInTrial == MaskValues_CurrentTrial.Value.y - 1)
+                {
+                    List<WhatWhenWhere_StimDef> selectedStims = SequenceManager.GetAllSelectedSDs();
 
-            //if (MaskValues_CurrentTrial != null)
-            //{
-            //    if (SequenceManager.NumCorrectChoicesInTrial > 0 && SequenceManager.NumCorrectChoicesInTrial == MaskValues_CurrentTrial.Value.y - 1)
-            //    {
-            //        List<WhatWhenWhere_StimDef> selectedStims = SequenceManager.GetAllSelectedSDs();
-
-            //        foreach (var stim in searchStims.stimDefs)
-            //        {
-            //            if(!selectedStims.Contains(stim))
-            //                MaskController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
-            //        }
-            //    }
-            //}
+                    foreach (var stim in searchStims.stimDefs)
+                    {
+                        if(!selectedStims.Contains(stim))
+                            MaskFBController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                    }
+                }
+            }
 
 
 
@@ -514,6 +517,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     public override void FinishTrialCleanup()
     {
+        MaskFBController.DestroyAllMasks();
+
         if(!Session.WebBuild)
         {
             if (playerViewParent.transform.childCount != 0)

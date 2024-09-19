@@ -589,10 +589,10 @@ namespace USE_ExperimentTemplate_Session
 
                 int count = 0;
 
-                foreach (QueueItem task in tasksInQueue)
+                foreach (QueueItem queueItem in tasksInQueue)
                 {
-                    string configName = task.ConfigName;
-                    string taskName = task.TaskName;
+                    string configName = queueItem.ConfigName;
+                    string taskName = queueItem.Task.TaskName;
 
                     GameObject taskButtonGO;
                     RawImage image;

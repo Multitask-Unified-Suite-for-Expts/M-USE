@@ -115,6 +115,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private Vector3? MaskValues_CurrentTrial;
 
 
+    private bool Masking = false;
+    private int MaskingErrors_Trial;
+
     public override void DefineControlLevel()
     {
         //---------------------------------------DEFINING STATES-----------------------------------------------------------------------
@@ -157,7 +160,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            SequenceManager.ResetNumSelected();
+            SequenceManager.ResetNumCorrectChoices();
 
             if (!variablesLoaded)
             {
@@ -203,7 +206,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //if (Session.SessionDef.IsHuman)
             //    Session.TimerController.SetDuration(selectObjectDuration.value);
 
-
             DelayDuration = chooseStimOnsetDelay.value;
             if (CurrentTrialDef.GuidedSequenceLearning)
                 StateAfterDelay = FlashNextCorrectStim;
@@ -241,6 +243,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
                     CreateTextOnExperimenterDisplay();
+            }
+
+
+            //Create the masks if neccessary:
+            if (MaskValues_CurrentTrial != null)
+            {
+                if (SequenceManager.NumCorrectChoicesInTrial > 0 && SequenceManager.NumCorrectChoicesInTrial >= MaskValues_CurrentTrial.Value.y - 1)
+                {
+                    foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
+                    {
+                        if (!stim.WasCorrectlyChosen && stim.MaskGameObject == null)
+                        {
+                            MaskFBController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                        }
+                    };
+
+                    foreach (WhatWhenWhere_StimDef distractorStim in distractorStims.stimDefs)
+                    {
+                        MaskFBController.CreateMask(distractorStim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                    }
+                }
             }
 
         });
@@ -291,15 +314,19 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
                 stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
 
+
             //Destroy the mask once they click it so that they can see their choice (and the pos/neg halo)
             if (selectedSD.MaskGameObject != null)
             {
-                MaskFBController.RemoveMaskFromDict(selectedSD.MaskGameObject);
-                Destroy(selectedSD.MaskGameObject);
+                MaskFBController.DestroyMask(selectedSD.MaskGameObject);
             }
+
 
             if (selectionType.ToLower().Contains("correct"))
             {
+                //Set the stim to ChosenCorrectly:
+                selectedSD.WasCorrectlyChosen = true;
+
                 AudioFBController.Play("Positive");
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrialDef.LeaveFeedbackOn ?  (float?)null : (CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
 
@@ -334,22 +361,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            //Create the masks if neccessary:
-            if (MaskValues_CurrentTrial != null)
-            {
-                if (SequenceManager.NumCorrectChoicesInTrial > 0 && SequenceManager.NumCorrectChoicesInTrial == MaskValues_CurrentTrial.Value.y - 1)
-                {
-                    List<WhatWhenWhere_StimDef> selectedStims = SequenceManager.GetAllSelectedSDs();
-
-                    foreach (var stim in searchStims.stimDefs)
-                    {
-                        if(!selectedStims.Contains(stim))
-                            MaskFBController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
-                    }
-                }
-            }
-
-
 
             SequenceManager.ResetSelectionClassifications();
         });
@@ -361,14 +372,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (!CurrentTrialDef.LeaveFeedbackOn) 
                 HaloFBController.DestroyAllHalos();
             
-
             // If the sequence has been completed, send to slider feedback state
             if (SequenceManager.GetFinishedSequence())
                 StateAfterDelay = SliderFlashingFeedback;
             else
             {
                 // If there is a MaxTrialErrors defined in the BlockDef and the number of errors in the trial exceed that value, send to ITI
-                if(CurrentTrialDef.MaxTrialErrors != null && totalErrors_InTrial >= CurrentTrialDef.MaxTrialErrors)
+                if((Masking && MaskingErrors_Trial -1 == CurrentTrialDef.MaskErrorsAllowed_Trial) || (CurrentTrialDef.MaxTrialErrors != null && totalErrors_InTrial >= CurrentTrialDef.MaxTrialErrors))
                 {
                     StateAfterDelay = ITI;
                 }
@@ -397,7 +407,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            
             UpdateExperimenterDisplaySummaryStrings();
         });
         SliderFlashingFeedback.AddSpecificInitializationMethod(() =>
@@ -409,7 +418,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
 
             HandleCompletedSequence();
-           
         });
         SliderFlashingFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
@@ -596,8 +604,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         foreach (var sd in distractorStims.stimDefs)
             AdjustQuaddleBodyRoughness(0, sd.StimGameObject);
     }
+
     public override void ResetTrialVariables()
     {
+        MaskingErrors_Trial = 0;
+        Masking = false;
         searchDurationStartTime = 0;
         sliderGainSteps = 0;
         sliderLossSteps = 0;

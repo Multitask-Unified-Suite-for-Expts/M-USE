@@ -43,7 +43,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 
     [HideInInspector] public int NumCorrectChoicesInTrial;
 
-    public void ResetNumSelected()
+
+    public void ResetNumCorrectChoices()
     {
         NumCorrectChoicesInTrial = 0;
     }
@@ -51,9 +52,8 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 
     public void ManageSelection()
     {
-
-
         correctSelection = selectedSD.IsCurrentTarget;
+
         if (correctSelection)
         {
             NumCorrectChoicesInTrial++;

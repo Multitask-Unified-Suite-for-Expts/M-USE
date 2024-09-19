@@ -57,7 +57,10 @@ namespace WhatWhenWhere_Namespace
         public float MinSimilarity;
         public float MeanSimilarity;
 
-        
+        public int MaskErrorsAllowed_Trial;
+
+
+
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -99,7 +102,7 @@ namespace WhatWhenWhere_Namespace
                 td.MaxTrialErrors = MaxTrialErrors;
                 td.GuidedSequenceLearning = GuidedSequenceLearning;
                 td.ParticleHaloActive = ParticleHaloActive;
-
+                td.MaskErrorsAllowed_Trial = MaskErrorsAllowed_Trial;
                 TrialDefs.Add(td);
             }
         }
@@ -122,12 +125,16 @@ namespace WhatWhenWhere_Namespace
         public bool GuidedSequenceLearning;
         public int MaxCorrectTrials;
         public int? MaxTrialErrors;
+
+        public int MaskErrorsAllowed_Trial;
+
     }
 
     public class WhatWhenWhere_StimDef : StimDef
     {
         public bool IsCurrentTarget;
         public bool IsDistractor;
+        public bool WasCorrectlyChosen;
     }
 
     public class WhatWhenWhere_TaskDef : TaskDef

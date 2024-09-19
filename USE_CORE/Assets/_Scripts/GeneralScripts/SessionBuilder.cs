@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
+using System.Linq;
 
 
 public class SessionBuilder : MonoBehaviour
@@ -107,15 +108,14 @@ public class SessionBuilder : MonoBehaviour
     {
         if(QueueItems != null)
         {
-            foreach(QueueItem task in QueueItems)
+            foreach(QueueItem queueItem in QueueItems)
             {
-                if (task.ConfigName == configName)
-                    return task.TaskName;
+                if (queueItem.ConfigName == configName)
+                    return queueItem.Task.TaskName;
             }
         }
         return null;
     }
-
 
     public List<QueueItem> GetQueueItems()
     {
@@ -207,7 +207,7 @@ public class SessionBuilder : MonoBehaviour
         try
         {
             RunButton = transform.Find(RunButtonName).gameObject;
-            RunButton.AddComponent<Button>().onClick.AddListener(OnDoneButtonClicked);
+            RunButton.AddComponent<Button>().onClick.AddListener(OnRunButtonClicked);
 
             ExpDisplay_TaskOrder_GridParent = taskOrderGridParent;
         }
@@ -222,8 +222,9 @@ public class SessionBuilder : MonoBehaviour
 
     }
 
-    private void OnDoneButtonClicked()
+    private void OnRunButtonClicked()
     {
+        AddIconsToExpDisplay();
         Session.SessionAudioController.PlayAudioClip("ClickedButton");
         RunButtonClicked = true;
     }
@@ -388,11 +389,9 @@ public class SessionBuilder : MonoBehaviour
             item.SetActive(true);
 
             QueueItem queueComponent = item.AddComponent<QueueItem>();
-            queueComponent.SetupItem(taskObject.TaskName, configName, QueueItems.Count + 1);
+            queueComponent.SetupItem(taskObject, configName, QueueItems.Count + 1);
             QueueItems.Add(queueComponent);
             taskObject.AddToQueueList(queueComponent);
-
-            AddIconToExpDisplay(taskObject);
         }
         catch(Exception e)
         {
@@ -400,10 +399,20 @@ public class SessionBuilder : MonoBehaviour
         }
     }
 
+
+    public void AddIconsToExpDisplay()
+    {
+        List<QueueItem> sortedItems = QueueItems.OrderBy(obj => obj.SpotInQueue).ToList();
+        foreach(var item in sortedItems)
+        {
+            AddIconToExpDisplay(item.Task);
+        }
+    }
+
     public void AddIconToExpDisplay(TaskObject taskObject)
     {
         GameObject item = Instantiate(Resources.Load<GameObject>("TaskOrder_GridItem"));
-        item.name = taskObject.TaskInitials;
+        item.name = taskObject.TaskInitials + "_MEOW";
         item.transform.SetParent(ExpDisplay_TaskOrder_GridParent.transform);
         item.transform.localScale = Vector3.one;
         item.transform.localPosition = Vector3.one;
@@ -492,14 +501,14 @@ public class SessionBuilder : MonoBehaviour
 
 public class QueueItem : MonoBehaviour
 {
-    public string TaskName;
+    public TaskObject Task; //task it relates to
     public string ConfigName;
     public int SpotInQueue;
     public TextMeshProUGUI Index_Text;
 
-    public void SetupItem(string taskName, string configName, int queueIndex)
+    public void SetupItem(TaskObject task, string configName, int queueIndex)
     {
-        TaskName = taskName;
+        Task = task;
         ConfigName = configName;
         SpotInQueue = queueIndex;
 

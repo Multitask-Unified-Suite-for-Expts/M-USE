@@ -376,6 +376,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("ObjectAnimStatus", () => GetObjAnimStatus());
         FrameData.AddDatum("ObjectMouthAngles", () => GetMouthAnglesString());
         FrameData.AddDatum("ObjectSelections", () => GetObjSelectionString());
+        FrameData.AddDatum("SelectionCorrectness", () => GetSelectionCorrectnessString());
     }
 
     private string GetObjSelectionString()
@@ -395,6 +396,44 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             }
         }
         return selections.Count < 1 ? "[]" : $"[{string.Join(", ", selections)}]";
+    }
+    
+    private string GetSelectionCorrectnessString()
+    {
+        if (TrialObjects == null)
+            return "[]";
+        
+        List<string> correctnesses = new List<string>();
+        
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (obj.gameObject.activeInHierarchy)
+                {
+                    if (!obj.ObjectSelected)
+                        correctnesses.Add("NotSelected");
+                    else
+                    {
+                        if (obj.IsTarget)
+                        {
+                            if (obj.WithinDuration)
+                                correctnesses.Add("CorrectSelection");
+                            else
+                                correctnesses.Add("Target_OutOfDuration");
+                        }
+                        else
+                        {
+                            if (obj.WithinDuration)
+                                correctnesses.Add("Distractor_InDuration");
+                            else
+                                correctnesses.Add("Distractor_OutOfDuration");
+                        }
+                    }
+                }
+            }
+        }
+        return correctnesses.Count < 1 ? "[]" : $"[{string.Join(", ", correctnesses)}]";
     }
 
     private string GetMouthAnglesString()

@@ -234,15 +234,23 @@ namespace USE_ExperimentTemplate_Task
                 GameObject taskCanvasGO = GameObject.Find(TaskName + "_Canvas");
                 if(taskCanvasGO != null)
                 {
-                    TrialLevel.MaskFBController.Canvas = taskCanvasGO.GetComponent<Canvas>();
+                    Canvas canvas = taskCanvasGO.GetComponent<Canvas>();
 
-                    if(Session.SessionDef.IsHuman)
+                    if(canvas != null)
                     {
-                        if (taskCanvasGO.TryGetComponent(out Canvas taskCanvas))
-                            Session.HumanStartPanel.CreateHumanStartPanel(FrameData, taskCanvas, TaskName);
-                        else
-                            Debug.LogWarning("NOT CREATING HUMAN-START-PANEL BECAUSE NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
+                        TrialLevel.DialogueController.Canvas = canvas;
+                        TrialLevel.MaskFBController.Canvas = canvas;
+
+                        if(Session.SessionDef.IsHuman)
+                        {
+                            Session.HumanStartPanel.CreateHumanStartPanel(FrameData, canvas, TaskName);
+                        }
+
                     }
+                    else
+                        Debug.LogWarning("NO CANVAS COMPONENT WAS FOUND ON GAMEOBJECT " + TaskName + "_Canvas");
+
+
                 }
                 else
                     Debug.LogWarning("UNABLE TO FIND A GAMEOBJECT NAMED: " + TaskName + "_Canvas");

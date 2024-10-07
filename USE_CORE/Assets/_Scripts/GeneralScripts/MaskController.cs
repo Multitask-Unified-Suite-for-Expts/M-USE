@@ -1,20 +1,54 @@
 using System.Collections.Generic;
 using UnityEngine;
-using USE_Data;
+
 
 public class MaskController : MonoBehaviour
 {
-    private List<GameObject> MaskList;
+    private List<Mask> Masks;
     public Sprite MaskSprite; //Assign in inspector
     [HideInInspector] public Canvas Canvas;
 
 
 
-    public void Init(DataController frameData)
+    public void Init()
     {
-        //frameData.AddDatum("HeldTooLong", () => Error_Dict["HeldTooLong"]);
+        Masks = new List<Mask>();
+    }
 
-        MaskList = new List<GameObject>();
+    public string GetMaskVisibilityString()
+    {
+        if (Masks == null)
+            return "[]";
+
+        List<string> visibilities = new List<string>();
+
+        if(Masks.Count > 0)
+        {
+            foreach(Mask mask in Masks)
+            {
+                if(mask.gameObject.activeInHierarchy)
+                    visibilities.Add("MaskActive_" + mask.TargetGO.name);
+            }
+        }
+        return visibilities.Count < 1 ? "[]" : $"[{string.Join(", ", visibilities)}]";
+    }
+
+    public string GetMaskPosString()
+    {
+        if (Masks == null)
+            return "[]";
+
+        List<string> positions = new List<string>();
+
+        if (Masks.Count > 0)
+        {
+            foreach (Mask mask in Masks)
+            {
+                if (mask.gameObject.activeInHierarchy)
+                    positions.Add(mask.gameObject.transform.position.ToString());
+            }
+        }
+        return positions.Count < 1 ? "[]" : $"[{string.Join(", ", positions)}]";
     }
 
     public void CreateMask(GameObject targetObject, float transparency)
@@ -81,7 +115,10 @@ public class MaskController : MonoBehaviour
 
         maskObject.transform.localScale = new Vector3(diameter, diameter, 1);
 
-        MaskList.Add(maskObject);
+
+        Mask maskComponent = maskObject.AddComponent<Mask>();
+        maskComponent.TargetGO = targetObject;
+        Masks.Add(maskComponent);
 
     }
 
@@ -89,22 +126,50 @@ public class MaskController : MonoBehaviour
 
     public void DestroyMask(GameObject maskObject)
     {
-        if (MaskList.Contains(maskObject))
+        Mask maskComponent = maskObject.GetComponent<Mask>();
+        if (maskComponent != null)
         {
-            MaskList.Remove(maskObject);
-            Destroy(maskObject);
+            if (Masks.Contains(maskComponent))
+            {
+                Masks.Remove(maskComponent);
+                Destroy(maskObject);
+            }
+            else
+                Debug.LogWarning("NOT IN THE MASK LIST!");
         }
         else
-            Debug.LogWarning("CAN NOT DESTROY BECAUSE THE GAMEOBJECT IS NOT IN THE MASK-LIST!");
+            Debug.LogWarning("TRIED TO DESTROY A MASK BUT THERES NO MASK COMPONENT ATTACHED");
     }
 
     public void DestroyAllMasks()
     {
-        foreach(var mask in MaskList)
+        foreach(var mask in Masks)
         {
             Destroy(mask);
         }
-        MaskList.Clear();
+        Masks.Clear();
+    }
+
+}
+
+
+
+public class Mask : MonoBehaviour
+{
+    public GameObject TargetGO; //this is the stim that the mask is going to be over top of 
+    public bool Masking
+    {
+        get
+        {
+            return gameObject.activeInHierarchy;
+        }
+    }
+    public Vector3 MaskPos
+    {
+        get
+        {
+            return gameObject.transform.localPosition;
+        }
     }
 
 }

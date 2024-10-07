@@ -100,6 +100,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public TokenFBController TokenFBController;
         [HideInInspector] public SliderFBController SliderFBController;
         [HideInInspector] public MaskController MaskFBController;
+        [HideInInspector] public DialogueController DialogueController;
 
         [HideInInspector] public Dictionary<string, EventCode> TaskEventCodes;
         

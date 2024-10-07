@@ -161,8 +161,11 @@ public class SetupTask_Level : ControlLevel
                 TrialLevel.TouchFBController.audioFBController = TrialLevel.AudioFBController;
                 TrialLevel.MaskFBController = fbControllers.GetComponent<MaskController>();
 
+                //Automatically give DialogueController:
+                TrialLevel.DialogueController = fbControllers.AddComponent<DialogueController>();
+
                 //Automatically giving MaskController:
-                TrialLevel.MaskFBController.Init(FrameData);
+                TrialLevel.MaskFBController.Init();
 
                 //Automatically giving TouchFbController;
                 TrialLevel.TouchFBController.Init(TrialData, FrameData);

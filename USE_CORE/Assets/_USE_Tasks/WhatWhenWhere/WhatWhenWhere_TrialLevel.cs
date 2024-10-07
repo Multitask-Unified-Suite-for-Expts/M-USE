@@ -661,6 +661,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeSelf ? "Active" : "NotActive");
         FrameData.AddDatum("SearchStimuliShown", () => searchStims?.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims?.IsActive);
+        FrameData.AddDatum("MaskVisibilities", () => MaskFBController.GetMaskVisibilityString());
+        FrameData.AddDatum("MaskPositions", () => MaskFBController.GetMaskPosString());
+
     }
 
     private void SetTrialSummaryString()

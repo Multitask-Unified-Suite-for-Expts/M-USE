@@ -52,7 +52,12 @@ public class LocateFile : MonoBehaviour
 		else if (possibleFiles.Length == 0)
 			Debug.Log("No file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
 		else
+		{
 			Debug.Log("More than one file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
+			Debug.LogWarning("FILES FOUND: " + possibleFiles.Length);
+			foreach (var file in possibleFiles)
+				Debug.LogWarning(file.ToString());
+		}
 		return "";
 	}
 }

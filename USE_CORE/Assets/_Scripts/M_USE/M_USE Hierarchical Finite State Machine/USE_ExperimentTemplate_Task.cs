@@ -264,8 +264,6 @@ namespace USE_ExperimentTemplate_Task
             //RunBlock State-----------------------------------------------------------------------------------------------------
             RunBlock.AddUniversalInitializationMethod(() =>
             {
-                Debug.LogWarning("START OF RUN BLOCK INIT METHOD");
-
                 TaskCam.gameObject.SetActive(true);
 
                 StartCoroutine(TurnOffLoadingCanvas());
@@ -285,6 +283,7 @@ namespace USE_ExperimentTemplate_Task
                 TotalIncompleteTouches_InBlock = 0;
                 Session.MouseTracker.ResetClicks();
 
+                //SHOULD BE 1
                 Debug.LogWarning("BEFORE SETTING CURRENT BLOCK DEF | BLOCK COUNT: " + BlockCount);
 
                 Debug.LogWarning("NUM BLOCK DEFS = " + BlockDefs.Count());
@@ -309,8 +308,6 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ReachedCriterion = false;
 
                 Session.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
-
-                Debug.LogWarning("END OF TEMPLATES RUNBLOCK INIT METHOD");
             });
 
             //Hotkeys for WebGL build so we can end task and go to next block

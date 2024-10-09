@@ -53,12 +53,19 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         {
             wmTL.ContextName = wmBD.ContextName;
 
+            Debug.LogWarning("WM - RUN BLOCK INIT METHOD");
+
             SetSkyBox(wmBD.ContextName);
+
+            Debug.LogWarning("WM - AFTER SET SKYBOX");
 
             wmTL.ResetBlockVariables();
             wmTL.TokenFBController.SetTotalTokensNum(wmBD.TokenBarCapacity);
             wmTL.TokenFBController.SetTokenBarValue(wmBD.NumInitialTokens);
             SetBlockSummaryString();
+
+            Debug.LogWarning("WM - END OF RUN BLOCK INIT METHOD");
+
         });
     }
     public override OrderedDictionary GetTaskSummaryData()

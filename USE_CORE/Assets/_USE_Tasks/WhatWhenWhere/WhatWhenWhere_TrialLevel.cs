@@ -226,6 +226,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
+            //For testing the dialogue controller:
+            //DialogueController.CreateDialogueBox("Last Trial!", 500f);
+
             Input.ResetInputAxes(); //reset input in case they holding down
 
             if (SequenceManager.GetTargetStimGO() == null)

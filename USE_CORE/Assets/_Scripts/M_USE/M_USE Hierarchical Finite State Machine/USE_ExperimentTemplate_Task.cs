@@ -285,7 +285,9 @@ namespace USE_ExperimentTemplate_Task
                 TotalIncompleteTouches_InBlock = 0;
                 Session.MouseTracker.ResetClicks();
 
-                Debug.LogWarning("BEFORE SETTING CURRENT BLOCK DEF");
+                Debug.LogWarning("BEFORE SETTING CURRENT BLOCK DEF | BLOCK COUNT: " + BlockCount);
+
+                Debug.LogWarning("NUM BLOCK DEFS = " + BlockDefs.Count());
 
                 CurrentBlockDef = BlockDefs[BlockCount];
 

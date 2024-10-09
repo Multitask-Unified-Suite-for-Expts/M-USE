@@ -47,18 +47,19 @@ public class LocateFile : MonoBehaviour
 	public string FindFilePathInExternalFolder(string keyToFolder, string stringPattern)
 	{
 		string[] possibleFiles = Directory.GetFiles(keyToFolder, stringPattern);
+
 		if (possibleFiles.Length == 1)
 			return possibleFiles[0];
 		else if (possibleFiles.Length == 0)
-			Debug.Log("No file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
+		{
+			Debug.LogWarning("No file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
+			return "";
+		}
 		else
 		{
-			Debug.Log("More than one file following pattern " + stringPattern + " is found at path " + keyToFolder + ".");
-			Debug.LogWarning("FILES FOUND: " + possibleFiles.Length);
-			foreach (var file in possibleFiles)
-				Debug.LogWarning(file.ToString());
+			Debug.LogWarning(possibleFiles.Length + " Files found following pattern " + stringPattern + " at path " + keyToFolder + " | Using the first file found.");
+			return possibleFiles[0];
 		}
-		return "";
 	}
 }
 

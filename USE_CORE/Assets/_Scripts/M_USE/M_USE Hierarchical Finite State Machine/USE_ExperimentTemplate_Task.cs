@@ -268,7 +268,6 @@ namespace USE_ExperimentTemplate_Task
 
                 StartCoroutine(TurnOffLoadingCanvas());
 
-
                 //For web build have to start each task with DirectionalLight off since only 1 display so all tasks verified during task selection scene and causing lighting issues.
                 if (TaskDirectionalLight != null)
                 {
@@ -283,14 +282,7 @@ namespace USE_ExperimentTemplate_Task
                 TotalIncompleteTouches_InBlock = 0;
                 Session.MouseTracker.ResetClicks();
 
-                //SHOULD BE 1
-                Debug.LogWarning("BEFORE SETTING CURRENT BLOCK DEF | BLOCK COUNT: " + BlockCount);
-
-                Debug.LogWarning("NUM BLOCK DEFS = " + BlockDefs.Count());
-
                 CurrentBlockDef = BlockDefs[BlockCount];
-
-                Debug.LogWarning("AFTER SETTING CURRENT BLOCK DEF | BlockCount = " + BlockCount);
 
                 TrialLevel.BlockCount = BlockCount;
                 if (BlockCount == 0)

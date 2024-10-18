@@ -189,7 +189,6 @@ namespace USE_ExperimentTemplate_Trial
         {
             if(TokenFBController != null)
                 TokenFBController.OnTokenBarFilled -= OnTokenBarFull;
-
         }
 
 

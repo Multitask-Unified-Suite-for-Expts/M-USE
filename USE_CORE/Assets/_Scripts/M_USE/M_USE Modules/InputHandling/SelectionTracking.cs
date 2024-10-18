@@ -27,8 +27,8 @@ SOFTWARE.
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using USE_States;
+
 
 namespace SelectionTracking
 {
@@ -206,6 +206,8 @@ namespace SelectionTracking
             public float SelectionPrecision;
             public string ErrorType;
 
+            public bool FixationDurationPassed;
+
             public string ParentName;
 
 
@@ -248,9 +250,7 @@ namespace SelectionTracking
             {
                 EndTime = Time.time;
                 Duration = EndTime - StartTime;
-                //Debug.LogWarning("COMPLETE SELECTION DUR: " + Duration);
                 WasSuccessful = success;
-                //error handling?
             }
         }
 
@@ -405,6 +405,7 @@ namespace SelectionTracking
                 return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
             }
 
+
             private void SelectionErrorHandling(string error)
             {
                 if (OngoingSelection != null)
@@ -438,7 +439,6 @@ namespace SelectionTracking
                     if (HoverOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        //Debug.Log("EVENTCODE: HoverOffObject (manual)");
                         Session.EventCodeManager.AddToFrameEventCodeBuffer("HoverOffObject");
                         HoverOnEventCodeSent = false; //reset hover
                     }
@@ -503,7 +503,9 @@ namespace SelectionTracking
                 if (init != null && init.Value) // intialization condition is true (e.g. mouse button is down)
                 {
                     if (initErrors == null)
+                    {
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
+                    }
                     else
                     {
                         SelectionErrorHandling(initErrors);
@@ -546,7 +548,6 @@ namespace SelectionTracking
                     {
                         OngoingSelection.CompleteSelection(true);
                         OngoingSelection.WasSuccessful = true;
-                        LastSelection = OngoingSelection;
                         LastSuccessfulSelection = OngoingSelection;
                         if(OngoingSelection.SelectedGameObject != null)
                             LastSuccessfulSelection.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(OngoingSelection.SelectedGameObject.transform.root.position));
@@ -667,5 +668,6 @@ namespace SelectionTracking
 
             }
         }
+
     }
 }

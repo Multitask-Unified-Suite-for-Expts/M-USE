@@ -25,9 +25,11 @@ public class ParticleHalo : MonoBehaviour
 
         GameObject rootObj = go.transform.root.gameObject;
         InstantiatedParticleHaloGO = Instantiate(particlePrefab, rootObj.transform);
-        InstantiatedParticleHaloGO.transform.localScale = go.transform.localScale;
-        // Position the haloPrefab behind the game object
-        float distanceBehind = 1.5f; // Set the distance behind the gameObj
+        InstantiatedParticleHaloGO.transform.localScale = rootObj.transform.localScale;
+        if (Session.UsingDefaultConfigs)
+            InstantiatedParticleHaloGO.transform.localScale *= .6f;
+
+        float distanceBehind = 1.5f; ; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         InstantiatedParticleHaloGO.transform.position = behindPos;
 

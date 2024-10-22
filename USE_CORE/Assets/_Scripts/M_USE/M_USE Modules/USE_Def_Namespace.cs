@@ -359,7 +359,10 @@ namespace USE_Def_Namespace
         /// </summary>
         public virtual float TaskDirectionalLightIntensity { get; set; } = 1.35f; //1.35 for new quaddles, 2 for old quaddles
 
-
+        /// <summary>
+        /// Whether or not to run a stimulation
+        /// </summary>
+        public bool RunSimulation;
     }
 
     public class BlockDef

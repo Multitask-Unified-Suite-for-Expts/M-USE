@@ -14,13 +14,13 @@ public class KT_ObjectManager : MonoBehaviour
     public List<KT_Object> TargetList;
     public List<KT_Object> DistractorList;
 
-    public static List<Vector3> StartingPositions;
-    public static List<Vector3> StartingPositionsUsed;
+    public List<Vector3> StartingPositions;
+    public List<Vector3> StartingPositionsUsed;
 
     private Transform ObjectParent;
 
-    public static readonly Vector2 xRange = new Vector2(-800f, 800f);
-    public static readonly Vector2 yRange = new Vector2(-400f, 325f);
+    public readonly Vector2 xRange = new Vector2(-800f, 800f);
+    public readonly Vector2 yRange = new Vector2(-400f, 325f);
 
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;
@@ -118,8 +118,8 @@ public class KT_ObjectManager : MonoBehaviour
     
     private void CalculateStartingPositions()
     {
-        int[] xValues = new int[] { -800, -400, 0, 400, 800 };
-        int[] yValues = new int[] { 325, 84, -158, -400};
+        int[] xValues = new int[] { -750, -400, 0, 400, 750 };
+        int[] yValues = new int[] { 300, 75, -150, -375};
 
         for (int i = 0; i < yValues.Length; i++)
         {
@@ -160,8 +160,6 @@ public class KT_ObjectManager : MonoBehaviour
         TargetList.Clear();
         DistractorList.Clear();
     }
-
-
 
     public void ActivateInitialTargets()
     {
@@ -205,7 +203,6 @@ public class KT_ObjectManager : MonoBehaviour
         yield return new WaitForSeconds(obj.ActivateDelay);
         obj.gameObject.SetActive(true);
         obj.ActivateMovement();
-
     }
 
     //Not Used:
@@ -221,7 +218,6 @@ public class KT_ObjectManager : MonoBehaviour
         foreach (var target in DistractorList)
             target.gameObject.SetActive(false);
     }
-
 
 }
 
@@ -538,13 +534,14 @@ public class KT_Object : MonoBehaviour
         PreviousAngleOffsets.Add(angleOffset);
         
         currentAngle += angleOffset;
+
         float radianAngle = Mathf.Deg2Rad * currentAngle;
         float newX = Mathf.Cos(radianAngle);
         float newY = Mathf.Sin(radianAngle);
         Vector3 change = new Vector3(newX, newY, 0);
         Vector3 destination = transform.localPosition + change * NextDestDist;
-        float xDiff = Mathf.Clamp(destination.x, KT_ObjectManager.xRange.x, KT_ObjectManager.xRange.y) - destination.x;
-        float yDiff = Mathf.Clamp(destination.y, KT_ObjectManager.yRange.x, KT_ObjectManager.yRange.y) - destination.y;
+        float xDiff = Mathf.Clamp(destination.x, ObjManager.xRange.x, ObjManager.xRange.y) - destination.x;
+        float yDiff = Mathf.Clamp(destination.y, ObjManager.yRange.x, ObjManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
 
         CurrentDestination = destination;
@@ -559,16 +556,17 @@ public class KT_Object : MonoBehaviour
 
         do
         {
-            randomIndex = Random.Range(0, KT_ObjectManager.StartingPositions.Count);
-            newRandomPos = KT_ObjectManager.StartingPositions[randomIndex];
+            randomIndex = Random.Range(0, ObjManager.StartingPositions.Count);
+            newRandomPos = ObjManager.StartingPositions[randomIndex];
         }
-        while (KT_ObjectManager.StartingPositionsUsed.Contains(newRandomPos));
+        while (ObjManager.StartingPositionsUsed.Contains(newRandomPos));
 
-        KT_ObjectManager.StartingPositionsUsed.Add(newRandomPos);
+        ObjManager.StartingPositionsUsed.Add(newRandomPos);
 
         StartingPosition = newRandomPos;
         transform.localPosition = newRandomPos;
     }
+
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -584,7 +582,7 @@ public class KT_Object : MonoBehaviour
         if (Time.time - NewDestStartTime >= MaxCollisionTime)
         {
             Direction = -Direction;
-            SetNewDestination();   
+            SetNewDestination();
         }
     }
 

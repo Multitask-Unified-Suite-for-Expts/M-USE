@@ -29,6 +29,8 @@ public class KT_ObjectManager : MonoBehaviour
 
     public float MaxTouchDuration;
 
+    public Vector2 MostRecentCollisionPoint;
+
 
     public void NoSelectionDuringInterval(KT_Object obj)
     {
@@ -44,8 +46,19 @@ public class KT_ObjectManager : MonoBehaviour
         DistractorList = new List<KT_Object>();
         StartingPositions = new List<Vector3>();
         StartingPositionsUsed = new List<Vector3>();
+    }
 
-        CalculateStartingPositions();
+    public void SetStartingPositions(Vector2[] startingPositions)
+    {
+        StartingPositions = new List<Vector3>();
+
+        foreach(Vector2 pos in startingPositions)
+        {
+            Vector3 fullPos = new Vector3(pos.x, pos.y, 0);
+            StartingPositions.Add(fullPos);
+        }
+
+        StartingPositionsUsed.Clear();
     }
 
     public void SetObjectParent(Transform parentTransform)
@@ -115,21 +128,6 @@ public class KT_ObjectManager : MonoBehaviour
         return trialObjects;
     }
     
-    private void CalculateStartingPositions()
-    {
-        int[] xValues = new int[] { -750, -400, 0, 400, 750 };
-        int[] yValues = new int[] { 300, 75, -150, -375};
-
-        for (int i = 0; i < yValues.Length; i++)
-        {
-            float y = yValues[i];
-            for (int j = 0; j < xValues.Length; j++)
-            {
-                float x = xValues[j];
-                StartingPositions.Add(new Vector3(x, y, 0));
-            }
-        }
-    }
 
     public void AddToList(KT_Object obj)
     {
@@ -562,6 +560,21 @@ public class KT_Object : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        //if(collision.contactCount > 0)
+        //{
+        //    foreach(ContactPoint2D contact in collision.contacts)
+        //    {
+        //        Vector2 collisionPoint = contact.point;
+
+        //        if(collisionPoint != ObjManager.MostRecentCollisionPoint)
+        //        {
+        //            Debug.LogWarning("COLLISION AT POINT: " + collisionPoint);
+        //            //send the event code here!
+        //        }
+        //        ObjManager.MostRecentCollisionPoint = collisionPoint;
+        //    }
+        //}
+
         if(!IsTarget)
         {
             Direction = -Direction;

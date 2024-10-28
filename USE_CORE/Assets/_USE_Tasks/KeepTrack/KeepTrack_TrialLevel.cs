@@ -90,6 +90,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                 Destroy(ObjManager);
 
             ObjManager = gameObject.AddComponent<KT_ObjectManager>();
+            ObjManager.SetStartingPositions(CurrentTrial.StartingPositions);
             ObjManager.MaxTouchDuration = maxObjectTouchDuration.value;
             ObjManager.TaskEventCodes = TaskEventCodes;
             ObjManager.SetObjectParent(KeepTrack_CanvasGO.transform);

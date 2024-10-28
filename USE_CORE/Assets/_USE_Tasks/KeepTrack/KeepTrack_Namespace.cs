@@ -1,6 +1,5 @@
 using USE_StimulusManagement;
 using USE_Def_Namespace;
-using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -16,6 +15,7 @@ namespace KeepTrack_Namespace
 
     public class KeepTrack_TrialDef : TrialDef
     {
+        public Vector2[] StartingPositions;
         public int[] TrialObjectIndices; //Where you will specify the ObjectNames you wish to use in the trial
         public float DisplayTargetDuration;
         public float DisplayDistractorsDuration;

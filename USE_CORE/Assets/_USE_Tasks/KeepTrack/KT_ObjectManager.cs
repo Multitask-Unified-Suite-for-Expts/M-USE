@@ -309,7 +309,7 @@ public class KT_Object : MonoBehaviour
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        List<float> randomFloats = new List<float>() { duration }; //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
+        List<float> randomFloats = new List<float>() { duration };  //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
 
         for (int i = 0; i < numIntervals; i++)
         {

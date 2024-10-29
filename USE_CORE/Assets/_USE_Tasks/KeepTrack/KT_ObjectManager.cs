@@ -14,9 +14,6 @@ public class KT_ObjectManager : MonoBehaviour
     public List<KT_Object> TargetList;
     public List<KT_Object> DistractorList;
 
-    public List<Vector3> StartingPositions;
-    public List<Vector3> StartingPositionsUsed;
-
     private Transform ObjectParent;
 
     public readonly Vector2 xRange = new Vector2(-800f, 800f);
@@ -45,21 +42,6 @@ public class KT_ObjectManager : MonoBehaviour
     {
         TargetList = new List<KT_Object>();
         DistractorList = new List<KT_Object>();
-        StartingPositions = new List<Vector3>();
-        StartingPositionsUsed = new List<Vector3>();
-    }
-
-    public void SetStartingPositions(Vector2[] startingPositions)
-    {
-        StartingPositions = new List<Vector3>();
-
-        foreach(Vector2 pos in startingPositions)
-        {
-            Vector3 fullPos = new Vector3(pos.x, pos.y, 0);
-            StartingPositions.Add(fullPos);
-        }
-
-        StartingPositionsUsed.Clear();
     }
 
     public void SetObjectParent(Transform parentTransform)
@@ -238,6 +220,7 @@ public class KT_Object : MonoBehaviour
     public float Speed;
     public float Size;
     public float NextDestDist;
+    public Vector2 StartingPosition;
     public Vector2 ResponseWindow;
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
@@ -249,7 +232,6 @@ public class KT_Object : MonoBehaviour
     public float ActivateDelay;
     public Vector2[] MouthAngles;
 
-    public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool MoveAroundScreen;
     public bool ObjectSelected;
@@ -285,6 +267,7 @@ public class KT_Object : MonoBehaviour
         OpenAngle = configValue.OpenAngle;
         ClosedLineThickness = configValue.ClosedLineThickness;
         IsTarget = configValue.IsTarget;
+        StartingPosition = configValue.StartingPosition;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
         MinAnimGap = configValue.MinAnimGap;
@@ -313,7 +296,8 @@ public class KT_Object : MonoBehaviour
             Cycles.Add(cycle);
         }
 
-        SetRandomStartingPosition();
+        transform.localPosition = new Vector3(StartingPosition.x, StartingPosition.y, 0);
+
         SetNewDestination();
 
         SetupMarker(); //Marker for debugging purposes
@@ -547,24 +531,6 @@ public class KT_Object : MonoBehaviour
 
     }
 
-    private void SetRandomStartingPosition()
-    {
-        int randomIndex;
-        Vector3 newRandomPos;
-
-        do
-        {
-            randomIndex = Random.Range(0, ObjManager.StartingPositions.Count);
-            newRandomPos = ObjManager.StartingPositions[randomIndex];
-        }
-        while (ObjManager.StartingPositionsUsed.Contains(newRandomPos));
-
-        ObjManager.StartingPositionsUsed.Add(newRandomPos);
-
-        StartingPosition = newRandomPos;
-        transform.localPosition = newRandomPos;
-    }
-
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -653,6 +619,7 @@ public class KT_Object_ConfigValues
     public bool RotateTowardsDest;
     public float Speed;
     public float Size;
+    public Vector2 StartingPosition;
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;

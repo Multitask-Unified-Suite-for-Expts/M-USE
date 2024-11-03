@@ -123,9 +123,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             Handler.MinDuration = minObjectTouchDuration.value;
             Handler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => CurrentTask.RunSimulation, DisplayTarget);
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget);
-        InitTrial.AddDefaultTerminationMethod(() =>
+        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget, () =>
         {
             BordersGO.SetActive(true);
 

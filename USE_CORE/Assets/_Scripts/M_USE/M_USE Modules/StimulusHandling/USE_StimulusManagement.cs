@@ -865,18 +865,20 @@ namespace USE_StimulusManagement
         public void SetLocations(IEnumerable<Vector3> locs)
 		{
 			Vector3[] LocArray = locs.ToArray();
-
-			if (LocArray.Length < stimDefs.Count)
-				Debug.LogError("NOT ENOUGH LOCATIONS FOR THE STIM! " + locs.Count() + " Locations and " + stimDefs.Count + "Stim");
+			if (LocArray.Length == stimDefs.Count)
+			{
+				for (int iL = 0; iL < LocArray.Length; iL++)
+				{
+					stimDefs[iL].StimLocation = LocArray[iL];
+				}
+			}
 			else
 			{
-                for (int stimIndex = 0; stimIndex < stimDefs.Count; stimIndex++)
-                {
-                    stimDefs[stimIndex].StimLocation = LocArray[stimIndex];
-                }
-            }
+				Debug.LogError("Attempted to set the locations of stims in StimGroup " + stimGroupName +
+				               ", but there are " + stimDefs.Count + " stimuli in this group and " + LocArray.Length +
+				               " locations were given.");
+			}
 		}
-
 		public void SetRotations(IEnumerable<Vector3> rots)
 		{
 			Vector3[] rotArray = rots.ToArray();

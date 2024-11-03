@@ -190,6 +190,7 @@ namespace USE_ExperimentTemplate_Trial
         {
             if(TokenFBController != null)
                 TokenFBController.OnTokenBarFilled -= OnTokenBarFull;
+
         }
 
 
@@ -731,14 +732,8 @@ namespace USE_ExperimentTemplate_Trial
             }
             else
             {
-                Debug.LogWarning($"Context File Path Not Found. Going to try and load backup context: {backupContextName}.");
-                string[] backupPaths = Directory.GetFiles(MaterialFilePath, $"{backupContextName}*", SearchOption.AllDirectories);
-                if (backupPaths.Length >= 1)
-                    contextPath = backupPaths[0];
-                else
-                {
-                    Debug.LogWarning("Backup context also not found!");
-                }
+                Debug.LogWarning($"Context File Path Not Found. Defaulting to {backupContextName}.");
+                contextPath = Directory.GetFiles(MaterialFilePath, backupContextName, SearchOption.AllDirectories)[0];
             }
 
             return contextPath;

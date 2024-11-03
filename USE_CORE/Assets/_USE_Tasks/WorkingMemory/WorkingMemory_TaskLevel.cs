@@ -63,6 +63,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     }
     public override OrderedDictionary GetTaskSummaryData()
     {
+
         OrderedDictionary data = base.GetTaskSummaryData();
 
         data["Token Bar Full"] = NumTokenBarFull_InTask;

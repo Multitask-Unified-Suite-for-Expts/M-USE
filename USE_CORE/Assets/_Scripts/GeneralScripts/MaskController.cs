@@ -85,7 +85,7 @@ public class MaskController : MonoBehaviour
             // For 3D objects:
             Transform objectTransform = targetObject.transform;
             worldPosition = objectTransform.position;
-            diameter = Mathf.Max(objectTransform.localScale.x, objectTransform.localScale.y) * 230f;
+            diameter = Mathf.Max(objectTransform.localScale.x, objectTransform.localScale.y) * 250f;
         }
         else
         {
@@ -124,15 +124,15 @@ public class MaskController : MonoBehaviour
 
 
 
-    public void DestroyMask(GameObject maskGO)
+    public void DestroyMask(GameObject maskObject)
     {
-        Mask maskComponent = maskGO.GetComponent<Mask>();
+        Mask maskComponent = maskObject.GetComponent<Mask>();
         if (maskComponent != null)
         {
             if (Masks.Contains(maskComponent))
             {
                 Masks.Remove(maskComponent);
-                Destroy(maskGO);
+                Destroy(maskObject);
             }
             else
                 Debug.LogWarning("NOT IN THE MASK LIST!");
@@ -145,7 +145,7 @@ public class MaskController : MonoBehaviour
     {
         foreach(var mask in Masks)
         {
-            Destroy(mask.gameObject);
+            Destroy(mask);
         }
         Masks.Clear();
     }

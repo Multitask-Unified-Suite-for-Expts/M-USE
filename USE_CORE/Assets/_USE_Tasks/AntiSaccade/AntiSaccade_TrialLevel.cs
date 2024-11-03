@@ -604,6 +604,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         diffLevelJitter = CurrentTrial.DiffLevelJitter;
         NumReversalsUntilTerm = CurrentTrial.NumReversalsUntilTerm;
         MinTrialsBeforeTermProcedure = CurrentTrial.MinTrialsBeforeTermProcedure;
+        MaxTrialsInBlock = CurrentTrial.MaxTrialsInBlock;
         TerminationWindowSize = CurrentTrial.TerminationWindowSize;
         //BlockCount = CurrentTaskLevel.currentBlockDef.BlockCount;
 
@@ -667,6 +668,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             
                     return true;
                 }
+                if (TrialCount_InBlock >= MaxTrialsInBlock)
+                    return true;
                 return false;
             
             default:

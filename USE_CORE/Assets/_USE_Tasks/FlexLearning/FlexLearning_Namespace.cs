@@ -74,6 +74,11 @@ namespace FlexLearning_Namespace
                 td.ParticleHaloActive = ParticleHaloActive;
                 td.CircleHaloActive = CircleHaloActive;
                 td.DifficultyLevelDefinition = DifficultyLevelDefintion;
+
+                td.StimulationType = StimulationType;
+                td.FixationDuration = FixationDuration;
+                td.StimulationOnsetDelay = StimulationOnsetDelay;
+
                 TrialDefs.Add(td);
             }
         }

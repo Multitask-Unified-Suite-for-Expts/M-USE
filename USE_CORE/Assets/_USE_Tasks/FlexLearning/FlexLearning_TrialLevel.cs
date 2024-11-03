@@ -31,7 +31,7 @@ using FlexLearning_Namespace;
 using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
-using USE_ExperimentTemplate_Task;
+using System.Collections;
 // #if (!UNITY_WEBGL)
 // using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 // #endif  
@@ -71,7 +71,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool CorrectSelection;
     FlexLearning_StimDef selectedSD = null;
     private bool choiceMade = false;
-    
+    private SelectionTracking.SelectionTracker.USE_Selection lastSelection = null;
     
     
     //Player View Variables
@@ -139,7 +139,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloRange(Session.UsingDefaultConfigs ? 1.75f: 2.5f);
+            //HaloFBController.SetCircleHaloRange(Session.UsingDefaultConfigs ? 1.75f: 2.5f);
             HaloFBController.SetCircleHaloIntensity(3f);
         });
         
@@ -169,13 +169,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.IsHuman)
                 Session.TimerController.SetDuration(selectObjectDuration.value);
 
-
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
@@ -205,18 +203,46 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
+            var ongoingSelection = ShotgunHandler.OngoingSelection;
+
+            if (ongoingSelection != null)
+            {
+                if (ongoingSelection.Duration >= CurrentTrialDef.FixationDuration && !ongoingSelection.FixationDurationPassed)
+                {
+                    ongoingSelection.FixationDurationPassed = true;
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
+
+                    GameObject GoSelected = ongoingSelection.SelectedGameObject;
+                    var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
+                    if(SdSelected != null)
+                    {
+                        string stimulationType = CurrentTrialDef.StimulationType.Trim();
+                        if (stimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
+                        {
+                            Debug.Log("STIM'ING TARGET!");
+                            StartCoroutine(StimulationCoroutine());
+                        }
+                        else if (stimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
+                        {
+                            Debug.Log("STIM'ING DISTRACTOR!");
+                            StartCoroutine(StimulationCoroutine());
+                        }
+                    }
+                }
+            }
+
             if(ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+                lastSelection = ShotgunHandler.LastSuccessfulSelection;
+                selectedGO = lastSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                ShotgunHandler.ClearSelections();
+
                 if(selectedSD != null)
                     choiceMade = true;
             }
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-
             CorrectSelection = selectedSD.IsTarget;
             if (CorrectSelection)
             {       
@@ -270,6 +296,23 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
+
+            string stimulationType = CurrentTrialDef.StimulationType.Trim();
+
+            if (lastSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
+            {
+                if (stimulationType == "HaloOnset_Correct" && CorrectSelection)
+                {
+                    Debug.Log("STIM'ING ON CORRECT HALO!");
+                    StartCoroutine(StimulationCoroutine());
+
+                }
+                else if (stimulationType == "HaloOnset_Incorrect" && !CorrectSelection)
+                {
+                    Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
+                    StartCoroutine(StimulationCoroutine());
+                }
+            }
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () =>
@@ -319,6 +362,13 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
+
+    public IEnumerator StimulationCoroutine()
+    {
+        yield return new WaitForSeconds(CurrentTrialDef.StimulationOnsetDelay);
+        Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrialDef.StimulationOnsetDelay);
+        Session.SyncBoxController?.SendSonication();
+    }
     public override void OnTokenBarFull()
     {
         NumTokenBarFull_InBlock++;

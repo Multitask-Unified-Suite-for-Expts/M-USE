@@ -359,7 +359,10 @@ namespace USE_Def_Namespace
         /// </summary>
         public virtual float TaskDirectionalLightIntensity { get; set; } = 1.35f; //1.35 for new quaddles, 2 for old quaddles
 
-
+        /// <summary>
+        /// Whether or not to run a stimulation
+        /// </summary>
+        public bool RunSimulation;
     }
 
     public class BlockDef
@@ -486,6 +489,21 @@ namespace USE_Def_Namespace
         /// MaskValues for the block. [TrialNum, MaskNum, Transparency]
         /// </summary>
         public Vector3[] MaskValues;
+
+        /// <summary>
+        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
+        /// </summary>
+        public string StimulationType;
+
+        /// <summary>
+        /// Fixation duration before completion
+        /// </summary>
+        public float FixationDuration = 0.3f;
+
+        /// <summary>
+        /// Delay before Stimulation
+        /// </summary>
+        public float StimulationOnsetDelay = 0f;
 
 
         /// <summary>
@@ -637,6 +655,22 @@ namespace USE_Def_Namespace
         /// Whether or not the circle halo will be created after a selection is made
         /// </summary>
         public bool CircleHaloActive = true;
+
+        /// <summary>
+        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
+        /// </summary>
+        public string StimulationType;
+
+        /// <summary>
+        /// Fixation duration before completion
+        /// </summary>
+        public float FixationDuration = 0.3f;
+
+        /// <summary>
+        /// Delay before Stimulation
+        /// </summary>
+        public float StimulationOnsetDelay = 0f;
+
 
 
         public int DifficultyLevel;

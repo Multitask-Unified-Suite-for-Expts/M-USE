@@ -14,13 +14,10 @@ public class KT_ObjectManager : MonoBehaviour
     public List<KT_Object> TargetList;
     public List<KT_Object> DistractorList;
 
-    public static List<Vector3> StartingPositions;
-    public static List<Vector3> StartingPositionsUsed;
-
     private Transform ObjectParent;
 
-    public static readonly Vector2 xRange = new Vector2(-800f, 800f);
-    public static readonly Vector2 yRange = new Vector2(-400f, 325f);
+    public readonly Vector2 xRange = new Vector2(-800f, 800f);
+    public readonly Vector2 yRange = new Vector2(-400f, 325f);
 
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;
@@ -29,6 +26,8 @@ public class KT_ObjectManager : MonoBehaviour
     public Dictionary<string, EventCode> TaskEventCodes; //task event codes passed in so can trigger "Object Animation Occured" event code
 
     public float MaxTouchDuration;
+
+    public Vector2 MostRecentCollisionPoint;
 
 
     public void NoSelectionDuringInterval(KT_Object obj)
@@ -43,10 +42,6 @@ public class KT_ObjectManager : MonoBehaviour
     {
         TargetList = new List<KT_Object>();
         DistractorList = new List<KT_Object>();
-        StartingPositions = new List<Vector3>();
-        StartingPositionsUsed = new List<Vector3>();
-
-        CalculateStartingPositions();
     }
 
     public void SetObjectParent(Transform parentTransform)
@@ -116,21 +111,6 @@ public class KT_ObjectManager : MonoBehaviour
         return trialObjects;
     }
     
-    private void CalculateStartingPositions()
-    {
-        int[] xValues = new int[] { -800, -400, 0, 400, 800 };
-        int[] yValues = new int[] { 325, 84, -158, -400};
-
-        for (int i = 0; i < yValues.Length; i++)
-        {
-            float y = yValues[i];
-            for (int j = 0; j < xValues.Length; j++)
-            {
-                float x = xValues[j];
-                StartingPositions.Add(new Vector3(x, y, 0));
-            }
-        }
-    }
 
     public void AddToList(KT_Object obj)
     {
@@ -160,8 +140,6 @@ public class KT_ObjectManager : MonoBehaviour
         TargetList.Clear();
         DistractorList.Clear();
     }
-
-
 
     public void ActivateInitialTargets()
     {
@@ -205,7 +183,6 @@ public class KT_ObjectManager : MonoBehaviour
         yield return new WaitForSeconds(obj.ActivateDelay);
         obj.gameObject.SetActive(true);
         obj.ActivateMovement();
-
     }
 
     //Not Used:
@@ -221,7 +198,6 @@ public class KT_ObjectManager : MonoBehaviour
         foreach (var target in DistractorList)
             target.gameObject.SetActive(false);
     }
-
 
 }
 
@@ -244,6 +220,7 @@ public class KT_Object : MonoBehaviour
     public float Speed;
     public float Size;
     public float NextDestDist;
+    public Vector2 StartingPosition;
     public Vector2 ResponseWindow;
     public float CloseDuration;
     public Vector2[] RatesAndDurations;
@@ -255,7 +232,6 @@ public class KT_Object : MonoBehaviour
     public float ActivateDelay;
     public Vector2[] MouthAngles;
 
-    public Vector2 StartingPosition;
     public Vector3 CurrentDestination;
     public bool MoveAroundScreen;
     public bool ObjectSelected;
@@ -291,6 +267,7 @@ public class KT_Object : MonoBehaviour
         OpenAngle = configValue.OpenAngle;
         ClosedLineThickness = configValue.ClosedLineThickness;
         IsTarget = configValue.IsTarget;
+        StartingPosition = configValue.StartingPosition;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
         MinAnimGap = configValue.MinAnimGap;
@@ -319,7 +296,8 @@ public class KT_Object : MonoBehaviour
             Cycles.Add(cycle);
         }
 
-        SetRandomStartingPosition();
+        transform.localPosition = new Vector3(StartingPosition.x, StartingPosition.y, 0);
+
         SetNewDestination();
 
         SetupMarker(); //Marker for debugging purposes
@@ -331,7 +309,7 @@ public class KT_Object : MonoBehaviour
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        List<float> randomFloats = new List<float>() { duration }; //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
+        List<float> randomFloats = new List<float>() { duration };  //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
 
         for (int i = 0; i < numIntervals; i++)
         {
@@ -538,13 +516,14 @@ public class KT_Object : MonoBehaviour
         PreviousAngleOffsets.Add(angleOffset);
         
         currentAngle += angleOffset;
+
         float radianAngle = Mathf.Deg2Rad * currentAngle;
         float newX = Mathf.Cos(radianAngle);
         float newY = Mathf.Sin(radianAngle);
         Vector3 change = new Vector3(newX, newY, 0);
         Vector3 destination = transform.localPosition + change * NextDestDist;
-        float xDiff = Mathf.Clamp(destination.x, KT_ObjectManager.xRange.x, KT_ObjectManager.xRange.y) - destination.x;
-        float yDiff = Mathf.Clamp(destination.y, KT_ObjectManager.yRange.x, KT_ObjectManager.yRange.y) - destination.y;
+        float xDiff = Mathf.Clamp(destination.x, ObjManager.xRange.x, ObjManager.xRange.y) - destination.x;
+        float yDiff = Mathf.Clamp(destination.y, ObjManager.yRange.x, ObjManager.yRange.y) - destination.y;
         destination += new Vector3(xDiff, yDiff, 0);
 
         CurrentDestination = destination;
@@ -552,26 +531,24 @@ public class KT_Object : MonoBehaviour
 
     }
 
-    private void SetRandomStartingPosition()
-    {
-        int randomIndex;
-        Vector3 newRandomPos;
-
-        do
-        {
-            randomIndex = Random.Range(0, KT_ObjectManager.StartingPositions.Count);
-            newRandomPos = KT_ObjectManager.StartingPositions[randomIndex];
-        }
-        while (KT_ObjectManager.StartingPositionsUsed.Contains(newRandomPos));
-
-        KT_ObjectManager.StartingPositionsUsed.Add(newRandomPos);
-
-        StartingPosition = newRandomPos;
-        transform.localPosition = newRandomPos;
-    }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        //if(collision.contactCount > 0)
+        //{
+        //    foreach(ContactPoint2D contact in collision.contacts)
+        //    {
+        //        Vector2 collisionPoint = contact.point;
+
+        //        if(collisionPoint != ObjManager.MostRecentCollisionPoint)
+        //        {
+        //            Debug.LogWarning("COLLISION AT POINT: " + collisionPoint);
+        //            //send the event code here!
+        //        }
+        //        ObjManager.MostRecentCollisionPoint = collisionPoint;
+        //    }
+        //}
+
         if(!IsTarget)
         {
             Direction = -Direction;
@@ -584,7 +561,7 @@ public class KT_Object : MonoBehaviour
         if (Time.time - NewDestStartTime >= MaxCollisionTime)
         {
             Direction = -Direction;
-            SetNewDestination();   
+            SetNewDestination();
         }
     }
 
@@ -642,6 +619,7 @@ public class KT_Object_ConfigValues
     public bool RotateTowardsDest;
     public float Speed;
     public float Size;
+    public Vector2 StartingPosition;
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;

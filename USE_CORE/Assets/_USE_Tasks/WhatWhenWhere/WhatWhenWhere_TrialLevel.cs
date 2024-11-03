@@ -226,6 +226,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
+            //For testing the dialogue controller:
+            //DialogueController.CreateDialogueBox("Last Trial!", 500f);
+
             Input.ResetInputAxes(); //reset input in case they holding down
 
             if (SequenceManager.GetTargetStimGO() == null)
@@ -717,12 +720,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         if (CurrentTrialDef.RandomizedLocations)
         {
-            CurrentTrialDef.SearchStimLocations = CurrentTrialDef.SearchStimLocations.OrderBy(x => Guid.NewGuid()).ToArray();
-            CurrentTrialDef.DistractorStimLocations = CurrentTrialDef.DistractorStimLocations.OrderBy(x => Guid.NewGuid()).ToArray();
+            //Combine the lists and randomize them:
+            Vector3[] allLocationsRandomized = CurrentTrialDef.SearchStimLocations.Concat(CurrentTrialDef.DistractorStimLocations).ToArray().OrderBy(x => Guid.NewGuid()).ToArray();
+
+            int numSearchStim = CurrentTrialDef.SearchStimIndices.Count();
+
+            Vector3[] searchStimLocations = allLocationsRandomized.Take(numSearchStim).ToArray();
+            Vector3[] distractorStimLocations = allLocationsRandomized.Skip(numSearchStim).ToArray();
+
+            searchStims.SetLocations(searchStimLocations);
+            distractorStims.SetLocations(distractorStimLocations);
+        }
+        else
+        {
+            searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
+            distractorStims.SetLocations(CurrentTrialDef.DistractorStimLocations);
         }
 
-        searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
-        distractorStims.SetLocations(CurrentTrialDef.DistractorStimLocations);
+
 
         TrialStims.Add(searchStims);
         TrialStims.Add(distractorStims);

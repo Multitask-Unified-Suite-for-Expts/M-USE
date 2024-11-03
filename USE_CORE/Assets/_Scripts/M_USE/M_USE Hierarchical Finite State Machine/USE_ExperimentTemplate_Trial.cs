@@ -66,6 +66,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public int diffLevelJitter;
         [HideInInspector] public int NumReversalsUntilTerm;
         [HideInInspector] public int MinTrialsBeforeTermProcedure;
+        [HideInInspector] public int MaxTrialsInBlock;
         [HideInInspector] public int TerminationWindowSize;
         [HideInInspector] public int reversalsCount;
         [HideInInspector] public List<int> DiffLevelsAtReversals;

@@ -679,6 +679,8 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
+  MaskFBController: {fileID: 0}
+  DialogueController: {fileID: 0}
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
   SkyboxMaterial: {fileID: 0}
@@ -691,6 +693,7 @@ MonoBehaviour:
   NotSelectablePeriodTexture: {fileID: 0}
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
+  MaskValues_Block: []
   TrialCompletions_Block: 0
   SuccessfulTargetSelections_Block: 0
   UnsuccessfulTargetSelections_Block: 0
@@ -803,7 +806,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 36
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:

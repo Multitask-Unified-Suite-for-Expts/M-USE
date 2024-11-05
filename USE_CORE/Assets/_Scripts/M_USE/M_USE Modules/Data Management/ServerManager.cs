@@ -80,7 +80,7 @@ public static class ServerManager //Used with the PHP scripts
             }
             else
             {
-                Debug.Log($"SERVER CONNECTION TEST FAILED! ERROR: {request.error}");
+                Debug.LogWarning($"SERVER CONNECTION TEST FAILED! ERROR: {request.error}");
                 callback?.Invoke(false);
             }
         }

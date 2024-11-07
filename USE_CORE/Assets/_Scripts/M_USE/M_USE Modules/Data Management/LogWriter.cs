@@ -200,7 +200,7 @@ public class LogWriter : MonoBehaviour
 
         if (!LogFolderCreated)
         {
-            Debug.Log("TRYING TO WRITE DATA ONAPPLICATIONQUIT BUT LOG FOLDER HASNT BEEN CREATED YET!");
+            Debug.LogWarning("TRYING TO WRITE DATA ONAPPLICATIONQUIT BUT LOG FOLDER HASNT BEEN CREATED YET!");
             return; //Do we want this here to stop from getting down below since no log folder created? //or maybe not neccessary cuz creating a file also creates folder?
         }
 

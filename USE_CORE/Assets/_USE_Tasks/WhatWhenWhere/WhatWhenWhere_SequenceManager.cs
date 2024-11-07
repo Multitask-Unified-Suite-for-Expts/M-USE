@@ -258,17 +258,19 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
     {
         targetStimGO = null;
 
-        int correctIndex = correctObjectTouchOrder[sequenceIdx];
+        int correctIndex = correctObjectTouchOrder[sequenceIdx] - 1;
 
-        foreach(WhatWhenWhere_StimDef stim in searchStims.stimDefs.Cast<WhatWhenWhere_StimDef>())
+        for(int iStim = 0; iStim < searchStims.stimDefs.Count; iStim++)
         {
-            if (stim.StimIndex == correctIndex)
+            WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[iStim];
+            if (iStim == correctIndex)
             {
-                stim.IsCurrentTarget = true;
-                targetStimGO = stim.StimGameObject;
+                Debug.LogWarning("TARGET = " + sd.StimIndex);
+                sd.IsCurrentTarget = true;
+                targetStimGO = sd.StimGameObject;
             }
             else
-                stim.IsCurrentTarget = false;
+                sd.IsCurrentTarget = false;
         }
 
         foreach (WhatWhenWhere_StimDef stim in distractorStims.stimDefs.Cast<WhatWhenWhere_StimDef>())

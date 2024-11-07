@@ -358,29 +358,31 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             HotKeyList.Add(endTask);
 
             // Quit Game Hot Key
-            HotKey quitGame = new HotKey
-            {
-                keyDescription = "Esc",
-                actionName = "Quit",
-                hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
-                hotKeyAction = () =>
-                {
-                    Debug.Log("---PRESSED QUIT GAME HOT KEY---");
-                    if(Session.TrialLevel != null)
-                        Session.TrialLevel.ForceBlockEnd = true;
+            //ALREADY HANDLED BY ApplicationQuit class!
+            //HotKey quitGame = new HotKey
+            //{
+            //    keyDescription = "Esc",
+            //    actionName = "Quit",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
+            //    hotKeyAction = () =>
+            //    {
+            //        Debug.Log("---PRESSED QUIT GAME HOT KEY---");
+            //        if(Session.TrialLevel != null)
+            //            Session.TrialLevel.ForceBlockEnd = true;
 
-                    if (Session.TaskLevel != null)
-                        Session.TaskLevel.Terminated = true;
+            //        if (Session.TaskLevel != null)
+            //            Session.TaskLevel.Terminated = true;
 
-                    if(Session.SessionLevel != null)
-                    {
-                        Session.SessionLevel.TasksFinished = true;
-                        Session.SessionLevel.SpecifyCurrentState(Session.SessionLevel.GetStateFromName("FinishSession"));
-                    }
-                    Application.Quit();
-                }
-            };
-            HotKeyList.Add(quitGame);
+            //        if(Session.SessionLevel != null)
+            //        {
+            //            Session.SessionLevel.TasksFinished = true;
+            //            Session.SessionLevel.SpecifyCurrentState(Session.SessionLevel.GetStateFromName("FinishSession"));
+            //        }
+            //        Debug.LogWarning("HOT KEY QUIT");
+            //        Application.Quit();
+            //    }
+            //};
+            //HotKeyList.Add(quitGame);
 
             //Reward HotKey:
             HotKey reward = new HotKey

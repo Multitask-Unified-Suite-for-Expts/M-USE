@@ -85,7 +85,7 @@ public class MaskController : MonoBehaviour
             // For 3D objects:
             Transform objectTransform = targetObject.transform;
             worldPosition = objectTransform.position;
-            diameter = Mathf.Max(objectTransform.localScale.x, objectTransform.localScale.y) * 230f;
+            diameter = Mathf.Max(objectTransform.localScale.x, objectTransform.localScale.y) * 325;
         }
         else
         {

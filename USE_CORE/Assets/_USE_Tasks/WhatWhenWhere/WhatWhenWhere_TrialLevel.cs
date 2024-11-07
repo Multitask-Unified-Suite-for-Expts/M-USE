@@ -212,6 +212,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
                 StateAfterDelay = ChooseStimulus;
             RemoveRoughnessFromStimMaterial();
+
+
+            //reset at start of each trial:
+            foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
+                stim.WasCorrectlyChosen = false;
         });
         
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
@@ -250,21 +255,25 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
 
             //Create the masks if neccessary:
-            if (MaskValues_CurrentTrial != null)
+            if (MaskValues_CurrentTrial != null && MaskValues_CurrentTrial.HasValue)
             {
-                if (SequenceManager.NumCorrectChoicesInTrial > 0 && SequenceManager.NumCorrectChoicesInTrial >= MaskValues_CurrentTrial.Value.y - 1)
+                if(SequenceManager.NumCorrectChoicesInTrial > 0)
                 {
-                    foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
+                    if (SequenceManager.NumCorrectChoicesInTrial >= MaskValues_CurrentTrial.Value.y - 1)
                     {
-                        if (!stim.WasCorrectlyChosen && stim.MaskGameObject == null)
+                        foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
                         {
-                            MaskFBController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
-                        }
-                    };
+                            if (!stim.WasCorrectlyChosen && stim.MaskGameObject == null)
+                            {
+                                MaskFBController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                            }
+                        };
 
-                    foreach (WhatWhenWhere_StimDef distractorStim in distractorStims.stimDefs)
-                    {
-                        MaskFBController.CreateMask(distractorStim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                        foreach (WhatWhenWhere_StimDef distractorStim in distractorStims.stimDefs)
+                        {
+                            if(distractorStim.MaskGameObject == null)
+                                MaskFBController.CreateMask(distractorStim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                        }
                     }
                 }
             }
@@ -690,7 +699,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent.transform);
             textLocation.y += 75;
             playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
-                (CurrentTrialDef.CorrectObjectTouchOrder[iStim] + 1).ToString(),
+                (CurrentTrialDef.CorrectObjectTouchOrder[iStim]).ToString(),
                 Color.red, textLocation, new Vector2(200, 200), playerViewParent.transform);
             playerViewText.SetActive(true);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);

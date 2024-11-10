@@ -217,7 +217,8 @@ public class SetupSession_Level : ControlLevel
         Session.SelectionTracker = new SelectionTracker();
         if (Session.SessionDef.SelectionType.ToLower().Equals("gaze"))
         {
-            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeSelection", Session.GazeTracker, inputActive, inputInactive);
+            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
+            Session.GazeTracker.enabled = true;
             Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
         }
         else

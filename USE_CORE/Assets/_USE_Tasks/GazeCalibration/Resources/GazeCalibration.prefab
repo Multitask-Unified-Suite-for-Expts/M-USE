@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 7041848841812600722}
   - component: {fileID: 9211538055877873826}
-  - component: {fileID: 4279271192035780211}
   m_Layer: 0
   m_Name: GazeCalibration_Camera
   m_TagString: MainCamera
@@ -75,14 +74,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &4279271192035780211
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 28328977909686342}
-  m_Enabled: 1
 --- !u!1 &287273562805883288
 GameObject:
   m_ObjectHideFlags: 0
@@ -131,7 +122,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GazeCalibration_CanvasGO: {fileID: 287273564729370799}
   GazeCalibration_CameraGO: {fileID: 28328977909686342}
-  GazeTrailCubeGO: {fileID: 0}
   GazeCalibrationTaskLevel: {fileID: 4445937192520635212}
   GazeCalibrationTrialLevel: {fileID: 4333728071008300758}
   RunCalibration: 0
@@ -343,6 +333,7 @@ MonoBehaviour:
   diffLevelJitter: 0
   NumReversalsUntilTerm: 0
   MinTrialsBeforeTermProcedure: 0
+  MaxTrialsInBlock: 0
   TerminationWindowSize: 0
   reversalsCount: 0
   DiffLevelsAtReversals: 
@@ -375,6 +366,8 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
+  MaskFBController: {fileID: 0}
+  DialogueController: {fileID: 0}
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
   SkyboxMaterial: {fileID: 0}
@@ -384,8 +377,10 @@ MonoBehaviour:
   MovedTooFarSquareTexture: {fileID: 0}
   HeldTooShortSquareTexture: {fileID: 0}
   HeldTooLongSquareTexture: {fileID: 0}
+  NotSelectablePeriodTexture: {fileID: 0}
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
+  MaskValues_Block: []
   GC_CanvasGO: {fileID: 0}
   numCalibPoints: 0
   currentCalibrationPointFinished: 0
@@ -453,6 +448,6 @@ MonoBehaviour:
   TrialAndBlockDefsHandled: 0
   StimsHandled: 0
   BlockResults_AudioClip: {fileID: 0}
-  BlockResultsGO: {fileID: 0}
+  TaskResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}

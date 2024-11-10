@@ -223,17 +223,9 @@ namespace USE_ExperimentTemplate_Session
                     }
                 }
 
-                if (Session.SessionDef.EyeTrackerActive && Session.GazeCalibrationController == null)
-                {
-                    LoadGazeGameObjects();
-                    gazeCalibration.AddChildLevel(Session.GazeCalibrationController.GazeCalibrationTaskLevel);
-                    Session.GazeCalibrationController.RunCalibration = true;
-                }
-
             });
 
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && Session.GazeCalibrationController != null && Session.GazeCalibrationController.RunCalibration, loadGazeCalibration);
-            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort && Session.GazeCalibrationController == null, sessionBuilder);
+            setupSession.SpecifyTermination(() => setupSessionLevel.Terminated && !waitForSerialPort, sessionBuilder);
             setupSession.AddDefaultTerminationMethod(() =>
             {
                 SessionSettings.Save();
@@ -305,6 +297,7 @@ namespace USE_ExperimentTemplate_Session
                 DefiningTask = false;
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
+
             });
             setupGazeCalibration.AddChildLevel(setupTaskLevel);
             setupGazeCalibration.AddSpecificInitializationMethod(() =>
@@ -337,6 +330,29 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(FrameData.AppendDataToFile());
 
                 // Deactivate TaskSelection scene elements
+                /*Session.InitCamGO.SetActive(false);
+                SessionCam.gameObject.SetActive(true);
+
+                MainDirectionalLight.SetActive(true);
+                Session.TaskSelectionCanvasGO.SetActive(true);*/
+
+                if (Session.WebBuild)
+                {
+                    Session.MainExperimenterCanvas_GO.SetActive(false);
+                }
+
+                Session.ParticipantCanvas_GO.SetActive(false);
+
+                if (!Session.WebBuild)
+                {
+                    ExperimenterDisplayCanvas.gameObject.SetActive(true);
+                    ExperimenterDisplayGO.SetActive(true);
+                    ExperimenterDisplayCanvas.transform.Find("Background").gameObject.SetActive(false); //Turn off the spinning background on the Exp Display now that session builder is done:
+                }
+                else
+                    ExperimenterDisplayCanvas.gameObject.SetActive(false);
+
+                ExperimenterDisplayGO.transform.Find("TopRightSection_Background").transform.Find("MainCameraCopy").gameObject.GetComponent<GazeOverlay>().enabled = true;
 
                 Session.ParticipantCanvas_GO.SetActive(false);
                 //Session.LoadingTextGO_Display1.SetActive(false);
@@ -371,12 +387,11 @@ namespace USE_ExperimentTemplate_Session
                     Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "SerialSentData";
                 }
 
-                if (Session.SessionDef.EyeTrackerActive)
-                {
-                    StartCoroutine(Session.GazeData.AppendDataToFile());
-                    gazeDataFileName = Session.GazeData.fileName;
-                    Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "GazeData";
-                }
+                
+                StartCoroutine(Session.GazeData.AppendDataToFile());
+                gazeDataFileName = Session.GazeData.fileName;
+                Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "GazeData";
+                
             });
 
             // Termination method for gaze calibration
@@ -435,6 +450,9 @@ namespace USE_ExperimentTemplate_Session
                 Session.TaskLevel = null;
                 Session.TrialLevel = null;
                 CurrentTask = null;
+
+                if (CameraRenderTexture != null)
+                    CameraRenderTexture.Release();
             });
 
             gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
@@ -455,7 +473,16 @@ namespace USE_ExperimentTemplate_Session
                 //ACTIVATE SESSION BUILDER:
                 SessionBuilder.ManualStart(TaskOrder_GridParent);
             });
+            sessionBuilder.SpecifyTermination(() => SessionBuilder.RunButtonClicked && Session.SessionDef.EyeTrackerActive, loadGazeCalibration, () =>
+            {
+                LoadGazeGameObjects();
+                gazeCalibration.AddChildLevel(Session.GazeCalibrationController.GazeCalibrationTaskLevel);
+                Session.GazeCalibrationController.RunCalibration = true;
+                SessionBuilderGO.SetActive(false);
+
+            });
             sessionBuilder.SpecifyTermination(() => SessionBuilder.RunButtonClicked, selectTask);
+
             sessionBuilder.AddDefaultTerminationMethod(() =>
             {
                 SessionBuilderGO.SetActive(false);
@@ -468,16 +495,20 @@ namespace USE_ExperimentTemplate_Session
                 SessionCam.gameObject.SetActive(true);
 
                 MainDirectionalLight.SetActive(true);
-                Session.TaskSelectionCanvasGO.SetActive(true);
 
-                if(Session.WebBuild)
+                // Activate TaskSelectionCanvas and assign it to the primary display
+                Session.TaskSelectionCanvasGO.SetActive(true);
+                Session.TaskSelectionCanvasGO.GetComponent<Canvas>().targetDisplay = 0;
+                SessionCam.targetDisplay = 0;
+
+                AssignExperimenterDisplayRenderTexture(SessionCam);
+
+                if (Session.WebBuild)
                 {
                     Session.MainExperimenterCanvas_GO.SetActive(false);
                 }
 
                 Session.ParticipantCanvas_GO.SetActive(false);
-
-                AssignExperimenterDisplayRenderTexture(SessionCam);
 
                 if(!Session.WebBuild)
                 {
@@ -691,8 +722,25 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddLateUpdateMethod(() =>
             {
                 Session.SelectionTracker.UpdateActiveSelections();
+
+
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
+                    GameObject selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
+
+                    if (selectedGO != null)
+                    {
+                        string hierarchyPath = selectedGO.name;
+                        Transform parent = selectedGO.transform.parent;
+
+                        while (parent != null)
+                        {
+                            hierarchyPath = parent.name + " -> " + hierarchyPath;
+                            parent = parent.parent;
+                        }
+
+                        print("MADE A SUCCESSFUL SELECTION: " + hierarchyPath + " AT: " + SelectionHandler.CurrentInputLocation());
+                    }
                     string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
                     {
@@ -707,7 +755,6 @@ namespace USE_ExperimentTemplate_Session
 
             });
             selectTask.SpecifyTermination(() => TasksFinished, finishSession);
-            selectTask.SpecifyTermination(() => Session.GazeCalibrationController != null && Session.GazeCalibrationController.RunCalibration, gazeCalibration);
             selectTask.SpecifyTermination(() => selectedConfigFolderName != null, loadTask, () => ResetSelectedTaskButtonSize());
             selectTask.AddTimer(() => Session.SessionDef != null ? Session.SessionDef.TaskSelectionTimeout : 0f, loadTask, () =>
             {
@@ -1227,9 +1274,9 @@ namespace USE_ExperimentTemplate_Session
                 Session.TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                 Session.TobiiEyeTrackerController.EyeTracker_GO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                 Session.TobiiEyeTrackerController.TrackBoxGuide_GO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
-               // THIS LINE BELOW CONTROLS THE OVERLAYING GAZE ONTO THE PLAYER SCENE
-                Session.TobiiEyeTrackerController.GazeTrail_GO = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);
                 Session.GazeCalibrationController = Instantiate(Resources.Load<GameObject>("GazeCalibration")).GetComponent<GazeCalibrationController>();
+               // THIS LINE BELOW CONTROLS THE OVERLAYING GAZE ONTO THE PLAYER SCENE
+               // Session.TobiiEyeTrackerController.GazeTrail_GO = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);
             }
             
         }

@@ -363,6 +363,11 @@ namespace USE_Def_Namespace
         /// Whether or not to run a stimulation
         /// </summary>
         public bool RunSimulation;
+
+        /// <summary>
+        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
+        /// </summary>
+        public string StimulationType;
     }
 
     public class BlockDef

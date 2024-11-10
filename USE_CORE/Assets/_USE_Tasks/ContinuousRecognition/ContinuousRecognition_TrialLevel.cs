@@ -37,6 +37,7 @@ using System.Linq;
 using TMPro;
 using System.Collections;
 using UnityEngine.UI;
+using static SelectionTracking.SelectionTracker;
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
@@ -171,7 +172,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
+        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
+        SelectionHandler ShotgunHandler;
+
+        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
+        else
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
+
         TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*15, CR_CanvasGO, true);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
@@ -352,6 +360,33 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     NonChosenStimLocations = $"[{string.Join(", ", CurrentTrial.TrialStimLocations.Where(location => location != ChosenStim.StimLocation))}]";
             }
 
+            var ongoingSelection = ShotgunHandler.OngoingSelection;
+
+            if (ongoingSelection != null)
+            {
+                if (ongoingSelection.Duration >= CurrentTrial.FixationDuration && !ongoingSelection.FixationDurationPassed)
+                {
+                    ongoingSelection.FixationDurationPassed = true;
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
+
+                    GameObject GoSelected = ongoingSelection.SelectedGameObject;
+                    if (CurrentTrial.StimulationType != null)
+                    {
+                        string stimulationType = CurrentTrial.StimulationType.Trim();
+                        if (stimulationType == "FixationChoice_Target" && GotTrialCorrect)
+                        {
+                            Debug.Log("STIMULATING TARGET!");
+                            StartCoroutine(StimulationCoroutine());
+                        }
+                        else if (stimulationType == "FixationChoice_Distractor" && !GotTrialCorrect)
+                        {
+                            Debug.Log("STIMULATING DISTRACTOR!");
+                            StartCoroutine(StimulationCoroutine());
+                        }
+                    }
+                }
+            }
+
             if (ChosenGO != null && ChosenStim != null && ShotgunHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
                 StimIsChosen = true;
 
@@ -389,6 +424,27 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
             else
                 HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
+
+            if (CurrentTrial.StimulationType != null)
+            {
+                string stimulationType = CurrentTrial.StimulationType.Trim();
+
+                if (ShotgunHandler.LastSuccessfulSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
+                {
+                    if (stimulationType == "HaloOnset_Correct" && GotTrialCorrect)
+                    {
+                        Debug.Log("STIM'ING ON CORRECT HALO!");
+                        StartCoroutine(StimulationCoroutine());
+
+                    }
+                    else if (stimulationType == "HaloOnset_Incorrect" && !GotTrialCorrect)
+                    {
+                        Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
+                        StartCoroutine(StimulationCoroutine());
+                    }
+                }
+            }
+
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -488,7 +544,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
-
+    public IEnumerator StimulationCoroutine()
+    {
+        yield return new WaitForSeconds(CurrentTrial.StimulationOnsetDelay);
+        Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationOnsetDelay);
+        Session.SyncBoxController?.SendSonication();
+    }
     public override void FinishTrialCleanup()
     {
         SliderFBController.SliderGO.SetActive(false);

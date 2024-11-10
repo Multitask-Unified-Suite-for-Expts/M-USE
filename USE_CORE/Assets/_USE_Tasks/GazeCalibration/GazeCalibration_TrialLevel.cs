@@ -146,9 +146,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (!CurrentTrialDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
 
-            InfoString.Append("<b>Info</b>"
-                                + "\nPress <b>Space</b> to begin a <b>9</b> point calibration"
-                                + "\nPress <b>6</b>, <b>5</b>, or <b>3</b> to begin the respective point calibration");
+            InfoString.Append("Info"
+                                + "\nPress Space to begin a 9 point calibration"
+                                + "\nPress 6, 5, or 3 to begin the respective point calibration");
             SetTrialSummaryString();
 
             // Assign UI Circles for the calib circles if not yet created
@@ -336,10 +336,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.white;
             if (!CurrentTrialDef.SpoofGazeWithMouse)
             {
-                InfoString.Append("<b>\n\nInfo</b>"
-                                + string.Format("\nCompute and Apply Returned <b>{0}</b>", CalibrationResult.Status)
-                                + "\nPress <b> = </b> to accept the point"
-                                + "\nPress <b> - </b> to recalibrate the point");
+                InfoString.Append("\n\nInfo"
+                                + string.Format("\nCompute and Apply Returned {0}", CalibrationResult.Status)
+                                + "\nPress = to accept the point"
+                                + "\nPress - to recalibrate the point");
 
                 // Plots sample points to the Result Container, if they exist for the current calibration point
                 CollectSamplePoints();
@@ -347,10 +347,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
                 if (ResultContainer.transform.childCount > 0)
                 {
-                    ResultsString.Append($"\n\n<b>Calibration Results</b>"
-                                         + $"\n<b>Left Eye</b>"
+                    ResultsString.Append($"\n\nCalibration Results"
+                                         + $"\nLeft Eye"
                                          + $"\n{CalculateSampleStatistics(LeftSampleDistances)}"
-                                         + $"\n\n<b>Right Eye</b> "
+                                         + $"\n\nRight Eye "
                                          + $"\n{CalculateSampleStatistics(RightSampleDistances)}");
                 }
                 else

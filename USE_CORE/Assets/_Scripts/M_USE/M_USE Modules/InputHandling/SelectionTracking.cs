@@ -522,6 +522,7 @@ namespace SelectionTracking
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
+                        Debug.Log("CURRENT INPUT LOCATION: " + CurrentInputLocation());
                         OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
                         return true;
                     }

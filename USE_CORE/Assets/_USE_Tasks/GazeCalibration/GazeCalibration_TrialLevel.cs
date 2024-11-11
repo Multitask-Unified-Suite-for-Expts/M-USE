@@ -104,6 +104,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private List<float> LeftSampleDistances = new List<float>();
     private List<float> RightSampleDistances = new List<float>();
     private int[] RecalibCount;
+    private float AverageCalibrationErrorL;
+    private float AverageCalibrationErrorR;
 
     // Experimenter Display Text Variables
     private StringBuilder InfoString = new StringBuilder();
@@ -448,10 +450,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         ITI.SpecifyTermination(() => true, FinishTrial, ()=>
         {
-            
+            Session.GazeCalibrationController.RunCalibration = false;
             // Destroy remaining results on the experimenter display at the end of the trial
             DestroyChildren(ResultContainer);
         });
+
+        DefineTrialData();
+        DefineFrameData();
 
     }
 
@@ -461,8 +466,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
     }
 
-    // ---------------------------------------------------------- METHODS ----------------------------------------------------------
-    private void ShrinkGameObject(GameObject gameObject, float targetSize, float shrinkDuration)
+    public override void DefineCustomTrialDefSelection()
+    {
+        TrialDefSelectionStyle = "gazeCalibration";
+    }
+
+        // ---------------------------------------------------------- METHODS ----------------------------------------------------------
+        private void ShrinkGameObject(GameObject gameObject, float targetSize, float shrinkDuration)
     {
         Vector3 startingScale = gameObject.transform.localScale;
         Vector3 finalScale = new Vector3(targetSize, targetSize, targetSize);
@@ -588,25 +598,24 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            //for (int i = 0; i < (calibPoint.CalibrationSamples.Count >= 10 ? 10 : calibPoint.CalibrationSamples.Count); i++)
             for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
             {
-                
                 CalibrationSample sample = calibPoint.CalibrationSamples[i];
-                // Record the positions of the Left and Right eye for each sample of the calibration point 
                 Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 LeftSamples.Add(leftSamplePos);
                 RightSamples.Add(rightSamplePos);
-
             }
+
+            // Log sample counts for debugging
+            Debug.Log($"Collected {LeftSamples.Count} left samples and {RightSamples.Count} right samples.");
 
             CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60f));
             LeftSamples.Clear();
             RightSamples.Clear();
-
         }
     }
+
 
     private void CreateSampleLines(List<Vector2> leftSamples, List<Vector2> rightSamples, Vector2 calibPoint)
     {
@@ -623,7 +632,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             RightSampleDistances.Add(rightSampleLine.LineLength);
             rightSampleLine.LineGO.SetActive(true);
         }
+
+        // Check if we have elements in distances lists before calculating averages
+        AverageCalibrationErrorL = LeftSampleDistances.Count > 0 ? LeftSampleDistances.Average() : 0f;
+        AverageCalibrationErrorR = RightSampleDistances.Count > 0 ? RightSampleDistances.Average() : 0f;
     }
+
 
     private void AssignCalibPositions()
     {
@@ -684,6 +698,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         CurrentProgressString.Clear();
         ResultsString.Clear();
         InfoString.Clear();
+
+        AverageCalibrationErrorL = 0;
+        AverageCalibrationErrorR = 0;
     }
 
     public override void FinishTrialCleanup()
@@ -705,6 +722,26 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;*/
 
     }
+    private void DefineTrialData()
+    {
+        // Gaze Calibration specific trial data
+        TrialData.AddDatum("NumCalibPoints", () => numCalibPoints); // Number of calibration points chosen
+        TrialData.AddDatum("RecalibCount", () => RecalibCount.Sum()); // Number of recalibrations for the current calibration point
+        TrialData.AddDatum("CalibrationCompleted", () => calibrationFinished ? "Completed" : "Incomplete");
+        TrialData.AddDatum("LeftAvgCalibrationError", () => AverageCalibrationErrorL); // average distance of all left eye results from the actually calib point
+        TrialData.AddDatum("RightAvgCalibrationError", () => AverageCalibrationErrorR);// average distance of all left eye results from the actually calib point
+
+
+    }
+    private void DefineFrameData()
+    {
+        // Gaze Calibration specific frame data
+        FrameData.AddDatum("CalibrationCircleVisible", () => CalibCircle?.CircleGO.activeSelf); // Whether the calibration circle is visible
+        FrameData.AddDatum("CurrentCalibrationPointX", () => (calibNum != 0) ? (float?)calibPointsADCS[calibNum].X : null);
+        FrameData.AddDatum("CurrentCalibrationPointY", () => (calibNum != 0) ? (float?)calibPointsADCS[calibNum].Y : null);
+        FrameData.AddDatum("InCalibrationRange", () => InCalibrationRange() ? 1 : 0); // If the gaze point is within the acceptable calibration range
+    }
+
 
     private string CalculateSampleStatistics(List<float> samples)
     {

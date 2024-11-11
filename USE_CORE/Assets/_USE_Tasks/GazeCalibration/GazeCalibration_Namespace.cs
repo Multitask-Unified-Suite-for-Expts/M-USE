@@ -49,18 +49,18 @@ namespace GazeCalibration_Namespace
         {
             TrialDefs = new List<GazeCalibration_TrialDef>().ConvertAll(x => (TrialDef)x);
 
-            for (int iTrial = 0; iTrial < NumTrials; iTrial++)
-            {
-                GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
-                td.NumPulses = NumPulses;
-                td.PulseSize = PulseSize;
-                td.SpoofGazeWithMouse = SpoofGazeWithMouse;
-                td.CalibPointsInset = CalibPointsInset;
-                td.MaxCircleScale = MaxCircleScale;
-                td.MinCircleScale = MinCircleScale;
-                td.ShrinkDuration = ShrinkDuration;
-                TrialDefs.Add(td);
-            }
+            //for (int iTrial = 0; iTrial < NumTrials; iTrial++)
+            //{
+            GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
+            td.NumPulses = NumPulses;
+            td.PulseSize = PulseSize;
+            td.SpoofGazeWithMouse = SpoofGazeWithMouse;
+            td.CalibPointsInset = CalibPointsInset;
+            td.MaxCircleScale = MaxCircleScale;
+            td.MinCircleScale = MinCircleScale;
+            td.ShrinkDuration = ShrinkDuration;
+            TrialDefs.Add(td);
+            //}
         }
     }
 
@@ -70,7 +70,7 @@ namespace GazeCalibration_Namespace
         //public int BlockCount, TrialCountInBlock, TrialCountInTask;
         //public TrialStims TrialStims;
        // public int BlockID;
-        public int NumTrials;
+       // public int NumTrials;
         public bool SpoofGazeWithMouse;
         public float[] CalibPointsInset = new float[] {0.15f, 0.15f};
         public float MaxCircleScale = 0.075f;
@@ -110,4 +110,5 @@ namespace GazeCalibration_Namespace
         //public State SetInactiveOnTermination;
     
     }
+
 }

@@ -726,21 +726,6 @@ namespace USE_ExperimentTemplate_Session
 
                 if (SelectionHandler.SuccessfulSelections.Count > 0)
                 {
-                    GameObject selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
-
-                    if (selectedGO != null)
-                    {
-                        string hierarchyPath = selectedGO.name;
-                        Transform parent = selectedGO.transform.parent;
-
-                        while (parent != null)
-                        {
-                            hierarchyPath = parent.name + " -> " + hierarchyPath;
-                            parent = parent.parent;
-                        }
-
-                        print("MADE A SUCCESSFUL SELECTION: " + hierarchyPath + " AT: " + SelectionHandler.CurrentInputLocation());
-                    }
                     string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
                     if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
                     {

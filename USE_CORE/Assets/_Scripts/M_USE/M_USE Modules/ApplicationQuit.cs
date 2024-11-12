@@ -29,18 +29,22 @@ using UnityEngine;
 public class ApplicationQuit : MonoBehaviour
 {
     public void Quit()
-	{
-		#if UNITY_EDITOR
-			UnityEditor.EditorApplication.isPlaying = false;
-		#else
-			Application.Quit();
-		#endif
-	}
+    {
+        #if UNITY_WEBGL && !UNITY_EDITOR
+            Application.OpenURL("https://m-use.psy.vanderbilt.edu");
+        #elif UNITY_WEBGL && UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
+    }
 
-	void Update ()
-	{
-		if(Input.GetKeyDown(KeyCode.Escape))
-			Quit();
-	}
-
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Debug.LogWarning("ESCAPE QUIT");
+            Quit();
+        }
+    }
 }

@@ -101,6 +101,8 @@ public static class Session
     public static EventCodeManager EventCodeManager;
 
     public static LogWriter LogWriter;
+
+    public static ApplicationQuit ApplicationQuit;
     
     public static string ConfigFolderPath;
 

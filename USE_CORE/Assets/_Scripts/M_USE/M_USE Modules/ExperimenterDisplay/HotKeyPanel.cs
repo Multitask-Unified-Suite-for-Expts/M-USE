@@ -440,7 +440,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             // The Hot Key is triggered during the Calibration Task
                             Session.TrialLevel.ForceBlockEnd = true;
                             Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
-                            Session.TrialLevel.WriteDataFiles();
+                           // Session.TrialLevel.WriteDataFiles();
 
 
                             // The Hot Key is triggered during the calibration task, exit the calibration task, and return to either task or session

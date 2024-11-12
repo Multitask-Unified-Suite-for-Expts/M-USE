@@ -360,7 +360,10 @@ namespace USE_ExperimentTemplate_Trial
                 TaskLevel.TotalTouches_InBlock += Session.MouseTracker.GetClickCount()[0];
                 TaskLevel.TotalIncompleteTouches_InBlock += TouchFBController?.ErrorCount;
 
-                WriteDataFiles();
+                if (TaskLevel.TaskName == "GazeCalibration")
+                    WriteGazeCalibrationDataFilesAndDeactivate();
+                else
+                    WriteDataFiles();
 
                 if (Session.TimerController.TimerGO != null)
                 {
@@ -405,6 +408,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 // Activate Gaze Calibration components
                 Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
+                Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
 
                 // Assign experimenter display render texture to the GazeCalibration_TaskLevel.TaskCam
                 Session.SessionLevel.AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.GazeCalibrationTaskLevel.TaskCam);
@@ -508,11 +512,9 @@ namespace USE_ExperimentTemplate_Trial
 
         public void WriteDataFiles()
         {
-            Debug.Log("**TRIAL DATA WRITTEN TO: " + TrialData.folderPath + " FROM " + TrialData.DataControllerName);
             StartCoroutine(TrialData.AppendDataToBuffer());
             StartCoroutine(TrialData.AppendDataToFile());
 
-            Debug.Log("**CURRENT TASK LEVEL: " + TaskLevel.name);
             StartCoroutine(TaskLevel.FrameData.AppendDataToBuffer());
             StartCoroutine(TaskLevel.FrameData.AppendDataToFile());
 
@@ -525,7 +527,26 @@ namespace USE_ExperimentTemplate_Trial
                 StartCoroutine(Session.SerialSentData.AppendDataToFile());
          
         }
-        
+
+        private IEnumerator WriteGazeCalibrationDataFilesAndDeactivate()
+        {
+            // Start TrialData coroutines and wait for them to complete
+            yield return StartCoroutine(TrialData.AppendDataToBuffer());
+            yield return StartCoroutine(TrialData.AppendDataToFile());
+
+            // Start TaskLevel.FrameData coroutines and wait for them to complete
+            yield return StartCoroutine(TaskLevel.FrameData.AppendDataToBuffer());
+            yield return StartCoroutine(TaskLevel.FrameData.AppendDataToFile());
+
+            Session.GazeCalibrationController.GazeCalibrationTaskLevel.DeactivateTaskDataControllers();
+        }
+
+        public void WriteGazeCalibrationDataFiles()
+        {
+            StartCoroutine(WriteGazeCalibrationDataFilesAndDeactivate());
+        }
+
+
         public bool CheckForcedBlockEnd()
         {
             if (ForceBlockEnd)

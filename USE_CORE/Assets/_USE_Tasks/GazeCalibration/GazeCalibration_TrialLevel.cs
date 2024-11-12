@@ -724,9 +724,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     private void DefineTrialData()
     {
+        Debug.Log("**TRIAL DATA DEFINED FOR GAZE!!");
         // Gaze Calibration specific trial data
         TrialData.AddDatum("NumCalibPoints", () => numCalibPoints); // Number of calibration points chosen
-        TrialData.AddDatum("RecalibCount", () => RecalibCount.Sum()); // Number of recalibrations for the current calibration point
+        TrialData.AddDatum("RecalibCount", () => RecalibCount?.Sum()); // Number of recalibrations for the current calibration point
         TrialData.AddDatum("CalibrationCompleted", () => calibrationFinished ? "Completed" : "Incomplete");
         TrialData.AddDatum("LeftAvgCalibrationError", () => AverageCalibrationErrorL); // average distance of all left eye results from the actually calib point
         TrialData.AddDatum("RightAvgCalibrationError", () => AverageCalibrationErrorR);// average distance of all left eye results from the actually calib point
@@ -735,6 +736,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     private void DefineFrameData()
     {
+        Debug.Log("**FRAME DATA DEFINED FOR GAZE!!");
+
         // Gaze Calibration specific frame data
         FrameData.AddDatum("CalibrationCircleVisible", () => CalibCircle?.CircleGO.activeSelf); // Whether the calibration circle is visible
         FrameData.AddDatum("CurrentCalibrationPointX", () => (calibNum != 0) ? (float?)calibPointsADCS[calibNum].X : null);

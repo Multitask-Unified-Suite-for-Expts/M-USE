@@ -383,14 +383,14 @@ namespace USE_ExperimentTemplate_Session
                     StartCoroutine(Session.SerialSentData.AppendDataToFile());
                     serialRecvDataFileName = Session.SerialRecvData.fileName;
                     serialSentDataFileName = Session.SerialSentData.fileName;
-                    Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "SerialRecvData";
-                    Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "SerialSentData";
+                    Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "SerialRecvData";
+                    Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "SerialSentData";
                 }
 
                 
                 StartCoroutine(Session.GazeData.AppendDataToFile());
                 gazeDataFileName = Session.GazeData.fileName;
-                Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData" + Path.DirectorySeparatorChar + "GazeData";
+                Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "GazeData";
                 
             });
 
@@ -431,7 +431,6 @@ namespace USE_ExperimentTemplate_Session
                 // Disable gaze calibration
                 Session.GazeCalibrationController.RunCalibration = false;
                 Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
-                Session.GazeCalibrationController.GazeCalibrationTaskLevel.DeactivateTaskDataControllers();
 
                 // Activate TaskSelection scene elements
                 FrameData.gameObject.SetActive(true);
@@ -451,8 +450,6 @@ namespace USE_ExperimentTemplate_Session
                 Session.TrialLevel = null;
                 CurrentTask = null;
 
-                if (CameraRenderTexture != null)
-                    CameraRenderTexture.Release();
             });
 
             gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
@@ -952,7 +949,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     Session.GazeData.fileName = Session.FilePrefix + "__GazeData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
                     Session.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
-                    Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData");
+                   // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData");
                 }
 
                 FrameData.fileName = Session.FilePrefix + "__FrameData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";

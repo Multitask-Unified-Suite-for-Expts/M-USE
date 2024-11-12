@@ -973,6 +973,21 @@ namespace USE_ExperimentTemplate_Session
             //SaveData State---------------------------------------------------------------------------------------------------------------
             saveData.AddSpecificInitializationMethod(() =>
             {
+                SavePanel.SetActive(true);
+
+                if(SessionSummaryGO != null)
+                    SessionSummaryGO.SetActive(false);
+
+                //start rotating background image
+                ImageRotator rotator = Session.TaskSelectionCanvasGO.transform.Find("Background").gameObject.GetComponent<ImageRotator>();
+                if (rotator != null)
+                {
+                    rotator.rotationSpeed = 10f;
+                    rotator.enabled = true;
+                }
+                else
+                    Debug.LogWarning("ROTATOR COMPONENT IS NULL ON THE BACKGROUND GAMEOBJECT");
+
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
 

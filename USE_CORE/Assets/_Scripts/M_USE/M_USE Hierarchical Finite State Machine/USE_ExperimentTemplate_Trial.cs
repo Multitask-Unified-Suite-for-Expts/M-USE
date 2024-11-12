@@ -361,7 +361,9 @@ namespace USE_ExperimentTemplate_Trial
                 TaskLevel.TotalIncompleteTouches_InBlock += TouchFBController?.ErrorCount;
 
                 if (TaskLevel.TaskName == "GazeCalibration")
-                    WriteGazeCalibrationDataFilesAndDeactivate();
+                {
+                    WriteGazeCalibrationDataFiles();
+                }
                 else
                     WriteDataFiles();
 
@@ -543,6 +545,7 @@ namespace USE_ExperimentTemplate_Trial
 
         public void WriteGazeCalibrationDataFiles()
         {
+            Debug.Log("**Trial Data Path: " + TrialData.folderPath);
             StartCoroutine(WriteGazeCalibrationDataFilesAndDeactivate());
         }
 

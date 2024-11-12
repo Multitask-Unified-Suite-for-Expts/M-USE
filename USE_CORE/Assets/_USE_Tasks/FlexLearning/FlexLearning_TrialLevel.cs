@@ -32,6 +32,7 @@ using USE_ExperimentTemplate_Trial;
 using System.Linq;
 using ConfigDynamicUI;
 using System.Collections;
+using static SelectionTracking.SelectionTracker;
 // #if (!UNITY_WEBGL)
 // using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 // #endif  
@@ -158,8 +159,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
-        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
+        
+        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
+        SelectionHandler ShotgunHandler;
+        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
+        else
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
+        
         TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO, true);
+
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
@@ -214,17 +223,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                     GameObject GoSelected = ongoingSelection.SelectedGameObject;
                     var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                    if(SdSelected != null)
+                    if(SdSelected != null && CurrentTrialDef.StimulationType != null)
                     {
                         string stimulationType = CurrentTrialDef.StimulationType.Trim();
                         if (stimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                         {
-                            Debug.Log("STIM'ING TARGET!");
+                            Debug.Log("STIMULATING TARGET!");
                             StartCoroutine(StimulationCoroutine());
                         }
                         else if (stimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
                         {
-                            Debug.Log("STIM'ING DISTRACTOR!");
+                            Debug.Log("STIMULATING DISTRACTOR!");
                             StartCoroutine(StimulationCoroutine());
                         }
                     }
@@ -297,20 +306,23 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
 
-            string stimulationType = CurrentTrialDef.StimulationType.Trim();
-
-            if (lastSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
+            if(CurrentTrialDef.StimulationType != null)
             {
-                if (stimulationType == "HaloOnset_Correct" && CorrectSelection)
-                {
-                    Debug.Log("STIM'ING ON CORRECT HALO!");
-                    StartCoroutine(StimulationCoroutine());
+                string stimulationType = CurrentTrialDef.StimulationType.Trim();
 
-                }
-                else if (stimulationType == "HaloOnset_Incorrect" && !CorrectSelection)
+                if (lastSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
                 {
-                    Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
-                    StartCoroutine(StimulationCoroutine());
+                    if (stimulationType == "HaloOnset_Correct" && CorrectSelection)
+                    {
+                        Debug.Log("STIM'ING ON CORRECT HALO!");
+                        StartCoroutine(StimulationCoroutine());
+
+                    }
+                    else if (stimulationType == "HaloOnset_Incorrect" && !CorrectSelection)
+                    {
+                        Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
+                        StartCoroutine(StimulationCoroutine());
+                    }
                 }
             }
         });

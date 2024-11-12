@@ -31,6 +31,8 @@ using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
 using USE_UI;
+using UnityEngine.UIElements;
+using static SelectionTracking.SelectionTracker;
 
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
@@ -152,9 +154,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-
-        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale*10, WM_CanvasGO, true);
+        
+        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
+        SelectionHandler ShotgunHandler;
+        if(Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
+        else
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
+        
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WM_CanvasGO, true);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
@@ -282,6 +290,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
+        
+        
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });

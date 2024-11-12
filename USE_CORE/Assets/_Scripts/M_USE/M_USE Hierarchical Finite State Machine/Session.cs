@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using SelectionTracking;
 using UnityEngine;
 using USE_Def_Namespace;
+using USE_DisplayManagement;
 using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Data;
 using USE_ExperimentTemplate_Session;

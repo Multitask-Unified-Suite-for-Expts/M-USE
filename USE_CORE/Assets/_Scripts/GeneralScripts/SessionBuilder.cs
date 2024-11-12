@@ -451,7 +451,12 @@ public class SessionBuilder : MonoBehaviour
         }
 
         //ALSO REMOVE THE ICON FROM THE TASK ORDER SECTION OF EXP DISPLAY:
-        Destroy(ExpDisplay_TaskOrder_GridParent.transform.GetChild(index).gameObject);
+        //Destroy(ExpDisplay_TaskOrder_GridParent.transform.GetChild(index).gameObject);
+
+        if (index >= 0 && index < ExpDisplay_TaskOrder_GridParent.transform.childCount)
+        {
+            Destroy(ExpDisplay_TaskOrder_GridParent.transform.GetChild(index).gameObject);
+        }
     }
 
     //Called in termination method of RunTask. Removes the first icon on the Exp Display task order list

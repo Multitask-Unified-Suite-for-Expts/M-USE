@@ -97,6 +97,7 @@ namespace USE_ExperimentTemplate_Session
         public GameObject HumanVersionToggleButton;
         public GameObject ToggleAudioButton;
         public GameObject RedAudioCross;
+        public GameObject SavePanel;
 
         //Load prefabs from resources:
         [HideInInspector] public GameObject HumanStartPanelPrefab;
@@ -127,7 +128,6 @@ namespace USE_ExperimentTemplate_Session
             Session.SessionLevel = this;
 
 
-
             State initScreen = new State("InitScreen");
             State setupSession = new State("SetupSession");
             State sessionBuilder = new State("SessionBuilder");
@@ -136,10 +136,11 @@ namespace USE_ExperimentTemplate_Session
             State setupTask = new State("SetupTask");
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
+            State saveData = new State("SaveData");
             State loadGazeCalibration = new State("LoadGazeCalibration");
             State setupGazeCalibration = new State("SetupGazeCalibration");
             State gazeCalibration = new State("GazeCalibration");
-            AddActiveStates(new List<State> { initScreen, setupSession, sessionBuilder, selectTask, loadTask, setupTask, runTask, finishSession, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
+            AddActiveStates(new List<State> { initScreen, setupSession, sessionBuilder, selectTask, loadTask, setupTask, runTask, finishSession, saveData, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
 
             initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
@@ -964,11 +965,29 @@ namespace USE_ExperimentTemplate_Session
                 
             });
             finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
-            finishSession.SpecifyTermination(() => skipSessionSummary, () => null);
-            finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);
-            finishSession.AddTimer(() => Session.SessionDef.SessionSummaryDuration, () => null);
-            finishSession.AddDefaultTerminationMethod(() =>
+            finishSession.SpecifyTermination(() => skipSessionSummary, () => saveData);
+            finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => saveData);
+            //finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);
+            finishSession.AddTimer(() => Session.SessionDef.SessionSummaryDuration, () => saveData);
+
+            //SaveData State---------------------------------------------------------------------------------------------------------------
+            saveData.AddSpecificInitializationMethod(() =>
             {
+                SavePanel.SetActive(true);
+
+                if(SessionSummaryGO != null)
+                    SessionSummaryGO.SetActive(false);
+
+                //start rotating background image
+                ImageRotator rotator = Session.TaskSelectionCanvasGO.transform.Find("Background").gameObject.GetComponent<ImageRotator>();
+                if (rotator != null)
+                {
+                    rotator.rotationSpeed = 10f;
+                    rotator.enabled = true;
+                }
+                else
+                    Debug.LogWarning("ROTATOR COMPONENT IS NULL ON THE BACKGROUND GAMEOBJECT");
+
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
 
@@ -986,6 +1005,22 @@ namespace USE_ExperimentTemplate_Session
                 }
 
                 StartCoroutine(FrameData.AppendDataToFile());
+
+
+                if (CurrentTask == null)
+                    Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
+                else
+                    StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
+
+                if (Session.SessionDef != null && Session.SessionDef.SerialPortActive && Session.SerialPortController != null)
+                    Session.SerialPortController.ClosePort();
+
+            });
+            saveData.AddTimer(() => 2.5f, () => null);
+            saveData.AddDefaultTerminationMethod(() =>
+            {
+                //Run the Quit method to the closing of: handle web build, normal build, or editor
+                Session.ApplicationQuit.Quit();
             });
         }
 
@@ -1008,13 +1043,7 @@ namespace USE_ExperimentTemplate_Session
 
         private void OnApplicationQuit()
         {
-            if (CurrentTask == null)
-                Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
-            else
-                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
-
-            if (Session.SessionDef != null && Session.SessionDef.SerialPortActive && Session.SerialPortController != null)
-                Session.SerialPortController.ClosePort();
+            Debug.LogWarning("SESSION OnAppQuit()");
         }
 
 
@@ -1027,6 +1056,7 @@ namespace USE_ExperimentTemplate_Session
                 Session.LogWriter = miscScripts.GetComponent<LogWriter>();
                 Session.EventCodeManager = miscScripts.GetComponent<EventCodeManager>();
                 Session.FullScreenController = miscScripts.GetComponent<FullScreenController>();
+                Session.ApplicationQuit = miscScripts.GetComponent<ApplicationQuit>();
                 Session.InitCamGO = GameObject.Find("InitCamera");
                 Session.TaskSelectionCanvasGO = GameObject.Find("TaskSelectionCanvas");
 
@@ -1040,6 +1070,8 @@ namespace USE_ExperimentTemplate_Session
                 HumanVersionToggleButton = GameObject.Find("HumanVersionToggleButton");
                 ToggleAudioButton = GameObject.Find("AudioButton");
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
+                SavePanel = GameObject.Find("SavePanel");
+                SavePanel.SetActive(false);
 
                 MainDirectionalLight = GameObject.Find("Directional Light");
 

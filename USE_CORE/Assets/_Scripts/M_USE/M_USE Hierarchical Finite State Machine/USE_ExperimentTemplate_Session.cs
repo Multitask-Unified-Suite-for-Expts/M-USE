@@ -998,10 +998,16 @@ namespace USE_ExperimentTemplate_Session
             finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => saveData);
             //finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);
             finishSession.AddTimer(() => Session.SessionDef.SessionSummaryDuration, () => saveData);
+            finishSession.AddDefaultTerminationMethod(() =>
+            {
+                SaveDataAtEndOfSession();
+            });
 
             //SaveData State---------------------------------------------------------------------------------------------------------------
             saveData.AddSpecificInitializationMethod(() =>
             {
+                SaveDataAtEndOfSession();
+
                 SavePanel.SetActive(true);
 
                 if(SessionSummaryGO != null)
@@ -1017,30 +1023,6 @@ namespace USE_ExperimentTemplate_Session
                 else
                     Debug.LogWarning("ROTATOR COMPONENT IS NULL ON THE BACKGROUND GAMEOBJECT");
 
-                StartCoroutine(SessionData.AppendDataToBuffer());
-                StartCoroutine(SessionData.AppendDataToFile());
-
-                AppendSerialData();
-                if (Session.SessionDef.SerialPortActive)
-                {
-                    StartCoroutine(Session.SerialSentData.AppendDataToFile());
-                    StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-                }
-
-                if (Session.SessionDef.EyeTrackerActive)
-                {
-                    StartCoroutine(Session.GazeData.AppendDataToBuffer());
-                    StartCoroutine(Session.GazeData.AppendDataToFile());
-                }
-
-                StartCoroutine(FrameData.AppendDataToFile());
-
-
-                if (CurrentTask == null)
-                    Debug.Log("CURRENT TASK IS NULL BEFORE TRYING TO WRITE TASK SUMMARY DATA!");
-                else
-                    StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
-
                 if (Session.SessionDef != null && Session.SessionDef.SerialPortActive && Session.SerialPortController != null)
                     Session.SerialPortController.ClosePort();
 
@@ -1049,8 +1031,37 @@ namespace USE_ExperimentTemplate_Session
             saveData.AddDefaultTerminationMethod(() =>
             {
                 //Run the Quit method to the closing of: handle web build, normal build, or editor
-                Session.ApplicationQuit.Quit();
+                Session.ApplicationQuit.HandleClosingApplication();
             });
+        }
+
+
+        public void SaveDataAtEndOfSession()
+        {
+            if (Session.SessionDef == null)
+                return;
+
+            StartCoroutine(SessionData.AppendDataToBuffer());
+            StartCoroutine(SessionData.AppendDataToFile());
+
+            AppendSerialData();
+            if (Session.SessionDef.SerialPortActive)
+            {
+                StartCoroutine(Session.SerialSentData.AppendDataToFile());
+                StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+            }
+
+            if (Session.SessionDef.EyeTrackerActive)
+            {
+                StartCoroutine(Session.GazeData.AppendDataToBuffer());
+                StartCoroutine(Session.GazeData.AppendDataToFile());
+            }
+
+            StartCoroutine(FrameData.AppendDataToFile());
+            if (CurrentTask == null)
+                Debug.Log("Current Task is Null before trying to write summary data! (could be that no task was started yet)");
+            else
+                StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
         }
 
         private void CreateSessionSummaryPanel(List<TaskObject> tasks)
@@ -1067,12 +1078,6 @@ namespace USE_ExperimentTemplate_Session
                 SessionSummaryController.CreateTaskSummaryGridItems(tasks);
             else
                 Debug.LogError("TASKS ARE NULL");
-        }
-
-
-        private void OnApplicationQuit()
-        {
-            Debug.LogWarning("SESSION OnAppQuit()");
         }
 
 

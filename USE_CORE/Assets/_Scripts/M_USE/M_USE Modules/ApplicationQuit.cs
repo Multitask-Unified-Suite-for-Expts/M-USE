@@ -28,14 +28,24 @@ using UnityEngine;
 
 public class ApplicationQuit : MonoBehaviour
 {
+    //When they press ESC key we want to both save data and then close app
     public void Quit()
     {
-        #if UNITY_WEBGL && !UNITY_EDITOR
-            Application.OpenURL("https://m-use.psy.vanderbilt.edu");
-        #elif UNITY_WEBGL && UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+        if (Session.SessionLevel != null)
+            Session.SessionLevel.SaveDataAtEndOfSession();
+       
+        HandleClosingApplication();
+    }
+
+    //Called by end of session level to close the app
+    public void HandleClosingApplication()
+    {
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #elif UNITY_WEBGL && !UNITY_EDITOR
+                Application.OpenURL("https://m-use.psy.vanderbilt.edu");
         #else
-            Application.Quit();
+                Application.Quit();
         #endif
     }
 
@@ -43,7 +53,7 @@ public class ApplicationQuit : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Debug.LogWarning("ESCAPE QUIT");
+            Debug.LogWarning("QUIT VIA ESCAPE KEY!");
             Quit();
         }
     }

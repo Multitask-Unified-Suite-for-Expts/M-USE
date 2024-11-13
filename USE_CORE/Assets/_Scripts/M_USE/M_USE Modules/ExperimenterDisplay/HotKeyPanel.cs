@@ -425,8 +425,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
                     if (Session.TrialLevel != null)
                     {
-                        Session.TrialLevel.AbortCode = 5;
-                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                        Session.TrialLevel.AbortCode = 7;
+                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["ToggleCalibration"]);
                         Session.TrialLevel.FinishTrialCleanup();
                         Session.TrialLevel.ResetTrialVariables();
                         Session.TrialLevel.ClearActiveTrialHandlers();
@@ -446,12 +446,12 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             // The Hot Key is triggered during the calibration task, exit the calibration task, and return to either task or session
                             if (OriginalTaskLevel != null)
                             {
-                                // Restore the Original Task Level
+                                /*// Restore the Original Task Level
                                 OriginalTaskLevel.ActivateAllSceneElements(OriginalTaskLevel);
                                 OriginalTaskLevel.ActivateTaskDataControllers();
-
-                                Session.TaskLevel = OriginalTaskLevel;
-                                Session.TrialLevel = OriginalTaskLevel.TrialLevel;
+*/
+                                Session.TaskLevel = Session.GazeCalibrationController.OriginalTaskLevel;
+                                Session.TrialLevel = Session.GazeCalibrationController.OriginalTrialLevel;
                             }
                             else
                             {
@@ -460,10 +460,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                                // Session.TrialLevel = null;
                             }
                             // Set calibration data controllers off
-                            Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
-                            Session.GazeCalibrationController.GazeCalibrationTaskLevel.DeactivateTaskDataControllers();
 
-                            Session.GazeCalibrationController.RunCalibration = false;
+                           /* Session.GazeCalibrationController.RunCalibration = false;*/
                         }
 
                         else
@@ -473,17 +471,14 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Session.GazeCalibrationController.RunCalibration = true;
                             Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
 
-                            OriginalTaskLevel = Session.TaskLevel;
-                            OriginalTrialLevel = Session.TrialLevel;
-
                             Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
-                            Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;
+                            Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;/*
                             Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("LoadTrialTextures"));
                             Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
                             Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
 
                             OriginalTaskLevel.DeactivateTaskDataControllers();
-                            OriginalTaskLevel.DeactivateAllSceneElements(OriginalTaskLevel);
+                            OriginalTaskLevel.DeactivateAllSceneElements(OriginalTaskLevel);*/
 
                         }
                     }

@@ -724,7 +724,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     }
     private void DefineTrialData()
     {
-        Debug.Log("**TRIAL DATA DEFINED FOR GAZE!!");
         // Gaze Calibration specific trial data
         TrialData.AddDatum("NumCalibPoints", () => numCalibPoints); // Number of calibration points chosen
         TrialData.AddDatum("RecalibCount", () => RecalibCount?.Sum()); // Number of recalibrations for the current calibration point

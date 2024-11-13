@@ -44,9 +44,8 @@ Shader "UI/RoundedCorners/RoundedCorners" {
             
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"          
-            #include "SDFUtils.cginc"
-            #include "ShaderSetup.cginc"
-            
+            #include "Assets/SDFUtils.cginc" // Updated path to .cginc file in Assets folder
+
             #pragma vertex vert
             #pragma fragment frag
 
@@ -58,11 +57,30 @@ Shader "UI/RoundedCorners/RoundedCorners" {
             fixed4 _TextureSampleAdd;
             float4 _ClipRect;
 
+            // Define v2f structure to pass data between vertex and fragment shaders
+            struct v2f {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 color : COLOR;
+                float2 worldPosition : TEXCOORD1;
+            };
+
+            // Minimal vertex function to set up the vertex data for the fragment shader
+            v2f vert (appdata_full v) { // Using appdata_full to access all vertex attributes
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.uv = v.texcoord;
+                o.color = v.color;
+                o.worldPosition = mul(unity_ObjectToWorld, v.vertex).xy;
+                return o;
+            }
+
+            // Fragment shader for rendering the rounded corners effect
             fixed4 frag (v2f i) : SV_Target {
                 half4 color = (tex2D(_MainTex, i.uv) + _TextureSampleAdd) * i.color;
 
                 #ifdef UNITY_UI_CLIP_RECT
-                color.a *= UnityGet2DClipping(i.worldPosition.xy, _ClipRect);
+                color.a *= UnityGet2DClipping(i.worldPosition, _ClipRect);
                 #endif
 
                 #ifdef UNITY_UI_ALPHACLIP
@@ -73,8 +91,13 @@ Shader "UI/RoundedCorners/RoundedCorners" {
                     return color;
                 }
 
+                // Original calculation for rounded corners (without using lerp)
                 float alpha = CalcAlpha(i.uv, _WidthHeightRadius.xy, _WidthHeightRadius.z);
-                return mixAlpha(tex2D(_MainTex, i.uv), i.color, alpha);
+                
+                // Combine alpha to round the corners
+                color.a *= alpha;
+                
+                return color;
             }
             
             ENDCG

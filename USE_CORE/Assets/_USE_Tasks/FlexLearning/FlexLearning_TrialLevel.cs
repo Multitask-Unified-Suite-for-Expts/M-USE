@@ -213,8 +213,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddUpdateMethod(() =>
         {
             var ongoingSelection = ShotgunHandler.OngoingSelection;
+            string stimulationType = CurrentTrialDef.StimulationType.Trim();
 
-            if (ongoingSelection != null)
+            if (!string.IsNullOrEmpty(CurrentTrialDef.StimulationType) && ongoingSelection != null)
             {
                 if (ongoingSelection.Duration >= CurrentTrialDef.FixationDuration && !ongoingSelection.FixationDurationPassed)
                 {
@@ -223,9 +224,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                     GameObject GoSelected = ongoingSelection.SelectedGameObject;
                     var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                    if(SdSelected != null && CurrentTrialDef.StimulationType != null)
+                    if(SdSelected != null)
                     {
-                        string stimulationType = CurrentTrialDef.StimulationType.Trim();
                         if (stimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                         {
                             Debug.Log("STIMULATING TARGET!");

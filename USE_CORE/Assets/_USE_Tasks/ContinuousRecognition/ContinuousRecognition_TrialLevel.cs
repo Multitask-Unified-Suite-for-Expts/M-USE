@@ -360,9 +360,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     NonChosenStimLocations = $"[{string.Join(", ", CurrentTrial.TrialStimLocations.Where(location => location != ChosenStim.StimLocation))}]";
             }
 
+
             var ongoingSelection = ShotgunHandler.OngoingSelection;
 
-            if (ongoingSelection != null)
+            if(!string.IsNullOrEmpty(CurrentTrial.StimulationType) && ongoingSelection != null)
             {
                 if (ongoingSelection.Duration >= CurrentTrial.FixationDuration && !ongoingSelection.FixationDurationPassed)
                 {
@@ -370,22 +371,22 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
 
                     GameObject GoSelected = ongoingSelection.SelectedGameObject;
-                    if (CurrentTrial.StimulationType != null)
+                        
+                    string stimulationType = CurrentTrial.StimulationType.Trim();
+                    if (stimulationType == "FixationChoice_Target" && GotTrialCorrect)
                     {
-                        string stimulationType = CurrentTrial.StimulationType.Trim();
-                        if (stimulationType == "FixationChoice_Target" && GotTrialCorrect)
-                        {
-                            Debug.Log("STIMULATING TARGET!");
-                            StartCoroutine(StimulationCoroutine());
-                        }
-                        else if (stimulationType == "FixationChoice_Distractor" && !GotTrialCorrect)
-                        {
-                            Debug.Log("STIMULATING DISTRACTOR!");
-                            StartCoroutine(StimulationCoroutine());
-                        }
+                        Debug.Log("STIMULATING TARGET!");
+                        StartCoroutine(StimulationCoroutine());
                     }
+                    else if (stimulationType == "FixationChoice_Distractor" && !GotTrialCorrect)
+                    {
+                        Debug.Log("STIMULATING DISTRACTOR!");
+                        StartCoroutine(StimulationCoroutine());
+                    }       
                 }
             }
+
+
 
             if (ChosenGO != null && ChosenStim != null && ShotgunHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
                 StimIsChosen = true;

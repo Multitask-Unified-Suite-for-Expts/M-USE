@@ -450,8 +450,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                                 OriginalTaskLevel.ActivateAllSceneElements(OriginalTaskLevel);
                                 OriginalTaskLevel.ActivateTaskDataControllers();
 */
-                                Session.TaskLevel = Session.GazeCalibrationController.OriginalTaskLevel;
-                                Session.TrialLevel = Session.GazeCalibrationController.OriginalTrialLevel;
+                                /*Session.TaskLevel = Session.GazeCalibrationController.OriginalTaskLevel;
+                                Session.TrialLevel = Session.GazeCalibrationController.OriginalTrialLevel;*/
                             }
                             else
                             {
@@ -471,8 +471,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Session.GazeCalibrationController.RunCalibration = true;
                             Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
 
-                            Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
-                            Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;/*
+                            /*Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
+                            Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel*/;/*
                             Session.GazeCalibrationController.GazeCalibrationTrialLevel.SpecifyCurrentState(Session.GazeCalibrationController.GazeCalibrationTrialLevel.GetStateFromName("LoadTrialTextures"));
                             Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
                             Session.GazeCalibrationController.ActivateGazeCalibrationComponents();

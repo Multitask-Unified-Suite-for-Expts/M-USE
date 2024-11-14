@@ -247,6 +247,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     StartCoroutine(Session.SerialSentData.CreateFile());
                     StartCoroutine(Session.SerialRecvData.CreateFile());
+
                 }
 
                 StartCoroutine(FrameData.CreateFile());
@@ -400,8 +401,8 @@ namespace USE_ExperimentTemplate_Session
                  Session.SerialRecvData.folderPath = Session.TaskSelectionDataPath;
                  Session.SerialSentData.folderPath = Session.TaskSelectionDataPath;*/
 
-                StartCoroutine(SummaryData.AddTaskRunData(Session.TaskLevel.ConfigFolderName, Session.TaskLevel, Session.TaskLevel.GetTaskSummaryData()));
-
+/*                StartCoroutine(SummaryData.AddTaskRunData(Session.TaskLevel.ConfigFolderName, Session.TaskLevel, Session.TaskLevel.GetTaskSummaryData()));
+*/
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
                 
@@ -428,7 +429,7 @@ namespace USE_ExperimentTemplate_Session
 
                 AssignExperimenterDisplayRenderTexture(SessionCam);
 
-                if (PreviousTaskSummaryString != null && Session.TaskLevel.CurrentTaskSummaryString != null)
+                if (PreviousTaskSummaryString != null && Session.TaskLevel?.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, Session.TaskLevel.CurrentTaskSummaryString);
 
                 Session.TaskLevel = null;
@@ -801,6 +802,7 @@ namespace USE_ExperimentTemplate_Session
                     StartCoroutine(FrameData.AppendDataToFile());
                     if (Session.SessionDef.EyeTrackerActive)
                     {
+                        //Session.GazeData.folderPath = Session.TaskSelectionDataPath;
                         StartCoroutine(Session.GazeData.AppendDataToFile());
                         Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "GazeData";
 

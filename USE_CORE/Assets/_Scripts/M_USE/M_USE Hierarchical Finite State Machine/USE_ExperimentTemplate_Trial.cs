@@ -43,6 +43,7 @@ using System.Collections;
 using UnityEngine.Serialization;
 using USE_Def_Namespace;
 using Random = UnityEngine.Random;
+using static GLTFast.Schema.AnimationChannel;
 
 
 namespace USE_ExperimentTemplate_Trial
@@ -342,7 +343,7 @@ namespace USE_ExperimentTemplate_Trial
             });
             
             if(Session.SessionDef.EyeTrackerActive)
-                FinishTrial.SpecifyTermination(() => AbortCode == 7, () => GazeCalibration);
+                FinishTrial.SpecifyTermination(() => AbortCode == 7 && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
             FinishTrial.SpecifyTermination(() => CheckBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => CheckForcedBlockEnd(), () => null);
             FinishTrial.SpecifyTermination(() => TrialCount_InBlock < TrialDefs.Count - 1, LoadTrialTextures);
@@ -365,12 +366,13 @@ namespace USE_ExperimentTemplate_Trial
                 if(TaskLevel.TaskName == "GazeCalibration")
                 {
                     AbortCode = 0;
-                    Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel);
+                    Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel, "GazeCalibrationToTask");
                 }
                 else if(AbortCode == 7)
                 {
                     AbortCode = 0;
-                    Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.OriginalTrialLevel, Session.GazeCalibrationController.OriginalTaskLevel);
+                    Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.OriginalTrialLevel, Session.GazeCalibrationController.OriginalTaskLevel, "TaskToGazeCalibration");
+                    Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("TaskToGazeCalibration");
                 }
                 else
                     WriteDataFiles();
@@ -397,26 +399,12 @@ namespace USE_ExperimentTemplate_Trial
                 if (TokenFBController)
                     TokenFBController.enabled = false;
                 Session.GazeCalibrationController.OriginalTaskLevel.DeactivateAllSceneElements(Session.GazeCalibrationController.OriginalTaskLevel);
+                Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.GazeCalibrationController.taskGazeCalibrationFolderPath);
 
-                /*// Organize Serial and Gaze data to write to the GazeCalibration folder, but store the original file name so they can be reassigned when exiting the GazeCalibration level
-                if (Session.SessionDef.SerialPortActive)
-                {
-                    StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-                    StartCoroutine(Session.SerialSentData.AppendDataToFile());
-
-                }
-
-                if (Session.SessionDef.EyeTrackerActive)
-                {
-                    StartCoroutine(Session.GazeData.AppendDataToFile());
-                 }
-*/
 
                 // Activate Gaze Calibration components
                 Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
                 Session.GazeCalibrationController.GazeCalibrationTaskLevel.ActivateTaskDataControllers();
-
-                // Change Data Writing to the Task Data Folder
 
                 // Assign experimenter display render texture to the GazeCalibration_TaskLevel.TaskCam
                 Session.SessionLevel.AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.GazeCalibrationTaskLevel.TaskCam);
@@ -424,6 +412,8 @@ namespace USE_ExperimentTemplate_Trial
 
             GazeCalibration.SpecifyTermination(() => !Session.GazeCalibrationController.RunCalibration, () => LoadTrialTextures, () =>
             {
+                Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToTask");
+
                 // Check and exit calibration mode for Tobii eye tracker
                 if (Session.SessionDef.EyeTrackerActive && Session.TobiiEyeTrackerController.isCalibrating)
                 {
@@ -433,26 +423,14 @@ namespace USE_ExperimentTemplate_Trial
                
                 // Deactivate Gaze Calibration components
                 Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
+                Session.GazeCalibrationController.OriginalTaskLevel.ActivateTaskDataControllers();
+                Session.GazeCalibrationController.OriginalTaskLevel.ActivateAllSceneElements(Session.GazeCalibrationController.OriginalTaskLevel);
 
-                // Activate all elements in the task scene
-                TaskLevel.ActivateAllSceneElements(TaskLevel);
-                Session.SessionLevel.AssignExperimenterDisplayRenderTexture(TaskLevel.TaskCam);
-                RenderSettings.skybox = SkyboxMaterial; 
+                Session.SessionLevel.AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.OriginalTaskLevel.TaskCam);
+                RenderSettings.skybox = SkyboxMaterial;
 
-                // Set the Gaze Data Path back to the outer level task folder
-                // Reset level and task references
-                //Session.GazeData.fileName = gazeDataFileName;
-                Session.GazeData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "GazeData";/*
-
-                Session.SerialRecvData.fileName = serialRecvDataFileName;
-                Session.SerialSentData.fileName = serialSentDataFileName;*/
-                Session.SerialRecvData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "SerialRecvData";
-                Session.SerialSentData.folderPath = TaskLevel.TaskDataPath + Path.DirectorySeparatorChar + "SerialSentData";
-
-
-                // Set the current task and trial levels
-                /*Session.TaskLevel = TaskLevel;
-                Session.TrialLevel = this;*/
+                Session.TaskLevel = Session.GazeCalibrationController.OriginalTaskLevel;
+                Session.TrialLevel = Session.GazeCalibrationController.OriginalTrialLevel;
             });
 
 
@@ -460,8 +438,6 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.ManuallyDefine();
             TrialData.AddStateTimingData(this);
             StartCoroutine(TrialData.CreateFile());
-
-            Debug.Log("**CREATING DATA OF THE NAME: " + TrialData.fileName + " AT: " + TrialData.folderPath);
 
         }
 

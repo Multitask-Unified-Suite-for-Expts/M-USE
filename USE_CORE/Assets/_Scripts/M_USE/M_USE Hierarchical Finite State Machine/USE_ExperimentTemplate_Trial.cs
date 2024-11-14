@@ -365,12 +365,10 @@ namespace USE_ExperimentTemplate_Trial
 
                 if(TaskLevel.TaskName == "GazeCalibration")
                 {
-                    AbortCode = 0;
                     Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel, "GazeCalibrationToTask");
                 }
                 else if(AbortCode == 7)
                 {
-                    AbortCode = 0;
                     Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.OriginalTrialLevel, Session.GazeCalibrationController.OriginalTaskLevel, "TaskToGazeCalibration");
                     Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("TaskToGazeCalibration");
                 }
@@ -395,12 +393,17 @@ namespace USE_ExperimentTemplate_Trial
             GazeCalibration.AddSpecificInitializationMethod(() =>
             {
                 // Deactivate Task Scene Elements
+                AbortCode = 0;
+
                 SkyboxMaterial = RenderSettings.skybox;
                 if (TokenFBController)
                     TokenFBController.enabled = false;
                 Session.GazeCalibrationController.OriginalTaskLevel.DeactivateAllSceneElements(Session.GazeCalibrationController.OriginalTaskLevel);
                 Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.GazeCalibrationController.taskGazeCalibrationFolderPath);
 
+                StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.BlockData.CreateFile());
+                StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTrialLevel.TrialData.CreateFile());
+                StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.FrameData.CreateFile());
 
                 // Activate Gaze Calibration components
                 Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
@@ -412,6 +415,7 @@ namespace USE_ExperimentTemplate_Trial
 
             GazeCalibration.SpecifyTermination(() => !Session.GazeCalibrationController.RunCalibration, () => LoadTrialTextures, () =>
             {
+                Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel, "GazeCalibrationToTask");
                 Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToTask");
 
                 // Check and exit calibration mode for Tobii eye tracker

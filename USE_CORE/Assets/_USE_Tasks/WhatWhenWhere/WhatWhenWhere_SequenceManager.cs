@@ -265,7 +265,6 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
             WhatWhenWhere_StimDef sd = (WhatWhenWhere_StimDef)searchStims.stimDefs[iStim];
             if (iStim == correctIndex)
             {
-                Debug.LogWarning("TARGET = " + sd.StimIndex);
                 sd.IsCurrentTarget = true;
                 targetStimGO = sd.StimGameObject;
             }

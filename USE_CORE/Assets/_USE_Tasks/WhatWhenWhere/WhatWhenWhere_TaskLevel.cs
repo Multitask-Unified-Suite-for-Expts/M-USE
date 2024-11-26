@@ -101,9 +101,6 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             blockDataSummary = new WhatWhenWhere_BlockDataSummary();
             blockStartTime = Time.time;
 
-            //Pass the Mask values to the trial level:
-            TrialLevel.MaskValues_Block = wwwBD.MaskValues;
-
         });
 
         RunBlock.AddDefaultTerminationMethod(() =>

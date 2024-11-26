@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -51,7 +52,7 @@ public class MaskController : MonoBehaviour
         return positions.Count < 1 ? "[]" : $"[{string.Join(", ", positions)}]";
     }
 
-    public void CreateMask(GameObject targetObject, float transparency)
+    public void CreateMask(GameObject targetObject, Vector3 maskColor, float transparency, float fadeInDuration)
     {
         GameObject maskObject = new GameObject("Mask_" + targetObject.name)
         {
@@ -66,11 +67,14 @@ public class MaskController : MonoBehaviour
 
         SpriteRenderer maskRenderer = maskObject.AddComponent<SpriteRenderer>();
 
-        if(transparency > 1 || transparency < 0)
+        if (transparency > 1 || transparency < 0)
+        {
             Debug.LogError("TRANSPARENCY VALUE NOT BETWEEN 0 AND 1");
+            return;
+        }
 
-        int alphaValue = Mathf.RoundToInt(transparency * 255);
-        maskRenderer.color = new Color32(120, 120, 120, (byte)alphaValue);
+        int targetAlphaValue = Mathf.RoundToInt(transparency * 255);
+        maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, 0); // Start with alpha = 0
 
         maskRenderer.sprite = MaskSprite;
         maskRenderer.sortingOrder = 999; // High number to ensure it's rendered in front
@@ -90,6 +94,8 @@ public class MaskController : MonoBehaviour
         else
         {
             // For 2D objects:
+            Debug.LogWarning("2D MASKING NOT YET TESTED");
+
             RectTransform rectTransform = targetObject.GetComponent<RectTransform>();
             if (rectTransform != null)
             {
@@ -115,13 +121,32 @@ public class MaskController : MonoBehaviour
 
         maskObject.transform.localScale = new Vector3(diameter, diameter, 1);
 
-
         Mask maskComponent = maskObject.AddComponent<Mask>();
         maskComponent.TargetGO = targetObject;
         Masks.Add(maskComponent);
 
+        // Start the fade-in coroutine
+        StartCoroutine(FadeInMask(maskRenderer, maskColor, targetAlphaValue, fadeInDuration)); // Fade in over 1 second
     }
 
+    private IEnumerator FadeInMask(SpriteRenderer maskRenderer, Vector3 maskColor, int targetAlphaValue, float duration)
+    {
+        float elapsedTime = 0;
+        byte initialAlpha = 0;
+        byte targetAlpha = (byte)targetAlphaValue;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / duration); // Normalized time (0 to 1)
+            byte currentAlpha = (byte)Mathf.Lerp(initialAlpha, targetAlpha, t); // Linearly interpolate alpha
+            maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, currentAlpha);
+            yield return null; // Wait for the next frame
+        }
+
+        // Ensure final alpha value is set
+        maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, targetAlpha);
+    }
 
 
     public void DestroyMask(GameObject maskGO)

@@ -184,11 +184,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
                 startButtonPresentationDelay = startButtonDelay.value;
 
-            Vector3 val = MaskValues_Block.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
-            if (val != null)
-                MaskValues_CurrentTrial = val;
-            else
-                MaskValues_CurrentTrial = null;
+
+            if(CurrentTrialDef.MaskValues != null)
+            {
+                Vector3 val = CurrentTrialDef.MaskValues.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
+                if (val != null)
+                    MaskValues_CurrentTrial = val;
+                else
+                    MaskValues_CurrentTrial = null;
+
+            }
         });
 
         SetupTrial.AddTimer(()=> startButtonPresentationDelay, InitTrial);
@@ -265,14 +270,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         {
                             if (!stim.WasCorrectlyChosen && stim.MaskGameObject == null)
                             {
-                                MaskFBController.CreateMask(stim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                                MaskFBController.CreateMask(stim.StimGameObject, CurrentTrialDef.MaskColor, MaskValues_CurrentTrial.Value.z, CurrentTrialDef.MaskFadeInDuration);
                             }
                         };
 
                         foreach (WhatWhenWhere_StimDef distractorStim in distractorStims.stimDefs)
                         {
                             if(distractorStim.MaskGameObject == null)
-                                MaskFBController.CreateMask(distractorStim.StimGameObject, MaskValues_CurrentTrial.Value.z);
+                                MaskFBController.CreateMask(distractorStim.StimGameObject, CurrentTrialDef.MaskColor, MaskValues_CurrentTrial.Value.z, CurrentTrialDef.MaskFadeInDuration);
                         }
                     }
                 }

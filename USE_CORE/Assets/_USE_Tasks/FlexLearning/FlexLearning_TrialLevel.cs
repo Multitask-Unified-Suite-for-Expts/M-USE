@@ -100,6 +100,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
+
+
     public override void DefineControlLevel()
     {
         State InitTrial = new State("InitTrial");
@@ -146,6 +148,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            //SET AND SEND STIMULATION CODE FOR THE BLOCK:
+            if (CurrentTrialDef.StimulationConditionCodes != null && CurrentTrialDef.StimulationConditionCodes.Length > 0)
+            {
+                int randomIndex = Random.Range(0, CurrentTrialDef.StimulationConditionCodes.Length);
+                TrialStimulationCode = CurrentTrialDef.StimulationConditionCodes[randomIndex];
+                Session.EventCodeManager.SendRangeCode("StimulationCondition", TrialStimulationCode);
+            }
+
             //Set the Stimuli Light/Shadow settings
             SetShadowType(currentTaskDef.ShadowType, "FlexLearning_DirectionalLight");
             if (currentTaskDef.StimFacingCamera)
@@ -209,6 +219,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
+
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -228,12 +239,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     {
                         if (stimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                         {
-                            Debug.Log("STIMULATING TARGET!");
+                            Debug.LogWarning("STIMULATING TARGET!");
                             StartCoroutine(StimulationCoroutine());
                         }
                         else if (stimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
                         {
-                            Debug.Log("STIMULATING DISTRACTOR!");
+                            Debug.LogWarning("STIMULATING DISTRACTOR!");
                             StartCoroutine(StimulationCoroutine());
                         }
                     }
@@ -378,9 +389,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     public IEnumerator StimulationCoroutine()
     {
         yield return new WaitForSeconds(CurrentTrialDef.StimulationOnsetDelay);
-        Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrialDef.StimulationOnsetDelay);
+        Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
         Session.SyncBoxController?.SendSonication();
     }
+
     public override void OnTokenBarFull()
     {
         NumTokenBarFull_InBlock++;
@@ -570,8 +582,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                              "\nCorrect Selection: " + CorrectSelection +
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
-                             "\n" + 
-                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
+                             "\n" +
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
+                             "\n" +
+                             (TrialStimulationCode > 0 ? "" : "");
+
+        if (TrialStimulationCode > 0)
+        {
+            TrialSummaryString += "\nStimulationCode: " + TrialStimulationCode.ToString();
+            TrialSummaryString += "\nStimulationType: " + CurrentTrialDef.StimulationType;
+        }
     }
     protected override bool CheckBlockEnd()
     {

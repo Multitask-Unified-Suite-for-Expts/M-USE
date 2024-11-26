@@ -123,9 +123,8 @@ namespace USE_ExperimentTemplate_Trial
 
         public int CurrentTrialDefIndex;
 
-        //Needs to be passed in individually by each task inside their taskLevel script
-        [HideInInspector] public Vector3[] MaskValues_Block;
-
+        //Can be used by tasks' trial levels to set the trial stimulation code
+        [HideInInspector] public int TrialStimulationCode = 0;
 
 
 

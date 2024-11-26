@@ -39,6 +39,7 @@ using System.Collections;
 using UnityEngine.UI;
 using static SelectionTracking.SelectionTracker;
 
+
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 {
     public ContinuousRecognition_TrialDef CurrentTrial => GetCurrentTrialDef<ContinuousRecognition_TrialDef>();
@@ -113,6 +114,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public bool GotTrialCorrect;
     [HideInInspector] public float TimeChosen_Trial, TimeToChoice_Trial;
     [HideInInspector] public string Locations_String, PC_String, New_String, PNC_String, PC_Percentage_String;
+
+
+    private bool StimulateThisTrial = false;
 
 
 
@@ -280,6 +284,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
 
+
+            StimulateThisTrial = false;
+            if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1))
+                StimulateThisTrial = true;
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -361,28 +369,34 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
 
-            var ongoingSelection = ShotgunHandler.OngoingSelection;
-
-            if(!string.IsNullOrEmpty(CurrentTrial.StimulationType) && ongoingSelection != null)
+            if(StimulateThisTrial)
             {
-                if (ongoingSelection.Duration >= CurrentTrial.FixationDuration && !ongoingSelection.FixationDurationPassed)
+                if(!string.IsNullOrEmpty(CurrentTrial.StimulationType))
                 {
-                    ongoingSelection.FixationDurationPassed = true;
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
+                    var ongoingSelection = ShotgunHandler.OngoingSelection;
+                    if(ongoingSelection != null)
+                    {
+                        if (ongoingSelection.Duration >= CurrentTrial.FixationDuration && !ongoingSelection.FixationDurationPassed)
+                        {
+                            ongoingSelection.FixationDurationPassed = true;
+                            Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
 
-                    GameObject GoSelected = ongoingSelection.SelectedGameObject;
-                        
-                    string stimulationType = CurrentTrial.StimulationType.Trim();
-                    if (stimulationType == "FixationChoice_Target" && GotTrialCorrect)
-                    {
-                        Debug.Log("STIMULATING TARGET!");
-                        StartCoroutine(StimulationCoroutine());
+                            GameObject GoSelected = ongoingSelection.SelectedGameObject;
+                            ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
+
+                            string stimulationType = CurrentTrial.StimulationType.Trim();
+                            if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
+                            {
+                                Debug.Log("STIMULATING TARGET!");
+                                StartCoroutine(StimulationCoroutine());
+                            }
+                            else if (stimulationType == "FixationChoice_Distractor" && chosenStimulus.PreviouslyChosen)
+                            {
+                                Debug.Log("STIMULATING DISTRACTOR!");
+                                StartCoroutine(StimulationCoroutine());
+                            }       
+                        }
                     }
-                    else if (stimulationType == "FixationChoice_Distractor" && !GotTrialCorrect)
-                    {
-                        Debug.Log("STIMULATING DISTRACTOR!");
-                        StartCoroutine(StimulationCoroutine());
-                    }       
                 }
             }
 
@@ -426,22 +440,26 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             else
                 HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
 
-            if (CurrentTrial.StimulationType != null)
+            if (StimulateThisTrial && CurrentTrial.StimulationType != null)
             {
                 string stimulationType = CurrentTrial.StimulationType.Trim();
+                var lastSelection = ShotgunHandler.LastSuccessfulSelection; //TEST WHETHER TO USE ONGOING SEL OR LAST SELECTION. PROB LAST SINCE SEL WAS MADE TO GET TO THIS STATE
 
-                if (ShotgunHandler.LastSuccessfulSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
+                if(lastSelection != null)
                 {
-                    if (stimulationType == "HaloOnset_Correct" && GotTrialCorrect)
+                    if (lastSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
                     {
-                        Debug.Log("STIM'ING ON CORRECT HALO!");
-                        StartCoroutine(StimulationCoroutine());
+                        if (stimulationType == "HaloOnset_Correct" && GotTrialCorrect)
+                        {
+                            Debug.LogWarning("STIM'ING ON CORRECT HALO!");
+                            StartCoroutine(StimulationCoroutine());
 
-                    }
-                    else if (stimulationType == "HaloOnset_Incorrect" && !GotTrialCorrect)
-                    {
-                        Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
-                        StartCoroutine(StimulationCoroutine());
+                        }
+                        else if (stimulationType == "HaloOnset_Incorrect" && !GotTrialCorrect)
+                        {
+                            Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
+                            StartCoroutine(StimulationCoroutine());
+                        }
                     }
                 }
             }

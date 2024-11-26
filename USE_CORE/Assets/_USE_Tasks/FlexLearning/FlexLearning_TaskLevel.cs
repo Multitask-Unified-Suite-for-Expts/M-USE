@@ -33,7 +33,6 @@ using UnityEngine;
 using USE_Settings;
 using USE_ExperimentTemplate_Task;
 
-
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
    // [HideInInspector] public int NumRewardPulses_InTask = 0;
@@ -48,6 +47,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int BlockStringsAdded = 0;
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
+
+
 
     public override void DefineControlLevel()
     {   
@@ -67,7 +68,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             MaxTrials_InBlock = flBD.MaxTrials;
             flTL.TokensWithStimOn = flBD.TokensWithStimOn;
             flTL.ContextName = flBD.ContextName;
-
+             
             ResetBlockVariables();
 
             SetSkyBox(flBD.ContextName);
@@ -76,7 +77,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.TokenFBController.SetTotalTokensNum(flBD.TokenBarCapacity);
             flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
             SetBlockSummaryString();
-            
         });
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
@@ -179,6 +179,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                                       "\nNum Reward Given: " + NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock);
+
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         /*if (PreviousBlocksString.Length > 0)
             CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/

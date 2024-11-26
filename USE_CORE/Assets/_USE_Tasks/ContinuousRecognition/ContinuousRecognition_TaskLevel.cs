@@ -60,6 +60,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int LongestStreak = 0;
     [HideInInspector] public float AverageStreak = 0f;
 
+    private int BlockStimulationCode = 0;
 
 
 
@@ -81,6 +82,15 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.NumInitialTokens);
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
+
+            //SET AND SEND STIMULATION CODE FOR THE BLOCK:
+            if (currentBlockDef.StimulationConditionCodes != null && currentBlockDef.StimulationConditionCodes.Length > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, currentBlockDef.StimulationConditionCodes.Length);
+                BlockStimulationCode = currentBlockDef.StimulationConditionCodes[randomIndex];
+                Session.EventCodeManager.SendRangeCode("StimulationCondition", BlockStimulationCode);
+            }
+
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() =>
@@ -203,13 +213,20 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "";
         CurrentBlockSummaryString.Clear();
 
-        CurrentBlockString = 
+        CurrentBlockString =
                 "\nCorrect: " + trialLevel.NumCorrect_Block +
                 (Session.SessionDef.IsHuman ? ("\nTbCompletions: " + trialLevel.NumTbCompletions_Block) : ("\nSliderCompletions: " + trialLevel.SliderBarCompletions_Block)) + 
                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
                 "\nReward Pulses: " + NumRewardPulses_InBlock + 
                 "\nNonStimTouches: " + trialLevel.NonStimTouches_Block;
+
+        if (BlockStimulationCode > 0)
+        {
+            CurrentBlockString += "\n\nStimulationCode: " + BlockStimulationCode.ToString();
+            CurrentBlockString += "\nStimulationType: " + currentBlockDef.StimulationType.ToString();
+        }
+
         if (blocksAdded > 1)
             CurrentBlockString += "\n";
 

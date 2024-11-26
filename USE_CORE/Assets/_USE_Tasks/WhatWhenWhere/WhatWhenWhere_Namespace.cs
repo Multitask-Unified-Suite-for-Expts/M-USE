@@ -57,6 +57,8 @@ namespace WhatWhenWhere_Namespace
         public float MinSimilarity;
         public float MeanSimilarity;
 
+
+        //Mask variable specific to WWW:
         public int MaskErrorsAllowed_Trial;
 
 
@@ -103,6 +105,9 @@ namespace WhatWhenWhere_Namespace
                 td.GuidedSequenceLearning = GuidedSequenceLearning;
                 td.ParticleHaloActive = ParticleHaloActive;
                 td.MaskErrorsAllowed_Trial = MaskErrorsAllowed_Trial;
+                td.MaskColor = MaskColor;
+                td.MaskValues = MaskValues;
+                td.MaskFadeInDuration = MaskFadeInDuration;
                 TrialDefs.Add(td);
             }
         }

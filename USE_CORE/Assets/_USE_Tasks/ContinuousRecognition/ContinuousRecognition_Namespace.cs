@@ -42,6 +42,7 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_BlockDef : BlockDef
     {
         //FROM BLOCK CONFIG:
+        public int[] TrialsToStimulateOn;
         public int SliderChange;
         public float ItiDuration;
         public int[] BlockStimIndices;
@@ -136,6 +137,14 @@ namespace ContinuousRecognition_Namespace
 
                 trial.slopeOfRewardIncreaseOverTrials = slopeOfRewardIncreaseOverTrials;
 
+
+                trial.TrialsToStimulateOn = TrialsToStimulateOn;
+
+                trial.StimulationType = StimulationType;
+                trial.FixationDuration = FixationDuration;
+                trial.StimulationOnsetDelay = StimulationOnsetDelay;
+
+
                 TrialDefs.Add(trial);
                 numTrialStims++;
             }
@@ -146,6 +155,7 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_TrialDef : TrialDef
     {
         //FROM BLOCK CONFIG & PASSED:
+        public int[] TrialsToStimulateOn;
         public int SliderChange;
         public float ItiDuration;
         public int[] BlockStimIndices;

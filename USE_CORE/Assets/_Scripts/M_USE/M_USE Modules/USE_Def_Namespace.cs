@@ -364,10 +364,6 @@ namespace USE_Def_Namespace
         /// </summary>
         public bool RunSimulation;
 
-        /// <summary>
-        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
-        /// </summary>
-        public string StimulationType;
     }
 
     public class BlockDef
@@ -491,9 +487,19 @@ namespace USE_Def_Namespace
         public bool CircleHaloActive = true;
 
         /// <summary>
-        /// MaskValues for the block. [TrialNum, MaskNum, Transparency]
+        /// MaskValues [TrialNum, MaskNum, Transparency]
         /// </summary>
         public Vector3[] MaskValues;
+
+        /// <summary>
+        /// MaskColor
+        /// </summary>
+        public Vector3 MaskColor;
+
+        /// <summary>
+        /// Mask Fade In Duration. Default is .75 seconds.
+        /// </summary>
+        public float MaskFadeInDuration = .75f;
 
         /// <summary>
         /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
@@ -509,6 +515,12 @@ namespace USE_Def_Namespace
         /// Delay before Stimulation
         /// </summary>
         public float StimulationOnsetDelay = 0f;
+
+        /// <summary>
+        /// Stimulation Conditions Event Code list
+        /// </summary>
+        public int[] StimulationConditionCodes;
+
 
 
         /// <summary>
@@ -662,6 +674,21 @@ namespace USE_Def_Namespace
         public bool CircleHaloActive = true;
 
         /// <summary>
+        /// MaskValues [TrialNum, MaskNum, Transparency]
+        /// </summary>
+        public Vector3[] MaskValues;
+
+        /// <summary>
+        /// MaskColor
+        /// </summary>
+        public Vector3 MaskColor;
+
+        /// <summary>
+        /// Mask Fade In Duration. Default is .75 seconds.
+        /// </summary>
+        public float MaskFadeInDuration = .75f;
+
+        /// <summary>
         /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
         /// </summary>
         public string StimulationType;
@@ -675,6 +702,11 @@ namespace USE_Def_Namespace
         /// Delay before Stimulation
         /// </summary>
         public float StimulationOnsetDelay = 0f;
+
+        /// <summary>
+        /// Stimulation Conditions Event Code list
+        /// </summary>
+        public int[] StimulationConditionCodes;
 
 
 

@@ -639,7 +639,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (runningPerformance.Last() == 1) {
                     if (prevResult == 0) {
                         DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                        TimingValuesAtReversals.Add(ChosenSpatialCueDelayDuration);
+                        TimingValuesAtReversals.Add(ChosenDisplayTargetDuration);
                 
                         reversalsCount++;
                     }
@@ -647,7 +647,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 else if (runningPerformance.Last() == 0) {
                     if (prevResult == 1) {
                         DiffLevelsAtReversals.Add(CurrentTrial.DifficultyLevel);
-                        TimingValuesAtReversals.Add(ChosenSpatialCueDelayDuration);
+                        TimingValuesAtReversals.Add(ChosenDisplayTargetDuration);
                         reversalsCount++;
                     }
                 }

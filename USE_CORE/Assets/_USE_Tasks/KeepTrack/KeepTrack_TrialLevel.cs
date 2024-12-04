@@ -172,7 +172,6 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             {
                 if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
                 {
-
                     if (ChosenObject.IsTarget)
                     {
                         if(ChosenObject.WithinDuration && !ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
@@ -226,8 +225,10 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
                     CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
 
-                    if(ChosenObject.CurrentCycle.firstIntervalStarted)
+                    if(ChosenObject.CurrentCycle.firstIntervalStarted && !ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
+                    {
                         ChosenObject.CurrentCycle.selectedDuringCurrentInterval = true;
+                    }
 
                     Input.ResetInputAxes(); //Reset input?
 

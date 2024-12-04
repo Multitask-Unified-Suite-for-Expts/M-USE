@@ -140,12 +140,14 @@ public class MaskController : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = Mathf.Clamp01(elapsedTime / duration); // Normalized time (0 to 1)
             byte currentAlpha = (byte)Mathf.Lerp(initialAlpha, targetAlpha, t); // Linearly interpolate alpha
-            maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, currentAlpha);
+            if(maskRenderer != null)
+                maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, currentAlpha);
             yield return null; // Wait for the next frame
         }
 
         // Ensure final alpha value is set
-        maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, targetAlpha);
+        if(maskRenderer != null)
+            maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, targetAlpha);
     }
 
 

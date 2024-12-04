@@ -349,7 +349,7 @@ namespace USE_ExperimentTemplate_Data
                 DataControllerContainers.Remove(name);
             }
             else
-                Debug.LogWarning("Attempted to destroy data controller " + name + ", but this does not exist.");
+                Debug.Log("Attempted to destroy data controller " + name + ", but this does not exist.");
         }
 
     }

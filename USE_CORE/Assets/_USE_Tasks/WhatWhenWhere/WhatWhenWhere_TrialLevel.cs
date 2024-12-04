@@ -568,10 +568,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public void MakeStimFaceCamera()
     {
-        foreach (StimGroup group in TrialStims)
-        foreach (var stim in group.stimDefs)
+        if(TrialStims != null && TrialStims.Count > 0)
         {
-            stim.StimGameObject.transform.LookAt(Camera.main.transform);
+            foreach (StimGroup group in TrialStims)
+            {
+                foreach (var stim in group.stimDefs)
+                {
+                    if(stim.StimGameObject != null)
+                        stim.StimGameObject.transform.LookAt(Camera.main.transform);
+                }
+            }
         }
     }
 

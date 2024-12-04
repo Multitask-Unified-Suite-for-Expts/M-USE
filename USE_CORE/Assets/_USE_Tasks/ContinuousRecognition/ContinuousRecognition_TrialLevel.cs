@@ -286,8 +286,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
             StimulateThisTrial = false;
-            if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1))
-                StimulateThisTrial = true;
+            if(CurrentTrial.TrialsToStimulateOn != null)
+            {
+                if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1))
+                    StimulateThisTrial = true;
+            }
+
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -1293,8 +1297,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void MakeStimsFaceCamera(StimGroup stims)
     {
+        if (stims == null || stims.stimDefs.Count < 1)
+            return;
+
         foreach (var stim in stims.stimDefs)
-            stim.StimGameObject.AddComponent<FaceCamera>();
+        {
+            if(stim.StimGameObject != null)
+               stim.StimGameObject.AddComponent<FaceCamera>();
+        }
     }
 
     private void DestroyFeedbackBorders()

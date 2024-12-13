@@ -505,7 +505,7 @@ namespace SelectionTracking
                 {
                     if (initErrors == null)
                     {
-                        Debug.LogWarning("START OF NEW SELECTION");
+                        //Debug.LogWarning("START OF NEW SELECTION");
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                     }
                     else

@@ -443,7 +443,8 @@ namespace USE_ExperimentTemplate_Task
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(false);
 
-                Destroy(GameObject.Find("InputManager").transform.Find("FeedbackControllers(Clone)").gameObject);
+                if(GameObject.Find("InputManager")?.transform.Find("FeedbackControllers(Clone)") != null)
+                    Destroy(GameObject.Find("InputManager").transform.Find("FeedbackControllers(Clone)").gameObject);
 
                 if (!Session.WebBuild)
                 {

@@ -507,14 +507,14 @@ namespace USE_Def_Namespace
         public string StimulationType;
 
         /// <summary>
-        /// Fixation duration before completion
+        /// Fixation time before sending the FixationOnsetPassed EventCode. 
         /// </summary>
-        public float FixationDuration = 0.3f;
+        public float InitialFixationDuration = 0.3f;
 
         /// <summary>
         /// Delay before Stimulation
         /// </summary>
-        public float StimulationOnsetDelay = 0f;
+        public float StimulationDelayDuration = 0f;
 
         /// <summary>
         /// Stimulation Conditions Event Code list
@@ -694,14 +694,14 @@ namespace USE_Def_Namespace
         public string StimulationType;
 
         /// <summary>
-        /// Fixation duration before completion
+        /// Fixation time before sending the FixationOnsetPassed EventCode. 
         /// </summary>
-        public float FixationDuration = 0.3f;
+        public float InitialFixationDuration = 0.3f;
 
         /// <summary>
         /// Delay before Stimulation
         /// </summary>
-        public float StimulationOnsetDelay = 0f;
+        public float StimulationDelayDuration = 0f;
 
         /// <summary>
         /// Stimulation Conditions Event Code list

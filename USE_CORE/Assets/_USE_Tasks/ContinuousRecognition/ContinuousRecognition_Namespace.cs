@@ -137,12 +137,10 @@ namespace ContinuousRecognition_Namespace
 
                 trial.slopeOfRewardIncreaseOverTrials = slopeOfRewardIncreaseOverTrials;
 
-
                 trial.TrialsToStimulateOn = TrialsToStimulateOn;
-
                 trial.StimulationType = StimulationType;
-                trial.FixationDuration = FixationDuration;
-                trial.StimulationOnsetDelay = StimulationOnsetDelay;
+                trial.InitialFixationDuration = InitialFixationDuration;
+                trial.StimulationDelayDuration = StimulationDelayDuration;
 
 
                 TrialDefs.Add(trial);

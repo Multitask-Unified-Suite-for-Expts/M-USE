@@ -228,23 +228,23 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (!string.IsNullOrEmpty(CurrentTrialDef.StimulationType) && ongoingSelection != null)
             {
-                if (ongoingSelection.Duration >= CurrentTrialDef.FixationDuration && !ongoingSelection.FixationDurationPassed)
+                if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
                 {
-                    ongoingSelection.FixationDurationPassed = true;
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
+                    ongoingSelection.InitialFixationDurationPassed = true;
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
 
                     GameObject GoSelected = ongoingSelection.SelectedGameObject;
                     var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                    if(SdSelected != null)
+                    if (SdSelected != null)
                     {
                         if (stimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                         {
-                            Debug.LogWarning("STIMULATING TARGET!");
+                            Debug.Log("STIMULATING TARGET!");
                             StartCoroutine(StimulationCoroutine());
                         }
                         else if (stimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
                         {
-                            Debug.LogWarning("STIMULATING DISTRACTOR!");
+                            Debug.Log("STIMULATING DISTRACTOR!");
                             StartCoroutine(StimulationCoroutine());
                         }
                     }
@@ -321,7 +321,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 string stimulationType = CurrentTrialDef.StimulationType.Trim();
 
-                if (lastSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
+                if (lastSelection.InitialFixationDurationPassed && stimulationType.Contains("Halo"))
                 {
                     if (stimulationType == "HaloOnset_Correct" && CorrectSelection)
                     {
@@ -331,7 +331,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     }
                     else if (stimulationType == "HaloOnset_Incorrect" && !CorrectSelection)
                     {
-                        Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
+                        Debug.Log("STIM'ING ON INCORRECT HALO!");
                         StartCoroutine(StimulationCoroutine());
                     }
                 }
@@ -388,7 +388,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     public IEnumerator StimulationCoroutine()
     {
-        yield return new WaitForSeconds(CurrentTrialDef.StimulationOnsetDelay);
+        yield return new WaitForSeconds(CurrentTrialDef.StimulationDelayDuration);
         Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
         Session.SyncBoxController?.SendSonication();
     }

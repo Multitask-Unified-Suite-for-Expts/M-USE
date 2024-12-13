@@ -206,7 +206,7 @@ namespace SelectionTracking
             public float SelectionPrecision;
             public string ErrorType;
 
-            public bool FixationDurationPassed;
+            public bool InitialFixationDurationPassed;
 
             public string ParentName;
 
@@ -275,7 +275,7 @@ namespace SelectionTracking
             public bool HandlerActive;
             public bool SelectablePeriod = true; //Set to true, then trial level's can turn off for certain states to get fb for selecting prematurely
 
-            private bool HoverOnEventCodeSent; //used so that hover event code is only sent on first frame of hovering. 
+            private bool FixateOnEventCodeSent; //used so that hover event code is only sent on first frame of hovering. 
 
             public event EventHandler<TouchFBController.TouchFeedbackArgs> TouchErrorFeedback;
 
@@ -436,20 +436,20 @@ namespace SelectionTracking
 
                 if (currentTarget == null) //input is not over a gameobject
                 {
-                    if (HoverOnEventCodeSent && OngoingSelection == null)
+                    if (FixateOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        Session.EventCodeManager.AddToFrameEventCodeBuffer("HoverOffObject");
-                        HoverOnEventCodeSent = false; //reset hover
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationOffObject");
+                        FixateOnEventCodeSent = false; //reset fixation
                     }
 
                     if (OngoingSelection != null) // the previous frame was a selection
                     {
                         //For EventCodes:
-                        if(HoverOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
+                        if(FixateOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
                         {
-                            Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "HoverOff");
-                            HoverOnEventCodeSent = false; //reset hover
+                            Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "FixationOff");
+                            FixateOnEventCodeSent = false; //reset fixation
                         }
 
                         CheckTermination();
@@ -458,10 +458,11 @@ namespace SelectionTracking
                 }
 
                 //For EventCodes:
-                if (currentTarget != null && !HoverOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
+                if (currentTarget != null && !FixateOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
-                    Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "HoverOn");
-                    HoverOnEventCodeSent = true;
+                    //Debug.LogWarning("FIXATION ON");
+                    Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "FixationOn");
+                    FixateOnEventCodeSent = true;
                 }
 
                 //if we have reached this point we know there is a target
@@ -504,6 +505,7 @@ namespace SelectionTracking
                 {
                     if (initErrors == null)
                     {
+                        Debug.LogWarning("START OF NEW SELECTION");
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                     }
                     else
@@ -555,7 +557,7 @@ namespace SelectionTracking
 
                         //For EventCodes:
                         Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
-                        HoverOnEventCodeSent = false; //reset hover
+                        FixateOnEventCodeSent = false; //reset hover
                     }
                     else
                     {
@@ -567,7 +569,7 @@ namespace SelectionTracking
                         SelectionErrorHandling(termErrors);
 
                         //For EventCodes:
-                        HoverOnEventCodeSent = false; //reset hover
+                        FixateOnEventCodeSent = false; //reset fixation
                     }
                     AllSelections.Add(OngoingSelection);
                     OngoingSelection = null;

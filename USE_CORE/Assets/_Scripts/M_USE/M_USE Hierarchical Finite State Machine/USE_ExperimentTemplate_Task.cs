@@ -146,6 +146,10 @@ namespace USE_ExperimentTemplate_Task
         private GameObject TaskLoadingControllerGO;
 
 
+        [HideInInspector] public int BlockStimulationCode = 0;
+
+
+
         public virtual void SpecifyTypes()
         {
             TaskLevelType = USE_Tasks_CustomTypes.CustomTaskDictionary[TaskName].TaskLevelType;

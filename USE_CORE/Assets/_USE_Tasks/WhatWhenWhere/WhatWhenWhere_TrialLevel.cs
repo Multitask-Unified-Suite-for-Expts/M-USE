@@ -294,6 +294,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (selectedSD != null)
                 {
                     choiceMade = true;
+
                     SequenceManager.SetSelectedGO(selectedGO);
                     SequenceManager.SetSelectedSD(selectedSD);
                     if (!SequenceManager.GetStartedSequence())
@@ -315,16 +316,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
         {
+            SequenceManager.ManageSelection();
+            ManageDataHandlers();
+
             ShotgunHandler.HandlerActive = false;
             int? depth = Session.Using2DStim ? 50 : (int?)null;
             int? stimIdx = null;
 
-            SequenceManager.ManageSelection();
-            ManageDataHandlers();
-
             GameObject selectedGO = SequenceManager.GetSelectedGO();
             WhatWhenWhere_StimDef selectedSD = SequenceManager.GetSelectedSD();
-
 
             if (selectedSD.IsDistractor)
                 stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
@@ -337,7 +337,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 MaskFBController.DestroyMask(selectedSD.MaskGameObject);
             }
-
 
             if (selectionType.ToLower().Contains("correct"))
             {
@@ -377,7 +376,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     
                 }
             }
-
 
             SequenceManager.ResetSelectionClassifications();
         });
@@ -695,7 +693,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                              "\nSelection Type : " + selectionType +
                              "\nLast Trial's Percent Error : " + percentError +
                              "\n" +
-                             "\nTotal Correct Selections in Trial : " + totalErrors_InTrial +
+                             "\nTotal Correct Selections in Trial : " + correctSelections_InTrial +
                              "\nTotal Errors in Trial : " + totalErrors_InTrial +
                              "\n" +
                              "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(searchDurations_InTrial);

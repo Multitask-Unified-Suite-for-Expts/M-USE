@@ -56,7 +56,11 @@ public class WhatWhenWhere_SequenceManager : MonoBehaviour
 
         if (correctSelection)
         {
-            NumCorrectChoicesInTrial++;
+            //CANT INCREMENT EVERY TIME BECAUSE IT MAY HAVE ALREADY BEEN CORRECTLY CHOSEN
+            if(!selectedSD.WasCorrectlyChosen)
+            {
+                NumCorrectChoicesInTrial++;
+            }
 
             // could be selection of the next correct object in the sequence OR return to last correctly selected object after an error
             if (!selectedFirstStimInSequence)

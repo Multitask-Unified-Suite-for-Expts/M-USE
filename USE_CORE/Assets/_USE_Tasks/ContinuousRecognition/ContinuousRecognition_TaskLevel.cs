@@ -60,8 +60,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int LongestStreak = 0;
     [HideInInspector] public float AverageStreak = 0f;
 
-    private int BlockStimulationCode = 0;
-
 
 
     public override void DefineControlLevel()
@@ -83,12 +81,12 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
 
-            //SET AND SEND STIMULATION CODE FOR THE BLOCK:
+
+            //SET STIMULATION CODE FOR THE BLOCK:
             if (currentBlockDef.StimulationConditionCodes != null && currentBlockDef.StimulationConditionCodes.Length > 0)
             {
-                int randomIndex = UnityEngine.Random.Range(0, currentBlockDef.StimulationConditionCodes.Length);
-                BlockStimulationCode = currentBlockDef.StimulationConditionCodes[randomIndex];
-                Session.EventCodeManager.SendRangeCode("StimulationCondition", BlockStimulationCode);
+                int indexNum = currentBlockDef.StimulationConditionCodes.Length == 1 ? 0 : UnityEngine.Random.Range(0, currentBlockDef.StimulationConditionCodes.Length);
+                trialLevel.TrialStimulationCode = currentBlockDef.StimulationConditionCodes[indexNum];
             }
 
         });

@@ -173,6 +173,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         });
 
         //SETUP TRIAL state ------------------------------------------------------------------------------------------------------
+        SetupTrial.AddSpecificInitializationMethod(() =>
+        {
+            StimulateThisTrial = false;
+            if (CurrentTrial.TrialsToStimulateOn != null)
+            {
+                if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
+                    StimulateThisTrial = true;
+            }
+
+            if(StimulateThisTrial)
+                Session.EventCodeManager.SendRangeCode("StimulationCondition", TrialStimulationCode);
+        });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //------------------------------------------------------------------------------------------------------------------------
@@ -283,15 +295,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
-
-
-            StimulateThisTrial = false;
-            if(CurrentTrial.TrialsToStimulateOn != null)
-            {
-                if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1))
-                    StimulateThisTrial = true;
-            }
-
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -378,12 +381,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 if(!string.IsNullOrEmpty(CurrentTrial.StimulationType))
                 {
                     var ongoingSelection = ShotgunHandler.OngoingSelection;
+
                     if(ongoingSelection != null)
                     {
-                        if (ongoingSelection.Duration >= CurrentTrial.FixationDuration && !ongoingSelection.FixationDurationPassed)
+                        if (ongoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
                         {
-                            ongoingSelection.FixationDurationPassed = true;
-                            Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationDurationPassed");
+                            ongoingSelection.InitialFixationDurationPassed = true;
+                            Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
 
                             GameObject GoSelected = ongoingSelection.SelectedGameObject;
                             ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
@@ -398,8 +402,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                             {
                                 Debug.Log("STIMULATING DISTRACTOR!");
                                 StartCoroutine(StimulationCoroutine());
-                            }       
+                            }
                         }
+                        
                     }
                 }
             }
@@ -451,17 +456,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 if(lastSelection != null)
                 {
-                    if (lastSelection.FixationDurationPassed && stimulationType.Contains("Halo"))
+                    if (lastSelection.InitialFixationDurationPassed && stimulationType.Contains("Halo"))
                     {
                         if (stimulationType == "HaloOnset_Correct" && GotTrialCorrect)
                         {
-                            Debug.LogWarning("STIM'ING ON CORRECT HALO!");
+                            Debug.Log("STIM'ING ON CORRECT HALO!");
                             StartCoroutine(StimulationCoroutine());
 
                         }
                         else if (stimulationType == "HaloOnset_Incorrect" && !GotTrialCorrect)
                         {
-                            Debug.LogWarning("STIM'ING ON INCORRECT HALO!");
+                            Debug.Log("STIM'ING ON INCORRECT HALO!");
                             StartCoroutine(StimulationCoroutine());
                         }
                     }
@@ -569,8 +574,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
     public IEnumerator StimulationCoroutine()
     {
-        yield return new WaitForSeconds(CurrentTrial.StimulationOnsetDelay);
-        Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationOnsetDelay);
+        yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
+        Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
         Session.SyncBoxController?.SendSonication();
     }
     public override void FinishTrialCleanup()

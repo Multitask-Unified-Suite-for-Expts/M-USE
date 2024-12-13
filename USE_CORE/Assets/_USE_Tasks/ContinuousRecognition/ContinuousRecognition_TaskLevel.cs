@@ -81,14 +81,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.ResetBlockVariables();
             CalculateBlockSummaryString();
 
-
             //SET STIMULATION CODE FOR THE BLOCK:
             if (currentBlockDef.StimulationConditionCodes != null && currentBlockDef.StimulationConditionCodes.Length > 0)
             {
                 int indexNum = currentBlockDef.StimulationConditionCodes.Length == 1 ? 0 : UnityEngine.Random.Range(0, currentBlockDef.StimulationConditionCodes.Length);
-                trialLevel.TrialStimulationCode = currentBlockDef.StimulationConditionCodes[indexNum];
+                BlockStimulationCode = currentBlockDef.StimulationConditionCodes[indexNum];
+                trialLevel.TrialStimulationCode = BlockStimulationCode;
             }
-
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() =>

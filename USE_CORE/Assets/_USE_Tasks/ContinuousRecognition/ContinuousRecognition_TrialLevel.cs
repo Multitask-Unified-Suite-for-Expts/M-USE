@@ -119,6 +119,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private bool StimulateThisTrial = false;
 
 
+    [HideInInspector] public USE_Selection OngoingSelection;
+
 
     public override void DefineControlLevel()
     {
@@ -380,16 +382,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 if(!string.IsNullOrEmpty(CurrentTrial.StimulationType))
                 {
-                    var ongoingSelection = ShotgunHandler.OngoingSelection;
+                    OngoingSelection = ShotgunHandler.OngoingSelection;
 
-                    if(ongoingSelection != null)
+                    if(OngoingSelection != null)
                     {
-                        if (ongoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
+                        if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
                         {
-                            ongoingSelection.InitialFixationDurationPassed = true;
+                            OngoingSelection.InitialFixationDurationPassed = true;
                             Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
 
-                            GameObject GoSelected = ongoingSelection.SelectedGameObject;
+                            GameObject GoSelected = OngoingSelection.SelectedGameObject;
                             ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
                             string stimulationType = CurrentTrial.StimulationType.Trim();
@@ -1406,6 +1408,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
         FrameData.AddDatum("StarfieldActive", () => Starfield != null && Starfield.activeInHierarchy ? "Active" : "NotActive");
+
+        FrameData.AddDatum("OngoingSelection_DURATION", () => OngoingSelection == null ? "" : OngoingSelection.Duration.ToString());
+
     }
 
     private void ClearCurrentTrialStimLists()

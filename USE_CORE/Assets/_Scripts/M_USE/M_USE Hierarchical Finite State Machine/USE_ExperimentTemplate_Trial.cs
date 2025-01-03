@@ -135,7 +135,7 @@ namespace USE_ExperimentTemplate_Trial
 
         public T GetCurrentTrialDef<T>() where T : TrialDef
         {
-            Debug.LogWarning("**CURRENT TRIAL DEF INDEX: " + CurrentTrialDefIndex + " LENGTH OF TRIAL DEFS: " + TrialDefs.Count);
+            //Debug.LogWarning("**CURRENT TRIAL DEF INDEX: " + CurrentTrialDefIndex + " LENGTH OF TRIAL DEFS: " + TrialDefs.Count);
             return (T)TrialDefs[CurrentTrialDefIndex];
         }
         

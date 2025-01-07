@@ -340,7 +340,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (Time.time - TrialStartTime > CurrentTrial.TimeToAutoEndTrialSec)
             {
                 TimeRanOut = true;
-                Session.EventCodeManager.SendCodeNextFrame("NoChoice");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
                 Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
                 AbortCode = 6;
             }

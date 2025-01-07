@@ -314,7 +314,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     GotTrialCorrect = true;
 
-                    Session.EventCodeManager.SendCodeImmediate("CorrectResponse");
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (PNC_Stim.Contains(ChosenStim.StimIndex))
@@ -365,7 +365,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     RecencyInterference_Block = (TrialCount_InBlock + 1) - ChosenStim.TrialNumFirstShownOn;
                     WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                    Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
+                    Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
                     ChosenStimCategory = "PC";
                 }
 
@@ -380,34 +380,30 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if(StimulateThisTrial)
             {
-                if(!string.IsNullOrEmpty(CurrentTrial.StimulationType))
+                OngoingSelection = ShotgunHandler.OngoingSelection;
+
+                if(OngoingSelection != null)
                 {
-                    OngoingSelection = ShotgunHandler.OngoingSelection;
-
-                    if(OngoingSelection != null)
+                    if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
                     {
-                        if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
+                        OngoingSelection.InitialFixationDurationPassed = true;
+                        Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
+
+                        GameObject GoSelected = OngoingSelection.SelectedGameObject;
+                        ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
+
+                        string stimulationType = CurrentTrial.StimulationType.Trim();
+                        if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
                         {
-                            OngoingSelection.InitialFixationDurationPassed = true;
-                            Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
-
-                            GameObject GoSelected = OngoingSelection.SelectedGameObject;
-                            ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
-
-                            string stimulationType = CurrentTrial.StimulationType.Trim();
-                            if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
-                            {
-                                Debug.Log("STIMULATING TARGET!");
-                                StartCoroutine(StimulationCoroutine());
-                            }
-                            else if (stimulationType == "FixationChoice_Distractor" && chosenStimulus.PreviouslyChosen)
-                            {
-                                Debug.Log("STIMULATING DISTRACTOR!");
-                                StartCoroutine(StimulationCoroutine());
-                            }
+                            Debug.Log("STIMULATING TARGET!");
+                            StartCoroutine(StimulationCoroutine());
                         }
-                        
-                    }
+                        else if (stimulationType == "FixationChoice_Distractor" && chosenStimulus.PreviouslyChosen)
+                        {
+                            Debug.Log("STIMULATING DISTRACTOR!");
+                            StartCoroutine(StimulationCoroutine());
+                        }
+                    }   
                 }
             }
 
@@ -430,7 +426,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
-            Session.EventCodeManager.SendCodeImmediate("NoChoice");
+            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
             AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
@@ -580,6 +576,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
         Session.SyncBoxController?.SendSonication();
     }
+
     public override void FinishTrialCleanup()
     {
         SliderFBController.SliderGO.SetActive(false);

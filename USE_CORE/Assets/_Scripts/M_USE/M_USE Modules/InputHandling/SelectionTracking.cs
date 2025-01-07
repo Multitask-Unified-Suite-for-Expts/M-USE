@@ -460,7 +460,6 @@ namespace SelectionTracking
                 //For EventCodes:
                 if (currentTarget != null && !FixationOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
-                    //Debug.LogWarning("FIXATION ON");
                     Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "FixationOn");
                     FixationOnEventCodeSent = true;
                 }

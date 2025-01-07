@@ -529,7 +529,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private void DefineFrameData()
     {
         // All AddDatum commmands from the Frame Data
-        FrameData.AddDatum("ContextName", () => ContextName);
         FrameData.AddDatum("StartButtonVisibility", () => StartButton == null ? false:StartButton.activeSelf); // CHECK THE DATA!
         FrameData.AddDatum("TrialStimVisibility", () => searchStim?.IsActive);
     }

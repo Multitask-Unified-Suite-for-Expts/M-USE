@@ -208,20 +208,22 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddEventCodeColumns()
         {
-            AddDatum("ReferenceEventCodes", () =>
+            AddDatum("ReferenceEventCodeSent", () =>
             {
                 string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("sent"));
                 Session.EventCodeManager.sentBuffer.Clear();
                 return dataString; // Return the data string
             });
-            // AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
-            //AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
+
             AddDatum("FrameEventCodes", () =>
             {
                 string dataString = string.Join(",", Session.EventCodeManager.frameEventCodeBufferToStore);
                 Session.EventCodeManager.frameEventCodeBufferToStore.Clear();
                 return dataString; // Return the data string
             });
+
+            // AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
+            //AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
         }
     }
 

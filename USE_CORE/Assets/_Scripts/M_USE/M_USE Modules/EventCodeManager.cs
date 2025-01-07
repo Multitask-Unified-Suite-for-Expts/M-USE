@@ -44,13 +44,7 @@ public class EventCodeManager : MonoBehaviour
     public bool codesActive;
     public int splitBytes;
 
-	//private EventWaitHandle _waitForMessage = new AutoResetEvent(false);
-	//private int codeToSend;
-	private int? checkCode;
-	private int checkReceivedCodePause = 1;
-	private int maxCheckReceivedCodeLoops = 10;
-	private object checkCodeLocker = new object(), checkLoopLocker = new object(), sendCodeLocker = new object();
-	private bool checking;
+	private object sendCodeLocker = new object();
 
     public string neuralAcquisitionDevice = "Neuralynx", returnedCodePrefix = "Lynx";
 
@@ -75,11 +69,12 @@ public class EventCodeManager : MonoBehaviour
     }
 
     public List<int> frameEventCodeBuffer = new List<int>();
-    private int referenceEventCodeMin = 100;
-    private int referenceEventCodeMax = 200;
+    private readonly int referenceEventCodeMin = 100;
+    private readonly int referenceEventCodeMax = 200;
     private int referenceEventCode = 100; // Same as Min
     public string data;
     public List<int> frameEventCodeBufferToStore;
+
     public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
     {
         if (frameEventCodeBuffer.Count > 0)
@@ -107,6 +102,7 @@ public class EventCodeManager : MonoBehaviour
     {
         if (code < 1)
             Debug.LogError("Code " + code + " is less than 1, and cannot be sent.");
+
         if (neuralAcquisitionDevice == "Neuroscan")
         {
             code = code * 256;
@@ -127,22 +123,6 @@ public class EventCodeManager : MonoBehaviour
 					SendSplitCode(code);
 				}
         }
-    }
-
-	public void SendRangeCode(string codeString, int valueToAdd)
-	{
-        EventCode code = SessionEventCodes[codeString];
-        if (code != null)
-		{
-			int computedCode = code.Range[0] + valueToAdd;
-			if (computedCode > code.Range[1])
-				Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
-			else
-			{
-				//SendCodeImmediate(computedCode); 
-				AddToFrameEventCodeBuffer(computedCode);
-			}
-		}
     }
 
     public void SendCodeImmediate(string codeString)
@@ -189,6 +169,22 @@ public class EventCodeManager : MonoBehaviour
 	    }
     }
 
+    public void SendRangeCode(string codeString, int valueToAdd)
+    {
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+        {
+            int computedCode = code.Range[0] + valueToAdd;
+            if (computedCode > code.Range[1])
+                Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
+            else
+            {
+                //SendCodeImmediate(computedCode); 
+                AddToFrameEventCodeBuffer(computedCode);
+            }
+        }
+    }
+
     // ------------------------ Reference Event Code Equivalent Methods ----------------------
     public void AddToFrameEventCodeBuffer(int code)
     {
@@ -198,7 +194,6 @@ public class EventCodeManager : MonoBehaviour
         }
         else
             Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
-
     }
 
     public void AddToFrameEventCodeBuffer(string codeString)
@@ -218,10 +213,11 @@ public class EventCodeManager : MonoBehaviour
             Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
         }
     }
+
     // -------------------------------------------------------------------------------------
     private void SendCode(int codeToSend)
 	{
-        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());//, new List<string> { returnedCodePrefix, codeToSend.ToString("X") });        
+        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());     
         sentBuffer.Add(codeToSend);
 	}
 
@@ -297,7 +293,6 @@ public class EventCodeManager : MonoBehaviour
         if (!string.IsNullOrEmpty(ending))
             eventCodeBuilder.Append(ending);
 
-        //Debug.Log("EVENTCODE: " + eventCodeBuilder.ToString());
         Session.EventCodeManager.AddToFrameEventCodeBuffer(eventCodeBuilder.ToString());
     }
 

@@ -520,7 +520,7 @@ namespace USE_ExperimentTemplate_Session
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
 
-                Session.EventCodeManager.SendCodeImmediate("SelectTaskStarts");
+                Session.EventCodeManager.AddToFrameEventCodeBuffer("SelectTaskStarts");
 
                 SessionSettings.Restore();
                 selectedConfigFolderName = null;

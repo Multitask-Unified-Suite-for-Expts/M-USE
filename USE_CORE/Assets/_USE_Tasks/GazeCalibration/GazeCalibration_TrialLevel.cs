@@ -60,7 +60,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int numCalibPoints;
     private float acceptableCalibrationDistance;
     private NormalizedPoint2D currentADCSTarget;
-    private Vector2 currentScreenPixelTarget;
+    private Vector2 currentScreenPixelTarget = new Vector2(float.NaN, float.NaN);
     private int calibNum;
 
     // Blink Calibration Point Variables
@@ -689,7 +689,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         pointFinished = false;
         calibrationFinished = false;
 
-        if(LeftSamples.Count > 0)
+        currentScreenPixelTarget = new Vector2(float.NaN, float.NaN);
+
+        if (LeftSamples.Count > 0)
             LeftSamples.Clear();
         
         if(RightSamples.Count > 0)
@@ -739,8 +741,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         // Gaze Calibration specific frame data
         FrameData.AddDatum("CalibrationCircleVisible", () => CalibCircle?.CircleGO.activeSelf); // Whether the calibration circle is visible
-        FrameData.AddDatum("CurrentCalibrationPointX", () => (calibNum != 0) ? (float?)calibPointsADCS[calibNum].X : null);
-        FrameData.AddDatum("CurrentCalibrationPointY", () => (calibNum != 0) ? (float?)calibPointsADCS[calibNum].Y : null);
+        FrameData.AddDatum("CurrentCalibrationPointPosition", () => currentScreenPixelTarget);
+
         FrameData.AddDatum("InCalibrationRange", () => InCalibrationRange() ? 1 : 0); // If the gaze point is within the acceptable calibration range
     }
 

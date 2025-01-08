@@ -217,7 +217,9 @@ public class EventCodeManager : MonoBehaviour
     // -------------------------------------------------------------------------------------
     private void SendCode(int codeToSend)
 	{
-        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());     
+       // codeToSend = 5;
+
+        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());    
         sentBuffer.Add(codeToSend);
 	}
 

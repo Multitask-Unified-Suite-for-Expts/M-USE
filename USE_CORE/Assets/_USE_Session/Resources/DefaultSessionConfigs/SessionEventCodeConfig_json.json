@@ -1,352 +1,361 @@
 {
-  "SetupSessionEnds": {
-    "Value": 1,
-    "Description": "Setup Session State Ends"
-  },
-  "SelectTaskStarts": {
-    "Value": 2,
-    "Description": "Select Task State Starts"
-  },
-  "RunTaskStarts": {
-    "Value": 3,
-    "Description": "Run Task State Starts"
-  },
-  "FinishSessionStarts": {
-    "Value": 4,
-    "Description": "Finish Session State Starts"
-  },
-  "CorrectResponse": {
-    "Value": 5,
-    "Description": "Selected the Correct Object"
-  },
-  "IncorrectResponse": {
-    "Value": 6,
-    "Description": "Failed to Select the Correct Object"
-  },
-  "NoChoice": {
-    "Value": 7,
-    "Description": "Trial Aborted Due to Object Selection Period Timing Out"
-  },
-  "TouchDurationError": {
-    "Value": 8,
-    "Description": "Did Not Maintain Object Selection For Minimum Duration, or Exceeded Max Duration"
-  },
-  "SliderFbController_SliderCompleteFbOn": {
-    "Value": 9,
-    "Description": "Slider Complete feedback start"
-  },
-  "SliderFbController_SliderCompleteFbOff": {
-    "Value": 10,
-    "Description": "Slider complete feedback termination"
-  },
-  "SliderFbController_SliderReset": {
-    "Value": 11,
-    "Description": "Slider Reset"
-  },
-  "TokenFbController_FullTbAnimationStart": {
-    "Value": 12,
-    "Description": "Token Bar Complete - Animation Begins"
-  },
-  "TokenFbController_FullTbAnimationEnd": {
-    "Value": 13,
-    "Description": "Token Bar Complete - Animation Ends"
-  },
-  "TokenFbController_TbReset": {
-    "Value": 14,
-    "Description": "TokenBar Reset to Initial Value"
-  },
-  "HaloFbController_SelectionVisualFbOn": {
-    "Value": 15,
-    "Description": "Selected object is highlighted to indicate accuracy"
-  },
-  "HaloFbController_SelectionVisualFbOff": {
-    "Value": 16,
-    "Description": "highlighted object is no longer highlighted"
-  },
-  "AudioFbController_SelectionAuditoryFbOn": {
-    "Value": 17,
-    "Description": "Auditory Feedback Played"
-  },
-  "TouchFBController_FeedbackOn": {
-    "Value": 18,
-    "Description": "Touch Feedback On"
-  },
-  "TouchFBController_FeedbackOff": {
-    "Value": 19,
-    "Description": "Touch Feedback Off"
-  },
-  "SyncBoxController_RewardPulseSent": {
-    "Range": [
-      20,
-      29
-    ],
-    "Description": "Reward Pulse Sent"
-  },
-  "SyncBoxController_SonicationPulseSent": {
-    "Range": [
-      30,
-      39
-    ],
-    "Description": "Sonication Pulse Sent"
-  },
-  "StimOn": {
-    "Value": 40,
-    "Description": "Stimulus Appears"
-  },
-  "StimOff": {
-    "Value": 41,
-    "Description": "Stimulus Disappears"
-  },
-  "TokenBarVisible": {
-    "Value": 42,
-    "Description": "TokenBar is Visible"
-  },
-  "HoverOnObject": {
-    "Value": 43,
-    "Description": "Hover On Object"
-  },
-  "HoverOnTargetObject": {
-    "Value": 44,
-    "Description": "Hover On Target Object"
-  },
-  "HoverOnDistractorObject": {
-    "Value": 45,
-    "Description": "Hover On Distractor Object"
-  },
-  "HoverOnIrrelevantObject": {
-    "Value": 46,
-    "Description": "Hover On Irrelevant Object"
-  },
-  "HoverOffObject": {
-    "Value": 47,
-    "Description": "Hover Off Object "
-  },
-  "HoverOffTargetObject": {
-    "Value": 48,
-    "Description": "Hover Off Target Object"
-  },
-  "HoverOffDistractorObject": {
-    "Value": 49,
-    "Description": "Hover Off Distractor Object"
-  },
-  "HoverOffIrrelevantObject": {
-    "Value": 50,
-    "Description": "Hover Off Irrelevant Object"
-  },
-  "Button0PressedOnObject": {
-    "Value": 51,
-    "Description": "Button 0 Pressed On Object"
-  },
-  "Button0PressedOnTargetObject": {
-    "Value": 52,
-    "Description": "Button 0 Pressed On Target Object"
-  },
-  "Button0PressedOnDistractorObject": {
-    "Value": 53,
-    "Description": "Button 0 Pressed On Distractor Object"
-  },
-  "Button0PressedOnIrrelevantObject": {
-    "Value": 54,
-    "Description": "Button 0 Pressed On Irrelevant Object"
-  },
-  "Button0ReleasedFromObject": {
-    "Value": 55,
-    "Description": "Button 0 Released from Object"
-  },
-  "Button0ReleasedFromTargetObject": {
-    "Value": 56,
-    "Description": "Button 0 Released from Target Object"
-  },
-  "Button0ReleasedFromDistractorObject": {
-    "Value": 57,
-    "Description": "Button 0 Released From Distractor Object"
-  },
-  "Button0ReleasedFromIrrelevantObject": {
-    "Value": 58,
-    "Description": "Button 0 Released From Irrelevant Object"
-  },
-  "Button1PressedOnObject": {
-    "Value": 59,
-    "Description": "Button 1 Pressed On Object"
-  },
-  "Button1PressedOnTargetObject": {
-    "Value": 60,
-    "Description": "Button 1 Pressed On Target Object"
-  },
-  "Button1PressedOnDistractorObject": {
-    "Value": 61,
-    "Description": "Button 1 Pressed On Distractor Object"
-  },
-  "Button1PressedOnIrrelevantObject": {
-    "Value": 62,
-    "Description": "Button 1 Pressed On Irrelevant Object"
-  },
-  "Button1ReleasedFromObject": {
-    "Value": 63,
-    "Description": "Button 1 Released From Object"
-  },
-  "Button1ReleasedFromTargetObject": {
-    "Value": 64,
-    "Description": "Button 1 Released From Target Object"
-  },
-  "Button1ReleasedFromDistractorObject": {
-    "Value": 65,
-    "Description": "Button 1 Released From Distractor Object"
-  },
-  "Button1ReleasedFromIrrelevantObject": {
-    "Value": 66,
-    "Description": "Button 1 Released From Irrelevant Object"
-  },
-  "Button2PressedOnObject": {
-    "Value": 67,
-    "Description": "Button 2 Pressed On Object"
-  },
-  "Button2PressedOnTargetObject": {
-    "Value": 68,
-    "Description": "Button 2 Pressed On Target Object"
-  },
-  "Button2PressedOnDistractorObject": {
-    "Value": 69,
-    "Description": "Button 2 Pressed On Distractor Object"
-  },
-  "Button2PressedOnIrrelevantObject": {
-    "Value": 70,
-    "Description": "Button 2 Pressed On Irrelevant Object"
-  },
-  "Button2ReleasedFromObject": {
-    "Value": 71,
-    "Description": "Button 2 Released From Object"
-  },
-  "Button2ReleasedFromTargetObject": {
-    "Value": 72,
-    "Description": "Button 2 Released From Target Object"
-  },
-  "Button2ReleasedFromDistractorObject": {
-    "Value": 73,
-    "Description": "Button 2 Released From Distractor Object"
-  },
-  "Button2ReleasedFromIrrelevantObject": {
-    "Value": 74,
-    "Description": "Button 2 Released From Irrelevant Object"
-  },
-  "ObjectSelected": {
-    "Value": 75,
-    "Description": "Object Selected"
-  },
-  "TargetObjectSelected": {
-    "Value": 76,
-    "Description": "Target Object Selected"
-  },
-  "DistractorObjectSelected": {
-    "Value": 77,
-    "Description": "Distractor Object Selected"
-  },
-  "IrrelevantObjectSelected": {
-    "Description": "Irrelevant Object Selected",
-    "Value": 78
-  },
-  "StartButtonSelected": {
-    "Description": "Start Button Selected",
-    "Value": 79
-  },
-  "ContextOn": {
-    "Value": 80,
-    "Description": "Context On"
-  },
-  "ContextOff": {
-    "Value": 81,
-    "Description": "Context Off"
-  },
-  "InstructionsOn": {
-    "Value": 82,
-    "Description": "Instructions On"
-  },
-  "InstructionsOff": {
-    "Value": 83,
-    "Description": "Instructions Off"
-  },
-  "HumanStartPanelOn": {
-    "Value": 84,
-    "Description": "HumanStartPanel On"
-  },
-  "HumanStartPanelOff": {
-    "Value": 85,
-    "Description": "HumanStartPanel Off"
-  },
+    "SetupSessionEnds": {
+        "Value": 1,
+        "Description": "Setup Session State Ends"
+    },
+    "SelectTaskStarts": {
+        "Value": 2,
+        "Description": "Select Task State Starts"
+    },
+    "RunTaskStarts": {
+        "Value": 3,
+        "Description": "Run Task State Starts"
+    },
+    "FinishSessionStarts": {
+        "Value": 4,
+        "Description": "Finish Session State Starts"
+    },
+    "CorrectResponse": {
+        "Value": 5,
+        "Description": "Selected the Correct Object"
+    },
+    "IncorrectResponse": {
+        "Value": 6,
+        "Description": "Failed to Select the Correct Object"
+    },
+    "NoChoice": {
+        "Value": 7,
+        "Description": "Trial Aborted Due to Object Selection Period Timing Out"
+    },
+    "TouchDurationError": {
+        "Value": 8,
+        "Description": "Did Not Maintain Object Selection For Minimum Duration, or Exceeded Max Duration"
+    },
+    "SliderFbController_SliderCompleteFbOn": {
+        "Value": 9,
+        "Description": "Slider Complete feedback start"
+    },
+    "SliderFbController_SliderCompleteFbOff": {
+        "Value": 10,
+        "Description": "Slider complete feedback termination"
+    },
+    "SliderFbController_SliderReset": {
+        "Value": 11,
+        "Description": "Slider Reset"
+    },
+    "TokenFbController_FullTbAnimationStart": {
+        "Value": 12,
+        "Description": "Token Bar Complete - Animation Begins"
+    },
+    "TokenFbController_FullTbAnimationEnd": {
+        "Value": 13,
+        "Description": "Token Bar Complete - Animation Ends"
+    },
+    "TokenFbController_TbReset": {
+        "Value": 14,
+        "Description": "TokenBar Reset to Initial Value"
+    },
+    "HaloFbController_SelectionVisualFbOn": {
+        "Value": 15,
+        "Description": "Selected object is highlighted to indicate accuracy"
+    },
+    "HaloFbController_SelectionVisualFbOff": {
+        "Value": 16,
+        "Description": "highlighted object is no longer highlighted"
+    },
+    "AudioFbController_SelectionAuditoryFbOn": {
+        "Value": 17,
+        "Description": "Auditory Feedback Played"
+    },
+    "TouchFBController_FeedbackOn": {
+        "Value": 18,
+        "Description": "Touch Feedback On"
+    },
+    "TouchFBController_FeedbackOff": {
+        "Value": 19,
+        "Description": "Touch Feedback Off"
+    },
+    "SyncBoxController_RewardPulseSent": {
+        "Range": [
+            20,
+            29
+        ],
+        "Description": "Reward Pulse Sent"
+    },
+    "SyncBoxController_SonicationPulseSent": {
+        "Range": [
+            30,
+            39
+        ],
+        "Description": "Sonication Pulse Sent"
+    },
+    "StimOn": {
+        "Value": 40,
+        "Description": "Stimulus Appears (followed by stim code)"
+    },
+    "StimOff": {
+        "Value": 41,
+        "Description": "Stimulus Disappears (followed by stim code)"
+    },
+    "TokenBarVisible": {
+        "Value": 42,
+        "Description": "TokenBar is Visible"
+    },
+    "FixationOnObject": {
+        "Value": 43,
+        "Description": "Fixation On Object"
+    },
+    "FixationOnTargetObject": {
+        "Value": 44,
+        "Description": "Fixation On Target Object"
+    },
+    "FixationOnDistractorObject": {
+        "Value": 45,
+        "Description": "Fixation On Distractor Object"
+    },
+    "FixationOnIrrelevantObject": {
+        "Value": 46,
+        "Description": "Fixation On Irrelevant Object"
+    },
+    "FixationOffObject": {
+        "Value": 47,
+        "Description": "Fixation Off Object "
+    },
+    "FixationOffTargetObject": {
+        "Value": 48,
+        "Description": "Fixation Off Target Object"
+    },
+    "FixationOffDistractorObject": {
+        "Value": 49,
+        "Description": "Fixation Off Distractor Object"
+    },
+    "FixationOffIrrelevantObject": {
+        "Value": 50,
+        "Description": "Fixation Off Irrelevant Object"
+    },
+    "Button0PressedOnObject": {
+        "Value": 51,
+        "Description": "Button 0 Pressed On Object"
+    },
+    "Button0PressedOnTargetObject": {
+        "Value": 52,
+        "Description": "Button 0 Pressed On Target Object"
+    },
+    "Button0PressedOnDistractorObject": {
+        "Value": 53,
+        "Description": "Button 0 Pressed On Distractor Object"
+    },
+    "Button0PressedOnIrrelevantObject": {
+        "Value": 54,
+        "Description": "Button 0 Pressed On Irrelevant Object"
+    },
+    "Button0ReleasedFromObject": {
+        "Value": 55,
+        "Description": "Button 0 Pressed Off Object"
+    },
+    "Button0ReleasedFromTargetObject": {
+        "Value": 56,
+        "Description": "Button 0 Pressed Off Target Object"
+    },
+    "Button0ReleasedFromDistractorObject": {
+        "Value": 57,
+        "Description": "Button 0 Pressed Off Distractor Object"
+    },
+    "Button0ReleasedFromIrrelevantObject": {
+        "Value": 58,
+        "Description": "Button 0 Pressed Off Irrelevant Object"
+    },
+    "Button1PressedOnObject": {
+        "Value": 59,
+        "Description": "Button 1 Pressed On Object"
+    },
+    "Button1PressedOnTargetObject": {
+        "Value": 60,
+        "Description": "Button 1 Pressed On Target Object"
+    },
+    "Button1PressedOnDistractorObject": {
+        "Value": 61,
+        "Description": "Button 1 Pressed On Distractor Object"
+    },
+    "Button1PressedOnIrrelevantObject": {
+        "Value": 62,
+        "Description": "Button 1 Pressed On Irrelevant Object"
+    },
+    "Button1ReleasedFromObject": {
+        "Value": 63,
+        "Description": "Button 1 Pressed Off Object"
+    },
+    "Button1ReleasedFromTargetObject": {
+        "Value": 64,
+        "Description": "Button 1 Pressed Off Target Object"
+    },
+    "Button1ReleasedFromDistractorObject": {
+        "Value": 65,
+        "Description": "Button 1 Pressed Off Distractor Object"
+    },
+    "Button1ReleasedFromIrrelevantObject": {
+        "Value": 66,
+        "Description": "Button 1 Pressed Off Irrelevant Object"
+    },
+    "Button2PressedOnObject": {
+        "Value": 67,
+        "Description": "Button 2 Pressed On Object"
+    },
+    "Button2PressedOnTargetObject": {
+        "Value": 68,
+        "Description": "Button 2 Pressed On Target Object"
+    },
+    "Button2PressedOnDistractorObject": {
+        "Value": 69,
+        "Description": "Button 2 Pressed On Distractor Object"
+    },
+    "Button2PressedOnIrrelevantObject": {
+        "Value": 70,
+        "Description": "Button 2 Pressed On Irrelevant Object"
+    },
+    "Button2ReleasedFromObject": {
+        "Value": 71,
+        "Description": "Button 2 Pressed Off Object"
+    },
+    "Button2ReleasedFromTargetObject": {
+        "Value": 72,
+        "Description": "Button 2 Pressed Off Target Object"
+    },
+    "Button2ReleasedFromDistractorObject": {
+        "Value": 73,
+        "Description": "Button 2 Pressed Off Distractor Object"
+    },
+    "Button2ReleasedFromIrrelevantObject": {
+        "Value": 74,
+        "Description": "Button 2 Pressed Off Irrelevant Object"
+    },
+    "ObjectSelected": {
+        "Value": 75,
+        "Description": "Object Selected"
+    },
+    "TargetObjectSelected": {
+        "Value": 76,
+        "Description": "Target Object Selected"
+    },
+    "DistractorObjectSelected": {
+        "Value": 77,
+        "Description": "Distractor Object Selected"
+    },
+    "IrrelevantObjectSelected": {
+        "Description": "Irrelevant Object Selected",
+        "Value": 78
+    },
+    "StartButtonSelected": {
+        "Description": "Start Button Selected",
+        "Value": 79
+    },
+    "ContextOn": {
+        "Value": 80,
+        "Description": "Context On"
+    },
+    "ContextOff": {
+        "Value": 81,
+        "Description": "Context Off"
+    },
+    "InstructionsOn": {
+        "Value": 82,
+        "Description": "Instructions On"
+    },
+    "InstructionsOff": {
+        "Value": 83,
+        "Description": "Instructions Off"
+    },
+    "HumanStartPanelOn": {
+        "Value": 84,
+        "Description": "HumanStartPanel On"
+    },
+    "HumanStartPanelOff": {
+        "Value": 85,
+        "Description": "HumanStartPanel Off"
+    },
+    "InitialFixationDurationPassed": {
+        "Value": 86,
+        "Description": "Initial Fixation Duration has passed"
+    },
+    "StimulationCondition": {
+        "Range": [
+            90,
+            100
+        ],
+        "Description": "Stimulation Condition"
+    },
+    "SetupTaskStarts": {
+        "Range": [
+            101,
+            130
+        ],
+        "Description": "Setup Task State Starts"
+    },
 
-
-
-  "SetupTaskStarts": {
-    "Range": [
-      101,
-      130
-    ],
-    "Description": "Setup Task State Starts"
-  },
-  "RunBlockStarts": {
-    "Range": [
-      201,
-      300
-    ],
-    "Description": "Run Block State Starts"
-  },
-  "BlockFeedbackStarts": {
-    "Value": 301,
-    "Description": "Block Feedback State Starts"
-  },
-  "FinishTaskStarts": {
-    "Value": 302,
-    "Description": "Finish Task State Starts"
-  },
-  "SetupTrialStarts": {
-    "Range": [
-      1001,
-      6000
-    ],
-    "Description": "Setup Trial State Starts "
-  },
-  "FinishTrialStarts": {
-    "Value": 7001,
-    "Description": "Finish Trial State Starts "
-  },
-  "GenericError": {
-    "Value": 8001,
-    "Description": "Generic Error"
-  },
-  "CustomError": {
-    "Range": [
-      8002,
-      8100
-    ],
-    "Description": "Custom Error"
-  },
-  "GenericAbortTrial": {
-    "Value": 9001,
-    "Description": "Generic Abort Trial"
-  },
-  "CustomAbortTrial": {
-    "Range": [
-      9002,
-      9100
-    ],
-    "Description": "Custom Abort Trial"
-  },
-  "GenericObject": {
-    "Value": 10000,
-    "Description": "Generic Object - Not Yet Implemented"
-  },
-  "Quaddle": {
-    "Range": [
-      10001,
-      19000
-    ],
-    "Description": "Quaddle becoming visible"
-  },
-  "SpecificObject": {
-    "Range": [
-      19001,
-      19999
-    ],
-    "Description": "Indicates Specific Object - Not Yet Implemented"
-  }
+    "RunBlockStarts": {
+        "Range": [
+            201,
+            400
+        ],
+        "Description": "Run Block State Starts"
+    },
+    "BlockFeedbackStarts": {
+        "Value": 401,
+        "Description": "Block Feedback State Starts"
+    },
+    "FinishTaskStarts": {
+        "Value": 402,
+        "Description": "Finish Task State Starts"
+    },
+    "SetupTrialStarts": {
+        "Range": [
+            1001,
+            6000
+        ],
+        "Description": " [1001, 6000] Setup Trial State Starts "
+    },
+    "FinishTrialStarts": {
+        "Value": 7001,
+        "Description": "Finish Trial State Starts "
+    },
+    "GenericError": {
+        "Value": 8001,
+        "Description": "Generic Error"
+    },
+    "CustomError": {
+        "Range": [
+            8002,
+            8100
+        ],
+        "Description": "8002, 8100 indicate Custom Error"
+    },
+    "GenericAbortTrial": {
+        "Value": 9001,
+        "Description": "Generic Abort Trial"
+    },
+    "CustomAbortTrial": {
+        "Range": [
+            9002,
+            9100
+        ],
+        "Description": "Custom Abort Trial"
+    },
+    "GenericObject": {
+        "Value": 10000,
+        "Description": "Generic Object"
+    },
+    "Quaddle": {
+        "Range": [
+            10001,
+            19000
+        ],
+        "Description": "10001, 19000 indicates Quaddle identity"
+    },
+    "SpecificObject": {
+        "Range": [
+            19001,
+            19999
+        ],
+        "Description": "19001, 19999 indicates Specific Object"
+    }
 }

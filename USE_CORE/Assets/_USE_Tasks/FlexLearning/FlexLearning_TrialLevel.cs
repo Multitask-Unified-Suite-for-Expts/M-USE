@@ -100,6 +100,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
+    private string StimulationType;
+
 
 
     public override void DefineControlLevel()
@@ -220,13 +222,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
+            if (CurrentTrialDef.StimulationType != null)
+                StimulationType = CurrentTrialDef.StimulationType.Trim();
+            else
+                StimulationType = null;
+
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
             var ongoingSelection = ShotgunHandler.OngoingSelection;
-            string stimulationType = CurrentTrialDef.StimulationType.Trim();
 
-            if (!string.IsNullOrEmpty(CurrentTrialDef.StimulationType) && ongoingSelection != null)
+            if (!string.IsNullOrEmpty(StimulationType) && ongoingSelection != null)
             {
                 if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
                 {
@@ -237,12 +243,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
                     if (SdSelected != null)
                     {
-                        if (stimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
+                        if (StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                         {
                             Debug.Log("STIMULATING TARGET!");
                             StartCoroutine(StimulationCoroutine());
                         }
-                        else if (stimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
+                        else if (StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
                         {
                             Debug.Log("STIMULATING DISTRACTOR!");
                             StartCoroutine(StimulationCoroutine());

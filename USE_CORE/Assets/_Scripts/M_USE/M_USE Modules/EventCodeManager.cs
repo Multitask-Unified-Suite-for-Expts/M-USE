@@ -232,8 +232,10 @@ public class EventCodeManager : MonoBehaviour
             splitCode[iCode] = (code % 255) + 1;
             code = (int)(code / 255);
         }
+
         if (code > 0)
             Debug.LogError("Event code " + code + " is too high, and thus not evenly divisible into " + splitBytes + " individual bytes");
+
 		for (int iCode = 0; iCode < splitBytes; iCode++)
 		{
 			try

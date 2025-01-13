@@ -536,6 +536,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private void CreateTextOnExperimenterDisplay()
     {
         //Create corresponding text on player view of experimenter display
+
         foreach (FlexLearning_StimDef stim in searchStim.stimDefs)
         {
             if (stim.IsTarget)

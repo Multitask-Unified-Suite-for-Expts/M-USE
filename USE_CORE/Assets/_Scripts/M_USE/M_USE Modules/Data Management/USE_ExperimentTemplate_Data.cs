@@ -208,14 +208,14 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddEventCodeColumns()
         {
-            AddDatum("ReferenceEventCodeSent", () =>
-            {
-                string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("sent"));
-                Session.EventCodeManager.sentBuffer.Clear();
-                return dataString; // Return the data string
-            });
+            //AddDatum("ReferenceEventCodeSent", () =>
+            //{
+            //    string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("sent"));
+            //    Session.EventCodeManager.sentBuffer.Clear();
+            //    return dataString; // Return the data string
+            //});
 
-            AddDatum("FrameEventCodes", () =>
+            AddDatum("FrameEventCode", () =>
             {
                 string dataString = string.Join(",", Session.EventCodeManager.frameEventCodeBufferToStore);
                 Session.EventCodeManager.frameEventCodeBufferToStore.Clear();

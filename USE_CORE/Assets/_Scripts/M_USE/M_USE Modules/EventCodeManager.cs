@@ -50,24 +50,6 @@ public class EventCodeManager : MonoBehaviour
 
 	public SyncBoxController SyncBoxController;
 
-
-    public void SendBufferedEventCodes()
-    {
-        if (Time.frameCount > frameChecker)
-        {
-            systemTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-            frameChecker = Time.frameCount;
-            if (toSendBuffer.Count > 0)
-            {
-                foreach (int code in toSendBuffer)
-                {
-                    SendCodeImmediate(code);
-				}
-                toSendBuffer.Clear();
-            }
-        }
-    }
-
     public List<int> frameEventCodeBuffer = new List<int>();
     private readonly int referenceEventCodeMin = 100;
     private readonly int referenceEventCodeMax = 200;
@@ -75,27 +57,32 @@ public class EventCodeManager : MonoBehaviour
     public string data;
     public List<int> frameEventCodeBufferToStore;
 
+
+    public void EventCodeLateUpdate()
+    {
+        sentBuffer.Clear();
+        splitSentBuffer.Clear();
+        preSplitBuffer.Clear();
+    }
+
     public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
     {
         if (frameEventCodeBuffer.Count > 0)
         {
-            SendCodeImmediate(referenceEventCode);
-            referenceEventCode++;
-            if (referenceEventCode > referenceEventCodeMax)
-                referenceEventCode = referenceEventCodeMin;
+            int currentCode = frameEventCodeBuffer[0];
+            SendCodeImmediate(currentCode);
 
-            // Store the frameEventCodeBuffer data temporarily
-            frameEventCodeBufferToStore.AddRange(frameEventCodeBuffer);
+            //SendCodeImmediate(referenceEventCode);
+            //referenceEventCode++;
+            //if (referenceEventCode > referenceEventCodeMax)
+            //    referenceEventCode = referenceEventCodeMin;
 
-            frameEventCodeBuffer.Clear();
+            frameEventCodeBufferToStore.Add(currentCode);
+            //frameEventCodeBufferToStore.AddRange(frameEventCodeBuffer);
+
+            frameEventCodeBuffer.RemoveAt(0);
+            //frameEventCodeBuffer.Clear();
         }
-    }
-
-    public void EventCodeLateUpdate()
-	{
-        sentBuffer.Clear();
-        splitSentBuffer.Clear();
-		preSplitBuffer.Clear();
     }
 
     public void SendCodeImmediate(int code)
@@ -300,5 +287,23 @@ public class EventCodeManager : MonoBehaviour
         Session.EventCodeManager.AddToFrameEventCodeBuffer(eventCodeBuilder.ToString());
     }
 
+
+    //Not used:
+    public void SendBufferedEventCodes()
+    {
+        if (Time.frameCount > frameChecker)
+        {
+            systemTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
+            frameChecker = Time.frameCount;
+            if (toSendBuffer.Count > 0)
+            {
+                foreach (int code in toSendBuffer)
+                {
+                    SendCodeImmediate(code);
+                }
+                toSendBuffer.Clear();
+            }
+        }
+    }
 
 }

@@ -217,8 +217,10 @@ namespace USE_ExperimentTemplate_Data
 
             AddDatum("FrameEventCode", () =>
             {
-                string dataString = string.Join(",", Session.EventCodeManager.frameEventCodeBufferToStore);
-                Session.EventCodeManager.frameEventCodeBufferToStore.Clear();
+                string dataString = Session.EventCodeManager.frameEventCodeBufferToStore[0].ToString();
+                //string dataString = string.Join(",", Session.EventCodeManager.frameEventCodeBufferToStore);
+                Session.EventCodeManager.frameEventCodeBufferToStore.RemoveAt(0);
+                //Session.EventCodeManager.frameEventCodeBufferToStore.Clear();
                 return dataString; // Return the data string
             });
 

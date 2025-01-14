@@ -27,19 +27,15 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using USE_Utilities;
 using USE_ExperimentTemplate_Classes;
 using System.Text;
+
 
 public class EventCodeManager : MonoBehaviour 
 {
     public Dictionary<string, EventCode> SessionEventCodes;
 
-    private int frameChecker = 0;
-    private List<int> toSendBuffer = new List<int>();
     public List<int> sentBuffer = new List<int>();
-    public List<int> splitSentBuffer = new List<int>();
-	public List<int> preSplitBuffer = new List<int>();
     public long systemTime;
     public bool codesActive;
     public int splitBytes;
@@ -51,9 +47,6 @@ public class EventCodeManager : MonoBehaviour
 	public SyncBoxController SyncBoxController;
 
     public List<int> frameEventCodeBuffer = new List<int>();
-    private readonly int referenceEventCodeMin = 100;
-    private readonly int referenceEventCodeMax = 200;
-    private int referenceEventCode = 100; // Same as Min
     public string data;
     public List<int> frameEventCodeBufferToStore;
 
@@ -61,29 +54,8 @@ public class EventCodeManager : MonoBehaviour
     public void EventCodeLateUpdate()
     {
         sentBuffer.Clear();
-        splitSentBuffer.Clear();
-        preSplitBuffer.Clear();
     }
 
-    public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
-    {
-        if (frameEventCodeBuffer.Count > 0)
-        {
-            int currentCode = frameEventCodeBuffer[0];
-            SendCodeImmediate(currentCode);
-
-            //SendCodeImmediate(referenceEventCode);
-            //referenceEventCode++;
-            //if (referenceEventCode > referenceEventCodeMax)
-            //    referenceEventCode = referenceEventCodeMin;
-
-            frameEventCodeBufferToStore.Add(currentCode);
-            //frameEventCodeBufferToStore.AddRange(frameEventCodeBuffer);
-
-            frameEventCodeBuffer.RemoveAt(0);
-            //frameEventCodeBuffer.Clear();
-        }
-    }
 
     public void SendCodeImmediate(int code)
     {
@@ -97,8 +69,11 @@ public class EventCodeManager : MonoBehaviour
 
         if (codesActive)
         {
+            sentBuffer.Add(code); //Add to SentBuffer before potentially splitting so its nonsplit in frame data
+
 			if (splitBytes <= 1)
 			{
+
 				lock (sendCodeLocker)
 				{
 					SendCode(code);
@@ -130,31 +105,6 @@ public class EventCodeManager : MonoBehaviour
 	    }
     }
     
-    public void SendCodeNextFrame(int code)
-    {
-        if (!toSendBuffer.Contains(code))
-            toSendBuffer.Add(code);
-        else
-            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
-    }
-
-	public void SendCodeNextFrame(string codeString)
-	{
-		EventCode code = SessionEventCodes[codeString];
-		if (code != null)
-			SendCodeNextFrame(code);
-	}
-
-    public void SendCodeNextFrame(EventCode ec)
-    {
-        if (ec.Value != null)
-		    SendCodeNextFrame(ec.Value.Value);
-	    else
-	    {
-		    SendCodeImmediate(1);
-		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
-	    }
-    }
 
     public void SendRangeCode(string codeString, int valueToAdd)
     {
@@ -166,51 +116,21 @@ public class EventCodeManager : MonoBehaviour
                 Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
             else
             {
-                //SendCodeImmediate(computedCode); 
-                AddToFrameEventCodeBuffer(computedCode);
+                SendCodeImmediate(computedCode); 
             }
         }
     }
 
-    // ------------------------ Reference Event Code Equivalent Methods ----------------------
-    public void AddToFrameEventCodeBuffer(int code)
-    {
-        if (!frameEventCodeBuffer.Contains(code))
-        {
-            frameEventCodeBuffer.Add(code);
-        }
-        else
-            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
-    }
-
-    public void AddToFrameEventCodeBuffer(string codeString)
-    {
-        EventCode code = SessionEventCodes[codeString];
-        if (code != null)
-            AddToFrameEventCodeBuffer(code);
-    }
-
-    public void AddToFrameEventCodeBuffer(EventCode ec)
-    {
-        if (ec.Value != null)
-            AddToFrameEventCodeBuffer(ec.Value.Value);
-        else
-        {
-            SendCodeImmediate(1);
-            Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
-        }
-    }
 
     // -------------------------------------------------------------------------------------
     private void SendCode(int codeToSend)
 	{
         SyncBoxController.SendCommand("NEU " + codeToSend.ToString());     
-        sentBuffer.Add(codeToSend);
+        //sentBuffer.Add(codeToSend); //adding up above now instead
 	}
 
 	public void SendSplitCode(int code)
     {
-		preSplitBuffer.Add(code);
         int[] splitCode = new int[splitBytes];
         for (int iCode = splitBytes - 1; iCode >= 0; iCode--)
         {
@@ -232,24 +152,8 @@ public class EventCodeManager : MonoBehaviour
 				Debug.Log(e);
 				Debug.Log("this many in splitCode: " + splitCode.Count());
 			}
-			splitSentBuffer.Add(splitCode[iCode]);
 		}
     }
-
-	public List<int> GetBuffer(string bufferType)
-	{
-		if (bufferType == "sent")
-			return sentBuffer;
-		else if (bufferType == "split")
-			return splitSentBuffer;
-		else if (bufferType == "presplit")
-			return preSplitBuffer;
-		else
-			Debug.LogError("Unknown event code buffer type " + bufferType + ".");
-		return new List<int>();
-
-	}
-
 
     public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
     {
@@ -282,26 +186,21 @@ public class EventCodeManager : MonoBehaviour
         if (!string.IsNullOrEmpty(ending))
             eventCodeBuilder.Append(ending);
 
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(eventCodeBuilder.ToString());
+        Session.EventCodeManager.SendCodeImmediate(eventCodeBuilder.ToString());
     }
 
-
-    //Not used:
-    public void SendBufferedEventCodes()
+    public List<int> GetBuffer(string bufferType)
     {
-        if (Time.frameCount > frameChecker)
-        {
-            systemTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-            frameChecker = Time.frameCount;
-            if (toSendBuffer.Count > 0)
-            {
-                foreach (int code in toSendBuffer)
-                {
-                    SendCodeImmediate(code);
-                }
-                toSendBuffer.Clear();
-            }
-        }
+        if (bufferType == "sent")
+            return sentBuffer;
+        //else if (bufferType == "split")
+        //    return splitSentBuffer;
+        //else if (bufferType == "presplit")
+        //    return preSplitBuffer;
+        else
+            Debug.LogError("Unknown event code buffer type " + bufferType + ".");
+        return new List<int>();
+
     }
 
 }

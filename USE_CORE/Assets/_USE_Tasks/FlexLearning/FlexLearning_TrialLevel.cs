@@ -212,7 +212,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!Session.WebBuild)
                 ActivateChildren(playerViewParent);
 
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            Session.EventCodeManager.SendCodeImmediate("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -237,7 +237,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
                 {
                     ongoingSelection.InitialFixationDurationPassed = true;
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
+                    Session.EventCodeManager.SendCodeImmediate("InitialFixationDurationPassed");
 
                     GameObject GoSelected = ongoingSelection.SelectedGameObject;
                     var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
@@ -275,14 +275,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                Session.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+                Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
             }
 
         if (selectedGO != null)
@@ -296,7 +296,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+            Session.EventCodeManager.SendCodeImmediate("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
@@ -378,7 +378,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "NeutralITI";
                 StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI")));
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
+                Session.EventCodeManager.SendCodeImmediate("ContextOff");
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>

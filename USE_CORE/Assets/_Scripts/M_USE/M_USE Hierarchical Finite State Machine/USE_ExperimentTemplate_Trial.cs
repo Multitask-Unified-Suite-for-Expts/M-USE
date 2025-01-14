@@ -339,7 +339,7 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddSpecificInitializationMethod(() =>
             {
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishTrialStarts");
+                Session.EventCodeManager.SendCodeImmediate("FinishTrialStarts");
             });
             
             if(Session.SessionDef.EyeTrackerActive)
@@ -611,7 +611,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 Session.HumanStartPanel.InstructionsGO.SetActive(false);
                 Session.HumanStartPanel.InstructionsOn = false;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+                Session.EventCodeManager.SendCodeImmediate(Session.EventCodeManager.SessionEventCodes["InstructionsOff"]);
             }
         }
 

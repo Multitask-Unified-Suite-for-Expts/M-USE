@@ -285,8 +285,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseBalloon.SpecifyTermination(() => SideChoice != null, CenterSelection, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BalloonChosen"]);
+            Session.EventCodeManager.SendCodeImmediate("Button0PressedOnTargetObject");//SELECTION STUFF (code may not be exact and/or could be moved to Selection handler)
+            Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["BalloonChosen"]);
 
             DestroyChildren(SideChoice == "Left" ? RewardContainerRight : RewardContainerLeft);
             InflationsNeeded = SideChoice == "Left" ? CurrentTrial.NumClicksLeft : CurrentTrial.NumClicksRight;
@@ -341,7 +341,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             TokenFBController.SetTotalTokensNum(SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
             TokenFBController.enabled = true;
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            Session.EventCodeManager.SendCodeImmediate("TokenBarVisible");
         });
 
         //Inflate Balloon state -----------------------------------------------------------------------------------------------------------------------------------------
@@ -463,7 +463,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                                 Handler.HandlerActive = false;
                                 NumInflations++;
 
-                                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                                Session.EventCodeManager.SendCodeImmediate("CorrectResponse");
 
                                 CalculateInflation(); //Sets Inflate to TRUE at end of func
                                 InflateAudioPlayed = false;
@@ -504,7 +504,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             }
             else
             {
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+                Session.EventCodeManager.SendCodeImmediate("NoChoice");
                 Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
                 AbortCode = 6;
 

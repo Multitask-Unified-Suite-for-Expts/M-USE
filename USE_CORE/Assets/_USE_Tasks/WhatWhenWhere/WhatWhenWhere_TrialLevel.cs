@@ -436,7 +436,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SliderFlashingFeedback.AddTimer(() => flashingFbDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
+            Session.EventCodeManager.SendCodeImmediate("ContextOff");
             
             CurrentTaskLevel.SetBlockSummaryString();
         });
@@ -489,7 +489,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     private void HandleAbortedTrialData()
     {
-        Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+        Session.EventCodeManager.SendCodeImmediate("NoChoice");
         Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
         AbortCode = 6;
 
@@ -836,7 +836,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void HandleRuleBreakingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleBreakingError"]);
+            Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleBreakingError"]);
 
         ruleBreakingErrors_InTrial++;
         CurrentTaskLevel.RuleBreakingErrors_InBlock++;
@@ -845,7 +845,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void HandleRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RuleAbidingError"]);
+            Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["RuleAbidingError"]);
 
         ruleAbidingErrors_InTrial++;
         CurrentTaskLevel.RuleAbidingErrors_InBlock++;
@@ -854,7 +854,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void HandleDistractorRuleAbidingErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRuleAbidingError"]);
+            Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["DistractorRuleAbidingError"]);
 
         ruleAbidingErrors_InTrial++;
         CurrentTaskLevel.RuleAbidingErrors_InBlock++;
@@ -863,7 +863,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleBackTrackErrorData()
     {
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BackTrackError"]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["BackTrackError"]);
 
         backTrackErrors_InTrial++;
         CurrentTaskLevel.BackTrackErrors_InBlock++;
@@ -872,7 +872,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void HandleRetouchErrorData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchError"]);
+            Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["RetouchError"]);
 
         retouchErrors_InTrial++;
         CurrentTaskLevel.RetouchErrors_InBlock++;
@@ -882,7 +882,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void HandleRetouchCorrectData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RetouchCorrect"]);
+            Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["RetouchCorrect"]);
 
         retouchCorrect_InTrial++;
         CurrentTaskLevel.RetouchCorrect_InBlock++;
@@ -892,7 +892,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void HandleCorrectSelectionData()
     {
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+            Session.EventCodeManager.SendCodeImmediate("CorrectResponse");
 
         correctSelections_InTrial++;
         CurrentTaskLevel.CorrectSelections_InBlock++;

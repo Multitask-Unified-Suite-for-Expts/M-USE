@@ -309,7 +309,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public void PlayerShift(string from, string to)
     {
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["ShiftFrom" + from + "To" + to]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["ShiftFrom" + from + "To" + to]);
     }
 
     public void TargetHit(string pos)
@@ -317,7 +317,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         TargetsHit_Trial++;
         TargetsHit_Block++;
         CurrentTaskLevel.TargetsHit_Task++;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetHit" + pos]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetHit" + pos]);
 
     }
     public void TargetMissed(string pos)
@@ -325,7 +325,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         TargetsMissed_Trial++;
         TargetsMissed_Block++;
         CurrentTaskLevel.TargetsMissed_Task++;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetMissed" + pos]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["TargetMissed" + pos]);
 
     }
     public void DistractorHit(string pos)
@@ -333,7 +333,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DistractorsHit_Trial++;
         DistractorsHit_Block++;
         CurrentTaskLevel.DistractorsHit_Task++;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorHit" + pos]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["DistractorHit" + pos]);
 
     }
     public void DistractorAvoided(string pos)
@@ -341,14 +341,14 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         DistractorsAvoided_Trial++;
         DistractorsAvoided_Block++;
         CurrentTaskLevel.DistractorsAvoided_Task++;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorAvoided" + pos]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["DistractorAvoided" + pos]);
     }
     public void BlockadeHit(string pos)
     {
         BlockadesHit_Trial++;
         BlockadesHit_Block++;
         CurrentTaskLevel.BlockadesHit_Task++;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BlockadeHit" + pos]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["BlockadeHit" + pos]);
 
     }
     public void BlockadeAvoided(string pos)
@@ -356,7 +356,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         BlockadesAvoided_Block++;
         BlockadesAvoided_Trial++;
         CurrentTaskLevel.BlockadesAvoided_Task++;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["BlockadeAvoided" + pos]);
+        Session.EventCodeManager.SendCodeImmediate(TaskEventCodes["BlockadeAvoided" + pos]);
     }
 
     protected override void DefineTrialStims()

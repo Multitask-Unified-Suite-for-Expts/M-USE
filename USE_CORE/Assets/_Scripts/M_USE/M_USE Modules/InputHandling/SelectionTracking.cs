@@ -391,7 +391,7 @@ namespace SelectionTracking
                     {
                         if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
                         {
-                            Session.EventCodeManager.AddToFrameEventCodeBuffer("StartButtonSelected");
+                            Session.EventCodeManager.SendCodeImmediate("StartButtonSelected");
                             return true;
                         }
                     }
@@ -439,7 +439,7 @@ namespace SelectionTracking
                     if (FixationOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        Session.EventCodeManager.AddToFrameEventCodeBuffer("FixationOffObject");
+                        Session.EventCodeManager.SendCodeImmediate("FixationOffObject");
                         FixationOnEventCodeSent = false; //reset fixation
                     }
 

@@ -34,7 +34,7 @@ public class ParticleHalo : MonoBehaviour
         InstantiatedParticleHaloGO.transform.position = behindPos;
 
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+            Session.EventCodeManager.SendCodeImmediate(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         
         Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration);
     }
@@ -51,7 +51,7 @@ public class ParticleHalo : MonoBehaviour
 
 
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+            Session.EventCodeManager.SendCodeImmediate(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
        
         Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration * 2);
 

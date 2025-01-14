@@ -266,7 +266,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             CreateTextOnExperimenterDisplay();
             multiCompStims.ToggleVisibility(true);
 
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            Session.EventCodeManager.SendCodeImmediate("TokenBarVisible");
             
             choiceMade = false;
             // Handler.HandlerActive = true;
@@ -298,13 +298,13 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                Session.EventCodeManager.SendCodeImmediate("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+                Session.EventCodeManager.SendCodeImmediate("IncorrectResponse");
                 
             }
 
@@ -321,7 +321,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             //means the player got timed out and didn't click on anything
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+            Session.EventCodeManager.SendCodeImmediate("NoChoice");
             Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
@@ -390,7 +390,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "itiImage";
                 StartCoroutine(HandleSkybox(GetContextNestedFilePath(ContextExternalFilePath, ContextName)));
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
+                Session.EventCodeManager.SendCodeImmediate("ContextOff");
             }
 
             //Setting back the parent to the mcCompHolder for individual components

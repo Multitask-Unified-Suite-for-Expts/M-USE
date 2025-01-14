@@ -725,7 +725,7 @@ namespace USE_StimulusManagement
             {
                 stim.ToggleVisibility(visibility);
             }
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(visibility ? "StimOn" : "StimOff");
+            Session.EventCodeManager.SendCodeImmediate(visibility ? "StimOn" : "StimOff");
             IsActive = visibility;
         }
 

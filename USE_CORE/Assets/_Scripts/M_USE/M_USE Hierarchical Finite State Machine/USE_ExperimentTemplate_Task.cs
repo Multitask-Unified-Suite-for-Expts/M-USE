@@ -327,7 +327,7 @@ namespace USE_ExperimentTemplate_Task
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
+                Session.EventCodeManager.SendCodeImmediate("BlockFeedbackStarts");
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
@@ -371,7 +371,7 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 if (Session.SessionDef.EventCodesActive)
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishTaskStarts");
+                    Session.EventCodeManager.SendCodeImmediate("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && CurrentBlockSummaryString != null)

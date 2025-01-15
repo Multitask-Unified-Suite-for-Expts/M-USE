@@ -413,7 +413,7 @@ namespace USE_ExperimentTemplate_Trial
                 Session.SessionLevel.AssignExperimenterDisplayRenderTexture(Session.GazeCalibrationController.GazeCalibrationTaskLevel.TaskCam);
             });
 
-            GazeCalibration.SpecifyTermination(() => !Session.GazeCalibrationController.RunCalibration, () => LoadTrialTextures, () =>
+            GazeCalibration.SpecifyTermination(() => !Session.GazeCalibrationController.RunCalibration, () => null, () =>
             {
                 Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel, "GazeCalibrationToTask");
                 Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToTask");
@@ -435,6 +435,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 Session.TaskLevel = Session.GazeCalibrationController.OriginalTaskLevel;
                 Session.TrialLevel = Session.GazeCalibrationController.OriginalTrialLevel;
+
             });
 
 

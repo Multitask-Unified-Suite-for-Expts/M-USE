@@ -126,7 +126,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SliderFBController.InitializeSlider();
+            if (SliderFBController != null && SliderFBController.SliderGO == null)
+                SliderFBController.InitializeSlider();
             //FileLoadingDelegate = LoadTileAndBgTextures; //Set file loading delegate
 
             if (!Session.WebBuild) //player view variables

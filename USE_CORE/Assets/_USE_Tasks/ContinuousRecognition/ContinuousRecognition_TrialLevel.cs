@@ -136,7 +136,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SliderFBController.InitializeSlider();
+            //SliderFBController.InitializeSlider();
 
             if (!Session.WebBuild)
             {
@@ -149,6 +149,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 Session.TimerController.CreateTimer(CR_CanvasGO.transform);
                 Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
+            }
+            else
+            {
+                if (SliderFBController != null && SliderFBController.SliderGO == null)
+                    SliderFBController.InitializeSlider();
             }
 
             SetControllerBlockValues();

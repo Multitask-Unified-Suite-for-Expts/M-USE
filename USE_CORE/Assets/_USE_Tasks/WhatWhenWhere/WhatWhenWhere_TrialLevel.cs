@@ -137,8 +137,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SliderFBController.InitializeSlider();
+           if (SliderFBController != null && SliderFBController.SliderGO == null)
+                    SliderFBController.InitializeSlider();
             
+
             HaloFBController.SetCircleHaloIntensity(5);
 
             //if (Session.SessionDef.IsHuman)

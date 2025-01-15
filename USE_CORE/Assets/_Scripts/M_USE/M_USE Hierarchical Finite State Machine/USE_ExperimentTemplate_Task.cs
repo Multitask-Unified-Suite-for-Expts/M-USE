@@ -406,6 +406,9 @@ namespace USE_ExperimentTemplate_Task
                     Session.SessionDataControllers.RemoveDataController("BlockData_" + TaskName);
                     Session.SessionDataControllers.RemoveDataController("TrialData_" + TaskName);
                     Session.SessionDataControllers.RemoveDataController("FrameData_" + TaskName);
+
+                    if (GameObject.Find("InputManager")?.transform.Find("FeedbackControllers(Clone)") != null)
+                        Destroy(GameObject.Find("InputManager").transform.Find("FeedbackControllers(Clone)").gameObject);
                 }
 
                 if (TaskStims != null)
@@ -443,8 +446,7 @@ namespace USE_ExperimentTemplate_Task
                     foreach (Canvas canvas in TaskCanvasses)
                         canvas.gameObject.SetActive(false);
 
-                if(GameObject.Find("InputManager")?.transform.Find("FeedbackControllers(Clone)") != null)
-                    Destroy(GameObject.Find("InputManager").transform.Find("FeedbackControllers(Clone)").gameObject);
+
 
                 if (!Session.WebBuild)
                 {

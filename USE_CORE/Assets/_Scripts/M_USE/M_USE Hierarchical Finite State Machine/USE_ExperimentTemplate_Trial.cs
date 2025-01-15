@@ -219,6 +219,7 @@ namespace USE_ExperimentTemplate_Trial
             if (TokenFBController != null)
                 TokenFBController.enabled = false;
 
+
             AddAbortCodeKeys();
 
             Debugger = new UI_Debugger();
@@ -236,16 +237,19 @@ namespace USE_ExperimentTemplate_Trial
                 TrialStims = new List<StimGroup>();
                 AudioFBController?.UpdateAudioSource();
 
-               /* if (Session.SessionDef.EyeTrackerActive && Session.GazeCalibrationController.GazeCalibrationTrialLevel.TrialData == null)
-                {
-                    Debug.Log("**CREATING GAZE DATA");
+                
 
-                    Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "TaskData" + Path.DirectorySeparatorChar + "GazeCalibration" );
-                    StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.BlockData.CreateFile());
-                    StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTrialLevel.TrialData.CreateFile());
-                    StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.FrameData.CreateFile());
 
-                }*/
+                /* if (Session.SessionDef.EyeTrackerActive && Session.GazeCalibrationController.GazeCalibrationTrialLevel.TrialData == null)
+                 {
+                     Debug.Log("**CREATING GAZE DATA");
+
+                     Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "TaskData" + Path.DirectorySeparatorChar + "GazeCalibration" );
+                     StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.BlockData.CreateFile());
+                     StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTrialLevel.TrialData.CreateFile());
+                     StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.FrameData.CreateFile());
+
+                 }*/
             });
 
             LoadTrialTextures.AddUniversalInitializationMethod(() =>

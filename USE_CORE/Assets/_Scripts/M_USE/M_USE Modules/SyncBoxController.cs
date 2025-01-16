@@ -33,10 +33,6 @@ public class SyncBoxController
     [HideInInspector] public SerialPortThreaded serialPortController;
 
     private bool usingSonication; //idk said something about adding to the trial level
-    private bool sonicationSentThisFrame;
-    private bool sonicationSentThisTrial;
-    private int numConsecutiveSonicationTrials;
-    private bool rewardFinished;
     private int MsBetweenRewardPulses = 200; //MAKE THIS A CONFIGURABLE VARIABLE!
     public bool sonicationBlockedThisTrial;
     public int numTrialsUntilNextSonication;
@@ -73,8 +69,6 @@ public class SyncBoxController
             Thread.Sleep(MsBetweenRewardPulses + pulseSize/10);
         }
         Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
-        
-        rewardFinished = true;
     }
 
     public void SendCameraSyncPulses(int numPulses, int pulseSize)
@@ -84,27 +78,12 @@ public class SyncBoxController
             serialPortController.AddToSend("RWB " + pulseSize);
             Thread.Sleep(MsBetweenRewardPulses + pulseSize / 10);
         }
-        rewardFinished = true;
     }
 
     public void SendSonication()
     {
-        if ((maxConsecutiveSonicationTrials == null
-            || numConsecutiveSonicationTrials < maxConsecutiveSonicationTrials && numTrialsUntilNextSonication == 0)
-            && sonicationSentThisTrial == false)
-        {
-            serialPortController.AddToSend("RWB " + ultrasoundTriggerDurationTicks);
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
-            sonicationSentThisFrame = true;
-            sonicationSentThisTrial = true;
-            numConsecutiveSonicationTrials += 1;
-            if (numConsecutiveSonicationTrials == maxConsecutiveSonicationTrials)
-                numTrialsUntilNextSonication = numTrialsWithoutSonicationAfterMax + 1; //+1 because subtraction happens at end of trial
-        }
-        else
-        {
-            sonicationBlockedThisTrial = true;
-        }
+        serialPortController.AddToSend("RWB");
+        Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
     }
 
 

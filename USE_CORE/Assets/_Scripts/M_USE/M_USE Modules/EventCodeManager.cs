@@ -71,25 +71,43 @@ public class EventCodeManager : MonoBehaviour
 
     public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
     {
+        //If there's a stimulation code, send it and use that as the ref code for any ohter FrameEventcodes in the buffer
         if(StimulationCodeBuffer > 0)
         {
             SendCodeImmediate(StimulationCodeBuffer);
+
             StimulationCodeStored = StimulationCodeBuffer;
             StimulationCodeBuffer = 0;
+
+            //If any frame codes exist, store them in frame data
+            StoreFrameBufferCodes();
+
+        }
+        else
+        {
+            if(FrameEventCodeBuffer.Count > 0)
+            {
+                SendCodeImmediate(referenceEventCode);
+
+                referenceEventCode++;
+                if (referenceEventCode > referenceEventCodeMax)
+                    referenceEventCode = referenceEventCodeMin;
+
+                StoreFrameBufferCodes();
+            }
         }
 
-        if (FrameEventCodeBuffer.Count > 0)
+    }
+
+    private void StoreFrameBufferCodes()
+    {
+        if(FrameEventCodeBuffer.Count > 0)
         {
-            SendCodeImmediate(referenceEventCode);
-
-            referenceEventCode++;
-            if (referenceEventCode > referenceEventCodeMax)
-                referenceEventCode = referenceEventCodeMin;
-
             FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
             FrameEventCodeBuffer.Clear();
         }
     }
+
 
     public void SendCodeImmediate(int code)
     {

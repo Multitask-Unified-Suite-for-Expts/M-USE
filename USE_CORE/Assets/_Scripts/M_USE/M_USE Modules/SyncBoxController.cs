@@ -34,6 +34,7 @@ public class SyncBoxController
 
     private int MsBetweenRewardPulses = 200; //MAKE THIS A CONFIGURABLE VARIABLE!
 
+    private int SonicationValue = 250;
 
 
     public void SendCommand(string command)
@@ -73,7 +74,7 @@ public class SyncBoxController
 
     public void SendSonication()
     {
-        serialPortController.AddToSend("RWB");
+        serialPortController.AddToSend("RWB " + SonicationValue);
         Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
     }
 

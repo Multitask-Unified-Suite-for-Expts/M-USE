@@ -35,28 +35,37 @@ public class EventCodeManager : MonoBehaviour
 {
     public Dictionary<string, EventCode> SessionEventCodes;
 
-    public List<int> sentBuffer = new List<int>();
+    private List<int> CodesToSendBuffer = new List<int>();
+
+    public List<int> SentCodesBuffer = new List<int>();
+    public List<int> SplitCodesBuffer = new List<int>();
+    public List<int> PreSplitCodesBuffer = new List<int>();
+
     public long systemTime;
     public bool codesActive;
     public int splitBytes;
 
 	private object sendCodeLocker = new object();
-
     public string neuralAcquisitionDevice = "Neuralynx", returnedCodePrefix = "Lynx";
-
 	public SyncBoxController SyncBoxController;
-
-    public List<int> frameEventCodeBuffer = new List<int>();
     public string data;
-    public List<int> frameEventCodeBufferToStore;
 
 
-    public void EventCodeLateUpdate()
+
+    public void CheckForCodesToSend() // Call this once per frame as early as possible at session level
     {
-        sentBuffer.Clear();
+        if (CodesToSendBuffer.Count > 0)
+        {
+            foreach(int code in CodesToSendBuffer)
+            {
+                SendCodeImmediate(code);
+            }
+
+            CodesToSendBuffer.Clear();
+        }
     }
 
-
+    // -------------------------------------------------------------------------------------
     public void SendCodeImmediate(int code)
     {
         if (code < 1)
@@ -69,11 +78,8 @@ public class EventCodeManager : MonoBehaviour
 
         if (codesActive)
         {
-            sentBuffer.Add(code); //Add to SentBuffer before potentially splitting so its nonsplit in frame data
-
 			if (splitBytes <= 1)
 			{
-
 				lock (sendCodeLocker)
 				{
 					SendCode(code);
@@ -104,7 +110,33 @@ public class EventCodeManager : MonoBehaviour
 		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
 	    }
     }
-    
+
+    // -------------------------------------------------------------------------------------
+    public void SendCodeNextFrame(int code)
+    {
+        if (!CodesToSendBuffer.Contains(code))
+            CodesToSendBuffer.Add(code);
+        else
+            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
+    }
+
+    public void SendCodeNextFrame(string codeString)
+    {
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+            SendCodeNextFrame(code);
+    }
+
+    public void SendCodeNextFrame(EventCode ec)
+    {
+        if (ec.Value != null)
+            SendCodeNextFrame(ec.Value.Value);
+        else
+        {
+            SendCodeImmediate(1);
+            Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
+        }
+    }
 
     public void SendRangeCode(string codeString, int valueToAdd)
     {
@@ -121,20 +153,21 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-
     // -------------------------------------------------------------------------------------
     private void SendCode(int codeToSend)
 	{
         SyncBoxController.SendCommand("NEU " + codeToSend.ToString());     
-        //sentBuffer.Add(codeToSend); //adding up above now instead
+        SentCodesBuffer.Add(codeToSend); //Add Code actually sent to sentBuffer
 	}
 
 	public void SendSplitCode(int code)
     {
-        int[] splitCode = new int[splitBytes];
+        PreSplitCodesBuffer.Add(code);
+
+        int[] splitCodes = new int[splitBytes];
         for (int iCode = splitBytes - 1; iCode >= 0; iCode--)
         {
-            splitCode[iCode] = (code % 255) + 1;
+            splitCodes[iCode] = (code % 255) + 1;
             code = (int)(code / 255);
         }
 
@@ -143,17 +176,21 @@ public class EventCodeManager : MonoBehaviour
 
 		for (int iCode = 0; iCode < splitBytes; iCode++)
 		{
+            int splitCode = splitCodes[iCode];
 			try
 			{
-				SendCode(splitCode[iCode] * 257);
+				SendCode(splitCode * 257);
 			}
 			catch (Exception e)
 			{
 				Debug.Log(e);
-				Debug.Log("this many in splitCode: " + splitCode.Count());
+				Debug.Log("this many in splitCode: " + splitCodes.Count());
 			}
+            SplitCodesBuffer.Add(splitCode);
 		}
     }
+
+    // -------------------------------------------------------------------------------------
 
     public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
     {
@@ -191,12 +228,14 @@ public class EventCodeManager : MonoBehaviour
 
     public List<int> GetBuffer(string bufferType)
     {
+        bufferType = bufferType.ToLower();
+
         if (bufferType == "sent")
-            return sentBuffer;
-        //else if (bufferType == "split")
-        //    return splitSentBuffer;
-        //else if (bufferType == "presplit")
-        //    return preSplitBuffer;
+            return SentCodesBuffer;
+        else if (bufferType == "split")
+            return SplitCodesBuffer;
+        else if (bufferType == "presplit")
+            return PreSplitCodesBuffer;
         else
             Debug.LogError("Unknown event code buffer type " + bufferType + ".");
         return new List<int>();

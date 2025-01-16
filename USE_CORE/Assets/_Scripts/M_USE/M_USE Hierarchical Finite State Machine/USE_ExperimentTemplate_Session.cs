@@ -284,7 +284,7 @@ namespace USE_ExperimentTemplate_Session
             bool DefiningTask = false;
             loadGazeCalibration.AddUpdateMethod(() =>
             {
-                //Session.EventCodeManager.CheckFrameEventCodeBuffer();
+                Session.EventCodeManager.CheckForCodesToSend();
 
                 if (!SceneLoading && CurrentTask != null && !DefiningTask)
                 {
@@ -315,7 +315,7 @@ namespace USE_ExperimentTemplate_Session
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
 
-            //gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckForCodesToSend(); });
 
             gazeCalibration.AddLateUpdateMethod(() =>
             {
@@ -323,8 +323,6 @@ namespace USE_ExperimentTemplate_Session
                 AppendSerialData();
                 if (Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
-
-                //Session.EventCodeManager.EventCodeLateUpdate();
             });
             gazeCalibration.AddSpecificInitializationMethod(() =>
             {
@@ -438,7 +436,7 @@ namespace USE_ExperimentTemplate_Session
 
             });
 
-            //gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckForCodesToSend(); });
 
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
@@ -744,7 +742,7 @@ namespace USE_ExperimentTemplate_Session
                 }
 
             });
-           //selectTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            selectTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckForCodesToSend(); });
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
@@ -782,7 +780,7 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.AddUpdateMethod(() =>
             {                
-                //Session.EventCodeManager.CheckFrameEventCodeBuffer();
+                Session.EventCodeManager.CheckForCodesToSend();
 
                 if (!SceneLoading && CurrentTask != null && !DefiningTask)
                 {
@@ -844,7 +842,7 @@ namespace USE_ExperimentTemplate_Session
                 }
             });
             setupTask.AddChildLevel(setupTaskLevel);
-            //setupTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            setupTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckForCodesToSend(); });
 
             setupTask.AddLateUpdateMethod(() =>
             {
@@ -886,7 +884,7 @@ namespace USE_ExperimentTemplate_Session
 
             });
             
-            //runTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            runTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckForCodesToSend(); });
             
             runTask.AddLateUpdateMethod(() =>
             {
@@ -985,7 +983,7 @@ namespace USE_ExperimentTemplate_Session
                     Debug.LogWarning("TASKS ARE NULL!");
                 
             });
-            //finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckForCodesToSend(); });
             finishSession.SpecifyTermination(() => skipSessionSummary, () => saveData);
             finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => saveData);
             //finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);

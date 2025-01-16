@@ -35,11 +35,11 @@ public class EventCodeManager : MonoBehaviour
 {
     public Dictionary<string, EventCode> SessionEventCodes;
 
-    private int frameChecker = 0;
-    private List<int> toSendBuffer = new List<int>();
+    private List<int> ToSendBuffer = new List<int>();
     public List<int> sentBuffer = new List<int>();
     public List<int> splitSentBuffer = new List<int>();
 	public List<int> preSplitBuffer = new List<int>();
+
     public long systemTime;
     public bool codesActive;
     public int splitBytes;
@@ -50,38 +50,44 @@ public class EventCodeManager : MonoBehaviour
 
 	public SyncBoxController SyncBoxController;
 
-    public List<int> frameEventCodeBuffer = new List<int>();
-    private readonly int referenceEventCodeMin = 100;
+    public List<int> FrameEventCodeBuffer = new List<int>();
+    public List<int> FrameEventCodesStored;
+    private readonly int referenceEventCodeMin = 101;
     private readonly int referenceEventCodeMax = 200;
-    private int referenceEventCode = 100; // Same as Min
-    public string data;
-    public List<int> frameEventCodeBufferToStore;
+    private int referenceEventCode = 101; // Same as Min
+
+    public int StimulationCodeBuffer = 0; //looks for anything other than 0
+    public int StimulationCodeStored; //temp storage so it appears in frame data
+    private readonly int StimulationCodeMin = 90;  //NEED TO MATCH EVENT CODE CONFIG RANGE FOR "StimulationCondition"
+    private readonly int StimulationCodeMax = 100; //NEED TO MATCH EVENT CODE CONFIG RANGE FOR "StimulationCondition"
 
 
-    public void EventCodeLateUpdate()
+
+    private bool IsStimulationCode(int code)
     {
-        sentBuffer.Clear();
-        splitSentBuffer.Clear();
-        preSplitBuffer.Clear();
+        return code >= StimulationCodeMin && code <= StimulationCodeMax;
     }
+
 
     public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
     {
-        if (frameEventCodeBuffer.Count > 0)
+        if(StimulationCodeBuffer > 0)
         {
-            int currentCode = frameEventCodeBuffer[0];
-            SendCodeImmediate(currentCode);
+            SendCodeImmediate(StimulationCodeBuffer);
+            StimulationCodeStored = StimulationCodeBuffer;
+            StimulationCodeBuffer = 0;
+        }
 
-            //SendCodeImmediate(referenceEventCode);
-            //referenceEventCode++;
-            //if (referenceEventCode > referenceEventCodeMax)
-            //    referenceEventCode = referenceEventCodeMin;
+        if (FrameEventCodeBuffer.Count > 0)
+        {
+            SendCodeImmediate(referenceEventCode);
 
-            frameEventCodeBufferToStore.Add(currentCode);
-            //frameEventCodeBufferToStore.AddRange(frameEventCodeBuffer);
+            referenceEventCode++;
+            if (referenceEventCode > referenceEventCodeMax)
+                referenceEventCode = referenceEventCodeMin;
 
-            frameEventCodeBuffer.RemoveAt(0);
-            //frameEventCodeBuffer.Clear();
+            FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
+            FrameEventCodeBuffer.Clear();
         }
     }
 
@@ -132,8 +138,8 @@ public class EventCodeManager : MonoBehaviour
     
     public void SendCodeNextFrame(int code)
     {
-        if (!toSendBuffer.Contains(code))
-            toSendBuffer.Add(code);
+        if (!ToSendBuffer.Contains(code))
+            ToSendBuffer.Add(code);
         else
             Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
     }
@@ -166,7 +172,6 @@ public class EventCodeManager : MonoBehaviour
                 Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
             else
             {
-                //SendCodeImmediate(computedCode); 
                 AddToFrameEventCodeBuffer(computedCode);
             }
         }
@@ -175,12 +180,20 @@ public class EventCodeManager : MonoBehaviour
     // ------------------------ Reference Event Code Equivalent Methods ----------------------
     public void AddToFrameEventCodeBuffer(int code)
     {
-        if (!frameEventCodeBuffer.Contains(code))
+        if(IsStimulationCode(code))
         {
-            frameEventCodeBuffer.Add(code);
+            if (StimulationCodeBuffer == 0)
+                StimulationCodeBuffer = code;
+            else
+                Debug.Log("ALREADY HAD A STIMULATION CODE! " + code);
         }
         else
-            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
+        {
+            if (!FrameEventCodeBuffer.Contains(code))
+                FrameEventCodeBuffer.Add(code);
+            else
+                Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
+        }
     }
 
     public void AddToFrameEventCodeBuffer(string codeString)
@@ -285,23 +298,5 @@ public class EventCodeManager : MonoBehaviour
         Session.EventCodeManager.AddToFrameEventCodeBuffer(eventCodeBuilder.ToString());
     }
 
-
-    //Not used:
-    public void SendBufferedEventCodes()
-    {
-        if (Time.frameCount > frameChecker)
-        {
-            systemTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-            frameChecker = Time.frameCount;
-            if (toSendBuffer.Count > 0)
-            {
-                foreach (int code in toSendBuffer)
-                {
-                    SendCodeImmediate(code);
-                }
-                toSendBuffer.Clear();
-            }
-        }
-    }
 
 }

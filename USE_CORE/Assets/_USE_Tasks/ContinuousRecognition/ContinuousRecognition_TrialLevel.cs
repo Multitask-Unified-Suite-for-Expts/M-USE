@@ -586,8 +586,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        SliderFBController.SliderGO.SetActive(false);
-        SliderFBController.SliderHaloGO.SetActive(false);
+        if(SliderFBController.SliderGO != null)
+            SliderFBController.SliderGO.SetActive(false);
+        if(SliderFBController.SliderHaloGO != null)
+            SliderFBController.SliderHaloGO.SetActive(false);
 
         if (GotTrialCorrect)
             score += (TrialCount_InBlock + 1) * 100;

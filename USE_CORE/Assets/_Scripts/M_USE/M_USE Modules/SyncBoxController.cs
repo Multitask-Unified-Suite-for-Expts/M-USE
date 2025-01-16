@@ -32,13 +32,8 @@ public class SyncBoxController
 {
     [HideInInspector] public SerialPortThreaded serialPortController;
 
-    private bool usingSonication; //idk said something about adding to the trial level
     private int MsBetweenRewardPulses = 200; //MAKE THIS A CONFIGURABLE VARIABLE!
-    public bool sonicationBlockedThisTrial;
-    public int numTrialsUntilNextSonication;
-    public int? maxConsecutiveSonicationTrials;
-    private string ultrasoundTriggerDurationTicks;
-    private int numTrialsWithoutSonicationAfterMax;
+
 
 
     public void SendCommand(string command)
@@ -57,10 +52,6 @@ public class SyncBoxController
     
     public void SendRewardPulses(int numPulses, int pulseSize)
     {
-        if (usingSonication)
-        {
-            SendSonication();
-        }
         Session.EventCodeManager.SendRangeCode("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
 
         for (int i = 0; i < numPulses; i++)

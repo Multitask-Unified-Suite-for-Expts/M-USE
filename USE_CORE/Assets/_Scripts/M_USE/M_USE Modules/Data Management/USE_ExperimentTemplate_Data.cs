@@ -208,25 +208,31 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddEventCodeColumns()
         {
-            //AddDatum("ReferenceEventCodeSent", () =>
-            //{
-            //    string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("sent"));
-            //    Session.EventCodeManager.sentBuffer.Clear();
-            //    return dataString; // Return the data string
-            //});
-
-            AddDatum("FrameEventCode", () =>
+            AddDatum("EventCodesSent", () =>
             {
-                string dataString = "";
-                if(Session.EventCodeManager.frameEventCodeBuffer.Count > 0)
-                    dataString = Session.EventCodeManager.frameEventCodeBuffer[0].ToString();
-                //string dataString = string.Join(",", Session.EventCodeManager.frameEventCodeBufferToStore);
-                //Session.EventCodeManager.frameEventCodeBufferToStore.Clear();
-                return dataString; // Return the data string
+                string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("sent"));
+                Session.EventCodeManager.sentBuffer.Clear();
+                return dataString;
             });
 
-            // AddDatum("SplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("split")));
-            //AddDatum("PreSplitEventCodes", () => string.Join(",", SessionValues.EventCodeManager.GetBuffer("presplit")));
+            AddDatum("FrameEventCodes", () =>
+            {
+                string dataString = string.Join(",", Session.EventCodeManager.FrameEventCodesStored);
+                Session.EventCodeManager.FrameEventCodesStored.Clear();
+                return dataString;
+            });
+
+            AddDatum("StimulationEventCode", () =>
+            {
+                string dataString = "";
+                if (Session.EventCodeManager.StimulationCodeStored > 0)
+                    dataString = Session.EventCodeManager.StimulationCodeStored.ToString();
+                Session.EventCodeManager.StimulationCodeStored = 0;
+                return dataString;
+            });
+
+            //AddDatum("SplitEventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("split")));
+            //AddDatum("PreSplitEventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("presplit")));
         }
     }
 

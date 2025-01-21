@@ -32,16 +32,16 @@ public class SyncBoxController
 {
     [HideInInspector] public SerialPortThreaded serialPortController;
 
-    private int MsBetweenRewardPulses = 200; //MAKE THIS A CONFIGURABLE VARIABLE!
+    private readonly int MsBetweenRewardPulses = 200;
 
 
     public void SendCommand(string command)
     {
         serialPortController.AddToSend(command);
     }
-    public void SendCommand(List<string> command)
+    public void SendCommand(List<string> commands)
     {
-        serialPortController.AddToSend(command);
+        serialPortController.AddToSend(commands);
     }
 
     public void SendCommand(string command, List<string> codesToCheck)
@@ -61,26 +61,13 @@ public class SyncBoxController
         Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
     }
 
-    public void SendCameraSyncPulses(int numPulses, int pulseSize)
+    public void SendSonication(int numPulses, int pulseSize)
     {
         for (int i = 0; i < numPulses; i++)
         {
             serialPortController.AddToSend("RWB " + pulseSize);
             Thread.Sleep(MsBetweenRewardPulses + pulseSize / 10);
         }
-    }
-
-    public void SendSonication()
-    {
-        int numPulses = 2;
-        int pulseSize = 250;
-
-        for (int i = 0; i < numPulses; i++)
-        {
-            serialPortController.AddToSend("RWB " + pulseSize);
-            Thread.Sleep(MsBetweenRewardPulses + pulseSize / 10);
-        }
-
         Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
     }
 

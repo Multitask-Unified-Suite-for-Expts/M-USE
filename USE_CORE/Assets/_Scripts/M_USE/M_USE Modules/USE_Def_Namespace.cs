@@ -154,7 +154,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Size of the circle for shotgun raycasting in DVA. Default is 1.25f.
         /// </summary>
-        public float ShotgunRayCastCircleSize_DVA = 1.25f;
+        public float ShotgunRaycastCircleSize_DVA = 1.25f;
 
         /// <summary>
         /// Spacing between raycasts in DVA for shotgun raycasting. Default is 0.3f.
@@ -253,6 +253,17 @@ namespace USE_Def_Namespace
         /// Duration of the SessionSummary screen before the session finishes.
         /// </summary>
         public float SessionSummaryDuration = 180f;
+
+
+        /// <summary>
+        /// Num of Stimulation Pulses
+        /// </summary>
+        public int StimulationNumPulses = 1;
+
+        /// <summary>
+        /// Size of Stimulation Pulses
+        /// </summary>
+        public int StimulationPulseSize = 250;
     }
 
     public class TaskDef
@@ -363,6 +374,22 @@ namespace USE_Def_Namespace
         /// Whether or not to run a stimulation
         /// </summary>
         public bool RunSimulation;
+
+
+        /// <summary>
+        /// Size of the circle for shotgun raycasting in DVA. Default is 1.25f.
+        /// </summary>
+        public float ShotgunRaycastCircleSize_DVA = 1.25f;
+
+        /// <summary>
+        /// Spacing between raycasts in DVA for shotgun raycasting. Default is 0.3f.
+        /// </summary>
+        public float ShotgunRaycastSpacing_DVA = 0.3f;
+
+        /// <summary>
+        /// Distance of the participant in centimeters. Default is 60f.
+        /// </summary>
+        public float ParticipantDistance_CM = 60f;
 
     }
 

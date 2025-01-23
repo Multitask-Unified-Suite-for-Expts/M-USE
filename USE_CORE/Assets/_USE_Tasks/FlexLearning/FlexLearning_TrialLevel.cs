@@ -396,7 +396,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         yield return new WaitForSeconds(CurrentTrialDef.StimulationDelayDuration);
         Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
-        Session.SyncBoxController?.SendSonication(2, 250); //move values later!
+        Session.SyncBoxController?.SendSonication();
     }
 
     public override void OnTokenBarFull()

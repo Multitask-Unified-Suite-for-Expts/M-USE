@@ -9,7 +9,7 @@ using System.Linq;
 using System;
 using SelectionTracking;
 using TMPro.SpriteAssetUtilities;
-
+using static SelectionTracking.SelectionTracker;
 
 public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 {
@@ -110,21 +110,31 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play); //Setup Handler
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, KeepTrack_CanvasGO, false); //Enable Touch Feedback
+
+        //Setup Shotgun Handler ---------------------------------------------------------------------
+        SelectionHandler ShotgunHandler;
+
+        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Play);
+        else
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play);
+        //--------------------------------------------------------------------------------------------
+
+
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, KeepTrack_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             SetTrialSummaryString();
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
         InitTrial.SpecifyTermination(() => CurrentTask.RunSimulation, DisplayTarget);
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             BordersGO.SetActive(true);
@@ -157,8 +167,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         Play.AddSpecificInitializationMethod(() =>
         {
             GiveRewardIfSliderFull = false;
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
 
 
             ObjManager.ActivateInitialObjectsMovement();
@@ -167,7 +177,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         });
         Play.AddUpdateMethod(() =>
         {
-            ChosenGO = Handler.LastSuccessfulSelection?.SelectedGameObject;
+            ChosenGO = ShotgunHandler.LastSuccessfulSelection?.SelectedGameObject;
             if (ChosenGO != null)
             {
                 if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
@@ -232,7 +242,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
                     Input.ResetInputAxes(); //Reset input?
 
-                    Handler.LastSuccessfulSelection = null;
+                    ShotgunHandler.LastSuccessfulSelection = null;
                 }
             }
 
@@ -282,6 +292,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             if (SliderFBController.isSliderBarFull() && !AudioFBController.IsPlaying())
             {
                 GiveReward();
+
                 SliderFBController.ResetSliderBarFull();
                 SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
                 GiveRewardIfSliderFull = false;

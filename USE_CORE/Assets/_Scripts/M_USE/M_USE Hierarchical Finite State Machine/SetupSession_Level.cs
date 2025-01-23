@@ -229,8 +229,8 @@ public class SetupSession_Level : ControlLevel
             Session.SessionLevel.SelectionHandler.MaxDuration = 2f;
         }
 
-        Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
-        Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRayCastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
+        Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRaycastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
+        Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRaycastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
 
         
 

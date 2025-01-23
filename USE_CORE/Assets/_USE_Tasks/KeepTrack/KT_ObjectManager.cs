@@ -223,6 +223,7 @@ public class KT_Object : MonoBehaviour
     public Vector2 StartingPosition;
     public Vector2 ResponseWindow;
     public float CloseDuration;
+    public int[] RewardPulsesBySec;
     public Vector2[] RatesAndDurations;
     public Vector3 AngleProbs;
     public Vector2[] AngleRanges;
@@ -252,6 +253,13 @@ public class KT_Object : MonoBehaviour
     public enum AnimationStatus { Open, Closed };
     public AnimationStatus CurrentAnimationStatus = AnimationStatus.Open; //start as closed
 
+    public float ActivationStartTime;
+
+    private float RewardTimer;
+    private float RewardInterval = 1f; //1 sec before going to next reward value
+
+    public int CurrentRewardValue;
+
 
     public KT_Object()
     {
@@ -276,6 +284,7 @@ public class KT_Object : MonoBehaviour
         Size = configValue.Size;
         NextDestDist = configValue.NextDestDist;
         CloseDuration = configValue.CloseDuration;
+        RewardPulsesBySec = configValue.RewardPulsesBySec;
         RatesAndDurations = configValue.RatesAndDurations;
         ObjectColor = configValue.ObjectColor;
         SliderChange = configValue.SliderChange;
@@ -284,6 +293,8 @@ public class KT_Object : MonoBehaviour
         MouthAngles = configValue.MouthAngles;
 
         ActivateDelay = configValue.ActivateDelay;
+
+        CheckRewardsMatchDurations();
 
         foreach (var rateAndDur in RatesAndDurations)
         {
@@ -305,6 +316,13 @@ public class KT_Object : MonoBehaviour
         PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
         PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
         PacmanDrawer.DrawMouth(OpenAngle);
+    }
+
+    private void CheckRewardsMatchDurations()
+    {
+        float durationSum = RatesAndDurations.Sum(value => value.y);
+        if (RewardPulsesBySec.Count() != durationSum)
+            Debug.LogError("NUMBER OF REWARD SECONDS DOES NOT MATCH THE SUM OF ALL THE Y VALUES IN THE RatesAndDurations variable!");
     }
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
@@ -340,15 +358,15 @@ public class KT_Object : MonoBehaviour
 
     private void Update()
     {
-        if(MoveAroundScreen)
+        if (MoveAroundScreen)
         {
-            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
+            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
                 StartCoroutine(AnimationCoroutine());
                 CurrentCycle.NextInterval();
             }
 
-            if(Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
             {
                 NextCycle();
             }
@@ -357,7 +375,28 @@ public class KT_Object : MonoBehaviour
 
             HandlePausingWhileBeingSelected();
             HandleInput();
+
+            //Call it every second instead of every frame:
+            RewardTimer += Time.deltaTime;
+            if (RewardTimer >= RewardInterval)
+            {
+                Debug.LogWarning("CALLING AT: " + RewardTimer);
+                SetCurrentRewardValue();
+                RewardTimer = 0;
+            }
+
         }
+    }
+
+    private void SetCurrentRewardValue()
+    {
+        int timeSinceActivation_Rounded = Mathf.CeilToInt(Time.time - ActivationStartTime);
+
+        if (RewardPulsesBySec != null && RewardPulsesBySec.Count() >= timeSinceActivation_Rounded)
+        {
+            CurrentRewardValue = RewardPulsesBySec[timeSinceActivation_Rounded - 1];
+        }
+
     }
 
     private void FixedUpdate()
@@ -456,6 +495,8 @@ public class KT_Object : MonoBehaviour
     public void ActivateMovement()
     {
         MoveAroundScreen = true;
+
+        ActivationStartTime = Time.time;
 
         AnimStartTime = 0; //used to be Time.time 
 
@@ -623,6 +664,7 @@ public class KT_Object_ConfigValues
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;
+    public int[] RewardPulsesBySec;
     public Vector2[] RatesAndDurations;
     public Vector3 AngleProbs;
     public Vector2[] AngleRanges;

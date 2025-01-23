@@ -574,7 +574,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
         Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
-        Session.SyncBoxController?.SendSonication(2, 250); //move values later!
+        Session.SyncBoxController?.SendSonication();
     }
 
     public override void FinishTrialCleanup()

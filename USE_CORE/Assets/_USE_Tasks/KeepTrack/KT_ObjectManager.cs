@@ -380,7 +380,6 @@ public class KT_Object : MonoBehaviour
             RewardTimer += Time.deltaTime;
             if (RewardTimer >= RewardInterval)
             {
-                Debug.LogWarning("CALLING AT: " + RewardTimer);
                 SetCurrentRewardValue();
                 RewardTimer = 0;
             }

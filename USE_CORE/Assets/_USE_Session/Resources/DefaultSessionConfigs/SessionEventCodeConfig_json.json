@@ -83,10 +83,7 @@
         "Description": "Reward Pulse Sent"
     },
     "SyncBoxController_SonicationPulseSent": {
-        "Range": [
-            30,
-            39
-        ],
+        "Value": 30,
         "Description": "Sonication Pulse Sent"
     },
     "StimOn": {

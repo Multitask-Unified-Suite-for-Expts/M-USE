@@ -185,7 +185,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
             if(StimulateThisTrial)
-                Session.EventCodeManager.SendRangeCode("StimulationCondition", TrialStimulationCode);
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
@@ -263,11 +263,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
 
+            Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
+
             if(Session.SessionDef.IsHuman)
             {
                 TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
                 TokenFBController.enabled = true;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
             }
             else
             {
@@ -314,7 +315,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 {
                     GotTrialCorrect = true;
 
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                    Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
 
                     //If chose a PNC Stim, remove it from PNC list.
                     if (PNC_Stim.Contains(ChosenStim.StimIndex))
@@ -365,7 +366,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     RecencyInterference_Block = (TrialCount_InBlock + 1) - ChosenStim.TrialNumFirstShownOn;
                     WrongStimIndex = ChosenStim.StimIndex; //identifies the stim they got wrong for Block FB purposes. 
                     TimeToCompletion_Block = Time.time - TimeToCompletion_StartTime;
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+                    Session.EventCodeManager.SendCodeThisFrame("IncorrectResponse");
                     ChosenStimCategory = "PC";
                 }
 
@@ -387,7 +388,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
                     {
                         OngoingSelection.InitialFixationDurationPassed = true;
-                        Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
+                        Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
 
                         GameObject GoSelected = OngoingSelection.SelectedGameObject;
                         ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
@@ -395,12 +396,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         string stimulationType = CurrentTrial.StimulationType.Trim();
                         if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
                         {
-                            Debug.Log("STIMULATING TARGET!");
+                            Debug.Log("STIMULATING TARGET AT FRAME: " + Time.frameCount);
                             StartCoroutine(StimulationCoroutine());
                         }
                         else if (stimulationType == "FixationChoice_Distractor" && chosenStimulus.PreviouslyChosen)
                         {
-                            Debug.Log("STIMULATING DISTRACTOR!");
+                            Debug.Log("STIMULATING DISTRACTOR AT FRAME: " + Time.frameCount);
                             StartCoroutine(StimulationCoroutine());
                         }
                     }   
@@ -426,8 +427,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
-            Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            Session.EventCodeManager.SendCodeThisFrame("NoChoice");
+            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
             AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
             numPulsesTrial = 0;
@@ -458,13 +459,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     {
                         if (stimulationType == "HaloOnset_Correct" && GotTrialCorrect)
                         {
-                            Debug.Log("STIM'ING ON CORRECT HALO!");
+                            Debug.Log("STIMULATION - CORRECT HALO!");
                             StartCoroutine(StimulationCoroutine());
 
                         }
                         else if (stimulationType == "HaloOnset_Incorrect" && !GotTrialCorrect)
                         {
-                            Debug.Log("STIM'ING ON INCORRECT HALO!");
+                            Debug.Log("STIMULATION - INCORRECT HALO!");
                             StartCoroutine(StimulationCoroutine());
                         }
                     }
@@ -573,8 +574,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     public IEnumerator StimulationCoroutine()
     {
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
-        Debug.LogWarning("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
+        Debug.Log("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
         Session.SyncBoxController?.SendSonication();
+
+        //Increment Data
+        StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
+        CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
     }
 
     public override void FinishTrialCleanup()
@@ -593,7 +598,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             DeactivatePlayerViewText();
         DestroyFeedbackBorders();
         ContextActive = false;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
+        Session.EventCodeManager.SendCodeThisFrame("ContextOff");
 
         if (AbortCode == 0)
         {
@@ -756,6 +761,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         NonStimTouches_Block = 0;
         NumCorrect_Block = 0;
         NumTbCompletions_Block = 0;
+        StimulationPulsesGiven_Block = 0;
         TimeToChoice_Block.Clear();
         AvgTimeToChoice_Block = 0;
         TimeToCompletion_Block = 0;
@@ -833,7 +839,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nPC_Stim: " + NumPC_Trial +
                              "\nNew_Stim: " + NumNew_Trial +
-                             "\nPNC_Stim: " + NumPNC_Trial;
+                             "\nPNC_Stim: " + NumPNC_Trial +
+
+                             "\nStimulateThisTrial? " + StimulateThisTrial;
+
     }
 
     Vector3[] CenterFeedbackLocations(Vector3[] locations, int numLocations)
@@ -1405,9 +1414,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
         FrameData.AddDatum("TrialStimShown", () => trialStims?.IsActive);
         FrameData.AddDatum("StarfieldActive", () => Starfield != null && Starfield.activeInHierarchy ? "Active" : "NotActive");
-
-        FrameData.AddDatum("OngoingSelection_DURATION", () => OngoingSelection == null ? "" : OngoingSelection.Duration.ToString());
-
     }
 
     private void ClearCurrentTrialStimLists()

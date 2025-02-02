@@ -51,7 +51,7 @@ public class SyncBoxController
     
     public void SendRewardPulses(int numPulses, int pulseSize)
     {
-        Session.EventCodeManager.SendRangeCode("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
+        Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
 
         for (int i = 0; i < numPulses; i++)
         {
@@ -68,7 +68,7 @@ public class SyncBoxController
             serialPortController.AddToSend("RWB " + Session.SessionDef.StimulationPulseSize);
             Thread.Sleep(MsBetweenRewardPulses + Session.SessionDef.StimulationPulseSize / 10);
         }
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
+        Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
     }
 
 
@@ -79,7 +79,7 @@ public class SyncBoxController
             serialPortController.AddToSend("RWB " + Session.SessionDef.Camera_PulseSize_Ticks);
             Thread.Sleep(MsBetweenRewardPulses + Session.SessionDef.Camera_PulseSize_Ticks / 10);
         }
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
+        Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
     }
 
 }

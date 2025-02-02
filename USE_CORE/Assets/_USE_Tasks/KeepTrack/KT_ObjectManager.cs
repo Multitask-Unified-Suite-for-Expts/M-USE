@@ -437,7 +437,7 @@ public class KT_Object : MonoBehaviour
     private IEnumerator AnimationCoroutine()
     {
         AnimStartTime = Time.time;
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
+        Session.EventCodeManager.SendCodeThisFrame(ObjManager.TaskEventCodes["ObjectAnimationBegins"]);
         gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
         CurrentAnimationStatus = AnimationStatus.Closed;
         yield return new WaitForSeconds(CloseDuration);

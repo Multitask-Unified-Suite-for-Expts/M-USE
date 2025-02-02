@@ -27,24 +27,24 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using USE_Utilities;
 using USE_ExperimentTemplate_Classes;
 using System.Text;
+using System.Collections;
+
 
 public class EventCodeManager : MonoBehaviour 
 {
     public Dictionary<string, EventCode> SessionEventCodes;
 
-    private List<int> ToSendBuffer = new List<int>();
-    public List<int> sentBuffer = new List<int>();
-    public List<int> splitSentBuffer = new List<int>();
-	public List<int> preSplitBuffer = new List<int>();
+    public List<int> SentBuffer = new List<int>();
+    public List<int> Split_SentBuffer = new List<int>();
+	public List<int> PreSplit_SentBuffer = new List<int>();
 
     public long systemTime;
     public bool codesActive;
     public int splitBytes;
 
-	private object sendCodeLocker = new object();
+	private readonly object sendCodeLocker = new object();
 
     public string neuralAcquisitionDevice = "Neuralynx", returnedCodePrefix = "Lynx";
 
@@ -52,11 +52,12 @@ public class EventCodeManager : MonoBehaviour
 
     public List<int> FrameEventCodeBuffer = new List<int>();
     public List<int> FrameEventCodesStored;
+
     private readonly int referenceEventCodeMin = 101;
     private readonly int referenceEventCodeMax = 200;
     private int referenceEventCode = 101; // Same as Min
 
-    public int StimulationCodeBuffer = 0; //looks for anything other than 0
+    public int StimulationCode = 0; //looks for anything other than 0
     public int StimulationCodeStored; //temp storage so it appears in frame data
     private readonly int StimulationCodeMin = 90;  //NEED TO MATCH EVENT CODE CONFIG RANGE FOR "StimulationCondition"
     private readonly int StimulationCodeMax = 100; //NEED TO MATCH EVENT CODE CONFIG RANGE FOR "StimulationCondition"
@@ -69,21 +70,22 @@ public class EventCodeManager : MonoBehaviour
     }
 
 
-    public void CheckFrameEventCodeBuffer() // Call this once per frame as early as possible at session level
+    // Call it every frame in LateUpdate() methods
+    public void CheckFrameEventCodeBuffer() 
     {
-        //If there's a stimulation code, send it and use that as the ref code for any ohter FrameEventcodes in the buffer
-        if(StimulationCodeBuffer > 0)
+        //If there's a stimulation code, send it and use that as the ref code for any other FrameEventcodes in the buffer
+        if(StimulationCode > 0)
         {
-            SendCodeImmediate(StimulationCodeBuffer);
+            SendCodeImmediate(StimulationCode);
 
-            StimulationCodeStored = StimulationCodeBuffer;
-            StimulationCodeBuffer = 0;
+            StimulationCodeStored = StimulationCode;
+            StimulationCode = 0;
 
             //If any frame codes exist, store them in frame data
             StoreFrameBufferCodes();
 
         }
-        else
+        else //Send Reference Code
         {
             if(FrameEventCodeBuffer.Count > 0)
             {
@@ -109,21 +111,21 @@ public class EventCodeManager : MonoBehaviour
     }
 
 
-    public void SendCodeImmediate(int code)
+    private void SendCodeImmediate(int code)
     {
         if (code < 1)
             Debug.LogError("Code " + code + " is less than 1, and cannot be sent.");
 
         if (neuralAcquisitionDevice == "Neuroscan")
         {
-            code = code * 256;
+            code *= 256;
         }
 
         if (codesActive)
         {
 			if (splitBytes <= 1)
 			{
-				lock (sendCodeLocker)
+                lock (sendCodeLocker)
 				{
 					SendCode(code);
 				}
@@ -136,30 +138,50 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-    public void SendCodeImmediate(string codeString)
+    private void SendCode(int codeToSend)
     {
-        EventCode code = SessionEventCodes[codeString];
-		if (code != null)
-			SendCodeImmediate(code);
+        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());
+        SentBuffer.Add(codeToSend);
     }
 
-    public void SendCodeImmediate(EventCode ec)
+    private void SendSplitCode(int code)
     {
-        if (ec.Value != null)
-			SendCodeImmediate(ec.Value.Value);
-	    else
-	    {
-		    SendCodeImmediate(1);
-		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
-	    }
+        PreSplit_SentBuffer.Add(code);
+        int[] splitCode = new int[splitBytes];
+        for (int iCode = splitBytes - 1; iCode >= 0; iCode--)
+        {
+            splitCode[iCode] = (code % 255) + 1;
+            code = (int)(code / 255);
+        }
+
+        if (code > 0)
+            Debug.LogError("Event code " + code + " is too high, and thus not evenly divisible into " + splitBytes + " individual bytes");
+
+        for (int iCode = 0; iCode < splitBytes; iCode++)
+        {
+            try
+            {
+                SendCode(splitCode[iCode] * 257);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                Debug.Log("this many in splitCode: " + splitCode.Count());
+            }
+            Split_SentBuffer.Add(splitCode[iCode]);
+        }
     }
-    
+
+    //--------------------------------------------------------------------------------------
+    private IEnumerator SendNextFrame_Coroutine(int code)
+    {
+        yield return null; //Wait a frame
+        SendCodeThisFrame(code);
+    }
+
     public void SendCodeNextFrame(int code)
     {
-        if (!ToSendBuffer.Contains(code))
-            ToSendBuffer.Add(code);
-        else
-            Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
+        StartCoroutine(SendNextFrame_Coroutine(code));
     }
 
 	public void SendCodeNextFrame(string codeString)
@@ -180,28 +202,13 @@ public class EventCodeManager : MonoBehaviour
 	    }
     }
 
-    public void SendRangeCode(string codeString, int valueToAdd)
-    {
-        EventCode code = SessionEventCodes[codeString];
-        if (code != null)
-        {
-            int computedCode = code.Range[0] + valueToAdd;
-            if (computedCode > code.Range[1])
-                Debug.LogError("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
-            else
-            {
-                AddToFrameEventCodeBuffer(computedCode);
-            }
-        }
-    }
-
-    // ------------------------ Reference Event Code Equivalent Methods ----------------------
-    public void AddToFrameEventCodeBuffer(int code)
+    // --------------------------------------------------------------------------------------
+    public void SendCodeThisFrame(int code)
     {
         if(IsStimulationCode(code))
         {
-            if (StimulationCodeBuffer == 0)
-                StimulationCodeBuffer = code;
+            if (StimulationCode == 0)
+                StimulationCode = code;
             else
                 Debug.Log("ALREADY HAD A STIMULATION CODE! " + code);
         }
@@ -214,17 +221,17 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-    public void AddToFrameEventCodeBuffer(string codeString)
+    public void SendCodeThisFrame(string codeString)
     {
         EventCode code = SessionEventCodes[codeString];
         if (code != null)
-            AddToFrameEventCodeBuffer(code);
+            SendCodeThisFrame(code);
     }
 
-    public void AddToFrameEventCodeBuffer(EventCode ec)
+    public void SendCodeThisFrame(EventCode ec)
     {
         if (ec.Value != null)
-            AddToFrameEventCodeBuffer(ec.Value.Value);
+            SendCodeThisFrame(ec.Value.Value);
         else
         {
             SendCodeImmediate(1);
@@ -232,55 +239,35 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-    // -------------------------------------------------------------------------------------
-    private void SendCode(int codeToSend)
-	{
-        SyncBoxController.SendCommand("NEU " + codeToSend.ToString());    
-        sentBuffer.Add(codeToSend);
-	}
-
-	public void SendSplitCode(int code)
+    public void SendRangeCodeThisFrame(string codeString, int valueToAdd)
     {
-		preSplitBuffer.Add(code);
-        int[] splitCode = new int[splitBytes];
-        for (int iCode = splitBytes - 1; iCode >= 0; iCode--)
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
         {
-            splitCode[iCode] = (code % 255) + 1;
-            code = (int)(code / 255);
+            int computedCode = code.Range[0] + valueToAdd;
+            if (computedCode > code.Range[1])
+                Debug.LogWarning("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
+            else
+            {
+                SendCodeThisFrame(computedCode);
+            }
         }
-
-        if (code > 0)
-            Debug.LogError("Event code " + code + " is too high, and thus not evenly divisible into " + splitBytes + " individual bytes");
-
-		for (int iCode = 0; iCode < splitBytes; iCode++)
-		{
-			try
-			{
-				SendCode(splitCode[iCode] * 257);
-			}
-			catch (Exception e)
-			{
-				Debug.Log(e);
-				Debug.Log("this many in splitCode: " + splitCode.Count());
-			}
-			splitSentBuffer.Add(splitCode[iCode]);
-		}
     }
 
-	public List<int> GetBuffer(string bufferType)
+
+    // -------------------------------------------------------------------------------------
+    public List<int> GetBuffer(string bufferType)
 	{
 		if (bufferType == "sent")
-			return sentBuffer;
-		else if (bufferType == "split")
-			return splitSentBuffer;
+			return SentBuffer;
+        else if (bufferType == "split")
+			return Split_SentBuffer;
 		else if (bufferType == "presplit")
-			return preSplitBuffer;
+			return PreSplit_SentBuffer;
 		else
 			Debug.LogError("Unknown event code buffer type " + bufferType + ".");
 		return new List<int>();
-
 	}
-
 
     public void CheckForAndSendEventCode(GameObject target, string beginning = "", string ending = "")
     {
@@ -313,7 +300,7 @@ public class EventCodeManager : MonoBehaviour
         if (!string.IsNullOrEmpty(ending))
             eventCodeBuilder.Append(ending);
 
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(eventCodeBuilder.ToString());
+        SendCodeThisFrame(eventCodeBuilder.ToString());
     }
 
 

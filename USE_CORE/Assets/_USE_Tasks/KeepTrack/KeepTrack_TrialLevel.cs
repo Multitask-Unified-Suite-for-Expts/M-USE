@@ -191,8 +191,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                             SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps));
                             SuccessfulTargetSelections_Block++;
                             CurrentTaskLevel.SuccessfulTargetSelections_Task++;
-                            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["SuccessfulTargetSelection"]);
-                            Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                            Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["SuccessfulTargetSelection"]);
+                            Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
                         }
                         else
                         {
@@ -203,7 +203,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                             {
                                 AdditionalTargetSelections_Block++;
                                 CurrentTaskLevel.AdditionalTargetSelections_Task++;
-                                Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["AdditionalTargetSelection"]);
+                                Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["AdditionalTargetSelection"]);
                             }
                             else
                             {
@@ -211,15 +211,15 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                                 {
                                     UnsuccessfulTargetSelections_Block++;
                                     CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
-                                    Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["UnsuccessfulTargetSelection"]);
-                                    Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+                                    Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["UnsuccessfulTargetSelection"]);
+                                    Session.EventCodeManager.SendCodeThisFrame("IncorrectResponse");
 
                                 }
                                 else
                                 {
                                     TargetSelectionsBeforeFirstAnim_Block++;
                                     CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
-                                    Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
+                                    Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
                                 }
                             }
                         }
@@ -230,7 +230,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                         SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;
-                        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorSelection"]);
+                        Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorSelection"]);
                     }
 
                     CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
@@ -272,8 +272,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["TargetAnimWithoutSelection"]);
-        Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
+        Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetAnimWithoutSelection"]);
+        Session.EventCodeManager.SendCodeThisFrame("NoChoice");
 
     }
     private void DistractorAvoided()
@@ -281,7 +281,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         DistractorRejections_Block++;
         CurrentTaskLevel.DistractorRejections_Task++;
         CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
-        Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["DistractorRejection"]);
+        Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorRejection"]);
 
     }
 

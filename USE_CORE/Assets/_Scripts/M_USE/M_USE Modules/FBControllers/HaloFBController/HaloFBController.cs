@@ -80,7 +80,7 @@ public class HaloFBController : MonoBehaviour
 
         }
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+            Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
 
     }
     public void ShowNegative(GameObject gameObj, bool particleHaloActive = false, bool circleHaloActive = true, float? destroyTime = null, float? depth = null)
@@ -120,7 +120,7 @@ public class HaloFBController : MonoBehaviour
         }
 
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
+            Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
     }
     private ParticleHalo GetOrCreateParticleHalo(GameObject gameObj)
     {
@@ -282,7 +282,7 @@ public class HaloFBController : MonoBehaviour
         DestroyAllCircleHalos();
         state = State.None;
         if (Session.SessionDef.EventCodesActive)
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
+            Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOff"]);
 
     }
     public List<CircleHalo> GetNegativeCircleHalos() { return NegativeCircleHalos;   }

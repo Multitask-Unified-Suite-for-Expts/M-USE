@@ -268,7 +268,7 @@ namespace USE_ExperimentTemplate_Session
                 if (!Session.WebBuild)
                     Session.SessionInfoPanel = ExperimenterDisplayGO.transform.Find("SessionInfoPanel").GetComponent<SessionInfoPanel>();
 
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("SetupSessionEnds");
+                Session.EventCodeManager.SendCodeThisFrame("SetupSessionEnds");
             });
             
             //LoadGazeCalibration State---------------------------------------------------------------------------------------------------------------
@@ -314,18 +314,6 @@ namespace USE_ExperimentTemplate_Session
             setupGazeCalibration.SpecifyTermination(() => setupTaskLevel.Terminated, gazeCalibration);
 
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
-
-            gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
-
-            gazeCalibration.AddLateUpdateMethod(() =>
-            {
-                Session.SelectionTracker.UpdateActiveSelections();
-                AppendSerialData();
-                if (Session.SessionDef.EyeTrackerActive)
-                    StartCoroutine(Session.GazeData.AppendDataToBuffer());
-
-                //Session.EventCodeManager.EventCodeLateUpdate();
-            });
             gazeCalibration.AddSpecificInitializationMethod(() =>
             {
                 StartCoroutine(FrameData.AppendDataToFile());
@@ -379,6 +367,18 @@ namespace USE_ExperimentTemplate_Session
 
                 AppendSerialData();
                 Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("SessionToGazeCalibration");
+            });
+
+            gazeCalibration.AddLateUpdateMethod(() =>
+            {
+                Session.EventCodeManager.CheckFrameEventCodeBuffer();
+
+                Session.SelectionTracker.UpdateActiveSelections();
+                AppendSerialData();
+                if (Session.SessionDef.EyeTrackerActive)
+                    StartCoroutine(Session.GazeData.AppendDataToBuffer());
+
+                //Session.EventCodeManager.EventCodeLateUpdate();
             });
 
             // Termination method for gaze calibration
@@ -437,8 +437,6 @@ namespace USE_ExperimentTemplate_Session
                 CurrentTask = null;
 
             });
-
-            gazeCalibration.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
 
             TaskButtonsContainer = null;
             Dictionary<string, GameObject> taskButtonGOs = new Dictionary<string, GameObject>();
@@ -520,7 +518,7 @@ namespace USE_ExperimentTemplate_Session
                 if (SelectionHandler.AllSelections.Count > 0)
                     SelectionHandler.ClearSelections();
 
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("SelectTaskStarts");
+                Session.EventCodeManager.SendCodeThisFrame("SelectTaskStarts");
 
                 SessionSettings.Restore();
                 selectedConfigFolderName = null;
@@ -744,7 +742,7 @@ namespace USE_ExperimentTemplate_Session
                 }
 
             });
-            selectTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            selectTask.AddLateUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
             //LoadTask State---------------------------------------------------------------------------------------------------------------
             loadTask.AddSpecificInitializationMethod(() =>
             {
@@ -782,8 +780,6 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.AddUpdateMethod(() =>
             {                
-                Session.EventCodeManager.CheckFrameEventCodeBuffer();
-
                 if (!SceneLoading && CurrentTask != null && !DefiningTask)
                 {
                     DefiningTask = true;
@@ -816,6 +812,8 @@ namespace USE_ExperimentTemplate_Session
 
             loadTask.AddLateUpdateMethod(() =>
             {
+                Session.EventCodeManager.CheckFrameEventCodeBuffer();
+
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
@@ -863,7 +861,7 @@ namespace USE_ExperimentTemplate_Session
             {
                 setupTaskLevel.TaskLevel = CurrentTask;
                 setupTaskLevel.ConfigFolderName = CurrentTask.ConfigFolderName;
-                Session.EventCodeManager.SendRangeCode("SetupTaskStarts", taskCount);
+                Session.EventCodeManager.SendRangeCodeThisFrame("SetupTaskStarts", taskCount);
 
                 CurrentTask.TaskConfigPath = Session.ConfigFolderPath + "/" + CurrentTask.ConfigFolderName;
             });
@@ -879,17 +877,17 @@ namespace USE_ExperimentTemplate_Session
                 Session.InitCamGO.SetActive(false);
                 Session.SessionAudioController.StopBackgroundMusic();
 
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("RunTaskStarts");
+                Session.EventCodeManager.SendCodeThisFrame("RunTaskStarts");
 
                 if(!Session.WebBuild)
                     AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
 
             });
-            
-            runTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
-            
+                       
             runTask.AddLateUpdateMethod(() =>
             {
+                Session.EventCodeManager.CheckFrameEventCodeBuffer();
+
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 if(Session.SessionDef.EyeTrackerActive)
@@ -959,7 +957,7 @@ namespace USE_ExperimentTemplate_Session
             bool skipSessionSummary = false;
             finishSession.AddSpecificInitializationMethod(() =>
             {
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishSessionStarts");
+                Session.EventCodeManager.SendCodeThisFrame("FinishSessionStarts");
 
                 ToggleAudioButton.SetActive(false);
                 HumanVersionToggleButton.SetActive(false);
@@ -985,7 +983,7 @@ namespace USE_ExperimentTemplate_Session
                     Debug.LogWarning("TASKS ARE NULL!");
                 
             });
-            finishSession.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+            finishSession.AddLateUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
             finishSession.SpecifyTermination(() => skipSessionSummary, () => saveData);
             finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => saveData);
             //finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);

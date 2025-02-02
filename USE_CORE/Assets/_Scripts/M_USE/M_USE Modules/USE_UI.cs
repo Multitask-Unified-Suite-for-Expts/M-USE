@@ -172,7 +172,7 @@ namespace USE_UI
                 HumanStartPanelGO.SetActive(false);
 
                 Session.TrialLevel.AbortCode = 5;
-                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
                 Session.TrialLevel.ForceBlockEnd = true;
                 Session.TrialLevel.FinishTrialCleanup();
                 Session.TrialLevel.ClearActiveTrialHandlers();
@@ -199,7 +199,7 @@ namespace USE_UI
         {
             InstructionsGO.SetActive(!InstructionsGO.activeInHierarchy);
             InstructionsOn = InstructionsGO.activeInHierarchy;
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
+            Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes[InstructionsGO.activeInHierarchy ? "InstructionsOn" : "InstructionsOff"]);
         }
 
         //Called at end of SetupTrial (TrialLevel)
@@ -246,7 +246,7 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(true);
             HumanPanelOn = true;
             if (Session.SessionDef.EventCodesActive)
-                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
+                Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOn"]);
             if (!StartButtonGO.activeInHierarchy)
                 StartButtonGO.SetActive(true);
         }
@@ -256,7 +256,7 @@ namespace USE_UI
             HumanStartPanelGO.SetActive(false);
             HumanPanelOn = false;
             if (Session.SessionDef.EventCodesActive)
-                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
+                Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HumanStartPanelOff"]);
         }
 
     }

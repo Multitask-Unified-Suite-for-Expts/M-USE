@@ -208,21 +208,32 @@ namespace USE_ExperimentTemplate_Data
 
         public void AddEventCodeColumns()
         {
-            AddDatum("EventCodesSent", () =>
+            //The split event codes (if splitByte > 1 in session config)
+            AddDatum("Split_EventCodes", () =>
+            {
+                string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("split"));
+                Session.EventCodeManager.Split_SentBuffer.Clear();
+                return dataString;
+            });
+
+            //Pre Split event codes (if splitByte > 1 in session config)
+            AddDatum("PreSplit_EventCodes", () =>
+            {
+                string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("presplit"));
+                Session.EventCodeManager.PreSplit_SentBuffer.Clear();
+                return dataString;
+            });
+
+            //The Event Codes sent that frame (could be split, or not split).
+            AddDatum("Sent_EventCodes", () =>
             {
                 string dataString = string.Join(",", Session.EventCodeManager.GetBuffer("sent"));
-                Session.EventCodeManager.sentBuffer.Clear();
+                Session.EventCodeManager.SentBuffer.Clear();
                 return dataString;
             });
 
-            AddDatum("FrameEventCodes", () =>
-            {
-                string dataString = string.Join(",", Session.EventCodeManager.FrameEventCodesStored);
-                Session.EventCodeManager.FrameEventCodesStored.Clear();
-                return dataString;
-            });
-
-            AddDatum("StimulationEventCode", () =>
+            //The Stimulation Event Code
+            AddDatum("Stimulation_EventCode", () =>
             {
                 string dataString = "";
                 if (Session.EventCodeManager.StimulationCodeStored > 0)
@@ -231,8 +242,14 @@ namespace USE_ExperimentTemplate_Data
                 return dataString;
             });
 
-            //AddDatum("SplitEventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("split")));
-            //AddDatum("PreSplitEventCodes", () => string.Join(",", Session.EventCodeManager.GetBuffer("presplit")));
+            //The individual frame event codes for that frame (could be a lot of them).
+            AddDatum("Frame_EventCodes", () =>
+            {
+                string dataString = string.Join(",", Session.EventCodeManager.FrameEventCodesStored);
+                Session.EventCodeManager.FrameEventCodesStored.Clear();
+                return dataString;
+            });
+
         }
     }
 

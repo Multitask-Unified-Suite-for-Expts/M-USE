@@ -45,6 +45,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public float NonStimTouches_Task;
     [HideInInspector] public int SliderBarCompletions_Task = 0;
 
+
     [HideInInspector] public int NumNew_Picked_Task;
     [HideInInspector] public int NumPNC_Picked_Task;
 
@@ -151,6 +152,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         data["New Objects Picked"] = NumNew_Picked_Task;
         data["PNC Objects Picked"] = NumPNC_Picked_Task;
 
+        data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
+
 
         return data;
     }
@@ -169,6 +172,8 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         data["New Objects Picked"] = NumNew_Picked_Task;
         data["PNC Objects Picked"] = NumPNC_Picked_Task;
+
+        data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
 
         return data;
     }
@@ -203,6 +208,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("New_Objects_Picked", () => trialLevel.NumNew_Picked_Block);
         BlockData.AddDatum("PNC_Objects_Picked", () => trialLevel.NumPNC_Picked_Block);
 
+        BlockData.AddDatum("StimulationPulsesGiven", () => trialLevel.StimulationPulsesGiven_Block);
+
+
     }
 
     public void CalculateBlockSummaryString()
@@ -212,11 +220,13 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString =
                 "\nCorrect: " + trialLevel.NumCorrect_Block +
-                (Session.SessionDef.IsHuman ? ("\nTbCompletions: " + trialLevel.NumTbCompletions_Block) : ("\nSliderCompletions: " + trialLevel.SliderBarCompletions_Block)) + 
+                (Session.SessionDef.IsHuman ? ("\nTbCompletions: " + trialLevel.NumTbCompletions_Block) : ("\nSliderCompletions: " + trialLevel.SliderBarCompletions_Block)) +
                 "\nAvgTimeToChoice: " + trialLevel.AvgTimeToChoice_Block.ToString("0.00") + "s" +
                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
-                "\nReward Pulses: " + NumRewardPulses_InBlock + 
-                "\nNonStimTouches: " + trialLevel.NonStimTouches_Block;
+                "\nReward Pulses: " + NumRewardPulses_InBlock +
+                "\nNonStimTouches: " + trialLevel.NonStimTouches_Block +
+                "\nStimulationPulsesGiven: " + trialLevel.StimulationPulsesGiven_Block;
+
 
         if (BlockStimulationCode > 0)
         {

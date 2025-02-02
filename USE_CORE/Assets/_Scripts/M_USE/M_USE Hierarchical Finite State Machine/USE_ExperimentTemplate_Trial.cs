@@ -56,7 +56,9 @@ namespace USE_ExperimentTemplate_Trial
 
         [HideInInspector] public int BlockCount, TrialCount_InTask, TrialCount_InBlock, AbortCode;
         protected int NumTrialsInBlock;
-        
+
+        [HideInInspector] public int StimulationPulsesGiven_Block = 0;
+
         [HideInInspector] public List<int> runningPerformance;
         [HideInInspector] public int difficultyLevel;
         [HideInInspector] public int posStep;
@@ -299,7 +301,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 TokenFBController?.RecalculateTokenBox(); //recalculate tokenbox incase they switch to fullscreen mode
 
-                Session.EventCodeManager.SendRangeCode("SetupTrialStarts", TrialCount_InTask);
+                Session.EventCodeManager.SendRangeCodeThisFrame("SetupTrialStarts", TrialCount_InTask);
 
                 ResetRelativeStartTime();
 
@@ -339,7 +341,7 @@ namespace USE_ExperimentTemplate_Trial
 
             FinishTrial.AddSpecificInitializationMethod(() =>
             {
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishTrialStarts");
+                Session.EventCodeManager.SendCodeThisFrame("FinishTrialStarts");
             });
             
             if(Session.SessionDef.EyeTrackerActive)
@@ -611,7 +613,7 @@ namespace USE_ExperimentTemplate_Trial
             {
                 Session.HumanStartPanel.InstructionsGO.SetActive(false);
                 Session.HumanStartPanel.InstructionsOn = false;
-                Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["InstructionsOff"]);
+                Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["InstructionsOff"]);
             }
         }
 

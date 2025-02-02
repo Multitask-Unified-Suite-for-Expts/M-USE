@@ -1187,7 +1187,7 @@ namespace USE_States
 			if (tex != null)
 			{
 				RenderSettings.skybox = CreateSkybox(tex);
-				Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOn");
+				Session.EventCodeManager.SendCodeThisFrame("ContextOn");
 			}
 			else
 				Debug.LogWarning("NOT SETTING SKYBOX BECAUSE TEX IS NULL!");

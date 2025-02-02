@@ -155,7 +155,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 int randomIndex = Random.Range(0, CurrentTrialDef.StimulationConditionCodes.Length);
                 TrialStimulationCode = CurrentTrialDef.StimulationConditionCodes[randomIndex];
-                Session.EventCodeManager.SendRangeCode("StimulationCondition", TrialStimulationCode);
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
             }
 
             //Set the Stimuli Light/Shadow settings
@@ -212,7 +212,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!Session.WebBuild)
                 ActivateChildren(playerViewParent);
 
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
@@ -237,7 +237,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
                 {
                     ongoingSelection.InitialFixationDurationPassed = true;
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("InitialFixationDurationPassed");
+                    Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
 
                     GameObject GoSelected = ongoingSelection.SelectedGameObject;
                     var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
@@ -275,14 +275,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("CorrectResponse");
+                Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("IncorrectResponse");
+                Session.EventCodeManager.SendCodeThisFrame("IncorrectResponse");
             }
 
         if (selectedGO != null)
@@ -296,8 +296,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("NoChoice");
-            Session.EventCodeManager.SendRangeCode("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
+            Session.EventCodeManager.SendCodeThisFrame("NoChoice");
+            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
             runningAcc.Add(0);
@@ -378,7 +378,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             {
                 ContextName = "NeutralITI";
                 StartCoroutine(HandleSkybox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI")));
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("ContextOff");
+                Session.EventCodeManager.SendCodeThisFrame("ContextOff");
             }
         });
         ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
@@ -397,6 +397,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(CurrentTrialDef.StimulationDelayDuration);
         Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
         Session.SyncBoxController?.SendSonication();
+
+        StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
+        CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
     }
 
     public override void OnTokenBarFull()
@@ -589,9 +592,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" +
-                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
-                             "\n" +
-                             (TrialStimulationCode > 0 ? "" : "");
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
 
         if (TrialStimulationCode > 0)
         {

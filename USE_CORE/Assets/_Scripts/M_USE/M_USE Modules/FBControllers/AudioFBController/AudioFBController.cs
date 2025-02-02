@@ -91,7 +91,7 @@ public class AudioFBController : MonoBehaviour
                 audioSource.Stop();
 
             audioSource.PlayOneShot(clip);
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(Session.EventCodeManager.SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
+            Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["AudioFbController_SelectionAuditoryFbOn"]);
         }
         else
             Debug.LogWarning("Trying to play clip " + clipName + " but it has not been added");

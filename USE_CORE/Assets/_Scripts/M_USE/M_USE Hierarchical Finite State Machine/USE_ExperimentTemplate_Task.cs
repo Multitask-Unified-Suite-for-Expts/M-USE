@@ -62,6 +62,8 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector] public int NumRewardPulses_InBlock;
         [HideInInspector] public int NumRewardPulses_InTask;
 
+        [HideInInspector] public int StimulationPulsesGiven_Task = 0;
+
         [HideInInspector] public int? TotalTouches_InBlock;
         [HideInInspector] public int? TotalIncompleteTouches_InBlock;
 
@@ -147,7 +149,6 @@ namespace USE_ExperimentTemplate_Task
 
 
         [HideInInspector] public int BlockStimulationCode = 0;
-
 
 
         public virtual void SpecifyTypes()
@@ -303,7 +304,7 @@ namespace USE_ExperimentTemplate_Task
                 TrialLevel.ForceBlockEnd = false;
                 TrialLevel.ReachedCriterion = false;
 
-                Session.EventCodeManager.SendRangeCode("RunBlockStarts", BlockCount);
+                Session.EventCodeManager.SendRangeCodeThisFrame("RunBlockStarts", BlockCount);
             });
 
             //Hotkeys for WebGL build so we can end task and go to next block
@@ -327,7 +328,7 @@ namespace USE_ExperimentTemplate_Task
             //BlockFeedback State-----------------------------------------------------------------------------------------------------
             BlockFeedback.AddUniversalInitializationMethod(() =>
             {
-                Session.EventCodeManager.AddToFrameEventCodeBuffer("BlockFeedbackStarts");
+                Session.EventCodeManager.SendCodeThisFrame("BlockFeedbackStarts");
             });
             BlockFeedback.AddLateUpdateMethod(() =>
             {
@@ -371,7 +372,7 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 if (Session.SessionDef.EventCodesActive)
-                    Session.EventCodeManager.AddToFrameEventCodeBuffer("FinishTaskStarts");
+                    Session.EventCodeManager.SendCodeThisFrame("FinishTaskStarts");
 
                 //Clear trialsummarystring and Blocksummarystring at end of task:
                 if (TrialLevel.TrialSummaryString != null && CurrentBlockSummaryString != null)
@@ -498,7 +499,7 @@ namespace USE_ExperimentTemplate_Task
                 Time.timeScale = 1; //if paused, unpause before ending task
 
                 TrialLevel.AbortCode = 5;
-                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
+                Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.FinishTrialCleanup();
                 TrialLevel.ClearActiveTrialHandlers();
@@ -522,7 +523,7 @@ namespace USE_ExperimentTemplate_Task
                 if (TrialLevel.AudioFBController.IsPlaying())
                     TrialLevel.AudioFBController.audioSource.Stop();
                 TrialLevel.AbortCode = 3;
-                Session.EventCodeManager.SendRangeCode("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
+                Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
                 TrialLevel.ForceBlockEnd = true;
                 TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
             }

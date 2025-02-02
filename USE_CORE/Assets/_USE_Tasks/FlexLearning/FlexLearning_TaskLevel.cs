@@ -100,6 +100,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         flTL.NumCorrect_InBlock = 0;
         flTL.NumTokenBarFull_InBlock = 0;
         flTL.TotalTokensCollected_InBlock = 0;
+        flTL.StimulationPulsesGiven_Block = 0;
     }
 
     public override OrderedDictionary GetTaskSummaryData()
@@ -111,7 +112,10 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (flTL.TrialCount_InTask));
         if(SearchDurations_InTask.Count > 0)
             data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
-        
+
+        data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
+
+
         return data;
     }
     // public string CreateTaskDataSummary()
@@ -165,20 +169,24 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         data["TokenBar Completions"] = NumTokenBarFull_InTask;
 
+        data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
+
         return data;
     }
 
     public void SetBlockSummaryString()
     {
         ClearStrings();
-        CurrentBlockSummaryString.AppendLine("Max Trials in Block: " + MaxTrials_InBlock + 
-                                      "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +  
-                                      "\n" + 
+        CurrentBlockSummaryString.AppendLine("Max Trials in Block: " + MaxTrials_InBlock +
+                                      "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +
+                                      "\n" +
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", CalculateAverageDuration(flTL.SearchDurations_InBlock)) +
                                       "\n" +
-                                      "\nNum Reward Given: " + NumRewardPulses_InBlock + 
+                                      "\nNum Reward Given: " + NumRewardPulses_InBlock +
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
-                                      "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock);
+                                      "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock +
+                                      "\nStimulationPulsesGiven: " + flTL.StimulationPulsesGiven_Block);
+
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
         /*if (PreviousBlocksString.Length > 0)
@@ -210,6 +218,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("SearchDurations", ()=> String.Join(",", flTL.SearchDurations_InBlock));
         BlockData.AddDatum("NumTokenBarFilled", ()=> flTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("TotalTokensCollected", ()=> flTL.TotalTokensCollected_InBlock);
+        BlockData.AddDatum("StimulationPulsesGiven", () => flTL.StimulationPulsesGiven_Block);
+
     }
     public void ClearStrings()
     {
@@ -224,5 +234,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         NumTokenBarFull_InTask = 0;
         TotalTokensCollected_InTask = 0;
         SearchDurations_InTask.Clear();
+        StimulationPulsesGiven_Task = 0;
     }
 }

@@ -155,7 +155,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             TokenFBController.enabled = true;
-            Session.EventCodeManager.AddToFrameEventCodeBuffer("TokenBarVisible");
+            Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
 
             if(Session.SessionDef.IsHuman)
             {
@@ -171,7 +171,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             ShotgunHandler.SelectablePeriod = false;
 
             WaitCueGO.SetActive(true);
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["WaitCueActive"]);
+            Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["WaitCueActive"]);
 
         });
         Preparation.AddTimer(() => CurrentTrial.PreparationDuration, DisplayOptions);
@@ -181,8 +181,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         {
             LeftIconGO.SetActive(true);
             RightIconGO.SetActive(true);
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["LeftObjectActive"]);
-            Session.EventCodeManager.AddToFrameEventCodeBuffer(TaskEventCodes["RightObjectActive"]);
+            Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["LeftObjectActive"]);
+            Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["RightObjectActive"]);
         });
         DisplayOptions.AddTimer(() => CurrentTrial.DisplayOptionsDuration, PlayAudio);
 

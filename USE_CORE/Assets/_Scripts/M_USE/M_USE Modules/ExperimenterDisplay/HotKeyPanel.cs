@@ -254,7 +254,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Session.TrialLevel.AudioFBController.audioSource.Stop();
 
                         Session.TrialLevel.AbortCode = 2;
-                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["RestartBlock"]);
+                        Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["RestartBlock"]);
                         Session.TrialLevel.ForceBlockEnd = true;
                         Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
                         Session.TaskLevel.BlockCount--;
@@ -278,7 +278,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Session.TrialLevel.AudioFBController.audioSource.Stop();
 
                         Session.TrialLevel.AbortCode = 4;
-                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["PreviousBlock"]);
+                        Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["PreviousBlock"]);
                         Session.TrialLevel.ForceBlockEnd = true;
                         Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
                     
@@ -321,7 +321,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                         }
 
                         Session.TrialLevel.AbortCode = 3;
-                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndBlock"]);
+                        Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndBlock"]);
                         Session.TrialLevel.ForceBlockEnd = true;
                         Session.TrialLevel.SpecifyCurrentState(Session.TrialLevel.GetStateFromName("FinishTrial"));
                     }
@@ -345,7 +345,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                             Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
 
                         Session.TrialLevel.AbortCode = 5;
-                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
+                        Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["EndTask"]);
                         Session.TrialLevel.ForceBlockEnd = true;
                         Session.TrialLevel.FinishTrialCleanup();
                         Session.TrialLevel.ClearActiveTrialHandlers();
@@ -426,7 +426,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                     if (Session.TrialLevel != null)
                     {
                         Session.TrialLevel.AbortCode = 7;
-                        Session.EventCodeManager.SendRangeCode("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["ToggleCalibration"]);
+                        Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", Session.TrialLevel.AbortCodeDict["ToggleCalibration"]);
                         Session.TrialLevel.FinishTrialCleanup();
                         Session.TrialLevel.ResetTrialVariables();
                         Session.TrialLevel.ClearActiveTrialHandlers();

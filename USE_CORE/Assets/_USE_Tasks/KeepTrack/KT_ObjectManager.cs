@@ -223,7 +223,7 @@ public class KT_Object : MonoBehaviour
     public Vector2 StartingPosition;
     public Vector2 ResponseWindow;
     public float CloseDuration;
-    public int[] RewardPulsesBySec;
+    public int[] RewardPulsesBySec = null;
     public Vector2[] RatesAndDurations;
     public Vector3 AngleProbs;
     public Vector2[] AngleRanges;
@@ -284,7 +284,12 @@ public class KT_Object : MonoBehaviour
         Size = configValue.Size;
         NextDestDist = configValue.NextDestDist;
         CloseDuration = configValue.CloseDuration;
-        RewardPulsesBySec = configValue.RewardPulsesBySec;
+
+        if (configValue.RewardPulsesBySec != null)
+            RewardPulsesBySec = configValue.RewardPulsesBySec;
+        else
+            RewardPulsesBySec = null;
+
         RatesAndDurations = configValue.RatesAndDurations;
         ObjectColor = configValue.ObjectColor;
         SliderChange = configValue.SliderChange;
@@ -320,6 +325,9 @@ public class KT_Object : MonoBehaviour
 
     private void CheckRewardsMatchDurations()
     {
+        if (RewardPulsesBySec == null)
+            return;
+
         float durationSum = RatesAndDurations.Sum(value => value.y);
         if (RewardPulsesBySec.Count() != durationSum)
             Debug.LogError("NUMBER OF REWARD SECONDS DOES NOT MATCH THE SUM OF ALL THE Y VALUES IN THE RatesAndDurations variable!");
@@ -663,7 +671,7 @@ public class KT_Object_ConfigValues
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;
-    public int[] RewardPulsesBySec;
+    public int[] RewardPulsesBySec = null;
     public Vector2[] RatesAndDurations;
     public Vector3 AngleProbs;
     public Vector2[] AngleRanges;

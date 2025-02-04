@@ -238,7 +238,7 @@ public class TouchFBController : MonoBehaviour
         go.AddComponent<RectTransform>();
 
         SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-        renderer.sortingOrder = 2;
+        renderer.sortingOrder = 200;
         renderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f));
         renderer.color = new Color32(224, 78, 92, 235);
 

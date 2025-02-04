@@ -77,7 +77,7 @@ public class MaskController : MonoBehaviour
         maskRenderer.color = new Color32((byte)maskColor.x, (byte)maskColor.y, (byte)maskColor.z, 0); // Start with alpha = 0
 
         maskRenderer.sprite = MaskSprite;
-        maskRenderer.sortingOrder = 999; // High number to ensure it's rendered in front
+        maskRenderer.sortingOrder = 100;
 
         maskObject.transform.SetParent(Canvas.transform, false);
 

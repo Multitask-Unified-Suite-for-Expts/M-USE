@@ -360,7 +360,24 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     {
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+
+        if (ChosenObject != null)
+        {
+            if(ChosenObject.RewardPulsesBySec != null)
+            {
+                Debug.Log("--------------- Using RewardPulsesBySec!");
+                Session.SyncBoxController?.SendRewardPulses(ChosenObject.CurrentRewardValue, CurrentTrial.PulseSize);
+            }
+            else
+            {
+                Debug.Log("--------------- NO RewardPulsesBySec so using CurrentTrial.NumPulses instead");
+                Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+            }
+
+        }
+        else
+            Debug.LogError("CHOSEN OBJ IS NULL WHEN TRYING TO SEND REWARD");
+
     }
 
     private void SetTrialSummaryString()

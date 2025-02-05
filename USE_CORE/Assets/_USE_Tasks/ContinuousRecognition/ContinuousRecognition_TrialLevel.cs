@@ -136,7 +136,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            SliderFBController.InitializeSlider();
+            //SliderFBController.InitializeSlider();
 
             if (!Session.WebBuild)
             {
@@ -149,6 +149,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             {
                 Session.TimerController.CreateTimer(CR_CanvasGO.transform);
                 Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
+            }
+            else
+            {
+                if (SliderFBController != null && SliderFBController.SliderGO == null)
+                    SliderFBController.InitializeSlider();
             }
 
             SetControllerBlockValues();
@@ -229,10 +234,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 Starfield.SetActive(true);
 
             //Should add this to other tasks as well!
-            if (Session.SessionDef.MacMainDisplayBuild && !Application.isEditor)
+            if (Session.SessionDef.MacMainDisplayBuild && !Application.isEditor) { }
                 TokenFBController.AdjustTokenBarSizing(100);
 
-            TokenFBController.enabled = false;
+            if(Session.SessionDef.IsHuman)
+                TokenFBController.enabled = false;
 
             //SetTokenFeedbackTimes();
             SetStimStrings();
@@ -393,6 +399,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         GameObject GoSelected = OngoingSelection.SelectedGameObject;
                         ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
+                        Debug.Log("IS THE CHOSEN STIMULUS NULL?? " + chosenStimulus == null ? "YES":"NO");
                         string stimulationType = CurrentTrial.StimulationType.Trim();
                         if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
                         {
@@ -500,6 +507,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                     SliderFBController.UpdateSliderValue((float)(CurrentTrial.SliderChange / 100f));
+                Debug.Log("**SLIDER CHANGE: " + CurrentTrial.SliderChange);
             }
             else //Got wrong
             {
@@ -558,8 +566,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if(CurrentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
-
-            TokenFBController.enabled = false;
+            if(Session.SessionDef.IsHuman)
+                TokenFBController.enabled = false;
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
@@ -713,6 +721,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         for(int i=0; i < CurrentTrial.NumTrialStims; ++i)
         {
+            Debug.Log("**CURRENT TRIAL NUM TRIAL STIMS: " + CurrentTrial.NumTrialStims + " || STIM DEFS: " + trialStims.stimDefs.Count);
             Vector2 textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent.transform);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);

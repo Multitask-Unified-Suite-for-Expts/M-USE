@@ -21,10 +21,13 @@ public class GazeCalibrationController : MonoBehaviour
     public string TaskLevelGazeDataFileName;
     public string GazeCalibrationDataFolderPath;
 
+    public bool InTaskGazeCalibration;
+
     public string serialRecvDataFileName = "", serialSentDataFileName = "", gazeDataFileName = "";
 
     private bool CreatedSessionSerialAndGazeDataFiles;
     private bool CreatedTaskSerialAndGazeDataFiles;
+    private bool CreatedGazeCalibrationDataFiles;
 
     public string taskGazeCalibrationFolderPath, taskFolderPath, sessionGazeCalibrationFolderPath, sessionFolderPath;
     public void ActivateGazeCalibrationComponents()
@@ -184,9 +187,19 @@ public class GazeCalibrationController : MonoBehaviour
         }
     }
 
-    public void ResetCreatedTaskSerialAndGazeDataFiles()
+    public void SetCreatedTaskSerialAndGazeDataFiles(bool val)
     {
-        CreatedTaskSerialAndGazeDataFiles = false;
+        CreatedTaskSerialAndGazeDataFiles = val;
+    }    
+    
+    public void SetCreatedGazeCalibrationDataFiles(bool val)
+    {
+        CreatedGazeCalibrationDataFiles = val;
+    }    
+    
+    public bool GetCreatedGazeCalibrationDataFiles()
+    {
+        return CreatedGazeCalibrationDataFiles;
     }
 
 }

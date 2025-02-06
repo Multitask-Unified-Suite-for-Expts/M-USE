@@ -124,7 +124,6 @@ namespace USE_ExperimentTemplate_Trial
         public bool TrialFilesLoaded;
 
         public int CurrentTrialDefIndex;
-
         //Can be used by tasks' trial levels to set the trial stimulation code
         [HideInInspector] public int TrialStimulationCode = 0;
 
@@ -404,7 +403,8 @@ namespace USE_ExperimentTemplate_Trial
                 Session.GazeCalibrationController.OriginalTaskLevel.DeactivateAllSceneElements(Session.GazeCalibrationController.OriginalTaskLevel);
                 Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.GazeCalibrationController.taskGazeCalibrationFolderPath);
 
-                CreateGazeCalibrationDataFolders();
+                if(!Session.GazeCalibrationController.GetCreatedGazeCalibrationDataFiles())
+                    CreateGazeCalibrationDataFolders();
 
                 // Activate Gaze Calibration components
                 Session.GazeCalibrationController.ActivateGazeCalibrationComponents();
@@ -453,6 +453,8 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.BlockData.CreateFile());
             StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTrialLevel.TrialData.CreateFile());
             StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.FrameData.CreateFile());
+
+            Session.GazeCalibrationController.SetCreatedGazeCalibrationDataFiles(true);
 
         }
         private IEnumerator HandleLoadingStims()

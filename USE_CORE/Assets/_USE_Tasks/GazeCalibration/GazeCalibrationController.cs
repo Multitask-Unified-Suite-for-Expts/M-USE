@@ -21,6 +21,7 @@ public class GazeCalibrationController : MonoBehaviour
     public string TaskLevelGazeDataFileName;
     public string GazeCalibrationDataFolderPath;
 
+    public int InTaskGazeCalibration_TrialCount_InTask;
     public bool InTaskGazeCalibration;
 
     public string serialRecvDataFileName = "", serialSentDataFileName = "", gazeDataFileName = "";

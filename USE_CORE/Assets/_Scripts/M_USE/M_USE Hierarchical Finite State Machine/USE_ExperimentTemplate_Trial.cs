@@ -233,6 +233,7 @@ namespace USE_ExperimentTemplate_Trial
             {
 
                 TrialCount_InBlock = -1;
+
                 DefineCustomTrialDefSelection();
                 
                 TrialStims = new List<StimGroup>();
@@ -341,10 +342,9 @@ namespace USE_ExperimentTemplate_Trial
             if (Session.SessionDef.EyeTrackerActive)
             {
                 FinishTrial.SpecifyTermination(() => AbortCode == 7 && TaskLevel.TaskName != "GazeCalibration", () => GazeCalibration);
-                FinishTrial.SpecifyTermination(() => TaskLevel.TaskName == "GazeCalibration" && Session.GazeCalibrationController.OriginalTaskLevel != null, () => null, () =>
+                FinishTrial.SpecifyTermination(() => Session.GazeCalibrationController.InTaskGazeCalibration, () => null, () =>
                 {
                     Session.GazeCalibrationController.RunCalibration = false;
-                    Debug.LogWarning("**I AM WRITING TO THE GAZECALIB TRIAL LEVEL");
                     Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel, "GazeCalibrationToTask");
                     Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToTask");
                 }
@@ -374,8 +374,10 @@ namespace USE_ExperimentTemplate_Trial
                     Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.OriginalTrialLevel, Session.GazeCalibrationController.OriginalTaskLevel, "TaskToGazeCalibration");
                     Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("TaskToGazeCalibration");
                 }
-                else
+                else if (!Session.GazeCalibrationController.InTaskGazeCalibration)
+                {
                     WriteDataFiles();
+                }
 
                 if (Session.TimerController.TimerGO != null)
                 {
@@ -394,9 +396,9 @@ namespace USE_ExperimentTemplate_Trial
 
             GazeCalibration.AddSpecificInitializationMethod(() =>
             {
-                // Deactivate Task Scene Elements
                 AbortCode = 0;
-
+                Session.GazeCalibrationController.InTaskGazeCalibration = true;
+                // Deactivate Task Scene Elements
                 SkyboxMaterial = RenderSettings.skybox;
                 if (TokenFBController)
                     TokenFBController.enabled = false;
@@ -418,7 +420,8 @@ namespace USE_ExperimentTemplate_Trial
 
             GazeCalibration.SpecifyTermination(() => !Session.GazeCalibrationController.RunCalibration, () => null, () =>
             {
-                
+                Session.GazeCalibrationController.InTaskGazeCalibration = false;
+                Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask++;
 
                 // Check and exit calibration mode for Tobii eye tracker
                 if (Session.SessionDef.EyeTrackerActive && Session.TobiiEyeTrackerController.isCalibrating)

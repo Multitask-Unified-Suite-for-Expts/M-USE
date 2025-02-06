@@ -141,12 +141,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 Session.TobiiEyeTrackerController.isCalibrating = true;
             }
 
-            if(Session.GazeCalibrationController.OriginalTaskLevel != null)
-            {
-                BlockCount = Session.GazeCalibrationController.OriginalTrialLevel.BlockCount;
-                TrialCount_InBlock = Session.GazeCalibrationController.OriginalTrialLevel.TrialCount_InBlock;
-                TrialCount_InTask = Session.GazeCalibrationController.OriginalTrialLevel.TrialCount_InTask;
-            }
+            if (Session.GazeCalibrationController.InTaskGazeCalibration) 
+                TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask;
+
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -175,6 +172,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             AssignGazeCalibrationCameraToTrackboxCanvas();
 
+            Debug.LogWarning("**this is my trial counti n task: " + Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask);
 
         });
 

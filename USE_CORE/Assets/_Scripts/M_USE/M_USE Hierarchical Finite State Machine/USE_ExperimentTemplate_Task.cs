@@ -383,6 +383,14 @@ namespace USE_ExperimentTemplate_Task
                 }
 
                 ClearActiveTaskHandlers();
+
+                if (Session.SessionDef.EyeTrackerActive && TaskName != "GazeCalibration")
+                {
+                    Session.GazeCalibrationController.ResetCreatedTaskSerialAndGazeDataFiles();
+                    Session.GazeCalibrationController.OriginalTaskLevel = null;
+                    Session.GazeCalibrationController.OriginalTrialLevel = null;
+                }
+
             });
             FinishTask.AddUpdateMethod(() =>
             {
@@ -398,6 +406,8 @@ namespace USE_ExperimentTemplate_Task
 
                 if (TaskResultsGO != null)
                     TaskResultsGO.SetActive(false);
+
+               
             });
 
             AddDefaultControlLevelTerminationMethod(() =>

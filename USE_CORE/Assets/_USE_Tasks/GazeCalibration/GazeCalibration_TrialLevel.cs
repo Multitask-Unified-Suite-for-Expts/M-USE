@@ -140,6 +140,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
                 Session.TobiiEyeTrackerController.isCalibrating = true;
             }
+
+            if(Session.GazeCalibrationController.OriginalTaskLevel != null)
+            {
+                BlockCount = Session.GazeCalibrationController.OriginalTrialLevel.BlockCount;
+                TrialCount_InBlock = Session.GazeCalibrationController.OriginalTrialLevel.TrialCount_InBlock;
+                TrialCount_InTask = Session.GazeCalibrationController.OriginalTrialLevel.TrialCount_InTask;
+            }
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -450,7 +457,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         ITI.SpecifyTermination(() => true, FinishTrial, ()=>
         {
-            Session.GazeCalibrationController.RunCalibration = false;
             // Destroy remaining results on the experimenter display at the end of the trial
             DestroyChildren(ResultContainer);
         });

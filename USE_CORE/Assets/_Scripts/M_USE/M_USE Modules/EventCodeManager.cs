@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using USE_ExperimentTemplate_Classes;
 using System.Text;
 using System.Collections;
+using Mono.Cecil.Cil;
 
 
 public class EventCodeManager : MonoBehaviour 
@@ -39,6 +40,7 @@ public class EventCodeManager : MonoBehaviour
     public List<int> SentBuffer = new List<int>();
     public List<int> Split_SentBuffer = new List<int>();
 	public List<int> PreSplit_SentBuffer = new List<int>();
+
 
     public long systemTime;
     public bool codesActive;
@@ -53,8 +55,11 @@ public class EventCodeManager : MonoBehaviour
     public List<int> FrameEventCodeBuffer = new List<int>();
     public List<int> FrameEventCodesStored;
 
+    public List<string> FrameEventCodeBuffer_Descriptions = new List<string>();
+    public List<string> FrameEventCodesStored_Descriptions = new List<string>();
+
     private readonly int referenceEventCodeMin = 101;
-    private readonly int referenceEventCodeMax = 200;
+    private readonly int referenceEventCodeMax = 255;
     private int referenceEventCode = 101; // Same as Min
 
     public int StimulationCode = 0; //looks for anything other than 0
@@ -107,6 +112,15 @@ public class EventCodeManager : MonoBehaviour
         {
             FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
             FrameEventCodeBuffer.Clear();
+        }
+
+        if(FrameEventCodeBuffer_Descriptions.Count > 0)
+        {
+            foreach(string description in FrameEventCodeBuffer_Descriptions)
+            {
+                FrameEventCodesStored_Descriptions.Add(description);
+            }
+            FrameEventCodeBuffer_Descriptions.Clear();
         }
     }
 
@@ -173,17 +187,6 @@ public class EventCodeManager : MonoBehaviour
     }
 
     //--------------------------------------------------------------------------------------
-    private IEnumerator SendNextFrame_Coroutine(int code)
-    {
-        yield return null; //Wait a frame
-        SendCodeThisFrame(code);
-    }
-
-    public void SendCodeNextFrame(int code)
-    {
-        StartCoroutine(SendNextFrame_Coroutine(code));
-    }
-
 	public void SendCodeNextFrame(string codeString)
 	{
 		EventCode code = SessionEventCodes[codeString];
@@ -194,7 +197,9 @@ public class EventCodeManager : MonoBehaviour
     public void SendCodeNextFrame(EventCode ec)
     {
         if (ec.Value != null)
-		    SendCodeNextFrame(ec.Value.Value);
+        {
+            StartCoroutine(SendNextFrame_Coroutine(ec));
+        }
 	    else
 	    {
 		    SendCodeImmediate(1);
@@ -202,25 +207,13 @@ public class EventCodeManager : MonoBehaviour
 	    }
     }
 
-    // --------------------------------------------------------------------------------------
-    public void SendCodeThisFrame(int code)
+    private IEnumerator SendNextFrame_Coroutine(EventCode ec)
     {
-        if(IsStimulationCode(code))
-        {
-            if (StimulationCode == 0)
-                StimulationCode = code;
-            else
-                Debug.Log("ALREADY HAD A STIMULATION CODE! " + code);
-        }
-        else
-        {
-            if (!FrameEventCodeBuffer.Contains(code))
-                FrameEventCodeBuffer.Add(code);
-            else
-                Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
-        }
+        yield return null; //Wait a frame
+        SendCodeThisFrame(ec);
     }
 
+    // --------------------------------------------------------------------------------------
     public void SendCodeThisFrame(string codeString)
     {
         EventCode code = SessionEventCodes[codeString];
@@ -231,7 +224,27 @@ public class EventCodeManager : MonoBehaviour
     public void SendCodeThisFrame(EventCode ec)
     {
         if (ec.Value != null)
-            SendCodeThisFrame(ec.Value.Value);
+        {
+            int code = (int)ec.Value;
+
+            if (IsStimulationCode(code))
+            {
+                if (StimulationCode == 0)
+                    StimulationCode = code;
+                else
+                    Debug.Log("ALREADY HAD A STIMULATION CODE! " + code);
+            }
+            else
+            {
+                if (!FrameEventCodeBuffer.Contains(code))
+                    FrameEventCodeBuffer.Add(code);
+                else
+                    Debug.Log("ATTEMPTED TO SEND CODE THAT WAS ALREADY IN BUFFER - CODE: " + code);
+            }
+
+            if (!FrameEventCodeBuffer_Descriptions.Contains(ec.Description))
+                FrameEventCodeBuffer_Descriptions.Add(ec.Description);
+        }
         else
         {
             SendCodeImmediate(1);
@@ -245,11 +258,13 @@ public class EventCodeManager : MonoBehaviour
         if (code != null)
         {
             int computedCode = code.Range[0] + valueToAdd;
+
             if (computedCode > code.Range[1])
                 Debug.LogWarning("COMPUTED EVENT CODE IS ABOVE THE SPECIFIED RANGE! | CodeString: " + codeString + " | " + "ValueToAdd: " + valueToAdd + " | " + "ComputedValue: " + computedCode);
             else
             {
-                SendCodeThisFrame(computedCode);
+                code.Value = computedCode;
+                SendCodeThisFrame(code);
             }
         }
     }

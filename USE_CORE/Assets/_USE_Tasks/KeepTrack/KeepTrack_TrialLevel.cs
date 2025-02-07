@@ -369,7 +369,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                 Session.SyncBoxController?.SendRewardPulses(ChosenObject.CurrentRewardValue, CurrentTrial.PulseSize);
             }
             else
-            {
+            { 
                 Debug.Log("--------------- NO RewardPulsesBySec so using CurrentTrial.NumPulses instead");
                 Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
             }

@@ -250,6 +250,14 @@ namespace USE_ExperimentTemplate_Data
                 return dataString;
             });
 
+            //The individual frame event codes descriptions for that frame (could be a lot of them).
+            AddDatum("Frame_EventCodes_Descriptions", () =>
+            {
+                string dataString = string.Join(", ", Session.EventCodeManager.FrameEventCodesStored_Descriptions);
+                Session.EventCodeManager.FrameEventCodesStored_Descriptions.Clear();
+                return dataString;
+            });
+
         }
     }
 

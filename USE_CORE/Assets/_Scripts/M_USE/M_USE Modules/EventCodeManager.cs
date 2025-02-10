@@ -172,40 +172,11 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-    //--------------------------------------------------------------------------------------
-    private IEnumerator SendNextFrame_Coroutine(int code)
-    {
-        yield return null; //Wait a frame
-        SendCodeThisFrame(code);
-    }
-
-    public void SendCodeNextFrame(int code)
-    {
-        StartCoroutine(SendNextFrame_Coroutine(code));
-    }
-
-	public void SendCodeNextFrame(string codeString)
-	{
-		EventCode code = SessionEventCodes[codeString];
-		if (code != null)
-			SendCodeNextFrame(code);
-	}
-
-    public void SendCodeNextFrame(EventCode ec)
-    {
-        if (ec.Value != null)
-		    SendCodeNextFrame(ec.Value.Value);
-	    else
-	    {
-		    SendCodeImmediate(1);
-		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
-	    }
-    }
 
     // --------------------------------------------------------------------------------------
     public void SendCodeThisFrame(int code)
     {
-        if(IsStimulationCode(code))
+        if (IsStimulationCode(code))
         {
             if (StimulationCode == 0)
                 StimulationCode = code;
@@ -254,6 +225,35 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
+    //--------------------------------------------------------------------------------------
+    private IEnumerator SendNextFrame_Coroutine(int code)
+    {
+        yield return null; //Wait a frame
+        SendCodeThisFrame(code);
+    }
+
+    public void SendCodeNextFrame(int code)
+    {
+        StartCoroutine(SendNextFrame_Coroutine(code));
+    }
+
+    public void SendCodeNextFrame(string codeString)
+    {
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+            SendCodeNextFrame(code);
+    }
+
+    public void SendCodeNextFrame(EventCode ec)
+    {
+        if (ec.Value != null)
+		    SendCodeNextFrame(ec.Value.Value);
+	    else
+	    {
+		    SendCodeImmediate(1);
+		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
+	    }
+    }
 
     // -------------------------------------------------------------------------------------
     public List<int> GetBuffer(string bufferType)

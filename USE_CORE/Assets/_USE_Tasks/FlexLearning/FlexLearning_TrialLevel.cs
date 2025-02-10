@@ -264,7 +264,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
 
                 if(selectedSD != null)
+                {
                     choiceMade = true;
+
+                    Session.EventCodeManager.SendCodeThisFrame(selectedSD.IsTarget ? "CorrectResponse" : "IncorrectResponse");
+                }
             }
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
@@ -275,14 +279,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 NumCorrect_InBlock++;
                 CurrentTaskLevel.NumCorrect_InTask++;
                 runningAcc.Add(1);
-                Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
             }
             else
             {
                 NumErrors_InBlock++;
                 CurrentTaskLevel.NumErrors_InTask++;
                 runningAcc.Add(0);
-                Session.EventCodeManager.SendCodeThisFrame("IncorrectResponse");
             }
 
         if (selectedGO != null)

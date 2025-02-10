@@ -53,9 +53,9 @@ public class EventCodeManager : MonoBehaviour
     public List<int> FrameEventCodeBuffer = new List<int>();
     public List<int> FrameEventCodesStored;
 
-    private readonly int referenceEventCodeMin = 101;
+    private readonly int referenceEventCodeMin = 2000;
     private readonly int referenceEventCodeMax = 65000;
-    private int referenceEventCode = 101; // Same as Min
+    private int referenceEventCode = 2001; // Same as Min
 
     public int StimulationCode = 0; //looks for anything other than 0
     public int StimulationCodeStored; //temp storage so it appears in frame data

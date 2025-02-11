@@ -112,6 +112,15 @@ public class SetupTask_Level : ControlLevel
             {
                 Session.GazeData.fileName = filePrefix + "__GazeData_PreTrial.txt";
                 Session.GazeData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "GazeData";
+            } 
+            
+            if (Session.SessionDef.SyncBoxActive)
+            {
+                Session.SerialRecvData.fileName = filePrefix + "__SerialRecvData_PreTrial.txt";
+                Session.SerialRecvData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "SerialRecvData";
+                
+                Session.SerialSentData.fileName = filePrefix + "__SerialSentData_PreTrial.txt";
+                Session.SerialSentData.folderPath = TaskDataPath + Path.DirectorySeparatorChar + "SerialSentData";
             }
 
             FrameData.fileName = filePrefix + "__FrameData_PreTrial.txt";
@@ -228,6 +237,11 @@ public class SetupTask_Level : ControlLevel
             StartCoroutine(FrameData.CreateFile());
             if (Session.SessionDef.EyeTrackerActive)
                 StartCoroutine(Session.GazeData.CreateFile());
+            if (Session.SessionDef.SyncBoxActive)
+            {
+                StartCoroutine(Session.SerialSentData.CreateFile());
+                StartCoroutine(Session.SerialRecvData.CreateFile());
+            }
 
         });
         OtherSetup.SpecifyTermination(() => true, () => null);

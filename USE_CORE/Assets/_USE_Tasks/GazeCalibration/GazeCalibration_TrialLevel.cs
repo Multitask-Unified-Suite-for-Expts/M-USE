@@ -144,12 +144,15 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (Session.GazeCalibrationController.InTaskGazeCalibration)
             {
                 TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask; //- 1;
-            } 
+                Debug.Log("TRIAL COUNT IN TASK FOR GC: " + TrialCount_InTask);
+            }
 
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            
+            
             AssignCalibPositions();
             if (!CurrentTrialDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();

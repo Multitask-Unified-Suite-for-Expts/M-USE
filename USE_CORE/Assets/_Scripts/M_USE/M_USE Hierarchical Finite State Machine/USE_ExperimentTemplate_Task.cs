@@ -384,13 +384,13 @@ namespace USE_ExperimentTemplate_Task
 
                 ClearActiveTaskHandlers();
 
-                if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+                if (Session.SessionDef.EyeTrackerActive && (TaskName != "GazeCalibration" || !Session.GazeCalibrationController.InTaskGazeCalibration))
                 {
                     Session.GazeCalibrationController.SetCreatedTaskSerialAndGazeDataFiles(false);
                     Session.GazeCalibrationController.SetCreatedGazeCalibrationDataFiles(false);
                     Session.GazeCalibrationController.OriginalTaskLevel = null;
                     Session.GazeCalibrationController.OriginalTrialLevel = null;
-                    Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask = 0;
+                    Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask = -1;
                 }
 
             });

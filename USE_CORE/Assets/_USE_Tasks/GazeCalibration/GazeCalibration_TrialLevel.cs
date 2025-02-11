@@ -141,8 +141,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 Session.TobiiEyeTrackerController.isCalibrating = true;
             }
 
-            if (Session.GazeCalibrationController.InTaskGazeCalibration) 
-                TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask;
+            if (Session.GazeCalibrationController.InTaskGazeCalibration)
+            {
+                TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask; //- 1;
+            } 
 
         });
 

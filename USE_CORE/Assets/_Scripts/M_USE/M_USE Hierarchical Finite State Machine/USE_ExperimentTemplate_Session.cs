@@ -858,7 +858,6 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
-                Debug.Log("**THIS IS THE SERIAL DATA PATH: " + Session.SerialSentData.folderPath + " AND NAMED: " + Session.SerialSentData.fileName);
                 Session.InitCamGO.SetActive(false);
                 Session.SessionAudioController.StopBackgroundMusic();
 

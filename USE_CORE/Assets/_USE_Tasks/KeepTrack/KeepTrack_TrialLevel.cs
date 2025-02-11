@@ -102,9 +102,20 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
             foreach (int objIndex in CurrentTrial.TrialObjectIndices)
             {
-                trialObjectsConfigValues.Add(CurrentTaskLevel.KT_Objects_ConfigValues[objIndex]);
+                if (objIndex >= 0 && objIndex < CurrentTaskLevel.KT_Objects_ConfigValues.Count())
+                {
+                    var configValue = CurrentTaskLevel.KT_Objects_ConfigValues[objIndex];
+                    if (configValue != null)
+                        trialObjectsConfigValues.Add(configValue);
+                    else
+                        Debug.LogWarning($"NO OBJECT FOUND AT INDEX {objIndex} in KT_Objects_ConfigValues.");
+                }
+                else
+                {
+                    Debug.LogWarning($"INDEX NUM {objIndex} IS OUT OF BOUNDS FOR KT OBJECTS CONFIG VALUES");
+                }
             }
-            
+
             TrialObjects = ObjManager.CreateObjects(trialObjectsConfigValues);
 
         });

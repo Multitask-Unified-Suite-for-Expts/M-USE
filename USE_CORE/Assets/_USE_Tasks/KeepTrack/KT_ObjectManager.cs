@@ -84,28 +84,42 @@ public class KT_ObjectManager : MonoBehaviour
 
         foreach(KT_Object_ConfigValues configValues in objects)
         {
-            GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
+            try
+            {
+                GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
 
-            go.GetComponent<PacmanDrawer>().ManualStart();
+                go.GetComponent<PacmanDrawer>().ManualStart();
 
-            go.name = configValues.IsTarget ? $"Target" : $"Distractor";
-            go.SetActive(false);
-            go.transform.SetParent(ObjectParent);
-            go.transform.localPosition = Vector3.zero;
-            go.transform.localScale = Vector3.one;
-            go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
-            go.GetComponent<Image>().color = new Color(configValues.ObjectColor[0], configValues.ObjectColor[1], configValues.ObjectColor[2]);
-            go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
+                go.name = configValues.IsTarget ? $"Target" : $"Distractor";
+                go.SetActive(false);
+                go.transform.SetParent(ObjectParent);
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localScale = Vector3.one;
+                go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
 
-            KT_Object obj = go.AddComponent<KT_Object>();
-            obj.SetupObject(this, configValues);
+                go.GetComponent<Image>().color = new Color(
+                                                            configValues.ObjectColor[0] / 255f,
+                                                            configValues.ObjectColor[1] / 255f,
+                                                            configValues.ObjectColor[2] / 255f,
+                                                            1f // Ensure alpha is fully opaque
+                                                        );
 
-            if (obj.IsTarget)
-                TargetList.Add(obj);
-            else
-                DistractorList.Add(obj);
+                go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
 
-            trialObjects.Add(obj);
+                KT_Object obj = go.AddComponent<KT_Object>();
+                obj.SetupObject(this, configValues);
+
+                if (obj.IsTarget)
+                    TargetList.Add(obj);
+                else
+                    DistractorList.Add(obj);
+
+                trialObjects.Add(obj);
+            }
+            catch(Exception ex)
+            {
+                Debug.LogWarning("ERROR CREATING OBJECT WITH INDEX NUMBER " + configValues.Index + " | Error Message: " + ex.Message);
+            }
         }
 
         return trialObjects;

@@ -371,7 +371,7 @@ namespace USE_ExperimentTemplate_Trial
                     Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.OriginalTrialLevel, Session.GazeCalibrationController.OriginalTaskLevel, "TaskToGazeCalibration");
                     Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("TaskToGazeCalibration");
                 }
-                else if (!Session.GazeCalibrationController.InTaskGazeCalibration)
+                else if (Session.GazeCalibrationController != null && !Session.GazeCalibrationController.InTaskGazeCalibration)
                 {
                     WriteDataFiles();
                 }

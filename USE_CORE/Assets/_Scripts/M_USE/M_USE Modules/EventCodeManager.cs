@@ -54,7 +54,7 @@ public class EventCodeManager : MonoBehaviour
     public List<int> FrameEventCodesStored;
 
     private readonly int referenceEventCodeMin = 101;
-    private readonly int referenceEventCodeMax = 200;
+    private readonly int referenceEventCodeMax = 255;
     private int referenceEventCode = 101; // Same as Min
 
     public int StimulationCode = 0; //looks for anything other than 0
@@ -63,11 +63,6 @@ public class EventCodeManager : MonoBehaviour
     private readonly int StimulationCodeMax = 100; //NEED TO MATCH EVENT CODE CONFIG RANGE FOR "StimulationCondition"
 
 
-
-    private bool IsStimulationCode(int code)
-    {
-        return code >= StimulationCodeMin && code <= StimulationCodeMax;
-    }
 
 
     // Call it every frame in LateUpdate() methods
@@ -99,15 +94,6 @@ public class EventCodeManager : MonoBehaviour
             }
         }
 
-    }
-
-    private void StoreFrameBufferCodes()
-    {
-        if(FrameEventCodeBuffer.Count > 0)
-        {
-            FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
-            FrameEventCodeBuffer.Clear();
-        }
     }
 
 
@@ -172,40 +158,11 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
-    //--------------------------------------------------------------------------------------
-    private IEnumerator SendNextFrame_Coroutine(int code)
-    {
-        yield return null; //Wait a frame
-        SendCodeThisFrame(code);
-    }
-
-    public void SendCodeNextFrame(int code)
-    {
-        StartCoroutine(SendNextFrame_Coroutine(code));
-    }
-
-	public void SendCodeNextFrame(string codeString)
-	{
-		EventCode code = SessionEventCodes[codeString];
-		if (code != null)
-			SendCodeNextFrame(code);
-	}
-
-    public void SendCodeNextFrame(EventCode ec)
-    {
-        if (ec.Value != null)
-		    SendCodeNextFrame(ec.Value.Value);
-	    else
-	    {
-		    SendCodeImmediate(1);
-		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
-	    }
-    }
 
     // --------------------------------------------------------------------------------------
     public void SendCodeThisFrame(int code)
     {
-        if(IsStimulationCode(code))
+        if (IsStimulationCode(code))
         {
             if (StimulationCode == 0)
                 StimulationCode = code;
@@ -254,6 +211,35 @@ public class EventCodeManager : MonoBehaviour
         }
     }
 
+    //--------------------------------------------------------------------------------------
+    private IEnumerator SendNextFrame_Coroutine(int code)
+    {
+        yield return null; //Wait a frame
+        SendCodeThisFrame(code);
+    }
+
+    public void SendCodeNextFrame(int code)
+    {
+        StartCoroutine(SendNextFrame_Coroutine(code));
+    }
+
+    public void SendCodeNextFrame(string codeString)
+    {
+        EventCode code = SessionEventCodes[codeString];
+        if (code != null)
+            SendCodeNextFrame(code);
+    }
+
+    public void SendCodeNextFrame(EventCode ec)
+    {
+        if (ec.Value != null)
+		    SendCodeNextFrame(ec.Value.Value);
+	    else
+	    {
+		    SendCodeImmediate(1);
+		    Debug.LogWarning("Attempted to send event code with no value specified, code of 1 sent instead.");
+	    }
+    }
 
     // -------------------------------------------------------------------------------------
     public List<int> GetBuffer(string bufferType)
@@ -303,5 +289,19 @@ public class EventCodeManager : MonoBehaviour
         SendCodeThisFrame(eventCodeBuilder.ToString());
     }
 
+
+    private bool IsStimulationCode(int code)
+    {
+        return code >= StimulationCodeMin && code <= StimulationCodeMax;
+    }
+
+    private void StoreFrameBufferCodes()
+    {
+        if (FrameEventCodeBuffer.Count > 0)
+        {
+            FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
+            FrameEventCodeBuffer.Clear();
+        }
+    }
 
 }

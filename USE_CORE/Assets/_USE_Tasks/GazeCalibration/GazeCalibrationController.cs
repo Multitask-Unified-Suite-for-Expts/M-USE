@@ -90,24 +90,23 @@ public class GazeCalibrationController : MonoBehaviour
 
     private IEnumerator WriteSerialAndGazeDataAndReassignPath(string path, string transition)
     {
+        // Write the Serial Sent, Serial Recv, and Gaze Data before changing path
+        if (Session.SessionDef.SerialPortActive)
+        {
+            yield return StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+            yield return StartCoroutine(Session.SerialSentData.AppendDataToFile());
+        }
+        yield return StartCoroutine(Session.GazeData.AppendDataToFile());
+
         if (transition.Equals("GazeCalibrationToSession"))
         {
             if (Session.SessionDef.SerialPortActive)
             {
                 Session.SerialRecvData.fileName = serialRecvDataFileName;
                 Session.SerialSentData.fileName = serialSentDataFileName;
-                Debug.Log("**Returning to the main level and the serial file name is: " + Session.SerialSentData.fileName);
             }
             Session.GazeData.fileName = gazeDataFileName;
         }
-        // Write the Serial Sent, Serial Recv, and Gaze Data before changing path
-        if (Session.SessionDef.SerialPortActive)
-        {
-            yield return StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-            yield return StartCoroutine(Session.SerialSentData.AppendDataToFile());
-
-        }
-        yield return StartCoroutine(Session.GazeData.AppendDataToFile());
 
         if (Session.SessionDef.SerialPortActive)
         {

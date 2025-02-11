@@ -262,8 +262,6 @@ namespace USE_ExperimentTemplate_Trial
             {
                 if(!Session.WebBuild && TrialCount_InTask != 0)
                     Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalTrials", 1));
-
-
                
                     FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
 
@@ -277,7 +275,6 @@ namespace USE_ExperimentTemplate_Trial
                 {
                     Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
                     Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
-
                 }
 
                 Session.ClearStimLists();
@@ -525,10 +522,16 @@ namespace USE_ExperimentTemplate_Trial
                 StartCoroutine(Session.GazeData.AppendDataToFile());
 
             if(Session.SerialRecvData != null)
+            {
                 StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+                Debug.LogWarning("**APPENDING DATA TO SERIAL RECV AT: " +  Session.SerialRecvData.folderPath + "/" + Session.SerialRecvData.fileName);
+            }
             if(Session.SerialSentData != null)
+            {
                 StartCoroutine(Session.SerialSentData.AppendDataToFile());
-         
+                Debug.LogWarning("**APPENDING DATA TO SERIAL SENT AT: " + Session.SerialSentData.folderPath + "/" + Session.SerialSentData.fileName);
+            }
+
         }
 
        

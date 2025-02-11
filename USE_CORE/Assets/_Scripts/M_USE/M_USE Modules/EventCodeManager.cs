@@ -64,11 +64,6 @@ public class EventCodeManager : MonoBehaviour
 
 
 
-    private bool IsStimulationCode(int code)
-    {
-        return code >= StimulationCodeMin && code <= StimulationCodeMax;
-    }
-
 
     // Call it every frame in LateUpdate() methods
     public void CheckFrameEventCodeBuffer() 
@@ -99,15 +94,6 @@ public class EventCodeManager : MonoBehaviour
             }
         }
 
-    }
-
-    private void StoreFrameBufferCodes()
-    {
-        if(FrameEventCodeBuffer.Count > 0)
-        {
-            FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
-            FrameEventCodeBuffer.Clear();
-        }
     }
 
 
@@ -303,5 +289,19 @@ public class EventCodeManager : MonoBehaviour
         SendCodeThisFrame(eventCodeBuilder.ToString());
     }
 
+
+    private bool IsStimulationCode(int code)
+    {
+        return code >= StimulationCodeMin && code <= StimulationCodeMax;
+    }
+
+    private void StoreFrameBufferCodes()
+    {
+        if (FrameEventCodeBuffer.Count > 0)
+        {
+            FrameEventCodesStored.AddRange(FrameEventCodeBuffer);
+            FrameEventCodeBuffer.Clear();
+        }
+    }
 
 }

@@ -300,6 +300,9 @@ namespace USE_ExperimentTemplate_Session
                 CurrentTask.TaskCam = GameObject.Find(CurrentTask.TaskName + "_Camera").GetComponent<Camera>();
                 CurrentTask.TrialLevel.TaskLevel = CurrentTask;
 
+                StartCoroutine(FrameData.AppendDataToFile());
+                AppendSerialData();
+                Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("SessionToGazeCalibration");
             });
             setupGazeCalibration.AddChildLevel(setupTaskLevel);
             setupGazeCalibration.AddSpecificInitializationMethod(() =>
@@ -316,7 +319,6 @@ namespace USE_ExperimentTemplate_Session
             //GazeCalibration State---------------------------------------------------------------------------------------------------------------
             gazeCalibration.AddSpecificInitializationMethod(() =>
             {
-                StartCoroutine(FrameData.AppendDataToFile());
 
                 // Deactivate TaskSelection scene elements
                 /*Session.InitCamGO.SetActive(false);
@@ -365,8 +367,6 @@ namespace USE_ExperimentTemplate_Session
                 Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
                 Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;
 
-                AppendSerialData();
-                Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("SessionToGazeCalibration");
             });
 
             gazeCalibration.AddLateUpdateMethod(() =>
@@ -784,25 +784,6 @@ namespace USE_ExperimentTemplate_Session
                 {
                     DefiningTask = true;
                     CurrentTask.ConfigFolderName = selectedConfigFolderName;
-                    
-                    if (Session.SessionDef.SerialPortActive)
-                    {
-                        AppendSerialData();
-                        StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-                        StartCoroutine(Session.SerialSentData.AppendDataToFile());
-                        Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialRecvData";
-                        Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "SerialSentData";
-
-                    }
-
-                    StartCoroutine(FrameData.AppendDataToFile());
-                    if (Session.SessionDef.EyeTrackerActive)
-                    {
-                        //Session.GazeData.folderPath = Session.TaskSelectionDataPath;
-                        StartCoroutine(Session.GazeData.AppendDataToFile());
-                        Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" + CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar + "GazeData";
-
-                    }
 
                     CurrentTask.DefineTaskLevel();
 
@@ -840,6 +821,9 @@ namespace USE_ExperimentTemplate_Session
                     Session.GazeCalibrationController.OriginalTaskLevel = CurrentTask;
                     Session.GazeCalibrationController.OriginalTrialLevel = CurrentTask.TrialLevel;
                 }
+
+                StartCoroutine(WriteSerialAndGazeDataAndSwitchToTaskDataPaths());
+
             });
             setupTask.AddChildLevel(setupTaskLevel);
             setupTask.AddUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
@@ -874,6 +858,7 @@ namespace USE_ExperimentTemplate_Session
             //RunTask State---------------------------------------------------------------------------------------------------------------
             runTask.AddUniversalInitializationMethod(() =>
             {
+                Debug.Log("**THIS IS THE SERIAL DATA PATH: " + Session.SerialSentData.folderPath + " AND NAMED: " + Session.SerialSentData.fileName);
                 Session.InitCamGO.SetActive(false);
                 Session.SessionAudioController.StopBackgroundMusic();
 
@@ -1023,6 +1008,45 @@ namespace USE_ExperimentTemplate_Session
                 //Run the Quit method to the closing of: handle web build, normal build, or editor
                 Session.ApplicationQuit.HandleClosingApplication();
             });
+        }
+
+
+        private IEnumerator WriteSerialAndGazeDataAndSwitchToTaskDataPaths()
+        {
+            if (Session.SessionDef.SerialPortActive)
+            {
+                AppendSerialData(); // Ensure data is prepared before writing
+
+                // Wait for Serial Data to be written before changing paths
+                yield return StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+                yield return StartCoroutine(Session.SerialSentData.AppendDataToFile());
+
+                // Now update the paths after writing is done
+                Session.SerialRecvData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar +
+                                                    "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" +
+                                                    CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar +
+                                                    "SerialRecvData";
+
+                Session.SerialSentData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar +
+                                                    "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" +
+                                                    CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar +
+                                                    "SerialSentData";
+            }
+
+            // Wait for Frame Data to be written before updating path
+            yield return StartCoroutine(FrameData.AppendDataToFile());
+
+            if (Session.SessionDef.EyeTrackerActive)
+            {
+                // Wait for Gaze Data to be written before changing path
+                yield return StartCoroutine(Session.GazeData.AppendDataToFile());
+
+                // Now update the path
+                Session.GazeData.folderPath = Session.SessionDataPath + Path.DirectorySeparatorChar +
+                                              "Task" + Session.GetNiceIntegers(taskCount + 1) + "_" +
+                                              CurrentTask.ConfigFolderName + Path.DirectorySeparatorChar +
+                                              "GazeData";
+            }
         }
 
 

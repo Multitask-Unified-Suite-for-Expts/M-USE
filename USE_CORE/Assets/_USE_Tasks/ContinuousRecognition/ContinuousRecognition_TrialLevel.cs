@@ -399,6 +399,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         GameObject GoSelected = OngoingSelection.SelectedGameObject;
                         ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
+                        Debug.Log("IS THE CHOSEN STIMULUS NULL?? " + (chosenStimulus == null ? "YES":"NO"));
+                        if (chosenStimulus == null)
+                            return;
                         string stimulationType = CurrentTrial.StimulationType.Trim();
                         if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
                         {

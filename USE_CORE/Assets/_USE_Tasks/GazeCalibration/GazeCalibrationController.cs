@@ -127,7 +127,7 @@ public class GazeCalibrationController : MonoBehaviour
             Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
 
         if (transition.Equals("GazeCalibrationToTask"))
-            OriginalTrialLevel.PathReassignmentComplete = true;
+            Session.TrialLevel.PathReassignmentComplete = true;
 
         if (transition.Equals("SessionToGazeCalibration"))
         {

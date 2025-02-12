@@ -20,6 +20,7 @@ public class GazeCalibrationController : MonoBehaviour
     public bool RunCalibration;
     public string TaskLevelGazeDataFileName;
     public string GazeCalibrationDataFolderPath;
+    public bool TransitioningFromGazeCalibrationToTask;
 
     public int InTaskGazeCalibration_TrialCount_InTask;
     public bool InTaskGazeCalibration;
@@ -89,8 +90,6 @@ public class GazeCalibrationController : MonoBehaviour
         // Write the Serial Sent, Serial Recv, and Gaze Data before changing path
         if (Session.SessionDef.SerialPortActive)
         {
-            Debug.Log("**WRITING TASK LEVEL SERIAL AND GAZE DATA TO : " + Session.SerialRecvData.folderPath);
-
             yield return StartCoroutine(Session.SerialRecvData.AppendDataToFile());
             yield return StartCoroutine(Session.SerialSentData.AppendDataToFile());
         }
@@ -127,7 +126,11 @@ public class GazeCalibrationController : MonoBehaviour
         else
             Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
 
-       // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(path);
+        if (transition.Equals("GazeCalibrationToTask"))
+            TransitioningFromGazeCalibrationToTask = false;
+
+
+        // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(path);
 
         if (!CreatedSessionSerialAndGazeDataFiles && transition.Equals("SessionToGazeCalibration"))
         {
@@ -143,7 +146,6 @@ public class GazeCalibrationController : MonoBehaviour
         {
             if (Session.SessionDef.SerialPortActive)
             {
-                Debug.Log("**this should only be the in task gaze calib place: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialRecvData.fileName);
                 Session.SerialSentData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
                 Session.SerialRecvData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
             }

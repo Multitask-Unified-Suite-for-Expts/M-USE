@@ -892,15 +892,7 @@ namespace USE_ExperimentTemplate_Session
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
 
-                if (Session.SessionDef.SerialPortActive)
-                {
-                    StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-                    StartCoroutine(Session.SerialSentData.AppendDataToFile());
-                }
-                if (Session.SessionDef.EyeTrackerActive)
-                {
-                    StartCoroutine(Session.GazeData.AppendDataToFile());
-                }
+                StartCoroutine(WriteSerialAndGazeDataAndSwitchToTaskSelectionDataPaths());
 
                 SceneManager.UnloadSceneAsync(CurrentTask.TaskName);
                 SceneManager.SetActiveScene(SceneManager.GetSceneByName(TaskSelectionSceneName));
@@ -912,21 +904,7 @@ namespace USE_ExperimentTemplate_Session
 
                 taskCount++;
 
-                if (Session.SessionDef.SerialPortActive)
-                {
-                    Session.SerialRecvData.fileName = Session.FilePrefix + "__SerialRecvData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
-                    Session.SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
-                    Session.SerialSentData.fileName = Session.FilePrefix + "__SerialSentData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
-                    Session.SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
-                }
-
-                if (Session.SessionDef.EyeTrackerActive)
-                {
-                    Session.GazeData.fileName = Session.FilePrefix + "__GazeData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
-                    Session.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
-                   // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData");
-                }
-
+                
                 FrameData.fileName = Session.FilePrefix + "__FrameData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
                 FrameData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
 
@@ -1048,7 +1026,36 @@ namespace USE_ExperimentTemplate_Session
             }
         }
 
+        private IEnumerator WriteSerialAndGazeDataAndSwitchToTaskSelectionDataPaths()
+        {
+            if (Session.SessionDef.SerialPortActive)
+            {
+                yield return StartCoroutine(Session.SerialRecvData.AppendDataToFile());
+                yield return StartCoroutine(Session.SerialSentData.AppendDataToFile());
+            }
+            if (Session.SessionDef.EyeTrackerActive)
+            {
+                yield return StartCoroutine(Session.GazeData.AppendDataToFile());
+            }
 
+            if (Session.SessionDef.SerialPortActive)
+            {
+                Session.SerialRecvData.fileName = Session.FilePrefix + "__SerialRecvData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
+                Session.SerialRecvData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
+                Session.SerialSentData.fileName = Session.FilePrefix + "__SerialSentData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
+                Session.SerialSentData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
+
+                Debug.Log("CREATING NEW SERIAL DATA FOLDER AND THIS IS PATH: " + Session.SerialSentData.folderPath);
+            }
+
+            if (Session.SessionDef.EyeTrackerActive)
+            {
+                Session.GazeData.fileName = Session.FilePrefix + "__GazeData_" + Session.GetNiceIntegers(taskCount + 1) + "_TaskSelection.txt";
+                Session.GazeData.CreateNewTaskIndexedFolder(taskCount + 1, Session.SessionDataPath, "TaskSelectionData", "Task");
+                // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData");
+            }
+
+        }
         public void SaveDataAtEndOfSession()
         {
             if (Session.SessionDef == null)

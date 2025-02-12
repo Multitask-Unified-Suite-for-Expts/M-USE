@@ -114,6 +114,8 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public GameObject PauseIconGO;
 
         [HideInInspector] public bool TrialStimsLoaded;
+        [HideInInspector] public bool PathReassignmentComplete = false;
+
         public Material SkyboxMaterial;
         // Texture Variables
         [HideInInspector] public Texture2D HeldTooLongTexture, HeldTooShortTexture, MovedTooFarTexture, MovedTooFarSquareTexture, HeldTooShortSquareTexture, HeldTooLongSquareTexture, NotSelectablePeriodTexture;
@@ -265,17 +267,23 @@ namespace USE_ExperimentTemplate_Trial
                
                     FrameData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
 
-                if (Session.SessionDef.EyeTrackerActive)
+                if (Session.SessionDef.EyeTrackerActive && Session.GazeCalibrationController.TransitioningFromGazeCalibrationToTask)
+                    StartCoroutine(WaitForTransitionFromGazeCalibrationToTask());
+                else
                 {
-                    Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
-                  
+                    if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+                    {
+                        Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                    }
+
+                    if (Session.SessionDef.SerialPortActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+                    {
+                        Debug.LogWarning("CREATING A NEW TASK INDEXED SERIAL DATA: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialSentData.fileName);
+                        Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                        Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                    }
                 }
 
-                if (Session.SessionDef.SerialPortActive)
-                {
-                    Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
-                    Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
-                }
 
                 Session.ClearStimLists();
                 DefineTrialStims();
@@ -344,6 +352,7 @@ namespace USE_ExperimentTemplate_Trial
                     Session.GazeCalibrationController.RunCalibration = false;
                     Session.GazeCalibrationController.WriteDataFileThenDeactivateDataController(Session.GazeCalibrationController.GazeCalibrationTrialLevel, Session.GazeCalibrationController.GazeCalibrationTaskLevel, "GazeCalibrationToTask");
                     Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToTask");
+                    Session.GazeCalibrationController.TransitioningFromGazeCalibrationToTask = true;
                 }
                     );
             }
@@ -447,7 +456,25 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+        private IEnumerator WaitForTransitionFromGazeCalibrationToTask()
+        {
+            yield return new WaitUntil(() => PathReassignmentComplete = true);
 
+            Session.GazeCalibrationController.TransitioningFromGazeCalibrationToTask = false;
+            if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+            {
+                Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+            }
+
+            if (Session.SessionDef.SerialPortActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+            {
+                Debug.LogWarning("CREATING A NEW TASK INDEXED SERIAL DATA: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialSentData.fileName);
+                Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+            }
+
+            PathReassignmentComplete = false;
+        }
         private void CreateGazeCalibrationDataFolders()
         {
             StartCoroutine(Session.GazeCalibrationController.GazeCalibrationTaskLevel.BlockData.CreateFile());

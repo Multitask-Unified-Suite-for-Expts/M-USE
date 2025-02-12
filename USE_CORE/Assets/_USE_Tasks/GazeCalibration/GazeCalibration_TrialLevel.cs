@@ -142,10 +142,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             }
 
             if (Session.GazeCalibrationController.InTaskGazeCalibration)
-            {
-                TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask; //- 1;
-            } 
-
+                TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask;
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -173,9 +170,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             }
 
             AssignGazeCalibrationCameraToTrackboxCanvas();
-
-            Debug.LogWarning("**this is my trial counti n task: " + Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask);
-
         });
 
 

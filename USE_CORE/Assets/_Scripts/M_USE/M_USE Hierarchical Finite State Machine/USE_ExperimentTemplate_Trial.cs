@@ -458,8 +458,9 @@ namespace USE_ExperimentTemplate_Trial
 
         private IEnumerator WaitForTransitionFromGazeCalibrationToTask()
         {
-            yield return new WaitUntil(() => Session.GazeCalibrationController.TransitioningFromGazeCalibrationToTask = false);
+            yield return new WaitUntil(() => PathReassignmentComplete = true);
 
+            Session.GazeCalibrationController.TransitioningFromGazeCalibrationToTask = false;
             if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
             {
                 Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
@@ -471,6 +472,8 @@ namespace USE_ExperimentTemplate_Trial
                 Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
                 Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
             }
+
+            PathReassignmentComplete = false;
         }
         private void CreateGazeCalibrationDataFolders()
         {

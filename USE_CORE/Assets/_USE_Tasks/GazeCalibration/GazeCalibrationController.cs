@@ -127,12 +127,9 @@ public class GazeCalibrationController : MonoBehaviour
             Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
 
         if (transition.Equals("GazeCalibrationToTask"))
-            TransitioningFromGazeCalibrationToTask = false;
+            OriginalTrialLevel.PathReassignmentComplete = true;
 
-
-        // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(path);
-
-        if (!CreatedSessionSerialAndGazeDataFiles && transition.Equals("SessionToGazeCalibration"))
+        if (transition.Equals("SessionToGazeCalibration"))
         {
             if (Session.SessionDef.SerialPortActive)
             {
@@ -140,9 +137,8 @@ public class GazeCalibrationController : MonoBehaviour
                 StartCoroutine(Session.SerialRecvData.CreateFile());
             }
             StartCoroutine(Session.GazeData.CreateFile());
-            CreatedSessionSerialAndGazeDataFiles = true;
         }
-        if (!CreatedTaskSerialAndGazeDataFiles && transition.Equals("TaskToGazeCalibration"))
+        if ( transition.Equals("TaskToGazeCalibration"))
         {
             if (Session.SessionDef.SerialPortActive)
             {
@@ -150,7 +146,6 @@ public class GazeCalibrationController : MonoBehaviour
                 Session.SerialRecvData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
             }
             Session.GazeData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
-            CreatedTaskSerialAndGazeDataFiles = true;
         }
 
 
@@ -188,11 +183,6 @@ public class GazeCalibrationController : MonoBehaviour
         }
     }
 
-    public void SetCreatedTaskSerialAndGazeDataFiles(bool val)
-    {
-        CreatedTaskSerialAndGazeDataFiles = val;
-    }    
-    
     public void SetCreatedGazeCalibrationDataFiles(bool val)
     {
         CreatedGazeCalibrationDataFiles = val;

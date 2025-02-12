@@ -386,7 +386,6 @@ namespace USE_ExperimentTemplate_Task
 
                 if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
                 {
-                    Session.GazeCalibrationController.SetCreatedTaskSerialAndGazeDataFiles(false);
                     Session.GazeCalibrationController.SetCreatedGazeCalibrationDataFiles(false);
                     Session.GazeCalibrationController.OriginalTaskLevel = null;
                     Session.GazeCalibrationController.OriginalTrialLevel = null;

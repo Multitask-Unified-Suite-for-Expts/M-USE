@@ -480,11 +480,11 @@ public class KT_Object : MonoBehaviour
                 TimeOfPause = Time.time;
             }
         }
-        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration + .2f)) //add .2 so the touch fb dissapears before object starts moving again
+        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration + .1f)) //add .1 so the touch fb dissapears before object starts moving again
             ObjectPaused = false;
 
-        if(ObjectPaused && InputBroker.GetMouseButton(0))
-            CurrentCycle.cycleStartTime += Time.deltaTime; //Push the cycle start time back while they're selecting.
+        //if(ObjectPaused && InputBroker.GetMouseButton(0))
+        //    CurrentCycle.cycleStartTime += Time.deltaTime; //Push the cycle start time back while they're selecting.
         
         if (ObjectSelected && InputBroker.GetMouseButtonUp(0))
         {

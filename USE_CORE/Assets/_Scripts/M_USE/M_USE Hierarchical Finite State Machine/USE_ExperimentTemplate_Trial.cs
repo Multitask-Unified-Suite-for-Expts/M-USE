@@ -697,7 +697,7 @@ namespace USE_ExperimentTemplate_Trial
             if (Math.Abs(totalProbability - 1) > 0.001)
                 Debug.LogError("Sum of reward probabilities on this trial is " + totalProbability + ", probabilities will be scaled to sum to 1.");
 
-            float randomNumber = UnityEngine.Random.Range(0, totalProbability);
+            float randomNumber = Random.Range(0, totalProbability);
 
             Reward selectedReward = rewards[0];
             float curProbSum = 0;

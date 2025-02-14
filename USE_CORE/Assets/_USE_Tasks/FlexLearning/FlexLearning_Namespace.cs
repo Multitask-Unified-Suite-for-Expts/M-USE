@@ -39,7 +39,6 @@ namespace FlexLearning_Namespace
     {
         public Vector3[] TrialStimLocations;
         public int[] TrialStimIndices;
-        public int[] TrialStimTokenReward;
         public Reward[][] ProbablisticTrialStimTokenReward;
         public Reward[] ProbabilisticNumPulses;
         public bool RandomizedLocations;
@@ -118,7 +117,6 @@ namespace FlexLearning_Namespace
     {
         public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
-        public int[] TrialStimTokenReward;
         public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbablisticNumPulses;
         public bool RandomizedLocations;

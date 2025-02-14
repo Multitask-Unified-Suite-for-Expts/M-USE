@@ -266,7 +266,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 if(selectedSD != null)
                 {
                     choiceMade = true;
-
                     Session.EventCodeManager.SendCodeThisFrame(selectedSD.IsTarget ? "CorrectResponse" : "IncorrectResponse");
                 }
             }
@@ -287,13 +286,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 runningAcc.Add(0);
             }
 
-        if (selectedGO != null)
-        {
-            SelectedStimIndex = selectedSD.StimIndex;
-            SelectedStimLocation = selectedSD.StimLocation;
-        }
-        Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
-        UpdateExperimenterDisplaySummaryStrings();
+            if (selectedGO != null)
+            {
+                SelectedStimIndex = selectedSD.StimIndex;
+                SelectedStimLocation = selectedSD.StimLocation;
+            }
+
+            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
+            UpdateExperimenterDisplaySummaryStrings();
         });
 
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
@@ -320,7 +320,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
-            if (CorrectSelection)
+            if(selectedSD.StimTokenRewardMag > 0)
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
@@ -411,15 +411,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         if (Session.SyncBoxController != null)
         {
-            int NumPulses;
+            int numPulses;
             if (CurrentTrialDef.ProbablisticNumPulses != null)
-                NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
+                numPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
             else
-                NumPulses = CurrentTrialDef.NumPulses;
-            Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
-            //SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses",CurrentTrialDef.NumPulses)); moved to syncbox class
-            CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
+                numPulses = CurrentTrialDef.NumPulses;
+
+            Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrialDef.PulseSize);
+
+            CurrentTaskLevel.NumRewardPulses_InBlock += numPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += numPulses;
             RewardGiven = true;
         }
     }
@@ -480,24 +481,44 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             searchStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
         else
             searchStim.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"),GetStateFromName("SelectionFeedback"));
+
         TrialStims.Add(searchStim);
+
+
+        float highestOverallProb = -1;
 
         for (int iStim = 0; iStim < CurrentTrialDef.TrialStimIndices.Length; iStim++)
         {
             FlexLearning_StimDef sd = (FlexLearning_StimDef)searchStim.stimDefs[iStim];
 
-            if (CurrentTrialDef.ProbabilisticTrialStimTokenReward != null)
-                sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim]);
-            else
-                sd.StimTokenRewardMag = CurrentTrialDef.TrialStimTokenReward[iStim];
+            var stimRewardList = CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim];
 
+            sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim]);
 
-            if (sd.StimTokenRewardMag > 0) 
-                sd.IsTarget = true; //CHECK THIS IMPLEMENTATION!!! only works if the target stim has a non-zero, positive reward
-            else 
-                sd.IsTarget = false;
+            foreach(var reward in stimRewardList)
+            {
+                if(reward.NumReward > 0 && reward.Probability > highestOverallProb)
+                    highestOverallProb = reward.Probability;
+            }
         }
-        
+
+        for (int iStim = 0; iStim < CurrentTrialDef.TrialStimIndices.Length; iStim++)
+        {
+            FlexLearning_StimDef sd = (FlexLearning_StimDef)searchStim.stimDefs[iStim];
+
+            var stimRewardList = CurrentTrialDef.ProbabilisticTrialStimTokenReward[iStim];
+
+            float highestStimProb = -1;
+            foreach (var reward in stimRewardList)
+            {
+                if (reward.NumReward > 0 && reward.Probability > highestStimProb)
+                    highestStimProb = reward.Probability;
+            }
+
+            sd.IsTarget = highestStimProb == highestOverallProb;
+        }
+
+
         if (CurrentTrialDef.RandomizedLocations)
         {
             int[] positionIndexArray = Enumerable.Range(0, CurrentTrialDef.TrialStimIndices.Length).ToArray();
@@ -514,6 +535,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             searchStim.SetLocations(CurrentTrialDef.TrialStimLocations);
         }
     }
+
     public override void ResetTrialVariables()
     {
         choiceMade = false;

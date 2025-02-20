@@ -302,6 +302,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -384,9 +387,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
             OngoingSelection = ShotgunHandler.OngoingSelection;
-
-            if (OngoingSelection != null && OngoingSelection.Duration > 0)
-                SetTrialSummaryString();
 
             if(OngoingSelection != null)
             {
@@ -858,7 +858,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nStimulateThisTrial? " + StimulateThisTrial +
                              "\n" +
-                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.ToString());
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }
 

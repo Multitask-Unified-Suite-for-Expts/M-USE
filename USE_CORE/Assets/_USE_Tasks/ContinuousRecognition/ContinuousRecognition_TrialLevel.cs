@@ -119,8 +119,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private bool StimulateThisTrial = false;
 
 
-    [HideInInspector] public USE_Selection OngoingSelection;
-
 
     public override void DefineControlLevel()
     {
@@ -385,11 +383,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
 
-            if(StimulateThisTrial)
-            {
-                OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = ShotgunHandler.OngoingSelection;
 
-                if(OngoingSelection != null)
+            if (OngoingSelection != null && OngoingSelection.Duration > 0)
+                SetTrialSummaryString();
+
+            if(OngoingSelection != null)
+            {
+                SetTrialSummaryString(); //update trial summary string so experimenter can see ongoing selection duration
+
+                if(StimulateThisTrial)
                 {
                     if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
                     {
@@ -399,9 +402,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                         GameObject GoSelected = OngoingSelection.SelectedGameObject;
                         ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
-                        Debug.Log("IS THE CHOSEN STIMULUS NULL?? " + (chosenStimulus == null ? "YES":"NO"));
                         if (chosenStimulus == null)
                             return;
+
                         string stimulationType = CurrentTrial.StimulationType.Trim();
                         if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
                         {
@@ -416,7 +419,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     }   
                 }
             }
-
 
 
             if (ChosenGO != null && ChosenStim != null && ShotgunHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
@@ -594,8 +596,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        SliderFBController.SliderGO.SetActive(false);
-        SliderFBController.SliderHaloGO.SetActive(false);
+        if(SliderFBController.SliderGO != null)
+            SliderFBController.SliderGO.SetActive(false);
+        if(SliderFBController.SliderHaloGO != null)
+            SliderFBController.SliderHaloGO.SetActive(false);
 
         if (GotTrialCorrect)
             score += (TrialCount_InBlock + 1) * 100;
@@ -851,8 +855,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\nPC_Stim: " + NumPC_Trial +
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial +
-
-                             "\nStimulateThisTrial? " + StimulateThisTrial;
+                             "\n" +
+                             "\nStimulateThisTrial? " + StimulateThisTrial +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.ToString());
 
     }
 
@@ -1217,7 +1223,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         DisplayResultsPanelGO.SetActive(true);
         Starfield.SetActive(false);
         TokenFBController.enabled = false;
-        SliderFBController.SliderGO.SetActive(false);
+
+        if(SliderFBController.SliderGO != null)
+            SliderFBController.SliderGO.SetActive(false);
 
         if (!StimIsChosen && ChosenStimIndices.Count < 1)
             yield break;

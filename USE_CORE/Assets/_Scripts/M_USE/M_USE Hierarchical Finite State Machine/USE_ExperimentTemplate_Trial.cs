@@ -40,10 +40,9 @@ using USE_UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections;
-using UnityEngine.Serialization;
 using USE_Def_Namespace;
 using Random = UnityEngine.Random;
-using static GLTFast.Schema.AnimationChannel;
+using static SelectionTracking.SelectionTracker;
 
 
 namespace USE_ExperimentTemplate_Trial
@@ -126,6 +125,9 @@ namespace USE_ExperimentTemplate_Trial
         public int CurrentTrialDefIndex;
         //Can be used by tasks' trial levels to set the trial stimulation code
         [HideInInspector] public int TrialStimulationCode = 0;
+
+
+        [HideInInspector] public USE_Selection OngoingSelection;
 
 
 

@@ -172,6 +172,8 @@ namespace SelectionTracking
 
             gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
             gazeSelection.CurrentInputLocation = () => InputBroker.gazePosition;
+            gazeSelection.MaxPixelDisplacement = 70;
+            gazeSelection.MinDuration = 0.7f;
             DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
 
             //----------------------------------------GAZE SHOTGUN HANDLER: --------------------------------------------------
@@ -189,6 +191,8 @@ namespace SelectionTracking
             gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
             gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
+            gazeShotgun.MaxPixelDisplacement = 70;
+            gazeShotgun.MinDuration = 0.7f;
             DefaultSelectionHandlers.Add("GazeShotgun", gazeShotgun);
             
             
@@ -566,7 +570,6 @@ namespace SelectionTracking
                         LastUnsuccessfulSelection = OngoingSelection;
                         UnsuccessfulSelections.Add(OngoingSelection);
                         SelectionErrorHandling(termErrors);
-
                         //For EventCodes:
                         FixationOnEventCodeSent = false; //reset fixation
                     }

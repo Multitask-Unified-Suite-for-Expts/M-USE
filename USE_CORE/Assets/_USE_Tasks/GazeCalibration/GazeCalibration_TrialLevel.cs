@@ -181,7 +181,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", Session.MouseTracker, Init, ITI);
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Session.GazeTracker, Init, ITI);
-        
+
 
         Init.AddUpdateMethod(() =>
         {

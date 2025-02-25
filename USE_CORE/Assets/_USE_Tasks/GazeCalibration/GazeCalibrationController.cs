@@ -121,23 +121,26 @@ public class GazeCalibrationController : MonoBehaviour
             
         }
 
-        if (transition.Equals("GazeCalibrationToSession"))
-            Session.GazeData.folderPath = path;
-        else
-            Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
+        if(!Session.SessionDef.SpoofGazeWithMouse){
+            if (transition.Equals("GazeCalibrationToSession"))
+                Session.GazeData.folderPath = path;
+            else
+                Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
 
-        if (transition.Equals("GazeCalibrationToTask"))
-            Session.TrialLevel.PathReassignmentComplete = true;
+            if (transition.Equals("GazeCalibrationToTask"))
+                Session.TrialLevel.PathReassignmentComplete = true;
 
-        if (transition.Equals("SessionToGazeCalibration"))
-        {
-            if (Session.SessionDef.SerialPortActive)
+            if (transition.Equals("SessionToGazeCalibration"))
             {
-                StartCoroutine(Session.SerialSentData.CreateFile());
-                StartCoroutine(Session.SerialRecvData.CreateFile());
+                if (Session.SessionDef.SerialPortActive)
+                {
+                    StartCoroutine(Session.SerialSentData.CreateFile());
+                    StartCoroutine(Session.SerialRecvData.CreateFile());
+                }
+                StartCoroutine(Session.GazeData.CreateFile());
             }
-            StartCoroutine(Session.GazeData.CreateFile());
         }
+
         if ( transition.Equals("TaskToGazeCalibration"))
         {
             if (Session.SessionDef.SerialPortActive)
@@ -145,6 +148,8 @@ public class GazeCalibrationController : MonoBehaviour
                 Session.SerialSentData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
                 Session.SerialRecvData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
             }
+
+            if(!Session.SessionDef.SpoofGazeWithMouse)
             Session.GazeData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
         }
 
@@ -166,16 +171,16 @@ public class GazeCalibrationController : MonoBehaviour
                 break;
             case "SessionToGazeCalibration":
                 sessionGazeCalibrationFolderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData";
-                serialRecvDataFileName = Session.SerialRecvData.fileName;
-                serialSentDataFileName = Session.SerialSentData.fileName;
-                gazeDataFileName = Session.GazeData.fileName;
+                serialRecvDataFileName = Session.SerialRecvData?.fileName;
+                serialSentDataFileName = Session.SerialSentData?.fileName;
+                gazeDataFileName = Session.GazeData?.fileName;
                 StartCoroutine(WriteSerialAndGazeDataAndReassignPath(sessionGazeCalibrationFolderPath, transition));
-                Debug.Log("**WRITING SESSION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData.folderPath + " AND CHANGING PATH TO " + sessionGazeCalibrationFolderPath);
+                Debug.Log("**WRITING SESSION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData?.folderPath + " AND CHANGING PATH TO " + sessionGazeCalibrationFolderPath);
                 break;
             case "GazeCalibrationToSession":
                 sessionFolderPath = Session.TaskSelectionDataPath;
                 StartCoroutine(WriteSerialAndGazeDataAndReassignPath(sessionFolderPath, transition));
-                Debug.Log("**WRITING GAZE CALIBRATION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData.folderPath + " AND CHANGING PATH TO " + sessionFolderPath);
+                Debug.Log("**WRITING GAZE CALIBRATION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData?.folderPath + " AND CHANGING PATH TO " + sessionFolderPath);
                 break;
             default:
                 Debug.LogWarning("INVALID TRANSITION TYPE BETWEEN DATA PATHS.");

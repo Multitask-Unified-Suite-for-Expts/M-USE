@@ -136,6 +136,12 @@ namespace USE_Def_Namespace
         /// </summary>
         public string SelectionType = "mouse";
 
+
+        /// <summary>
+        /// Whether or not to run the eyetracker with the mosue position assigned as gaze input
+        /// </summary>
+        public bool SpoofGazeWithMouse;
+        
         /// <summary>
         /// Details of the monitor being used.
         /// </summary>
@@ -374,7 +380,6 @@ namespace USE_Def_Namespace
         /// Whether or not to run a stimulation
         /// </summary>
         public bool RunSimulation;
-
 
         /// <summary>
         /// Size of the circle for shotgun raycasting in DVA. Default is 1.25f.

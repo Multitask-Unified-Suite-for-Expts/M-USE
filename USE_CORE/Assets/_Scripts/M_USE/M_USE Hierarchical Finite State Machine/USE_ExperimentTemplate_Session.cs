@@ -252,7 +252,7 @@ namespace USE_ExperimentTemplate_Session
 
                 StartCoroutine(FrameData.CreateFile());
 
-                if (Session.SessionDef.EyeTrackerActive)
+                if (Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
                     StartCoroutine(Session.GazeData.CreateFile());
                 
 
@@ -320,13 +320,6 @@ namespace USE_ExperimentTemplate_Session
             gazeCalibration.AddSpecificInitializationMethod(() =>
             {
 
-                // Deactivate TaskSelection scene elements
-                /*Session.InitCamGO.SetActive(false);
-                SessionCam.gameObject.SetActive(true);
-
-                MainDirectionalLight.SetActive(true);
-                Session.TaskSelectionCanvasGO.SetActive(true);*/
-
                 if (Session.WebBuild)
                 {
                     Session.MainExperimenterCanvas_GO.SetActive(false);
@@ -366,7 +359,6 @@ namespace USE_ExperimentTemplate_Session
                 // Set the current task and trial levels 
                 Session.TaskLevel = Session.GazeCalibrationController.GazeCalibrationTaskLevel;
                 Session.TrialLevel = Session.GazeCalibrationController.GazeCalibrationTrialLevel;
-
             });
 
             gazeCalibration.AddLateUpdateMethod(() =>
@@ -375,7 +367,7 @@ namespace USE_ExperimentTemplate_Session
 
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
-                if (Session.SessionDef.EyeTrackerActive)
+                if (Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
 
                 //Session.EventCodeManager.EventCodeLateUpdate();
@@ -386,29 +378,13 @@ namespace USE_ExperimentTemplate_Session
             {
                 Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToSession");
 
-                /* if (Session.SessionDef.SerialPortActive)
-                 {
-                     StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-                     StartCoroutine(Session.SerialSentData.AppendDataToFile());
-                 }
-
-                 if (Session.SessionDef.EyeTrackerActive)
-                     StartCoroutine(Session.GazeData.AppendDataToFile());
-
-
-                 // Reset level and task references
-                 Session.GazeData.folderPath = Session.TaskSelectionDataPath;
-                 Session.SerialRecvData.folderPath = Session.TaskSelectionDataPath;
-                 Session.SerialSentData.folderPath = Session.TaskSelectionDataPath;*/
-
-/*                StartCoroutine(SummaryData.AddTaskRunData(Session.TaskLevel.ConfigFolderName, Session.TaskLevel, Session.TaskLevel.GetTaskSummaryData()));
-*/
                 StartCoroutine(SessionData.AppendDataToBuffer());
                 StartCoroutine(SessionData.AppendDataToFile());
                 
 
+                
                 // Check and exit calibration mode for Tobii eye tracker
-                if (Session.TobiiEyeTrackerController.isCalibrating)
+                if (!Session.SessionDef.SpoofGazeWithMouse && Session.TobiiEyeTrackerController.isCalibrating)
                 {
                     Session.TobiiEyeTrackerController.isCalibrating = false;
                     Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
@@ -716,7 +692,7 @@ namespace USE_ExperimentTemplate_Session
 
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                if(Session.SessionDef.EyeTrackerActive)
+                if(Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
 
             });
@@ -798,7 +774,7 @@ namespace USE_ExperimentTemplate_Session
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                if(Session.SessionDef.EyeTrackerActive)
+                if(Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
             });
 
@@ -833,7 +809,7 @@ namespace USE_ExperimentTemplate_Session
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 
-                if (Session.SessionDef.EyeTrackerActive)
+                if (Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
 
                 if (CurrentTask.FrameData != null)
@@ -874,7 +850,7 @@ namespace USE_ExperimentTemplate_Session
 
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
-                if(Session.SessionDef.EyeTrackerActive)
+                if(Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
             });
 
@@ -1308,11 +1284,14 @@ namespace USE_ExperimentTemplate_Session
         {
             if (GameObject.Find("TobiiEyeTrackerController") == null)
             {
+                if(!Session.SessionDef.SpoofGazeWithMouse){
                 // gets called once when finding and creating the tobii eye tracker prefabs
                 GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
                 Session.TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                 Session.TobiiEyeTrackerController.EyeTracker_GO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                 Session.TobiiEyeTrackerController.TrackBoxGuide_GO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
+                }
+
                 Session.GazeCalibrationController = Instantiate(Resources.Load<GameObject>("GazeCalibration")).GetComponent<GazeCalibrationController>();
                // THIS LINE BELOW CONTROLS THE OVERLAYING GAZE ONTO THE PLAYER SCENE
                // Session.TobiiEyeTrackerController.GazeTrail_GO = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);

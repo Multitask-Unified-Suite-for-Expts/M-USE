@@ -134,9 +134,9 @@ public static class Session
 
     public static void ClearStimLists()
     {
-        TargetObjects.Clear();
-        DistractorObjects.Clear();
-        IrrelevantObjects.Clear();
+        TargetObjects?.Clear();
+        DistractorObjects?.Clear();
+        IrrelevantObjects?.Clear();
     }
 
     public static List<GameObject> GetStartButtonChildren()

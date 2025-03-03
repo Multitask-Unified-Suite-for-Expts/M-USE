@@ -31,6 +31,7 @@ public class GazeCalibrationController : MonoBehaviour
     private bool CreatedGazeCalibrationDataFiles;
 
     public string taskGazeCalibrationFolderPath, taskFolderPath, sessionGazeCalibrationFolderPath, sessionFolderPath;
+
     public void ActivateGazeCalibrationComponents()
     {
         GazeCalibration_CanvasGO.SetActive(true);
@@ -60,11 +61,7 @@ public class GazeCalibrationController : MonoBehaviour
         yield return StartCoroutine(taskLevel.FrameData.AppendDataToBuffer());
         yield return StartCoroutine(taskLevel.FrameData.AppendDataToFile());
 
-        
-
         taskLevel.DeactivateTaskDataControllers();
-
-
     }
 
     public void WriteDataFileThenDeactivateDataController(ControlLevel_Trial_Template trialLevel, ControlLevel_Task_Template taskLevel, string transition)

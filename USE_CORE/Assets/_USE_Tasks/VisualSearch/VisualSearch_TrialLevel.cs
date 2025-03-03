@@ -123,8 +123,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            // Initialize FB Controller Values
-            HaloFBController.SetCircleHaloIntensity(3f);
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>

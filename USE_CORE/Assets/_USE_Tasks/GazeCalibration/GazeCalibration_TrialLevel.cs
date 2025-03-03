@@ -253,7 +253,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Blink.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
         //----------------------------------------------------- SHRINK THE CALIBRATION POINT -----------------------------------------------------
-        
+        //in the shrink state as long as InCalibrationRange, otherwise it goes back to blink
+
         Shrink.AddSpecificInitializationMethod(() =>
         {
             elapsedShrinkDuration = 0;
@@ -310,7 +311,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         });
        
-        Calibrate.AddUpdateMethod(() =>
+        Calibrate.AddUpdateMethod(() => 
         {
             // Determines if the collected point contains valid gaze Data
             if(!CurrentTrialDef.SpoofGazeWithMouse)
@@ -466,6 +467,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     }
 
+
+
+    // ---------------------------------------------------------- METHODS ----------------------------------------------------------
+
     private void OnApplicationQuit()
     {
         if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
@@ -477,8 +482,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         TrialDefSelectionStyle = "gazeCalibration";
     }
 
-        // ---------------------------------------------------------- METHODS ----------------------------------------------------------
-        private void ShrinkGameObject(GameObject gameObject, float targetSize, float shrinkDuration)
+    private void ShrinkGameObject(GameObject gameObject, float targetSize, float shrinkDuration)
     {
         Vector3 startingScale = gameObject.transform.localScale;
         Vector3 finalScale = new Vector3(targetSize, targetSize, targetSize);
@@ -487,6 +491,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         gameObject.transform.localScale = Vector3.Lerp(startingScale, finalScale, elapsedShrinkDuration / shrinkDuration);
         elapsedShrinkDuration += Time.deltaTime;
     }
+
     void DefineCalibPoints(int nPoints)
     {
         switch (nPoints)
@@ -555,6 +560,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             go.SetActive(true);
         }
     }
+
 
 
     public void DetermineCollectDataStatus(NormalizedPoint2D point)
@@ -674,8 +680,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private bool InCalibrationRange()
     {
-        return (Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget) < acceptableCalibrationDistance);
+        return Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget) < acceptableCalibrationDistance;
     }
+
     private void CreateResultContainer()
     {
         ResultContainer = new GameObject("ResultContainer", typeof(Canvas), typeof(CanvasRenderer));

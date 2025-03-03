@@ -273,17 +273,21 @@ namespace USE_ExperimentTemplate_Trial
                     StartCoroutine(WaitForTransitionFromGazeCalibrationToTask());
                 else
                 {
-                    if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+                    if(Session.GazeCalibrationController != null)
                     {
-                        Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                        if (Session.SessionDef.EyeTrackerActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+                        {
+                            Session.GazeData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                        }
+
+                        if (Session.SessionDef.SerialPortActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
+                        {
+                            Debug.LogWarning("CREATING A NEW TASK INDEXED SERIAL DATA: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialSentData.fileName);
+                            Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                            Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
+                        }
                     }
 
-                    if (Session.SessionDef.SerialPortActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
-                    {
-                        Debug.LogWarning("CREATING A NEW TASK INDEXED SERIAL DATA: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialSentData.fileName);
-                        Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
-                        Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
-                    }
                 }
 
 

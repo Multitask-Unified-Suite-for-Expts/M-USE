@@ -144,8 +144,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             }
 
             // Initialize FB Controller Values
-            //HaloFBController.SetCircleHaloRange(Session.UsingDefaultConfigs ? 1.75f: 2.5f);
-            HaloFBController.SetCircleHaloIntensity(3f);
+            HaloFBController.SetCircleHaloIntensity(Session.UsingDefaultConfigs ? 1.75f : 2.5f);
         });
         
         SetupTrial.AddSpecificInitializationMethod(() =>
@@ -321,7 +320,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
-            if(selectedSD.StimTokenRewardMag > 0)
+            if (selectedSD.StimTokenRewardMag > 0)
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);

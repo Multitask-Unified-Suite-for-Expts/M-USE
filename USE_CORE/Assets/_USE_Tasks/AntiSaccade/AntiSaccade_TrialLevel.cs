@@ -36,8 +36,7 @@ using UnityEngine.UI;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Globalization;
-
-
+using static SelectionTracking.SelectionTracker;
 
 public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 {
@@ -135,10 +134,17 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             TargetStim_GO = targetStim.stimDefs[0].StimGameObject;
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
-        //var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ChooseStim); //Setup Handler (may eventually wanna use shotgun handler)
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
+
+        //------------------------------------------------------------------------------------------------------------------------
+        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
+        SelectionHandler ShotgunHandler;
+
+        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
+        else
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
+
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -153,12 +159,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             SetShadowType(CurrentTask.ShadowType, "AntiSaccade_DirectionalLight");
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
+            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
+            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
+        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
 
         //PreCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         PreCue.AddSpecificInitializationMethod(() =>
@@ -212,9 +218,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetOn"]);
         });
 
-
-
-            DisplayTarget.AddTimer(() => ChosenDisplayTargetDuration, Mask, () =>
+        DisplayTarget.AddTimer(() => ChosenDisplayTargetDuration, Mask, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetOff"]);
 
@@ -257,12 +261,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             ChosenStim = null;
             stimChosen = false;
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (ShotgunHandler.AllSelections.Count > 0)
+                ShotgunHandler.ClearSelections();
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-            ChosenGO = Handler.LastSuccessfulSelection.SelectedGameObject;
+            ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<AntiSaccade_StimDef>();
             if (ChosenStim != null)
             {
@@ -270,6 +274,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 if (CurrentTrial.DeactivateNonSelectedStimOnSel)
                     DeactivateStimNotSelected();
             }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+            if(OngoingSelection != null)
+            {
+
+            }
+
         });
         ChooseStim.SpecifyTermination(() => stimChosen, Feedback);
         ChooseStim.AddTimer(() => CurrentTrial.ChooseStimDuration, Feedback);

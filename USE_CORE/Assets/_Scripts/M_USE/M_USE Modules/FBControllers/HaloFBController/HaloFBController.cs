@@ -46,6 +46,7 @@ public class HaloFBController : MonoBehaviour
     private enum State { None, Positive, Negative };
     private State state;
 
+
     public void Init(DataController frameData)
     {
         frameData.AddDatum("HaloType", () => state.ToString());

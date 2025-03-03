@@ -54,13 +54,10 @@ public class CircleHalo : MonoBehaviour
         {
             InstantiatedCircleHaloGO = Instantiate(circleHaloPrefab, go.transform.root.transform);
 
-            Vector3 objectSize = go.transform.localScale;
-            float maxDimension = Mathf.Max(objectSize.x, objectSize.y, objectSize.z);
-
             Light haloLight = InstantiatedCircleHaloGO.GetComponent<Light>();
             if (haloLight != null)
             {
-                haloLight.range = maxDimension * 3.5f;
+                haloLight.range = 2.5f;
             }
             else
                 Debug.LogWarning("HALO LIGHT COMPONENT IS NULL");

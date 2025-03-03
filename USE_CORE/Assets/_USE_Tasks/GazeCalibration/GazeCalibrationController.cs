@@ -32,6 +32,7 @@ public class GazeCalibrationController : MonoBehaviour
     private bool CreatedGazeCalibrationDataFiles;
 
     public string taskGazeCalibrationFolderPath, taskFolderPath, sessionGazeCalibrationFolderPath, sessionFolderPath;
+
     public void ActivateGazeCalibrationComponents()
     {
         GazeCalibration_CanvasGO.SetActive(true);

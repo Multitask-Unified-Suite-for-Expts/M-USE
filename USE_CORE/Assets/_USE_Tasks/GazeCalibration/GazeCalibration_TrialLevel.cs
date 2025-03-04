@@ -313,28 +313,22 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
        
         Calibrate.AddUpdateMethod(() => 
         {
-            // Determines if the collected point contains valid gaze Data
             if(!CurrentTrialDef.SpoofGazeWithMouse)
-                DetermineCollectDataStatus(currentNormPoint);
+            {
+                CalibrationStatus status = Session.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(currentNormPoint);
+                if (status.Equals(CalibrationStatus.Success))
+                {
+                    currentCalibrationPointFinished = true;
+                    CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
+                }
+            }
+
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
      
-        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Delay, () =>
+        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Confirm, () =>
         {
-            // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
-            if (!CurrentTrialDef.SpoofGazeWithMouse)
-            {
-                CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
-            }
-
             currentCalibrationPointFinished = false;
-            StateAfterDelay = Confirm;
-
-            // Assign a 3 Second delay following calibration to allow the sample to be properly recorded
-            if (!CurrentTrialDef.SpoofGazeWithMouse)
-                DelayDuration = 3f;
-            else
-                DelayDuration = 0;
 
             InfoString.Clear();
         });
@@ -561,18 +555,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-
-
-    public void DetermineCollectDataStatus(NormalizedPoint2D point)
-    {
-        CalibrationStatus status = Session.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(point);
-        Debug.Log("STATUS: " + status.ToString());
-        if (status.Equals(CalibrationStatus.Success))
-        {
-            // Done calibrating the point if successful
-            currentCalibrationPointFinished = true;
-        }
-    }
     
     public Vector2 ADCSToScreen(NormalizedPoint2D normADCSGazePoint)
     {

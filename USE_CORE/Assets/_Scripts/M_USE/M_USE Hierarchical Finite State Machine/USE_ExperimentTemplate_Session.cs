@@ -384,15 +384,20 @@ namespace USE_ExperimentTemplate_Session
 
                 
                 // Check and exit calibration mode for Tobii eye tracker
-                if (!Session.SessionDef.SpoofGazeWithMouse && Session.TobiiEyeTrackerController.isCalibrating)
+                if(!Session.SessionDef.SpoofGazeWithMouse)
                 {
-                    Session.TobiiEyeTrackerController.isCalibrating = false;
-                    Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
+                    if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
+                    {
+                        Session.TobiiEyeTrackerController.isCalibrating = false;
+                        Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
+                    }
                 }
 
                 // Disable gaze calibration
+                Debug.LogWarning("--------------------------------------------BEFORE --------------------------------------------");
                 Session.GazeCalibrationController.RunCalibration = false;
                 Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
+                Debug.LogWarning("--------------------------------------------AFTER --------------------------------------------");
 
                 // Activate TaskSelection scene elements
                 FrameData.gameObject.SetActive(true);

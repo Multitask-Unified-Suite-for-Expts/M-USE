@@ -185,6 +185,9 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             ObjManager.ActivateInitialObjectsMovement();
             ObjManager.ActivateRemainingObjects();
 
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
+
         });
         Play.AddUpdateMethod(() =>
         {
@@ -258,6 +261,15 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             }
 
             HandleSlider();
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
+            }
+
         });
         Play.SpecifyTermination(() => ObjManager.DistractorList.Count < 1 && ObjManager.TargetList.Count < 1, ITI);
 
@@ -395,8 +407,9 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nNum Targets: " + TrialObjects.Where(obj => obj.IsTarget).Count() +
-                             "\nNum Distractors: " + TrialObjects.Where(obj => !obj.IsTarget).Count();
-
+                             "\nNum Distractors: " + TrialObjects.Where(obj => !obj.IsTarget).Count() +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 
     private void DefineTrialData()

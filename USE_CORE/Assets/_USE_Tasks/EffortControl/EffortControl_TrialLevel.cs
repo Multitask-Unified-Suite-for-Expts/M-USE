@@ -380,6 +380,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (Handler != null)
                 Handler.HandlerActive = true;
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         InflateBalloon.AddUpdateMethod(() =>
         {
@@ -472,6 +475,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         }
                     }
                 }
+            }
+
+            OngoingSelection = Handler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
             }
         });
         InflateBalloon.AddTimer(() => inflateDuration.value, Delay);
@@ -982,7 +993,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Touches: " + TrialTouches +
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +
-                            "\nEffort Chosen: " + EffortChoice;
+                            "\nEffort Chosen: " + EffortChoice +
+                            "\n" +
+                            "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
+
     }
 
     private void ClearTrialSummaryString()

@@ -227,31 +227,40 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
                 StimulationType = null;
 
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
+
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
             var ongoingSelection = ShotgunHandler.OngoingSelection;
 
-            if (!string.IsNullOrEmpty(StimulationType) && ongoingSelection != null)
+            if(ongoingSelection != null)
             {
-                if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
-                {
-                    ongoingSelection.InitialFixationDurationPassed = true;
-                    Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
+                SetTrialSummaryString();
 
-                    GameObject GoSelected = ongoingSelection.SelectedGameObject;
-                    var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
-                    if (SdSelected != null)
+                if (!string.IsNullOrEmpty(StimulationType))
+                {
+                    if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
                     {
-                        if (StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
+                        ongoingSelection.InitialFixationDurationPassed = true;
+                        Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
+
+                        GameObject GoSelected = ongoingSelection.SelectedGameObject;
+                        var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
+
+                        if (SdSelected != null)
                         {
-                            Debug.Log("STIMULATING TARGET!");
-                            StartCoroutine(StimulationCoroutine());
-                        }
-                        else if (StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
-                        {
-                            Debug.Log("STIMULATING DISTRACTOR!");
-                            StartCoroutine(StimulationCoroutine());
+                            if (StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
+                            {
+                                Debug.Log("STIMULATING TARGET!");
+                                StartCoroutine(StimulationCoroutine());
+                            }
+                            else if (StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
+                            {
+                                Debug.Log("STIMULATING DISTRACTOR!");
+                                StartCoroutine(StimulationCoroutine());
+                            }
                         }
                     }
                 }
@@ -616,7 +625,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" +
-                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
+
 
         if (TrialStimulationCode > 0)
         {

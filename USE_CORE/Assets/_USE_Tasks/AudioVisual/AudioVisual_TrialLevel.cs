@@ -211,6 +211,9 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         PlayerChoice.AddUpdateMethod(() =>
         {
@@ -243,6 +246,15 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                     SelectionMade = true;
                 }
             }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
+            }
+
         });
         PlayerChoice.AddTimer(() => CurrentTrial.ChoiceDuration, Feedback);
         PlayerChoice.SpecifyTermination(() => SelectionMade, Feedback);
@@ -502,7 +514,9 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nCorrect Object: " + CurrentTrial.CorrectObject +
-                             "\nDifficulty Level: " + CurrentTrial.DifficultyLevel;
+                             "\nDifficulty Level: " + CurrentTrial.DifficultyLevel +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 
 

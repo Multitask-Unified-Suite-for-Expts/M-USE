@@ -138,7 +138,7 @@ namespace USE_Def_Namespace
 
 
         /// <summary>
-        /// Whether or not to run the eyetracker with the mosue position assigned as gaze input
+        /// Whether or not to run the eyetracker with the mouse position assigned as gaze input
         /// </summary>
         public bool SpoofGazeWithMouse;
         

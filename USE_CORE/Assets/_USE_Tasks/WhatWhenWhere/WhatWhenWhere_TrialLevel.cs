@@ -285,6 +285,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
@@ -305,6 +308,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         SequenceManager.SetSequenceStartTime(Time.time);
                     }
                 }
+            }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
             }
         });
         ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
@@ -698,10 +709,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                              "\nTotal Correct Selections in Trial : " + correctSelections_InTrial +
                              "\nTotal Errors in Trial : " + totalErrors_InTrial +
                              "\n" +
-                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(searchDurations_InTrial);
+                             "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(searchDurations_InTrial) +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
+
     }
 
-    
+
     private void CreateTextOnExperimenterDisplay()
     {
         for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)

@@ -197,14 +197,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
             if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
-
                 selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
+
                 if (selectedSD != null)
                 {
                     float searchDuration = Time.time - searchStartTime;
@@ -215,6 +218,14 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     choiceMade = true;
                 }
                 ShotgunHandler.ClearSelections();
+            }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
             }
         });
         
@@ -521,7 +532,10 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nSearch Duration: " + searchStartTime +
                              "\n" + 
-                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
+
     }
 
     private void UpdateExperimenterDisplaySummaryStrings()

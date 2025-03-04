@@ -388,16 +388,13 @@ namespace USE_ExperimentTemplate_Session
                 {
                     if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
                     {
-                        Session.TobiiEyeTrackerController.isCalibrating = false;
                         Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
                     }
                 }
 
                 // Disable gaze calibration
-                Debug.LogWarning("--------------------------------------------BEFORE --------------------------------------------");
                 Session.GazeCalibrationController.RunCalibration = false;
                 Session.GazeCalibrationController.DectivateGazeCalibrationComponents();
-                Debug.LogWarning("--------------------------------------------AFTER --------------------------------------------");
 
                 // Activate TaskSelection scene elements
                 FrameData.gameObject.SetActive(true);

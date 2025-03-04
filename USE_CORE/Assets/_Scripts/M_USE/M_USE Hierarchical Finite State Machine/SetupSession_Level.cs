@@ -221,6 +221,12 @@ public class SetupSession_Level : ControlLevel
             Session.GazeTracker.enabled = true;
             Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
         }
+        else if(Session.SessionDef.SelectionType.ToLower().Equals("mouseHover"))
+        {
+            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseHover", Session.MouseTracker, inputActive, inputInactive);
+            Session.MouseTracker.enabled = true;
+            Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
+        }
         else
         {
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", Session.MouseTracker, inputActive, inputInactive);

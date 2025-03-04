@@ -20,6 +20,7 @@ public class GazeCalibrationController : MonoBehaviour
     public bool RunCalibration;
     public string TaskLevelGazeDataFileName;
     public string GazeCalibrationDataFolderPath;
+    public bool TransitioningFromGazeCalibrationToTask;
 
     public int InTaskGazeCalibration_TrialCount_InTask;
     public bool InTaskGazeCalibration;
@@ -116,36 +117,41 @@ public class GazeCalibrationController : MonoBehaviour
             {
                 Session.SerialRecvData.folderPath = path + Path.DirectorySeparatorChar + "SerialRecvData";
                 Session.SerialSentData.folderPath = path + Path.DirectorySeparatorChar + "SerialSentData";
+                Debug.Log("THIS IS THE PATH FOR SERIAL RECV DATA: " + Session.SerialRecvData.folderPath);
             }
             
         }
 
-        if (transition.Equals("GazeCalibrationToSession"))
-            Session.GazeData.folderPath = path;
-        else
-            Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
+        if(!Session.SessionDef.SpoofGazeWithMouse){
+            if (transition.Equals("GazeCalibrationToSession"))
+                Session.GazeData.folderPath = path;
+            else
+                Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
 
-       // Session.GazeCalibrationController.ReassignGazeCalibrationDataFolderPath(path);
+            if (transition.Equals("GazeCalibrationToTask"))
+                Session.TrialLevel.PathReassignmentComplete = true;
 
-        if (!CreatedSessionSerialAndGazeDataFiles && transition.Equals("SessionToGazeCalibration"))
-        {
-            if (Session.SessionDef.SerialPortActive)
+            if (transition.Equals("SessionToGazeCalibration"))
             {
-                StartCoroutine(Session.SerialSentData.CreateFile());
-                StartCoroutine(Session.SerialRecvData.CreateFile());
+                if (Session.SessionDef.SerialPortActive)
+                {
+                    StartCoroutine(Session.SerialSentData.CreateFile());
+                    StartCoroutine(Session.SerialRecvData.CreateFile());
+                }
+                StartCoroutine(Session.GazeData.CreateFile());
             }
-            StartCoroutine(Session.GazeData.CreateFile());
-            CreatedSessionSerialAndGazeDataFiles = true;
         }
-        if (!CreatedTaskSerialAndGazeDataFiles && transition.Equals("TaskToGazeCalibration"))
+
+        if ( transition.Equals("TaskToGazeCalibration"))
         {
             if (Session.SessionDef.SerialPortActive)
             {
-                Session.SerialSentData.CreateNewTrialIndexedFile(OriginalTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
-                Session.SerialRecvData.CreateNewTrialIndexedFile(OriginalTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
+                Session.SerialSentData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
+                Session.SerialRecvData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
             }
-            Session.GazeData.CreateNewTrialIndexedFile(OriginalTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
-            CreatedTaskSerialAndGazeDataFiles = true;
+
+            if(!Session.SessionDef.SpoofGazeWithMouse)
+            Session.GazeData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
         }
 
 
@@ -158,7 +164,6 @@ public class GazeCalibrationController : MonoBehaviour
                 taskGazeCalibrationFolderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskData" + 
                     Path.DirectorySeparatorChar + OriginalTaskLevel.TaskName;
                 StartCoroutine(WriteSerialAndGazeDataAndReassignPath(taskGazeCalibrationFolderPath, transition));
-                Debug.Log("**WRITING TASK LEVEL SERIAL AND GAZE DATA TO : " + Session.SerialRecvData.folderPath + " AND CHANGING PATH TO " + taskGazeCalibrationFolderPath);
                 break;
             case "GazeCalibrationToTask":
                 taskFolderPath = OriginalTaskLevel.TaskDataPath;
@@ -167,16 +172,16 @@ public class GazeCalibrationController : MonoBehaviour
                 break;
             case "SessionToGazeCalibration":
                 sessionGazeCalibrationFolderPath = Session.SessionDataPath + Path.DirectorySeparatorChar + "GazeCalibration" + Path.DirectorySeparatorChar + "TaskSelectionData";
-                serialRecvDataFileName = Session.SerialRecvData.fileName;
-                serialSentDataFileName = Session.SerialSentData.fileName;
-                gazeDataFileName = Session.GazeData.fileName;
+                serialRecvDataFileName = Session.SerialRecvData?.fileName;
+                serialSentDataFileName = Session.SerialSentData?.fileName;
+                gazeDataFileName = Session.GazeData?.fileName;
                 StartCoroutine(WriteSerialAndGazeDataAndReassignPath(sessionGazeCalibrationFolderPath, transition));
-                Debug.Log("**WRITING SESSION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData.folderPath + " AND CHANGING PATH TO " + sessionGazeCalibrationFolderPath);
+                Debug.Log("**WRITING SESSION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData?.folderPath + " AND CHANGING PATH TO " + sessionGazeCalibrationFolderPath);
                 break;
             case "GazeCalibrationToSession":
                 sessionFolderPath = Session.TaskSelectionDataPath;
                 StartCoroutine(WriteSerialAndGazeDataAndReassignPath(sessionFolderPath, transition));
-                Debug.Log("**WRITING GAZE CALIBRATION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData.folderPath + " AND CHANGING PATH TO " + sessionFolderPath);
+                Debug.Log("**WRITING GAZE CALIBRATION SERIAL AND GAZE DATA TO : " + Session.SerialRecvData?.folderPath + " AND CHANGING PATH TO " + sessionFolderPath);
                 break;
             default:
                 Debug.LogWarning("INVALID TRANSITION TYPE BETWEEN DATA PATHS.");
@@ -184,11 +189,6 @@ public class GazeCalibrationController : MonoBehaviour
         }
     }
 
-    public void SetCreatedTaskSerialAndGazeDataFiles(bool val)
-    {
-        CreatedTaskSerialAndGazeDataFiles = val;
-    }    
-    
     public void SetCreatedGazeCalibrationDataFiles(bool val)
     {
         CreatedGazeCalibrationDataFiles = val;

@@ -310,7 +310,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Calibrate.AddUpdateMethod(() =>
         {
-            if (!CurrentTrialDef.SpoofGazeWithMouse)
+            if (!Session.SessionDef.SpoofGazeWithMouse)
             {
                 CalibrationStatus status = Session.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(currentNormPoint);
                 if (status.Equals(CalibrationStatus.Success))
@@ -455,7 +455,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         ITI.AddSpecificInitializationMethod(() =>
         {
-            if (!CurrentTrialDef.SpoofGazeWithMouse)
+            if (!Session.SessionDef.SpoofGazeWithMouse)
                 CollectSamplePoints();
         });
 

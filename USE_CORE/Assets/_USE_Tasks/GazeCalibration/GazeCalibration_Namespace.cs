@@ -33,6 +33,7 @@ namespace GazeCalibration_Namespace
 {
     public class GazeCalibration_TaskDef : TaskDef
     {
+        public string RewardStructure;
     }
 
     public class GazeCalibration_BlockDef : BlockDef
@@ -40,7 +41,6 @@ namespace GazeCalibration_Namespace
         //Already-existing fields (inherited from BlockDef)
         //public int BlockCount;
         //public TrialDef[] TrialDefs;
-        public bool SpoofGazeWithMouse;
         public float[] CalibPointsInset;
         public float MaxCircleScale;
         public float MinCircleScale;
@@ -54,7 +54,6 @@ namespace GazeCalibration_Namespace
             GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
             td.NumPulses = NumPulses;
             td.PulseSize = PulseSize;
-            td.SpoofGazeWithMouse = SpoofGazeWithMouse;
             td.CalibPointsInset = CalibPointsInset;
             td.MaxCircleScale = MaxCircleScale;
             td.MinCircleScale = MinCircleScale;
@@ -71,7 +70,6 @@ namespace GazeCalibration_Namespace
         //public TrialStims TrialStims;
        // public int BlockID;
        // public int NumTrials;
-        public bool SpoofGazeWithMouse;
         public float[] CalibPointsInset = new float[] {0.15f, 0.15f};
         public float MaxCircleScale = 0.075f;
         public float MinCircleScale = 0.015f;
@@ -80,35 +78,7 @@ namespace GazeCalibration_Namespace
 
     public class GazeCalibration_StimDef : StimDef
     {
-        //Already-existing fields (inherited from Stim  Def)
-        //public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
-        //public string StimName;
-        //public string StimPath;
-        //public string PrefabPath;
-        //public string ExternalFilePath;
-        //public string StimFolderPath;
-        //public string StimExtension;
-        //public int StimCode; //optional, for analysis purposes
-        //public string StimID;
-        //public int[] StimDimVals; //only if this is parametrically-defined stim
-        //[System.NonSerialized] //public GameObject StimGameObject; //not in config, generated at runtime
-        //public Vector3 StimLocation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector3 StimRotation; //to be passed in explicitly if trial doesn't include location method
-        //public Vector2 StimScreenLocation; //screen position calculated during trial
-        //public float? StimScale;
-        //public bool StimLocationSet;
-        //public bool StimRotationSet;
-        //public float StimTrialPositiveFbProb; //set to -1 if stim is irrelevant
-        //public float StimTrialRewardMag; //set to -1 if stim is irrelevant
-        //public TokenReward[] TokenRewards;
-        //public int[] BaseTokenGain;
-        //public int[] BaseTokenLoss;
-        //public int TimesUsedInBlock;
-        //public bool IsRelevant;
-        //public bool TriggersSonication;
-        //public State SetActiveOnInitialization;
-        //public State SetInactiveOnTermination;
-    
+
     }
 
 }

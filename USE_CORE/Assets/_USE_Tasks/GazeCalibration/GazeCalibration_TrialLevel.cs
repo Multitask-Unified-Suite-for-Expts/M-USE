@@ -86,7 +86,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private GameObject PlayerViewPanelGO;
     private PlayerViewPanel PlayerViewPanel;
     private GameObject ResultContainer;
-    
+
     // Tobii SDK Variables 
     private CalibrationResult CalibrationResult;
     public GameObject EyeTrackerPrefab;
@@ -94,6 +94,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private IEyeTracker IEyeTracker;
     private EyeTracker EyeTracker;
 
+    private DisplayCoordinate DisplayCoordinate;
+    private ScreenDetails ScreenDetails;
 
     // Gaze Data Samples
     private List<Vector2> LeftSamples = new List<Vector2>();
@@ -132,11 +134,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             GC_CanvasGO = GameObject.Find("GazeCalibration_Canvas");
 
-            if (!Session.SessionDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController.isCalibrating)
-            {
-                Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
-                Session.TobiiEyeTrackerController.isCalibrating = true;
-            }
+            TurnOnCalibration();
 
             if (Session.GazeCalibrationController.InTaskGazeCalibration)
                 TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask;
@@ -166,12 +164,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 CreateResultContainer();
             }
 
-            if(!Session.SessionDef.SpoofGazeWithMouse)
+            if (!Session.SessionDef.SpoofGazeWithMouse)
                 AssignGazeCalibrationCameraToTrackboxCanvas();
         });
 
 
-        SetupTrial.SpecifyTermination(()=> (!Session.SessionDef.SpoofGazeWithMouse ? (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null):true), Init);
+        SetupTrial.SpecifyTermination(() => (!Session.SessionDef.SpoofGazeWithMouse ? (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null) : true), Init);
 
         if (Session.SessionDef.SpoofGazeWithMouse)
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", Session.MouseTracker, Init, ITI);
@@ -184,51 +182,46 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Define the number of calibration points given the following key codes (Space, 6, 5, 3, 1)
             if (InputBroker.GetKeyUp(KeyCode.Space))
                 numCalibPoints = 9;
-            
+
             else if (InputBroker.GetKeyUp(KeyCode.Alpha6))
                 numCalibPoints = 6;
-            
+
             else if (InputBroker.GetKeyUp(KeyCode.Alpha5))
                 numCalibPoints = 5;
-            
+
             else if (InputBroker.GetKeyUp(KeyCode.Alpha3))
                 numCalibPoints = 3;
-            
+
             else if (InputBroker.GetKeyUp(KeyCode.Alpha1))
                 numCalibPoints = 1;
         });
-        
+
         Init.SpecifyTermination(() => numCalibPoints != 0, Fixate, () =>
         {
-            // Only enter Calibration if an eyetracker is being used
-            if (!Session.SessionDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController.isCalibrating)
-            {
-                Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
-                Session.TobiiEyeTrackerController.isCalibrating = true;
-            }
-            // Assign the correct calibration points given the User's selection
+            TurnOnCalibration();
 
+            // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
             InfoString.Clear();
         });
 
         //----------------------------------------------------- CONFIRM GAZE IS IN RANGE OF THE CALIBRATION POINT -----------------------------------------------------
-        
+
         Fixate.AddSpecificInitializationMethod(() =>
         {
             // Initialize the Calibration Point at Max Scale
             InitializeCalibPoint();
             blinkTimer = 0;
-            
+
             // Reset variables relating to calibration completion
             currentCalibrationPointFinished = false;
             keyboardOverride = false;
-           
+
             CurrentProgressString.Clear();
             CurrentProgressString.Append($"<b>Calib Point #:  {calibNum + 1}</b> (of {numCalibPoints})"
                                    + $"\n<b>Calib Position:</b> ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
                                    + $"\n<b>Recalib Count:</b> {RecalibCount[calibNum]}");
-            InfoString.Append("<b>\n\nInfo</b>" 
+            InfoString.Append("<b>\n\nInfo</b>"
                                 + "\nThe calibration point is <b>blinking</b>."
                                 + "\nInstruct the player to focus on the point until the circle shrinks.");
             SetTrialSummaryString();
@@ -237,7 +230,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Fixate.AddUpdateMethod(() =>
         {
             // Blinks the current calibration point until the acceptable calibration is met or keyboard override is triggered
-           // BlinkCalibrationPoint(CalibCircle.CircleGO);
+            // BlinkCalibrationPoint(CalibCircle.CircleGO);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
 
@@ -267,11 +260,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         });
 
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
-        
+
         Shrink.AddUniversalLateTerminationMethod(() => { InfoString.Clear(); });
 
         //----------------------------------------------------- CHECK CALIBRATION READINESS -----------------------------------------------------
-        
+
         Check.AddSpecificInitializationMethod(() =>
         {
             keyboardOverride = false;
@@ -283,7 +276,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         //Set keyboardOverride to true if they press space
         Check.AddUpdateMethod(() => keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space));
-        
+
         Check.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Calibrate, () =>
         {
             currentNormPoint = calibPointsADCS[calibNum];
@@ -317,7 +310,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 else
                 {
                     unsuccessfulCount++;
-                   
+
                     if (unsuccessfulCount == 1)
                         Debug.LogWarning("The CollectData() calibration method was unsuccessful. This can happen the first time. Will try again next frame.");
                     else if (unsuccessfulCount > 1)
@@ -351,7 +344,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 CollectSamplePoints();
                 CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
-                
+
                 if (ResultContainer.transform.childCount > 0)
                 {
                     ResultsString.Append($"\n\nCalibration Results"
@@ -368,19 +361,19 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            if (Session.SyncBoxController != null )
+            if (Session.SyncBoxController != null)
             {
                 if (string.Equals(CurrentTaskDef.RewardStructure, "perpoint", StringComparison.OrdinalIgnoreCase) ||
                     (string.Equals(CurrentTaskDef.RewardStructure, "oncompletion", StringComparison.OrdinalIgnoreCase) &&
-                    calibNum == calibPointsADCS.Length - 1)){                    
-                    
+                    calibNum == calibPointsADCS.Length - 1)) {
+
                     // Provide reward during the Confirm state based off values in the TrialDef and 
                     // RewardStructure in the TaskDef
                     Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
                     CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
-           }
+            }
         });
 
         Confirm.AddUpdateMethod(() =>
@@ -396,7 +389,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             else if (InputBroker.GetKeyDown(KeyCode.Minus))
             {
                 // User selected to recalibrate current point, sample data is discarded and return to Blink
-                if(!Session.SessionDef.SpoofGazeWithMouse)
+                if (!Session.SessionDef.SpoofGazeWithMouse)
                     Session.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(currentNormPoint);
                 recalibPoint = true;
                 RecalibCount[calibNum] += 1;
@@ -405,12 +398,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         // Dictates the subsequent state given the outcome of the User validation
         Confirm.SpecifyTermination(() => recalibPoint, Fixate);
-        
-        Confirm.SpecifyTermination(() => pointFinished, Fixate, ()=> { calibNum++; });
 
-        Confirm.SpecifyTermination(()=> calibrationFinished, ITI);
-        
-        Confirm.AddTimer(() => assessTime, Delay, ()=>
+        Confirm.SpecifyTermination(() => pointFinished, Fixate, () => { calibNum++; });
+
+        Confirm.SpecifyTermination(() => calibrationFinished, ITI);
+
+        Confirm.AddTimer(() => assessTime, Delay, () =>
         {
             DelayDuration = 0;
 
@@ -454,7 +447,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 CollectSamplePoints();
         });
 
-        ITI.SpecifyTermination(() => true, FinishTrial, ()=>
+        ITI.SpecifyTermination(() => true, FinishTrial, () =>
         {
             // Destroy remaining results on the experimenter display at the end of the trial
             DestroyChildren(ResultContainer);
@@ -474,11 +467,25 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         TurnOffCalibration();
     }
 
+    private void TurnOnCalibration()
+    {
+        if (!Session.SessionDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController.isCalibrating)
+        {
+            Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
+            Session.TobiiEyeTrackerController.isCalibrating = true;
+        }
+    }
+
     private void TurnOffCalibration()
     {
-        if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
+       if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
+        {
+            Session.TobiiEyeTrackerController.isCalibrating = false;
             Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
+
+        }
     }
+    
 
     public override void DefineCustomTrialDefSelection()
     {
@@ -702,7 +709,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        TurnOffCalibration(); //Adding again in FinishTrial in case hotkey used and skips ITI straight to FinishTrial State
+        //TurnOffCalibration(); //Adding again in FinishTrial in case hotkey used and skips ITI straight to FinishTrial State
 
         if (GameObject.Find("CalibrationCircle") != null)
             CalibCircle.CircleGO.SetActive(false);

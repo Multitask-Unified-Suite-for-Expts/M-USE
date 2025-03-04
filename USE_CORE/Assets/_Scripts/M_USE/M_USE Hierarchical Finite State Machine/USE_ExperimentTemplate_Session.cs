@@ -388,6 +388,7 @@ namespace USE_ExperimentTemplate_Session
                 {
                     if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
                     {
+                        Session.TobiiEyeTrackerController.isCalibrating = false;
                         Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
                     }
                 }

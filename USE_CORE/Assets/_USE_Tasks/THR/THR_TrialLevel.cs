@@ -187,6 +187,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BackdropGO.SetActive(true);
             AvoidObjectStartTime = Time.time;
             AvoidObjectTimeoutTime = 0;
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         AvoidObject.AddUpdateMethod(() =>
         {
@@ -228,6 +231,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 BackdropTouches = 0;
                 BackdropTouchTime = 0;
             }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
+            }
+
         });
         AvoidObject.SpecifyTermination(() => ((Time.time - AvoidObjectStartTime) > CurrentTrial.AvoidObjectDuration) && AvoidObjectTimeoutTime == 0, SelectObject);
 
@@ -247,6 +259,9 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             BackdropTouchTime = 0;
             BackdropTouches = 0;
             HeldDuration = 0;
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         SelectObject.AddUpdateMethod(() =>
         {
@@ -351,6 +366,15 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 BackdropTouches = 0;
                 BackdropTouchTime = 0;
             }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
+            }
+
         });
         SelectObject.SpecifyTermination(() => (Time.time - SelectObjectStartTime > CurrentTrial.SelectObjectDuration) && !InputBroker.GetMouseButton(0) && !MainObjectReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating, AvoidObject); //Go back to white square if bluesquare time lapses (and they aren't already holding down)
         SelectObject.SpecifyTermination(() => (MainObjectReleased && !USE_Backdrop.IsGrating && !USE_Square.IsGrating) || MovedOutside || HeldTooLong || HeldTooShort || TimeRanOut || GiveTouchReward, Feedback); //If rewarding touch and they touched, or click the square and release, or run out of time. 
@@ -532,7 +556,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Reward Protocol: " + (CurrentTrial.RewardTouch ? "Touch" : "Release") +
                               "\nRandom Position: " + ((CurrentTrial.RandomObjectPosition ? "True" : "False")) +
-                              "\nRandom Size: " + ((CurrentTrial.RandomObjectSize ? "True" : "False"));
+                              "\nRandom Size: " + ((CurrentTrial.RandomObjectSize ? "True" : "False")) +
+                              "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
+
     }
 
     protected override bool CheckBlockEnd()

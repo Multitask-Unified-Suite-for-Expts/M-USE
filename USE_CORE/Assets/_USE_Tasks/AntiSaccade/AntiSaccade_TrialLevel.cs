@@ -34,9 +34,8 @@ using AntiSaccade_Namespace;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using System.Linq;
-using Newtonsoft.Json;
-using System.Globalization;
 using static SelectionTracking.SelectionTracker;
+
 
 public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 {
@@ -263,6 +262,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             if (ShotgunHandler.AllSelections.Count > 0)
                 ShotgunHandler.ClearSelections();
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -276,9 +278,11 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             }
 
             OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
             if(OngoingSelection != null)
             {
-
+                SetTrialSummaryString();
             }
 
         });
@@ -543,7 +547,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                              "\nNum Distractors: " + CurrentTrial.DistractorStimIndices.Length +
                              "\nDifficulty Level: " + difficultyLevel +
                              "\nDisplay Target Duration (sec): " + ChosenDisplayTargetDuration +
-                             "\nSpatial Cue Delay Duration (sec): " + ChosenSpatialCueDelayDuration;
+                             "\nSpatial Cue Delay Duration (sec): " + ChosenSpatialCueDelayDuration +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 
     private void LoadConfigUIVariables()

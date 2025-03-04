@@ -217,7 +217,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         // Wait for a click and provide feedback accordingly
         SearchDisplay.AddSpecificInitializationMethod(() =>
         {
-
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             
             choiceMade = false;
@@ -229,6 +228,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
+
+            //reset it so the duration is 0 on exp display even if had one last trial
+            OngoingSelection = null;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
@@ -239,6 +241,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
                 if (selectedSD != null)
                     choiceMade = true;
+            }
+
+            OngoingSelection = ShotgunHandler.OngoingSelection;
+
+            //Update Exp Display with OngoingSelection Duration:
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString();
             }
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
@@ -516,7 +526,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                              "\n" +
                              "\nSearch Duration: " + SearchDuration +
                              "\n" + 
-                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue();
+                             "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
+                             "\n" +
+                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
+
     }
     private void CreateTextOnExperimenterDisplay()
     {

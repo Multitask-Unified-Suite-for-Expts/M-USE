@@ -314,7 +314,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
      
-        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Delay, () =>
+        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Confirm, () =>
         {
             // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
             if (!Session.SessionDef.SpoofGazeWithMouse)
@@ -323,13 +323,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             }
 
             currentCalibrationPointFinished = false;
-            StateAfterDelay = Confirm;
+            // StateAfterDelay = Confirm;
 
-            // Assign a 3 Second delay following calibration to allow the sample to be properly recorded
-            if (!Session.SessionDef.SpoofGazeWithMouse)
-                DelayDuration = 3f;
-            else
-                DelayDuration = 0;
+            // // Assign a 3 Second delay following calibration to allow the sample to be properly recorded
+            // if (!Session.SessionDef.SpoofGazeWithMouse)
+            //     DelayDuration = 3f;
+            // else
+            //     DelayDuration = 0;
 
             InfoString.Clear();
         });
@@ -449,21 +449,27 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        ITI.AddSpecificInitializationMethod(() =>
-        {
-            // Leave calibration mode once the user has confirmed all points
-            // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
-            if (!Session.SessionDef.SpoofGazeWithMouse)
-            {
-                CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
-                CollectSamplePoints();
-            }
-        });
+        // ITI.AddSpecificInitializationMethod(() =>
+        // {
+        //     // Leave calibration mode once the user has confirmed all points
+        //     // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
+        //     if (!Session.SessionDef.SpoofGazeWithMouse)
+        //     {
+        //         CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply();
+        //         CollectSamplePoints();
+        //     }
+        // });
 
         ITI.SpecifyTermination(() => true, FinishTrial, ()=>
         {
             // Destroy remaining results on the experimenter display at the end of the trial
             DestroyChildren(ResultContainer);
+            
+            if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
+            {
+                    Session.TobiiEyeTrackerController.isCalibrating = false;
+                    Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
+            }
         });
 
         DefineTrialData();

@@ -94,10 +94,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private IEyeTracker IEyeTracker;
     private EyeTracker EyeTracker;
 
-    // USE_DisplayManagement Variables
-    private DisplayCoordinate DisplayCoordinate;
-    private ScreenDetails ScreenDetails;
-
 
     // Gaze Data Samples
     private List<Vector2> LeftSamples = new List<Vector2>();
@@ -351,12 +347,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                                 + "\nPress - to recalibrate the point");
 
                 // Plots sample points to the Result Container, if they exist for the current calibration point
-                if(!Session.SessionDef.SpoofGazeWithMouse){
-                    CollectSamplePoints();
-                    CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
-                }
+                CollectSamplePoints();
+                CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
+                
                 if (ResultContainer.transform.childCount > 0)
                 {
                     ResultsString.Append($"\n\nCalibration Results"
@@ -463,8 +458,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             // Destroy remaining results on the experimenter display at the end of the trial
             DestroyChildren(ResultContainer);
-
-            TurnOffCalibration();
         });
 
         DefineTrialData();
@@ -475,10 +468,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
-    private void LogUnsuccessful()
-    {
-
-    }
 
     private void OnApplicationQuit()
     {

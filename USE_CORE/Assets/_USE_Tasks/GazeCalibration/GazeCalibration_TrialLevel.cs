@@ -77,7 +77,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private bool pointFinished;
     private bool recalibPoint;
     private NormalizedPoint2D currentNormPoint;
-    private float assessTime = 5f;
     private Vector2? latestGazePosition;
     private bool keyboardOverride = false;
 
@@ -274,9 +273,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        //Set keyboardOverride to true if they press space
-        Check.AddUpdateMethod(() => keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space));
+        Check.AddUpdateMethod(() =>
+        {
+            //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
+            ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
 
+            //Set keyboardOverride to true if they press space
+            keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
+        });
         Check.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Calibrate, () =>
         {
             currentNormPoint = calibPointsADCS[calibNum];
@@ -289,9 +293,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Calibrate.AddSpecificInitializationMethod(() =>
         {
             keyboardOverride = false;
-            CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
+
             InfoString.Append("<b>\n\nInfo</b>"
                                 + $"\nCalibration Beginning at <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
+
             SetTrialSummaryString();
 
             unsuccessfulCount = 0;
@@ -299,6 +304,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Calibrate.AddUpdateMethod(() =>
         {
+            //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
+            ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
+
             if (!Session.SessionDef.SpoofGazeWithMouse)
             {
                 CalibrationStatus status = Session.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(currentNormPoint);
@@ -322,6 +330,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Confirm, () =>
         {
+            CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
+
             currentCalibrationPointFinished = false;
 
             InfoString.Clear();
@@ -331,7 +341,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Confirm.AddSpecificInitializationMethod(() =>
         {
-            CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.white;
             if (!Session.SessionDef.SpoofGazeWithMouse)
             {
                 InfoString.Append("\n\nInfo"
@@ -403,7 +412,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Confirm.SpecifyTermination(() => calibrationFinished, ITI);
 
-        Confirm.AddTimer(() => assessTime, Delay, () =>
+        Confirm.AddTimer(() => CurrentTrialDef.ConfirmDuration, Delay, () =>
         {
             DelayDuration = 0;
 
@@ -496,7 +505,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         Vector3 startingScale = gameObject.transform.localScale;
         Vector3 finalScale = new Vector3(targetSize, targetSize, targetSize);
-        gameObject.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.red;
         gameObject.SetActive(true);
         gameObject.transform.localScale = Vector3.Lerp(startingScale, finalScale, elapsedShrinkDuration / shrinkDuration);
         elapsedShrinkDuration += Time.deltaTime;

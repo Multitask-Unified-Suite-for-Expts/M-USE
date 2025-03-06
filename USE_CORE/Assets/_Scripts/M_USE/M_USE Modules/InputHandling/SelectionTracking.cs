@@ -191,7 +191,7 @@ namespace SelectionTracking
             gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
             gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
-            gazeShotgun.MaxPixelDisplacement = 70;
+            //gazeShotgun.MaxPixelDisplacement = 70;
             gazeShotgun.MinDuration = 0.7f;
             DefaultSelectionHandlers.Add("GazeShotgun", gazeShotgun);
             

@@ -58,7 +58,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
         var trackers = EyeTrackingOperations.FindAllEyeTrackers();
         if (trackers.Count == 0)
         {
-            Debug.LogError("No eyetrackers detected.");
+            Debug.LogWarning("No eyetrackers detected.");
             return;
         }
 

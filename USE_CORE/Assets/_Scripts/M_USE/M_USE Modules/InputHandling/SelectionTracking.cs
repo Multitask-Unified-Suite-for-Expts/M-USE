@@ -164,9 +164,10 @@ namespace SelectionTracking
 
             gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
 
-            gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
+           // gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
 
             gazeSelection.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeSelection.DefaultConditions("NotSelectablePeriod"));
+            //gazeSelection.UpdateErrorTriggers.Add("InvalidGazePosition", gazeSelection.DefaultConditions("InvalidGazePosition"));
 
             gazeSelection.TerminationConditions.Add(gazeSelection.DefaultConditions("DurationSufficient"));
 
@@ -183,8 +184,8 @@ namespace SelectionTracking
             gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
 
             gazeShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeShotgun.DefaultConditions("NotSelectablePeriod"));
-
-            gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
+            //gazeShotgun.UpdateErrorTriggers.Add("InvalidGazePosition", gazeShotgun.DefaultConditions("InvalidGazePosition"));
+            //gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
 
             gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("DurationSufficient"));
 

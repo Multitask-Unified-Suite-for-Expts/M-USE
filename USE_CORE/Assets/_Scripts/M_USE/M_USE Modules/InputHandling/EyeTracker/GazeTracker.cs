@@ -64,6 +64,11 @@ public class GazeTracker : InputTracker
             SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
 
         }
+        else
+        {
+            ShotgunModalTarget = null;
+            SimpleRaycastTarget = null;
+        }
     }
     public override void CustomUpdate()
     {

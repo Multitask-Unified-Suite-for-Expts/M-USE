@@ -197,6 +197,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.MinDuration = minObjectTouchDuration.value;
             ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+
+            Input.ResetInputAxes(); //reset input in case they holding down
         });
         InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
 

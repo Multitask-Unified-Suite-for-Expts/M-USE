@@ -23,22 +23,19 @@ SOFTWARE.
 */
 
 
-using EyeTrackerData_Namespace;
 using GazeCalibration_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Text;
 using Tobii.Research;
 using Tobii.Research.Unity;
-using UnityEditor;
 using UnityEngine;
 using USE_DisplayManagement;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_UI;
-using static Tobii.Research.Unity.CalibrationThread;
+
 
 public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 {
@@ -66,9 +63,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     // Blink Calibration Point Variables
     private float elapsedShrinkDuration;
-    private float blinkOnDuration = 0.2f;
-    private float blinkOffDuration = 0.1f;
-    private float blinkTimer = 0;
 
 
     // Calibration Assessment Variables
@@ -77,7 +71,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private bool pointFinished;
     private bool recalibPoint;
     private NormalizedPoint2D currentNormPoint;
-    private Vector2? latestGazePosition;
     private bool keyboardOverride = false;
 
     // Game Objects
@@ -92,9 +85,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public GameObject TrackBoxPrefab;
     private IEyeTracker IEyeTracker;
     private EyeTracker EyeTracker;
-
-    private DisplayCoordinate DisplayCoordinate;
-    private ScreenDetails ScreenDetails;
 
     // Gaze Data Samples
     private List<Vector2> LeftSamples = new List<Vector2>();
@@ -213,7 +203,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             // Initialize the Calibration Point at Max Scale
             InitializeCalibPoint();
-            blinkTimer = 0;
 
             // Reset variables relating to calibration completion
             currentCalibrationPointFinished = false;
@@ -238,8 +227,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             SetTrialSummaryString();
 
-            // Blinks the current calibration point until the acceptable calibration is met or keyboard override is triggered
-            // BlinkCalibrationPoint(CalibCircle.CircleGO);
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
 
@@ -576,22 +563,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
                 RecalibCount = new int[3];
                 break;
-        }
-    }
-
-    private void BlinkCalibrationPoint(GameObject go)
-    {
-        blinkTimer += Time.deltaTime;
-
-        if (go.activeSelf && (blinkTimer > blinkOnDuration))
-        {
-            blinkTimer = 0;
-            go.SetActive(false);
-        }
-        else if (!go.activeSelf && (blinkTimer > blinkOffDuration))
-        {
-            blinkTimer = 0;
-            go.SetActive(true);
         }
     }
 

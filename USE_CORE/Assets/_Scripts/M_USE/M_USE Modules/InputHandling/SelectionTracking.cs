@@ -164,15 +164,16 @@ namespace SelectionTracking
 
             gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
 
-            gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
+           // gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
 
             gazeSelection.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeSelection.DefaultConditions("NotSelectablePeriod"));
+            //gazeSelection.UpdateErrorTriggers.Add("InvalidGazePosition", gazeSelection.DefaultConditions("InvalidGazePosition"));
 
             gazeSelection.TerminationConditions.Add(gazeSelection.DefaultConditions("DurationSufficient"));
 
             gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
             gazeSelection.CurrentInputLocation = () => InputBroker.gazePosition;
-            gazeSelection.MaxPixelDisplacement = 70;
+            // gazeSelection.MaxPixelDisplacement = 70;
             gazeSelection.MinDuration = 0.7f;
             DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
 
@@ -183,15 +184,15 @@ namespace SelectionTracking
             gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
 
             gazeShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeShotgun.DefaultConditions("NotSelectablePeriod"));
-
-            gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
+            //gazeShotgun.UpdateErrorTriggers.Add("InvalidGazePosition", gazeShotgun.DefaultConditions("InvalidGazePosition"));
+            //gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
 
             gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("DurationSufficient"));
 
             gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
             gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
-            gazeShotgun.MaxPixelDisplacement = 70;
+            //gazeShotgun.MaxPixelDisplacement = 70;
             gazeShotgun.MinDuration = 0.7f;
             DefaultSelectionHandlers.Add("GazeShotgun", gazeShotgun);
             

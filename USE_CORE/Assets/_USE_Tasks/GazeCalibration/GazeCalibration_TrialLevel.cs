@@ -64,7 +64,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // Blink Calibration Point Variables
     private float elapsedShrinkDuration;
 
-
     // Calibration Assessment Variables
     [HideInInspector] public bool currentCalibrationPointFinished;
     [HideInInspector] public bool calibrationFinished;
@@ -237,6 +236,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Shrink.AddSpecificInitializationMethod(() =>
         {
+            originalScale = CalibCircle.CircleGO.transform.localScale;
             elapsedShrinkDuration = 0;
             InfoString.Append("<b>\n\nInfo</b>"
                                 + "\nThe calibration point is <b>shrinking</b>."
@@ -251,11 +251,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
         });
 
-        Shrink.SpecifyTermination(() => elapsedShrinkDuration > CurrentTrialDef.ShrinkDuration, Check, () =>
-        {
-            // Make sure that the Scale is set to the min scale
-            CalibCircle.SetCircleScale(CurrentTrialDef.MinCircleScale);
-        });
+        // Terminate the shrink state 2 frames early so that the object continues to shrink for Check and Calibrate
+        Shrink.SpecifyTermination(() => elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), Check);
 
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
 
@@ -333,6 +330,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Calibrate.SpecifyTermination(() => currentCalibrationPointFinished | keyboardOverride, Confirm, () =>
         {
+            // Make sure that the Scale is set to the min scale
+            CalibCircle.SetCircleScale(CurrentTrialDef.MinCircleScale);
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
 
             currentCalibrationPointFinished = false;
@@ -505,10 +504,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void ShrinkGameObject(GameObject gameObject, float targetSize, float shrinkDuration)
     {
-        Vector3 startingScale = gameObject.transform.localScale;
         Vector3 finalScale = new Vector3(targetSize, targetSize, targetSize);
         gameObject.SetActive(true);
-        gameObject.transform.localScale = Vector3.Lerp(startingScale, finalScale, elapsedShrinkDuration / shrinkDuration);
+
+        float progress = elapsedShrinkDuration / shrinkDuration;
+        gameObject.transform.localScale = Vector3.Lerp(originalScale, finalScale, progress);
+
         elapsedShrinkDuration += Time.deltaTime;
     }
 

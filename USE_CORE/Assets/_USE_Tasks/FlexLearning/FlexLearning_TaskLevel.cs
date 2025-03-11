@@ -109,8 +109,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
         if(flTL.TrialCount_InTask != 0)
-            data["Accuracy"] = decimal.Divide(NumCorrect_InTask, (flTL.TrialCount_InTask));
-        if(SearchDurations_InTask.Count > 0)
+            data["Accuracy"] = String.Format("{0:0.0}" + "%", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask) * 100);
+        if (SearchDurations_InTask.Count > 0)
             data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
 
         data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;

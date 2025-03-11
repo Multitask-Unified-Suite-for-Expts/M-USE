@@ -378,11 +378,10 @@ namespace USE_ExperimentTemplate_Session
             {
                 Session.GazeCalibrationController.WriteSerialAndGazeDataThenReassignDataPath("GazeCalibrationToSession");
 
-                StartCoroutine(SessionData.AppendDataToBuffer());
-                StartCoroutine(SessionData.AppendDataToFile());
+                //StartCoroutine(SessionData.AppendDataToBuffer());
+                //StartCoroutine(SessionData.AppendDataToFile());
                 
 
-                
                 // Check and exit calibration mode for Tobii eye tracker
                 if(!Session.SessionDef.SpoofGazeWithMouse)
                 {
@@ -868,8 +867,8 @@ namespace USE_ExperimentTemplate_Session
                 
                 StartCoroutine(SummaryData.AddTaskRunData(CurrentTask.ConfigFolderName, CurrentTask, CurrentTask.GetTaskSummaryData()));
 
-                StartCoroutine(SessionData.AppendDataToBuffer());
-                StartCoroutine(SessionData.AppendDataToFile());
+                //StartCoroutine(SessionData.AppendDataToBuffer());
+                //StartCoroutine(SessionData.AppendDataToFile());
 
                 StartCoroutine(WriteSerialAndGazeDataAndSwitchToTaskSelectionDataPaths());
 

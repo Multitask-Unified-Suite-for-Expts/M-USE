@@ -273,6 +273,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if(Session.SessionDef.IsHuman)
             {
+                if (CurrentTrial.TokenBarCapacity < 1)
+                    Debug.LogError("TRYING TO ENABLE TOKEN BAR BUT TokenBarCapacity IN TRIAL CONFIG IS EMPTY OR ZERO!");
+
                 TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
                 TokenFBController.enabled = true;
             }

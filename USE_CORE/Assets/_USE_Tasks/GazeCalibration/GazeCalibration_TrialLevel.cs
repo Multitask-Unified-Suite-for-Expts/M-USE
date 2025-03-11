@@ -801,12 +801,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = CurrentProgressString.ToString()
+        TrialSummaryString = "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s")
+                                + CurrentProgressString.ToString()
                                 + ResultsString.ToString()
-                                + InfoString.ToString();
-
-        if (OngoingSelection != null)
-            TrialSummaryString += ("OngoingSelectionDuration: " + OngoingSelection.Duration.Value.ToString("F3") + " s");        
+                                + InfoString.ToString();   
     }
 
     private void AssignGazeCalibrationCameraToTrackboxCanvas()

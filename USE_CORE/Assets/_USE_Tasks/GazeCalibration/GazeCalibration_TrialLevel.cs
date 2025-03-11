@@ -61,7 +61,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private Vector2 currentScreenPixelTarget = new Vector2(float.NaN, float.NaN);
     private int calibNum;
 
-    // Blink Calibration Point Variables
+    // Shrink Calibration Point Variables
+    private Vector3 originalScale;
     private float elapsedShrinkDuration;
 
     // Calibration Assessment Variables

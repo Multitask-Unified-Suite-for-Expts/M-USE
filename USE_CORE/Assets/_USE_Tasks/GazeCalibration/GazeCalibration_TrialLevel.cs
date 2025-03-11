@@ -448,9 +448,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Confirm.AddUniversalLateTerminationMethod(() =>
         {
-            //reset it so not showing on exp display
-            OngoingSelection = null;
-
             // Set the calibration point to inactive at the end of confirming
             CalibCircle.CircleGO.SetActive(false);
             DestroyChildren(ResultContainer);

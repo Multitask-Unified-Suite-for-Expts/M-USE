@@ -78,7 +78,7 @@ namespace GazeCalibration_Namespace
         public float MaxCircleScale = 0.075f;
         public float MinCircleScale = 0.015f;
         public float ShrinkDuration = 1.5f;
-        public float ConfirmDuration = 4f;
+        public float ConfirmDuration = 1.5f;
     }
 
     public class GazeCalibration_StimDef : StimDef

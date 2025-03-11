@@ -111,6 +111,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private StringBuilder CurrentProgressString = new StringBuilder();
     private StringBuilder ResultsString = new StringBuilder();
 
+
+    private float TimeInCalibrationRange = 0f;
+
+
     public override void DefineControlLevel()
     {
         State Init = new State("Init");
@@ -217,8 +221,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             keyboardOverride = false;
 
             CurrentProgressString.Clear();
-            CurrentProgressString.Append($"<b>Ongoing Selection Duration:  {calibNum + 1}</b> (of {numCalibPoints})"
-                                    + $"<b>Calib Point #:  {calibNum + 1}</b> (of {numCalibPoints})"
+            CurrentProgressString.Append($"<b>Calib Point #:  {calibNum + 1}</b> (of {numCalibPoints})"
                                    + $"\n<b>Calib Position:</b> ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
                                    + $"\n<b>Recalib Count:</b> {RecalibCount[calibNum]}");
             InfoString.Append("<b>\n\nInfo</b>"
@@ -227,13 +230,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            //reset it so the duration is 0 on exp display even if had one last trial
-            OngoingSelection = null;
+            //Reset before fixation
+            TimeInCalibrationRange = 0;
+
         });
 
         Fixate.AddUpdateMethod(() =>
         {
-            HandleOngoingSelection();
+            SetTrialSummaryString();
 
             // Blinks the current calibration point until the acceptable calibration is met or keyboard override is triggered
             // BlinkCalibrationPoint(CalibCircle.CircleGO);
@@ -257,7 +261,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Shrink.AddUpdateMethod(() =>
         {
-            HandleOngoingSelection();
+            SetTrialSummaryString();
 
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
         });
@@ -282,7 +286,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Check.AddUpdateMethod(() =>
         {
-            HandleOngoingSelection();
+            SetTrialSummaryString();
 
             //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
@@ -313,7 +317,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Calibrate.AddUpdateMethod(() =>
         {
-            HandleOngoingSelection();
+            SetTrialSummaryString();
 
             //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
@@ -486,15 +490,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
-    private void HandleOngoingSelection()
-    {
-        OngoingSelection = SelectionHandler.OngoingSelection;
-
-        if (OngoingSelection != null)
-        {
-            SetTrialSummaryString();
-        }
-    }
     private void OnApplicationQuit()
     {
         TurnOffCalibration();
@@ -702,7 +697,18 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private bool InCalibrationRange()
     {
-        return Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget) < acceptableCalibrationDistance;
+        bool inRange = Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget) < acceptableCalibrationDistance;
+
+        if(inRange)
+        {
+            TimeInCalibrationRange += Time.deltaTime;
+            return true;
+        }
+        else
+        {
+            TimeInCalibrationRange = 0;
+            return false;
+        }
     }
 
     private void CreateResultContainer()
@@ -804,13 +810,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s")
-                                + "\n"
-                                + CurrentProgressString.ToString()
-                                + "\n"
-                                + ResultsString.ToString()
-                                + "\n"
-                                + InfoString.ToString();   
+        TrialSummaryString = "TimeInCalibRange" + TimeInCalibrationRange.ToString("F2") + " s"
+                             + "\n"
+                             + "\n"
+                             + CurrentProgressString.ToString()
+                             + "\n"
+                             + ResultsString.ToString()
+                             + "\n"
+                             + InfoString.ToString();
     }
 
     private void AssignGazeCalibrationCameraToTrackboxCanvas()

@@ -72,7 +72,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private bool CorrectSelection;
     FlexLearning_StimDef selectedSD = null;
     private bool choiceMade = false;
-    private SelectionTracking.SelectionTracker.USE_Selection lastSelection = null;
+    private USE_Selection lastSelection = null;
     
     
     //Player View Variables
@@ -235,20 +235,20 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            var ongoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = ShotgunHandler.OngoingSelection;
 
-            if(ongoingSelection != null)
+            if (OngoingSelection != null)
             {
                 SetTrialSummaryString();
 
                 if (!string.IsNullOrEmpty(StimulationType))
                 {
-                    if (ongoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !ongoingSelection.InitialFixationDurationPassed)
+                    if (OngoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
                     {
-                        ongoingSelection.InitialFixationDurationPassed = true;
+                        OngoingSelection.InitialFixationDurationPassed = true;
                         Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
 
-                        GameObject GoSelected = ongoingSelection.SelectedGameObject;
+                        GameObject GoSelected = OngoingSelection.SelectedGameObject;
                         var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
 
                         if (SdSelected != null)
@@ -268,7 +268,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if(ShotgunHandler.SuccessfulSelections.Count > 0)
+            if (ShotgunHandler.SuccessfulSelections.Count > 0)
             {
                 lastSelection = ShotgunHandler.LastSuccessfulSelection;
                 selectedGO = lastSelection.SelectedGameObject;
@@ -280,6 +280,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.SendCodeThisFrame(selectedSD.IsTarget ? "CorrectResponse" : "IncorrectResponse");
                 }
             }
+
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
@@ -630,7 +631,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
                              "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
-
 
         if (TrialStimulationCode > 0)
         {

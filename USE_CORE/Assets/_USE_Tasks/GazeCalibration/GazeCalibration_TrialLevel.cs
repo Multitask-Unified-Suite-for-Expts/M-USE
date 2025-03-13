@@ -777,8 +777,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void SetTrialSummaryString()
     {
-        TrialSummaryString = "TimeInCalibRange" + TimeInCalibrationRange.ToString("F2") + " s"
-                             + "\n"
+        TrialSummaryString = "TimeInCalibRange: " + TimeInCalibrationRange.ToString("F2") + " s"
                              + "\n"
                              + CurrentProgressString.ToString()
                              + "\n"

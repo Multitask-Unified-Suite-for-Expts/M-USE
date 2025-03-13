@@ -9,7 +9,7 @@ using UnityEngine.UI;
 using System.IO;
 using TMPro;
 using System;
-
+using static SelectionTracking.SelectionTracker;
 
 public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 {
@@ -123,7 +123,13 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, PlayerChoice);
+        SelectionHandler ShotgunHandler;
+
+        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, PlayerChoice);
+        else
+            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, PlayerChoice);
+
         TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 20, AV_CanvasGO, false);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------

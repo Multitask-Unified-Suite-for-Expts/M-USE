@@ -6395,7 +6395,7 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 1348229186436093604}
   m_TextViewport: {fileID: 8827579578104320026}
-  m_TextComponent: {fileID: 8069123658179240416}
+  m_TextComponent: {fileID: 0}
   m_Placeholder: {fileID: 2248236962066903018}
   m_VerticalScrollbar: {fileID: 0}
   m_VerticalScrollbarEventHandler: {fileID: 0}

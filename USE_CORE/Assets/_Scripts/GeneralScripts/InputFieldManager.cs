@@ -25,6 +25,7 @@ SOFTWARE.
 
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class InputFieldManager : MonoBehaviour
 {
@@ -46,7 +47,15 @@ public class InputFieldManager : MonoBehaviour
 
     public void SaveInputValue() //Save current value when user changes it
     {
+        StartCoroutine(DelayedSave());
+        //PlayerPrefs.SetString(playerPrefKey, inputField.text);
+    }
+
+    private IEnumerator DelayedSave()
+    {
+        yield return new WaitForSeconds(0.1f); // Short delay to allow pasting to complete
         PlayerPrefs.SetString(playerPrefKey, inputField.text);
+        PlayerPrefs.Save();
     }
 
     private string GetDefaultValue() 

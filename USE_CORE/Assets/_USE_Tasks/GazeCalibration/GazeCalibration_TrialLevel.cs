@@ -472,26 +472,32 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private bool ShouldGiveReward()
     {
         if (CurrentTaskDef == null)
-            Debug.LogError("CURRENT TASK ISNULL AT START OF SHOULDGIVEREWARD() METHOD!");
-
-        string rewardStructure = CurrentTaskDef?.RewardStructure?.ToLower();
-
-        if (!string.IsNullOrEmpty(rewardStructure))
         {
-            if (rewardStructure == "perpoint"
-                || (rewardStructure == "oncompletion" && calibNum == calibPointsADCS.Length - 1))
-            {
-                Debug.LogWarning("STRING MATCHES! YAY! String: " + rewardStructure);
-                return true;
-            }
-            else
-                Debug.LogError("STRING DOES NOT EQUAL PERPOINT OR ONCOMPLETION! String = " + rewardStructure);
+            Debug.LogError("CURRENT TASK IS NULL AT START OF SHOULDGIVEREWARD() METHOD!");
+            return false;
         }
-        else
-            Debug.LogError("REWARD STRUCTURE STRING IS NULL OR EMPTY!");
 
+        string rewardStructure = CurrentTaskDef.RewardStructure?.ToLower();
+
+        if (string.IsNullOrEmpty(rewardStructure))
+        {
+            Debug.LogError("REWARD STRUCTURE STRING IS NULL OR EMPTY!");
+            return false;
+        }
+
+        bool isPerPoint = rewardStructure == "perpoint";
+        bool isOnCompletion = rewardStructure == "oncompletion" && calibNum == calibPointsADCS.Length - 1;
+
+        if (isPerPoint || isOnCompletion)
+        {
+            Debug.LogWarning($"REWARDSTRUCTURE STRING IS CORRECTLY EITHER PerPoint or OnCompletion!");
+            return true;
+        }
+
+        Debug.LogError($"STRING DOES NOT EQUAL PERPOINT OR ONCOMPLETION! String = {rewardStructure}");
         return false;
     }
+
 
     private void OnApplicationQuit()
     {

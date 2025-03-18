@@ -471,6 +471,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
     private bool ShouldGiveReward()
     {
+        if (CurrentTaskDef == null)
+            Debug.LogError("CURRENT TASK ISNULL AT START OF SHOULDGIVEREWARD() METHOD!");
+
         string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();
 
         if (!string.IsNullOrEmpty(rewardStructure))

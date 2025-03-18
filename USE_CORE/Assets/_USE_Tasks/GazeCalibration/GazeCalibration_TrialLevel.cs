@@ -376,15 +376,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             if (ShouldGiveReward())
             {
-                Debug.LogWarning("GOOD - SHOULD GIVE REWARD!");
-
                 Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
 
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
-            else
-                Debug.LogWarning("BAD --- NOT GIVING REWARD!!!");
+
         });
 
         Confirm.AddUpdateMethod(() =>
@@ -476,14 +473,19 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();
 
-        if (rewardStructure == "perpoint"
-            || (rewardStructure == "oncompletion" && calibNum == calibPointsADCS.Length - 1))
+        if (!string.IsNullOrEmpty(rewardStructure))
         {
-            Debug.LogWarning("STRING MATCHES! YAY! String: " + rewardStructure);
-            return true;
+            if (rewardStructure == "perpoint"
+                || (rewardStructure == "oncompletion" && calibNum == calibPointsADCS.Length - 1))
+            {
+                Debug.LogWarning("STRING MATCHES! YAY! String: " + rewardStructure);
+                return true;
+            }
+            else
+                Debug.LogWarning("STRING DOES NOT EQUAL PERPOINT OR ONCOMPLETION! String = " + rewardStructure);
         }
-
-        Debug.LogWarning("BAD - FAILED - NOT GOING TO GIVE REWARD!! String used was: " + rewardStructure);
+        else
+            Debug.LogWarning("REWARD STRUCTURE STRING IS NULL OR EMPTY!");
 
         return false;
     }

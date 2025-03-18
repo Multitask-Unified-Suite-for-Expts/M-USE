@@ -373,23 +373,18 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            if (Session.SyncBoxController != null)
+
+            if (ShouldGiveReward())
             {
-                if (string.Equals(CurrentTaskDef.RewardStructure, "perpoint", StringComparison.OrdinalIgnoreCase) ||
-                    (string.Equals(CurrentTaskDef.RewardStructure, "oncompletion", StringComparison.OrdinalIgnoreCase) && calibNum == calibPointsADCS.Length - 1))
-                {
-                    Debug.LogWarning("GOOD ------ String is PerPoint or OnCompletion:");
+                Debug.LogWarning("GOOD - SHOULD GIVE REWARD!");
 
-                    Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
 
-                    CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-                    CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
-                }
-                else
-                    Debug.LogWarning("BAD ------ STRING IS NOT PerPoint OR OnCompletion FOR GAZE Reward!!!!!!!");
+                CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
+                CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
             else
-                Debug.LogWarning("SYNCBOX IS NULL!!!!!!!!!!");
+                Debug.LogWarning("BAD --- NOT GIVING REWARD!!!");
         });
 
         Confirm.AddUpdateMethod(() =>
@@ -477,6 +472,22 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
+    private bool ShouldGiveReward()
+    {
+        string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();
+
+        if (rewardStructure == "perpoint"
+            || (rewardStructure == "oncompletion" && calibNum == calibPointsADCS.Length - 1))
+        {
+            Debug.LogWarning("STRING MATCHES! YAY! String: " + rewardStructure);
+            return true;
+        }
+
+        Debug.LogWarning("BAD - FAILED - NOT GOING TO GIVE REWARD!! String used was: " + rewardStructure);
+
+        return false;
+    }
+
     private void OnApplicationQuit()
     {
         TurnOffCalibration();

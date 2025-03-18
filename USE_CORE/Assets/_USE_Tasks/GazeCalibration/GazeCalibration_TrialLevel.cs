@@ -474,7 +474,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (CurrentTaskDef == null)
             Debug.LogError("CURRENT TASK ISNULL AT START OF SHOULDGIVEREWARD() METHOD!");
 
-        string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();
+        string rewardStructure = CurrentTaskDef?.RewardStructure?.ToLower();
 
         if (!string.IsNullOrEmpty(rewardStructure))
         {
@@ -485,10 +485,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 return true;
             }
             else
-                Debug.LogWarning("STRING DOES NOT EQUAL PERPOINT OR ONCOMPLETION! String = " + rewardStructure);
+                Debug.LogError("STRING DOES NOT EQUAL PERPOINT OR ONCOMPLETION! String = " + rewardStructure);
         }
         else
-            Debug.LogWarning("REWARD STRUCTURE STRING IS NULL OR EMPTY!");
+            Debug.LogError("REWARD STRUCTURE STRING IS NULL OR EMPTY!");
 
         return false;
     }

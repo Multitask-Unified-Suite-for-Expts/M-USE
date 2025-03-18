@@ -376,16 +376,20 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (Session.SyncBoxController != null)
             {
                 if (string.Equals(CurrentTaskDef.RewardStructure, "perpoint", StringComparison.OrdinalIgnoreCase) ||
-                    (string.Equals(CurrentTaskDef.RewardStructure, "oncompletion", StringComparison.OrdinalIgnoreCase) &&
-                    calibNum == calibPointsADCS.Length - 1)) {
+                    (string.Equals(CurrentTaskDef.RewardStructure, "oncompletion", StringComparison.OrdinalIgnoreCase) && calibNum == calibPointsADCS.Length - 1))
+                {
+                    Debug.LogWarning("GOOD ------ String is PerPoint or OnCompletion:");
 
-                    // Provide reward during the Confirm state based off values in the TrialDef and 
-                    // RewardStructure in the TaskDef
                     Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+
                     CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                     CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
                 }
+                else
+                    Debug.LogWarning("BAD ------ STRING IS NOT PerPoint OR OnCompletion FOR GAZE Reward!!!!!!!");
             }
+            else
+                Debug.LogWarning("SYNCBOX IS NULL!!!!!!!!!!");
         });
 
         Confirm.AddUpdateMethod(() =>

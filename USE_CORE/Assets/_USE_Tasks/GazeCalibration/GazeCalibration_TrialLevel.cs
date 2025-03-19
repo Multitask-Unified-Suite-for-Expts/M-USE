@@ -127,7 +127,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             GC_CanvasGO = GameObject.Find("GazeCalibration_Canvas");
 
-            TurnOnCalibration();
 
             if (Session.GazeCalibrationController.InTaskGazeCalibration)
                 TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask;
@@ -135,6 +134,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            TurnOnCalibration();
+
             AssignCalibPositions();
             if (!Session.SessionDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
@@ -471,17 +472,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
     private bool ShouldGiveReward()
     {
-        if (CurrentTaskDef == null)
-        {
-            Debug.LogError("CURRENT TASK IS NULL AT START OF SHOULDGIVEREWARD() METHOD!");
-            return false;
-        }
-
         string rewardStructure = CurrentTaskDef.RewardStructure?.ToLower();
 
         if (string.IsNullOrEmpty(rewardStructure))
         {
-            Debug.LogError("REWARD STRUCTURE STRING IS NULL OR EMPTY!");
+            Debug.LogError("REWARD STRUCTURE STRING IS NULL OR EMPTY! String = " + rewardStructure);
             return false;
         }
 

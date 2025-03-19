@@ -33,7 +33,7 @@ namespace GazeCalibration_Namespace
 {
     public class GazeCalibration_TaskDef : TaskDef
     {
-        public string RewardStructure;
+        public string RewardStructure = "PerPoint";
     }
 
     public class GazeCalibration_BlockDef : BlockDef

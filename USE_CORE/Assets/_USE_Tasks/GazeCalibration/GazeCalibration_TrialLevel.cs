@@ -506,13 +506,29 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void TurnOnCalibration()
     {
-        if (!Session.SessionDef.SpoofGazeWithMouse && !Session.TobiiEyeTrackerController.isCalibrating)
+        if(Session.TobiiEyeTrackerController == null)
         {
-            Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
-            Session.TobiiEyeTrackerController.isCalibrating = true;
+            Debug.LogError("SESSION OR TOBII EYE TRACKER IS NULL");
+            return;
+        }
+
+        if (Session.SessionDef.SpoofGazeWithMouse)
+            return;
+        
+        if (!Session.TobiiEyeTrackerController.isCalibrating)
+        {
+            if (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null)
+            {
+                Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
+                Session.TobiiEyeTrackerController.isCalibrating = true;
+            }
+            else
+            {
+                Debug.LogError("SCREEN BASED CALIBRATION IS NULL!");
+            }
         }
     }
-
+    
     private void TurnOffCalibration()
     {
        if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)

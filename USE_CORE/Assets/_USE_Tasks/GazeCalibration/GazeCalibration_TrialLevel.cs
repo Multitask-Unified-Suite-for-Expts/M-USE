@@ -134,11 +134,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            TurnOnCalibration();
-
             AssignCalibPositions();
+
             if (!Session.SessionDef.SpoofGazeWithMouse)
                 InitializeEyeTrackerSettings();
+
+            TurnOnCalibration();
 
             InfoString.Append("Info"
                                 + "\nPress Space to begin a 9 point calibration"

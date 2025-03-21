@@ -231,8 +231,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.UseStarfield)
                 Starfield.SetActive(true);
 
-            //Should add this to other tasks as well!
-            if (Session.SessionDef.MacMainDisplayBuild && !Application.isEditor) { }
+            if (Session.SessionDef.MacMainDisplayBuild && !Application.isEditor)
                 TokenFBController.AdjustTokenBarSizing(100);
 
             if(Session.SessionDef.IsHuman)
@@ -269,7 +268,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTask.MakeStimPopOut)
                 PopStimOut();
 
-            Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
 
             if(Session.SessionDef.IsHuman)
             {
@@ -278,6 +276,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                 TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
                 TokenFBController.enabled = true;
+
+                Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             }
             else
             {

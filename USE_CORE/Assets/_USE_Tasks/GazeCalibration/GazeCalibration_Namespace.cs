@@ -29,6 +29,7 @@ using UnityEngine;
 using USE_StimulusManagement;
 using USE_Def_Namespace;
 
+
 namespace GazeCalibration_Namespace
 {
     public class GazeCalibration_TaskDef : TaskDef

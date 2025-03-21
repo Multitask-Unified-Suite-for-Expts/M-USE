@@ -195,6 +195,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
+
             InfoString.Clear();
         });
 
@@ -752,8 +753,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup()
     {
-        //TurnOffCalibration(); //Adding again in FinishTrial in case hotkey used and skips ITI straight to FinishTrial State
-
         if (GameObject.Find("CalibrationCircle") != null)
             CalibCircle.CircleGO.SetActive(false);
         if(GameObject.Find("ResultContainer") != null)

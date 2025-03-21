@@ -85,12 +85,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // Block Data Variables
     [HideInInspector] public string ContextName = "";
     [HideInInspector] public int NumCorrect_InBlock;
-    [HideInInspector] public List<float?> SearchDurations_InBlock = new List<float?>();
     [HideInInspector] public int NumErrors_InBlock;
+    [HideInInspector] public List<float?> SearchDurations_InBlock = new List<float?>();
+    [HideInInspector] public int TrialsWithTokenGain_InBlock;
+
     [HideInInspector] public int NumTokenBarFull_InBlock;
     [HideInInspector] public int TotalTokensCollected_InBlock;
-    [HideInInspector] public decimal Accuracy_InBlock;
-   
+    [HideInInspector] public decimal ChoiceAccuracy_InBlock;
+    [HideInInspector] public decimal PercentRewarded_InBlock;
+
+
     // Trial Data Variables
     private int? SelectedStimIndex = null;
     private Vector3? SelectedStimLocation = null;
@@ -285,6 +289,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
             CorrectSelection = selectedSD.IsTarget;
+
             if (CorrectSelection)
             {       
                 NumCorrect_InBlock++;
@@ -304,7 +309,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 SelectedStimLocation = selectedSD.StimLocation;
             }
 
-            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
+            if(selectedSD.StimTokenRewardMag > 0)
+            {
+                TrialsWithTokenGain_InBlock++;
+                CurrentTaskLevel.TrialsWithTokenGain_InTask++;
+            }
+
+            ChoiceAccuracy_InBlock = decimal.Divide(NumCorrect_InBlock, TrialCount_InBlock + 1);
+            PercentRewarded_InBlock = decimal.Divide(TrialsWithTokenGain_InBlock, TrialCount_InBlock + 1);
+
             UpdateExperimenterDisplaySummaryStrings();
         });
 
@@ -334,7 +347,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (selectedSD.StimTokenRewardMag > 0)
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
-            else 
+            else
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
 
             if(CurrentTrialDef.StimulationType != null)

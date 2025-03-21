@@ -27,17 +27,18 @@ using FlexLearning_Namespace;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using UnityEngine;
-using USE_Settings;
 using USE_ExperimentTemplate_Task;
+
 
 public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 {
    // [HideInInspector] public int NumRewardPulses_InTask = 0;
     [HideInInspector] public int NumTokenBarFull_InTask = 0;
     [HideInInspector] public int TotalTokensCollected_InTask = 0;
+    [HideInInspector] public int TrialsWithTokenGain_InTask = 0;
+
     [HideInInspector] public int NumCorrect_InTask = 0;
     [HideInInspector] public int NumErrors_InTask = 0;
     [HideInInspector] public List<float?> SearchDurations_InTask = new List<float?>();
@@ -95,9 +96,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         flTL.SearchDurations_InBlock.Clear();
         flTL.runningAcc.Clear();
-        flTL.Accuracy_InBlock = 0;
+        flTL.ChoiceAccuracy_InBlock = 0;
+        flTL.PercentRewarded_InBlock = 0;
         flTL.NumErrors_InBlock = 0;
         flTL.NumCorrect_InBlock = 0;
+        flTL.TrialsWithTokenGain_InBlock = 0;
         flTL.NumTokenBarFull_InBlock = 0;
         flTL.TotalTokensCollected_InBlock = 0;
         flTL.StimulationPulsesGiven_Block = 0;
@@ -106,15 +109,19 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskSummaryData()
     {
         OrderedDictionary data = base.GetTaskSummaryData();
+
         data["Token Bar Full"] = NumTokenBarFull_InTask;
         data["Total Tokens Collected"] = TotalTokensCollected_InTask;
-        if(flTL.TrialCount_InTask != 0)
-            data["Accuracy"] = String.Format("{0:0.0}" + "%", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask) * 100);
-        if (SearchDurations_InTask.Count > 0)
-            data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
-
         data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
 
+        if (flTL.TrialCount_InTask != 0)
+        {
+            data["Choice Accuracy"] = String.Format("{0:0.0}" + "%", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask) * 100);
+            data["Percent Rewarded"] = String.Format("{0:0.0}" + "%", decimal.Divide(TrialsWithTokenGain_InTask, flTL.TrialCount_InTask) * 100);
+        }
+
+        if (SearchDurations_InTask.Count > 0)
+            data["Avg Search Duration"] = CalculateAverageDuration(SearchDurations_InTask);
 
         return data;
     }
@@ -162,13 +169,15 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskResultsData();
 
         if (flTL.TrialCount_InTask != 0)
-            data["Accuracy"] = String.Format("{0:0.0}" + "%", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask) * 100);
+        {
+            data["Choice Accuracy"] = String.Format("{0:0.0}" + "%", decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask) * 100);
+            data["Percent Rewarded"] = String.Format("{0:0.0}" + "%", decimal.Divide(TrialsWithTokenGain_InTask, flTL.TrialCount_InTask) * 100);
+        }
 
         if (SearchDurations_InTask.Count > 0)
             data["Avg Search Duration"] = String.Format("{0:0.0} " + "Seconds", CalculateAverageDuration(SearchDurations_InTask));
 
         data["TokenBar Completions"] = NumTokenBarFull_InTask;
-
         data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
 
         return data;
@@ -178,7 +187,10 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("Max Trials in Block: " + MaxTrials_InBlock +
-                                      "\nAccuracy: " + String.Format("{0:0.000}", (float)flTL.Accuracy_InBlock) +
+                                      "\n" +
+                                      "\nChoice Accuracy: " + String.Format("{0:0}", (float)flTL.ChoiceAccuracy_InBlock) + "%" + 
+                                      "\n" +
+                                      "\nPercentage Rewarded: " + String.Format("{0:0}", (float)flTL.PercentRewarded_InBlock) + "%" +
                                       "\n" +
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", CalculateAverageDuration(flTL.SearchDurations_InBlock)) +
                                       "\n" +
@@ -203,10 +215,11 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
 
         if (flTL.TrialCount_InTask != 0)
         {
-            CurrentTaskSummaryString.Append($"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(flTL.TrialCount_InTask)),2))*100}%" + 
-                                                        $"\tAvg Search Duration: {avgSearchDuration}" +
-                                                        $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
-                                                        $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
+            CurrentTaskSummaryString.Append($"\nChoice Accuracy: {Math.Round(decimal.Divide(NumCorrect_InTask,flTL.TrialCount_InTask),2)*100}%" +
+                                            $"\nPercent Rewarded: {Math.Round(decimal.Divide(NumCorrect_InTask, flTL.TrialCount_InTask), 2) * 100}%" +
+                                            $"\tAvg Search Duration: {avgSearchDuration}" +
+                                            $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
+                                            $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
         }
     }
 
@@ -214,7 +227,8 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         BlockData.AddDatum("MinTrials", () => MinTrials_InBlock);
         BlockData.AddDatum("MaxTrials", () => MaxTrials_InBlock);
-        BlockData.AddDatum("BlockAccuracy", ()=> (float)flTL.Accuracy_InBlock);
+        BlockData.AddDatum("ChoiceAccuracy", ()=> (float)flTL.ChoiceAccuracy_InBlock);
+        BlockData.AddDatum("PercentageRewarded", () => (float)flTL.PercentRewarded_InBlock);
         BlockData.AddDatum("SearchDurations", ()=> String.Join(",", flTL.SearchDurations_InBlock));
         BlockData.AddDatum("NumTokenBarFilled", ()=> flTL.NumTokenBarFull_InBlock);
         BlockData.AddDatum("TotalTokensCollected", ()=> flTL.TotalTokensCollected_InBlock);

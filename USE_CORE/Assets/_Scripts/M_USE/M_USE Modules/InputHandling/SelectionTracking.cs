@@ -389,7 +389,6 @@ namespace SelectionTracking
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
                 List<GameObject> startButtonChildren = Session.GetStartButtonChildren();
-
                 if (startButtonChildren != null && LastSuccessfulSelection?.SelectedGameObject != null)
                 {
                     foreach (GameObject go in startButtonChildren)

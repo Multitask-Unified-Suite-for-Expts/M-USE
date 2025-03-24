@@ -1,63 +1,60 @@
 {
-	"varsNumber": {
-
-		"minObjectTouchDuration": {
-			"value": 0.001,
-			"min": 0.001,
-			"max": 5.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Min Object Touch Duration",
-			"hidden": false
-		},
-
-		"maxObjectTouchDuration": {
-			"value": 4.0,
-			"min": 0.1,
-			"max": 10.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Max Object Touch Duration",
-			"hidden": false
-		},
-		"itiDuration": {
-			"value": 0.1,
-			"min": 0.001,
-			"max": 10.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Iti Duration",
-			"hidden": false
-		},
-		"sliderSize": {
-			"value": 25.0,
-			"min": 1.0,
-			"max": 100.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Slider Size",
-			"hidden": false
-		},
-		"sliderUpdateDuration": {
-			"value": 0.15,
-			"min": 0.1,
-			"max": 10.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Slider Update Duration",
-			"hidden": false
-		},
-		"sliderFlashingDuration": {
-			"value": 0.15,
-			"min": 0.1,
-			"max": 20.0,
-			"precision": 1,
-			"isRange": true,
-			"name": "Slider Flashing Duration",
-			"hidden": false
-		}
-	},
-
-	"varsBoolean": {},
-	"varsString": {}
+  "varsNumber": {
+    "minObjectTouchDuration": {
+      "name": "Min Object Touch Duration",
+      "value": 0.01,
+      "min": 0.001,
+      "max": 1,
+      "precision": 1,
+      "isRange": 1,
+      "hidden": 0
+    },
+    "maxObjectTouchDuration": {
+      "name": "Max Object Touch Duration",
+      "value": 1,
+      "min": 0.01,
+      "max": 4,
+      "precision": 1,
+      "isRange": 1,
+      "hidden": 0
+    },
+    "itiDuration": {
+      "name": "Iti Duration",
+      "value": 0.1,
+      "min": 0.01,
+      "max": 10,
+      "precision": 0,
+      "isRange": 1,
+      "hidden": 0
+    },
+    "sliderSize": {
+      "name": "Slider Size",
+      "value": 25,
+      "min": 1,
+      "max": 100,
+      "precision": 1,
+      "isRange": 1,
+      "hidden": 0
+    },
+    "sliderUpdateDuration": {
+      "name": "Slider Update Duration",
+      "value": 0.15,
+      "min": 0.1,
+      "max": 10,
+      "precision": 1,
+      "isRange": 1,
+      "hidden": 0
+    },
+    "sliderFlashingDuration": {
+      "name": "Slider Flashing Duration",
+      "value": 0.15,
+      "min": 0.1,
+      "max": 20,
+      "precision": 1,
+      "isRange": 1,
+      "hidden": 0
+    }
+  },
+  "varsBoolean": {},
+  "varsString": {}
 }

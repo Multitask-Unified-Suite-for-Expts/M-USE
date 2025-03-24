@@ -1,2 +1,6 @@
 float	ExternalStimScale	5.25
+Vector3	StartButtonPosition	[0, 0, 0]
+float	StartButtonScale	1
+float	TouchFeedbackDuration	0.3
 List<string>	FeedbackControllers	["Audio", "Halo", "Slider"]
+bool	NeutralITI	false

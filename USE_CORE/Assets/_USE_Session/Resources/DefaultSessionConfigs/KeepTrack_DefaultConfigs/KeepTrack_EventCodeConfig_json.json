@@ -1,35 +1,34 @@
 {
-    "SuccessfulTargetSelection": {
-        "Value": 15076,
-        "Description": "Successfully selected a target object within the response window"
-    },
-    "UnsuccessfulTargetSelection": {
-        "Value": 15077,
-        "Description": "Selected a target not within the response window after an animation"
-    },
-    "TargetSelectionBeforeFirstAnim": {
-        "Value": 15078,
-        "Description": "Target selected before the first animation begins"
-    },
-    "AdditionalTargetSelection": {
-        "Value": 15079,
-        "Description": "Target selected after already being selected once during the current animation interval"
-    },
-    "TargetAnimWithoutSelection": {
-        "Value": 15080,
-        "Description": "Target animation occured without a selection"
-    },
-    "DistractorSelection": {
-        "Value": 15081,
-        "Description": "Selected a distractor object"
-    },
-    "DistractorRejection": {
-        "Value": 15082,
-        "Description": "Avoided selecting a distractor object"
-    },
-    "ObjectAnimationBegins": {
-        "Value": 15083,
-        "Description": "Object animation begins"
-    }
-
+  "SuccessfulTargetSelection": {
+    "Value": 15076,
+    "Description": "Successfully selected a target object within the response window"
+  },
+  "UnsuccessfulTargetSelection": {
+    "Value": 15077,
+    "Description": "Selected a target not within the response window after an animation"
+  },
+  "TargetSelectionBeforeFirstAnim": {
+    "Value": 15078,
+    "Description": "Target selected before the first animation begins"
+  },
+  "AdditionalTargetSelection": {
+    "Value": 15079,
+    "Description": "Target selected after already being selected once during the current animation interval"
+  },
+  "TargetAnimWithoutSelection": {
+    "Value": 15080,
+    "Description": "Target animation occured without a selection"
+  },
+  "DistractorSelection": {
+    "Value": 15081,
+    "Description": "Selected a distractor object"
+  },
+  "DistractorRejection": {
+    "Value": 15082,
+    "Description": "Avoided selecting a distractor object"
+  },
+  "ObjectAnimationBegins": {
+    "Value": 15083,
+    "Description": "Object animation begins"
+  }
 }

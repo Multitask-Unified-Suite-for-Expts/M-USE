@@ -63,12 +63,13 @@ public class SyncBoxController
 
     public void SendSonication()
     {
+        Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
+
         for (int i = 0; i < Session.SessionDef.StimulationNumPulses; i++)
         {
             serialPortController.AddToSend("RWB " + Session.SessionDef.StimulationPulseSize);
             Thread.Sleep(MsBetweenRewardPulses + Session.SessionDef.StimulationPulseSize / 10);
         }
-        Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
     }
 
 

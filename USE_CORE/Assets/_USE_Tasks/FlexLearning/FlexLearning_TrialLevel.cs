@@ -423,7 +423,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         yield return new WaitForSeconds(CurrentTrialDef.StimulationDelayDuration);
         Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
-        Session.SyncBoxController?.SendSonication();
+        StartCoroutine(Session.SyncBoxController?.SendSonication());
 
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
         CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
@@ -442,7 +442,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
                 numPulses = CurrentTrialDef.NumPulses;
 
-            Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrialDef.PulseSize);
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrialDef.PulseSize));
 
             CurrentTaskLevel.NumRewardPulses_InBlock += numPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += numPulses;

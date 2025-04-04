@@ -377,7 +377,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             if (ShouldGiveReward())
             {
-                Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+                StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
 
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;

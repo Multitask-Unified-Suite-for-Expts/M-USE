@@ -596,13 +596,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     {
         if (SideChoice == "Left")
         {
-            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft);
+            StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
         }
         else
         {
-            Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight);
+            StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
         }

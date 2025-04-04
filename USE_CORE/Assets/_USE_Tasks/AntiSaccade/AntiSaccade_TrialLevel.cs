@@ -384,7 +384,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         TokenBarCompletions_Block++;
         CurrentTaskLevel.TokenBarsCompleted_Task++;
 
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 

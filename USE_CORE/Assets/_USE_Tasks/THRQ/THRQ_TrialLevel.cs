@@ -318,14 +318,14 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         {
             if (GiveReleaseReward && Session.SyncBoxController != null)
             {
-                Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize);
+                StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumReleasePulses, CurrentTrial.PulseSize));
                 NumReleaseRewards_Trial += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumReleasePulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumReleasePulses;
             }
             if (GiveTouchReward && Session.SyncBoxController != null)
             {
-                Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize);
+                StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumTouchPulses, CurrentTrial.PulseSize));
                 NumTouchRewards_Trial += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumTouchPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumTouchPulses;

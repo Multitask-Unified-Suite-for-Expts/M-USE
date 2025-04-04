@@ -464,7 +464,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         {
             if (Session.SyncBoxController != null)
             {
-                Session.SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize);
+                StartCoroutine(Session.SyncBoxController.SendRewardPulses(1, CurrentTrialDef.PulseSize));
                 CurrentTaskLevel.NumRewardPulses_InBlock++; ;
                 CurrentTaskLevel.NumRewardPulses_InTask++;
             }
@@ -485,7 +485,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         if (Session.SyncBoxController != null)
         {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
         }

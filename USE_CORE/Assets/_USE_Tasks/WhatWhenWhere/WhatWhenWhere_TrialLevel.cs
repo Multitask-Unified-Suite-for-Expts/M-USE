@@ -487,7 +487,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         if (Session.SyncBoxController != null)
         {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
         }

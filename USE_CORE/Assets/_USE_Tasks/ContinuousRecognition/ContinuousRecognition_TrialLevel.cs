@@ -309,24 +309,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
-
-            //DELETE LATER!!!!!
-            chooseStimDuration.value = 500;
-
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-
-            //DELETE LATER!!!
-            if (InputBroker.GetKeyDown(KeyCode.LeftArrow))
-                InputBroker.DecreaseShotgunRadius();
-            else if (InputBroker.GetKeyDown(KeyCode.RightArrow))
-                InputBroker.IncreaseShotgunRadius();
-            else if (InputBroker.GetKeyDown(KeyCode.UpArrow))
-                InputBroker.IncreaseShotgunRays();
-            else if (InputBroker.GetKeyDown(KeyCode.DownArrow))
-                InputBroker.DecreaseShotgunRays();
-
             ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 

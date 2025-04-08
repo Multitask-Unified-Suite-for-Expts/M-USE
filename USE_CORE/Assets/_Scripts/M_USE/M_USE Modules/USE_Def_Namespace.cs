@@ -158,21 +158,6 @@ namespace USE_Def_Namespace
         public bool SonicationActive;
 
         /// <summary>
-        /// Size of the circle for shotgun raycasting in DVA. Default is 1.25f.
-        /// </summary>
-        public float ShotgunRaycastCircleSize_DVA = 1.25f;
-
-        /// <summary>
-        /// Spacing between raycasts in DVA for shotgun raycasting. Default is 0.3f.
-        /// </summary>
-        public float ShotgunRaycastSpacing_DVA = 0.3f;
-
-        /// <summary>
-        /// Distance of the participant in centimeters. Default is 60f.
-        /// </summary>
-        public float ParticipantDistance_CM = 60f;
-
-        /// <summary>
         /// Number of pulses for the reward hotkey. Default is 1.
         /// </summary>
         public int RewardHotKeyNumPulses = 1;
@@ -381,20 +366,11 @@ namespace USE_Def_Namespace
         /// </summary>
         public bool RunSimulation;
 
-        /// <summary>
-        /// Size of the circle for shotgun raycasting in DVA. Default is 1.25f.
-        /// </summary>
-        public float ShotgunRaycastCircleSize_DVA = 1.25f;
 
         /// <summary>
-        /// Spacing between raycasts in DVA for shotgun raycasting. Default is 0.3f.
+        /// 3D Shotgun Radius in Pixels
         /// </summary>
-        public float ShotgunRaycastSpacing_DVA = 0.3f;
-
-        /// <summary>
-        /// Distance of the participant in centimeters. Default is 60f.
-        /// </summary>
-        public float ParticipantDistance_CM = 60f;
+        public int ShotgunRadius_Pixels = 100;
 
     }
 
@@ -689,7 +665,7 @@ namespace USE_Def_Namespace
         /// The number of tokens displayed in the token bar at the start of the trial.
         /// </summary>
         public int NumInitialTokens;
-       
+
         /// <summary>
         /// The number of tokens that the token bar can hold.
         /// </summary>

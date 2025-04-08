@@ -63,8 +63,6 @@ public class EventCodeManager : MonoBehaviour
     private readonly int StimulationCodeMax = 100; //NEED TO MATCH EVENT CODE CONFIG RANGE FOR "StimulationCondition"
 
 
-
-
     // Call it every frame in LateUpdate() methods
     public void CheckFrameEventCodeBuffer() 
     {

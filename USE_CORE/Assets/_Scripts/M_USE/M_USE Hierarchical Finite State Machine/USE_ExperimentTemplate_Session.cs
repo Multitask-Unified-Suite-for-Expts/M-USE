@@ -840,8 +840,10 @@ namespace USE_ExperimentTemplate_Session
                 Session.SessionAudioController.StopBackgroundMusic();
 
                 Session.EventCodeManager.SendCodeThisFrame("RunTaskStarts");
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", 0);
 
-                if(!Session.WebBuild)
+
+                if (!Session.WebBuild)
                     AssignExperimenterDisplayRenderTexture(CurrentTask.TaskCam);
 
             });

@@ -434,7 +434,7 @@ namespace SelectionTracking
                 
                 //if we have reached this point we know there is input
                 if (HandlerName.ToLower().Contains("shotgun"))
-                    currentTarget = InputTracker.ShotgunModalTarget;
+                    currentTarget = InputTracker.ShotgunRaycastTarget;
                 else
                     currentTarget = InputTracker.SimpleRaycastTarget;
 
@@ -629,10 +629,12 @@ namespace SelectionTracking
             public BoolDelegate DefaultConditions(string ConditionName)
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
-                DefaultConditions.Add("ShotgunRaycastHitsProportion", () => InputTracker.ShotgunGoAboveThreshold.Count > 0);
+
+                DefaultConditions.Add("ShotgunRaycastHitsProportion", () => InputTracker.ShotgunRaycastTarget != null);
                 DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsProportion"]() &&
                                                                             OngoingSelection != null &&
-                                                                            InputTracker.ShotgunModalTarget == OngoingSelection.SelectedGameObject);
+                                                                            InputTracker.ShotgunRaycastTarget == OngoingSelection.SelectedGameObject);
+
                 DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&

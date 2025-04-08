@@ -202,7 +202,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         {
             if (InputBroker.GetMouseButtonDown(0))
             {
-                GameObject hitGO = InputBroker.RaycastBoth(InputBroker.mousePosition);
+                GameObject hitGO = InputBroker.SimpleRaycast(InputBroker.mousePosition);
                 if (hitGO != null)
                 {
                     if (hitGO.name == "StimGO") //removed !isGrating from both

@@ -38,12 +38,6 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Keep Track");
         Session.HumanStartPanel.AddTaskInstructions(TaskName, "Keep your eye on the Target object. Select the object as quickly as you can once it animates (closes its mouth)!");
 
-        //Set Shotgun variables for the TASK:
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
-            Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(TaskDef.ShotgunRaycastCircleSize_DVA, TaskDef.ParticipantDistance_CM, TaskDef.ShotgunRaycastSpacing_DVA);
-        else
-            Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(TaskDef.ShotgunRaycastCircleSize_DVA, TaskDef.ParticipantDistance_CM, TaskDef.ShotgunRaycastSpacing_DVA);
-
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {

@@ -220,6 +220,10 @@ public class SetupSession_Level : ControlLevel
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
             Session.GazeTracker.enabled = true;
             Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
+
+            //MANUALLY ADDING, DELETE LATER:
+            InputBroker.SetShotgunRadius(50);
+
         }
         else if(Session.SessionDef.SelectionType.ToLower().Equals("mouseHover"))
         {

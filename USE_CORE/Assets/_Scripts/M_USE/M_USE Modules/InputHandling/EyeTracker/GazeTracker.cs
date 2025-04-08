@@ -61,6 +61,7 @@ public class GazeTracker : InputTracker
         }
         else
         {
+            Debug.LogWarning("INPUT POS MUST BE OFF SCREEN.....");
             ShotgunRaycastTarget = null;
             SimpleRaycastTarget = null;
         }

@@ -25,7 +25,6 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 
 
@@ -49,7 +48,7 @@ public class SyncBoxController
     {
         serialPortController.AddToSend(command, codesToCheck);
     }
-    
+
     public IEnumerator SendRewardPulses(int numPulses, int pulseSize)
     {
         Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range

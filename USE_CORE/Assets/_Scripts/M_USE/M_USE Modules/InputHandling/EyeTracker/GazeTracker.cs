@@ -67,7 +67,7 @@ public class GazeTracker : InputTracker
         }
         else
         {
-            Debug.LogWarning("INPUT IS OFF SCREEN");
+            Debug.LogWarning("INPUT IS OFF SCREEN (" + InputBroker.gazePosition + ")");
             ShotgunRaycastTarget = null;
             SimpleRaycastTarget = null;
         }

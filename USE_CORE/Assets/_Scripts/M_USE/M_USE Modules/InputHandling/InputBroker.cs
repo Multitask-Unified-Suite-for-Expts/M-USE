@@ -304,7 +304,7 @@ public class InputBroker
 
         Dictionary<GameObject, int> hitCount = new Dictionary<GameObject, int>();
 
-        int layers = Mathf.Clamp(Mathf.FloorToInt(ShotgunRadius / 30), 1, 5);
+        int layers = Mathf.Clamp(Mathf.FloorToInt(ShotgunRadius / 25), 1, 5);
 
 		//FOR EVERY LAYER:
         for (int layer = 1; layer <= layers; layer++)

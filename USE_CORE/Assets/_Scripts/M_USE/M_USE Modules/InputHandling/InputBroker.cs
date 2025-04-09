@@ -406,8 +406,8 @@ public class InputBroker
 
 	private static Vector2 CurrentGazePositionOnDisplayArea()
 	{
-        
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
+
         if (Session.TobiiEyeTrackerController?.iEyeTracker != null)
         { // Get the most recent gaze data point
             var gazeData = Session.TobiiEyeTrackerController.EyeTracker?.LatestGazeData; // REFER TO TOBII EYETRACKER CONTROLLER
@@ -426,21 +426,24 @@ public class InputBroker
 						(leftGazePoint.x + rightGazePoint.x) / 2f,
 						(leftGazePoint.y + rightGazePoint.y) / 2f);
 					screenPoint = new Vector2(Screen.width * combinedGazePoint.x, Screen.height * (1 - combinedGazePoint.y));
-                    // Convert the combined gaze point to screen coordinates
-                }
+					// Convert the combined gaze point to screen coordinates
+				}
 				else if (gazeData.Left.GazePointValid)
 				{
-                    // Use the gaze point from the left eye
-                    screenPoint = new Vector2(Screen.width * leftGazePoint.x, Screen.height * (1 - leftGazePoint.y));
-                }
+					// Use the gaze point from the left eye
+					screenPoint = new Vector2(Screen.width * leftGazePoint.x, Screen.height * (1 - leftGazePoint.y));
+				}
 				else if (gazeData.Right.GazePointValid)
 				{
-                    // Use the gaze point from the right eye
-
-                    screenPoint = new Vector2(Screen.width * rightGazePoint.x, Screen.height * (1 - rightGazePoint.y));
-                }
-            }
+					// Use the gaze point from the right eye
+					screenPoint = new Vector2(Screen.width * rightGazePoint.x, Screen.height * (1 - rightGazePoint.y));
+				}
+				Debug.LogWarning("GAZE DATA NOT NULL | SCREEN POINT = " + screenPoint.ToString());
+			}
+			else
+				Debug.LogWarning("---------------GAZE POS DATA IS NULL---------------");
         }
+
 		return screenPoint;
     }
 }

@@ -95,7 +95,13 @@ public class MouseTracker : InputTracker
 
     public override void FindCurrentTarget()
     {
-        ValidateInputScreenPosition(InputBroker.mousePosition);
+        CurrentInputScreenPosition = InputBroker.mousePosition;
+
+        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
+        || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        {
+            CurrentInputScreenPosition = null;
+        }
 
         if (CurrentInputScreenPosition != null && Camera.main != null)
         {

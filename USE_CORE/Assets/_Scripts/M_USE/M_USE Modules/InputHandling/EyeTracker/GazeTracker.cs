@@ -44,7 +44,13 @@ public class GazeTracker : InputTracker
     {
         ValidateInputScreenPosition(InputBroker.gazePosition);
 
-        if (CurrentInputScreenPosition != null && Camera.main != null)
+        if(Camera.main == null)
+        {
+            Debug.LogWarning("MAIN CAMERA IS NULL");
+            return;
+        }
+
+        if (CurrentInputScreenPosition != null)
         {
             SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
 
@@ -61,7 +67,7 @@ public class GazeTracker : InputTracker
         }
         else
         {
-            Debug.LogWarning("INPUT POS MUST BE OFF SCREEN.....");
+            Debug.LogWarning("INPUT IS OFF SCREEN");
             ShotgunRaycastTarget = null;
             SimpleRaycastTarget = null;
         }

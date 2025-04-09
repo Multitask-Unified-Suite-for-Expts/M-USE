@@ -139,7 +139,7 @@ namespace SelectionTracking
 
             //----------------------------------------TOUCH SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler touchShotgun = new SelectionHandler();
-            touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsProportion"));
+            touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsAGameObject"));
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("MouseButton0Down"));
 
             touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
@@ -179,7 +179,7 @@ namespace SelectionTracking
 
             //----------------------------------------GAZE SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler gazeShotgun = new SelectionHandler();
-            gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsProportion"));
+            gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsAGameObject"));
 
             gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
 
@@ -630,8 +630,8 @@ namespace SelectionTracking
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
 
-                DefaultConditions.Add("ShotgunRaycastHitsProportion", () => InputTracker.ShotgunRaycastTarget != null);
-                DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsProportion"]() &&
+                DefaultConditions.Add("ShotgunRaycastHitsAGameObject", () => InputTracker.ShotgunRaycastTarget != null);
+                DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsAGameObject"]() &&
                                                                             OngoingSelection != null &&
                                                                             InputTracker.ShotgunRaycastTarget == OngoingSelection.SelectedGameObject);
 

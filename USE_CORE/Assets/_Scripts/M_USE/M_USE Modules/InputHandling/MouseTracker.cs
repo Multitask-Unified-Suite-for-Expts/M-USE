@@ -101,7 +101,7 @@ public class MouseTracker : InputTracker
         {
             SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
 
-            if(UsingShotgunHandler)
+            if (UsingShotgunHandler)
             {
                 if (SimpleRaycastTarget != null)
                     ShotgunRaycastTarget = SimpleRaycastTarget; //If hit an object directly, set shotgun value as well
@@ -109,8 +109,8 @@ public class MouseTracker : InputTracker
                     ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
 
-            if (ShotgunRaycastTarget != null)
-                Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
+            //if (ShotgunRaycastTarget != null)
+            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
         }
         else
         {

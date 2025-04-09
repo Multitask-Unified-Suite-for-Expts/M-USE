@@ -215,15 +215,14 @@ public class SetupSession_Level : ControlLevel
         Session.GazeTracker = Session.InputTrackers.GetComponent<GazeTracker>();
 
         Session.SelectionTracker = new SelectionTracker();
+
         if (Session.SessionDef.SelectionType.ToLower().Equals("gaze"))
         {
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
             Session.GazeTracker.enabled = true;
             Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
-
-            //MANUALLY ADDING, DELETE LATER:
-            InputBroker.SetShotgunRadius(50);
-
+            Session.GazeTracker.UsingShotgunHandler = true;
+            InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
         }
         else if(Session.SessionDef.SelectionType.ToLower().Equals("mouseHover"))
         {

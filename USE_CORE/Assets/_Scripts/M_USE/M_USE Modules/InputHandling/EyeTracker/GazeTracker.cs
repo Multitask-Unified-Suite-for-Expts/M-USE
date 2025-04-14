@@ -67,6 +67,11 @@ public class GazeTracker : InputTracker
                 else
                     ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
+            else
+            {
+                Debug.LogWarning("NOT USING SHOTGUN HANDLER !!!! THIS IS DEFINITELY THE PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                return;
+            }
 
             if (ShotgunRaycastTarget != null)
                 Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET: " + ShotgunRaycastTarget.name);

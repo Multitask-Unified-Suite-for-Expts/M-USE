@@ -219,9 +219,9 @@ public class SetupSession_Level : ControlLevel
         if (Session.SessionDef.SelectionType.ToLower().Equals("gaze"))
         {
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
-            Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
             Session.GazeTracker.enabled = true;
             Session.GazeTracker.UsingShotgunHandler = true;
+            Debug.LogWarning("SETTING USINGSHOTGUNHANDLER TO TRUE!");
             InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
         }
         else if(Session.SessionDef.SelectionType.ToLower().Equals("mouseHover"))
@@ -229,6 +229,14 @@ public class SetupSession_Level : ControlLevel
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseHover", Session.MouseTracker, inputActive, inputInactive);
             Session.MouseTracker.enabled = true;
             Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
+        }
+        else if (Session.SessionDef.SelectionType.ToLower().Equals("touchShotgun"))
+        {
+            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "TouchShotgun", Session.MouseTracker, inputActive, inputInactive);
+            Session.MouseTracker.enabled = true;
+            Session.SessionLevel.SelectionHandler.MinDuration = 0.1f;
+            Session.SessionLevel.SelectionHandler.MaxDuration = 2f;
+            InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
         }
         else
         {

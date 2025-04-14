@@ -51,7 +51,9 @@ namespace SelectionTracking
                 newHandler.HandlerLevel = handlerLevel.ToLower();
                 newHandler.InputTracker = inputTracker;
 
-                newHandler.InputTracker.UsingShotgunHandler = handlerName.ToLower().Contains("shotgun"); //Newly added to hopefully fix EventCode stuff
+                newHandler.InputTracker.UsingShotgunHandler = handlerName.ToLower().Contains("shotgun");
+
+                Debug.LogWarning("USING SHOTGUN HANDLER? " + newHandler.InputTracker.UsingShotgunHandler);
 
                 newHandler.selectionTracker = this;
                 if (setActiveOnInit != null)

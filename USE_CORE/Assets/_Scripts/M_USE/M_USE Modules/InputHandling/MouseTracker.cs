@@ -124,6 +124,8 @@ public class MouseTracker : InputTracker
 
             //if (ShotgunRaycastTarget != null)
             //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
+            //else
+            //    Debug.LogWarning("NO SHOTGUN TARGET!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
         else
         {

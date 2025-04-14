@@ -438,7 +438,7 @@ public class InputBroker
 					// Use the gaze point from the right eye
 					screenPoint = new Vector2(Screen.width * rightGazePoint.x, Screen.height * (1 - rightGazePoint.y));
 				}
-				Debug.LogWarning("GAZE DATA NOT NULL | SCREEN POINT = " + screenPoint.ToString());
+				//Debug.LogWarning("GAZE DATA NOT NULL | SCREEN POINT = " + screenPoint.ToString());
 			}
 			else
 				Debug.LogWarning("---------------GAZE POS DATA IS NULL---------------");

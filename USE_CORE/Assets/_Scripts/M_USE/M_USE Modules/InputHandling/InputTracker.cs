@@ -64,17 +64,6 @@ public abstract class InputTracker : MonoBehaviour
     public virtual void CustomUpdate() //Anything a particular tracker needs to track that isn't a target neccessarily (ex: click count). 
     {
     }
-
-    public void ValidateInputScreenPosition(Vector3 screenPos)
-    {
-        CurrentInputScreenPosition = screenPos;
-
-        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
-        || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
-        {
-            CurrentInputScreenPosition = null;
-        }
-    }
     
 
 }

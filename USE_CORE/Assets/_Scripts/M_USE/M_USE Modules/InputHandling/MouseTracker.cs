@@ -26,6 +26,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+//using System.Windows.Forms;
 using UnityEngine;
 using USE_Data;
 
@@ -97,13 +98,19 @@ public class MouseTracker : InputTracker
     {
         CurrentInputScreenPosition = InputBroker.mousePosition;
 
+        if(Camera.main == null)
+        {
+            Debug.LogError("MAIN CAMERA NULL");
+            return;
+        }
+
         if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
         || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
         {
             CurrentInputScreenPosition = null;
         }
 
-        if (CurrentInputScreenPosition != null && Camera.main != null)
+        if (CurrentInputScreenPosition != null)
         {
             SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
 
@@ -120,6 +127,7 @@ public class MouseTracker : InputTracker
         }
         else
         {
+
             ShotgunRaycastTarget = null;
             SimpleRaycastTarget = null;
         }

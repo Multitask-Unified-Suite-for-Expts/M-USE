@@ -450,6 +450,14 @@ namespace USE_ExperimentTemplate_Session
             //SelectTask State---------------------------------------------------------------------------------------------------------------
             selectTask.AddUniversalInitializationMethod(() =>
             {
+                //NEED TO RESET SHOTGUN VARIABLE IF USING GAZE BECAUSE GAZE TRIAL LEVEL CHANGES IT
+                if (Session.SessionDef.SelectionType.ToLower().Contains("gaze") || Session.SessionDef.SelectionType.ToLower().Contains("shotgun"))
+                {
+                    Debug.LogWarning("***** start of select task ****** SETTING USINGSHOTGUNHANDLER TO TRUE!");
+                    Session.GazeTracker.UsingShotgunHandler = true;
+                }
+
+
                 Session.InitCamGO.SetActive(false);
                 SessionCam.gameObject.SetActive(true);
 

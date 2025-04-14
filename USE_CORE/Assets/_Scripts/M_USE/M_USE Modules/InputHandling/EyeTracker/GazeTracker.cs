@@ -67,23 +67,22 @@ public class GazeTracker : InputTracker
                 else
                     ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
-            else
-            {
-                Debug.LogWarning("NOT USING SHOTGUN HANDLER !!!! THIS IS DEFINITELY THE PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                return;
-            }
-
-            if (ShotgunRaycastTarget != null)
-                Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET: " + ShotgunRaycastTarget.name);
-            else
-                Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET IS NULL!!!!!!!!!!!!!!!!!!");
+            //else
+            //{
+            //    Debug.LogWarning("NOT USING SHOTGUN HANDLER !!!! THIS IS DEFINITELY THE PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            //    return;
+            //}
 
             //if (ShotgunRaycastTarget != null)
-            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
+            //    Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET: " + ShotgunRaycastTarget.name);
+            //else
+            //    Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET IS NULL!!!!!!!!!!!!!!!!!!");
+
+            if (ShotgunRaycastTarget != null)
+                Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
         }
         else
         {
-            Debug.LogWarning("INPUT IS OFF SCREEN | GAZE POS = " + InputBroker.gazePosition);
             ShotgunRaycastTarget = null;
             SimpleRaycastTarget = null;
         }

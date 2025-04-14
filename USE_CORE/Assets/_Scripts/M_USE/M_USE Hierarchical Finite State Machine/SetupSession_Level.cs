@@ -216,12 +216,12 @@ public class SetupSession_Level : ControlLevel
 
         Session.SelectionTracker = new SelectionTracker();
 
-        if (Session.SessionDef.SelectionType.ToLower().Equals("gaze"))
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
         {
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
             Session.GazeTracker.enabled = true;
             Session.GazeTracker.UsingShotgunHandler = true;
-            Debug.LogWarning("SETTING USINGSHOTGUNHANDLER TO TRUE!");
+            Debug.LogWarning("SETTING USINGSHOTGUNHANDLER TO TRUE DURING SETUPSESSIONLEVEL!");
             InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
         }
         else if(Session.SessionDef.SelectionType.ToLower().Equals("mouseHover"))

@@ -455,8 +455,9 @@ namespace USE_ExperimentTemplate_Session
                 {
                     Debug.LogWarning("***** start of select task ****** SETTING USINGSHOTGUNHANDLER TO TRUE!");
                     Session.GazeTracker.UsingShotgunHandler = true;
-                }
 
+                    InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
+                }
 
                 Session.InitCamGO.SetActive(false);
                 SessionCam.gameObject.SetActive(true);

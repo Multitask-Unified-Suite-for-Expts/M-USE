@@ -190,7 +190,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             TurnOnCalibration();
 
-            acceptableCalibrationDistance = CurrentTaskDef.ShotgunRadius_Pixels;
+            //acceptableCalibrationDistance = CurrentTaskDef.ShotgunRadius_Pixels;
 
             // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
@@ -565,7 +565,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints[7],
                 allCalibPoints[8]};
 
-                //acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 2;
 
                 RecalibCount = new int[9];
                 break;
@@ -578,7 +578,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [3],
                 allCalibPoints[5]};
 
-                //acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 2;
 
                 RecalibCount = new int[6];
                 break;
@@ -590,7 +590,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [6],
                 allCalibPoints [8]};
 
-                //acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[4].ToVector2(), "screenadcs", 60)) / 3;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[4].ToVector2(), "screenadcs", 60)) / 2;
 
                 RecalibCount = new int[5];
                 break;
@@ -600,7 +600,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [3],
                 allCalibPoints [5] };
 
-                //acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
 
                 RecalibCount = new int[3];
                 break;
@@ -610,13 +610,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     public Vector2 ADCSToScreen(NormalizedPoint2D normADCSGazePoint)
     {
         Vector2 adcsGazePoint = normADCSGazePoint.ToVector2();
-
-        float normX = Mathf.Clamp01(adcsGazePoint.x);
-        float normY = Mathf.Clamp01(adcsGazePoint.y);
-
-        float x = normX * MonitorDetails.PixelResolution.x;
-        float y = (1 - normY) * MonitorDetails.PixelResolution.y;
-
+        float x = adcsGazePoint.x * MonitorDetails.PixelResolution.x;
+        float y = ((1 - adcsGazePoint.y) * MonitorDetails.PixelResolution.y);
         return new Vector2(x, y);
     }
 
@@ -624,10 +619,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         float x = screenPoint.x / MonitorDetails.PixelResolution.x;
         float y = 1 - (screenPoint.y / MonitorDetails.PixelResolution.y);
-
-        x = Mathf.Clamp01(x);
-        y = Mathf.Clamp01(y);
-
         return new Vector2(x, y);
     }
 

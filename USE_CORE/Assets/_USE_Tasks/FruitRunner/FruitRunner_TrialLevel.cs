@@ -292,7 +292,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         //GIVE REWARD:
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize);
+        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
     }
 
     private void SubscribeToFrEvents()

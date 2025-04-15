@@ -433,7 +433,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.NumTokenBarFull_InTask++;
         if (Session.SyncBoxController != null)
         {
-            Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize);
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
             // SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", CurrentTrialDef.NumPulses)); moved to syncbox class
             NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;

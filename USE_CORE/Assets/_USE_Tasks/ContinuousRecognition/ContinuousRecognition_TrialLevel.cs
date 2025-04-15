@@ -591,7 +591,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
         Debug.Log("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
-        Session.SyncBoxController?.SendSonication();
+        StartCoroutine(Session.SyncBoxController?.SendSonication());
 
         //Increment Data
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
@@ -690,7 +690,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void GiveReward(int numPulses)
     {
-        Session.SyncBoxController?.SendRewardPulses(numPulses, CurrentTrial.PulseSize); // CurrentTrial.NumPulses
+        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(numPulses, CurrentTrial.PulseSize)); // CurrentTrial.NumPulses
     }
 
 

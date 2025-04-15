@@ -345,7 +345,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
             else
                 NumPulses = CurrentTrialDef.NumPulses;
-            Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize);
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize));
             CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
             RewardGiven = true;

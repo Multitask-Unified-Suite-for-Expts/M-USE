@@ -164,7 +164,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.SpoofGazeWithMouse)
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", Session.MouseTracker, Init, ITI);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeSelection", Session.GazeTracker, Init, ITI);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, Init, ITI);
 
 
         Init.AddUpdateMethod(() =>
@@ -190,7 +190,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             TurnOnCalibration();
 
-            acceptableCalibrationDistance = CurrentTaskDef.ShotgunRadius_Pixels;
+            //acceptableCalibrationDistance = CurrentTaskDef.ShotgunRadius_Pixels;
 
             // Assign the correct calibration points given the User's selection
             DefineCalibPoints(numCalibPoints);
@@ -565,6 +565,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints[7],
                 allCalibPoints[8]};
 
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
+
                 RecalibCount = new int[9];
                 break;
             case 6:
@@ -576,6 +578,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [3],
                 allCalibPoints[5]};
 
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
+
                 RecalibCount = new int[6];
                 break;
             case 5:
@@ -586,6 +590,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [6],
                 allCalibPoints [8]};
 
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[4].ToVector2(), "screenadcs", 60)) / 3;
+
                 RecalibCount = new int[5];
                 break;
             case 3:
@@ -593,6 +599,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [4],
                 allCalibPoints [3],
                 allCalibPoints [5] };
+
+                acceptableCalibrationDistance = Vector2.Distance((Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[0].ToVector2(), "screenadcs", 60), (Vector2)USE_CoordinateConverter.GetScreenPixel(allCalibPoints[1].ToVector2(), "screenadcs", 60)) / 3;
 
                 RecalibCount = new int[3];
                 break;

@@ -25,16 +25,16 @@ SOFTWARE.
 
 
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
-using static UnityEngine.GraphicsBuffer;
+
 
 public class MouseTracker : InputTracker
 {
     public int[] ButtonCompletedClickCount = {0, 0 , 0};
     public int[] ButtonStatus = {0, 0, 0};
     public float[] ButtonPressDuration = {0, 0, 0};
+
 
 
     public void ResetClicks()
@@ -53,7 +53,7 @@ public class MouseTracker : InputTracker
     {
         for (int iButton = 0; iButton < 3; iButton++)
         {
-            GameObject target = UsingShotgunHandler ? ShotgunModalTarget : SimpleRaycastTarget;
+            GameObject target = UsingShotgunHandler ? ShotgunRaycastTarget : SimpleRaycastTarget;
 
             if (InputBroker.GetMouseButtonUp(iButton))
             {
@@ -85,41 +85,47 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MousePosition", () => InputBroker.mousePosition != null ? InputBroker.mousePosition : new Vector3(float.NaN, float.NaN, float.NaN));
         frameData.AddDatum("MouseButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
         frameData.AddDatum("SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
-        frameData.AddDatum("ShotgunModalTarget", ()=> ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
+        frameData.AddDatum("ShotgunModalTarget", ()=> ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
 
         frameData.AddDatum("JoystickInputX", () => Input.GetAxis("Horizontal"));
         frameData.AddDatum("JoystickInputZ", () => Input.GetAxis("Vertical"));
     }
 
-    //returns GO that is the current target
+
     public override void FindCurrentTarget()
     {
         CurrentInputScreenPosition = InputBroker.mousePosition;
 
         if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
-            || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
         {
             CurrentInputScreenPosition = null;
         }
 
         if (CurrentInputScreenPosition != null && Camera.main != null)
         {
-            //Find Current Shotgun Target:
-            Dictionary<GameObject, float> proportions = ShotgunRaycast.RaycastShotgunProportions(CurrentInputScreenPosition.Value, Camera.main);
-            ShotgunGoAboveThreshold.Clear();
+            SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
 
-            foreach (var pair in proportions)
+            if (UsingShotgunHandler)
             {
-                if (pair.Value > ShotgunThreshold)
-                    ShotgunGoAboveThreshold.Add(pair.Key);
+                if (SimpleRaycastTarget != null)
+                    ShotgunRaycastTarget = SimpleRaycastTarget; //If hit an object directly, set shotgun value as well
+                else
+                    ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
 
-            ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
+            //if (ShotgunRaycastTarget != null)
+            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
+        }
+        else
+        {
 
-            //Find Current Target and return it if found:
-            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
+            ShotgunRaycastTarget = null;
+            SimpleRaycastTarget = null;
         }
     }
+
+
 
 
 }

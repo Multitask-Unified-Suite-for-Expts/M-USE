@@ -264,6 +264,10 @@ namespace USE_ExperimentTemplate_Task
                 if (Session.SessionDef.FlashPanelsActive)
                     GameObject.Find("UI_Canvas").GetComponent<Canvas>().worldCamera = TaskCam;
 
+
+                //SET SHOTGUN RADIUS FOR THE TASK:
+                InputBroker.SetShotgunRadius(TaskDef.ShotgunRadius_Pixels);
+
             });
 
             //RunBlock State-----------------------------------------------------------------------------------------------------

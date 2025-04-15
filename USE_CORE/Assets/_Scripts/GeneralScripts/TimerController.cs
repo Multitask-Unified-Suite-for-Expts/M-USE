@@ -7,7 +7,7 @@ using USE_UI;
 
 
 //Script is attached to the Scripts/MiscScripts GameObject.
-//Trial level's can use this class by calling CreateTimer() and StartTimer();
+//Trial level's can use this class by calling CreateTimer() and then setting the visibility states and duration
 
 public class TimerController : MonoBehaviour
 {
@@ -93,13 +93,13 @@ public class TimerController : MonoBehaviour
 
     }
 
-    public void StartTimer()
+    private void StartTimer()
     {
         StopAllCoroutines();
         StartCoroutine(TimerRoutine(Duration));
     }
 
-    public void StopTimer()
+    private void StopTimer()
     {
         StopAllCoroutines();
         ClockAudioSource.Stop();

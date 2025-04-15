@@ -25,9 +25,10 @@ SOFTWARE.
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 
 public class InputBroker
@@ -77,6 +78,18 @@ public class InputBroker
             }
         }
     }
+
+	//Shotgun Raycast Variables:
+    private static int ShotgunRays = 25;
+    private static int ShotgunRadius = 50; // CONFIGURABLE VARIABLE IN TASK DEF's
+
+
+
+    public static void SetShotgunRadius(int shotgunRadius)
+	{
+		ShotgunRadius = shotgunRadius;
+	}
+		
 
     public static void SetMouseButtonDown(int button)
 	{
@@ -244,51 +257,121 @@ public class InputBroker
 	
 	public static IEnumerator ClickKey(KeyCode key)
 	{
-		InputBroker.SetKeyDown(key);
+		SetKeyDown(key);
 		yield return new WaitForEndOfFrame();
-		InputBroker.SetKey(key);
+		SetKey(key);
 		yield return new WaitForEndOfFrame();
 		yield return new WaitForEndOfFrame();
-		InputBroker.SetKeyUp(key);
+		SetKeyUp(key);
 		yield return new WaitForEndOfFrame();
-		InputBroker.DeleteKey(key);
+		DeleteKey(key);
 	}
 
 	
 	public static IEnumerator HoldKey(KeyCode key)
 	{
-		InputBroker.SetKeyDown(key);
+		SetKeyDown(key);
 		yield return new WaitForEndOfFrame();
-		InputBroker.SetKey(key);
+		SetKey(key);
 	}
 
 	
 	public static IEnumerator ReleaseKey(KeyCode key)
 	{
-		InputBroker.SetKeyUp(key);
+		SetKeyUp(key);
 		yield return new WaitForEndOfFrame();
-		InputBroker.DeleteKey(key);
+		DeleteKey(key);
 	}
 
 
 	public static IEnumerator ClickMouseButton(int button)
 	{
-		InputBroker.SetMouseButtonDown(button);
+		SetMouseButtonDown(button);
 		yield return new WaitForEndOfFrame();
-		InputBroker.SetMouseButton(button);
+		SetMouseButton(button);
 		yield return new WaitForEndOfFrame();
 		yield return new WaitForEndOfFrame();
-		InputBroker.SetMouseButtonUp(button);
+		SetMouseButtonUp(button);
 		yield return new WaitForEndOfFrame();
-		InputBroker.DeleteMouseButton(button);
+		DeleteMouseButton(button);
 	}
 
-    public static GameObject RaycastBoth(Vector3 touchPos)
+
+    public static GameObject ShotgunRaycast(Vector3 screenPosition)
     {
         GameObject target = null;
-        float distance2D = 0;
-        float distance3D = 0;
+        RaycastHit hit;
 
+        Dictionary<GameObject, int> hitCount = new Dictionary<GameObject, int>();
+
+        int layers = Mathf.Clamp(Mathf.FloorToInt(ShotgunRadius / 25), 1, 5);
+
+		//FOR EVERY LAYER:
+        for (int layer = 1; layer <= layers; layer++)
+        {
+            float layerRatio = (float)layer / layers;  // Fraction of total layers
+            int raysPerLayer = Mathf.CeilToInt(ShotgunRays * layerRatio); // Scale rays
+
+            float layerRadius = (ShotgunRadius / layers) * layer;  // Spread layers evenly
+
+			//FOR EVERY RAY IN LAYER:
+            for (int i = 0; i < raysPerLayer; i++)
+            {
+                float angle = (2 * Mathf.PI / raysPerLayer) * i;
+                Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * layerRadius;
+                Vector3 screenPosForRay = screenPosition + new Vector3(offset.x, offset.y, 0);
+                Ray spreadRay = Camera.main.ScreenPointToRay(screenPosForRay);
+
+                // 3D Raycast
+                if (Physics.Raycast(spreadRay, out hit, Mathf.Infinity))
+                {
+                    GameObject hitObject = hit.collider.gameObject;
+                    if (!hitCount.ContainsKey(hitObject))
+                    {
+                        hitCount[hitObject] = 0;
+                    }
+                    hitCount[hitObject]++;
+                }
+
+                // 2D Raycast
+                PointerEventData eventData = new PointerEventData(EventSystem.current);
+                eventData.position = screenPosForRay;
+
+                List<RaycastResult> results = new List<RaycastResult>();
+                EventSystem.current.RaycastAll(eventData, results);
+
+                foreach (RaycastResult result in results)
+                {
+                    if (result.gameObject != null)
+                    {
+                        if (!hitCount.ContainsKey(result.gameObject))
+                        {
+                            hitCount[result.gameObject] = 0;
+                        }
+                        hitCount[result.gameObject]++;
+                    }
+                }
+            }
+        }
+
+        // Find the most hit object in the shotgun rays
+        if (hitCount.Count > 0)
+        {
+            target = hitCount.OrderByDescending(x => x.Value).First().Key;
+        }
+
+        return target;
+    }
+
+
+
+
+
+
+    public static GameObject SimpleRaycast(Vector3 touchPos)
+	{
+		GameObject target = null;
+		float distance3D = 0;
 
 		//3D:
 		RaycastHit hit;
@@ -300,29 +383,31 @@ public class InputBroker
 
 		//2D:
 		PointerEventData eventData = new PointerEventData(EventSystem.current);
-        eventData.position = touchPos;
+		eventData.position = touchPos;
 
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
+		List<RaycastResult> results = new List<RaycastResult>();
+		EventSystem.current.RaycastAll(eventData, results);
 
-        foreach (RaycastResult result in results)
-        {
+		foreach (RaycastResult result in results)
+		{
 			if (result.gameObject != null)
-            {
-                distance2D = (result.gameObject.transform.position - touchPos).magnitude;
-                if (target == null || (distance3D != 0 && (distance2D < distance3D)))
-                {
-                    target = result.gameObject;
-                    break;
-                }
-            }
-        }
-        return target;
-    }
+			{
+				float distance2D = (result.gameObject.transform.position - touchPos).magnitude;
+				if (target == null || (distance3D != 0 && (distance2D < distance3D)))
+				{
+					target = result.gameObject;
+					break;
+				}
+			}
+		}
+		return target;
+	}
+
+
 	private static Vector2 CurrentGazePositionOnDisplayArea()
 	{
-        
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
+
         if (Session.TobiiEyeTrackerController?.iEyeTracker != null)
         { // Get the most recent gaze data point
             var gazeData = Session.TobiiEyeTrackerController.EyeTracker?.LatestGazeData; // REFER TO TOBII EYETRACKER CONTROLLER
@@ -341,21 +426,24 @@ public class InputBroker
 						(leftGazePoint.x + rightGazePoint.x) / 2f,
 						(leftGazePoint.y + rightGazePoint.y) / 2f);
 					screenPoint = new Vector2(Screen.width * combinedGazePoint.x, Screen.height * (1 - combinedGazePoint.y));
-                    // Convert the combined gaze point to screen coordinates
-                }
+					// Convert the combined gaze point to screen coordinates
+				}
 				else if (gazeData.Left.GazePointValid)
 				{
-                    // Use the gaze point from the left eye
-                    screenPoint = new Vector2(Screen.width * leftGazePoint.x, Screen.height * (1 - leftGazePoint.y));
-                }
+					// Use the gaze point from the left eye
+					screenPoint = new Vector2(Screen.width * leftGazePoint.x, Screen.height * (1 - leftGazePoint.y));
+				}
 				else if (gazeData.Right.GazePointValid)
 				{
-                    // Use the gaze point from the right eye
-
-                    screenPoint = new Vector2(Screen.width * rightGazePoint.x, Screen.height * (1 - rightGazePoint.y));
-                }
-            }
+					// Use the gaze point from the right eye
+					screenPoint = new Vector2(Screen.width * rightGazePoint.x, Screen.height * (1 - rightGazePoint.y));
+				}
+				//Debug.LogWarning("GAZE DATA NOT NULL | SCREEN POINT = " + screenPoint.ToString());
+			}
+			else
+				Debug.LogWarning("---------------GAZE POS DATA IS NULL---------------");
         }
+
 		return screenPoint;
     }
 }

@@ -134,8 +134,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            //SliderFBController.InitializeSlider();
-
             if (!Session.WebBuild)
             {
                 playerView = gameObject.AddComponent<PlayerViewPanel>();
@@ -143,12 +141,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 playerViewTextList = new List<GameObject>();
             }
 
-            if(Session.SessionDef.IsHuman)
-            {
-                Session.TimerController.CreateTimer(CR_CanvasGO.transform);
-                Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
-            }
-            else
+            if(!Session.SessionDef.IsHuman)
             {
                 if (SliderFBController != null && SliderFBController.SliderGO == null)
                     SliderFBController.InitializeSlider();
@@ -211,7 +204,11 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             //Set timer duration for the trial:
             if (Session.SessionDef.IsHuman)
+            {
+                Session.TimerController.CreateTimer(CR_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
                 Session.TimerController.SetDuration(chooseStimDuration.value);
+            }
             
             if (TrialCount_InBlock == 0)
                 CalculateBlockFeedbackLocations();
@@ -271,12 +268,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if(Session.SessionDef.IsHuman)
             {
-                if (CurrentTrial.TokenBarCapacity < 1)
-                    Debug.LogError("TRYING TO ENABLE TOKEN BAR BUT TokenBarCapacity IN TRIAL CONFIG IS EMPTY OR ZERO!");
-
+                if(CurrentTrial.TokenBarCapacity < 1)
+                {
+                    Debug.LogWarning("DID NOT SPECIFY TOKENBARCAPACITY IN BLOCK CONFIG! Defaulting to a value of 5");
+                    CurrentTrial.TokenBarCapacity = 5;
+                }
+                
                 TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
                 TokenFBController.enabled = true;
-
                 Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             }
             else

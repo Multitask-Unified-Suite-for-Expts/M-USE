@@ -472,7 +472,7 @@ public class KT_Object : MonoBehaviour
     {
         if (InputBroker.GetMouseButtonDown(0))
         {
-            GameObject hit = InputBroker.RaycastBoth(InputBroker.mousePosition);
+            GameObject hit = InputBroker.SimpleRaycast(InputBroker.mousePosition);
             if (hit != null && hit == gameObject)
             {
                 ObjectSelected = true;

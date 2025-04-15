@@ -24,11 +24,11 @@ SOFTWARE.
 
 
 
+using System.Collections.Generic;
 using UnityEngine;
 using USE_Data;
 using USE_StimulusManagement;
-using System;
-using System.Collections.Generic;
+
 
 
 public abstract class InputTracker : MonoBehaviour
@@ -38,24 +38,13 @@ public abstract class InputTracker : MonoBehaviour
     protected int AllowedDisplay = -1;
     public Vector3? CurrentInputScreenPosition;
 
-    public List<GameObject> ShotgunGoAboveThreshold;
-    public GameObject ShotgunModalTarget;
+    public GameObject ShotgunRaycastTarget;
     public GameObject SimpleRaycastTarget;
-
-    public ShotgunRaycast ShotgunRaycast;
-    public float ShotgunThreshold;
 
     public bool UsingShotgunHandler;
 
 
 
-    public delegate bool IsSelectionPossible();
-
-
-    public void Awake()
-    {
-        ShotgunRaycast = GameObject.Find("MiscScripts").GetComponent<ShotgunRaycast>();
-    }
     public void Init(DataController frameData, int allowedDisplay)
     {
         AddFieldsToFrameData(frameData);
@@ -68,9 +57,9 @@ public abstract class InputTracker : MonoBehaviour
         FindCurrentTarget();
     }
 
-    public abstract void AddFieldsToFrameData(DataController frameData);
-
     public abstract void FindCurrentTarget();
+
+    public abstract void AddFieldsToFrameData(DataController frameData);
 
     public virtual void CustomUpdate() //Anything a particular tracker needs to track that isn't a target neccessarily (ex: click count). 
     {

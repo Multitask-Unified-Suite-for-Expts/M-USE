@@ -215,17 +215,27 @@ public class SetupSession_Level : ControlLevel
         Session.GazeTracker = Session.InputTrackers.GetComponent<GazeTracker>();
 
         Session.SelectionTracker = new SelectionTracker();
-        if (Session.SessionDef.SelectionType.ToLower().Equals("gaze"))
+
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
         {
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
             Session.GazeTracker.enabled = true;
-            Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
+            Session.GazeTracker.UsingShotgunHandler = true;
+            InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
         }
         else if(Session.SessionDef.SelectionType.ToLower().Equals("mouseHover"))
         {
             Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseHover", Session.MouseTracker, inputActive, inputInactive);
             Session.MouseTracker.enabled = true;
             Session.SessionLevel.SelectionHandler.MinDuration = 0.7f;
+        }
+        else if (Session.SessionDef.SelectionType.ToLower().Equals("touchShotgun"))
+        {
+            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "TouchShotgun", Session.MouseTracker, inputActive, inputInactive);
+            Session.MouseTracker.enabled = true;
+            Session.SessionLevel.SelectionHandler.MinDuration = 0.1f;
+            Session.SessionLevel.SelectionHandler.MaxDuration = 2f;
+            InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
         }
         else
         {
@@ -234,10 +244,6 @@ public class SetupSession_Level : ControlLevel
             Session.SessionLevel.SelectionHandler.MinDuration = 0.01f;
             Session.SessionLevel.SelectionHandler.MaxDuration = 2f;
         }
-
-        Session.MouseTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRaycastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
-        Session.GazeTracker.ShotgunRaycast.SetShotgunVariables(Session.SessionDef.ShotgunRaycastCircleSize_DVA, Session.SessionDef.ParticipantDistance_CM, Session.SessionDef.ShotgunRaycastSpacing_DVA);
-
         
 
         if (Session.SessionDef.MonitorDetails != null && Session.SessionDef.ScreenDetails != null)

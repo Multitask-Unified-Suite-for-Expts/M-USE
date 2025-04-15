@@ -31,48 +31,45 @@ using USE_Data;
 
 public class GazeTracker : InputTracker
 {
+
     public override void AddFieldsToFrameData(DataController frameData)
     {
         frameData.AddDatum("GazePosition", () => InputBroker.gazePosition != null ? InputBroker.gazePosition : new Vector2(float.NaN, float.NaN));
         frameData.AddDatum("SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
-        frameData.AddDatum("ShotgunModalTarget", () => ShotgunModalTarget != null ? ShotgunModalTarget.name : null);
+        frameData.AddDatum("ShotgunModalTarget", () => ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
     }
+
 
     public override void FindCurrentTarget()
     {
         CurrentInputScreenPosition = InputBroker.gazePosition;
 
-        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height ||
-                    float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
+        || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
+        {
             CurrentInputScreenPosition = null;
+        }
 
         if (CurrentInputScreenPosition != null && Camera.main != null)
         {
-            //Find Current Shotgun Target:
-            Dictionary<GameObject, float> proportions = ShotgunRaycast.RaycastShotgunProportions(CurrentInputScreenPosition.Value, Camera.main);
-            ShotgunGoAboveThreshold.Clear();
+            SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
 
-            foreach (var pair in proportions)
+            if (UsingShotgunHandler)
             {
-                if (pair.Value > ShotgunThreshold)
-                    ShotgunGoAboveThreshold.Add(pair.Key);
+                if (SimpleRaycastTarget != null)
+                    ShotgunRaycastTarget = SimpleRaycastTarget; //If hit an object directly, set shotgun value as well
+                else
+                    ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
 
-            ShotgunModalTarget = ShotgunRaycast.ModalShotgunTarget(proportions);
-
-            //Find Current Target and return it if found:
-            SimpleRaycastTarget = InputBroker.RaycastBoth(CurrentInputScreenPosition.Value);
-
+            //if (ShotgunRaycastTarget != null)
+            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
         }
         else
         {
-            ShotgunModalTarget = null;
+            ShotgunRaycastTarget = null;
             SimpleRaycastTarget = null;
         }
-    }
-    public override void CustomUpdate()
-    {
-
     }
 
 

@@ -80,7 +80,13 @@ public class InputBroker
     }
 
 	//Shotgun Raycast Variables:
-    private static int ShotgunRays = 25;
+    private static int ShotgunRays
+	{
+		get
+		{
+           return Mathf.Clamp(Mathf.RoundToInt(ShotgunRadius * .5f), 10, 50);
+        }
+	}
     private static int ShotgunRadius = 50; // CONFIGURABLE VARIABLE IN TASK DEF's
 
 
@@ -440,8 +446,6 @@ public class InputBroker
 				}
 				//Debug.LogWarning("GAZE DATA NOT NULL | SCREEN POINT = " + screenPoint.ToString());
 			}
-			else
-				Debug.LogWarning("---------------GAZE POS DATA IS NULL---------------");
         }
 
 		return screenPoint;

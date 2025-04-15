@@ -44,19 +44,13 @@ public class GazeTracker : InputTracker
     {
         CurrentInputScreenPosition = InputBroker.gazePosition;
 
-        if (Camera.main == null)
-        {
-            Debug.LogError("MAIN CAMERA NULL");
-            return;
-        }
-
         if (CurrentInputScreenPosition.Value.x < 0 || CurrentInputScreenPosition.Value.y < 0 || CurrentInputScreenPosition.Value.x > Screen.width || CurrentInputScreenPosition.Value.y > Screen.height
         || float.IsNaN(CurrentInputScreenPosition.Value.x) || float.IsNaN(CurrentInputScreenPosition.Value.y) || float.IsNaN(CurrentInputScreenPosition.Value.z))
         {
             CurrentInputScreenPosition = null;
         }
 
-        if (CurrentInputScreenPosition != null)
+        if (CurrentInputScreenPosition != null && Camera.main != null)
         {
             SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
 
@@ -67,19 +61,9 @@ public class GazeTracker : InputTracker
                 else
                     ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
-            //else
-            //{
-            //    Debug.LogWarning("NOT USING SHOTGUN HANDLER !!!! THIS IS DEFINITELY THE PROBLEM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            //    return;
-            //}
 
             //if (ShotgunRaycastTarget != null)
-            //    Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET: " + ShotgunRaycastTarget.name);
-            //else
-            //    Debug.LogWarning("SCREEN POS: " + CurrentInputScreenPosition.Value + " | SHOTGUN TARGET IS NULL!!!!!!!!!!!!!!!!!!");
-
-            if (ShotgunRaycastTarget != null)
-                Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
+            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
         }
         else
         {

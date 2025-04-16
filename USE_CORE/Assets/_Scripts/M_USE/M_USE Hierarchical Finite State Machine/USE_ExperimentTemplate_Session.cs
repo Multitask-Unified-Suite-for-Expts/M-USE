@@ -451,11 +451,9 @@ namespace USE_ExperimentTemplate_Session
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 //NEED TO RESET SHOTGUN VARIABLE IF USING GAZE BECAUSE GAZE TRIAL LEVEL CHANGES IT
-                if (Session.SessionDef.SelectionType.ToLower().Contains("gaze") || Session.SessionDef.SelectionType.ToLower().Contains("shotgun"))
+                if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
                 {
-                    Debug.LogWarning("***** start of select task ****** SETTING USINGSHOTGUNHANDLER TO TRUE!");
                     Session.GazeTracker.UsingShotgunHandler = true;
-
                     InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
                 }
 

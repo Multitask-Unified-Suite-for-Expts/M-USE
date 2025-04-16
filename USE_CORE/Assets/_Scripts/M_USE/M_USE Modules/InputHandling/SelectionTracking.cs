@@ -53,8 +53,6 @@ namespace SelectionTracking
 
                 newHandler.InputTracker.UsingShotgunHandler = handlerName.ToLower().Contains("shotgun");
 
-                Debug.LogWarning("USING SHOTGUN HANDLER? " + newHandler.InputTracker.UsingShotgunHandler);
-
                 newHandler.selectionTracker = this;
                 if (setActiveOnInit != null)
                     setActiveOnInit.StateInitializationFinished += newHandler.AddToActiveHandlers;

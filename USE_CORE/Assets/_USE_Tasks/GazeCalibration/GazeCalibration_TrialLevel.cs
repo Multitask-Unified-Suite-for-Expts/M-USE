@@ -356,8 +356,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
                 // Plots sample points to the Result Container, if they exist for the current calibration point
 
-                CollectSamplePoints();
-                CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
+                //CollectSamplePoints();
+                //CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
 
                 if (ResultContainer.transform.childCount > 0)
@@ -452,11 +452,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        ITI.AddSpecificInitializationMethod(() =>
-        {
-            if (!Session.SessionDef.SpoofGazeWithMouse)
-                CollectSamplePoints();
-        });
+        //ITI.AddSpecificInitializationMethod(() =>
+        //{
+        //    if (!Session.SessionDef.SpoofGazeWithMouse)
+        //        CollectSamplePoints();
+        //});
 
         ITI.SpecifyTermination(() => true, FinishTrial, () =>
         {
@@ -764,12 +764,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (IEyeTracker == null)
             IEyeTracker = Session.TobiiEyeTrackerController.iEyeTracker;
         if (EyeTracker == null)
-            EyeTracker = Session.TobiiEyeTrackerController.EyeTracker;/*
-        if (ScreenBasedCalibration == null)
-            ScreenBasedCalibration = TobiiEyeTrackerController.Instance.ScreenBasedCalibration;
-        if (DisplayArea == null)
-            DisplayArea = TobiiEyeTrackerController.Instance.DisplayArea;*/
-
+            EyeTracker = Session.TobiiEyeTrackerController.EyeTracker;
     }
 
     private void DefineTrialData()

@@ -813,9 +813,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                              + "\n"
                              + CurrentProgressString.ToString()
                              + "\n"
+                             + "\n"
                              + ResultsString.ToString()
                              + "\n"
-                             + InfoString.ToString();
+                             + InfoString.ToString()
+                             + "\n"
+                             + "\n"
+                             + DistanceToCurrentPoint.ToString();
+
     }
 
     private void AssignGazeCalibrationCameraToTrackboxCanvas()

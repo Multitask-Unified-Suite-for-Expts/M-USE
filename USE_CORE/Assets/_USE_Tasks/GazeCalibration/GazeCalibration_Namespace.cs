@@ -40,9 +40,6 @@ namespace GazeCalibration_Namespace
 
     public class GazeCalibration_BlockDef : BlockDef
     {
-        //Already-existing fields (inherited from BlockDef)
-        //public int BlockCount;
-        //public TrialDef[] TrialDefs;
         public float[] CalibPointsInset;
         public float MaxCircleScale;
         public float MinCircleScale;
@@ -53,8 +50,6 @@ namespace GazeCalibration_Namespace
         {
             TrialDefs = new List<GazeCalibration_TrialDef>().ConvertAll(x => (TrialDef)x);
 
-            //for (int iTrial = 0; iTrial < NumTrials; iTrial++)
-            //{
             GazeCalibration_TrialDef td = new GazeCalibration_TrialDef();
             td.NumPulses = NumPulses;
             td.PulseSize = PulseSize;
@@ -65,17 +60,11 @@ namespace GazeCalibration_Namespace
             td.ConfirmDuration = ConfirmDuration;
 
             TrialDefs.Add(td);
-            //}
         }
     }
 
     public class GazeCalibration_TrialDef : TrialDef
     {
-        //Already-existing fields (inherited from TrialDef)
-        //public int BlockCount, TrialCountInBlock, TrialCountInTask;
-        //public TrialStims TrialStims;
-       // public int BlockID;
-       // public int NumTrials;
         public float[] CalibPointsInset = new float[] {0.15f, 0.15f};
         public float MaxCircleScale = 0.075f;
         public float MinCircleScale = 0.015f;

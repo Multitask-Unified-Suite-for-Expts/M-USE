@@ -103,6 +103,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private float TimeInCalibrationRange = 0f;
 
+    private float DistanceToCurrentPoint = 0f;
+
 
     public override void DefineControlLevel()
     {
@@ -197,6 +199,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             DefineCalibPoints(numCalibPoints);
 
             InfoString.Clear();
+
+            DistanceToCurrentPoint = 0;
         });
 
         //----------------------------------------------------- CONFIRM GAZE IS IN RANGE OF THE CALIBRATION POINT -----------------------------------------------------
@@ -210,11 +214,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             keyboardOverride = false;
 
             CurrentProgressString.Clear();
-            CurrentProgressString.Append($"<b>Calib Point #:  {calibNum + 1}</b> (of {numCalibPoints})"
-                                   + $"\n<b>Calib Position:</b> ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
-                                   + $"\n<b>Recalib Count:</b> {RecalibCount[calibNum]}");
-            InfoString.Append("<b>\n\nInfo</b>"
-                                + "\nThe calibration point is <b>blinking</b>."
+            CurrentProgressString.Append($"Calib Point #:  {calibNum + 1} (of {numCalibPoints})"
+                                   + $"\nCalib Position: ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
+                                   + $"\nRecalib Count: {RecalibCount[calibNum]}");
+            InfoString.Append("\n\nInfo"
+                                + "\nThe calibration point is blinking."
                                 + "\nInstruct the player to focus on the point until the circle shrinks.");
 
             SetTrialSummaryString();
@@ -317,7 +321,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 if (status.Equals(CalibrationStatus.Success))
                 {
                     currentCalibrationPointFinished = true;
-                    CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply(); // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
                 }
                 else
                 {
@@ -350,12 +353,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (!Session.SessionDef.SpoofGazeWithMouse)
             {
                 InfoString.Append("\n\nInfo"
-                                + string.Format("\nCompute and Apply Returned {0}", CalibrationResult.Status)
                                 + "\nPress = to accept the point"
                                 + "\nPress - to recalibrate the point");
 
-                // Plots sample points to the Result Container, if they exist for the current calibration point
 
+                // Plots sample points to the Result Container, if they exist for the current calibration point
                 //CollectSamplePoints();
                 //CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
@@ -412,7 +414,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Confirm.SpecifyTermination(() => pointFinished, Fixate, () => { calibNum++; });
 
-        Confirm.SpecifyTermination(() => calibrationFinished, ITI);
+        Confirm.SpecifyTermination(() => calibrationFinished, ITI, () =>
+        {
+            //COMPUTE THE RESULTS AFTER ALL POINTS ARE DONE:
+            CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply(); // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
+        });
 
         Confirm.AddTimer(() => CurrentTrialDef.ConfirmDuration, Delay, () =>
         {
@@ -428,6 +434,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             {
                 // Continues to ITI state since all points have been calibrated already
                 StateAfterDelay = ITI;
+
+                //COMPUTE THE RESULTS AFTER ALL POINTS ARE DONE:
+                CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply(); // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
+
             }
         });
 
@@ -452,11 +462,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        //ITI.AddSpecificInitializationMethod(() =>
-        //{
-        //    if (!Session.SessionDef.SpoofGazeWithMouse)
-        //        CollectSamplePoints();
-        //});
 
         ITI.SpecifyTermination(() => true, FinishTrial, () =>
         {
@@ -512,18 +517,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.SpoofGazeWithMouse)
             return;
         
-        if (!Session.TobiiEyeTrackerController.isCalibrating)
-        {
-            if (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null)
-            {
-                Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
-                Session.TobiiEyeTrackerController.isCalibrating = true;
-            }
-            else
-            {
-                Debug.LogError("SCREEN BASED CALIBRATION IS NULL!");
-            }
-        }
+        if (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null)
+            Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();
+        else
+            Debug.LogError("SCREEN BASED CALIBRATION IS NULL!");
     }
     
     private void TurnOffCalibration()
@@ -701,7 +698,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private bool InCalibrationRange()
     {
-        bool inRange = Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget) < acceptableCalibrationDistance;
+        DistanceToCurrentPoint = Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget);
+
+        bool inRange = DistanceToCurrentPoint < acceptableCalibrationDistance;
 
         if(inRange)
         {

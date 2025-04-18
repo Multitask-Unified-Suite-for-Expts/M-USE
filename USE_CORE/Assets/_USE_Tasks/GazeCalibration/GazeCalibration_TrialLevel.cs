@@ -56,7 +56,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public NormalizedPoint2D[] allCalibPoints;
     [HideInInspector] public NormalizedPoint2D[] calibPointsADCS;
     [HideInInspector] public int numCalibPoints;
-    private float acceptableCalibrationDistance;
     private NormalizedPoint2D currentADCSTarget;
     private Vector2 currentScreenPixelTarget = new Vector2(float.NaN, float.NaN);
     private int calibNum;
@@ -104,6 +103,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private float TimeInCalibrationRange = 0f;
 
     private float DistanceToCurrentPoint = 0f;
+
+    private float AcceptableDistance;
 
 
     public override void DefineControlLevel()
@@ -203,9 +204,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             DistanceToCurrentPoint = 0;
 
             //DELETE LATER IF GO BACK TO OTHER CALCULATION:
-            acceptableCalibrationDistance = CurrentTaskDef.ShotgunRadius_Pixels;
+            AcceptableDistance = CurrentTaskDef.AcceptableDistance_Pixels;
 
-            Debug.LogWarning("ACCEPTABLE DISTANCE = " + acceptableCalibrationDistance);
+            Debug.LogWarning("ACCEPTABLE DISTANCE: " + AcceptableDistance);
         });
 
         //----------------------------------------------------- CONFIRM GAZE IS IN RANGE OF THE CALIBRATION POINT -----------------------------------------------------
@@ -705,7 +706,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         DistanceToCurrentPoint = Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget);
 
-        bool inRange = DistanceToCurrentPoint < acceptableCalibrationDistance;
+        bool inRange = DistanceToCurrentPoint < AcceptableDistance;
 
         if(inRange)
         {
@@ -821,7 +822,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                              + InfoString.ToString()
                              + "\n"
                              + "\n"
-                             + DistanceToCurrentPoint.ToString();
+                             + "Distance: " + DistanceToCurrentPoint.ToString();
 
     }
 

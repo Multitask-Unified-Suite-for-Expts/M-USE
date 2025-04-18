@@ -35,6 +35,7 @@ namespace GazeCalibration_Namespace
     public class GazeCalibration_TaskDef : TaskDef
     {
         public string RewardStructure = "PerPoint";
+        public int AcceptableDistance_Pixels = 500;
     }
 
     public class GazeCalibration_BlockDef : BlockDef

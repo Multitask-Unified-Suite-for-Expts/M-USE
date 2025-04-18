@@ -351,8 +351,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
                 // Plots sample points to the Result Container, if they exist for the current calibration point
-                CollectSamplePoints();
-                CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
+                //CollectSamplePoints();
+                //CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
 
                 if (ResultContainer.transform.childCount > 0)

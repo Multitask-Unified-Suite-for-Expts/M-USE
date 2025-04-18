@@ -206,7 +206,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             //DELETE LATER IF GO BACK TO OTHER CALCULATION:
             AcceptableDistance = CurrentTaskDef.AcceptableDistance_Pixels;
 
-            Debug.LogWarning("ACCEPTABLE DISTANCE: " + AcceptableDistance);
+            Debug.LogWarning("ACCEPTABLE DISTANCE: " + CurrentTaskDef.AcceptableDistance_Pixels);
+            Debug.LogWarning("REWARD STRUCTURE: " + CurrentTaskDef.RewardStructure);
         });
 
         //----------------------------------------------------- CONFIRM GAZE IS IN RANGE OF THE CALIBRATION POINT -----------------------------------------------------

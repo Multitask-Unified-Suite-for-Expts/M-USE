@@ -104,7 +104,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private float DistanceToCurrentPoint = 0f;
 
-    private float AcceptableDistance;
+    private int AcceptableDistance;
 
 
     public override void DefineControlLevel()

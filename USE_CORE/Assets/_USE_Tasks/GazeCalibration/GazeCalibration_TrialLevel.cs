@@ -210,7 +210,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             CurrentProgressString.Append($"Calib Point #:  {calibNum + 1} (of {numCalibPoints})"
                                    + $"\nCalib Position: ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
                                    + $"\nRecalib Count: {RecalibCount[calibNum]}");
-            InfoString.Append("\n\nInfo"
+            InfoString.Append("Info"
                                 + "\nThe calibration point is blinking."
                                 + "\nInstruct the player to focus on the point until the circle shrinks.");
 
@@ -264,7 +264,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Check.AddSpecificInitializationMethod(() =>
         {
             keyboardOverride = false;
-            InfoString.Append("\nInfo"
+            InfoString.Append("Info"
                                 + "\nChecking that input is within range for calibration"
                                 + "\nPress <b>Space</b> to override and calibrate regardless of gaze input location");
             SetTrialSummaryString();
@@ -293,7 +293,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             keyboardOverride = false;
 
-            InfoString.Append("<b>\n\nInfo</b>"
+            InfoString.Append("\nInfo"
                                 + $"\nCalibration Beginning at <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
 
             SetTrialSummaryString();
@@ -345,7 +345,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             if (!Session.SessionDef.SpoofGazeWithMouse)
             {
-                InfoString.Append("\n\nInfo"
+                InfoString.Append("\nInfo"
                                 + "\nPress = to accept the point"
                                 + "\nPress - to recalibrate the point");
 
@@ -791,9 +791,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "TimeInCalibRange: " + TimeInCalibrationRange.ToString("F2") + " s"
                              + "\n"
-                             + "Distance To Point: " + DistanceToCurrentPoint.ToString()
                              + "\n"
                              + "Acceptable Distance: " + CurrentTaskDef.AcceptableDistance_Pixels.ToString()
+                             + "\n"
+                             + "Distance To Point: " + DistanceToCurrentPoint.ToString()
                              + "\n"
                              + "\n"
                              + CurrentProgressString.ToString()

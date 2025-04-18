@@ -24,8 +24,6 @@ SOFTWARE.
 
 
 using GazeCalibration_Namespace;
-using System;
-using UnityEngine;
 using USE_ExperimentTemplate_Task;
 
 
@@ -33,14 +31,10 @@ public class GazeCalibration_TaskLevel : ControlLevel_Task_Template
 {
     public GazeCalibration_BlockDef gcBD => GetCurrentBlockDef<GazeCalibration_BlockDef>();
     GazeCalibration_TrialLevel gcTL;
+
     public override void DefineControlLevel()
     {
         gcTL = (GazeCalibration_TrialLevel)TrialLevel;
-
-        RunBlock.AddSpecificInitializationMethod(() =>
-        {
-            SetSkyBox("Grey");
-        });
     }
     
 

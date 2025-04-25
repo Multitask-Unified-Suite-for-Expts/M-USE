@@ -125,7 +125,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         //------------------------------------------------------------------------------------------------------------------------
         SelectionHandler ShotgunHandler;
 
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, PlayerChoice);
         else
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, PlayerChoice);
@@ -397,7 +397,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        if(Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
     }
 
 

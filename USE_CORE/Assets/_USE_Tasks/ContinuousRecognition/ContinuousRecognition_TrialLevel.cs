@@ -116,8 +116,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public string Locations_String, PC_String, New_String, PNC_String, PC_Percentage_String;
 
 
-    private bool StimulateThisTrial = false;
-
 
 
     public override void DefineControlLevel()
@@ -187,14 +185,13 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //------------------------------------------------------------------------------------------------------------------------
         // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
-        SelectionHandler ShotgunHandler;
 
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
 
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*15, CR_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*15, CR_CanvasGO, true);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -238,14 +235,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetStimStrings();
             SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllSelections.Count > 0)
+                SelectionHandler.ClearSelections();
+            SelectionHandler.MinDuration = minObjectTouchDuration.value;
+            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
 
             Input.ResetInputAxes(); //reset input in case they holding down
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayStims);
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             if (Session.SessionDef.IsHuman)
@@ -304,15 +301,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            if (SelectionHandler.AllSelections.Count > 0)
+                SelectionHandler.ClearSelections();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-            ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+            ChosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
             if (ChosenStim != null) //They Clicked a Stim
@@ -390,7 +387,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             if(OngoingSelection != null)
             {
@@ -425,7 +422,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
 
 
-            if (ChosenGO != null && ChosenStim != null && ShotgunHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null && SelectionHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
                 StimIsChosen = true;
 
             //Count NonStim Clicks:
@@ -466,7 +463,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (StimulateThisTrial && CurrentTrial.StimulationType != null)
             {
                 string stimulationType = CurrentTrial.StimulationType.Trim();
-                var lastSelection = ShotgunHandler.LastSuccessfulSelection; //TEST WHETHER TO USE ONGOING SEL OR LAST SELECTION. PROB LAST SINCE SEL WAS MADE TO GET TO THIS STATE
+                var lastSelection = SelectionHandler.LastSuccessfulSelection; //TEST WHETHER TO USE ONGOING SEL OR LAST SELECTION. PROB LAST SINCE SEL WAS MADE TO GET TO THIS STATE
 
                 if(lastSelection != null)
                 {
@@ -690,7 +687,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void GiveReward(int numPulses)
     {
-        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(numPulses, CurrentTrial.PulseSize)); // CurrentTrial.NumPulses
+        if (Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize));
     }
 
 

@@ -189,7 +189,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Setup Handler:
         SelectionHandler ShotgunHandler;
 
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InflateBalloon);
         else
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, InflateBalloon);
@@ -594,17 +594,12 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public override void OnTokenBarFull()
     {
-        if (SideChoice == "Left")
+        CurrentTaskLevel.NumRewardPulses_InBlock += SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight;
+        CurrentTaskLevel.NumRewardPulses_InTask += SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight;
+
+        if(Session.SyncBoxController != null)
         {
-            StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesLeft, CurrentTrial.PulseSizeLeft));
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesLeft;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesLeft;
-        }
-        else
-        {
-            StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulsesRight, CurrentTrial.PulseSizeRight));
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulsesRight;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulsesRight;
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight, SideChoice == "Left" ? CurrentTrial.PulseSizeLeft : CurrentTrial.PulseSizeRight));
         }
     }
 

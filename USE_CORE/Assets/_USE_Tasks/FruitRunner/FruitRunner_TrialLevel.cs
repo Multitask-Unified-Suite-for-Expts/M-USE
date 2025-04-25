@@ -104,7 +104,11 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Setup); //Setup Handler
+        //----------------------------------------------------------------------------------------------------------------------------------------------
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Setup);
+        else
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Setup);
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -113,18 +117,18 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            if (Handler.AllSelections.Count > 0)
-                Handler.ClearSelections();
+            if (SelectionHandler.AllSelections.Count > 0)
+                SelectionHandler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
+            SelectionHandler.MinDuration = minObjectTouchDuration.value;
+            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
 
             TokenFBController.enabled = false;
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
             TokenFBController.SetTokenBarValue(CurrentTrial.NumInitialTokens);
 
         });
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
         {
             TokenFBController.AdjustTokenBarSizing(100);
             TokenFBController.SetRevealTime(.1f);
@@ -292,7 +296,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         //GIVE REWARD:
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+
+        if(Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
     }
 
     private void SubscribeToFrEvents()

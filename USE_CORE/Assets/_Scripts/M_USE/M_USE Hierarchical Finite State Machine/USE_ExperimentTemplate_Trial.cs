@@ -125,11 +125,18 @@ namespace USE_ExperimentTemplate_Trial
         public bool TrialFilesLoaded;
 
         public int CurrentTrialDefIndex;
+
         //Can be used by tasks' trial levels to set the trial stimulation code
         [HideInInspector] public int TrialStimulationCode = 0;
 
+        [HideInInspector] public bool StimulateThisTrial = false;
+
+
 
         [HideInInspector] public USE_Selection OngoingSelection;
+
+        [HideInInspector] public SelectionHandler SelectionHandler;
+
 
 
 
@@ -314,6 +321,10 @@ namespace USE_ExperimentTemplate_Trial
                 ResetTrialVariables();
                 TouchFBController?.ClearErrorCounts();
                 Session.MouseTracker?.ResetClicks();
+
+
+                //Set stimulate to false, then individual tasks trial levels can set to try if conditions warrant it
+                StimulateThisTrial = false;
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>

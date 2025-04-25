@@ -101,6 +101,14 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
             blockDataSummary = new WhatWhenWhere_BlockDataSummary();
             blockStartTime = Time.time;
 
+            //SET STIMULATION CODE FOR THE BLOCK:
+            if (currentBlockDef.StimulationConditionCodes != null && currentBlockDef.StimulationConditionCodes.Length > 0)
+            {
+                int indexNum = currentBlockDef.StimulationConditionCodes.Length == 1 ? 0 : UnityEngine.Random.Range(0, currentBlockDef.StimulationConditionCodes.Length);
+                BlockStimulationCode = currentBlockDef.StimulationConditionCodes[indexNum];
+                wwwTL.TrialStimulationCode = BlockStimulationCode;
+            }
+
         });
 
         RunBlock.AddDefaultTerminationMethod(() =>
@@ -125,6 +133,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         data["Back Track Errors"] = BackTrackErrors_InTask;
         data["Retouch Errors"] = RetouchErrors_InTask;
         data["Retouch Correct"] = RetouchCorrect_InTask;
+        data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
+
 
         foreach (WhatWhenWhere_BlockDataSummary blockDataSummary in WWW_BlockSummaryData)
         {
@@ -141,6 +151,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
         data["Slider Completions"] = NumSliderBarFilled_InTask;
         data["Avg Search Duration"] = String.Format("{0:0.000}", CalculateAverageDuration(SearchDurations_InTask));
+        data["Stimulation Pulses Given"] = StimulationPulsesGiven_Task;
+
 
         return data;
     }
@@ -160,7 +172,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
                                       "\nRetouch Errors: " + RetouchErrors_InBlock +
                                       "\nRetouch Correct: " + RetouchCorrect_InBlock +
                                       "\nBack Track Errors: " + BackTrackErrors_InBlock +
-                                      "\nNum Aborted Trials in Block: " + NumAbortedTrials_InBlock);
+                                      "\nNum Aborted Trials in Block: " + NumAbortedTrials_InBlock +
+                                      "\nStimulationPulsesGiven: " + wwwTL.StimulationPulsesGiven_Block);
+
     }
 
     public override void SetTaskSummaryString()
@@ -198,6 +212,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("CorrectSelections_InBlock", () => CorrectSelections_InBlock);
         BlockData.AddDatum("TotalErrors_InBlock", () => TotalErrors_InBlock);
         BlockData.AddDatum("CompletedSequences_InBlock", () => CompletedSequences_InBlock);
+        BlockData.AddDatum("StimulationPulsesGiven", () => wwwTL.StimulationPulsesGiven_Block);
 
     }
 

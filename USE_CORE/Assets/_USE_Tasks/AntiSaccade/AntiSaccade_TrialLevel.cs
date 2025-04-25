@@ -138,7 +138,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
         SelectionHandler ShotgunHandler;
 
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
         else
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
@@ -303,7 +303,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (ChosenStim == null)
                 return;
 
-            int? haloDepth = Session.Using2DStim ? 10 : (int?)null;
+            int? haloDepth = Session.Using2DStim ? 25 : (int?)null;
 
             float? tokenYAdjustment = Session.Using2DStim ? -5f : (float?)null; //used to adjust where the tokens appear in relation to GameObject
 
@@ -379,12 +379,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         ChosenDisplayTargetDuration = CurrentTrial.DisplayTargetDuration[randomIndex2];
         Debug.Log(("CHOSEN DISPLAYTARGETDURATION: " + ChosenDisplayTargetDuration));
     }
+
     public override void OnTokenBarFull()
     {
         TokenBarCompletions_Block++;
         CurrentTaskLevel.TokenBarsCompleted_Task++;
 
-        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        if(Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 

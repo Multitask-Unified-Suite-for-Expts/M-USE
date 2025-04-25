@@ -45,7 +45,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
     public WhatWhenWhere_TaskDef CurrentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
-    private SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
 
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
@@ -196,16 +195,31 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     MaskValues_CurrentTrial = null;
 
             }
+
+            StimulateThisTrial = false;
+            if (CurrentTrialDef.TrialsToStimulateOn != null)
+            {
+                if (CurrentTrialDef.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrialDef.StimulationType))
+                    StimulateThisTrial = true;
+            }
+
+            if (StimulateThisTrial)
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
         });
 
         SetupTrial.AddTimer(()=> startButtonPresentationDelay, InitTrial);
 
-        ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SliderFlashingFeedback);
+        //-------------------------------------------------------------------------------------------------------------------------------
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SliderFlashingFeedback);
+        else
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SliderFlashingFeedback);
 
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
+        //-------------------------------------------------------------------------------------------------------------------------------
 
         InitTrial.AddSpecificInitializationMethod(() => InitializeShotgunHandler());
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
             PrepareSliderForTrial();
 
@@ -249,9 +263,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             searchDurationStartTime = Time.time;
             choiceMade = false;
 
-            ShotgunHandler.HandlerActive = true;
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            SelectionHandler.HandlerActive = true;
+            if (SelectionHandler.AllSelections.Count > 0)
+                SelectionHandler.ClearSelections();
             
             
             if (!Session.WebBuild)
@@ -291,11 +305,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            if (ShotgunHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.SuccessfulSelections.Count > 0)
             {
-                GameObject selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject.transform.root.gameObject;
+                GameObject selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject.transform.root.gameObject;
                 WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
-                ShotgunHandler.ClearSelections();
+                SelectionHandler.ClearSelections();
                 if (selectedSD != null)
                 {
                     choiceMade = true;
@@ -310,7 +324,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
@@ -332,7 +346,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SequenceManager.ManageSelection();
             ManageDataHandlers();
 
-            ShotgunHandler.HandlerActive = false;
+            SelectionHandler.HandlerActive = false;
             int? depth = Session.Using2DStim ? 50 : (int?)null;
             int? stimIdx = null;
 
@@ -439,7 +453,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SliderFlashingFeedback.AddSpecificInitializationMethod(() =>
         {
-            ShotgunHandler.HandlerActive = false;
+            SelectionHandler.HandlerActive = false;
 
             //Destroy all created text objects on Player View of Experimenter Display
             if(!Session.WebBuild)
@@ -826,12 +840,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void InitializeShotgunHandler()
     {
-        ShotgunHandler.HandlerActive = true;
-        if (ShotgunHandler.AllSelections.Count > 0)
-            ShotgunHandler.ClearSelections();
-        ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-        ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
-        ShotgunHandler.MaxPixelDisplacement = 50;
+        SelectionHandler.HandlerActive = true;
+        if (SelectionHandler.AllSelections.Count > 0)
+            SelectionHandler.ClearSelections();
+        SelectionHandler.MinDuration = minObjectTouchDuration.value;
+        SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+        SelectionHandler.MaxPixelDisplacement = 50;
     }
     private void UpdateExperimenterDisplaySummaryStrings()
     {

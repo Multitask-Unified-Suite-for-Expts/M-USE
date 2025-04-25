@@ -158,8 +158,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        var SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, ITI);
+
+
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ITI);
+        else
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ITI);
+
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 15, MG_CanvasGO, false);
+        //--------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {

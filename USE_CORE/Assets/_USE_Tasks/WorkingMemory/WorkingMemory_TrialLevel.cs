@@ -358,7 +358,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         NumTokenBarFull_InBlock++;
         CurrentTaskLevel.NumTokenBarFull_InTask++;
 
-        StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
+        if(Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
+
         CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
         CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
         

@@ -177,7 +177,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
         SelectionHandler ShotgunHandler;
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
         else
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);

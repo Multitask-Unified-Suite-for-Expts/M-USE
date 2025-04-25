@@ -125,7 +125,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         //Setup Shotgun Handler ---------------------------------------------------------------------
         SelectionHandler ShotgunHandler;
 
-        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Play);
         else
             ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play);
@@ -386,17 +386,10 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
         if (ChosenObject != null)
         {
-            if(ChosenObject.RewardPulsesBySec != null)
+            if(Session.SyncBoxController != null)
             {
-                Debug.Log("--------------- Using RewardPulsesBySec!");
-                StartCoroutine(Session.SyncBoxController?.SendRewardPulses(ChosenObject.CurrentRewardValue, CurrentTrial.PulseSize));
+                StartCoroutine(Session.SyncBoxController.SendRewardPulses(ChosenObject.RewardPulsesBySec != null ? ChosenObject.CurrentRewardValue : CurrentTrial.NumPulses, CurrentTrial.PulseSize));
             }
-            else
-            {
-                Debug.Log("--------------- NO RewardPulsesBySec so using CurrentTrial.NumPulses instead");
-                StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
-            }
-
         }
         else
             Debug.LogError("CHOSEN OBJ IS NULL WHEN TRYING TO SEND REWARD");

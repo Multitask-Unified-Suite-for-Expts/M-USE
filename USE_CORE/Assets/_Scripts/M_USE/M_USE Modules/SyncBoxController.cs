@@ -73,6 +73,7 @@ public class SyncBoxController
             float waitTime = (MsBetweenRewardPulses + Session.SessionDef.StimulationPulseSize / 10) / 1000;
             yield return new WaitForSeconds(waitTime);
         }
+        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalStimulationPulses", Session.SessionDef.StimulationNumPulses));
     }
 
 

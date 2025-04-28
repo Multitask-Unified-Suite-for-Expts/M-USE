@@ -38,6 +38,7 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
     public GameObject sessionInfoPanelText;
     public int totalTrials;
     public int totalRewardPulses;
+    public int totalStimulationPulses;
     public float sessionDuration;
     public float timeFromLastTrialCompletion;
     public StringBuilder TaskSummaryString;
@@ -83,6 +84,7 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
         SessionSummaryString.Append(
             "Total Trials: " + totalTrials +
             "\nTotal Reward Pulses: " + totalRewardPulses +
+            "\nTotal Stimulation Pulses: " + totalStimulationPulses +
             "\nSession Duration: " + String.Format("{0:0.0}", sessionDuration) + " s" +
             "\nTime From Last Trial Completion: " + String.Format("{0:0.0}", timeFromLastTrialCompletion) + " s");
         
@@ -109,6 +111,10 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
                 case nameof(totalRewardPulses):
                     if (changeValue is int rewardPulsesIncrement && rewardPulsesIncrement > 0)
                         totalRewardPulses += rewardPulsesIncrement;
+                    break;
+                case nameof(totalStimulationPulses):
+                    if (changeValue is int stimulationPulsesIncrement && stimulationPulsesIncrement > 0)
+                        totalRewardPulses += stimulationPulsesIncrement;
                     break;
                 case nameof(sessionDuration):
                     if (changeValue is float currentSessionDuration && currentSessionDuration > 0)

@@ -46,7 +46,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     public GameObject GC_CanvasGO;
-    private SelectionTracking.SelectionTracker.SelectionHandler SelectionHandler;
 
 
     // Inherited from the Session Level...
@@ -137,8 +136,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             AssignCalibPositions();
 
-            if (!Session.SessionDef.SpoofGazeWithMouse)
-                InitializeEyeTrackerSettings();
+            InitializeEyeTrackerSettings();
 
             InfoString.Append("Info"
                                 + "\nPress Space to begin a 9 point calibration"
@@ -156,17 +154,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (ResultContainer == null)
                 CreateResultContainer();
 
-            if (!Session.SessionDef.SpoofGazeWithMouse)
-                AssignGazeCalibrationCameraToTrackboxCanvas();
+            AssignGazeCalibrationCameraToTrackboxCanvas();
         });
+        SetupTrial.SpecifyTermination(() => Session.TobiiEyeTrackerController.ScreenBasedCalibration != null, Init);
 
 
-        SetupTrial.SpecifyTermination(() => (!Session.SessionDef.SpoofGazeWithMouse ? (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null) : true), Init);
-
-        if (Session.SessionDef.SpoofGazeWithMouse)
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseHover", Session.MouseTracker, Init, ITI);
-        else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, Init, ITI);
+        SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, Init, ITI);
 
 
         Init.AddUpdateMethod(() =>
@@ -308,23 +301,21 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
 
-            if (!Session.SessionDef.SpoofGazeWithMouse)
+            CalibrationStatus status = Session.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(currentNormPoint);
+            if (status.Equals(CalibrationStatus.Success))
             {
-                CalibrationStatus status = Session.TobiiEyeTrackerController.ScreenBasedCalibration.CollectData(currentNormPoint);
-                if (status.Equals(CalibrationStatus.Success))
-                {
-                    currentCalibrationPointFinished = true;
-                }
-                else
-                {
-                    unsuccessfulCount++;
-
-                    if (unsuccessfulCount == 1)
-                        Debug.LogWarning("The CollectData() calibration method was unsuccessful. This can happen the first time. Will try again next frame.");
-                    else if (unsuccessfulCount > 1)
-                        Debug.LogError("CollectData() CALIBRATION METHOD WAS UNSUCCESSFUL MULTIPLE TIMES!!!!");
-                }
+                currentCalibrationPointFinished = true;
             }
+            else
+            {
+                unsuccessfulCount++;
+
+                if (unsuccessfulCount == 1)
+                    Debug.LogWarning("The CollectData() calibration method was unsuccessful. This can happen the first time. Will try again next frame.");
+                else if (unsuccessfulCount > 1)
+                    Debug.LogError("CollectData() CALIBRATION METHOD WAS UNSUCCESSFUL MULTIPLE TIMES!!!!");
+            }
+            
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
 
@@ -343,34 +334,30 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Confirm.AddSpecificInitializationMethod(() =>
         {
-            if (!Session.SessionDef.SpoofGazeWithMouse)
+            InfoString.Append("\nInfo"
+                            + "\nPress = to accept the point"
+                            + "\nPress - to recalibrate the point");
+
+
+            // Plots sample points to the Result Container, if they exist for the current calibration point
+            //CollectSamplePoints();
+            //CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
+
+
+            if (ResultContainer.transform.childCount > 0)
             {
-                InfoString.Append("\nInfo"
-                                + "\nPress = to accept the point"
-                                + "\nPress - to recalibrate the point");
-
-
-                // Plots sample points to the Result Container, if they exist for the current calibration point
-                //CollectSamplePoints();
-                //CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
-
-
-                if (ResultContainer.transform.childCount > 0)
-                {
-                    ResultsString.Append($"\n\nCalibration Results"
-                                         + $"\nLeft Eye"
-                                         + $"\n{CalculateSampleStatistics(LeftSampleDistances)}"
-                                         + $"\n\nRight Eye "
-                                         + $"\n{CalculateSampleStatistics(RightSampleDistances)}");
-                }
-                else
-                {
-                    ResultsString.Append($"No Samples Collected at this Calibration Point: <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
-                }
+                ResultsString.Append($"\n\nCalibration Results"
+                                        + $"\nLeft Eye"
+                                        + $"\n{CalculateSampleStatistics(LeftSampleDistances)}"
+                                        + $"\n\nRight Eye "
+                                        + $"\n{CalculateSampleStatistics(RightSampleDistances)}");
             }
-
+            else
+            {
+                ResultsString.Append($"No Samples Collected at this Calibration Point: <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
+            }
+            
             SetTrialSummaryString();
-
 
             if (ShouldGiveReward())
             {
@@ -395,8 +382,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             else if (InputBroker.GetKeyDown(KeyCode.Minus))
             {
                 // User selected to recalibrate current point, sample data is discarded and return to Blink
-                if (!Session.SessionDef.SpoofGazeWithMouse)
-                    Session.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(currentNormPoint);
+                Session.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(currentNormPoint);
                 recalibPoint = true;
                 RecalibCount[calibNum] += 1;
             }
@@ -503,9 +489,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             Debug.LogError("SESSION OR TOBII EYE TRACKER IS NULL");
             return;
         }
-
-        if (Session.SessionDef.SpoofGazeWithMouse)
-            return;
         
         if (Session.TobiiEyeTrackerController.ScreenBasedCalibration != null)
             Session.TobiiEyeTrackerController.ScreenBasedCalibration.EnterCalibrationMode();

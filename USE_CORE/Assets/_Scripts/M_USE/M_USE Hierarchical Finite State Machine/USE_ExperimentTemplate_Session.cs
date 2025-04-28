@@ -98,6 +98,8 @@ namespace USE_ExperimentTemplate_Session
         public GameObject ToggleAudioButton;
         public GameObject RedAudioCross;
         public GameObject SavePanel;
+        public GameObject SonicationTestingGO;
+        public TextMeshProUGUI SonicationTesting_UpdateText;
 
         //Load prefabs from resources:
         [HideInInspector] public GameObject HumanStartPanelPrefab;
@@ -252,7 +254,7 @@ namespace USE_ExperimentTemplate_Session
 
                 StartCoroutine(FrameData.CreateFile());
 
-                if (Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
+                if (Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.CreateFile());
                 
 
@@ -367,7 +369,7 @@ namespace USE_ExperimentTemplate_Session
 
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
-                if (Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
+                if (Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
 
                 //Session.EventCodeManager.EventCodeLateUpdate();
@@ -380,17 +382,14 @@ namespace USE_ExperimentTemplate_Session
 
                 //StartCoroutine(SessionData.AppendDataToBuffer());
                 //StartCoroutine(SessionData.AppendDataToFile());
-                
 
-                // Check and exit calibration mode for Tobii eye tracker
-                if(!Session.SessionDef.SpoofGazeWithMouse)
+
+                if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
                 {
-                    if (Session.TobiiEyeTrackerController != null && Session.TobiiEyeTrackerController.isCalibrating)
-                    {
-                        Session.TobiiEyeTrackerController.isCalibrating = false;
-                        Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
-                    }
+                    Session.TobiiEyeTrackerController.isCalibrating = false;
+                    Session.TobiiEyeTrackerController.ScreenBasedCalibration.LeaveCalibrationMode();
                 }
+                
 
                 // Disable gaze calibration
                 Session.GazeCalibrationController.RunCalibration = false;
@@ -448,6 +447,8 @@ namespace USE_ExperimentTemplate_Session
             });
 
             //SelectTask State---------------------------------------------------------------------------------------------------------------
+            bool startedSonicationTesting = false;
+
             selectTask.AddUniversalInitializationMethod(() =>
             {
                 Session.InitCamGO.SetActive(false);
@@ -676,6 +677,21 @@ namespace USE_ExperimentTemplate_Session
                         RedAudioCross.SetActive(true);
                 }
 
+                startedSonicationTesting = false;
+
+            });
+
+            selectTask.AddUpdateMethod(() =>
+            {
+                if(!startedSonicationTesting)
+                {
+                    if(InputBroker.GetKeyDown(KeyCode.Space))
+                    {
+                        startedSonicationTesting = true;
+                        StartCoroutine(SonicationUnitTest());
+                    }
+
+                }
             });
 
             selectTask.AddLateUpdateMethod(() =>
@@ -694,7 +710,7 @@ namespace USE_ExperimentTemplate_Session
 
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                if(Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
+                if(Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
 
             });
@@ -776,7 +792,7 @@ namespace USE_ExperimentTemplate_Session
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 StartCoroutine(FrameData.AppendDataToBuffer());
-                if(Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
+                if(Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
             });
 
@@ -811,7 +827,7 @@ namespace USE_ExperimentTemplate_Session
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
                 
-                if (Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
+                if (Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
 
                 if (CurrentTask.FrameData != null)
@@ -854,7 +870,7 @@ namespace USE_ExperimentTemplate_Session
 
                 Session.SelectionTracker.UpdateActiveSelections();
                 AppendSerialData();
-                if(Session.SessionDef.EyeTrackerActive && !Session.SessionDef.SpoofGazeWithMouse)
+                if(Session.SessionDef.EyeTrackerActive)
                     StartCoroutine(Session.GazeData.AppendDataToBuffer());
             });
 
@@ -967,6 +983,62 @@ namespace USE_ExperimentTemplate_Session
             });
         }
 
+        //----------------------------------------------------------------------------------------------------------------------------------
+        private IEnumerator SonicationUnitTest()
+        {
+            SonicationTestingGO.SetActive(true);
+
+            for(int i = 0; i < Session.SessionDef.SonicationTest_NumPerCondition; i++)
+            {
+                SonicationTesting_UpdateText.text = "Sending Event Code (" + i + ") For Stimulation Condition 1";
+                Debug.LogWarning("SENDING STIMULATION CONDITION (1) EVENT CODE AT: " + Time.time);
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", 1);
+
+                yield return new WaitForSeconds(Session.SessionDef.SonicationTest_TimeBetween);
+
+                SonicationTesting_UpdateText.text = "Sending Sonication Command (" + i + ") For Stimulation Condition 1";
+                Debug.LogWarning("INITIATING SONICATION FOR CONDITION (1) AT: " + Time.time);
+                if(Session.SyncBoxController != null)
+                    StartCoroutine(Session.SyncBoxController?.SendSonication());
+
+                yield return new WaitForSeconds(Session.SessionDef.SonicationTest_TimeBetween);
+            }
+
+            for (int i = 0; i < Session.SessionDef.SonicationTest_NumPerCondition; i++)
+            {
+                SonicationTesting_UpdateText.text = "Sending Event Code (" + i + ") For Stimulation Condition 2";
+                Debug.LogWarning("SENDING STIMULATION CONDITION (2) EVENT CODE AT: " + Time.time);
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", 2);
+
+                yield return new WaitForSeconds(Session.SessionDef.SonicationTest_TimeBetween);
+
+                SonicationTesting_UpdateText.text = "Sending Sonication Command (" + i + ") For Stimulation Condition 2";
+                Debug.LogWarning("INITIATING SONICATION FOR CONDITION (2) AT: " + Time.time);
+                if (Session.SyncBoxController != null)
+                    StartCoroutine(Session.SyncBoxController?.SendSonication());
+
+                yield return new WaitForSeconds(Session.SessionDef.SonicationTest_TimeBetween);
+            }
+
+            for (int i = 0; i < Session.SessionDef.SonicationTest_NumPerCondition; i++)
+            {
+                SonicationTesting_UpdateText.text = "Sending Event Code (" + i + ") For Stimulation Condition 3";
+                Debug.LogWarning("SENDING STIMULATION CONDITION (3) EVENT CODE AT: " + Time.time);
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", 3);
+
+                yield return new WaitForSeconds(Session.SessionDef.SonicationTest_TimeBetween);
+
+                SonicationTesting_UpdateText.text = "Sending Sonication Command (" + i + ") For Stimulation Condition 3";
+                Debug.LogWarning("INITIATING SONICATION FOR CONDITION (3) AT: " + Time.time);
+                if (Session.SyncBoxController != null)
+                    StartCoroutine(Session.SyncBoxController?.SendSonication());
+
+                if(i < 9)
+                    yield return new WaitForSeconds(Session.SessionDef.SonicationTest_TimeBetween);
+            }
+
+            SonicationTestingGO.SetActive(false);
+        }
 
         private IEnumerator WriteSerialAndGazeDataAndSwitchToTaskDataPaths()
         {
@@ -1106,6 +1178,10 @@ namespace USE_ExperimentTemplate_Session
                 RedAudioCross = ToggleAudioButton.transform.Find("Cross").gameObject;
                 SavePanel = GameObject.Find("SavePanel");
                 SavePanel.SetActive(false);
+
+                SonicationTestingGO = GameObject.Find("SonicationTesting");
+                SonicationTesting_UpdateText = SonicationTestingGO.transform.Find("Front").transform.Find("UpdateText").GetComponent<TextMeshProUGUI>();
+                SonicationTestingGO.SetActive(false);
 
                 MainDirectionalLight = GameObject.Find("Directional Light");
 
@@ -1288,14 +1364,12 @@ namespace USE_ExperimentTemplate_Session
         {
             if (GameObject.Find("TobiiEyeTrackerController") == null)
             {
-                if(!Session.SessionDef.SpoofGazeWithMouse){
                 // gets called once when finding and creating the tobii eye tracker prefabs
                 GameObject TobiiEyeTrackerControllerGO = new GameObject("TobiiEyeTrackerController");
                 Session.TobiiEyeTrackerController = TobiiEyeTrackerControllerGO.AddComponent<TobiiEyeTrackerController>();
                 Session.TobiiEyeTrackerController.EyeTracker_GO = Instantiate(Resources.Load<GameObject>("EyeTracker"), TobiiEyeTrackerControllerGO.transform);
                 Session.TobiiEyeTrackerController.TrackBoxGuide_GO = Instantiate(Resources.Load<GameObject>("TrackBoxGuide"), TobiiEyeTrackerControllerGO.transform);
-                }
-
+                
                 Session.GazeCalibrationController = Instantiate(Resources.Load<GameObject>("GazeCalibration")).GetComponent<GazeCalibrationController>();
                // THIS LINE BELOW CONTROLS THE OVERLAYING GAZE ONTO THE PLAYER SCENE
                // Session.TobiiEyeTrackerController.GazeTrail_GO = Instantiate(Resources.Load<GameObject>("GazeTrail"), TobiiEyeTrackerControllerGO.transform);

@@ -135,12 +135,6 @@ namespace USE_Def_Namespace
         /// Type of selection method being used. Default is "mouse".
         /// </summary>
         public string SelectionType = "mouse";
-
-
-        /// <summary>
-        /// Whether or not to run the eyetracker with the mouse position assigned as gaze input
-        /// </summary>
-        public bool SpoofGazeWithMouse;
         
         /// <summary>
         /// Details of the monitor being used.
@@ -255,6 +249,17 @@ namespace USE_Def_Namespace
         /// Size of Stimulation Pulses
         /// </summary>
         public int StimulationPulseSize = 250;
+
+
+        /// <summary>
+        /// Time between sending event code and sending command for sonication unit testing
+        /// </summary>
+        public int SonicationTest_TimeBetween = 2;
+
+        /// <summary>
+        /// Number of times to send event code and sonication for each stimulation condition
+        /// </summary>
+        public int SonicationTest_NumPerCondition = 10;
     }
 
     public class TaskDef
@@ -370,7 +375,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// 3D Shotgun Radius in Pixels
         /// </summary>
-        public int ShotgunRadius_Pixels = 100;
+        public int ShotgunRadius_Pixels = 50;
 
     }
 

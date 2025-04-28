@@ -122,25 +122,24 @@ public class GazeCalibrationController : MonoBehaviour
             
         }
 
-        if(!Session.SessionDef.SpoofGazeWithMouse){
-            if (transition.Equals("GazeCalibrationToSession"))
-                Session.GazeData.folderPath = path;
-            else
-                Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
+        if (transition.Equals("GazeCalibrationToSession"))
+            Session.GazeData.folderPath = path;
+        else
+            Session.GazeData.folderPath = path + Path.DirectorySeparatorChar + "GazeData";
 
-            if (transition.Equals("GazeCalibrationToTask"))
-                Session.TrialLevel.PathReassignmentComplete = true;
+        if (transition.Equals("GazeCalibrationToTask"))
+            Session.TrialLevel.PathReassignmentComplete = true;
 
-            if (transition.Equals("SessionToGazeCalibration"))
+        if (transition.Equals("SessionToGazeCalibration"))
+        {
+            if (Session.SessionDef.SerialPortActive)
             {
-                if (Session.SessionDef.SerialPortActive)
-                {
-                    StartCoroutine(Session.SerialSentData.CreateFile());
-                    StartCoroutine(Session.SerialRecvData.CreateFile());
-                }
-                StartCoroutine(Session.GazeData.CreateFile());
+                StartCoroutine(Session.SerialSentData.CreateFile());
+                StartCoroutine(Session.SerialRecvData.CreateFile());
             }
+            StartCoroutine(Session.GazeData.CreateFile());
         }
+        
 
         if ( transition.Equals("TaskToGazeCalibration"))
         {
@@ -150,7 +149,6 @@ public class GazeCalibrationController : MonoBehaviour
                 Session.SerialRecvData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
             }
 
-            if(!Session.SessionDef.SpoofGazeWithMouse)
             Session.GazeData.CreateNewTrialIndexedFile(GazeCalibrationTrialLevel.TrialCount_InTask + 1, Session.FilePrefix);
         }
 

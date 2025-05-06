@@ -162,10 +162,9 @@ namespace SelectionTracking
             gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
             gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("ReachedRequiredDuration"));
-
+            gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("NoOngoingSelection"));
 
             gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
-            gazeShotgun.TimeBeforeChoiceStarts = 0.7f;
             DefaultSelectionHandlers.Add("GazeShotgun", gazeShotgun);
             
             
@@ -678,6 +677,8 @@ namespace SelectionTracking
                 DefaultConditions.Add("ReachedRequiredDuration", () => OngoingSelection != null && OngoingSelection.ChoiceStarted && OngoingSelection.ChoiceCompleted);
 
                 DefaultConditions.Add("MouseUpOrReachedRequiredDuration", () => DefaultConditions["MouseButton0Up"]() || DefaultConditions["ReachedRequiredDuration"]());
+
+                DefaultConditions.Add("NoOngoingSelection", () => OngoingSelection == null);
 
 
                 //TERM ERRORS:

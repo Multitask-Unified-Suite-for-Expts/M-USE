@@ -186,8 +186,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //------------------------------------------------------------------------------------------------------------------------
-        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
-
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
         else

@@ -389,12 +389,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
         InflateBalloon.AddUpdateMethod(() =>
         {
-            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
-            {
-                Debug.LogWarning("CHOICE FAILED");
-                ChoiceFailed_Trial = true;
-            }
-
             InflationDuration += Time.deltaTime;
 
             if (Inflate)
@@ -491,6 +485,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             if (OngoingSelection != null)
             {
                 SetTrialSummaryString();
+            }
+
+
+
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0)
+            {
+                if (!ChoiceFailed_Trial)
+                {
+                    if (correctObjects.Contains(SelectionHandler.UnsuccessfulChoices[0].SelectedGameObject))
+                    {
+                        Debug.LogWarning("CHOICE FAILED ON A SELECTABLE OBJECT");
+                        ChoiceFailed_Trial = true;
+                    }
+                    else
+                        Debug.LogWarning("CHOICE FAILED ON ANOTHER OBJECT: " + SelectionHandler.UnsuccessfulChoices[0].SelectedGameObject.name);
+                }
+
+                SelectionHandler.ClearSelections();
             }
 
         });

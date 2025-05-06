@@ -61,9 +61,6 @@ public class GazeTracker : InputTracker
                 else
                     ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
-
-            //if (ShotgunRaycastTarget != null)
-            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
         }
         else
         {

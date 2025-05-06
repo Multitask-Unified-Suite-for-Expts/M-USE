@@ -87,7 +87,7 @@ public class InputBroker
            return Mathf.Clamp(Mathf.RoundToInt(ShotgunRadius * .5f), 10, 50);
         }
 	}
-    private static int ShotgunRadius = 50; // CONFIGURABLE VARIABLE IN TASK DEF's
+    private static int ShotgunRadius = 25; // CONFIGURABLE VARIABLE IN TASK DEF's
 
 
 
@@ -259,8 +259,6 @@ public class InputBroker
 		}
 	}
 	
-	
-	
 	public static IEnumerator ClickKey(KeyCode key)
 	{
 		SetKeyDown(key);
@@ -312,15 +310,14 @@ public class InputBroker
 
         int layers = Mathf.Clamp(Mathf.FloorToInt(ShotgunRadius / 25), 1, 5);
 
-		//FOR EVERY LAYER:
+        // FOR EVERY LAYER:
         for (int layer = 1; layer <= layers; layer++)
         {
-            float layerRatio = (float)layer / layers;  // Fraction of total layers
-            int raysPerLayer = Mathf.CeilToInt(ShotgunRays * layerRatio); // Scale rays
+            float layerRatio = (float)layer / layers;
+            int raysPerLayer = Mathf.CeilToInt(ShotgunRays * layerRatio);
+            float layerRadius = (ShotgunRadius / layers) * layer;
 
-            float layerRadius = (ShotgunRadius / layers) * layer;  // Spread layers evenly
-
-			//FOR EVERY RAY IN LAYER:
+            // FOR EVERY RAY IN LAYER:
             for (int i = 0; i < raysPerLayer; i++)
             {
                 float angle = (2 * Mathf.PI / raysPerLayer) * i;
@@ -331,12 +328,12 @@ public class InputBroker
                 // 3D Raycast
                 if (Physics.Raycast(spreadRay, out hit, Mathf.Infinity))
                 {
-                    GameObject hitObject = hit.collider.gameObject;
-                    if (!hitCount.ContainsKey(hitObject))
+                    GameObject rootObject = hit.collider.gameObject.transform.root.gameObject;
+                    if (!hitCount.ContainsKey(rootObject))
                     {
-                        hitCount[hitObject] = 0;
+                        hitCount[rootObject] = 0;
                     }
-                    hitCount[hitObject]++;
+                    hitCount[rootObject]++;
                 }
 
                 // 2D Raycast
@@ -350,17 +347,19 @@ public class InputBroker
                 {
                     if (result.gameObject != null)
                     {
-                        if (!hitCount.ContainsKey(result.gameObject))
+						GameObject rootObject = result.gameObject;
+                        //GameObject rootObject = result.gameObject.transform.root.gameObject;
+                        if (!hitCount.ContainsKey(rootObject))
                         {
-                            hitCount[result.gameObject] = 0;
+                            hitCount[rootObject] = 0;
                         }
-                        hitCount[result.gameObject]++;
+                        hitCount[rootObject]++;
                     }
                 }
             }
         }
 
-        // Find the most hit object in the shotgun rays
+        // Find the most hit root object
         if (hitCount.Count > 0)
         {
             target = hitCount.OrderByDescending(x => x.Value).First().Key;
@@ -371,46 +370,38 @@ public class InputBroker
 
 
 
-
-
-
     public static GameObject SimpleRaycast(Vector3 touchPos)
-	{
-		GameObject target = null;
-		float distance3D = 0;
+    {
+        GameObject target = null;
 
-		//3D:
-		RaycastHit hit;
-		if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
-		{
-			target = hit.transform.gameObject;
-			distance3D = (hit.point - touchPos).magnitude;
-		}
+        // 3D Raycast
+        RaycastHit hit;
+        if (Physics.Raycast(Camera.main.ScreenPointToRay(touchPos), out hit, Mathf.Infinity))
+        {
+            target = hit.transform.root.gameObject;  // Get root GameObject
+        }
 
-		//2D:
-		PointerEventData eventData = new PointerEventData(EventSystem.current);
-		eventData.position = touchPos;
+        // 2D Raycast using Unity UI system
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = touchPos;
 
-		List<RaycastResult> results = new List<RaycastResult>();
-		EventSystem.current.RaycastAll(eventData, results);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
 
-		foreach (RaycastResult result in results)
-		{
-			if (result.gameObject != null)
-			{
-				float distance2D = (result.gameObject.transform.position - touchPos).magnitude;
-				if (target == null || (distance3D != 0 && (distance2D < distance3D)))
-				{
-					target = result.gameObject;
-					break;
-				}
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject != null)
+            {
+				return result.gameObject; //return 2D first even if 3D
 			}
-		}
-		return target;
-	}
+        }
+
+        return target;
+    }
 
 
-	private static Vector2 CurrentGazePositionOnDisplayArea()
+
+    private static Vector2 CurrentGazePositionOnDisplayArea()
 	{
         Vector2 screenPoint = new Vector2(float.NaN, float.NaN);
 

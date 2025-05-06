@@ -34,6 +34,7 @@ using USE_UI;
 using UnityEngine.UIElements;
 using static SelectionTracking.SelectionTracker;
 
+
 public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WM_CanvasGO;
@@ -59,8 +60,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     private bool configUIVariablesLoaded = false;
     private float tokenFbDuration;
 
-    [HideInInspector] public ConfigNumber minObjectTouchDuration;
-    [HideInInspector] public ConfigNumber maxObjectTouchDuration;
+    [HideInInspector] public ConfigNumber timeBeforeChoiceStarts;
+    [HideInInspector] public ConfigNumber totalChoiceDuration;
     [HideInInspector] public ConfigNumber maxSearchDuration;
     [HideInInspector] public ConfigNumber tokenRevealDuration;
     [HideInInspector] public ConfigNumber tokenUpdateDuration;
@@ -154,15 +155,14 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
-        
-        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
-        SelectionHandler ShotgunHandler;
-        if(Session.SessionDef.SelectionType?.ToLower() == "gaze")
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
+
+        //------------------------------------------------------------------------------------------------------------------------
+        if (Session.SessionDef.SelectionType?.ToLower() == "gaze")
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
         
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WM_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WM_CanvasGO, true);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
@@ -181,17 +181,18 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
-            ShotgunHandler.HandlerActive = false;
+            SelectionHandler.HandlerActive = false;
            
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
         });
@@ -219,31 +220,37 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             
+            SelectionHandler.HandlerActive = true;
+
             choiceMade = false;
-
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-
-            ShotgunHandler.HandlerActive = true;
+            ChoiceFailed_Trial = false;
 
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (ShotgunHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
-                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+                ChoiceFailed_Trial = true;
+            }
+
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
+            {
+                selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WorkingMemory_StimDef>();
-                ShotgunHandler.ClearSelections();
+                SelectionHandler.ClearSelections();
                 if (selectedSD != null)
                     choiceMade = true;
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
@@ -277,14 +284,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
             UpdateExperimenterDisplaySummaryStrings();
         });
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            HandleAbortedTrialData();
+        });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            //means the player got timed out and didn't click on anything
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
-            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-            SearchDurations_InBlock.Add(null);
-            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+            AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
+            HandleAbortedTrialData();
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
@@ -300,8 +310,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else 
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
-        
-        
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });
@@ -351,6 +359,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineFrameData();
         DefineTrialData();
+    }
+
+    private void HandleAbortedTrialData()
+    {
+        SearchDurations_InBlock.Add(null);
+        CurrentTaskLevel.SearchDurations_InTask.Add(null);
     }
 
     public override void OnTokenBarFull()
@@ -472,8 +486,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     public void LoadConfigUIVariables()
     {   
         //config UI variables
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration"); 
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration"); 
         maxSearchDuration = ConfigUiVariables.get<ConfigNumber>("maxSearchDuration"); 
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         fbDuration = ConfigUiVariables.get<ConfigNumber>("fbDuration");

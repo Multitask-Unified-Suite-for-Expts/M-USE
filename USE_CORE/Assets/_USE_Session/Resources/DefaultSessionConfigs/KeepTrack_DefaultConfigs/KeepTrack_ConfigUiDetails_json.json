@@ -1,60 +1,61 @@
 {
-  "varsNumber": {
-    "minObjectTouchDuration": {
-      "name": "Min Object Touch Duration",
-      "value": 0.01,
-      "min": 0.001,
-      "max": 1,
-      "precision": 1,
-      "isRange": 1,
-      "hidden": 0
+    "varsNumber": {
+        "timeBeforeChoiceStarts": {
+            "value": 0.3,
+            "min": 0.01,
+            "max": 3.0,
+            "precision": 1,
+            "isRange": true,
+            "name": "Time Before Choice Starts",
+            "hidden": false
+        },
+
+        "totalChoiceDuration": {
+            "value": 0.7,
+            "min": 0.01,
+            "max": 5.0,
+            "precision": 1,
+            "isRange": true,
+            "name": "Total Choice Duration",
+            "hidden": false
+        },
+        "itiDuration": {
+            "name": "Iti Duration",
+            "value": 0.1,
+            "min": 0.01,
+            "max": 10,
+            "precision": 0,
+            "isRange": 1,
+            "hidden": 0
+        },
+        "sliderSize": {
+            "name": "Slider Size",
+            "value": 25,
+            "min": 1,
+            "max": 100,
+            "precision": 1,
+            "isRange": 1,
+            "hidden": 0
+        },
+        "sliderUpdateDuration": {
+            "name": "Slider Update Duration",
+            "value": 0.15,
+            "min": 0.1,
+            "max": 10,
+            "precision": 1,
+            "isRange": 1,
+            "hidden": 0
+        },
+        "sliderFlashingDuration": {
+            "name": "Slider Flashing Duration",
+            "value": 0.15,
+            "min": 0.1,
+            "max": 20,
+            "precision": 1,
+            "isRange": 1,
+            "hidden": 0
+        }
     },
-    "maxObjectTouchDuration": {
-      "name": "Max Object Touch Duration",
-      "value": 1,
-      "min": 0.01,
-      "max": 4,
-      "precision": 1,
-      "isRange": 1,
-      "hidden": 0
-    },
-    "itiDuration": {
-      "name": "Iti Duration",
-      "value": 0.1,
-      "min": 0.01,
-      "max": 10,
-      "precision": 0,
-      "isRange": 1,
-      "hidden": 0
-    },
-    "sliderSize": {
-      "name": "Slider Size",
-      "value": 25,
-      "min": 1,
-      "max": 100,
-      "precision": 1,
-      "isRange": 1,
-      "hidden": 0
-    },
-    "sliderUpdateDuration": {
-      "name": "Slider Update Duration",
-      "value": 0.15,
-      "min": 0.1,
-      "max": 10,
-      "precision": 1,
-      "isRange": 1,
-      "hidden": 0
-    },
-    "sliderFlashingDuration": {
-      "name": "Slider Flashing Duration",
-      "value": 0.15,
-      "min": 0.1,
-      "max": 20,
-      "precision": 1,
-      "isRange": 1,
-      "hidden": 0
-    }
-  },
   "varsBoolean": {},
   "varsString": {}
 }

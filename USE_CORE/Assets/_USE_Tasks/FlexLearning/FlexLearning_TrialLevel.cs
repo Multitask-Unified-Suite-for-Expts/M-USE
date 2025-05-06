@@ -56,8 +56,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     // ConfigUI Variables
     private bool configUIVariablesLoaded;
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, itiDuration, 
-        fbDuration, maxObjectTouchDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, 
+    public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, itiDuration, 
+        fbDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, 
         searchDisplayDelay;
 
     private float tokenFbDuration;
@@ -71,7 +71,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private GameObject selectedGO = null;
     private bool CorrectSelection;
     FlexLearning_StimDef selectedSD = null;
-    private bool choiceMade = false;
+    private bool ChoiceMade = false;
     private USE_Selection lastSelection = null;
     
     
@@ -173,17 +173,16 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         
         // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
-        SelectionHandler ShotgunHandler;
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
         
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, FL_CanvasGO, true);
 
+        //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
@@ -197,14 +196,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
             Input.ResetInputAxes(); //reset input in case they holding down
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
@@ -220,8 +219,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
 
@@ -233,25 +232,28 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
                 StimulationType = null;
 
+
+            ChoiceFailed_Trial = false;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
 
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             if (OngoingSelection != null)
             {
                 SetTrialSummaryString();
 
-                if (!string.IsNullOrEmpty(StimulationType))
+                if (!StimulatedDuringThisTrial && !string.IsNullOrEmpty(StimulationType))
                 {
-                    if (OngoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
+                    if (OngoingSelection.Duration >= CurrentTrialDef.InitialFixationDuration)
                     {
-                        OngoingSelection.InitialFixationDurationPassed = true;
-                        Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
-
                         GameObject GoSelected = OngoingSelection.SelectedGameObject;
                         var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
 
@@ -259,12 +261,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                         {
                             if (StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                             {
-                                Debug.Log("STIMULATING TARGET!");
                                 StartCoroutine(StimulationCoroutine());
                             }
                             else if (StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
                             {
-                                Debug.Log("STIMULATING DISTRACTOR!");
                                 StartCoroutine(StimulationCoroutine());
                             }
                         }
@@ -272,21 +272,26 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (ShotgunHandler.SuccessfulSelections.Count > 0)
+            if (base.SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
-                lastSelection = ShotgunHandler.LastSuccessfulSelection;
+                ChoiceFailed_Trial = true;
+            }
+
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
+            {
+                lastSelection = SelectionHandler.LastSuccessfulChoice;
                 selectedGO = lastSelection.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FlexLearning_StimDef>();
 
                 if(selectedSD != null)
                 {
-                    choiceMade = true;
+                    ChoiceMade = true;
                     Session.EventCodeManager.SendCodeThisFrame(selectedSD.IsTarget ? "CorrectResponse" : "IncorrectResponse");
                 }
             }
 
         });
-        SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
+        SearchDisplay.SpecifyTermination(() => ChoiceMade, SelectionFeedback, () =>
         {
             CorrectSelection = selectedSD.IsTarget;
 
@@ -320,7 +325,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             UpdateExperimenterDisplaySummaryStrings();
         });
-
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            //EndBlock = true; //dont think i need this for FL cuz it just needs to end the trial not the block
+        });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
@@ -349,32 +358,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
             else
                 HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
-
-            if(CurrentTrialDef.StimulationType != null)
-            {
-                string stimulationType = CurrentTrialDef.StimulationType.Trim();
-
-                if (lastSelection.InitialFixationDurationPassed && stimulationType.Contains("Halo"))
-                {
-                    if (stimulationType == "HaloOnset_Correct" && CorrectSelection)
-                    {
-                        Debug.Log("STIM'ING ON CORRECT HALO!");
-                        StartCoroutine(StimulationCoroutine());
-
-                    }
-                    else if (stimulationType == "HaloOnset_Incorrect" && !CorrectSelection)
-                    {
-                        Debug.Log("STIM'ING ON INCORRECT HALO!");
-                        StartCoroutine(StimulationCoroutine());
-                    }
-                }
-            }
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () =>
         {
             HaloFBController.DestroyAllHalos();
-            choiceMade = false;
+            ChoiceMade = false;
         });
        
         // TOKEN FEEDBACK STATE ------------------------------------------------------------------------------------------------
@@ -421,9 +410,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     public IEnumerator StimulationCoroutine()
     {
+        if (StimulatedDuringThisTrial)
+            yield break;
+
+        StimulatedDuringThisTrial = true;
+
         yield return new WaitForSeconds(CurrentTrialDef.StimulationDelayDuration);
-        Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
-        StartCoroutine(Session.SyncBoxController?.SendSonication());
+        //Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
+        if(Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendSonication());
 
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
         CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
@@ -563,7 +558,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     public override void ResetTrialVariables()
     {
-        choiceMade = false;
+        ChoiceMade = false;
         selectedGO = null;
         selectedSD = null;
         SelectedStimIndex = null;
@@ -571,6 +566,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SearchDuration = 0;
         CorrectSelection = false;
         RewardGiven = false;
+        ChoiceFailed_Trial = false;
+
     }
     private void DefineTrialData()
     {
@@ -618,8 +615,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     void LoadConfigUIVariables()
     {
         //config UI variables
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");

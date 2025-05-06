@@ -130,6 +130,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public int TrialStimulationCode = 0;
 
         [HideInInspector] public bool StimulateThisTrial = false;
+        [HideInInspector] public bool StimulatedDuringThisTrial = false;
 
 
 
@@ -138,6 +139,7 @@ namespace USE_ExperimentTemplate_Trial
         [HideInInspector] public SelectionHandler SelectionHandler;
 
 
+        [HideInInspector] public bool ChoiceFailed_Trial;
 
 
 
@@ -325,6 +327,10 @@ namespace USE_ExperimentTemplate_Trial
 
                 //Set stimulate to false, then individual tasks trial levels can set to try if conditions warrant it
                 StimulateThisTrial = false;
+
+                StimulatedDuringThisTrial = false;
+
+                ChoiceFailed_Trial = false;
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>
@@ -475,6 +481,7 @@ namespace USE_ExperimentTemplate_Trial
             StartCoroutine(TrialData.CreateFile());
 
         }
+
 
         private IEnumerator WaitForTransitionFromGazeCalibrationToTask()
         {
@@ -628,6 +635,10 @@ namespace USE_ExperimentTemplate_Trial
             
             if (!AbortCodeDict.ContainsKey("ToggleCalibration"))
                 AbortCodeDict.Add("ToggleCalibration", 7);
+
+            if (!AbortCodeDict.ContainsKey("ChoiceFailed"))
+                AbortCodeDict.Add("ChoiceFailed", 8);
+
         }
 
         public void AddRigidBody(GameObject go)

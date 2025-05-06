@@ -42,7 +42,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     private int SliderGainSteps;
     private bool GiveRewardIfSliderFull = false;
 
-    [HideInInspector] public ConfigNumber itiDuration, minObjectTouchDuration, maxObjectTouchDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
+    [HideInInspector] public ConfigNumber itiDuration, timeBeforeChoiceStarts, totalChoiceDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
 
     private float HaloDepth = 15f;
@@ -92,7 +92,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                 Destroy(ObjManager);
 
             ObjManager = gameObject.AddComponent<KT_ObjectManager>();
-            ObjManager.MaxTouchDuration = maxObjectTouchDuration.value;
+            ObjManager.MaxTouchDuration = totalChoiceDuration.value;
             ObjManager.TaskEventCodes = TaskEventCodes;
             ObjManager.SetObjectParent(KeepTrack_CanvasGO.transform);
             ObjManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
@@ -123,29 +123,25 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
 
         //Setup Shotgun Handler ---------------------------------------------------------------------
-        SelectionHandler ShotgunHandler;
-
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Play);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Play);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play);
         //--------------------------------------------------------------------------------------------
-
-
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, KeepTrack_CanvasGO, false); //Enable Touch Feedback
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, KeepTrack_CanvasGO, false); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             SetTrialSummaryString();
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
         });
         InitTrial.SpecifyTermination(() => CurrentTask.RunSimulation, DisplayTarget);
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget);
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayTarget);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             BordersGO.SetActive(true);
@@ -178,8 +174,9 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         Play.AddSpecificInitializationMethod(() =>
         {
             GiveRewardIfSliderFull = false;
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
 
             ObjManager.ActivateInitialObjectsMovement();
@@ -191,7 +188,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         });
         Play.AddUpdateMethod(() =>
         {
-            ChosenGO = ShotgunHandler.LastSuccessfulSelection?.SelectedGameObject;
+            ChosenGO = SelectionHandler.LastSuccessfulChoice?.SelectedGameObject;
             if (ChosenGO != null)
             {
                 if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
@@ -256,13 +253,13 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
                     Input.ResetInputAxes(); //Reset input?
 
-                    ShotgunHandler.LastSuccessfulSelection = null;
+                    SelectionHandler.LastSuccessfulChoice = null;
                 }
             }
 
             HandleSlider();
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
@@ -270,8 +267,18 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                 SetTrialSummaryString();
             }
 
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                ChoiceFailed_Trial = true;
+            }
+
         });
         Play.SpecifyTermination(() => ObjManager.DistractorList.Count < 1 && ObjManager.TargetList.Count < 1, ITI);
+        Play.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
+        {
+            AbortCode = 8;
+            Debug.LogWarning("Trial aborted due to unsuccessful selection");
+        });
 
         //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => itiDuration.value, FinishTrial);
@@ -557,8 +564,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
         sliderFlashingDuration = ConfigUiVariables.get<ConfigNumber>("sliderFlashingDuration");

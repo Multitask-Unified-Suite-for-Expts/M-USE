@@ -72,7 +72,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     // Config Loading Variables
     private bool configUIVariablesLoaded = false;
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration,
+    public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, gratingSquareDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, selectObjectDuration, selectionFbDuration, displaySampleDuration, postSampleDelayDuration,
           itiDuration;
     private float tokenFbDuration;
 
@@ -214,7 +214,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
         var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, SearchDisplay);
         TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, StartButtonScale, taskCanvas, true);
 
-        InitTrial.AddSpecificInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod((VoidDelegate)(() =>
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -225,12 +225,12 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 AdjustedPositionsForMac = true;
             }
 
-            if (Handler.AllSelections.Count > 0)
+            if (Handler.AllChoices.Count > 0)
                 Handler.ClearSelections();
 
-            Handler.MinDuration = minObjectTouchDuration.value;
-            Handler.MaxDuration = maxObjectTouchDuration.value;
-        });
+            Handler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            Handler.TotalChoiceDuration = totalChoiceDuration.value;
+        }));
 
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(Session.USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
@@ -270,7 +270,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             
             choiceMade = false;
             // Handler.HandlerActive = true;
-            if (Handler.AllSelections.Count > 0)
+            if (Handler.AllChoices.Count > 0)
                 Handler.ClearSelections();
             
             foreach(StimDef sd in multiCompStims.stimDefs)
@@ -279,9 +279,9 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (Handler.SuccessfulSelections.Count > 0)
+            if (Handler.SuccessfulChoices.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulSelection.SelectedGameObject.GetComponent<StimDefPointer>().StimDef.StimGameObject;
+                selectedGO = Handler.LastSuccessfulChoice.SelectedGameObject.GetComponent<StimDefPointer>().StimDef.StimGameObject;
                 Debug.Log("selected stim" + selectedGO);
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FeatureUncertaintyWM_MultiCompStimDef>();
                 Handler.ClearSelections();
@@ -795,8 +795,8 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
     public void LoadConfigUIVariables()
     {
         //config UI variables
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration"); 
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration"); 
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
         selectionFbDuration = ConfigUiVariables.get<ConfigNumber>("selectionFbDuration");
         displaySampleDuration = ConfigUiVariables.get<ConfigNumber>("displaySampleDuration");

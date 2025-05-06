@@ -11,6 +11,7 @@ using TMPro;
 using System;
 using static SelectionTracking.SelectionTracker;
 
+
 public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 {
     public AudioVisual_TrialDef CurrentTrial => GetCurrentTrialDef<AudioVisual_TrialDef>();
@@ -44,7 +45,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     public TextMeshProUGUI FeedbackText;
 
     //Config UI Variables:
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, touchFbDuration, tokenUpdateDuration, tokenRevealDuration, tokenFlashingDuration;
+    public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, touchFbDuration, tokenUpdateDuration, tokenRevealDuration, tokenFlashingDuration;
 
 
     [HideInInspector] public int NumCorrect_Block, NumTbCompletions_Block; //DONE
@@ -123,19 +124,17 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //------------------------------------------------------------------------------------------------------------------------
-        SelectionHandler ShotgunHandler;
-
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, PlayerChoice);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, PlayerChoice);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, PlayerChoice);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, PlayerChoice);
 
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 20, AV_CanvasGO, false);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 20, AV_CanvasGO, false);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            ShotgunHandler.SelectablePeriod = true;
+            SelectionHandler.SelectablePeriod = true;
 
             LoadConfigUIVariables();
 
@@ -151,13 +150,13 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
             SetShadowType(CurrentTask.ShadowType, "AudioVisual_DirectionalLight");
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Preparation);
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Preparation);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
             TokenFBController.enabled = true;
@@ -174,7 +173,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         //Preparation state -------------------------------------------------------------------------------------------------------
         Preparation.AddSpecificInitializationMethod(() =>
         {
-            ShotgunHandler.SelectablePeriod = false;
+            SelectionHandler.SelectablePeriod = false;
 
             WaitCueGO.SetActive(true);
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["WaitCueActive"]);
@@ -209,21 +208,23 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         //PlayerChoice state -------------------------------------------------------------------------------------------------------
         PlayerChoice.AddSpecificInitializationMethod(() =>
         {
-            ShotgunHandler.SelectablePeriod = true;
+            SelectionHandler.SelectablePeriod = true;
 
             ChosenGO = null;
             SelectionMade = false;
+            ChoiceFailed_Trial = false;
+
             WaitCueGO.SetActive(false);
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
         PlayerChoice.AddUpdateMethod(() =>
         {
-            ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+            ChosenGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject;
             if(ChosenGO != null)
             {
                 if(ChosenGO == LeftIconGO)
@@ -253,7 +254,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
@@ -261,22 +262,30 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 SetTrialSummaryString();
             }
 
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                ChoiceFailed_Trial = true;
+            }
+
         });
-        PlayerChoice.AddTimer(() => CurrentTrial.ChoiceDuration, Feedback);
         PlayerChoice.SpecifyTermination(() => SelectionMade, Feedback);
+        PlayerChoice.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            //Dont need negative audio because touchfeedback (for holding too short) plays it
+        });
+        PlayerChoice.AddTimer(() => CurrentTrial.ChoiceDuration, ITI, () =>
+        {
+            AbortCode = 6;
+            Session.EventCodeManager.SendCodeThisFrame("NoChoice");
+            AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
+        });
 
         //Feedback state -------------------------------------------------------------------------------------------------------
         Feedback.AddSpecificInitializationMethod(() =>
         {
             if (CurrentTrial.ShowTextFeedback)
                 FeedbackPanelGO.SetActive(true);
-            
-            if (ChosenGO == null)
-            {
-                FeedbackText.text = "Time Ran Out!";
-                AudioFBController.Play("NegativeShow");
-                return;
-            }
 
             if (GotTrialCorrect)
             {
@@ -292,20 +301,19 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);
-        //Feedback.SpecifyTermination(() => ChosenGO == null, ITI);
-        Feedback.AddDefaultTerminationMethod(() =>
+
+        //ITI state -------------------------------------------------------------------------------------------------------
+        ITI.AddSpecificInitializationMethod(() =>
         {
             FeedbackPanelGO.SetActive(false);
             HaloFBController.DestroyAllHalos();
 
-            if(Session.SessionDef.IsHuman)
+            if (Session.SessionDef.IsHuman)
             {
                 ScoreTextGO.SetActive(false);
                 NumCorrectTextGO.SetActive(false);
             }
         });
-
-        //ITI state -------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
 
         //-----------------------------------------------------------------------------------------------------------------
@@ -509,8 +517,8 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         touchFbDuration = ConfigUiVariables.get<ConfigNumber>("touchFbDuration");
         tokenRevealDuration = ConfigUiVariables.get<ConfigNumber>("tokenRevealDuration");
         tokenUpdateDuration = ConfigUiVariables.get<ConfigNumber>("tokenUpdateDuration");

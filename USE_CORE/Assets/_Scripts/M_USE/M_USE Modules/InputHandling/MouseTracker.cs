@@ -105,7 +105,7 @@ public class MouseTracker : InputTracker
         if (CurrentInputScreenPosition != null && Camera.main != null)
         {
             SimpleRaycastTarget = InputBroker.SimpleRaycast(CurrentInputScreenPosition.Value); //Normal raycast
-
+            
             if (UsingShotgunHandler)
             {
                 if (SimpleRaycastTarget != null)
@@ -113,9 +113,6 @@ public class MouseTracker : InputTracker
                 else
                     ShotgunRaycastTarget = InputBroker.ShotgunRaycast(CurrentInputScreenPosition.Value);
             }
-
-            //if (ShotgunRaycastTarget != null)
-            //    Debug.LogWarning("SHOTGUN TARGET = " + ShotgunRaycastTarget.name);
         }
         else
         {

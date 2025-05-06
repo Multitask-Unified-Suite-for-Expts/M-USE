@@ -41,7 +41,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     public VisualSearch_TaskDef currentTaskDef => GetTaskDef<VisualSearch_TaskDef>();
 
     public GameObject VS_CanvasGO;
-    public SelectionTracking.SelectionTracker.SelectionHandler ShotgunHandler;
     
     // Stimuli Variables
     private StimGroup searchStim;
@@ -50,7 +49,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     // ConfigUI variables / Timing Variable
     private bool configUIVariablesLoaded;
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, itiDuration, fbDuration, maxObjectTouchDuration, 
+    public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, itiDuration, fbDuration,
         selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, searchDisplayDelay;
     private float tokenFbDuration;
 
@@ -143,14 +142,15 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
+        //Selection Handler ----------------------------------------------------------------------------------------------
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SearchDisplay);
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SearchDisplay);
 
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, VS_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale *10, VS_CanvasGO, true);
 
+        //INIT TRIAL STATE ----------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
@@ -164,17 +164,17 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
         });
 
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(),
-            SearchDisplayDelay, () => 
-            {
-                choiceMade = false;
-            });
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay, () => 
+        {
+            choiceMade = false;
+        });
         
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);
@@ -187,25 +187,31 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
             searchStartTime = Time.time;
             
-
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
-            
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
 
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
+            ChoiceFailed_Trial = false;
+
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (ShotgunHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
-                selectedGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+                ChoiceFailed_Trial = true;
+            }
+
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
+            {
+                selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
 
                 if (selectedSD != null)
@@ -214,13 +220,13 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     SearchDurations_InBlock.Add(searchDuration);
                     CurrentTaskLevel.SearchDurations_InTask.Add(searchDuration);
                     TrialDataSummary.ReactionTime = searchDuration;
-                    TrialDataSummary.SelectionPrecision = ShotgunHandler.LastSuccessfulSelection.SelectionPrecision;
+                    TrialDataSummary.SelectionPrecision = SelectionHandler.LastSuccessfulChoice.SelectionPrecision;
                     choiceMade = true;
                 }
-                ShotgunHandler.ClearSelections();
+                SelectionHandler.ClearSelections();
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
@@ -255,10 +261,20 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
             UpdateExperimenterDisplaySummaryStrings();
         });
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            //Dont need negative audio because touchfeedback (for holding too short) plays it
+
+            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+            SearchDurations_InBlock.Add(null);
+            TrialDataSummary.ReactionTime = null;
+            TrialDataSummary.CorrectSelection = null;
+            TrialDataSummary.SelectionPrecision = null;
+        });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
-            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
@@ -274,10 +290,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
         // SELECTION FEEDBACK STATE ---------------------------------------------------------------------------------------   
         SelectionFeedback.AddSpecificInitializationMethod(() =>
-        {
-            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
-
-            
+        {   
             UpdateExperimenterDisplaySummaryStrings();
 
             int? depth = Session.Using2DStim ? 50 : (int?)null;
@@ -316,6 +329,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         // ITI STATE ---------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
         {
+            Accuracy_InBlock = decimal.Divide(NumCorrect_InBlock, (TrialCount_InBlock + 1));
+
             if (currentTaskDef.NeutralITI)
             {
                 ContextName = "NeutralITI";
@@ -345,7 +360,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 NumPulses = chooseReward(CurrentTrialDef.ProbablisticNumPulses);
             else
                 NumPulses = CurrentTrialDef.NumPulses;
+
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrialDef.PulseSize));
+
             CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
             RewardGiven = true;
@@ -509,8 +526,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     private void LoadConfigUIVariables()
     {
         //config UI variables
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         searchDisplayDelay = ConfigUiVariables.get<ConfigNumber>("searchDisplayDelay");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");

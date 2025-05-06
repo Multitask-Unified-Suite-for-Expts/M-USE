@@ -91,8 +91,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     public ConfigNumber sliderSize;
     public ConfigNumber tileBlinkingDuration;
     public ConfigNumber maxMazeDuration;
-    public ConfigNumber minObjectTouchDuration;
-    public ConfigNumber maxObjectTouchDuration;
+    public ConfigNumber timeBeforeChoiceStarts;
+    public ConfigNumber totalChoiceDuration;
 
     // Player View Variables
     private PlayerViewPanel PlayerViewPanelController;
@@ -199,10 +199,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             if (MazeManager.GetMazeStartTime() == 0)
                 MazeManager.SetMazeStartTime(Time.unscaledTime);
 
-            SelectionHandler.HandlerActive = true;
-            if (SelectionHandler.AllSelections.Count > 0)
-                SelectionHandler.ClearSelections();
-
             if (CheckTileFlash())
             {
                 if (!MazeManager.IsMazeStarted())
@@ -212,6 +208,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
                 MazeManager.FlashNextCorrectTile(flashingTile);
             }
+
+            ChoiceFailed_Trial = false;
+
+            SelectionHandler.HandlerActive = true;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
         });
         ChooseTile.AddUpdateMethod(() =>
         {
@@ -220,9 +224,9 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             
             SetTrialSummaryString(); // called every frame to update duration info
             
-            if (SelectionHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
-                if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.GetComponent<Tile>() != null)
+                if (SelectionHandler.LastSuccessfulChoice.SelectedGameObject.GetComponent<Tile>() != null)
                 {
                     if(flashingTile != null)
                         MazeManager.TerminateNextCorrectTileFlashing(flashingTile);
@@ -230,9 +234,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     choiceMade = true;
                     
                     MazeManager.AddReactionTime();
-                    MazeManager.SetSelectedTileGO(SelectionHandler.LastSuccessfulSelection.SelectedGameObject);
+                    MazeManager.SetSelectedTileGO(SelectionHandler.LastSuccessfulChoice.SelectedGameObject);
                     SelectionHandler.ClearSelections();
                 }
+            }
+
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                ChoiceFailed_Trial = true;
             }
         });
         ChooseTile.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
@@ -256,19 +265,17 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["MazeFinish"]);
             }
         });
-        ChooseTile.SpecifyTermination(() => (MazeManager.GetMazeDuration() > CurrentTrialDef.MaxMazeDuration) || (MazeManager.GetChoiceDuration() > CurrentTrialDef.MaxChoiceDuration), () => FinishTrial, () =>
+        ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            HandleAbortTrialData();
+        });
+        ChooseTile.SpecifyTermination(() => (MazeManager.GetMazeDuration() > CurrentTrialDef.MaxMazeDuration) || (MazeManager.GetChoiceDuration() > CurrentTrialDef.MaxChoiceDuration), () => ITI, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
-            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-
-            CurrentTaskLevel.MazeDurations_InBlock.Add(null);
-            CurrentTaskLevel.MazeDurations_InTask.Add(null);
-
-            CurrentTaskLevel.ChoiceDurations_InBlock.Add(null);
-            CurrentTaskLevel.ChoiceDurations_InTask.Add(null);
-
-            runningPercentError.Add(null);
+            HandleAbortTrialData();
+            AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
@@ -369,6 +376,19 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     }
 
 
+
+    private void HandleAbortTrialData()
+    {
+        CurrentTaskLevel.MazeDurations_InBlock.Add(null);
+        CurrentTaskLevel.MazeDurations_InTask.Add(null);
+
+        CurrentTaskLevel.ChoiceDurations_InBlock.Add(null);
+        CurrentTaskLevel.ChoiceDurations_InTask.Add(null);
+
+        runningPercentError.Add(null);
+    }
+
+
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     public override void AddToStimLists()
     {
@@ -444,10 +464,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private void InitializeSelectionHandler(SelectionTracking.SelectionTracker.SelectionHandler selectionHandler)
     {
         selectionHandler.HandlerActive = true;
-        if (selectionHandler.AllSelections.Count > 0)
+        if (selectionHandler.AllChoices.Count > 0)
             selectionHandler.ClearSelections();
-        selectionHandler.MinDuration = minObjectTouchDuration.value;
-        selectionHandler.MaxDuration = maxObjectTouchDuration.value;
+        selectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+        selectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
     }
     
     public bool CheckTileFlash()
@@ -522,8 +542,8 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         incorrectRuleBreakingFbDuration = ConfigUiVariables.get<ConfigNumber>("incorrectRuleBreakingFbDuration");
         tileBlinkingDuration = ConfigUiVariables.get<ConfigNumber>("tileBlinkingDuration");
         maxMazeDuration = ConfigUiVariables.get<ConfigNumber>("maxMazeDuration");
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
 
         finishedFbDuration = flashingFbDuration.value + correctFbDuration.value;
         configVariablesLoaded = true;

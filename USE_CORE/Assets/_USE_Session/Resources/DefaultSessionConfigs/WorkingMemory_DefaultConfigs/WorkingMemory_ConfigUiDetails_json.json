@@ -30,24 +30,24 @@
 			"name": "Token Flashing Duration",
 			"hidden": false
 		},
-		
-		"minObjectTouchDuration": {
-			"value": 0.001,
-			"min": 0.001,
-			"max": 5.0,
+
+		"timeBeforeChoiceStarts": {
+			"value": 0.3,
+			"min": 0.01,
+			"max": 3.0,
 			"precision": 1,
 			"isRange": true,
-			"name": "Min Object Touch Duration",
+			"name": "Time Before Choice Starts",
 			"hidden": false
 		},
 
-		"maxObjectTouchDuration": {
-			"value": 2.0,
-			"min": 0.1,
+		"totalChoiceDuration": {
+			"value": 0.7,
+			"min": 0.01,
 			"max": 5.0,
 			"precision": 1,
 			"isRange": true,
-			"name": "Max Object Touch Duration",
+			"name": "Total Choice Duration",
 			"hidden": false
 		},
 

@@ -97,6 +97,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] GameObject ChosenGO;
     [HideInInspector] ContinuousRecognition_StimDef ChosenStim;
+    [HideInInspector] ContinuousRecognition_StimDef OngoingSelectionStim;
+
 
     private int NumPC_Trial, NumNew_Trial, NumPNC_Trial;
 
@@ -106,7 +108,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     
     //Config Variables
     [HideInInspector]
-    public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, displayStimDuration, chooseStimDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
+    public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, displayStimDuration, chooseStimDuration, touchFbDuration, displayResultsDuration, tokenUpdateDuration, tokenRevealDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
 
     public GameObject DisplayResults2DContainerGO, DisplayResultsPanelGO;
 
@@ -235,10 +237,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetStimStrings();
             SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 
-            if (SelectionHandler.AllSelections.Count > 0)
+            if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
-            SelectionHandler.MinDuration = minObjectTouchDuration.value;
-            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
             Input.ResetInputAxes(); //reset input in case they holding down
         });
@@ -297,19 +299,51 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             ChosenGO = null;
             ChosenStim = null;
             StimIsChosen = false;
+            ChoiceFailed_Trial = false;
 
             if (TrialCount_InBlock == 0)
                 TimeToCompletion_StartTime = Time.time;
 
-            if (SelectionHandler.AllSelections.Count > 0)
+            if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
+
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-            ChosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject;
+            OngoingSelection = SelectionHandler.OngoingSelection;
+
+            if (OngoingSelection != null)
+            {
+                SetTrialSummaryString(); //update trial summary string so experimenter can see ongoing selection duration
+
+                if (StimulateThisTrial && !StimulatedDuringThisTrial)
+                {
+                    if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.ChoiceStarted)
+                    {
+                        GameObject ongoingSelectionGO = OngoingSelection.SelectedGameObject;
+                        OngoingSelectionStim = ongoingSelectionGO.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
+
+                        if(OngoingSelectionStim != null)
+                        {
+                            string stimulationType = CurrentTrial.StimulationType.Trim();
+                            if (stimulationType == "FixationChoice_Target" && !OngoingSelectionStim.PreviouslyChosen)
+                                StartCoroutine(StimulationCoroutine());
+                            else if (stimulationType == "FixationChoice_Distractor" && OngoingSelectionStim.PreviouslyChosen)
+                                StartCoroutine(StimulationCoroutine());
+                        }
+                    }
+                }
+            }
+
+            if(SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                ChoiceFailed_Trial = true;
+            }
+
+            ChosenGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
             if (ChosenStim != null) //They Clicked a Stim
@@ -386,43 +420,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     NonChosenStimLocations = $"[{string.Join(", ", CurrentTrial.TrialStimLocations.Where(location => location != ChosenStim.StimLocation))}]";
             }
 
-
-            OngoingSelection = SelectionHandler.OngoingSelection;
-
-            if(OngoingSelection != null)
-            {
-                SetTrialSummaryString(); //update trial summary string so experimenter can see ongoing selection duration
-
-                if(StimulateThisTrial)
-                {
-                    if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.InitialFixationDurationPassed)
-                    {
-                        OngoingSelection.InitialFixationDurationPassed = true;
-                        Session.EventCodeManager.SendCodeThisFrame("InitialFixationDurationPassed");
-
-                        GameObject GoSelected = OngoingSelection.SelectedGameObject;
-                        ContinuousRecognition_StimDef chosenStimulus = GoSelected.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
-
-                        if (chosenStimulus == null)
-                            return;
-
-                        string stimulationType = CurrentTrial.StimulationType.Trim();
-                        if (stimulationType == "FixationChoice_Target" && !chosenStimulus.PreviouslyChosen)
-                        {
-                            Debug.Log("STIMULATING TARGET AT FRAME: " + Time.frameCount);
-                            StartCoroutine(StimulationCoroutine());
-                        }
-                        else if (stimulationType == "FixationChoice_Distractor" && chosenStimulus.PreviouslyChosen)
-                        {
-                            Debug.Log("STIMULATING DISTRACTOR AT FRAME: " + Time.frameCount);
-                            StartCoroutine(StimulationCoroutine());
-                        }
-                    }   
-                }
-            }
-
-
-            if (ChosenGO != null && ChosenStim != null && SelectionHandler.SuccessfulSelections.Count > 0) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null && SelectionHandler.SuccessfulChoices.Count > 0) //if they chose a stim 
                 StimIsChosen = true;
 
             //Count NonStim Clicks:
@@ -437,6 +435,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
+        ChooseStim.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        {
+            AbortCode = 8;
+            numPulsesTrial = 0;
+            EndBlock = true;
+        });
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
@@ -459,31 +463,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
             else
                 HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depth: depth);
-
-            if (StimulateThisTrial && CurrentTrial.StimulationType != null)
-            {
-                string stimulationType = CurrentTrial.StimulationType.Trim();
-                var lastSelection = SelectionHandler.LastSuccessfulSelection; //TEST WHETHER TO USE ONGOING SEL OR LAST SELECTION. PROB LAST SINCE SEL WAS MADE TO GET TO THIS STATE
-
-                if(lastSelection != null)
-                {
-                    if (lastSelection.InitialFixationDurationPassed && stimulationType.Contains("Halo"))
-                    {
-                        if (stimulationType == "HaloOnset_Correct" && GotTrialCorrect)
-                        {
-                            Debug.Log("STIMULATION - CORRECT HALO!");
-                            StartCoroutine(StimulationCoroutine());
-
-                        }
-                        else if (stimulationType == "HaloOnset_Incorrect" && !GotTrialCorrect)
-                        {
-                            Debug.Log("STIMULATION - INCORRECT HALO!");
-                            StartCoroutine(StimulationCoroutine());
-                        }
-                    }
-                }
-            }
-
         });
         TouchFeedback.AddTimer(() => touchFbDuration.value, TokenUpdate);
         TouchFeedback.SpecifyTermination(() => !StimIsChosen, TokenUpdate);
@@ -512,7 +491,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                     SliderFBController.UpdateSliderValue((float)(CurrentTrial.SliderChange / 100f));
-                Debug.Log("**SLIDER CHANGE: " + CurrentTrial.SliderChange);
             }
             else //Got wrong
             {
@@ -586,9 +564,16 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
     public IEnumerator StimulationCoroutine()
     {
+        if (StimulatedDuringThisTrial)
+            yield break;
+
+        StimulatedDuringThisTrial = true;
+
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
-        Debug.Log("SENDING SONICATION AFTER DELAY OF: " + CurrentTrial.StimulationDelayDuration);
-        StartCoroutine(Session.SyncBoxController?.SendSonication());
+        //Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
+
+        if(Session.SyncBoxController != null)
+            StartCoroutine(Session.SyncBoxController.SendSonication());
 
         //Increment Data
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
@@ -759,6 +744,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         CompletedAllTrials = false;
         EndBlock = false;
         StimIsChosen = false;
+        ChoiceFailed_Trial = false;
 
         // for time outs
         ChosenStimCategory = "No Stim Chosen";
@@ -1450,8 +1436,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         displayStimDuration = ConfigUiVariables.get<ConfigNumber>("displayStimDuration");
         chooseStimDuration = ConfigUiVariables.get<ConfigNumber>("chooseStimDuration");
         touchFbDuration = ConfigUiVariables.get<ConfigNumber>("touchFbDuration");

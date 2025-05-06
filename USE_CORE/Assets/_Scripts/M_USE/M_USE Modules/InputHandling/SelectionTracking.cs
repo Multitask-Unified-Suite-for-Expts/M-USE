@@ -124,7 +124,6 @@ namespace SelectionTracking
 
             mouseHover.UpdateConditions.Add(mouseHover.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
 
-            mouseHover.UpdateErrorTriggers.Add("MovedTooFar", mouseHover.DefaultConditions("MovedTooFar"));
             mouseHover.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseHover.DefaultConditions("NotSelectablePeriod"));
 
             mouseHover.TerminationErrorTriggers.Add("DurationTooShort", mouseHover.DefaultConditions("DurationTooShort"));
@@ -257,7 +256,7 @@ namespace SelectionTracking
             public float? TotalChoiceDuration = 0.7f;
 
 
-            public int? MaxPixelDisplacement;
+            public int? MaxPixelDisplacement = 100;
             public List<BoolDelegate> InitConditions, UpdateConditions, TerminationConditions;
             public Dictionary<string, BoolDelegate> InitErrorTriggers, UpdateErrorTriggers, TerminationErrorTriggers;
             public InputDelegate CurrentInputLocation;
@@ -482,7 +481,7 @@ namespace SelectionTracking
                     return;
                 }
 
-                
+
 
                 //if we have reached this point we know there is a target, there was a previous selection AND this is not first frame of new selection
                 if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
@@ -518,7 +517,6 @@ namespace SelectionTracking
                 bool? update = CheckForAllConditions(UpdateConditions);
                 string? updateErrors = CheckAllErrorTriggers("update");
 
-
                 if (update != null && update.Value)
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
@@ -527,7 +525,7 @@ namespace SelectionTracking
                     }
                     else
                     {
-                        Debug.LogWarning("UPDATE ERROR!!");
+                        Debug.LogWarning("UPDATE ERROR | " + updateErrors);
                         ChoiceFailed(updateErrors);
                     }
                 }
@@ -546,7 +544,7 @@ namespace SelectionTracking
                     }
                     else
                     {
-                        Debug.LogWarning("TERMINATION ERROR");
+                        Debug.LogWarning("TERMINATION ERROR | " + termErrors);
                         ChoiceFailed(termErrors);
                     }
                 }
@@ -711,6 +709,8 @@ namespace SelectionTracking
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
                     return MaxPixelDisplacement != null
+                           && OngoingSelection != null
+                           && OngoingSelection.ChoiceStarted
                            && OngoingSelection.InputLocations.Count > 0
                            && Vector3.Distance(OngoingSelection.InputLocations[0], CurrentInputLocation()) > MaxPixelDisplacement;
                 });

@@ -213,7 +213,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SliderFlashingFeedback);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, SliderFlashingFeedback);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, SliderFlashingFeedback);
 
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
         //-------------------------------------------------------------------------------------------------------------------------------

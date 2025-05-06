@@ -164,7 +164,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ITI);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ITI);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, ITI);
 
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 15, MG_CanvasGO, false);
         //--------------------------------------------------------------------------------------------------------------------------------------------------------

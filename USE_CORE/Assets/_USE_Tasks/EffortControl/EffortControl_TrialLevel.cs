@@ -190,7 +190,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InflateBalloon);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, InflateBalloon);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, InflateBalloon);
 
         //Enable Touch Feedback:
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO, true);

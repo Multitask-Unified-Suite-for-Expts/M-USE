@@ -115,7 +115,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int NumSameRewardChosen_Block;
     [HideInInspector] public List<float?> InflationDurations_Block = new List<float?>();
 
-    [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
+    [HideInInspector] public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, scalingInterval, inflateDuration, itiDuration, popToFeedbackDelay, choiceToTouchDelay, sbToBalloonDelay; //ScalingInterval is used for balloonInflation!
 
     [HideInInspector] public GameObject MaxOutline_Left;
     [HideInInspector] public GameObject MaxOutline_Right;
@@ -186,26 +186,24 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        //Setup Handler:
-        SelectionHandler ShotgunHandler;
-
+        //Setup Handler--------------------------------------------------------------------------------------------------------------------------------------------------
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InflateBalloon);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InflateBalloon);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, InflateBalloon);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, InflateBalloon);
 
         //Enable Touch Feedback:
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 10, EC_CanvasGO, true);
 
         //INIT Trial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             //Set handler active in case they ran out of time mid inflation and it was never set back to active
-            if (ShotgunHandler != null)
-                ShotgunHandler.HandlerActive = true;
+            if (SelectionHandler != null)
+                SelectionHandler.HandlerActive = true;
 
             TokenFBController.enabled = false;
-            ResetRelativeStartTime(); 
+            ResetRelativeStartTime();
             DisableAllGameobjects();
 
             ResetToOriginalPositions();
@@ -218,13 +216,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             CurrentTaskLevel.CalculateBlockSummaryString();
 
-            if(ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if(SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
@@ -261,20 +259,20 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             SideChoice = null;
 
-            if(ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            if(SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
         });
         ChooseBalloon.AddUpdateMethod(() =>
         {
-            if (ShotgunHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
                 BalloonSelectedTime = Time.time;
-                if (ShotgunHandler.LastSuccessfulSelection.SelectedGameObject.name.Contains("Left"))
+                if (SelectionHandler.LastSuccessfulChoice.SelectedGameObject.name.Contains("Left"))
                 {
                     SideChoice = "Left";
                     TrialStim = StimLeft;
                 }
-                else if (ShotgunHandler.LastSuccessfulSelection.SelectedGameObject.name.Contains("Right"))
+                else if (SelectionHandler.LastSuccessfulChoice.SelectedGameObject.name.Contains("Right"))
                 {
                     SideChoice = "Right";
                     TrialStim = StimRight;
@@ -352,8 +350,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         //Inflate Balloon state -----------------------------------------------------------------------------------------------------------------------------------------
         int outlineClicksRemaining = 1;
         int successfulSelections = 0;
-        float startTime = 0;
-        float holdTime = 0;
         List<GameObject> correctObjects = new List<GameObject>();
 
         InflateBalloon.AddSpecificInitializationMethod(() =>
@@ -370,28 +366,35 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             TrialTouches = 0;
             NumInflations = 0;
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-
             SetTrialSummaryString();
 
             outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
-            startTime = 0;
-            holdTime = 0;
             successfulSelections = 0;
 
             correctObjects = new List<GameObject>() {TrialStim, MaxOutline_Left, MaxOutline_Right };
 
             Inflate = false;
 
-            if (ShotgunHandler != null)
-                ShotgunHandler.HandlerActive = true;
+            ChoiceFailed_Trial = false;
+
+            if (SelectionHandler != null)
+                SelectionHandler.HandlerActive = true;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
+
         InflateBalloon.AddUpdateMethod(() =>
         {
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                Debug.LogWarning("CHOICE FAILED");
+                ChoiceFailed_Trial = true;
+            }
+
             InflationDuration += Time.deltaTime;
 
             if (Inflate)
@@ -412,7 +415,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     else //Reached the scale 
                     {
                         Inflate = false;
-                        ShotgunHandler.HandlerActive = true;
+                        SelectionHandler.HandlerActive = true;
                         if (NumInflations >= InflationsNeeded) //Done enough inflations
                         {
                             Response = 1;
@@ -425,8 +428,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (InputBroker.GetMouseButtonDown(0))
             {
-                startTime = Time.time;
-
                 //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
                 if (Response != 1)
                 {
@@ -436,7 +437,46 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if(InputBroker.GetMouseButtonUp(0))
+
+            if(SelectionHandler.SuccessfulChoices.Count > 0)
+            {
+                GameObject chosenGO = SelectionHandler.SuccessfulChoices[0].SelectedGameObject;
+
+                if(chosenGO != null && correctObjects.Contains(chosenGO))
+                {
+                    successfulSelections++;
+
+                    if (outlineClicksRemaining > 1 && !Inflate)
+                    {
+                        if (outlineClicksRemaining > 1) //Dont play on the last one because full inflate will play 
+                            AudioFBController.Play("SHORT_INFLATION");
+                        outlineClicksRemaining--;
+                    }
+                    else if (outlineClicksRemaining == 1 && !Inflate)
+                    {
+                        if (NumInflations < InflationsNeeded)
+                        {
+                            Input.ResetInputAxes();
+                            clickTimings.Add(Time.time - timeTracker);
+                            timeTracker = Time.time;
+
+                            SelectionHandler.HandlerActive = false;
+                            NumInflations++;
+
+                            Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
+
+                            CalculateInflation(); //Sets Inflate to TRUE at end of func
+                            InflateAudioPlayed = false;
+
+                            outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
+                        }
+                    }
+                }
+
+                SelectionHandler.ClearSelections();
+            }
+
+            if (InputBroker.GetMouseButtonUp(0))
             {
                 TrialTouches++;
                 TotalTouches_Block++;
@@ -444,53 +484,17 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 SetTrialSummaryString();
                 CurrentTaskLevel.CalculateBlockSummaryString();
                 CurrentTaskLevel.SetTaskSummaryString();
-
-                holdTime = Time.time - startTime;
-
-                if(holdTime >= ShotgunHandler.MinDuration && holdTime < ShotgunHandler.MaxDuration)
-                {
-                    GameObject clickedGO = InputBroker.SimpleRaycast(InputBroker.mousePosition);
-                    if(clickedGO != null && correctObjects.Contains(clickedGO)) //If they correctly clicked inside the balloon
-                    {
-                        successfulSelections++;
-
-                        if (outlineClicksRemaining > 1 && !Inflate)
-                        {
-                            if (outlineClicksRemaining > 1) //Dont play on the last one because full inflate will play 
-                                AudioFBController.Play("SHORT_INFLATION");
-                            outlineClicksRemaining--;
-                        }
-                        else if (outlineClicksRemaining == 1 && !Inflate)
-                        {
-                            if (NumInflations < InflationsNeeded)
-                            {
-                                Input.ResetInputAxes();
-                                clickTimings.Add(Time.time - timeTracker);
-                                timeTracker = Time.time;
-
-                                ShotgunHandler.HandlerActive = false;
-                                NumInflations++;
-
-                                Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
-
-                                CalculateInflation(); //Sets Inflate to TRUE at end of func
-                                InflateAudioPlayed = false;
-
-                                outlineClicksRemaining = CurrentTrial.ClicksPerOutline;
-                            }
-                        }
-                    }
-                }
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
-            //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
             {
                 SetTrialSummaryString();
             }
+
         });
+        InflateBalloon.SpecifyTermination(() => ChoiceFailed_Trial, Delay);
         InflateBalloon.AddTimer(() => inflateDuration.value, Delay);
         InflateBalloon.SpecifyTermination(() => Response == 1, Delay);
         InflateBalloon.AddDefaultTerminationMethod(() =>
@@ -846,8 +850,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         scalingInterval = ConfigUiVariables.get<ConfigNumber>("scalingInterval");
         inflateDuration = ConfigUiVariables.get<ConfigNumber>("inflateDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");

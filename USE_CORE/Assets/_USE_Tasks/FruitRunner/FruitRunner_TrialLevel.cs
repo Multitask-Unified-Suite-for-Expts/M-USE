@@ -24,7 +24,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private GameObject StartButton;
 
-    [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration, setupDuration, playDuration, celebrationDuration, itiDuration;
+    [HideInInspector] public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, setupDuration, playDuration, celebrationDuration, itiDuration;
 
     GameObject PlayerGO;
     private FR_PlayerManager PlayerManager;
@@ -106,9 +106,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         //----------------------------------------------------------------------------------------------------------------------------------------------
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Setup);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, Play);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Setup);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, Play);
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -117,11 +117,11 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            if (SelectionHandler.AllSelections.Count > 0)
+            if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
 
-            SelectionHandler.MinDuration = minObjectTouchDuration.value;
-            SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
             TokenFBController.enabled = false;
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
@@ -158,7 +158,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             PlayerManager.CanvasTransform = FruitRunner_CanvasGO.transform; //Pass in the canvas for the player's MovementCirclesController
 
             SetUsingBananas();
-           
+
             ItemManagerGO = new GameObject("ItemManager");
             ItemManager = ItemManagerGO.AddComponent<FR_ItemManager>();
             ItemManager.SetupQuaddleList(trialStims.stimDefs);
@@ -168,7 +168,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             ItemManager.BlockadeTokenLoss = CurrentTrial.BlockadeTokenLoss;
             ItemManager.StimFaceCamera = CurrentTrial.StimFacingCamera;
             ItemManager.gameObject.SetActive(true);
-            
+
             FloorManagerGO = new GameObject("FloorManager");
             FloorManager = FloorManagerGO.AddComponent<FR_FloorManager>();
             FloorManager.SetTotalTiles(CurrentTrial.TrialGroup_InSpawnOrder.Length, CurrentTrial.NumGroups);
@@ -190,7 +190,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             StateAfterDelay = CurrentTrial.SkipCelebrationState ? ITI : Celebration;
             DelayDuration = 0;
 
-            if(CurrentTrial.ShowUI)
+            if (CurrentTrial.ShowUI)
             {
                 SpeedSliderGO.SetActive(true);
                 SpeedSlider.value = FloorManager.FloorMovementSpeed;
@@ -209,6 +209,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
 
             finishedPlaying = false;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
         });
         Play.AddUpdateMethod(() =>
         {
@@ -218,15 +221,26 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.ShowUI && SpeedSlider != null)
                 FloorManager.FloorMovementSpeed = SpeedSlider.value;
 
-            if(InputBroker.GetKeyDown(KeyCode.A))
+            if (InputBroker.GetKeyDown(KeyCode.A))
             {
                 PlayerManager.AllowItemPickupAnimations = !PlayerManager.AllowItemPickupAnimations;
             }
 
-            if(InputBroker.GetKeyDown(KeyCode.Q))
+            if (InputBroker.GetKeyDown(KeyCode.Q))
             {
                 ScoreManager.ToggleScoreText();
                 SpeedSliderGO.SetActive(!SpeedSliderGO.activeInHierarchy);
+            }
+
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
+            {
+                GameObject lastSuccessful = SelectionHandler.SuccessfulChoices[0].SelectedGameObject;
+
+                if (SelectedAMovementCircle(lastSuccessful))
+                {
+                    PlayerManager.MovementCirclesController.HandleCircleClicked(lastSuccessful);
+                }
+                SelectionHandler.ClearSelections();
             }
 
         });
@@ -258,6 +272,20 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
         DefineTrialData();
         DefineFrameData();
+    }
+
+    private bool SelectedAMovementCircle(GameObject selectedGO)
+    {
+        if (selectedGO == PlayerManager.MovementCirclesController.LeftCircleGO
+            ||
+            selectedGO == PlayerManager.MovementCirclesController.MiddleCircleGO
+            ||
+            selectedGO == PlayerManager.MovementCirclesController.RightCircleGO)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private void SpawnQuaddleCircle()
@@ -466,8 +494,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
 
         setupDuration = ConfigUiVariables.get<ConfigNumber>("setupDuration");
         playDuration = ConfigUiVariables.get<ConfigNumber>("playDuration");

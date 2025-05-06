@@ -494,7 +494,7 @@ namespace USE_ExperimentTemplate_Session
 
                 HumanVersionToggleButton.SetActive(Session.SessionDef.IsHuman);
 
-                if (SelectionHandler.AllSelections.Count > 0)
+                if (SelectionHandler.AllChoices.Count > 0)
                     SelectionHandler.ClearSelections();
 
                 Session.EventCodeManager.SendCodeThisFrame("SelectTaskStarts");
@@ -699,9 +699,9 @@ namespace USE_ExperimentTemplate_Session
                 Session.SelectionTracker.UpdateActiveSelections();
 
 
-                if (SelectionHandler.SuccessfulSelections.Count > 0)
+                if (SelectionHandler.SuccessfulChoices.Count > 0)
                 {
-                    string chosenGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject?.name;
+                    string chosenGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject?.name;
                     if (chosenGO != null && taskButtonGOs.ContainsKey(chosenGO))
                     {
                         selectedConfigFolderName = chosenGO;
@@ -1307,9 +1307,9 @@ namespace USE_ExperimentTemplate_Session
 
         private void ResetSelectedTaskButtonSize()
         {
-            if (SelectionHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
-                if (SelectionHandler.LastSuccessfulSelection.SelectedGameObject.TryGetComponent(out HoverEffect hoverComponent))
+                if (SelectionHandler.LastSuccessfulChoice.SelectedGameObject.TryGetComponent(out HoverEffect hoverComponent))
                     hoverComponent.SetToInitialSize();
             }
             else

@@ -35,13 +35,13 @@ public class MovementCirclesController : MonoBehaviour
         Instantiated.transform.localRotation = Quaternion.identity;
 
         LeftCircleGO = Instantiated.transform.Find("LeftCircle").gameObject;
-        LeftCircleGO.AddComponent<Button>().onClick.AddListener(() => HandleCircleClicked(LeftCircleGO));
+        //LeftCircleGO.AddComponent<Button>().onClick.AddListener(() => HandleCircleClicked(LeftCircleGO));
 
         MiddleCircleGO = Instantiated.transform.Find("MiddleCircle").gameObject;
-        MiddleCircleGO.AddComponent<Button>().onClick.AddListener(() => HandleCircleClicked(MiddleCircleGO));
+        //MiddleCircleGO.AddComponent<Button>().onClick.AddListener(() => HandleCircleClicked(MiddleCircleGO));
 
         RightCircleGO = Instantiated.transform.Find("RightCircle").gameObject;
-        RightCircleGO.AddComponent<Button>().onClick.AddListener(() => HandleCircleClicked(RightCircleGO));
+        //RightCircleGO.AddComponent<Button>().onClick.AddListener(() => HandleCircleClicked(RightCircleGO));
 
         Circles = new List<GameObject>
         {
@@ -57,8 +57,6 @@ public class MovementCirclesController : MonoBehaviour
 
     public void HandleCircleClicked(GameObject clickedGO)
     {
-        HighlightActiveCircle(clickedGO);
-
         if (clickedGO == LeftCircleGO)
             PlayerManager.MoveToPosition(PlayerManager.LeftPos);
         else if (clickedGO == MiddleCircleGO)
@@ -66,7 +64,10 @@ public class MovementCirclesController : MonoBehaviour
         else if (clickedGO == RightCircleGO)
             PlayerManager.MoveToPosition(PlayerManager.RightPos);
         else
-            Debug.LogWarning("CLICKED GO DOESNT MATCH LEFT, MIDDLE, or RIGHT circle!");
+            return;
+
+        HighlightActiveCircle(clickedGO);
+
     }
 
     public void HighlightActiveCircle(GameObject clickedGO)

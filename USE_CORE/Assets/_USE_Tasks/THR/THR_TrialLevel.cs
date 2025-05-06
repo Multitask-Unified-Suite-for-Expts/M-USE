@@ -170,7 +170,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (ShotgunHandler.AllSelections.Count > 0)
+            if (ShotgunHandler.AllChoices.Count > 0)
                 ShotgunHandler.ClearSelections();
         });
         InitTrial.SpecifyTermination(() => true && ((Session.SessionDef.IsHuman && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton()) || StartButton == null), CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);

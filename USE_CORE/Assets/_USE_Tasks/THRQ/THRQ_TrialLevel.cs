@@ -144,7 +144,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
         var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, SelectObject);
         TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration,  CurrentTask.StartButtonScale * 30f, THRQ_CanvasGO, true);
 
-        InitTrial.AddSpecificInitializationMethod(() =>
+        InitTrial.AddSpecificInitializationMethod((VoidDelegate)(() =>
         {
             TouchFBController.SetPrefabSizes(CurrentTask.StartButtonScale * 30f);
 
@@ -162,11 +162,11 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (ShotgunHandler.AllSelections.Count > 0)
+            if (ShotgunHandler.AllChoices.Count > 0)
                 ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = CurrentTrial.MinTouchDuration;
-            ShotgunHandler.MaxDuration = CurrentTrial.MaxTouchDuration;
-        });
+            ShotgunHandler.TimeBeforeChoiceStarts = CurrentTrial.MinTouchDuration;
+            ShotgunHandler.TotalChoiceDuration = CurrentTrial.MaxTouchDuration;
+        }));
         InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SelectObject);
 
         //SELECT OBJECT state -------------------------------------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
             BackdropTouches = 0;
             HeldDuration = 0;
 
-            if (ShotgunHandler.AllSelections.Count > 0)
+            if (ShotgunHandler.AllChoices.Count > 0)
                 ShotgunHandler.ClearSelections();
 
             TrialStartTime = Time.time;
@@ -244,7 +244,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
                 AbortCode = 6;
             }
 
-            if(ShotgunHandler.LastSuccessfulSelection != null && ShotgunHandler.LastSuccessfulSelection.SelectedGameObject != null)
+            if(ShotgunHandler.LastSuccessfulChoice != null && ShotgunHandler.LastSuccessfulChoice.SelectedGameObject != null)
             {
                 if(ShotgunHandler.LastSuccessfulSelectionMatches(StimGO))
                 {

@@ -1,96 +1,115 @@
 {
-  "varsNumber": {
-    "selectObjectDuration": {
-      "value": 10,
-      "min": 1,
-      "max": 20,
-      "precision": 1,
-      "isRange": true,
-      "name": "Select Object Duration",
-      "hidden": false
-    },
-    "minObjectTouchDuration": {
-      "value": 0.01,
-      "min": 0.01,
-      "max": 5,
-      "precision": 1,
-      "isRange": true,
-      "name": "Min Object Touch Duration",
-      "hidden": false
-    },
-    "maxObjectTouchDuration": {
-      "value": 2,
-      "min": 0.1,
-      "max": 5,
-      "precision": 1,
-      "isRange": true,
-      "name": "Max Object Touch Duration",
-      "hidden": false
-    },
-    "itiDuration": {
-      "value": 0.5,
-      "min": 0.1,
-      "max": 10,
-      "precision": 1,
-      "isRange": true,
-      "name": "Iti Duration",
-      "hidden": false
-    },
-    "sliderSize": {
-      "value": 11,
-      "min": 1,
-      "max": 100,
-      "precision": 1,
-      "isRange": true,
-      "name": "Slider Size",
-      "hidden": false
-    },
-    "fbDuration": {
-      "value": 0.5,
-      "min": 0.1,
-      "max": 10,
-      "precision": 1,
-      "isRange": true,
-      "name": "FB Duration",
-      "hidden": false
-    },
-    "finalFbDuration": {
-      "value": 0.5,
-      "min": 0.1,
-      "max": 20,
-      "precision": 1,
-      "isRange": true,
-      "name": "Final FB Duration",
-      "hidden": false
-    },
-    "chooseStimOnsetDelay": {
-      "value": 0.01,
-      "min": 0.01,
-      "max": 20,
-      "precision": 1,
-      "isRange": true,
-      "name": "Choose Stim Onset Delay",
-      "hidden": false
-    },
-    "timeoutDuration": {
-      "value": 5,
-      "min": 0.1,
-      "max": 20,
-      "precision": 1,
-      "isRange": true,
-      "name": "Timeout Duration",
-      "hidden": false
-    },
-    "startButtonDelay": {
-      "value": 0.01,
-      "min": 0.01,
-      "max": 20,
-      "precision": 1,
-      "isRange": true,
-      "name": "Start Button Delay",
-      "hidden": false
-    }
-  },
-  "varsBoolean": {},
-  "varsString": {}
+	"varsNumber": {
+
+		"selectObjectDuration": {
+			"value": 10.0,
+			"min": 1.0,
+			"max": 20.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Select Object Duration",
+			"hidden": false
+		},
+
+		"timeBeforeChoiceStarts": {
+			"value": 0.3,
+			"min": 0.01,
+			"max": 3.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Time Before Choice Starts",
+			"hidden": false
+		},
+
+		"totalChoiceDuration": {
+			"value": 0.7,
+			"min": 0.01,
+			"max": 5.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Total Choice Duration",
+			"hidden": false
+		},
+
+		"itiDuration": {
+			"value": 0.5,
+			"min": 0.1,
+			"max": 10.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Iti Duration",
+			"hidden": false
+		},
+
+		"sliderSize": {
+			"value": 15.0,
+			"min": 1.0,
+			"max": 100.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Slider Size",
+			"hidden": false
+		},
+
+		"fbDuration": {
+			"value": 0.5,
+			"min": 0.1,
+			"max": 10.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "FB Duration",
+			"hidden": false
+		},
+		"finalFbDuration": {
+			"value": 0.5,
+			"min": 0.1,
+			"max": 20.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Final FB Duration",
+			"hidden": false
+		},
+		"chooseStimOnsetDelay": {
+			"value": 0.01,
+			"min": 0.01,
+			"max": 20.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Choose Stim Onset Delay",
+			"hidden": false
+		},
+		"timeoutDuration": {
+			"value": 5,
+			"min": 0.1,
+			"max": 20.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Timeout Duration",
+			"hidden": false
+		},
+		"startButtonDelay": {
+			"value": 0.01,
+			"min": 0.01,
+			"max": 20.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Start Button Delay",
+			"hidden": false
+		},
+		"gratingSquareDuration": {
+			"value": 1,
+			"min": 0.1,
+			"max": 20.0,
+			"precision": 1,
+			"isRange": true,
+			"name": "Grating Square Duration",
+			"hidden": false
+		}
+
+
+
+	},
+
+	"varsBoolean": {},
+	"varsString": {}
 }

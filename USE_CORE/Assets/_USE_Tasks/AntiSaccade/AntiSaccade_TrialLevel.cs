@@ -57,7 +57,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
     private float ChosenDisplayTargetDuration;
     private float ChosenSpatialCueDelayDuration;
 
-    [HideInInspector] public ConfigNumber minObjectTouchDuration, maxObjectTouchDuration;
+    [HideInInspector] public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration;
 
     private GameObject ChosenGO = null;
     private AntiSaccade_StimDef ChosenStim = null;
@@ -135,15 +135,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         //------------------------------------------------------------------------------------------------------------------------
-        // The code below allows the SelectionHandler to switch on the basis of the SelectionType in the SessionConfig
-        SelectionHandler ShotgunHandler;
-
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ChooseStim);
         else
-            ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "TouchShotgun", Session.MouseTracker, InitTrial, ChooseStim);
 
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, AntiSaccade_CanvasGO, true); //Enable Touch Feedback:
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -158,12 +155,12 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             SetShadowType(CurrentTask.ShadowType, "AntiSaccade_DirectionalLight");
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
-            ShotgunHandler.MinDuration = minObjectTouchDuration.value;
-            ShotgunHandler.MaxDuration = maxObjectTouchDuration.value;
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
         });
-        InitTrial.SpecifyTermination(() => ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
 
         //PreCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         PreCue.AddSpecificInitializationMethod(() =>
@@ -259,16 +256,17 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             ChosenGO = null;
             ChosenStim = null;
             stimChosen = false;
+            ChoiceFailed_Trial = false;
 
-            if (ShotgunHandler.AllSelections.Count > 0)
-                ShotgunHandler.ClearSelections();
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
         ChooseStim.AddUpdateMethod(() =>
         {
-            ChosenGO = ShotgunHandler.LastSuccessfulSelection.SelectedGameObject;
+            ChosenGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject;
             ChosenStim = ChosenGO?.GetComponent<StimDefPointer>()?.GetStimDef<AntiSaccade_StimDef>();
             if (ChosenStim != null)
             {
@@ -277,7 +275,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                     DeactivateStimNotSelected();
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if(OngoingSelection != null)
@@ -285,9 +283,23 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 SetTrialSummaryString();
             }
 
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                ChoiceFailed_Trial = true;
+            }
+
         });
         ChooseStim.SpecifyTermination(() => stimChosen, Feedback);
-        ChooseStim.AddTimer(() => CurrentTrial.ChooseStimDuration, Feedback);
+        ChooseStim.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+        });
+        ChooseStim.AddTimer(() => CurrentTrial.ChooseStimDuration, Feedback, () =>
+        {
+            AbortCode = 6;
+            Session.EventCodeManager.SendCodeThisFrame("NoChoice");
+            AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
+        });
 
         //Feedback state ----------------------------------------------------------------------------------------------------------------------------------------------
         float rotationSpeed = 260f;
@@ -349,16 +361,15 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 HaloFBController.DestroyAllHalos();
         });
         Feedback.AddTimer(() => CurrentTrial.FeedbackDuration, ITI);
-        Feedback.SpecifyTermination(() => !stimChosen, ITI, () => AudioFBController.Play("Negative"));
-        Feedback.AddUniversalTerminationMethod(() =>
+
+
+        //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
+        ITI.AddSpecificInitializationMethod(() =>
         {
             TokenFBController.enabled = false;
             TargetStim_GO.SetActive(false);
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetOff"]);
         });
-
-
-        //ITI state ----------------------------------------------------------------------------------------------------------------------------------------------
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
 
         DefineTrialData();
@@ -557,8 +568,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private void LoadConfigUIVariables()
     {
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
     }
 
     protected override void DefineTrialStims()

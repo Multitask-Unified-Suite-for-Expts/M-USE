@@ -78,8 +78,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector]
     public ConfigNumber flashingFbDuration;
     public ConfigNumber fbDuration;
-    public ConfigNumber minObjectTouchDuration;
-    public ConfigNumber maxObjectTouchDuration;
+    public ConfigNumber timeBeforeChoiceStarts;
+    public ConfigNumber totalChoiceDuration;
     public ConfigNumber selectObjectDuration;
     public ConfigNumber itiDuration;
     public ConfigNumber sliderSize;
@@ -261,13 +261,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder, searchStims, distractorStims);
 
             searchDurationStartTime = Time.time;
-            choiceMade = false;
 
-            SelectionHandler.HandlerActive = true;
-            if (SelectionHandler.AllSelections.Count > 0)
-                SelectionHandler.ClearSelections();
-            
-            
             if (!Session.WebBuild)
             {
                 if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
@@ -299,15 +293,23 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
+            choiceMade = false;
+            ChoiceFailed_Trial = false;
+
+            SelectionHandler.HandlerActive = true;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
-            if (SelectionHandler.SuccessfulSelections.Count > 0)
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
-                GameObject selectedGO = SelectionHandler.LastSuccessfulSelection.SelectedGameObject.transform.root.gameObject;
+                GameObject selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.transform.root.gameObject;
                 WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
                 SelectionHandler.ClearSelections();
                 if (selectedSD != null)
@@ -331,14 +333,28 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 SetTrialSummaryString();
             }
+
+
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                ChoiceFailed_Trial = true;
+            }
         });
         ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
             HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
+        ChooseStimulus.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            HandleAbortedTrialData();
+        });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
+            Session.EventCodeManager.SendCodeThisFrame("NoChoice");
+            AbortCode = 6;
             HandleAbortedTrialData();
+            AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
         });
 
         SelectionFeedback.AddSpecificInitializationMethod(() =>
@@ -516,10 +532,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //This method is for EventCodes and gets called automatically at end of SetupTrial:
     private void HandleAbortedTrialData()
     {
-        Session.EventCodeManager.SendCodeThisFrame("NoChoice");
-        Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
-        AbortCode = 6;
-
         HandleSearchDurationData(null);
         runningAcc.Add(0);
 
@@ -747,9 +759,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     void LoadConfigUiVariables()
     {
         //config UI variables
-        minObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("minObjectTouchDuration");
-        
-        maxObjectTouchDuration = ConfigUiVariables.get<ConfigNumber>("maxObjectTouchDuration");
+        timeBeforeChoiceStarts = ConfigUiVariables.get<ConfigNumber>("timeBeforeChoiceStarts");
+        totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
         itiDuration = ConfigUiVariables.get<ConfigNumber>("itiDuration");
         sliderSize = ConfigUiVariables.get<ConfigNumber>("sliderSize");
         selectObjectDuration = ConfigUiVariables.get<ConfigNumber>("selectObjectDuration");
@@ -841,10 +852,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void InitializeShotgunHandler()
     {
         SelectionHandler.HandlerActive = true;
-        if (SelectionHandler.AllSelections.Count > 0)
+        if (SelectionHandler.AllChoices.Count > 0)
             SelectionHandler.ClearSelections();
-        SelectionHandler.MinDuration = minObjectTouchDuration.value;
-        SelectionHandler.MaxDuration = maxObjectTouchDuration.value;
+        SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+        SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
         SelectionHandler.MaxPixelDisplacement = 50;
     }
     private void UpdateExperimenterDisplaySummaryStrings()

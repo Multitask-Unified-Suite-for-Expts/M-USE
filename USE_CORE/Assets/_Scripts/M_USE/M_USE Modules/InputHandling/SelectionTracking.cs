@@ -97,48 +97,43 @@ namespace SelectionTracking
 
             //----------------------------------------MOUSE CLICK HANDLER: --------------------------------------------------
             SelectionHandler mouseClick = new SelectionHandler();
-            //Init Conditions: Has to click button, and has to hit a GO
+
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
-            //Update Conditions: Mouse button must be down, raycast must hit previously hit GO
+
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0"));
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
-            //Update Error Triggers: Moving too far, holding for too long
-            mouseClick.UpdateErrorTriggers.Add("MovedTooFar", mouseClick.DefaultConditions("MovedTooFar"));
 
+            mouseClick.UpdateErrorTriggers.Add("MovedTooFar", mouseClick.DefaultConditions("MovedTooFar"));
             mouseClick.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseClick.DefaultConditions("NotSelectablePeriod"));
 
-            mouseClick.UpdateErrorTriggers.Add("DurationTooLong", mouseClick.DefaultConditions("DurationTooLong"));
-            //Termination Conditions: Releasing mouse click
-            mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
-            //Termination Error Triggers: HoldingTooShort
             mouseClick.TerminationErrorTriggers.Add("DurationTooShort", mouseClick.DefaultConditions("DurationTooShort"));
+
+            mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseUpOrReachedRequiredDuration"));
 
             mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
 
-
             //----------------------------------------MOUSE HOVER HANDLER: --------------------------------------------------
             SelectionHandler mouseHover = new SelectionHandler();
             
-            //Init Conditions: has to hit a GO
             mouseHover.InitConditions.Add(mouseHover.DefaultConditions("RaycastHitsAGameObject"));
-            //Update Conditions: raycast must hit previously hit GO
+
             mouseHover.UpdateConditions.Add(mouseHover.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
-            //Update Error Triggers: Moving too far, holding for too long
+
             mouseHover.UpdateErrorTriggers.Add("MovedTooFar", mouseHover.DefaultConditions("MovedTooFar"));
             mouseHover.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseHover.DefaultConditions("NotSelectablePeriod"));
-            //Termination Conditions: Hovered above object for long enough
-            mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("DurationSufficient"));
-            //Termination Error Triggers: HoldingTooShort
+
             mouseHover.TerminationErrorTriggers.Add("DurationTooShort", mouseHover.DefaultConditions("DurationTooShort"));
 
+            mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("ReachedRequiredDuration"));
 
             mouseHover.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseHover", mouseHover);
 
             //----------------------------------------TOUCH SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler touchShotgun = new SelectionHandler();
+
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsAGameObject"));
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("MouseButton0Down"));
 
@@ -146,54 +141,31 @@ namespace SelectionTracking
             touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("MouseButton0"));
 
             touchShotgun.UpdateErrorTriggers.Add("MovedTooFar", touchShotgun.DefaultConditions("MovedTooFar"));
-            touchShotgun.UpdateErrorTriggers.Add("DurationTooLong", touchShotgun.DefaultConditions("DurationTooLong"));
-
             touchShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", touchShotgun.DefaultConditions("NotSelectablePeriod"));
 
-
-            touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("MouseButton0Up"));
-
             touchShotgun.TerminationErrorTriggers.Add("DurationTooShort", touchShotgun.DefaultConditions("DurationTooShort"));
+
+            touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("MouseUpOrReachedRequiredDuration"));
 
             touchShotgun.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("TouchShotgun", touchShotgun);
 
-            //----------------------------------------GAZE HANDLER: --------------------------------------------------
-           // SelectionHandler gazeSelection = new SelectionHandler();
-           // gazeSelection.InitConditions.Add(gazeSelection.DefaultConditions("RaycastHitsAGameObject"));
-
-           // gazeSelection.UpdateConditions.Add(gazeSelection.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
-
-           //// gazeSelection.UpdateErrorTriggers.Add("MovedTooFar", gazeSelection.DefaultConditions("MovedTooFar"));
-
-           // gazeSelection.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeSelection.DefaultConditions("NotSelectablePeriod"));
-           // //gazeSelection.UpdateErrorTriggers.Add("InvalidGazePosition", gazeSelection.DefaultConditions("InvalidGazePosition"));
-
-           // gazeSelection.TerminationConditions.Add(gazeSelection.DefaultConditions("DurationSufficient"));
-
-           // gazeSelection.TerminationErrorTriggers.Add("DurationTooShort", gazeSelection.DefaultConditions("DurationTooShort"));
-           // gazeSelection.CurrentInputLocation = () => InputBroker.gazePosition;
-           // // gazeSelection.MaxPixelDisplacement = 70;
-           // gazeSelection.MinDuration = 0.7f;
-           // DefaultSelectionHandlers.Add("GazeSelection", gazeSelection);
-
             //----------------------------------------GAZE SHOTGUN HANDLER: --------------------------------------------------
             SelectionHandler gazeShotgun = new SelectionHandler();
+
             gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsAGameObject"));
 
             gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
 
             gazeShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeShotgun.DefaultConditions("NotSelectablePeriod"));
-            //gazeShotgun.UpdateErrorTriggers.Add("InvalidGazePosition", gazeShotgun.DefaultConditions("InvalidGazePosition"));
-            //gazeShotgun.UpdateErrorTriggers.Add("MovedTooFar", gazeShotgun.DefaultConditions("MovedTooFar"));
-
-            gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("DurationSufficient"));
 
             gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
+            gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("ReachedRequiredDuration"));
+
+
             gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
-            //gazeShotgun.MaxPixelDisplacement = 70;
-            gazeShotgun.MinDuration = 0.7f;
+            gazeShotgun.TimeBeforeChoiceStarts = 0.7f;
             DefaultSelectionHandlers.Add("GazeShotgun", gazeShotgun);
             
             
@@ -211,7 +183,8 @@ namespace SelectionTracking
             public float SelectionPrecision;
             public string ErrorType;
 
-            public bool InitialFixationDurationPassed;
+            public bool ChoiceStarted; //its passed the min duration
+            public bool ChoiceCompleted; //its passed the max (full selection) duration
 
             public string ParentName;
 
@@ -261,15 +234,19 @@ namespace SelectionTracking
 
         public class SelectionHandler
         {
-            public USE_Selection LastSelection;
-            public USE_Selection LastSuccessfulSelection;
-            public USE_Selection LastUnsuccessfulSelection;
+            public USE_Selection LastChoice;
+            public USE_Selection LastSuccessfulChoice;
+            public USE_Selection LastUnsuccessfulChoice;
             public USE_Selection OngoingSelection;
-            public List<USE_Selection> AllSelections, SuccessfulSelections, UnsuccessfulSelections;
+            public List<USE_Selection> AllChoices, SuccessfulChoices, UnsuccessfulChoices;
             public InputTracker InputTracker; 
 
             private GameObject currentTarget;
-            public float? MinDuration, MaxDuration;
+
+            public float? TimeBeforeChoiceStarts = 0.3f;
+            public float? TotalChoiceDuration = 0.7f;
+
+
             public int? MaxPixelDisplacement;
             public List<BoolDelegate> InitConditions, UpdateConditions, TerminationConditions;
             public Dictionary<string, BoolDelegate> InitErrorTriggers, UpdateErrorTriggers, TerminationErrorTriggers;
@@ -295,13 +272,13 @@ namespace SelectionTracking
                 UpdateErrorTriggers = new Dictionary<string, BoolDelegate>();
                 TerminationErrorTriggers = new Dictionary<string, BoolDelegate>();
 
-                AllSelections = new List<USE_Selection>();
-                SuccessfulSelections = new List<USE_Selection>();
-                UnsuccessfulSelections = new List<USE_Selection>();
+                AllChoices = new List<USE_Selection>();
+                SuccessfulChoices = new List<USE_Selection>();
+                UnsuccessfulChoices = new List<USE_Selection>();
 
-                LastSelection = new USE_Selection(null);
-                LastSuccessfulSelection = new USE_Selection(null);
-                LastUnsuccessfulSelection = new USE_Selection(null);
+                LastChoice = new USE_Selection(null);
+                LastSuccessfulChoice = new USE_Selection(null);
+                LastUnsuccessfulChoice = new USE_Selection(null);
             }
 
             public SelectionHandler(InputDelegate inputLoc = null, float? minDuration = null, float? maxDuration = null,
@@ -310,8 +287,8 @@ namespace SelectionTracking
                 if (inputLoc == null)
                     CurrentInputLocation = () => InputBroker.mousePosition; //default to just using the mouse
 
-                MinDuration = minDuration;
-                MaxDuration = maxDuration;
+                TimeBeforeChoiceStarts = minDuration;
+                TotalChoiceDuration = maxDuration;
                 MaxPixelDisplacement = maxPixelDisplacement;
             }
 
@@ -346,25 +323,25 @@ namespace SelectionTracking
 
             public void ClearSelections()
             {
-                if (SuccessfulSelections.Count > 0)
-                    SuccessfulSelections.Clear();
+                if (SuccessfulChoices.Count > 0)
+                    SuccessfulChoices.Clear();
 
-                if (UnsuccessfulSelections.Count > 0)
-                    UnsuccessfulSelections.Clear();
+                if (UnsuccessfulChoices.Count > 0)
+                    UnsuccessfulChoices.Clear();
 
-                if (AllSelections.Count > 0)
-                    AllSelections.Clear();
+                if (AllChoices.Count > 0)
+                    AllChoices.Clear();
 
-                LastSelection = new USE_Selection(null);
-                LastSuccessfulSelection = new USE_Selection(null);
-                LastUnsuccessfulSelection = new USE_Selection(null);
+                LastChoice = new USE_Selection(null);
+                LastSuccessfulChoice = new USE_Selection(null);
+                LastUnsuccessfulChoice = new USE_Selection(null);
             }
 
             public bool LastSelectionMatches(GameObject go)
             {
-                if(go != null && LastSelection != null && LastSelection.SelectedGameObject != null)
+                if(go != null && LastChoice != null && LastChoice.SelectedGameObject != null)
                 {
-                    if (ReferenceEquals(LastSelection.SelectedGameObject, go))
+                    if (ReferenceEquals(LastChoice.SelectedGameObject, go))
                         return true;
                 }
 
@@ -373,11 +350,11 @@ namespace SelectionTracking
 
             public bool LastSuccessfulSelectionMatches(List<GameObject> gameObjects) //Used for startbutton since it has 3 children GO's
             {
-                if (gameObjects != null && LastSuccessfulSelection != null && LastSuccessfulSelection.SelectedGameObject != null)
+                if (gameObjects != null && LastSuccessfulChoice != null && LastSuccessfulChoice.SelectedGameObject != null)
                 {
                     foreach (GameObject go in gameObjects)
                     {
-                        if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                        if (ReferenceEquals(LastSuccessfulChoice.SelectedGameObject, go))
                             return true;
                     }
                 }
@@ -389,11 +366,11 @@ namespace SelectionTracking
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
                 List<GameObject> startButtonChildren = Session.GetStartButtonChildren();
-                if (startButtonChildren != null && LastSuccessfulSelection?.SelectedGameObject != null)
+                if (startButtonChildren != null && LastSuccessfulChoice?.SelectedGameObject != null)
                 {
                     foreach (GameObject go in startButtonChildren)
                     {
-                        if (ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go))
+                        if (ReferenceEquals(LastSuccessfulChoice.SelectedGameObject, go))
                         {
                             Session.EventCodeManager.SendCodeThisFrame("StartButtonSelected");
                             return true;
@@ -406,7 +383,7 @@ namespace SelectionTracking
 
             public bool LastSuccessfulSelectionMatches(GameObject go)
             {
-                return ReferenceEquals(LastSuccessfulSelection.SelectedGameObject, go);
+                return ReferenceEquals(LastSuccessfulChoice.SelectedGameObject, go);
             }
 
 
@@ -421,6 +398,7 @@ namespace SelectionTracking
                     Debug.Log("Trying to set the ErrorType of OngoingSelection, but OngoingSelection is null!");
             }
 
+
             public void UpdateSelections()
             {
                 if (CurrentInputLocation == null)
@@ -432,18 +410,36 @@ namespace SelectionTracking
                     return;
                 }
                 
-                //if we have reached this point we know there is input
+                //WE HAVE INPUT ----------------------------------------
+
                 if (HandlerName.ToLower().Contains("shotgun"))
                     currentTarget = InputTracker.ShotgunRaycastTarget;
                 else
                     currentTarget = InputTracker.SimpleRaycastTarget;
+
+
+                if(OngoingSelection != null)
+                {
+                    if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
+                    {
+                        Debug.LogWarning("CHOICE STARTED AT DURATION: " + OngoingSelection.Duration);
+                        OngoingSelection.ChoiceStarted = true;
+                        Session.EventCodeManager.SendCodeThisFrame("ChoiceBegins");
+                    }
+
+                    if(OngoingSelection.Duration >= TotalChoiceDuration && !OngoingSelection.ChoiceCompleted)
+                    {
+                        OngoingSelection.ChoiceCompleted = true;
+                    }
+                }
+
 
                 if (currentTarget == null) //input is not over a gameobject
                 {
                     if (FixationOnEventCodeSent && OngoingSelection == null)
                     {
                         //For EventCodes:
-                        Session.EventCodeManager.SendCodeThisFrame("FixationOffObject");
+                        Session.EventCodeManager.SendCodeThisFrame("SelectionOffObject");
                         FixationOnEventCodeSent = false; //reset fixation
                     }
 
@@ -452,7 +448,7 @@ namespace SelectionTracking
                         //For EventCodes:
                         if(FixationOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
                         {
-                            Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "FixationOff");
+                            Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "SelectionOff");
                             FixationOnEventCodeSent = false; //reset fixation
                         }
 
@@ -462,13 +458,13 @@ namespace SelectionTracking
                 }
 
                 //For EventCodes:
-                if (currentTarget != null && !FixationOnEventCodeSent && LastSelection.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
+                if (currentTarget != null && !FixationOnEventCodeSent && LastChoice.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
-                    Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "FixationOn");
+                    Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "SelectionOn");
                     FixationOnEventCodeSent = true;
                 }
 
-                //if we have reached this point we know there is a target
+                //WE HAVE A TARGET --------------------------------------
                 if (OngoingSelection == null) //no previous selection
                 {
                     CheckInit();
@@ -477,8 +473,7 @@ namespace SelectionTracking
 
                 
 
-                //if we have reached this point we know there is a target, there was a previous selection,
-                //and this is not the first frame of new selection
+                //if we have reached this point we know there is a target, there was a previous selection AND this is not first frame of new selection
                 if (currentTarget != OngoingSelection.SelectedGameObject) //previous selection was on different game object
                 {
                     CheckTermination(); //check termination of previous selection
@@ -487,17 +482,11 @@ namespace SelectionTracking
                 }
 
                 //if we have reached this point we know we have an ongoing selection
-                bool updateConditionsMet = CheckUpdate();
+                CheckUpdate();
                 CheckTermination();
-                //the selection fails because update conditions are not met (but termination condition was not met either)
-                if (!updateConditionsMet && OngoingSelection != null)
-                {
-                    OngoingSelection.CompleteSelection(false);
-                    AllSelections.Add(OngoingSelection);
-                    UnsuccessfulSelections.Add(OngoingSelection);
-                    OngoingSelection = null;
-                }
+
             }
+
 
             private void CheckInit()
             {
@@ -508,37 +497,28 @@ namespace SelectionTracking
                 {
                     if (initErrors == null)
                     {
-                        //Debug.LogWarning("START OF NEW SELECTION");
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
-                    }
-                    else
-                    {
-                        SelectionErrorHandling(initErrors);
                     }
                 }
             }
 
-            private bool CheckUpdate()
+            private void CheckUpdate()
             {
                 bool? update = CheckAllConditions(UpdateConditions);
                 string? updateErrors = CheckAllErrorTriggers("update");
+
 
                 if (update == null || update.Value)
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
                         OngoingSelection.UpdateSelection(CurrentInputLocation()); // will track duration and other custom functions while selecting
-                        return true;
                     }
                     else
                     {
-                        SelectionErrorHandling(updateErrors);
-                        return false;
+                        Debug.LogWarning("UPDATE ERROR!!");
+                        ChoiceFailed(updateErrors);
                     }
-                }
-                else
-                {
-                    return false;
                 }
             }
 
@@ -551,32 +531,75 @@ namespace SelectionTracking
                 {
                     if (termErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
-                        OngoingSelection.CompleteSelection(true);
-                        OngoingSelection.WasSuccessful = true;
-                        LastSuccessfulSelection = OngoingSelection;
-                        if(OngoingSelection.SelectedGameObject != null)
-                            LastSuccessfulSelection.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(OngoingSelection.SelectedGameObject.transform.root.position));
-                        SuccessfulSelections.Add(OngoingSelection);
-
-                        //For EventCodes:
-                        Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, null, "Selected");
-                        FixationOnEventCodeSent = false; //reset hover
+                        ChoiceComplete();
                     }
                     else
                     {
-                        OngoingSelection.CompleteSelection(false);
-                        OngoingSelection.WasSuccessful = false;
-                        LastSelection = OngoingSelection;
-                        LastUnsuccessfulSelection = OngoingSelection;
-                        UnsuccessfulSelections.Add(OngoingSelection);
-                        SelectionErrorHandling(termErrors);
-                        //For EventCodes:
-                        FixationOnEventCodeSent = false; //reset fixation
+                        Debug.LogWarning("TERMINATION ERROR");
+                        ChoiceFailed(termErrors);
                     }
-                    AllSelections.Add(OngoingSelection);
-                    OngoingSelection = null;
                 }
             }
+
+
+            private void ChoiceFailed(string error = null)
+            {
+                if (OngoingSelection == null)
+                    return;
+
+                if (!OngoingSelection.ChoiceStarted)
+                {
+                    OngoingSelection = null;
+                    return;
+                }
+
+                Debug.LogWarning("SELECTION FAILED AT DURATION: " + OngoingSelection.Duration);
+
+                if(error != null)
+                    SelectionErrorHandling(error);
+
+                OngoingSelection.CompleteSelection(false);
+                OngoingSelection.WasSuccessful = false;
+                LastUnsuccessfulChoice = OngoingSelection;
+                LastChoice = OngoingSelection;
+                AllChoices.Add(OngoingSelection);
+                UnsuccessfulChoices.Add(OngoingSelection);
+
+                Session.EventCodeManager.SendCodeThisFrame("ChoiceFailed");
+                FixationOnEventCodeSent = false; //reset fixation for event codes
+
+                OngoingSelection = null;
+            }
+
+            private void ChoiceComplete()
+            {
+                if (OngoingSelection == null)
+                    return;
+
+                if (!OngoingSelection.ChoiceStarted)
+                {
+                    OngoingSelection = null;
+                    return;
+                }
+
+                Debug.LogWarning("SELECTION COMPLETE! Duration = " + OngoingSelection.Duration);
+
+                OngoingSelection.CompleteSelection(true);
+                OngoingSelection.WasSuccessful = true;
+                LastSuccessfulChoice = OngoingSelection;
+                LastChoice = OngoingSelection;
+                AllChoices.Add(OngoingSelection);
+                SuccessfulChoices.Add(OngoingSelection);
+
+                if (OngoingSelection.SelectedGameObject != null)
+                    LastSuccessfulChoice.SelectionPrecision = Vector2.Distance(OngoingSelection.InputLocations[0], Camera.main.WorldToScreenPoint(OngoingSelection.SelectedGameObject.transform.root.position));
+
+                Session.EventCodeManager.SendCodeThisFrame("ChoiceCompleted");
+                FixationOnEventCodeSent = false; //reset fixation for event codes
+
+                OngoingSelection = null;
+            }
+
 
             public delegate GameObject GoDelegate();
 
@@ -589,7 +612,9 @@ namespace SelectionTracking
                     foreach(var pair in InitErrorTriggers)
                     {
                         if (pair.Value() == true)
+                        {
                             return pair.Key;
+                        }
                     }
                 }
                 else if (category == "update" && UpdateErrorTriggers != null)
@@ -597,7 +622,9 @@ namespace SelectionTracking
                     foreach (var pair in UpdateErrorTriggers)
                     {
                         if (pair.Value() == true)
+                        {
                             return pair.Key;
+                        }
                     }
                 }
                 else if (category == "term" && TerminationErrorTriggers != null)
@@ -605,7 +632,9 @@ namespace SelectionTracking
                     foreach (var pair in TerminationErrorTriggers)
                     {
                         if (pair.Value() == true)
+                        {
                             return pair.Key;
+                        }
                     }
                 }
                 return null;
@@ -630,18 +659,32 @@ namespace SelectionTracking
             {
                 Dictionary<string, BoolDelegate> DefaultConditions = new Dictionary<string, BoolDelegate>();
 
+                //INIT CONDITIONS:
                 DefaultConditions.Add("ShotgunRaycastHitsAGameObject", () => InputTracker.ShotgunRaycastTarget != null);
+                DefaultConditions.Add("RaycastHitsAGameObject", () => InputTracker.SimpleRaycastTarget != null);
+
+                //UPDATE CONDITIONS:
                 DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsAGameObject"]() &&
                                                                             OngoingSelection != null &&
                                                                             InputTracker.ShotgunRaycastTarget == OngoingSelection.SelectedGameObject);
 
-                DefaultConditions.Add("RaycastHitsAGameObject", () => currentTarget != null);
                 DefaultConditions.Add("RaycastHitsSameObjectAsPreviousFrame", () => DefaultConditions["RaycastHitsAGameObject"]() &&
                                                                                    OngoingSelection != null &&
-                                                                                   currentTarget == OngoingSelection.SelectedGameObject);
-                DefaultConditions.Add("DurationSufficient", () => OngoingSelection != null && OngoingSelection.Duration > MinDuration);
-                DefaultConditions.Add("DurationTooLong", () => MaxDuration != null && OngoingSelection != null && OngoingSelection.Duration > MaxDuration);
-                DefaultConditions.Add("DurationTooShort", () => MinDuration != null && OngoingSelection != null && OngoingSelection.Duration < MinDuration);
+                                                                                   InputTracker.SimpleRaycastTarget == OngoingSelection.SelectedGameObject);
+
+
+                //END SELECTION IF THEY FINISHED THE SELECTION:
+
+                DefaultConditions.Add("ReachedRequiredDuration", () => OngoingSelection != null && OngoingSelection.ChoiceStarted && OngoingSelection.ChoiceCompleted);
+
+                DefaultConditions.Add("MouseUpOrReachedRequiredDuration", () => DefaultConditions["MouseButton0Up"]() || DefaultConditions["ReachedRequiredDuration"]());
+
+
+                //TERM ERRORS:
+                DefaultConditions.Add("DurationTooShort", () => OngoingSelection != null && OngoingSelection.ChoiceStarted && !OngoingSelection.ChoiceCompleted);
+
+
+
                 DefaultConditions.Add("MovedTooFar", () =>
                 {
                     return MaxPixelDisplacement != null

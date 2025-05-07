@@ -252,11 +252,11 @@ namespace SelectionTracking
 
             private GameObject currentTarget;
 
-            public float? TimeBeforeChoiceStarts = 0.3f;
-            public float? TotalChoiceDuration = 0.7f;
+            public float? TimeBeforeChoiceStarts = 0.1f;
+            public float? TotalChoiceDuration = 0.3f;
 
+            public int? MaxPixelDisplacement = 200;
 
-            public int? MaxPixelDisplacement = 150;
             public List<BoolDelegate> InitConditions, UpdateConditions, TerminationConditions;
             public Dictionary<string, BoolDelegate> InitErrorTriggers, UpdateErrorTriggers, TerminationErrorTriggers;
             public InputDelegate CurrentInputLocation;

@@ -139,20 +139,6 @@ public static class Session
         IrrelevantObjects?.Clear();
     }
 
-    public static List<GameObject> GetStartButtonChildren()
-    {
-        if(SessionDef == null)
-            Debug.LogWarning("TRIED TO GET START BUTTON CHILDREN BUT SESSION DEF IS NULL!!!!!");
-        else
-        {
-            if (SessionDef.IsHuman && HumanStartPanel.StartButtonChildren != null)
-                return HumanStartPanel.StartButtonChildren;
-            else if (!SessionDef.IsHuman && USE_StartButton.StartButtonChildren != null)
-                return USE_StartButton.StartButtonChildren;
-        }
-        Debug.LogWarning("TRIED TO GET START BUTTON CHILDREN BUT THEY ARE NULL!!!!");
-        return null;
-    }
 
     public static string GetNiceIntegers(int desiredNum)
     {

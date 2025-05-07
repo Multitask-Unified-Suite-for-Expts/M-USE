@@ -307,7 +307,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
-
         });
         ChooseStim.AddUpdateMethod(() =>
         {
@@ -418,8 +417,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                     NonChosenStimLocations = $"[{string.Join(", ", CurrentTrial.TrialStimLocations.Where(location => location != ChosenStim.StimLocation))}]";
             }
 
-            if (ChosenGO != null && ChosenStim != null && SelectionHandler.SuccessfulChoices.Count > 0) //if they chose a stim 
+            if (ChosenGO != null && ChosenStim != null && SelectionHandler.SuccessfulChoices.Count > 0) //if they chose a stim
+            {
                 StimIsChosen = true;
+            }
 
             //Count NonStim Clicks:
             if (InputBroker.GetMouseButtonDown(0))

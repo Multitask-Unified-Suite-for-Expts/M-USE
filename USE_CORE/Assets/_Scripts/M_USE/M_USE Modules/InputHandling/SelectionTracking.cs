@@ -256,7 +256,7 @@ namespace SelectionTracking
             public float? TotalChoiceDuration = 0.7f;
 
 
-            public int? MaxPixelDisplacement = 100;
+            public int? MaxPixelDisplacement = 150;
             public List<BoolDelegate> InitConditions, UpdateConditions, TerminationConditions;
             public Dictionary<string, BoolDelegate> InitErrorTriggers, UpdateErrorTriggers, TerminationErrorTriggers;
             public InputDelegate CurrentInputLocation;
@@ -374,18 +374,23 @@ namespace SelectionTracking
             //Main method used by tasks to check if selection matches start button:
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
-                List<GameObject> startButtonChildren = Session.GetStartButtonChildren();
-                if (startButtonChildren != null && LastSuccessfulChoice?.SelectedGameObject != null)
+                if(LastSuccessfulChoice.SelectedGameObject != null)
                 {
-                    foreach (GameObject go in startButtonChildren)
-                    {
-                        if (ReferenceEquals(LastSuccessfulChoice.SelectedGameObject, go))
-                        {
-                            Session.EventCodeManager.SendCodeThisFrame("StartButtonSelected");
-                            return true;
-                        }
-                    }
+                    if (LastSuccessfulChoice.SelectedGameObject.name == "StartButton_TransparentFront")
+                        return true;
                 }
+                //List<GameObject> startButtonChildren = Session.GetStartButtonChildren();
+                //if (startButtonChildren != null && LastSuccessfulChoice?.SelectedGameObject != null)
+                //{
+                //    foreach (GameObject go in startButtonChildren)
+                //    {
+                //        if (ReferenceEquals(LastSuccessfulChoice.SelectedGameObject, go))
+                //        {
+                //            Session.EventCodeManager.SendCodeThisFrame("StartButtonSelected");
+                //            return true;
+                //        }
+                //    }
+                //}
                 return false;
             }
 
@@ -428,6 +433,7 @@ namespace SelectionTracking
                     currentTarget = InputTracker.SimpleRaycastTarget;
 
 
+                //Set the booleans to know when selection actually starts and finishes
                 if(OngoingSelection != null)
                 {
                     if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
@@ -443,8 +449,8 @@ namespace SelectionTracking
                     }
                 }
 
-
-                if (currentTarget == null) //input is not over a gameobject
+                //IF NO INPUT OVER A GAMEOBJECT, RETURN!
+                if (currentTarget == null)
                 {
                     if (SelectionOnEventCodeSent && OngoingSelection == null)
                     {
@@ -464,6 +470,7 @@ namespace SelectionTracking
 
                         CheckTermination();
                     }
+
                     return;
                 }
 
@@ -473,6 +480,7 @@ namespace SelectionTracking
                     Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "SelectionOn");
                     SelectionOnEventCodeSent = true;
                 }
+
 
                 //WE HAVE A TARGET --------------------------------------
                 if (OngoingSelection == null) //no previous selection

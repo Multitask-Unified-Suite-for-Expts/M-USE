@@ -84,17 +84,17 @@ public class MouseTracker : InputTracker
     {
         if(Session.GazeTracker != null && Session.GazeTracker.enabled)
         {
-            Debug.LogWarning("NOT ADDING FRAME DATA FIELDS FOR MOUSE TRACKER BECAUSE GAZE TRACKER IS ACTIVE");
+            Debug.LogWarning("NOT ADDING FRAME DATA FIELDS FOR MOUSE TRACKER BECAUSE GAZE TRACKER IS ENABLED!");
             return;
         }
 
-        frameData.AddDatum("MousePosition", () => InputBroker.mousePosition != null ? InputBroker.mousePosition : new Vector3(float.NaN, float.NaN, float.NaN));
-        frameData.AddDatum("MouseButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
-        frameData.AddDatum("SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
-        frameData.AddDatum("ShotgunRaycastTarget", ()=> ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
+        frameData.AddDatum("Mouse_Position", () => InputBroker.mousePosition != null ? InputBroker.mousePosition : new Vector3(float.NaN, float.NaN, float.NaN));
+        frameData.AddDatum("Mouse_ButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
+        frameData.AddDatum("Mouse_SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
+        frameData.AddDatum("Mouse_ShotgunRaycastTarget", ()=> ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
 
-        frameData.AddDatum("JoystickInputX", () => Input.GetAxis("Horizontal"));
-        frameData.AddDatum("JoystickInputZ", () => Input.GetAxis("Vertical"));
+        frameData.AddDatum("Mouse_JoystickInputX", () => Input.GetAxis("Horizontal"));
+        frameData.AddDatum("Mouse_JoystickInputZ", () => Input.GetAxis("Vertical"));
     }
 
 

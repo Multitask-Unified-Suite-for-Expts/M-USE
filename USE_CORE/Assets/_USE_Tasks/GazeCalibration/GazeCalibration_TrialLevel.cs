@@ -25,6 +25,7 @@ SOFTWARE.
 
 using GazeCalibration_Namespace;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -435,8 +436,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
         });
+        ITI.AddSpecificInitializationMethod(() =>
+        {
+            //NEED TO TURN ON MIDDLE POINT AND SHOW GAZE:
+            StartCoroutine(LoopThroughPoints());
 
-        ITI.SpecifyTermination(() => true, FinishTrial);
+        });
+        ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
+        //ITI.SpecifyTermination(() => true, FinishTrial);
         ITI.AddDefaultTerminationMethod(() =>
         {
             DestroyChildren(ResultContainer);
@@ -450,6 +457,17 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
+    private IEnumerator LoopThroughPoints()
+    {
+        for(int i = 0; i < numCalibPoints; i++)
+        {
+            calibNum = i;
+            InitializeCalibPoint();
+            yield return new WaitForSeconds(2f);
+        }
+        CalibCircle.CircleGO.SetActive(false);
+    }
+
     private bool ShouldGiveReward()
     {
         string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();

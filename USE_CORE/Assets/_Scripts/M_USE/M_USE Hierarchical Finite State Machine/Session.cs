@@ -111,7 +111,6 @@ public static class Session
     public static SerialPortThreaded SerialPortController;
 
     public static SelectionTracker SelectionTracker;
-    public static SelectionTracker.SelectionHandler SelectionHandler;
 
     public static ControlLevel_Session_Template SessionLevel;
     public static ControlLevel_Task_Template TaskLevel;

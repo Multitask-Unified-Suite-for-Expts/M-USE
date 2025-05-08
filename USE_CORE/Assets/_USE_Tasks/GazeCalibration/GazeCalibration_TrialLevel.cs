@@ -104,6 +104,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private float DistanceToCurrentPoint = 0f;
 
+    private List<USE_Line> LinesOnScreen = new List<USE_Line>();
+
 
     public override void DefineControlLevel()
     {
@@ -457,6 +459,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
+    private void DeleteAllLines()
+    {
+        foreach(USE_Line line in LinesOnScreen)
+        {
+            Destroy(line.LineGO);
+            //line.LineGO.SetActive(false);
+        }
+        LinesOnScreen.Clear();
+    }
+
     private IEnumerator LoopThroughPoints()
     {
         if (numCalibPoints < 1)
@@ -467,6 +479,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             InitializeCalibPoint(i);
             CollectSamplePoint(i);
             yield return new WaitForSeconds(3f);
+            DeleteAllLines();
         }
         CalibCircle.CircleGO.SetActive(false);
     }
@@ -616,6 +629,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         var calibPoint = CalibrationResult.CalibrationPoints[index];
 
+        LeftSamples.Clear();
+        RightSamples.Clear();
+
         for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
         {
             CalibrationSample sample = calibPoint.CalibrationSamples[i];
@@ -626,8 +642,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
 
         CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[index].ToVector2(), "screenadcs", 60f));
-        LeftSamples.Clear();
-        RightSamples.Clear();
     }
 
     private void CollectSamplePoints()
@@ -679,6 +693,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             USE_Line leftSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(leftSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.blue, $"L{i + 1}", true);
             LeftSampleDistances.Add(leftSampleLine.LineLength);
+            LinesOnScreen.Add(leftSampleLine);
             leftSampleLine.LineGO.SetActive(true);
         }
 
@@ -686,6 +701,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         {
             USE_Line rightSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(rightSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.red, $"R{i + 1}", true);
             RightSampleDistances.Add(rightSampleLine.LineLength);
+            LinesOnScreen.Add(rightSampleLine);
             rightSampleLine.LineGO.SetActive(true);
         }
 

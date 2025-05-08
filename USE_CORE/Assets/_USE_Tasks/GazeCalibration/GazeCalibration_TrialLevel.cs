@@ -194,7 +194,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Fixate.AddSpecificInitializationMethod(() =>
         {
             // Initialize the Calibration Point at Max Scale
-            InitializeCalibPoint();
+            InitializeCalibPoint(calibNum);
 
             // Reset variables relating to calibration completion
             currentCalibrationPointFinished = false;
@@ -441,8 +441,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             //NEED TO TURN ON MIDDLE POINT AND SHOW GAZE:
             StartCoroutine(LoopThroughPoints());
 
-            CollectSamplePoints();
-
         });
         ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
         //ITI.SpecifyTermination(() => true, FinishTrial);
@@ -461,11 +459,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
     private IEnumerator LoopThroughPoints()
     {
+        if (numCalibPoints < 1)
+            yield break;
+
         for(int i = 0; i < numCalibPoints; i++)
         {
-            calibNum = i;
-            InitializeCalibPoint();
-            yield return new WaitForSeconds(2f);
+            InitializeCalibPoint(i);
+            CollectSamplePoint(i);
+            yield return new WaitForSeconds(3f);
         }
         CalibCircle.CircleGO.SetActive(false);
     }
@@ -603,6 +604,32 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         return new Vector2(x, y);
     }
 
+
+
+    private void CollectSamplePoint(int index)
+    {
+        if (CalibrationResult == null)
+        {
+            Debug.LogWarning("No calibration result so not showing sample points");
+            return;
+        }
+
+        var calibPoint = CalibrationResult.CalibrationPoints[index];
+
+        for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
+        {
+            CalibrationSample sample = calibPoint.CalibrationSamples[i];
+            Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
+            Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
+            LeftSamples.Add(leftSamplePos);
+            RightSamples.Add(rightSamplePos);
+        }
+
+        CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[index].ToVector2(), "screenadcs", 60f));
+        LeftSamples.Clear();
+        RightSamples.Clear();
+    }
+
     private void CollectSamplePoints()
     {
         if (CalibrationResult == null)
@@ -683,11 +710,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         };
     }
 
-    private void InitializeCalibPoint()
+    private void InitializeCalibPoint(int index)
     {
         CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.black;
         CalibCircle.SetCircleScale(CurrentTrialDef.MaxCircleScale);
-        currentADCSTarget = calibPointsADCS[calibNum]; // get calib coordinates in screen ADCS space
+        currentADCSTarget = calibPointsADCS[index]; // get calib coordinates in screen ADCS space
         currentScreenPixelTarget = (Vector2)USE_CoordinateConverter.GetScreenPixel(currentADCSTarget.ToVector2(), "screenadcs", 60); // get calib coordinates in Screen space
         CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenPixelTarget;
         CalibCircle.CircleGO.SetActive(true);

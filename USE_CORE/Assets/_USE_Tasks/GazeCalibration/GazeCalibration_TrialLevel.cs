@@ -442,7 +442,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         });
 
         ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
-        ITI.SpecifyTermination(() => true, FinishTrial);
+        //ITI.SpecifyTermination(() => true, FinishTrial);
 
         ITI.AddDefaultTerminationMethod(() =>
         {

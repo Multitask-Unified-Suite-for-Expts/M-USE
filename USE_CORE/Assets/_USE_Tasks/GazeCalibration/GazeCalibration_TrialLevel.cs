@@ -609,21 +609,39 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             return;
         }
 
-        foreach (var Calib in CalibrationResult.CalibrationPoints)
+        for(int i = 0; i < CalibrationResult.CalibrationPoints.Count; i++)
         {
-            for (int i = 0; i < Calib.CalibrationSamples.Count; i++)
+            var calibPoint = CalibrationResult.CalibrationPoints[i];
+
+            for (int j = 0; j < calibPoint.CalibrationSamples.Count; i++)
             {
-                CalibrationSample sample = Calib.CalibrationSamples[i];
+                CalibrationSample sample = calibPoint.CalibrationSamples[j];
                 Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 LeftSamples.Add(leftSamplePos);
                 RightSamples.Add(rightSamplePos);
             }
 
-            CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60f));
+            CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[i].ToVector2(), "screenadcs", 60f));
             LeftSamples.Clear();
             RightSamples.Clear();
         }
+
+        //foreach (var calibPoint in CalibrationResult.CalibrationPoints)
+        //{
+        //    for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
+        //    {
+        //        CalibrationSample sample = calibPoint.CalibrationSamples[i];
+        //        Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
+        //        Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
+        //        LeftSamples.Add(leftSamplePos);
+        //        RightSamples.Add(rightSamplePos);
+        //    }
+
+        //    CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60f));
+        //    LeftSamples.Clear();
+        //    RightSamples.Clear();
+        //}
     }
 
     private void CreateSampleLines(List<Vector2> leftSamples, List<Vector2> rightSamples, Vector2 calibPoint)

@@ -441,6 +441,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             //NEED TO TURN ON MIDDLE POINT AND SHOW GAZE:
             StartCoroutine(LoopThroughPoints());
 
+            CollectSamplePoints();
+
         });
         ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
         //ITI.SpecifyTermination(() => true, FinishTrial);

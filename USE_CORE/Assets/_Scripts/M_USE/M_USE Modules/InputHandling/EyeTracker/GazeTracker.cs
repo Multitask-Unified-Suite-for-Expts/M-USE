@@ -36,7 +36,7 @@ public class GazeTracker : InputTracker
     {
         frameData.AddDatum("GazePosition", () => InputBroker.gazePosition != null ? InputBroker.gazePosition : new Vector2(float.NaN, float.NaN));
         frameData.AddDatum("SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
-        frameData.AddDatum("ShotgunModalTarget", () => ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
+        frameData.AddDatum("ShotgunRaycastTarget", () => ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
     }
 
 

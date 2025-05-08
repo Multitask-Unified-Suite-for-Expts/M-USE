@@ -85,7 +85,7 @@ public class MouseTracker : InputTracker
         frameData.AddDatum("MousePosition", () => InputBroker.mousePosition != null ? InputBroker.mousePosition : new Vector3(float.NaN, float.NaN, float.NaN));
         frameData.AddDatum("MouseButtonStatus", () => "[" + string.Join(",",ButtonStatus) + "]");
         frameData.AddDatum("SimpleRaycastTarget", ()=> SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
-        frameData.AddDatum("ShotgunModalTarget", ()=> ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
+        frameData.AddDatum("ShotgunRaycastTarget", ()=> ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
 
         frameData.AddDatum("JoystickInputX", () => Input.GetAxis("Horizontal"));
         frameData.AddDatum("JoystickInputZ", () => Input.GetAxis("Vertical"));

@@ -70,7 +70,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private bool pointFinished;
     private bool recalibPoint;
     private NormalizedPoint2D currentNormPoint;
-    private bool keyboardOverride = false;
 
     // Game Objects
     private USE_Circle CalibCircle;
@@ -198,7 +197,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             // Reset variables relating to calibration completion
             currentCalibrationPointFinished = false;
-            keyboardOverride = false;
 
             CurrentProgressString.Clear();
             CurrentProgressString.Append($"Calib Point #:  {calibNum + 1} (of {numCalibPoints})"
@@ -218,11 +216,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Fixate.AddUpdateMethod(() =>
         {
             SetTrialSummaryString();
-
-            keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
 
-        Fixate.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
+        Fixate.SpecifyTermination(() => InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
         //----------------------------------------------------- SHRINK THE CALIBRATION POINT -----------------------------------------------------
         //in the shrink state as long as InCalibrationRange, otherwise it goes back to blink
@@ -257,7 +253,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Check.AddSpecificInitializationMethod(() =>
         {
-            keyboardOverride = false;
             InfoString.Append("Info"
                                 + "\nChecking that input is within range for calibration"
                                 + "\nPress <b>Space</b> to override and calibrate regardless of gaze input location");
@@ -271,10 +266,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
 
-            //Set keyboardOverride to true if they press space
-            keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
-        Check.SpecifyTermination(() => keyboardOverride || InCalibrationRange(), Calibrate, () =>
+        Check.SpecifyTermination(() => InCalibrationRange(), Calibrate, () =>
         {
             currentNormPoint = calibPointsADCS[calibNum];
             InfoString.Clear();
@@ -285,8 +278,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Calibrate.AddSpecificInitializationMethod(() =>
         {
-            keyboardOverride = false;
-
             InfoString.Append("\nInfo"
                                 + $"\nCalibration Beginning at <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
 
@@ -316,11 +307,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 else if (unsuccessfulCount > 1)
                     Debug.LogWarning("CollectData() CALIBRATION METHOD WAS UNSUCCESSFUL MULTIPLE TIMES!!!!");
             }
-            
-            keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
         });
 
-        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished || keyboardOverride, Confirm, () =>
+        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished, Confirm, () =>
         {
             // Make sure that the Scale is set to the min scale
             CalibCircle.SetCircleScale(CurrentTrialDef.MinCircleScale);
@@ -340,9 +329,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                             + "\nPress - to recalibrate the point");
 
 
-            // Plots sample points to the Result Container, if they exist for the current calibration point
             //CollectSamplePoints();
-            //CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60));
 
 
             if (ResultContainer.transform.childCount > 0)
@@ -436,18 +423,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
         });
-        ITI.AddSpecificInitializationMethod(() =>
-        {
-            //NEED TO TURN ON MIDDLE POINT AND SHOW GAZE:
-            StartCoroutine(LoopThroughPoints());
 
-        });
-        ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
-        //ITI.SpecifyTermination(() => true, FinishTrial);
-        ITI.AddDefaultTerminationMethod(() =>
+        //ITI---------------------------------------------------------------------------------------------------------------------
+        ITI.SpecifyTermination(() => true, FinishTrial, () =>
         {
             DestroyChildren(ResultContainer);
         });
+
 
         DefineTrialData();
         DefineFrameData();
@@ -457,17 +439,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
-    private IEnumerator LoopThroughPoints()
-    {
-        for(int i = 0; i < numCalibPoints; i++)
-        {
-            calibNum = i;
-            InitializeCalibPoint();
-            yield return new WaitForSeconds(2f);
-        }
-        CalibCircle.CircleGO.SetActive(false);
-    }
-
     private bool ShouldGiveReward()
     {
         string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();

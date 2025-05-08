@@ -34,6 +34,12 @@ public class GazeTracker : InputTracker
 
     public override void AddFieldsToFrameData(DataController frameData)
     {
+        if (Session.MouseTracker != null && Session.MouseTracker.enabled)
+        {
+            Debug.LogWarning("NOT ADDING FRAME DATA FIELDS FOR GAZE TRACKER BECAUSE MOUSE TRACKER IS NOT NULL");
+            return;
+        }
+
         frameData.AddDatum("GazePosition", () => InputBroker.gazePosition != null ? InputBroker.gazePosition : new Vector2(float.NaN, float.NaN));
         frameData.AddDatum("SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
         frameData.AddDatum("ShotgunRaycastTarget", () => ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);

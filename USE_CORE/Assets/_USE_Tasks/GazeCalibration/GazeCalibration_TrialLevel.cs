@@ -436,14 +436,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        ITI.AddSpecificInitializationMethod(() =>
-        {
-            CollectSamplePoints();
-        });
-
-        ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
-        //ITI.SpecifyTermination(() => true, FinishTrial);
-
+        ITI.SpecifyTermination(() => true, FinishTrial);
         ITI.AddDefaultTerminationMethod(() =>
         {
             DestroyChildren(ResultContainer);
@@ -512,7 +505,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         }
     }
     
-
     public override void DefineCustomTrialDefSelection()
     {
         TrialDefSelectionStyle = "gazeCalibration";

@@ -313,7 +313,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 if (unsuccessfulCount == 1)
                     Debug.LogWarning("The CollectData() calibration method was unsuccessful. This can happen the first time. Will try again next frame.");
                 else if (unsuccessfulCount > 1)
-                    Debug.LogError("CollectData() CALIBRATION METHOD WAS UNSUCCESSFUL MULTIPLE TIMES!!!!");
+                    Debug.LogWarning("CollectData() CALIBRATION METHOD WAS UNSUCCESSFUL MULTIPLE TIMES!!!!");
             }
             
             keyboardOverride |= InputBroker.GetKeyDown(KeyCode.Space);
@@ -436,10 +436,16 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-
-        ITI.SpecifyTermination(() => true, FinishTrial, () =>
+        ITI.AddSpecificInitializationMethod(() =>
         {
-            // Destroy remaining results on the experimenter display at the end of the trial
+            CollectSamplePoints();
+        });
+
+        ITI.SpecifyTermination(() => InputBroker.GetKeyDown(KeyCode.Z), FinishTrial);
+        ITI.SpecifyTermination(() => true, FinishTrial);
+
+        ITI.AddDefaultTerminationMethod(() =>
+        {
             DestroyChildren(ResultContainer);
         });
 
@@ -587,22 +593,17 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void CollectSamplePoints()
     {
-        Tobii.Research.CalibrationPoint calibPoint = null;
-        foreach (var Calib in CalibrationResult.CalibrationPoints)
+        if (CalibrationResult == null)
         {
-            if (Calib.PositionOnDisplayArea.ToVector2() == calibPointsADCS[calibNum].ToVector2())
-                calibPoint = Calib;
-        }
-        if (calibPoint == null)
-        {
-            Debug.Log("There is no data associated with the current calibration point.");
+            Debug.LogWarning("No calibration result so not showing sample points");
             return;
         }
-        else
+
+        foreach (var Calib in CalibrationResult.CalibrationPoints)
         {
-            for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
+            for (int i = 0; i < Calib.CalibrationSamples.Count; i++)
             {
-                CalibrationSample sample = calibPoint.CalibrationSamples[i];
+                CalibrationSample sample = Calib.CalibrationSamples[i];
                 Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 LeftSamples.Add(leftSamplePos);

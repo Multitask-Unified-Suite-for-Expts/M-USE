@@ -379,18 +379,6 @@ namespace SelectionTracking
                     if (LastSuccessfulChoice.SelectedGameObject.name == "StartButton_TransparentFront")
                         return true;
                 }
-                //List<GameObject> startButtonChildren = Session.GetStartButtonChildren();
-                //if (startButtonChildren != null && LastSuccessfulChoice?.SelectedGameObject != null)
-                //{
-                //    foreach (GameObject go in startButtonChildren)
-                //    {
-                //        if (ReferenceEquals(LastSuccessfulChoice.SelectedGameObject, go))
-                //        {
-                //            Session.EventCodeManager.SendCodeThisFrame("StartButtonSelected");
-                //            return true;
-                //        }
-                //    }
-                //}
                 return false;
             }
 
@@ -563,12 +551,11 @@ namespace SelectionTracking
             {
                 if (!OngoingSelection.ChoiceStarted)
                 {
-                    Debug.LogWarning("CHOICE FAILED BEFORE EVEN MAKING IT TO MIN DURATION");
                     OngoingSelection = null;
                     return;
                 }
 
-                Debug.LogWarning("CHOICE FAILED AT DURATION: " + OngoingSelection.Duration);
+                Debug.LogWarning("CHOICE FAILED! DURATION = " + OngoingSelection.Duration);
 
                 if(error != null)
                     SelectionErrorHandling(error);

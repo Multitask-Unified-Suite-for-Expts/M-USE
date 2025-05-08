@@ -36,13 +36,13 @@ public class GazeTracker : InputTracker
     {
         if (Session.MouseTracker != null && Session.MouseTracker.enabled)
         {
-            Debug.LogWarning("NOT ADDING FRAME DATA FIELDS FOR GAZE TRACKER BECAUSE MOUSE TRACKER IS NOT NULL");
+            Debug.LogWarning("NOT ADDING FRAME DATA FIELDS FOR GAZE TRACKER BECAUSE MOUSE TRACKER IS ENABLED!");
             return;
         }
 
-        frameData.AddDatum("GazePosition", () => InputBroker.gazePosition != null ? InputBroker.gazePosition : new Vector2(float.NaN, float.NaN));
-        frameData.AddDatum("SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
-        frameData.AddDatum("ShotgunRaycastTarget", () => ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
+        frameData.AddDatum("Gaze_Position", () => InputBroker.gazePosition != null ? InputBroker.gazePosition : new Vector2(float.NaN, float.NaN));
+        frameData.AddDatum("Gaze_SimpleRaycastTarget", () => SimpleRaycastTarget != null ? SimpleRaycastTarget.name : null);
+        frameData.AddDatum("Gaze_ShotgunRaycastTarget", () => ShotgunRaycastTarget != null ? ShotgunRaycastTarget.name : null);
     }
 
 

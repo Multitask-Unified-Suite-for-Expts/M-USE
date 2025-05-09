@@ -66,9 +66,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     // Calibration Assessment Variables
     [HideInInspector] public bool currentCalibrationPointFinished;
-    [HideInInspector] public bool calibrationFinished;
-    private bool pointFinished;
-    private bool recalibPoint;
+    [HideInInspector] public bool CalibrationAccepted;
+
+    private int RecalibCount;
+    private bool RestartCalibration;
+
     private NormalizedPoint2D currentNormPoint;
 
     // Game Objects
@@ -89,9 +91,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private List<Vector2> RightSamples = new List<Vector2>();
     private List<float> LeftSampleDistances = new List<float>();
     private List<float> RightSampleDistances = new List<float>();
-    private int[] RecalibCount;
-    private float AverageCalibrationErrorL;
-    private float AverageCalibrationErrorR;
 
     // Experimenter Display Text Variables
     private StringBuilder InfoString = new StringBuilder();
@@ -103,7 +102,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private float DistanceToCurrentPoint = 0f;
 
-    private List<USE_Line> LinesOnScreen = new List<USE_Line>();
+    private List<USE_Circle> Circles = new List<USE_Circle>();
+
 
 
     public override void DefineControlLevel()
@@ -111,12 +111,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         State Init = new State("Init");
         State Fixate = new State("Blink");
         State Shrink = new State("Shrink");
-        State Check = new State("Check");
-        State Calibrate = new State("Calibrate");
-        State Confirm = new State("Confirm");
+        State CollectData = new State("CollectData");
+        State Reward = new State("Reward");
+        State ApplyCalibration = new State("ApplyCalibration");
+        State ConfirmResults = new State("ConfirmResults");
         State ITI = new State("ITI");
 
-        AddActiveStates(new List<State> { Init, Fixate, Shrink, Check, Calibrate, Confirm, ITI });
+        AddActiveStates(new List<State> { Init, Fixate, Shrink, CollectData, Reward, ApplyCalibration, ConfirmResults, ITI });
 
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -161,9 +162,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => Session.TobiiEyeTrackerController.ScreenBasedCalibration != null, Init);
 
 
+        //SELECTION HANDLER ------------------------------------------------------------------------------------------------------------------------------------------
         SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, Init, ITI);
 
 
+        //----------------------------------------------------- INIT -------------------------------------------------------------------------------------------------
         Init.AddUpdateMethod(() =>
         {
             // Define the number of calibration points given the following key codes (Space, 6, 5, 3, 1)
@@ -197,21 +200,35 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             // Initialize the Calibration Point at Max Scale
             InitializeCalibPoint(calibNum);
 
-            // Reset variables relating to calibration completion
             currentCalibrationPointFinished = false;
 
             CurrentProgressString.Clear();
             CurrentProgressString.Append($"Calib Point #:  {calibNum + 1} (of {numCalibPoints})"
                                    + $"\nCalib Position: ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})"
-                                   + $"\nRecalib Count: {RecalibCount[calibNum]}");
+                                   + $"\nRecalib Count: {RecalibCount}");
+
+            InfoString.Clear();
             InfoString.Append("Info"
                                 + "\nThe calibration point is blinking."
                                 + "\nInstruct the player to focus on the point until the circle shrinks.");
 
             SetTrialSummaryString();
 
+
+            ResultsString.Clear();
+            LeftSamples.Clear();
+            LeftSampleDistances.Clear();
+            RightSamples.Clear();
+            RightSampleDistances.Clear();
+
+
             //Reset before fixation
             TimeInCalibrationRange = 0;
+
+            CalibCircle.CircleGO.SetActive(true);
+
+            RestartCalibration = false;
+
 
         });
 
@@ -222,17 +239,17 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Fixate.SpecifyTermination(() => InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
-        //----------------------------------------------------- SHRINK THE CALIBRATION POINT -----------------------------------------------------
-        //in the shrink state as long as InCalibrationRange, otherwise it goes back to blink
-
+        //----------------------------------------------------- SHRINK THE CALIBRATION POINT WHILE IN CALIBRATION RANGE -----------------------------------------------------
         Shrink.AddSpecificInitializationMethod(() =>
         {
-            originalScale = CalibCircle.CircleGO.transform.localScale;
-            elapsedShrinkDuration = 0;
-            InfoString.Append("<b>\n\nInfo</b>"
-                                + "\nThe calibration point is <b>shrinking</b>."
+            InfoString.Append("\n\nInfo"
+                                + "\nThe calibration point is shrinking."
                                 + "\nContinue to focus on the point to prepare for calibration.");
             SetTrialSummaryString();
+
+            originalScale = CalibCircle.CircleGO.transform.localScale;
+
+            elapsedShrinkDuration = 0;
         });
 
         Shrink.AddUpdateMethod(() =>
@@ -244,51 +261,30 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
         });
 
-        // Terminate the shrink state 2 frames early so that the object continues to shrink for Check and Calibrate
-        Shrink.SpecifyTermination(() => elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), Check);
-
-        Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
-
-        Shrink.AddUniversalLateTerminationMethod(() => { InfoString.Clear(); });
-
-        //----------------------------------------------------- CHECK CALIBRATION READINESS -----------------------------------------------------
-
-        Check.AddSpecificInitializationMethod(() =>
-        {
-            InfoString.Append("Info"
-                                + "\nChecking that input is within range for calibration"
-                                + "\nPress <b>Space</b> to override and calibrate regardless of gaze input location");
-            SetTrialSummaryString();
-        });
-
-        Check.AddUpdateMethod(() =>
-        {
-            SetTrialSummaryString();
-
-            //Keep shrinking the circle during Check state (which should only be 1 frame anyway);
-            ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
-
-        });
-        Check.SpecifyTermination(() => InCalibrationRange(), Calibrate, () =>
+        Shrink.SpecifyTermination(() => InCalibrationRange() && elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), CollectData, () =>
         {
             currentNormPoint = calibPointsADCS[calibNum];
-            InfoString.Clear();
         });
+        Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
 
-        //-------------------------------------------------------- CALIBRATE GAZE POINT --------------------------------------------------------
+
+        //-------------------------------------------------------- COLLECT DATA --------------------------------------------------------
         int unsuccessfulCount = 0;
 
-        Calibrate.AddSpecificInitializationMethod(() =>
+        CollectData.AddSpecificInitializationMethod(() =>
         {
+            InfoString.Clear();
             InfoString.Append("\nInfo"
-                                + $"\nCalibration Beginning at <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
+                                + $"Collecting Data for point at: ({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})");
 
             SetTrialSummaryString();
 
             unsuccessfulCount = 0;
+
+            currentCalibrationPointFinished = false;
         });
 
-        Calibrate.AddUpdateMethod(() =>
+        CollectData.AddUpdateMethod(() =>
         {
             SetTrialSummaryString();
 
@@ -311,126 +307,96 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             }
         });
 
-        Calibrate.SpecifyTermination(() => currentCalibrationPointFinished, Confirm, () =>
+        CollectData.SpecifyTermination(() => currentCalibrationPointFinished, Reward, () =>
         {
             // Make sure that the Scale is set to the min scale
             CalibCircle.SetCircleScale(CurrentTrialDef.MinCircleScale);
             CalibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
 
-            currentCalibrationPointFinished = false;
-
             InfoString.Clear();
         });
 
-        //---------------------------------------------------- CONFIRM CALIBRATION RESULTS ----------------------------------------------------
-
-        Confirm.AddSpecificInitializationMethod(() =>
+        //---------------------------------------------------- Reward -------------------------------------------------------------------------
+        Reward.AddSpecificInitializationMethod(() =>
         {
-            InfoString.Append("\nInfo"
-                            + "\nPress = to accept the point"
-                            + "\nPress - to recalibrate the point");
-
-
-            //CollectSamplePoints();
-
-
-            if (ResultContainer.transform.childCount > 0)
-            {
-                ResultsString.Append($"\n\nCalibration Results"
-                                        + $"\nLeft Eye"
-                                        + $"\n{CalculateSampleStatistics(LeftSampleDistances)}"
-                                        + $"\n\nRight Eye "
-                                        + $"\n{CalculateSampleStatistics(RightSampleDistances)}");
-            }
-            else
-            {
-                ResultsString.Append($"No Samples Collected at this Calibration Point: <b>({String.Format("{0:0.00}", calibPointsADCS[calibNum].X)}, {String.Format("{0:0.00}", calibPointsADCS[calibNum].Y)})</b>");
-            }
-            
-            SetTrialSummaryString();
-
             if (ShouldGiveReward())
             {
                 StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
-
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
-
         });
-
-        Confirm.AddUpdateMethod(() =>
+        Reward.SpecifyTermination(() => true, Delay, () =>
         {
-            if (InputBroker.GetKeyDown(KeyCode.Equals))
+            if (calibNum == calibPointsADCS.Length - 1)
             {
-                //  All calibration points have been displayed and the final one has been validated
-                if (calibNum == calibPointsADCS.Length - 1)
-                    calibrationFinished = true;
-                else
-                    pointFinished = true;
-            }
-            else if (InputBroker.GetKeyDown(KeyCode.Minus))
-            {
-                // User selected to recalibrate current point, sample data is discarded and return to Blink
-                Session.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(currentNormPoint);
-                recalibPoint = true;
-                RecalibCount[calibNum] += 1;
-            }
-        });
-
-        Confirm.SpecifyTermination(() => recalibPoint, Fixate);
-        Confirm.SpecifyTermination(() => pointFinished, Fixate, () => { calibNum++; });
-        Confirm.SpecifyTermination(() => calibrationFinished, ITI, () =>
-        {
-            //COMPUTE THE RESULTS AFTER ALL POINTS ARE DONE:
-            CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply(); // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
-        });
-        Confirm.AddTimer(() => CurrentTrialDef.ConfirmDuration, Delay, () =>
-        {
-            DelayDuration = 0;
-
-            if (!(calibNum == calibPointsADCS.Length - 1))
-            {
-                // Return to the Blinking state to calibrate the next point, if all points haven't been calibrated yet
-                StateAfterDelay = Fixate;
-                calibNum++;
+                StateAfterDelay = ApplyCalibration;
             }
             else
             {
-                // Continues to ITI state since all points have been calibrated already
-                StateAfterDelay = ITI;
-
-                //COMPUTE THE RESULTS AFTER ALL POINTS ARE DONE:
-                CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply(); // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
+                StateAfterDelay = Fixate;
+                calibNum++;
             }
         });
 
-        Confirm.AddUniversalLateTerminationMethod(() =>
+        //---------------------------------------------------- COMPUTE AND APPLY CALIBRATION RESULTS ----------------------------------------------------
+        ApplyCalibration.AddSpecificInitializationMethod(() =>
         {
-            // Set the calibration point to inactive at the end of confirming
-            CalibCircle.CircleGO.SetActive(false);
-            DestroyChildren(ResultContainer);
+            //COMPUTE AND APPLY THE CALIBRATION RESULTS AFTER ALL POINTS ARE DONE:
+            CalibrationResult = Session.TobiiEyeTrackerController.ScreenBasedCalibration.ComputeAndApply(); // Collects eye tracking data at the current calibration point, computes the calibration settings, and applies them to the eye tracker.
 
-            // Reset variables once they have been evaluated
-            pointFinished = false;
-            recalibPoint = false;
+            if (CalibrationResult == null)
+                Debug.LogError("CALIBRATION RESULT IS NULL AFTER COMPUTING AND APPLYING");
+        });
+        ApplyCalibration.SpecifyTermination(() => true, ConfirmResults);
 
-            LeftSamples.Clear();
-            LeftSampleDistances.Clear();
-            RightSamples.Clear();
-            RightSampleDistances.Clear();
 
-            ResultsString.Clear();
-            InfoString.Clear();
+        //---------------------------------------------------- CONFIRM CALIBRATION RESULTS ----------------------------------------------------
+        ConfirmResults.AddSpecificInitializationMethod(() =>
+        {
+            ShowAllCalibPoints();
+
+            ShowSamplePointsInRange();
+
+
+            InfoString.Append("\nInfo"
+                            + "\nPress = to accept the calibration"
+                            + "\nPress - to start the calibration over");
 
             SetTrialSummaryString();
         });
 
-        //ITI---------------------------------------------------------------------------------------------------------------------
-        ITI.SpecifyTermination(() => true, FinishTrial, () =>
+        ConfirmResults.AddUpdateMethod(() =>
         {
+            if (InputBroker.GetKeyDown(KeyCode.Equals))
+            {
+                CalibrationAccepted = true;
+            }
+            else if (InputBroker.GetKeyDown(KeyCode.Minus))
+            {
+                RestartCalibration = true;
+
+                RecalibCount++;
+
+                //DO WE ALSO WANT TO DISCARD DATA FOR ALL POINTS?
+                //for(int i = 0; i < calibPointsADCS.Length; i++)
+                //{
+                //    Session.TobiiEyeTrackerController.ScreenBasedCalibration.DiscardData(calibPointsADCS[i]);
+                //}
+            }
+        });
+
+        ConfirmResults.SpecifyTermination(() => RestartCalibration, Fixate, () => { calibNum = 0; });
+        ConfirmResults.SpecifyTermination(() => CalibrationAccepted, ITI);
+        ConfirmResults.AddTimer(() => CurrentTrialDef.ConfirmDuration, ITI);
+
+        //ITI---------------------------------------------------------------------------------------------------------------------
+        ITI.AddSpecificInitializationMethod(() =>
+        {
+            CalibCircle.CircleGO.SetActive(false);
             DestroyChildren(ResultContainer);
         });
+        ITI.SpecifyTermination(() => true, FinishTrial);
 
 
         DefineTrialData();
@@ -526,7 +492,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints[7],
                 allCalibPoints[8]};
 
-                RecalibCount = new int[9];
+                RecalibCount = 9;
                 break;
             case 6:
                 calibPointsADCS = new NormalizedPoint2D[6] {
@@ -537,7 +503,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [3],
                 allCalibPoints[5]};
 
-                RecalibCount = new int[6];
+                RecalibCount = 6;
                 break;
             case 5:
                 calibPointsADCS = new NormalizedPoint2D[5] {
@@ -547,7 +513,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [6],
                 allCalibPoints [8]};
 
-                RecalibCount = new int[5];
+                RecalibCount = 5;
                 break;
             case 3:
                 calibPointsADCS = new NormalizedPoint2D[3]{
@@ -555,7 +521,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 allCalibPoints [3],
                 allCalibPoints [5] };
 
-                RecalibCount = new int[3];
+                RecalibCount = 3;
                 break;
         }
     }
@@ -576,96 +542,80 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
 
-    private void CollectSamplePoint(int index)
+    private void ShowSamplePointsInRange()
     {
         if (CalibrationResult == null)
         {
             Debug.LogWarning("No calibration result so not showing sample points");
             return;
         }
-
-        var calibPoint = CalibrationResult.CalibrationPoints[index];
 
         LeftSamples.Clear();
         RightSamples.Clear();
 
-        for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
-        {
-            CalibrationSample sample = calibPoint.CalibrationSamples[i];
-            Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
-            Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
-            LeftSamples.Add(leftSamplePos);
-            RightSamples.Add(rightSamplePos);
-        }
-
-        CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[index].ToVector2(), "screenadcs", 60f));
-    }
-
-    private void CollectSamplePoints()
-    {
-        if (CalibrationResult == null)
-        {
-            Debug.LogWarning("No calibration result so not showing sample points");
-            return;
-        }
+        int threshold = 250;
 
         for(int i = 0; i < CalibrationResult.CalibrationPoints.Count; i++)
         {
-            var calibPoint = CalibrationResult.CalibrationPoints[i];
+            var calibResultPoint = CalibrationResult.CalibrationPoints[i];
 
-            for (int j = 0; j < calibPoint.CalibrationSamples.Count; i++)
+            for (int j = 0; j < calibResultPoint.CalibrationSamples.Count; i++)
             {
-                CalibrationSample sample = calibPoint.CalibrationSamples[j];
+                CalibrationSample sample = calibResultPoint.CalibrationSamples[j];
+
                 Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
                 Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
-                LeftSamples.Add(leftSamplePos);
-                RightSamples.Add(rightSamplePos);
+
+                float leftSampleDistance = Vector2.Distance(leftSamplePos, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[i].ToVector2(), "screenadcs", 60f));
+                float rightSampleDistance = Vector2.Distance(rightSamplePos, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[i].ToVector2(), "screenadcs", 60f));
+
+                Debug.LogWarning("LEFT SAMPLE DISTANCE = " + leftSampleDistance + " | RIGHT SAMPLE DISTANCE: " + rightSampleDistance);
+
+                if (leftSampleDistance <= threshold && rightSampleDistance <= threshold)
+                {
+                    LeftSamples.Add(leftSamplePos);
+                    RightSamples.Add(rightSamplePos);
+
+                    LeftSampleDistances.Add(leftSampleDistance);
+                    RightSampleDistances.Add(rightSampleDistance);
+                }
+                else
+                    Debug.LogWarning("Atleast one sample was outside threshold");
             }
 
-            CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[i].ToVector2(), "screenadcs", 60f));
-            LeftSamples.Clear();
-            RightSamples.Clear();
+            CreateSampleCircles();
         }
-
-        //foreach (var calibPoint in CalibrationResult.CalibrationPoints)
-        //{
-        //    for (int i = 0; i < calibPoint.CalibrationSamples.Count; i++)
-        //    {
-        //        CalibrationSample sample = calibPoint.CalibrationSamples[i];
-        //        Vector2 leftSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.LeftEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
-        //        Vector2 rightSamplePos = (Vector2)USE_CoordinateConverter.GetScreenPixel(sample.RightEye.PositionOnDisplayArea.ToVector2(), "screenadcs", 60);
-        //        LeftSamples.Add(leftSamplePos);
-        //        RightSamples.Add(rightSamplePos);
-        //    }
-
-        //    CreateSampleLines(LeftSamples, RightSamples, (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPointsADCS[calibNum].ToVector2(), "screenadcs", 60f));
-        //    LeftSamples.Clear();
-        //    RightSamples.Clear();
-        //}
     }
 
-    private void CreateSampleLines(List<Vector2> leftSamples, List<Vector2> rightSamples, Vector2 calibPoint)
+    private void CreateSampleCircles()
     {
-        for (int i = 0; i < leftSamples.Count; i++)
+        if (LeftSamples != null && LeftSamples.Count > 0)
         {
-            USE_Line leftSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(leftSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.blue, $"L{i + 1}", true);
-            LeftSampleDistances.Add(leftSampleLine.LineLength);
-            LinesOnScreen.Add(leftSampleLine);
-            leftSampleLine.LineGO.SetActive(true);
+            for (int i = 0; i < LeftSamples.Count; i++)
+            {
+                USE_Circle leftSampleCircle = new USE_Circle(ResultContainer.GetComponent<Canvas>(), LeftSamples[i], 5, "LeftSampleCircle_ " + i);
+                leftSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.cyan;
+                leftSampleCircle.CircleGO.SetActive(true);
+                Circles.Add(leftSampleCircle);
+            }
         }
+        else
+            Debug.LogWarning("NO LEFT SAMPLES");
 
-        for (int i = 0; i < rightSamples.Count; i++)
+        if (RightSamples != null && RightSamples.Count > 0)
         {
-            USE_Line rightSampleLine = new USE_Line(ResultContainer.GetComponent<Canvas>(), ScreenToPlayerViewPosition(rightSamples[i], ResultContainer.transform), ScreenToPlayerViewPosition(calibPoint, ResultContainer.transform), Color.red, $"R{i + 1}", true);
-            RightSampleDistances.Add(rightSampleLine.LineLength);
-            LinesOnScreen.Add(rightSampleLine);
-            rightSampleLine.LineGO.SetActive(true);
+            for (int i = 0; i < RightSamples.Count; i++)
+            {
+                USE_Circle rightSampleCircle = new USE_Circle(ResultContainer.GetComponent<Canvas>(), RightSamples[i], 5, "RightSampleCircle_ " + i);
+                rightSampleCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.magenta;
+                rightSampleCircle.CircleGO.SetActive(true);
+                Circles.Add(rightSampleCircle);
+            }
         }
-
-        // Check if we have elements in distances lists before calculating averages
-        AverageCalibrationErrorL = LeftSampleDistances.Count > 0 ? LeftSampleDistances.Average() : 0f;
-        AverageCalibrationErrorR = RightSampleDistances.Count > 0 ? RightSampleDistances.Average() : 0f;
+        else
+            Debug.LogWarning("NO RIGHT SAMPLES");
     }
+
 
     private void AssignCalibPositions()
     {
@@ -691,6 +641,27 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         currentScreenPixelTarget = (Vector2)USE_CoordinateConverter.GetScreenPixel(currentADCSTarget.ToVector2(), "screenadcs", 60); // get calib coordinates in Screen space
         CalibCircle.CircleGO.GetComponent<RectTransform>().anchoredPosition = currentScreenPixelTarget;
         CalibCircle.CircleGO.SetActive(true);
+    }
+
+    private void ShowAllCalibPoints()
+    {
+        if(calibPointsADCS.Length < 1)
+        {
+            Debug.LogWarning("CANT INITIALIZE ALL CALIB POINTS BECAUSE ITS LENGTH IS LESS THAN 1");
+            return;
+        }
+
+        for(int i = 0; i < calibPointsADCS.Length; i++)
+        {
+            var calibPoint = calibPointsADCS[i];
+
+            var location = (Vector2)USE_CoordinateConverter.GetScreenPixel(calibPoint.ToVector2(), "screenadcs", 60);
+
+            USE_Circle calibCircle = new USE_Circle(ResultContainer.GetComponent<Canvas>(), location, CurrentTrialDef.MaxCircleScale, "CalibCircle_Point" + i);
+            calibCircle.CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>().color = Color.green;
+            calibCircle.CircleGO.SetActive(true);
+            Circles.Add(calibCircle);
+        }
     }
 
     private bool InCalibrationRange()
@@ -727,9 +698,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         calibNum = 0;
         numCalibPoints = 0;
 
-        recalibPoint = false;
-        pointFinished = false;
-        calibrationFinished = false;
+        RestartCalibration = false;
+        CalibrationAccepted = false;
 
         currentScreenPixelTarget = new Vector2(float.NaN, float.NaN);
 
@@ -743,8 +713,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         ResultsString.Clear();
         InfoString.Clear();
 
-        AverageCalibrationErrorL = 0;
-        AverageCalibrationErrorR = 0;
     }
 
     public override void FinishTrialCleanup()
@@ -767,10 +735,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     {
         // Gaze Calibration specific trial data
         TrialData.AddDatum("NumCalibPoints", () => numCalibPoints); // Number of calibration points chosen
-        TrialData.AddDatum("RecalibCount", () => RecalibCount?.Sum()); // Number of recalibrations for the current calibration point
-        TrialData.AddDatum("CalibrationCompleted", () => calibrationFinished ? "Completed" : "Incomplete");
-        TrialData.AddDatum("LeftAvgCalibrationError", () => AverageCalibrationErrorL); // average distance of all left eye results from the actually calib point
-        TrialData.AddDatum("RightAvgCalibrationError", () => AverageCalibrationErrorR);// average distance of all left eye results from the actually calib point
+        TrialData.AddDatum("RecalibCount", () => RecalibCount); // Number of recalibrations
+        TrialData.AddDatum("CalibrationCompleted", () => CalibrationAccepted ? "Completed" : "Incomplete");
     }
     private void DefineFrameData()
     {
@@ -778,27 +744,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         FrameData.AddDatum("CalibrationCircleVisible", () => CalibCircle?.CircleGO.activeSelf); // Whether the calibration circle is visible
         FrameData.AddDatum("CurrentCalibrationPointPosition", () => currentScreenPixelTarget);
         FrameData.AddDatum("InCalibrationRange", () => InCalibrationRange() ? 1 : 0); // If the gaze point is within the acceptable calibration range
-    }
-
-    private string CalculateSampleStatistics(List<float> samples)
-    {
-        int n = samples.Count;
-        if (n <= 1)
-        {
-            return "Insufficient data to calculate standard deviation.";
-        }
-
-        // Calculate average
-        float average = samples.Average();
-
-        // Calculate standard deviation
-        float sumOfSquaredDeviations = samples.Sum(value => Mathf.Pow(value - average, 2));
-        float standardDeviation = Mathf.Sqrt(sumOfSquaredDeviations / samples.Count);
-
-        string result = $"<b>Mean:</b> {String.Format("{0:0.000}", average)}" +
-            $"\n<b>Standard Deviation:</b> {String.Format("{0:0.000}", standardDeviation)}";
-
-        return result;
     }
 
     private void SetTrialSummaryString()

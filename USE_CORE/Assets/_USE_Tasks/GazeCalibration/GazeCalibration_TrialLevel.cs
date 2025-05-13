@@ -228,7 +228,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
 
-        Fixate.SpecifyTermination(() => InCalibrationRange(CurrentTaskDef.AcceptableDistance_Pixels), Shrink, () => { InfoString.Clear(); });
+        Fixate.SpecifyTermination(() => InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
         //----------------------------------------------------- SHRINK THE CALIBRATION POINT WHILE IN CALIBRATION RANGE -----------------------------------------------------
         Shrink.AddSpecificInitializationMethod(() =>
@@ -254,8 +254,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             ShrinkGameObject(CalibCircle.CircleGO, CurrentTrialDef.MinCircleScale, CurrentTrialDef.ShrinkDuration);
         });
 
-        Shrink.SpecifyTermination(() => InCalibrationRange(CurrentTaskDef.AcceptableDistance_Pixels) && elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), CollectData);
-        Shrink.SpecifyTermination(() => !InCalibrationRange(CurrentTaskDef.AcceptableDistance_Pixels) && elapsedShrinkDuration != 0, Fixate);
+        Shrink.SpecifyTermination(() => InCalibrationRange() && elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), CollectData);
+        Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
 
 
         //-------------------------------------------------------- COLLECT DATA --------------------------------------------------------
@@ -510,11 +510,11 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         CalibCircle.CircleGO.SetActive(true);
     }
 
-    private bool InCalibrationRange(float acceptableDistance)
+    private bool InCalibrationRange()
     {
         DistanceToCurrentPoint = Vector2.Distance((Vector2)SelectionHandler.CurrentInputLocation(), currentScreenPixelTarget);
 
-        bool inRange = DistanceToCurrentPoint < acceptableDistance;
+        bool inRange = DistanceToCurrentPoint < CurrentTaskDef.AcceptableDistance_Pixels;
 
         if(inRange)
         {
@@ -583,7 +583,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         // Gaze Calibration specific frame data
         FrameData.AddDatum("CalibrationCircleVisible", () => CalibCircle?.CircleGO.activeSelf); // Whether the calibration circle is visible
         FrameData.AddDatum("CurrentCalibrationPointPosition", () => currentScreenPixelTarget);
-        FrameData.AddDatum("InCalibrationRange", () => InCalibrationRange(CurrentTaskDef.AcceptableDistance_Pixels) ? 1 : 0); // If the gaze point is within the acceptable calibration range
+        FrameData.AddDatum("InCalibrationRange", () => InCalibrationRange() ? 1 : 0); // If the gaze point is within the acceptable calibration range
     }
 
     private void SetTrialSummaryString()

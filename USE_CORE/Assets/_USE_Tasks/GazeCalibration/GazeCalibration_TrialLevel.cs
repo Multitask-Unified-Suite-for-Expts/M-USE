@@ -223,7 +223,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         });
 
         Fixate.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
-        Fixate.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0;});
+        Fixate.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { RestartCalibration(); });
 
         Fixate.SpecifyTermination(() => InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
@@ -254,8 +254,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         Shrink.SpecifyTermination(() => InCalibrationRange() && elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), CollectData);
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
         Shrink.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
-        Shrink.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0; });
-
+        Shrink.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { RestartCalibration(); });
 
         //-------------------------------------------------------- COLLECT DATA --------------------------------------------------------
         CollectData.AddSpecificInitializationMethod(() =>
@@ -294,14 +293,14 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             InfoString.Clear();
         });
         CollectData.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
-        CollectData.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0; });
+        CollectData.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { RestartCalibration(); });
 
         //---------------------------------------------------- Reward -------------------------------------------------------------------------
         Reward.AddSpecificInitializationMethod(() =>
         {
-            if (ShouldGiveReward())
+            if (ShouldGiveReward() && Session.SyncBoxController != null)
             {
-                StartCoroutine(Session.SyncBoxController?.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
+                StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
                 CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
                 CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
             }
@@ -322,7 +321,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             }
         });
         Reward.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
-        Reward.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0; });
+        Reward.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { RestartCalibration(); });
 
 
 
@@ -340,8 +339,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             calibNum = 0;
             OnlyConfirming = true;
         });
-        ApplyCalibration.SpecifyTermination(() => CalibrationResult != null, ConfirmResults);
-
 
         //---------------------------------------------------- CONFIRM CALIBRATION RESULTS ----------------------------------------------------
         ConfirmResults.AddSpecificInitializationMethod(() =>
@@ -355,12 +352,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
         });
         ConfirmResults.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
-        ConfirmResults.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () =>
-        {
-            OnlyConfirming = false;
-            calibNum = 0;
-            NumCalibrationsPerformed++;
-        });
+        ConfirmResults.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { RestartCalibration(); });
 
         //ITI---------------------------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>
@@ -379,6 +371,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
 
     // ---------------------------------------------------------- METHODS ----------------------------------------------------------
+    private void RestartCalibration()
+    {
+        calibNum = 0;
+        OnlyConfirming = false;
+        NumCalibrationsPerformed++;
+
+    }
     private bool ShouldGiveReward()
     {
         string rewardStructure = CurrentTaskDef.RewardStructure.ToLower();

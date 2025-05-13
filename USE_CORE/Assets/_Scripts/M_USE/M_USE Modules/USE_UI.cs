@@ -497,19 +497,16 @@ namespace USE_UI
 
         public USE_Circle(Canvas parent, Vector2 circleLocation, float size, string name)
         {
-            CircleGO = new GameObject(name, typeof(RectTransform), typeof(UnityEngine.UI.Extensions.UICircle));
+            CircleGO = new GameObject(name, typeof(RectTransform), typeof(UICircle));
             CircleGO.transform.SetParent(parent.transform, false);
             CircleGO.transform.localScale = Vector3.one * size;
 
-            var circle = CircleGO.GetComponent<UnityEngine.UI.Extensions.UICircle>();
+            var circle = CircleGO.GetComponent<UICircle>();
             circle.Fill = true;
             circle.Thickness = 2f;
 
             var rect = CircleGO.GetComponent<RectTransform>();
 
-            /*rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 1920);
-            rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 1080)*/
-            ;
             rect.sizeDelta = new Vector2(1920, 1080);
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.zero;
@@ -542,7 +539,7 @@ namespace USE_UI
         }
         public void SetCircleScale(float size)
         {
-            this.CircleGO.transform.localScale = new Vector3(size, size, size);
+            CircleGO.transform.localScale = new Vector3(size, size, size);
         }
     }
     public class USE_Line

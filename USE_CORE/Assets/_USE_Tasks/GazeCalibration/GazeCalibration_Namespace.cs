@@ -44,7 +44,6 @@ namespace GazeCalibration_Namespace
         public float MaxCircleScale;
         public float MinCircleScale;
         public float ShrinkDuration;
-        public float ConfirmDuration;
 
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -57,7 +56,6 @@ namespace GazeCalibration_Namespace
             td.MaxCircleScale = MaxCircleScale;
             td.MinCircleScale = MinCircleScale;
             td.ShrinkDuration = ShrinkDuration;
-            td.ConfirmDuration = ConfirmDuration;
 
             TrialDefs.Add(td);
         }
@@ -69,7 +67,6 @@ namespace GazeCalibration_Namespace
         public float MaxCircleScale = 0.075f;
         public float MinCircleScale = 0.015f;
         public float ShrinkDuration = 1.5f;
-        public float ConfirmDuration = 1.5f;
     }
 
     public class GazeCalibration_StimDef : StimDef

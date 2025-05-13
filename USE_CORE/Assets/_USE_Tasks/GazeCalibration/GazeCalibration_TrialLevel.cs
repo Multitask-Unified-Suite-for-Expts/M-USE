@@ -211,22 +211,19 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                                 + "\nInstruct the player to focus on the point until the circle shrinks.");
 
             SetTrialSummaryString();
-
-
             ResultsString.Clear();
-
             //Reset before fixation
             TimeInCalibrationRange = 0;
-
             CalibCircle.CircleGO.SetActive(true);
-
-
         });
 
         Fixate.AddUpdateMethod(() =>
         {
             SetTrialSummaryString();
         });
+
+        Fixate.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
+        Fixate.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0;});
 
         Fixate.SpecifyTermination(() => InCalibrationRange(), Shrink, () => { InfoString.Clear(); });
 
@@ -256,6 +253,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Shrink.SpecifyTermination(() => InCalibrationRange() && elapsedShrinkDuration > (CurrentTrialDef.ShrinkDuration - 0.05f), CollectData);
         Shrink.SpecifyTermination(() => !InCalibrationRange() && elapsedShrinkDuration != 0, Fixate);
+        Shrink.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
+        Shrink.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0; });
 
 
         //-------------------------------------------------------- COLLECT DATA --------------------------------------------------------
@@ -294,6 +293,8 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             InfoString.Clear();
         });
+        CollectData.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
+        CollectData.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0; });
 
         //---------------------------------------------------- Reward -------------------------------------------------------------------------
         Reward.AddSpecificInitializationMethod(() =>
@@ -320,6 +321,10 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
                 calibNum++;
             }
         });
+        Reward.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
+        Reward.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () => { calibNum = 0; });
+
+
 
         //---------------------------------------------------- COMPUTE AND APPLY CALIBRATION RESULTS ----------------------------------------------------
         ApplyCalibration.AddSpecificInitializationMethod(() =>
@@ -335,7 +340,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             calibNum = 0;
             OnlyConfirming = true;
         });
-
         ApplyCalibration.SpecifyTermination(() => CalibrationResult != null, ConfirmResults);
 
 
@@ -350,28 +354,13 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
         });
-
-        ConfirmResults.AddUpdateMethod(() =>
+        ConfirmResults.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Equals), ITI);
+        ConfirmResults.SpecifyTermination(() => OnlyConfirming && InputBroker.GetKeyDown(KeyCode.Minus), Fixate, () =>
         {
-            if (InputBroker.GetKeyDown(KeyCode.Equals))
-            {
-                CalibrationAccepted = true;
-            }
-            else if (InputBroker.GetKeyDown(KeyCode.Minus))
-            {
-                PerformAnotherCalibration = true;
-
-                NumCalibrationsPerformed++;
-            }
-        });
-
-        ConfirmResults.SpecifyTermination(() => PerformAnotherCalibration, Fixate, () =>
-        {
-            calibNum = 0;
             OnlyConfirming = false;
-            PerformAnotherCalibration = false;
+            calibNum = 0;
+            NumCalibrationsPerformed++;
         });
-        ConfirmResults.SpecifyTermination(() => CalibrationAccepted, ITI);
 
         //ITI---------------------------------------------------------------------------------------------------------------------
         ITI.AddSpecificInitializationMethod(() =>

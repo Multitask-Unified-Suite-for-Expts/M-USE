@@ -330,6 +330,12 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
             if (CalibrationResult == null)
                 Debug.LogError("CALIBRATION RESULT IS NULL AFTER COMPUTING AND APPLYING");
         });
+        ApplyCalibration.SpecifyTermination(() => CalibrationResult != null, Fixate, () =>
+        {
+            calibNum = 0;
+            OnlyConfirming = true;
+        });
+
         ApplyCalibration.SpecifyTermination(() => CalibrationResult != null, ConfirmResults);
 
 

@@ -434,16 +434,17 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, TokenUpdate, () =>
+        ChooseStim.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, Delay, () =>
         {
             AbortCode = 8;
             numPulsesTrial = 0;
-            EndBlock = true;
+
+            DelayDuration = .5f; //50ms delay for stimulation to finish
+            StateAfterDelay = ITI;
         });
         ChooseStim.SpecifyTermination(() => (Time.time - ChooseStim.TimingInfo.StartTimeAbsolute > chooseStimDuration.value) && !TouchFBController.FeedbackOn, TokenUpdate, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
-            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
             AudioFBController.Play(Session.SessionDef.IsHuman ? "TimeRanOut" : "Negative");
             numPulsesTrial = 0;
@@ -545,14 +546,20 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             DisplayResultsPanelGO.SetActive(false);
             DisplayResults2DContainerGO.SetActive(false);
-
-            if(CurrentTrial.ShakeStim)
-                RemoveShakeStimScript(trialStims);
-            if(Session.SessionDef.IsHuman)
-                TokenFBController.enabled = false;
         });
 
         //ITI State----------------------------------------------------------------------------------------------------------------------
+        ITI.AddSpecificInitializationMethod(() =>
+        {
+            if (AbortCode == 8)
+                EndBlock = true; //end the block if they failed a selection
+
+            if (CurrentTrial.ShakeStim)
+                RemoveShakeStimScript(trialStims);
+
+            if (Session.SessionDef.IsHuman)
+                TokenFBController.enabled = false;
+        });
         ITI.AddTimer(() => CurrentTrial.ItiDuration, FinishTrial);
         //---------------------------------------------------------------------------------------------------------------------------------
         DefineTrialData();
@@ -569,14 +576,15 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         StimulatedDuringThisTrial = true;
 
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
-        //Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
 
         if(Session.SyncBoxController != null)
             StartCoroutine(Session.SyncBoxController.SendSonication());
 
-        //Increment Data
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
         CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
+
+        CurrentTaskLevel.CalculateBlockSummaryString(); //update exp display after incrementing data
+
     }
 
     public override void FinishTrialCleanup()

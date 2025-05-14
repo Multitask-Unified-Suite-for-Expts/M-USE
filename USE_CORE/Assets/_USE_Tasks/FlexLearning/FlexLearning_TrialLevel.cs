@@ -272,7 +272,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (base.SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
                 ChoiceFailed_Trial = true;
             }
@@ -325,19 +325,23 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             UpdateExperimenterDisplaySummaryStrings();
         });
-        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, Delay, () =>
         {
             AbortCode = 8;
-            //EndBlock = true; //dont think i need this for FL cuz it just needs to end the trial not the block
+            DelayDuration = .5f; //50ms delay for stimulation to finish
+            StateAfterDelay = ITI;
+
+            runningAcc.Add(0);
+            CurrentTaskLevel.SearchDurations_InTask.Add(null);
+            SearchDurations_InBlock.Add(null);
+            SetTrialSummaryString();
         });
         SearchDisplay.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
-            Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
 
             runningAcc.Add(0);
-
             CurrentTaskLevel.SearchDurations_InTask.Add(null);
             SearchDurations_InBlock.Add(null);
             SetTrialSummaryString();
@@ -416,12 +420,15 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         StimulatedDuringThisTrial = true;
 
         yield return new WaitForSeconds(CurrentTrialDef.StimulationDelayDuration);
-        //Debug.LogWarning("SENDING SONICATION ON FRAME: " + Time.frameCount);
+
         if(Session.SyncBoxController != null)
             StartCoroutine(Session.SyncBoxController.SendSonication());
 
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
         CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
+
+        CurrentTaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
+
     }
 
     public override void OnTokenBarFull()

@@ -401,10 +401,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 Session.EventCodeManager.SendCodeThisFrame("ContextOff");
             }
         });
-        ITI.AddTimer(() => itiDuration.value, FinishTrial, () =>
-        {
-            UpdateExperimenterDisplaySummaryStrings();
-        });
+        ITI.AddTimer(() => itiDuration.value, FinishTrial);
 
         //---------------------------------ADD FRAME AND TRIAL DATA TO LOG FILES---------------------------------------
         DefineTrialData();

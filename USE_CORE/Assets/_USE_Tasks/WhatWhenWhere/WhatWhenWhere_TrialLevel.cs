@@ -218,9 +218,23 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
         //-------------------------------------------------------------------------------------------------------------------------------
 
-        InitTrial.AddSpecificInitializationMethod(() => InitializeShotgunHandler());
+        InitTrial.AddSpecificInitializationMethod(() =>
+        {
+            SelectionHandler.HandlerActive = true;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
+
+            SelectionHandler.MaxPixelDisplacement = 50;
+        });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             PrepareSliderForTrial();
 
             //Set timer duration for the trial:
@@ -849,15 +863,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
     }
 
-    private void InitializeShotgunHandler()
-    {
-        SelectionHandler.HandlerActive = true;
-        if (SelectionHandler.AllChoices.Count > 0)
-            SelectionHandler.ClearSelections();
-        SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-        SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
-        SelectionHandler.MaxPixelDisplacement = 50;
-    }
+
     private void UpdateExperimenterDisplaySummaryStrings()
     {
         CurrentTaskLevel.SetBlockSummaryString();

@@ -198,12 +198,17 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
-            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
 
             Input.ResetInputAxes(); //reset input in case they holding down
         });
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay);
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), SearchDisplayDelay, () =>
+        {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+        });
 
         // Provide delay following start button selection and before stimuli onset
         SearchDisplayDelay.AddTimer(() => searchDisplayDelay.value, SearchDisplay);

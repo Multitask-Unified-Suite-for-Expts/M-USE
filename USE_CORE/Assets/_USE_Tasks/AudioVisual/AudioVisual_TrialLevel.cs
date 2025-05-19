@@ -152,13 +152,17 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
-            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
 
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Preparation);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             TokenFBController.enabled = true;
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
 

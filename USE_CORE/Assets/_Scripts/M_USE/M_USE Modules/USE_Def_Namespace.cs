@@ -260,6 +260,13 @@ namespace USE_Def_Namespace
         /// Number of times to send event code and sonication for each stimulation condition
         /// </summary>
         public int SonicationTest_NumPerCondition = 10;
+
+        /// <summary>
+        /// Duration for Start Button Selection
+        /// </summary>
+        public float StartButtonSelectionDuration = 0.3f;
+
+
     }
 
     public class TaskDef

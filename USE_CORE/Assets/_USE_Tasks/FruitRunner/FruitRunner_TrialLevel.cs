@@ -120,8 +120,8 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
 
-            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
 
             TokenFBController.enabled = false;
             TokenFBController.SetTotalTokensNum(CurrentTrial.TokenBarCapacity);
@@ -130,6 +130,9 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Setup, () =>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             TokenFBController.AdjustTokenBarSizing(100);
             TokenFBController.SetRevealTime(.1f);
             TokenFBController.SetUpdateTime(.2f);

@@ -79,7 +79,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     //MAIN TARGET:
     private GameObject TargetStim_GO;
-    
+
 
     public override void DefineControlLevel()
     {
@@ -125,7 +125,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             LoadConfigUIVariables();
 
             SetDataStrings();
-            
+
             CreateIcons();
             //CreateGameObjects();
 
@@ -157,10 +157,17 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
+
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
+        });
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () =>
+        {
             SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
             SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
+            TokenFBController.enabled = true;
         });
-        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), PreCue, () => TokenFBController.enabled = true);
 
         //PreCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         PreCue.AddSpecificInitializationMethod(() =>

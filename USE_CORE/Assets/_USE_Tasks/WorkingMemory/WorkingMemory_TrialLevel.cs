@@ -184,12 +184,15 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
 
-            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
         });
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), DisplaySample, () =>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             //Set the token bar settings
             TokenFBController.enabled = true;
             SelectionHandler.HandlerActive = false;

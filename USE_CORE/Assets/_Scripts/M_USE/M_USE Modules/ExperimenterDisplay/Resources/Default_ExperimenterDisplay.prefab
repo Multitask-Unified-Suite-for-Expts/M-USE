@@ -224,8 +224,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Block
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
-  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
+  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
+  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -1418,8 +1418,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Log
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
-  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
+  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
+  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -2940,7 +2940,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: ed01368cda63e425ab7f00570f996ed4, type: 3}
+    m_Font: {fileID: 12800000, guid: 53224191b5f4a46f39e903a60c127c11, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -3434,7 +3434,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: ed01368cda63e425ab7f00570f996ed4, type: 3}
+    m_Font: {fileID: 12800000, guid: 53224191b5f4a46f39e903a60c127c11, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -3593,8 +3593,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Trial
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
-  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
+  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
+  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -4553,7 +4553,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: ed01368cda63e425ab7f00570f996ed4, type: 3}
+    m_Font: {fileID: 12800000, guid: 53224191b5f4a46f39e903a60c127c11, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -4869,8 +4869,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Session
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
-  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
+  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
+  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -5429,8 +5429,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Hot Keys
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
-  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
+  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
+  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -6882,7 +6882,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: ed01368cda63e425ab7f00570f996ed4, type: 3}
+    m_Font: {fileID: 12800000, guid: 53224191b5f4a46f39e903a60c127c11, type: 3}
     m_FontSize: 19
     m_FontStyle: 0
     m_BestFit: 0
@@ -7047,7 +7047,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: ed01368cda63e425ab7f00570f996ed4, type: 3}
+    m_Font: {fileID: 12800000, guid: 53224191b5f4a46f39e903a60c127c11, type: 3}
     m_FontSize: 22
     m_FontStyle: 0
     m_BestFit: 0

@@ -127,8 +127,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Task Order
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: dcda59be71fa04440b8b2c22e1ae4c6c, type: 2}
-  m_sharedMaterial: {fileID: -8406529082079625351, guid: dcda59be71fa04440b8b2c22e1ae4c6c,
+  m_fontAsset: {fileID: 11400000, guid: 34de07b03e8724a6c93abb18030b1511, type: 2}
+  m_sharedMaterial: {fileID: 7250606405739318610, guid: 34de07b03e8724a6c93abb18030b1511,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}

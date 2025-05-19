@@ -426,7 +426,6 @@ namespace SelectionTracking
                 {
                     if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
                     {
-                        Debug.LogWarning("CHOICE STARTED AT DURATION: " + OngoingSelection.Duration);
                         OngoingSelection.ChoiceStarted = true;
                         Session.EventCodeManager.SendCodeThisFrame("ChoiceBegins");
                     }
@@ -521,7 +520,6 @@ namespace SelectionTracking
                     }
                     else
                     {
-                        Debug.LogWarning("UPDATE ERROR | " + updateErrors);
                         ChoiceFailed(updateErrors);
                     }
                 }
@@ -540,7 +538,6 @@ namespace SelectionTracking
                     }
                     else
                     {
-                        Debug.LogWarning("TERMINATION ERROR | " + termErrors);
                         ChoiceFailed(termErrors);
                     }
                 }
@@ -554,8 +551,6 @@ namespace SelectionTracking
                     OngoingSelection = null;
                     return;
                 }
-
-                Debug.LogWarning("CHOICE FAILED! DURATION = " + OngoingSelection.Duration);
 
                 if(error != null)
                     SelectionErrorHandling(error);
@@ -580,8 +575,6 @@ namespace SelectionTracking
                     OngoingSelection = null;
                     return;
                 }
-
-                Debug.LogWarning("CHOICE COMPLETE! Duration = " + OngoingSelection.Duration);
 
                 OngoingSelection.CompleteSelection(true);
                 OngoingSelection.WasSuccessful = true;

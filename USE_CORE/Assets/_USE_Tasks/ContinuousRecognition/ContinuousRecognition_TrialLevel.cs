@@ -580,6 +580,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if(Session.SyncBoxController != null)
             StartCoroutine(Session.SyncBoxController.SendSonication());
 
+        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalStimulationPulses", Session.SessionDef.StimulationNumPulses));
         StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
         CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
 

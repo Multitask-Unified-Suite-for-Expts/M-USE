@@ -237,14 +237,18 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
-            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
 
             Input.ResetInputAxes(); //reset input in case they holding down
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), DisplayStims);
         InitTrial.AddDefaultTerminationMethod(() =>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             if (Session.SessionDef.IsHuman)
             {
                 CR_CanvasGO.SetActive(true);

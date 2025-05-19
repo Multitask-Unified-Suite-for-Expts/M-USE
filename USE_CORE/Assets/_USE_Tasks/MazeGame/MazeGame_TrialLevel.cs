@@ -42,6 +42,7 @@ using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
 using USE_UI;
+using static SelectionTracking.SelectionTracker;
 
 public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 {
@@ -172,11 +173,20 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            InitializeSelectionHandler(SelectionHandler);
+            SelectionHandler.HandlerActive = true;
+
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
+
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
         });
 
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["MazeOn"]);
 
             StateAfterDelay = ChooseTile;
@@ -460,16 +470,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         tiles = MazeManager.CreateMaze();
         TrialStims.Add(tiles);
     }
-    
-    private void InitializeSelectionHandler(SelectionTracking.SelectionTracker.SelectionHandler selectionHandler)
-    {
-        selectionHandler.HandlerActive = true;
-        if (selectionHandler.AllChoices.Count > 0)
-            selectionHandler.ClearSelections();
-        selectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-        selectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
-    }
-    
+        
     public bool CheckTileFlash()
     {
         if (MazeManager.GetConsecutiveErrorCount() >= 2)

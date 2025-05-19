@@ -218,12 +218,15 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if(SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
-            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
+            SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
+            SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, () =>
         {
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             trialStartTime = Time.time;
@@ -282,7 +285,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             //Neg FB if touch outside balloon. Adding "sideChoice == null" so that they cant click outside balloon at the end and mess up pop audio.
             if (InputBroker.GetMouseButtonDown(0) && SideChoice == null)
             {
-                GameObject hitGO = InputBroker.SimpleRaycast(InputBroker.mousePosition);
+                GameObject hitGO = InputBroker.ShotgunRaycast(InputBroker.mousePosition);
                 if (hitGO == null)
                     AudioFBController.Play("Negative");
             }
@@ -420,15 +423,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            if (InputBroker.GetMouseButtonDown(0))
+            if (InputBroker.GetMouseButtonDown(0) && Response != 1) //Neg audio if touch outside the balloon
             {
-                //Neg FB if touch outside balloon. Adding response != 1 so that they cant click outside balloon at the end and mess up pop audio.
-                if (Response != 1)
-                {
-                    GameObject hitGO = InputBroker.SimpleRaycast(InputBroker.mousePosition);
-                    if (hitGO == null)
-                        AudioFBController.Play("Negative");
-                }
+                GameObject hitGO = InputBroker.ShotgunRaycast(InputBroker.mousePosition);
+                if (hitGO == null)
+                    AudioFBController.Play("Negative");
             }
 
 

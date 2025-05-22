@@ -645,13 +645,9 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
-                             "\n" +
                              "\nCorrect Selection: " + CorrectSelection +
-                             "\n" +
                              "\nSearch Duration: " + SearchDuration +
-                             "\n" +
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
         if (TrialStimulationCode > 0)

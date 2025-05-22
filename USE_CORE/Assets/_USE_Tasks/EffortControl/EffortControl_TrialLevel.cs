@@ -1017,7 +1017,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                             "\nSide Chosen: " + SideChoice +
                             "\nReward Chosen: " + RewardChoice +
                             "\nEffort Chosen: " + EffortChoice +
-                            "\n" +
                             "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

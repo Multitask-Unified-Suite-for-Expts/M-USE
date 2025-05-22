@@ -549,13 +549,9 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
-                             "\n" +
                              "\nCorrect Selection: " + CorrectSelection +
-                             "\n" +
                              "\nSearch Duration: " + searchStartTime +
-                             "\n" + 
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

@@ -534,7 +534,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nCorrect Object: " + CurrentTrial.CorrectObject +
                              "\nDifficulty Level: " + CurrentTrial.DifficultyLevel +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 

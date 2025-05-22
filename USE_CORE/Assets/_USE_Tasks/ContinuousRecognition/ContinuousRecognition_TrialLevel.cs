@@ -858,9 +858,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\nPC_Stim: " + NumPC_Trial +
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial +
-                             "\n" +
                              "\nStimulateThisTrial? " + StimulateThisTrial +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

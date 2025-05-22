@@ -191,7 +191,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, ChooseStim);
 
-        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale*15, CR_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, CR_CanvasGO);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -685,7 +685,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private void GiveReward(int numPulses)
     {
         if (Session.SyncBoxController != null)
+        {
+            Debug.LogWarning("CR GIVING PULSES: " + numPulses);
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize));
+        }
     }
 
 

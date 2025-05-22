@@ -128,7 +128,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, Play);
         //--------------------------------------------------------------------------------------------
-        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 15, KeepTrack_CanvasGO, false); //Enable Touch Feedback
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, KeepTrack_CanvasGO); //Enable Touch Feedback
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>

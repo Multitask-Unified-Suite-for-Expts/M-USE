@@ -103,16 +103,17 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
         var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, Response);
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 30, TOJ_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, TOJ_CanvasGO);
 
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
-        InitTrial.AddSpecificInitializationMethod((VoidDelegate)(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (Handler.AllChoices.Count > 0)
                 Handler.ClearSelections();
+
             Handler.TimeBeforeChoiceStarts = minObjectTouchDuration.value;
             Handler.TotalChoiceDuration = maxObjectTouchDuration.value;
-        }));
+        });
         InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatchesStartButton(), FixationCross);
 
         //FixatioCross state -------------------------------------------------------------------------------------------------------------------------------------------

@@ -211,10 +211,10 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SetupTrial.SpecifyTermination(() => true, InitTrial);
 
-        var Handler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, SearchDisplay);
-        TouchFBController.EnableTouchFeedback(Handler, CurrentTask.TouchFeedbackDuration, StartButtonScale, taskCanvas, true);
+        SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, SearchDisplay);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, taskCanvas);
 
-        InitTrial.AddSpecificInitializationMethod((VoidDelegate)(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor && !AdjustedPositionsForMac) //adj text positions if running build with mac as main display
             {
@@ -225,14 +225,14 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 AdjustedPositionsForMac = true;
             }
 
-            if (Handler.AllChoices.Count > 0)
-                Handler.ClearSelections();
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
 
-            Handler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
-            Handler.TotalChoiceDuration = totalChoiceDuration.value;
-        }));
+            SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
+            SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
+        });
 
-        InitTrial.SpecifyTermination(() => Handler.LastSuccessfulSelectionMatches(Session.USE_StartButton.StartButtonChildren), DisplaySample, () =>
+        InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatches(Session.USE_StartButton.StartButtonChildren), DisplaySample, () =>
         {
             //Set the token bar settings
             TokenFBController.enabled = true;
@@ -270,8 +270,8 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             
             choiceMade = false;
             // Handler.HandlerActive = true;
-            if (Handler.AllChoices.Count > 0)
-                Handler.ClearSelections();
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearSelections();
             
             foreach(StimDef sd in multiCompStims.stimDefs)
                 sd.StimGameObject.transform.localRotation = Quaternion.Euler(Vector3.zero);
@@ -279,12 +279,12 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         SearchDisplay.AddUpdateMethod(() =>
         {
-            if (Handler.SuccessfulChoices.Count > 0)
+            if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
-                selectedGO = Handler.LastSuccessfulChoice.SelectedGameObject.GetComponent<StimDefPointer>().StimDef.StimGameObject;
+                selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.GetComponent<StimDefPointer>().StimDef.StimGameObject;
                 Debug.Log("selected stim" + selectedGO);
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FeatureUncertaintyWM_MultiCompStimDef>();
-                Handler.ClearSelections();
+                SelectionHandler.ClearSelections();
                 if (selectedSD != null)
                     choiceMade = true;
             }

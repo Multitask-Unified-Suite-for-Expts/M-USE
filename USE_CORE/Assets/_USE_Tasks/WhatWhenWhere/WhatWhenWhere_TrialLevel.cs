@@ -42,9 +42,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     public WhatWhenWhere_SequenceManager SequenceManager; // Set in Inspector;
 
     //This variable is required for most tasks, and is defined as the output of the GetCurrentTrialDef function 
-    public WhatWhenWhere_TrialDef CurrentTrialDef => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
+    public WhatWhenWhere_TrialDef CurrentTrial => GetCurrentTrialDef<WhatWhenWhere_TrialDef>();
     public WhatWhenWhere_TaskLevel CurrentTaskLevel => GetTaskLevel<WhatWhenWhere_TaskLevel>();
-    public WhatWhenWhere_TaskDef CurrentTaskDef => GetTaskDef<WhatWhenWhere_TaskDef>();
+    public WhatWhenWhere_TaskDef CurrentTask => GetTaskDef<WhatWhenWhere_TaskDef>();
 
     // Block Ending Variable
     public List<float?> runningPercentError = new List<float?>();
@@ -169,26 +169,26 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUiVariables();
             }
 
-            if (CurrentTrialDef.LeaveFeedbackOn)
+            if (CurrentTrial.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn(true);
 
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(CurrentTaskDef.ShadowType, "WhatWhenWhere_DirectionalLight");
-            if (CurrentTaskDef.StimFacingCamera)
+            SetShadowType(CurrentTask.ShadowType, "WhatWhenWhere_DirectionalLight");
+            if (CurrentTask.StimFacingCamera)
                 MakeStimFaceCamera();
 
             UpdateExperimenterDisplaySummaryStrings();
 
             // Determine Start Button onset if the participant has made consecutive errors that exceed the error threshold
-            if (SequenceManager.GetBlockSpecificConsecutiveErrorCount() >= CurrentTrialDef.ErrorThreshold)
+            if (SequenceManager.GetBlockSpecificConsecutiveErrorCount() >= CurrentTrial.ErrorThreshold)
                 startButtonPresentationDelay = timeoutDuration.value;
             else
                 startButtonPresentationDelay = startButtonDelay.value;
 
 
-            if(CurrentTrialDef.MaskValues != null)
+            if(CurrentTrial.MaskValues != null)
             {
-                Vector3 val = CurrentTrialDef.MaskValues.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
+                Vector3 val = CurrentTrial.MaskValues.FirstOrDefault(num => num.x == TrialCount_InBlock + 1);
                 if (val != null)
                     MaskValues_CurrentTrial = val;
                 else
@@ -197,9 +197,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
             StimulateThisTrial = false;
-            if (CurrentTrialDef.TrialsToStimulateOn != null)
+            if (CurrentTrial.TrialsToStimulateOn != null)
             {
-                if (CurrentTrialDef.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrialDef.StimulationType))
+                if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
                     StimulateThisTrial = true;
             }
 
@@ -215,7 +215,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, SliderFlashingFeedback);
 
-        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTaskDef.TouchFeedbackDuration, CurrentTaskDef.StartButtonScale * 10, WWW_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, WWW_CanvasGO);
         //-------------------------------------------------------------------------------------------------------------------------------
 
         InitTrial.AddSpecificInitializationMethod(() =>
@@ -242,7 +242,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //    Session.TimerController.SetDuration(selectObjectDuration.value);
 
             DelayDuration = chooseStimOnsetDelay.value;
-            if (CurrentTrialDef.GuidedSequenceLearning)
+            if (CurrentTrial.GuidedSequenceLearning)
                 StateAfterDelay = FlashNextCorrectStim;
             else
                 StateAfterDelay = ChooseStimulus;
@@ -257,7 +257,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
         {
             if (SequenceManager.GetTargetStimGO() == null)
-                SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder,searchStims, distractorStims);
+                SequenceManager.AssignStimClassifiers(CurrentTrial.CorrectObjectTouchOrder,searchStims, distractorStims);
             HaloFBController.StartFlashingHalo(1f, 2, SequenceManager.GetTargetStimGO());
         });
         
@@ -272,7 +272,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             Input.ResetInputAxes(); //reset input in case they holding down
 
             if (SequenceManager.GetTargetStimGO() == null)
-                SequenceManager.AssignStimClassifiers(CurrentTrialDef.CorrectObjectTouchOrder, searchStims, distractorStims);
+                SequenceManager.AssignStimClassifiers(CurrentTrial.CorrectObjectTouchOrder, searchStims, distractorStims);
 
             searchDurationStartTime = Time.time;
 
@@ -294,14 +294,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         {
                             if (!stim.WasCorrectlyChosen && stim.MaskGameObject == null)
                             {
-                                MaskFBController.CreateMask(stim.StimGameObject, CurrentTrialDef.MaskColor, MaskValues_CurrentTrial.Value.z, CurrentTrialDef.MaskFadeInDuration);
+                                MaskFBController.CreateMask(stim.StimGameObject, CurrentTrial.MaskColor, MaskValues_CurrentTrial.Value.z, CurrentTrial.MaskFadeInDuration);
                             }
                         };
 
                         foreach (WhatWhenWhere_StimDef distractorStim in distractorStims.stimDefs)
                         {
                             if(distractorStim.MaskGameObject == null)
-                                MaskFBController.CreateMask(distractorStim.StimGameObject, CurrentTrialDef.MaskColor, MaskValues_CurrentTrial.Value.z, CurrentTrialDef.MaskFadeInDuration);
+                                MaskFBController.CreateMask(distractorStim.StimGameObject, CurrentTrial.MaskColor, MaskValues_CurrentTrial.Value.z, CurrentTrial.MaskFadeInDuration);
                         }
                     }
                 }
@@ -384,9 +384,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             WhatWhenWhere_StimDef selectedSD = SequenceManager.GetSelectedSD();
 
             if (selectedSD.IsDistractor)
-                stimIdx = Array.IndexOf(CurrentTrialDef.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
+                stimIdx = Array.IndexOf(CurrentTrial.DistractorStimIndices, selectedSD.StimIndex); // used to index through the arrays in the config file/mapping different columns
             else
-                stimIdx = Array.IndexOf(CurrentTrialDef.SearchStimIndices, selectedSD.StimIndex);
+                stimIdx = Array.IndexOf(CurrentTrial.SearchStimIndices, selectedSD.StimIndex);
 
 
             //Destroy the mask once they click it so that they can see their choice (and the pos/neg halo)
@@ -401,12 +401,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 selectedSD.WasCorrectlyChosen = true;
 
                 AudioFBController.Play("Positive");
-                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrialDef.LeaveFeedbackOn ?  (float?)null : (CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrial.LeaveFeedbackOn ?  (float?)null : (CurrentTrial.ParticleHaloActive ? 0.76f : 1.06f), depth: depth);
 
                 if(SequenceManager.GetFinishedSequence())
                     SliderFBController.UpdateSliderValue(1);
                 else
-                    SliderFBController.UpdateSliderValue(CurrentTrialDef.SliderGain[(int)stimIdx] * (1f / sliderGainSteps));
+                    SliderFBController.UpdateSliderValue(CurrentTrial.SliderGain[(int)stimIdx] * (1f / sliderGainSteps));
             }
             else //Chose Incorrect
             {
@@ -414,22 +414,22 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
                 if (selectionType.ToLower().Contains("retoucherror"))
                 {
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:true, destroyTime: CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive:true, destroyTime: CurrentTrial.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
                     SequenceManager.ResetSelectionClassifications();
                     return;
                 }
                 else if (selectionType.ToLower().Contains("backtrackerror"))
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive:true, destroyTime: CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive:true, destroyTime: CurrentTrial.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
                 else
-                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrialDef.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
+                    HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: true, destroyTime: CurrentTrial.ParticleHaloActive ? 0.76f : 1.26f, depth: depth);
 
 
-                if (CurrentTrialDef.LeaveFeedbackOn && SequenceManager.GetTrialSpecificConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
+                if (CurrentTrial.LeaveFeedbackOn && SequenceManager.GetTrialSpecificConsecutiveErrorCount() == 1 && SequenceManager.GetSelectedFirstStimInSequence())
                     SequenceManager.GetLastCorrectStimGO().GetComponent<CircleHalo>()?.DeactivateInstantiatedCircleHalo();
 
                 if (SliderFBController.GetSliderValue() != 0 && SequenceManager.GetTrialSpecificConsecutiveErrorCount() == 1)
                 {
-                    SliderFBController.UpdateSliderValue(-CurrentTrialDef.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
+                    SliderFBController.UpdateSliderValue(-CurrentTrial.SliderLoss[(int)stimIdx] * (1f / sliderLossSteps));
                     
                 }
             }
@@ -441,7 +441,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             DelayDuration = 0;
             
-            if (!CurrentTrialDef.LeaveFeedbackOn) 
+            if (!CurrentTrial.LeaveFeedbackOn) 
                 HaloFBController.DestroyAllHalos();
             
             // If the sequence has been completed, send to slider feedback state
@@ -450,17 +450,17 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             else
             {
                 // If there is a MaxTrialErrors defined in the BlockDef and the number of errors in the trial exceed that value, send to ITI
-                if((Masking && MaskingErrors_Trial -1 == CurrentTrialDef.MaskErrorsAllowed_Trial) || (CurrentTrialDef.MaxTrialErrors != null && totalErrors_InTrial >= CurrentTrialDef.MaxTrialErrors))
+                if((Masking && MaskingErrors_Trial -1 == CurrentTrial.MaskErrorsAllowed_Trial) || (CurrentTrial.MaxTrialErrors != null && totalErrors_InTrial >= CurrentTrial.MaxTrialErrors))
                 {
                     StateAfterDelay = ITI;
                 }
 
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, either move onto the next stim in the sequence or terminate the trial for an incorrect choice
-                else if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
+                else if (CurrentTrial.BlockEndType == "SimpleThreshold")
                 {
                     if (selectionType.ToLower().Contains("correct"))
                     {
-                        if (CurrentTrialDef.GuidedSequenceLearning)
+                        if (CurrentTrial.GuidedSequenceLearning)
                             StateAfterDelay = FlashNextCorrectStim;
                         else
                             StateAfterDelay = ChooseStimulus;
@@ -470,9 +470,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
 
                 // If there is either no MaxTrialErrors or the error threshold hasn't been met, move onto the next stim in the sequence (aborting is handled in ChooseStim.AddTimer)
-                else if (CurrentTrialDef.BlockEndType.Contains("CurrentTrial"))
+                else if (CurrentTrial.BlockEndType.Contains("CurrentTrial"))
                 {
-                    if (CurrentTrialDef.GuidedSequenceLearning || (SequenceManager.GetTrialSpecificConsecutiveErrorCount() >= 2 && SequenceManager.GetSelectedFirstStimInSequence()))
+                    if (CurrentTrial.GuidedSequenceLearning || (SequenceManager.GetTrialSpecificConsecutiveErrorCount() >= 2 && SequenceManager.GetSelectedFirstStimInSequence()))
                         StateAfterDelay = FlashNextCorrectStim;
                     else
                         StateAfterDelay = ChooseStimulus;
@@ -501,10 +501,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         //Define iti state
         ITI.AddSpecificInitializationMethod(() =>
         {
-            if (CurrentTaskDef.NeutralITI)
+            if (CurrentTask.NeutralITI)
             {
                 ContextName = "NeutralITI";
-                string path = !string.IsNullOrEmpty(CurrentTaskDef.ContextExternalFilePath) ? CurrentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath;
+                string path = !string.IsNullOrEmpty(CurrentTask.ContextExternalFilePath) ? CurrentTask.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath;
                 CurrentTaskLevel.SetSkyBox(path + Path.DirectorySeparatorChar + "NeutralITI" + ".png");
             }
 
@@ -524,16 +524,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.CompletedSequences_InBlock++;
         CurrentTaskLevel.CompletedSequences_InTask++;
 
-        percentError = (float)decimal.Divide(totalErrors_InTrial, CurrentTrialDef.CorrectObjectTouchOrder.Length);
+        percentError = (float)decimal.Divide(totalErrors_InTrial, CurrentTrial.CorrectObjectTouchOrder.Length);
         runningPercentError.Add(percentError);
 
         runningErrorCount.Add(totalErrors_InTrial);
 
         if (Session.SyncBoxController != null)
         {
-            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
-            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
         }
     }
     private void HandleSearchDurationData(float? searchDuration)
@@ -564,29 +564,29 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     protected override bool CheckBlockEnd()
     {
         // If there is a MaxCorrectTrials defined, end the block when the minimum number of trials is run and the maximum number of correct trials is achieved
-        if (CurrentTrialDef.MaxCorrectTrials != 0)
-            return ( TrialCount_InBlock >= CurrentTaskLevel.MinTrials_InBlock && runningAcc.Count(num => num == 1) >= CurrentTrialDef.MaxCorrectTrials);
+        if (CurrentTrial.MaxCorrectTrials != 0)
+            return ( TrialCount_InBlock >= CurrentTaskLevel.MinTrials_InBlock && runningAcc.Count(num => num == 1) >= CurrentTrial.MaxCorrectTrials);
         
         // If using the SimpleThreshold block end, use the following CheckBlockEnd method
-        if (CurrentTrialDef.BlockEndType == "SimpleThreshold")
-            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningAcc,
-                CurrentTrialDef.BlockEndThreshold, CurrentTrialDef.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
-                CurrentTrialDef.MaxTrials);
+        if (CurrentTrial.BlockEndType == "SimpleThreshold")
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrial.BlockEndType, runningAcc,
+                CurrentTrial.BlockEndThreshold, CurrentTrial.BlockEndWindow, CurrentTaskLevel.MinTrials_InBlock,
+                CurrentTrial.MaxTrials);
 
         // If using the CurrentTrialPercentError block end, use the following CheckBlockEnd method
-        if (CurrentTrialDef.BlockEndType == "CurrentTrialPercentError")
-            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningPercentError,
-                CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
+        if (CurrentTrial.BlockEndType == "CurrentTrialPercentError")
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrial.BlockEndType, runningPercentError,
+                CurrentTrial.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
         
         // If using the CurrentTrialErrorCount block end, use the following CheckBlockEnd method
-        if (CurrentTrialDef.BlockEndType == "CurrentTrialErrorCount")
-            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrialDef.BlockEndType, runningErrorCount,
-                CurrentTrialDef.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
+        if (CurrentTrial.BlockEndType == "CurrentTrialErrorCount")
+            return CurrentTaskLevel.TaskLevel_Methods.CheckBlockEnd(CurrentTrial.BlockEndType, runningErrorCount,
+                CurrentTrial.BlockEndThreshold, CurrentTaskLevel.MinTrials_InBlock,
                 CurrentTaskLevel.MaxTrials_InBlock);
 
          
-        Debug.Log($"Cannot handle {CurrentTrialDef.BlockEndType} Block End Type. Forced block switch not applied.");
+        Debug.Log($"Cannot handle {CurrentTrial.BlockEndType} Block End Type. Forced block switch not applied.");
          return false;
         
          
@@ -708,8 +708,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     //-----------------------------------------------------------------METHODS FOR DATA HANDLING----------------------------------------------------------------------
     private void DefineTrialData() //All ".AddDatum" commands for Trial Data
     {
-        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID); //NaN if only using blockdef structure
-        TrialData.AddDatum("ContextName", () => CurrentTrialDef.ContextName);
+        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID); //NaN if only using blockdef structure
+        TrialData.AddDatum("ContextName", () => CurrentTrial.ContextName);
         TrialData.AddDatum("SearchStimLocations", () => searchStimsLocations);
         TrialData.AddDatum("DistractorStimLocations", () => distractorStimsLocations);
         TrialData.AddDatum("TouchedObjects", () => string.Join(",", SequenceManager.GetAllSelectedSDs().Select(sd => sd.StimIndex)));
@@ -758,13 +758,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateTextOnExperimenterDisplay()
     {
-        for (int iStim = 0; iStim < CurrentTrialDef.CorrectObjectTouchOrder.Length; ++iStim)
+        for (int iStim = 0; iStim < CurrentTrial.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
             textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent.transform);
             textLocation.y += 75;
-            playerViewText = playerView.CreateTextObject(CurrentTrialDef.CorrectObjectTouchOrder[iStim].ToString(),
-                (CurrentTrialDef.CorrectObjectTouchOrder[iStim]).ToString(),
+            playerViewText = playerView.CreateTextObject(CurrentTrial.CorrectObjectTouchOrder[iStim].ToString(),
+                (CurrentTrial.CorrectObjectTouchOrder[iStim]).ToString(),
                 Color.red, textLocation, new Vector2(200, 200), playerViewParent.transform);
             playerViewText.SetActive(true);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
@@ -788,15 +788,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     protected override void DefineTrialStims()
     {
-        searchStims = SetupStimGroup("SearchStims", CurrentTrialDef.SearchStimIndices);
-        distractorStims = SetupStimGroup("DistractorStims", CurrentTrialDef.DistractorStimIndices);
+        searchStims = SetupStimGroup("SearchStims", CurrentTrial.SearchStimIndices);
+        distractorStims = SetupStimGroup("DistractorStims", CurrentTrial.DistractorStimIndices);
 
-        if (CurrentTrialDef.RandomizedLocations)
+        if (CurrentTrial.RandomizedLocations)
         {
             //Combine the lists and randomize them:
-            Vector3[] allLocationsRandomized = CurrentTrialDef.SearchStimLocations.Concat(CurrentTrialDef.DistractorStimLocations).ToArray().OrderBy(x => Guid.NewGuid()).ToArray();
+            Vector3[] allLocationsRandomized = CurrentTrial.SearchStimLocations.Concat(CurrentTrial.DistractorStimLocations).ToArray().OrderBy(x => Guid.NewGuid()).ToArray();
 
-            int numSearchStim = CurrentTrialDef.SearchStimIndices.Count();
+            int numSearchStim = CurrentTrial.SearchStimIndices.Count();
 
             Vector3[] searchStimLocations = allLocationsRandomized.Take(numSearchStim).ToArray();
             Vector3[] distractorStimLocations = allLocationsRandomized.Skip(numSearchStim).ToArray();
@@ -806,8 +806,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
-            distractorStims.SetLocations(CurrentTrialDef.DistractorStimLocations);
+            searchStims.SetLocations(CurrentTrial.SearchStimLocations);
+            distractorStims.SetLocations(CurrentTrial.DistractorStimLocations);
         }
 
 
@@ -823,7 +823,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     {
         var stimGroup = new StimGroup(name, Session.UsingDefaultConfigs ? PrefabStims : ExternalStims, indices);
 
-        if (CurrentTrialDef.GuidedSequenceLearning)
+        if (CurrentTrial.GuidedSequenceLearning)
             stimGroup.SetVisibilityOnOffStates(GetStateFromName("FlashNextCorrectStim"), GetStateFromName("ITI"));
         else
             stimGroup.SetVisibilityOnOffStates(GetStateFromName("ChooseStimulus"), GetStateFromName("ITI"));
@@ -837,16 +837,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void CalculateSliderSteps()
     {
         //Configure the Slider Steps for each Stim
-        foreach (int sliderGain in CurrentTrialDef.SliderGain)
+        foreach (int sliderGain in CurrentTrial.SliderGain)
         {
             sliderGainSteps += sliderGain;
         }
-        sliderGainSteps += CurrentTrialDef.SliderInitialValue;
-        foreach (int sliderLoss in CurrentTrialDef.SliderLoss)
+        sliderGainSteps += CurrentTrial.SliderInitialValue;
+        foreach (int sliderLoss in CurrentTrial.SliderLoss)
         {
             sliderLossSteps += sliderLoss;
         }
-        sliderLossSteps += CurrentTrialDef.SliderInitialValue;
+        sliderLossSteps += CurrentTrial.SliderInitialValue;
     }
 
     private void InitializeStartButton(State visOnState, State visOffState)
@@ -858,7 +858,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         }
         else
         {
-            StartButton = Session.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), CurrentTaskDef.StartButtonPosition, CurrentTaskDef.StartButtonScale);
+            StartButton = Session.USE_StartButton.CreateStartButton(WWW_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
             Session.USE_StartButton.SetVisibilityOnOffStates(visOnState, visOffState);
         }
     }
@@ -874,7 +874,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private void PrepareSliderForTrial()
     {
         CalculateSliderSteps();
-        SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrialDef.SliderInitialValue * (1f / sliderGainSteps));
+        SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / sliderGainSteps));
         SliderFBController.SetSliderRectSize(new Vector2(400f, 25f));
         SliderFBController.SliderGO.SetActive(true);
         SliderFBController.SetUpdateDuration(fbDuration.value);

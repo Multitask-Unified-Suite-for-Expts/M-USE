@@ -30,8 +30,6 @@ using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
 using WorkingMemory_Namespace;
-using USE_UI;
-using UnityEngine.UIElements;
 using static SelectionTracking.SelectionTracker;
 
 
@@ -39,9 +37,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 {
     public GameObject WM_CanvasGO;
 
-    public WorkingMemory_TrialDef CurrentTrialDef => GetCurrentTrialDef<WorkingMemory_TrialDef>();
+    public WorkingMemory_TrialDef CurrentTrial => GetCurrentTrialDef<WorkingMemory_TrialDef>();
     public WorkingMemory_TaskLevel CurrentTaskLevel => GetTaskLevel<WorkingMemory_TaskLevel>();
-    public WorkingMemory_TaskDef currentTaskDef => GetTaskDef<WorkingMemory_TaskDef>();
+    public WorkingMemory_TaskDef CurrentTask => GetTaskDef<WorkingMemory_TaskDef>();
 
     // Block End Variables
     public List<int> runningAcc;
@@ -131,7 +129,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 }
                 else
                 {
-                    StartButton = Session.USE_StartButton.CreateStartButton(WM_CanvasGO.GetComponent<Canvas>(), currentTaskDef.StartButtonPosition, currentTaskDef.StartButtonScale);
+                    StartButton = Session.USE_StartButton.CreateStartButton(WM_CanvasGO.GetComponent<Canvas>(), CurrentTask.StartButtonPosition, CurrentTask.StartButtonScale);
                     Session.USE_StartButton.SetVisibilityOnOffStates(InitTrial, InitTrial);
                 }
             }
@@ -142,8 +140,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //Set the Stimuli Light/Shadow settings
-            SetShadowType(currentTaskDef.ShadowType, "WorkingMemory_DirectionalLight");
-            if (currentTaskDef.StimFacingCamera)
+            SetShadowType(CurrentTask.ShadowType, "WorkingMemory_DirectionalLight");
+            if (CurrentTask.StimFacingCamera)
                 MakeStimFaceCamera();
 
 
@@ -162,7 +160,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, SearchDisplay);
         
-        TouchFBController.EnableTouchFeedback(SelectionHandler, currentTaskDef.TouchFeedbackDuration, currentTaskDef.StartButtonScale * 10, WM_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, WM_CanvasGO);
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
@@ -201,20 +199,20 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         
         // Show the target/sample by itself for some time
-        DisplaySample.AddTimer(() => CurrentTrialDef.DisplaySampleDuration, Delay, () =>
+        DisplaySample.AddTimer(() => CurrentTrial.DisplaySampleDuration, Delay, () =>
         {
             if (postSampleDistractorStims.stimDefs.Count != 0)
                 StateAfterDelay = DisplayDistractors;
             else
                 StateAfterDelay = SearchDisplay;
-            DelayDuration = CurrentTrialDef.PostSampleDelayDuration;
+            DelayDuration = CurrentTrial.PostSampleDelayDuration;
         });
 
         // Show some distractors without the target/sample
-        DisplayDistractors.AddTimer(() => CurrentTrialDef.DisplayPostSampleDistractorsDuration, Delay, () =>
+        DisplayDistractors.AddTimer(() => CurrentTrial.DisplayPostSampleDistractorsDuration, Delay, () =>
           {
               StateAfterDelay = SearchDisplay;
-              DelayDuration = CurrentTrialDef.PostSampleDelayDuration;
+              DelayDuration = CurrentTrial.PostSampleDelayDuration;
           });
 
         // Show the target/sample with some other distractors
@@ -310,9 +308,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
-                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
+                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: depth);
             else 
-                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrialDef.ParticleHaloActive, circleHaloActive: CurrentTrialDef.CircleHaloActive, depth: depth);
+                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: depth);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () => { HaloFBController.DestroyAllHalos(); });
@@ -346,10 +344,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         ITI.AddSpecificInitializationMethod(() =>
         {
-            if (currentTaskDef.NeutralITI)
+            if (CurrentTask.NeutralITI)
             {
                 ContextName = "NeutralITI";
-                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(currentTaskDef.ContextExternalFilePath) ? currentTaskDef.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI"));
+                CurrentTaskLevel.SetSkyBox(GetContextNestedFilePath(!string.IsNullOrEmpty(CurrentTask.ContextExternalFilePath) ? CurrentTask.ContextExternalFilePath : Session.SessionDef.ContextExternalFilePath, "NeutralITI"));
                 Session.EventCodeManager.SendCodeThisFrame("ContextOff");
             }
         });
@@ -376,10 +374,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.NumTokenBarFull_InTask++;
 
         if(Session.SyncBoxController != null)
-            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrialDef.NumPulses, CurrentTrialDef.PulseSize));
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrialDef.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrialDef.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
         
     }
 
@@ -449,21 +447,21 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         StimGroup group = Session.UsingDefaultConfigs ? PrefabStims : ExternalStims;
 
-        searchStims = new StimGroup("SearchStims", group, CurrentTrialDef.SearchStimIndices);
+        searchStims = new StimGroup("SearchStims", group, CurrentTrial.SearchStimIndices);
         searchStims.SetVisibilityOnOffStates(GetStateFromName("SearchDisplay"), GetStateFromName("ITI"));
-        searchStims.SetLocations(CurrentTrialDef.SearchStimLocations);
+        searchStims.SetLocations(CurrentTrial.SearchStimLocations);
         TrialStims.Add(searchStims);
 
         List<StimDef> rewardedStimdefs = new List<StimDef>();
 
         sampleStim = new StimGroup("SampleStim", GetStateFromName("DisplaySample"), GetStateFromName("DisplaySample"));
-        for (int iStim = 0; iStim < CurrentTrialDef.SearchStimIndices.Length; iStim++)
+        for (int iStim = 0; iStim < CurrentTrial.SearchStimIndices.Length; iStim++)
         {
             WorkingMemory_StimDef sd = (WorkingMemory_StimDef)searchStims.stimDefs[iStim];
-            if (CurrentTrialDef.ProbabilisticSearchStimTokenReward != null)
-                sd.StimTokenRewardMag = chooseReward(CurrentTrialDef.ProbabilisticSearchStimTokenReward[iStim]);
+            if (CurrentTrial.ProbabilisticSearchStimTokenReward != null)
+                sd.StimTokenRewardMag = chooseReward(CurrentTrial.ProbabilisticSearchStimTokenReward[iStim]);
             else
-                sd.StimTokenRewardMag = CurrentTrialDef.SearchStimTokenReward[iStim];
+                sd.StimTokenRewardMag = CurrentTrial.SearchStimTokenReward[iStim];
 
             if (sd.StimTokenRewardMag > 0)
             {
@@ -476,12 +474,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         }
 
         // for (int iT)
-        sampleStim.SetLocations(new Vector3[]{ CurrentTrialDef.SampleStimLocation});
+        sampleStim.SetLocations(new Vector3[]{ CurrentTrial.SampleStimLocation});
         TrialStims.Add(sampleStim);
 
-        postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrialDef.PostSampleDistractorStimIndices);
+        postSampleDistractorStims = new StimGroup("DisplayDistractors", group, CurrentTrial.PostSampleDistractorStimIndices);
         postSampleDistractorStims.SetVisibilityOnOffStates(GetStateFromName("DisplayDistractors"), GetStateFromName("DisplayDistractors"));
-        postSampleDistractorStims.SetLocations(CurrentTrialDef.PostSampleDistractorStimLocations);
+        postSampleDistractorStims.SetLocations(CurrentTrial.PostSampleDistractorStimLocations);
         TrialStims.Add(postSampleDistractorStims);
         
      }
@@ -519,7 +517,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {
         // All AddDatum commands for the Trial Data
 
-        TrialData.AddDatum("TrialID", () => CurrentTrialDef.TrialID);
+        TrialData.AddDatum("TrialID", () => CurrentTrial.TrialID);
         TrialData.AddDatum("ContextName", () => ContextName);
         TrialData.AddDatum("SelectedStimCode", () => selectedSD?.StimCode ?? null);
         TrialData.AddDatum("SelectedLocation", () => selectedSD?.StimLocation ?? null);

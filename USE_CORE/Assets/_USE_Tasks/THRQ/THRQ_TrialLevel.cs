@@ -142,9 +142,9 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
 
         //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, SelectObject);
-        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration,  CurrentTask.StartButtonScale * 30f, THRQ_CanvasGO, true);
+        TouchFBController.EnableTouchFeedback(ShotgunHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, THRQ_CanvasGO);
 
-        InitTrial.AddSpecificInitializationMethod((VoidDelegate)(() =>
+        InitTrial.AddSpecificInitializationMethod(() =>
         {
             TouchFBController.SetPrefabSizes(CurrentTask.StartButtonScale * 30f);
 
@@ -166,7 +166,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
                 ShotgunHandler.ClearSelections();
             ShotgunHandler.TimeBeforeChoiceStarts = CurrentTrial.MinTouchDuration;
             ShotgunHandler.TotalChoiceDuration = CurrentTrial.MaxTouchDuration;
-        }));
+        });
         InitTrial.SpecifyTermination(() => true && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton(), SelectObject);
 
         //SELECT OBJECT state -------------------------------------------------------------------------------------------------------------------------

@@ -73,7 +73,6 @@ public class TouchFBController : MonoBehaviour
     public delegate void TouchErrorFeedbackEventHandler(object sender, TouchFeedbackArgs e);
     public event TouchErrorFeedbackEventHandler TouchErrorFeedbackEvent;
 
-
     public void Init(DataController trialData, DataController frameData)
     {
         CreateErrorDict();
@@ -105,7 +104,7 @@ public class TouchFBController : MonoBehaviour
         ObjectsToIgnore.AddRange(objectsToIgnore);
     }
 
-    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO, bool useRootPosition, List<GameObject> objects = null)
+    public void EnableTouchFeedback(SelectionTracker.SelectionHandler handler, float fbDuration, float fbSize, GameObject taskCanvasGO, List<GameObject> objects = null)
     {
         TouchFbEnabled = true;
         Handler = handler;
@@ -113,7 +112,8 @@ public class TouchFBController : MonoBehaviour
         FeedbackSize = fbSize;
         TaskCanvasGO = taskCanvasGO;
         TaskCanvas = TaskCanvasGO.GetComponent<Canvas>();
-        UseRootGoPos = useRootPosition;
+
+        //UseRootGoPos = useRootPosition;
 
         if (HeldTooShort_Prefab == null || HeldTooLong_Prefab == null || MovedTooFar_Prefab == null || NotSelectablePeriod_Prefab == null) //If null, create the prefabs
             CreatePrefabs();
@@ -265,6 +265,11 @@ public class TouchFBController : MonoBehaviour
         }
         else
             Debug.LogWarning("Trying to change the prefab sizes, but the prefablist only has " + PrefabList.Count + " items!");
+    }
+
+    public void SetUseRootGoPos(bool useRootGoPos)
+    {
+        UseRootGoPos = useRootGoPos;
     }
 
 

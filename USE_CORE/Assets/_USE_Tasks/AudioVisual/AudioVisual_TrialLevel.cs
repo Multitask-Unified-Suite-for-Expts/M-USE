@@ -129,7 +129,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         else
             SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, PlayerChoice);
 
-        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.StartButtonScale * 20, AV_CanvasGO, false);
+        TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, AV_CanvasGO);
 
         //INIT Trial state -------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>

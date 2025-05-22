@@ -331,6 +331,9 @@ namespace USE_ExperimentTemplate_Trial
                 StimulatedDuringThisTrial = false;
 
                 ChoiceFailed_Trial = false;
+
+                TouchFBController.SetUseRootGoPos(!Session.Using2DStim); //Has to be set after stim are loaded!! 2D stim need it to be false, 3D stim need it to be true
+
             });
 
             SetupTrial.AddDefaultTerminationMethod(() =>

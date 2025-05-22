@@ -352,6 +352,11 @@ namespace USE_Def_Namespace
         public float StartButtonScale = 1.2f;
 
         /// <summary>
+        /// TouchFeedback size. Default is 20.
+        /// </summary>
+        public float TouchFeedbackSize = 20f;
+
+        /// <summary>
         /// Indicates whether the stimulus is facing the camera.
         /// </summary>
         public bool StimFacingCamera;

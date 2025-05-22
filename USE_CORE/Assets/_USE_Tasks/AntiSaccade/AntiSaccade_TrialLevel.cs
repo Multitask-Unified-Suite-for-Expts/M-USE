@@ -569,7 +569,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                              "\nDifficulty Level: " + difficultyLevel +
                              "\nDisplay Target Duration (sec): " + ChosenDisplayTargetDuration +
                              "\nSpatial Cue Delay Duration (sec): " + ChosenSpatialCueDelayDuration +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 

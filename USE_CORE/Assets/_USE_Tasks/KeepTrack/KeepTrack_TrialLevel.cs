@@ -412,7 +412,6 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
                              "\nNum Targets: " + TrialObjects.Where(obj => obj.IsTarget).Count() +
                              "\nNum Distractors: " + TrialObjects.Where(obj => !obj.IsTarget).Count() +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 

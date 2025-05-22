@@ -745,12 +745,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         TrialSummaryString = "Selected Object Indices: " + string.Join(",",SequenceManager.GetAllSelectedSDs().Select(obj => obj.StimIndex)) +
                              "\nSelection Type : " + selectionType +
                              "\nLast Trial's Percent Error : " + percentError +
-                             "\n" +
                              "\nTotal Correct Selections in Trial : " + correctSelections_InTrial +
                              "\nTotal Errors in Trial : " + totalErrors_InTrial +
-                             "\n" +
                              "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(searchDurations_InTrial) +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

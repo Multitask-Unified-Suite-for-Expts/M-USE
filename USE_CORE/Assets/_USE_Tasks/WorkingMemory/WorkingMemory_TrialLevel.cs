@@ -540,11 +540,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                              "\nSelected Object Location: " + SelectedStimLocation +
                              "\n\nCorrect Selection: " + CorrectSelection +
                              "\nTouch Duration Error: " + TouchDurationError +
-                             "\n" +
                              "\nSearch Duration: " + SearchDuration +
-                             "\n" + 
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +
-                             "\n" +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

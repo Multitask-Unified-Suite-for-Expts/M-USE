@@ -424,14 +424,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
 
         if(Session.SyncBoxController != null)
+        {
             StartCoroutine(Session.SyncBoxController.SendSonication());
-
-        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalStimulationPulses", Session.SessionDef.StimulationNumPulses));
-        StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
-        CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
-
-        CurrentTaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
-
+            StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
+            CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
+            CurrentTaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
+        }
     }
 
     public override void OnTokenBarFull()

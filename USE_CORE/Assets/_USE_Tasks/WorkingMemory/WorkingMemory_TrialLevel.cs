@@ -538,7 +538,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     {
         TrialSummaryString = "Selected Object Index: " + SelectedStimIndex +
                              "\nSelected Object Location: " + SelectedStimLocation +
-                             "\n\nCorrect Selection: " + CorrectSelection +
+                             "\nCorrect Selection: " + CorrectSelection +
                              "\nTouch Duration Error: " + TouchDurationError +
                              "\nSearch Duration: " + SearchDuration +
                              "\nToken Bar Value: " + TokenFBController.GetTokenBarValue() +

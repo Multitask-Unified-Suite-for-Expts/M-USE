@@ -255,6 +255,10 @@ public class SerialPortThreaded : MonoBehaviour
 			messageToSend.ExpectedResponseCode = new ExpectedResponseCode(codesToCheck);
 		lock (toSendBuffer)
 		{
+			if(message.Contains("RWD"))
+			{
+				Debug.LogWarning("----- ADDED TO SEND BUFFER** AT: " + Time.time);
+			}
 			toSendBuffer.Add(messageToSend);
 		}
 		_waitForSendCode.Set();

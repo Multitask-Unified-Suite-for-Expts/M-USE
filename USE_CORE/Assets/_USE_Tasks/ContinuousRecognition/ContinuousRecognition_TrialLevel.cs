@@ -644,8 +644,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SliderBarCompletions_Block++;
             CurrentTaskLevel.SliderBarCompletions_Task++;
             numPulsesTrial = numPulses;
-            CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
-            CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
         }
     }
 
@@ -674,9 +672,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //int numPulses = getProbabilisticNumPulsesTrial(CurrentTrial.NumTrialStims - 1); // using multiple Gaussians
         int numPulses = getProbabilisticPulsesUsingRewardProb(CurrentTrial.NumTrialStims - 1, CurrentTrial.slopeOfRewardIncreaseOverTrials); // using single Gaussian
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
-        CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
-
         GiveReward(numPulses);
     }
 
@@ -686,6 +681,9 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             Debug.LogWarning("CR GIVING PULSES: " + numPulses);
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize));
+
+            CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses
+            CurrentTaskLevel.NumRewardPulses_InTask += numPulses; // += CurrentTrial.NumPulses
         }
     }
 

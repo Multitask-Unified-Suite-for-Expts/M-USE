@@ -112,7 +112,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +
                                             "\nMax Trials in Block: " + MaxTrials_InBlock +
-                                            "\n\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
+                                            "\nAccuracy: " + string.Format("{0:0.00}", (float)vsTL.Accuracy_InBlock) +  
                                       "\nAvg Search Duration: " + string.Format("{0:0.00}", CalculateAverageDuration(vsTL.SearchDurations_InBlock)) +
                                       "\nNum Aborted Trials: " + + NumAbortedTrials_InBlock + 
                                       "\nNum Reward Given: " + NumRewardPulses_InBlock + 
@@ -190,9 +190,9 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         taskDataSummaryString = $"\nTotal Accuracy: {taskDataSummary.TotalAccuracy:F4}" +
                         $"\nAverage Reaction Time: {taskDataSummary.AvgReactionTime:F4}" +
                         $"\nAverage Selection Precision: {taskDataSummary.AvgSelectionPrecision:F4}" +
-                        $"\n\nDistractor Interference on Reaction Time: {taskDataSummary.DistractorInterferenceReactionTime:F4}" +
+                        $"\nDistractor Interference on Reaction Time: {taskDataSummary.DistractorInterferenceReactionTime:F4}" +
                         $"\nDistractor Interference on Accuracy: {taskDataSummary.DistractorInterferenceAccuracy:F4}" +
-                        $"\n\nMedian Feature Similarity: {taskDataSummary.MedianFeatureSimilarity}" +
+                        $"\nMedian Feature Similarity: {taskDataSummary.MedianFeatureSimilarity}" +
                         $"\nHigh Feature Similarity Accuracy: {taskDataSummary.HighFeatureSimilarityAccuracy:F4}" +
                         $"\nLow Feature Similarity Accuracy: {taskDataSummary.LowFeatureSimilarityAccuracy:F4}\n";
 

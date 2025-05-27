@@ -237,7 +237,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         CurrentBlockString = "\nMin Trials in Block: " + MinTrials_InBlock +
                              "\nMax Trials in Block: " + MaxTrials_InBlock +
                              "\nLearning Criterion: " + String.Format("{0:0.00}%", mgBD.BlockEndThreshold*100) +
-                             "\n\nLast Trial's Percent Error: " + (latestPercentError == null ?
+                             "\nLast Trial's Percent Error: " + (latestPercentError == null ?
                                  ("N/A"):String.Format("{0:0.00}%", latestPercentError)) +
                              "\nTotal Errors: " + TotalErrors_InBlock +
                              "\nRule-Abiding Errors: " + RuleAbidingErrors_InBlock +
@@ -245,7 +245,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              "\nBacktrack Errors: " + BacktrackErrors_InBlock +
                              "\nRetouch Correct: " + RetouchCorrect_InBlock +
                              "\nRetouch Erroneous: " + RetouchError_InBlock +
-                             "\n\nRewards: " + NumRewardPulses_InBlock +
+                             "\nRewards: " + NumRewardPulses_InBlock +
                              "\nAverage Choice Duration: " +
                              String.Format("{0:0.00}", CalculateAverageDuration(ChoiceDurations_InBlock)) +
                              "\nAverage Maze Duration: " +
@@ -262,20 +262,20 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                                         $"\nCorrect Selections: {blockSummary.CorrectTouches}" +
                                         $"\nIncorrect Selections: {blockSummary.IncorrectTouches}" +
                                        
-                                        $"\n\nRule Abiding Errors: {blockSummary.RuleAbidingErrors}" +
+                                        $"\nRule Abiding Errors: {blockSummary.RuleAbidingErrors}" +
                                         $"\nPerseverative Rule Abiding Errors: {blockSummary.PerseverativeRuleAbidingErrors}" +
                                         
-                                        $"\n\nRule Breaking Errors: {blockSummary.RuleBreakingErrors}" +
+                                        $"\nRule Breaking Errors: {blockSummary.RuleBreakingErrors}" +
                                         $"\nPerseverative Rule Breaking Errors: {blockSummary.PerseverativeRuleBreakingErrors}" +
                                         
-                                        $"\n\nBacktrack Errors: {blockSummary.BacktrackErrors}" +
+                                        $"\nBacktrack Errors: {blockSummary.BacktrackErrors}" +
                                         $"\nPerseverative Backtrack Errors: {blockSummary.PerseverativeBackTrackErrors}" +
                                         
-                                        $"\n\nRetouch Error: {blockSummary.RetouchError}" +
+                                        $"\nRetouch Error: {blockSummary.RetouchError}" +
                                         $"\nPerseverative Retouch Error: {blockSummary.PerseverativeRetouchErrors}" +
                                         $"\nRetouch Correct: {blockSummary.RetouchCorrect}" +
                                         
-                                        $"\n\nAvg Maze Duration: {blockSummary.AvgMazeDuration}" +
+                                        $"\nAvg Maze Duration: {blockSummary.AvgMazeDuration}" +
                                         $"\nAvg Choice Duration: {blockSummary.AvgChoiceDuration}" +
                                         $"\nNum Completed Trials: {blockSummary.NumCompletedTrials}" +
                                         $"\nTrials To Criterion: {blockSummary.TrialsToCriterion}";

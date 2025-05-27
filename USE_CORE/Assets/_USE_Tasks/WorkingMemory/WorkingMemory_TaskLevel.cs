@@ -94,9 +94,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         if (wmTL.SearchDurations_InBlock.Count != 0)
             avgBlockSearchDuration = CalculateAverageDuration(wmTL.SearchDurations_InBlock);
         CurrentBlockSummaryString.AppendLine("Accuracy: " + String.Format("{0:0.000}", wmTL.Accuracy_InBlock) +  
-                                      "\n" + 
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", avgBlockSearchDuration) +
-                                      "\n" +
                                       "\nNum Reward Given: " + NumRewardPulses_InBlock + 
                                       "\nNum Token Bar Filled: " + wmTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + wmTL.TotalTokensCollected_InBlock);
@@ -114,7 +112,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
         {
 
             CurrentTaskSummaryString.Append( $"\nAccuracy: {(Math.Round(decimal.Divide(NumCorrect_InTask,(wmTL.TrialCount_InTask)),2))*100}%" + 
-                                            $"\tAvg Search Duration: {avgSearchDuration}" +
+                                            $"\nAvg Search Duration: {avgSearchDuration}" +
                                             $"\n# Token Bar Filled: {NumTokenBarFull_InTask}" +
                                             $"\n# Tokens Collected: {TotalTokensCollected_InTask}");
         }

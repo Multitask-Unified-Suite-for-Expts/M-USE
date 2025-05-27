@@ -230,7 +230,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         if (BlockStimulationCode > 0)
         {
-            CurrentBlockString += "\n\nStimulationCode: " + BlockStimulationCode.ToString();
+            CurrentBlockString += "\nStimulationCode: " + BlockStimulationCode.ToString();
             CurrentBlockString += "\nStimulationType: " + currentBlockDef.StimulationType.ToString();
         }
 

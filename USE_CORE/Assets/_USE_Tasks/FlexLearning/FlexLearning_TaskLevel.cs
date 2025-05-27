@@ -149,13 +149,9 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     {
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("Max Trials in Block: " + MaxTrials_InBlock +
-                                      "\n" +
                                       "\nChoice Accuracy: " + String.Format("{0:0}", (float)flTL.ChoiceAccuracy_InBlock * 100) + "%" + 
-                                      "\n" +
                                       "\nPercentage Rewarded: " + String.Format("{0:0}", (float)flTL.PercentRewarded_InBlock * 100) + "%" +
-                                      "\n" +
                                       "\nAvg Search Duration: " + String.Format("{0:0.000}", CalculateAverageDuration(flTL.SearchDurations_InBlock)) + "s" +
-                                      "\n" +
                                       "\nNum Reward Given: " + NumRewardPulses_InBlock +
                                       "\nNum Token Bar Filled: " + flTL.NumTokenBarFull_InBlock +
                                       "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock +

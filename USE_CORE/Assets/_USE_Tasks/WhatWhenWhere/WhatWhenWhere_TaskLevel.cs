@@ -162,11 +162,9 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +
                                             "\nMax Trials in Block: " + MaxTrials_InBlock +
-                                      "\n\nAverage Search Duration: " + CalculateAverageDuration(SearchDurations_InBlock) +
-                                      "\n" +
+                                      "\nAverage Search Duration: " + CalculateAverageDuration(SearchDurations_InBlock) +
                                       "\nCorrect Selections: " + CorrectSelections_InBlock +
                                       "\nTotal Errors: " + TotalErrors_InBlock +
-                                      "\n" +
                                       "\nRule Abiding Errors: " + RuleAbidingErrors_InBlock +
                                       "\nDistractor Rule Abiding Errors: " + DistractorRuleAbidingErrors_InBlock +
                                       "\nRetouch Errors: " + RetouchErrors_InBlock +
@@ -222,10 +220,10 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
                                         $"\nCorrect Selections: {blockSummary.CorrectTouches}" +
                                         $"\nIncorrect Selections: {blockSummary.IncorrectTouches}" +
                                         $"\nIncomplete Touches: {blockSummary.IncompleteTouches}" +
-                                        $"\n\nMin Similarity: {blockSummary.MinSimilarity}" +
+                                        $"\nMin Similarity: {blockSummary.MinSimilarity}" +
                                         $"\nMax Similarity: {blockSummary.MaxSimilarity}" +
                                         $"\nMean Similarity: {blockSummary.MeanSimilarity}" +
-                                        $"\n\nBlock Duration: {blockSummary.BlockDuration}" +
+                                        $"\nBlock Duration: {blockSummary.BlockDuration}" +
                                         $"\nNum Rewarded Trials: {blockSummary.NumRewardedTrials}" +
                                         $"\nTrials To Criterion: {blockSummary.TrialsToCriterion}";
         return blockDataSummaryString;

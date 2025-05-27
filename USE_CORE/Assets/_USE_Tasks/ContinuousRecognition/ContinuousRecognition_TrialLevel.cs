@@ -679,7 +679,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     {
         if (Session.SyncBoxController != null)
         {
-            Debug.LogWarning("CR GIVING PULSES: " + numPulses);
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize));
 
             CurrentTaskLevel.NumRewardPulses_InBlock += numPulses; // += CurrentTrial.NumPulses

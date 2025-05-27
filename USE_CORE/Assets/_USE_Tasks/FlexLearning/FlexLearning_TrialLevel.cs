@@ -445,8 +445,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             else
                 numPulses = CurrentTrial.NumPulses;
 
-            Debug.LogWarning("FL SENDING PULSES: " + numPulses);
-
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(numPulses, CurrentTrial.PulseSize));
 
             CurrentTaskLevel.NumRewardPulses_InBlock += numPulses;

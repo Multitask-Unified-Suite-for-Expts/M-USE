@@ -159,7 +159,7 @@ public class SerialPortThreaded : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError("SendLoop Exception: " + ex.Message);
+                Debug.Log("SendLoop Exception: " + ex.Message);
             }
         }
 
@@ -269,7 +269,7 @@ public class SerialPortThreaded : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError("RecvLoop Exception: " + ex.Message);
+                Debug.Log("RecvLoop Exception: " + ex.Message);
             }
         }
 
@@ -296,7 +296,7 @@ public class SerialPortThreaded : MonoBehaviour
 		{
 			if(message.Contains("RWD"))
 			{
-				Debug.LogWarning("----- ADDED TO SEND BUFFER** AT: " + Time.time);
+				Debug.LogWarning("----- ADDED RWD COMMANd TO SEND BUFFER AT: " + Time.time);
 			}
 			toSendBuffer.Add(messageToSend);
 		}

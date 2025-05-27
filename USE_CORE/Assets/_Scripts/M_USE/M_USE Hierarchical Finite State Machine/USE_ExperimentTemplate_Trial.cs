@@ -581,12 +581,12 @@ namespace USE_ExperimentTemplate_Trial
             if(Session.SerialRecvData != null)
             {
                 StartCoroutine(Session.SerialRecvData.AppendDataToFile());
-                Debug.LogWarning("**APPENDING DATA TO SERIAL RECV AT: " +  Session.SerialRecvData.folderPath + "/" + Session.SerialRecvData.fileName);
+                //Debug.LogWarning("**APPENDING DATA TO SERIAL RECV AT: " +  Session.SerialRecvData.folderPath + "/" + Session.SerialRecvData.fileName);
             }
             if(Session.SerialSentData != null)
             {
                 StartCoroutine(Session.SerialSentData.AppendDataToFile());
-                Debug.LogWarning("**APPENDING DATA TO SERIAL SENT AT: " + Session.SerialSentData.folderPath + "/" + Session.SerialSentData.fileName);
+                //Debug.LogWarning("**APPENDING DATA TO SERIAL SENT AT: " + Session.SerialSentData.folderPath + "/" + Session.SerialSentData.fileName);
             }
 
         }

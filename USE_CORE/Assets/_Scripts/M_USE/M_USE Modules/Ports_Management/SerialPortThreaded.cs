@@ -103,6 +103,9 @@ public class SerialPortThreaded : MonoBehaviour
 					ExpectedResponseCode expectedResponseCode = null;
 					lock (toSendBuffer)
 					{
+
+						Debug.LogWarning("WRITING CODE: " + toSendBuffer[0].Code.ToString());
+
 						sp.Write(toSendBuffer[0].Code + "\n");
 						lastSentTimeStamp = currTime;
 						lock (sentBuffer)

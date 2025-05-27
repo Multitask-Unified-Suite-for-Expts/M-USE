@@ -155,8 +155,6 @@ namespace USE_ExperimentTemplate_Session
             FindGameObjects();
             LoadPrefabs();
 
-            Session.CameraSyncController = gameObject.AddComponent<CameraSyncController>();
-
             Session.LocateFile = gameObject.AddComponent<LocateFile>();
 
             Session.FlashPanelController = GameObject.Find("UI_Canvas").GetComponent<FlashPanelController>();

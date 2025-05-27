@@ -123,7 +123,6 @@ public class SerialPortThreaded : MonoBehaviour
                     {
                         if (sp != null && sp.IsOpen)
                         {
-                            Debug.LogWarning("WRITING CODE: " + codeToSend);
                             sp.Write(codeToSend + "\n");
                         }
                         else

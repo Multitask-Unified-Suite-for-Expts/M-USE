@@ -58,7 +58,9 @@ public class SerialPortThreaded : MonoBehaviour
 
 	public List<string> recvBufferCheck = new List<string>();
 
-	public void Initialize()
+
+
+    public void Initialize()
 	{
 		sp = new SerialPort(SerialPortAddress, SerialPortSpeed);
 		sp.Open();
@@ -77,8 +79,6 @@ public class SerialPortThreaded : MonoBehaviour
 		StartSendLoop();
 		StartRecvLoop();
         Session.SessionLevel.waitForSerialPort = false;
-        Thread.CurrentThread.Abort();
-		
 	}
 
 	public void StartSendLoop()
@@ -91,160 +91,199 @@ public class SerialPortThreaded : MonoBehaviour
 		new Thread(RecvLoop).Start();
 	}
 
-	private void SendLoop()
-	{
-		while (active)
-		{
-			if (toSendBuffer.Count > 0)
-			{
-				long currTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-				if (currTime - lastSentTimeStamp > minMsBetweenSending * 10000)
-				{
-					ExpectedResponseCode expectedResponseCode = null;
-					lock (toSendBuffer)
-					{
+    private void SendLoop()
+    {
+        while (active)
+        {
+            try
+            {
+                bool hasItemToSend = false;
+                MessageToSend item = null;
 
-						Debug.LogWarning("WRITING CODE: " + toSendBuffer[0].Code.ToString());
+                lock (toSendBuffer)
+                {
+                    if (toSendBuffer.Count > 0)
+                    {
+                        long currTime = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
+                        if (currTime - lastSentTimeStamp > minMsBetweenSending * 10000)
+                        {
+                            item = toSendBuffer[0];
+                            toSendBuffer.RemoveAt(0);
+                            lastSentTimeStamp = currTime;
+                            hasItemToSend = true;
+                        }
+                    }
+                }
 
-						sp.Write(toSendBuffer[0].Code + "\n");
-						lastSentTimeStamp = currTime;
-						lock (sentBuffer)
-							sentBuffer.Add(currTime.ToString() + "\t" + toSendBuffer[0].Code);
-						expectedResponseCode = toSendBuffer[0].ExpectedResponseCode;
-						toSendBuffer.RemoveAt(0);
-					}
+                if (hasItemToSend && item != null)
+                {
+                    string codeToSend = item.Code;
 
-					if (expectedResponseCode != null)
-					{
-						if (checkForResponseCode != null)
-						{
-							lock (responseCheckLocker)
-							{
-								checkForResponseCode = expectedResponseCode;
-								checkForResponseCode.TimeAdded = currTime;
-							}
-						}
-						else
-						{
-							checkForResponseCode = expectedResponseCode;
-							checkForResponseCode.TimeAdded = currTime;
-						}
-						_waitForRecvCodeDetected.WaitOne();
-					}
-					else
-						Thread.Sleep(minMsBetweenSending);
-				}
-			}
-			else
-				_waitForSendCode.WaitOne();
-		}
-		Thread.CurrentThread.Abort();
-	}
+                    lock (sp)
+                    {
+                        if (sp != null && sp.IsOpen)
+                        {
+                            Debug.LogWarning("WRITING CODE: " + codeToSend);
+                            sp.Write(codeToSend + "\n");
+                        }
+                        else
+                        {
+                            Debug.LogWarning("Serial port not open when attempting to send.");
+                        }
+                    }
 
-	private void RecvLoop()
-	{
-		bool lastMsgUnfinished = false;
-		string lastMsg = "";
-		while (active)
-		{
-			if (sp.BytesToRead > 0)
-			{
-				long timestamp = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-				string rawInput = sp.ReadExisting();
-				if (lastMsgUnfinished)
-				{
-					rawInput = lastMsg + rawInput;
-					lastMsgUnfinished = false;
-				}
-				string[] input = rawInput.Split('\n');
-				if (rawInput[rawInput.Length - 1] != '\n')
-				{
-					lastMsgUnfinished = true;
-					lastMsg = input[input.Length - 1];
+                    lock (sentBuffer)
+                    {
+                        sentBuffer.Add(lastSentTimeStamp.ToString() + "\t" + codeToSend);
+                    }
+
+                    if (item.ExpectedResponseCode != null)
+                    {
+                        lock (responseCheckLocker)
+                        {
+                            checkForResponseCode = item.ExpectedResponseCode;
+                            checkForResponseCode.TimeAdded = lastSentTimeStamp;
+                        }
+
+                        _waitForRecvCodeDetected.WaitOne(); // Wait for response
+                    }
+                    else
+                    {
+                        Thread.Sleep(minMsBetweenSending);
+                    }
                 }
                 else
-				{
-					lastMsg = "";
-					lastMsgUnfinished = false;
-				}
+                {
+                    _waitForSendCode.WaitOne(); // Wait until new data is added
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("SendLoop Exception: " + ex.Message);
+            }
+        }
 
-                for (int lineCount = 0; lineCount < input.Length; lineCount++)
-				{
-					switch (dataVerbosity)
-					{
-						case 0:
-							if (!lastMsgUnfinished || lineCount < input.Length - 1)
-							{
-								string myLine = input[lineCount].TrimEnd();
-								if (!string.IsNullOrEmpty(myLine))
-								{
-									lock (receivedBuffer)
-									{
-                                        receivedBuffer.Add(timestamp.ToString() + "\t" + myLine);
+        Debug.Log("SendLoop exiting cleanly.");
+    }
+
+
+    private void RecvLoop()
+    {
+        bool lastMsgUnfinished = false;
+        string lastMsg = "";
+
+        while (active)
+        {
+            try
+            {
+                string rawInput = string.Empty;
+
+                lock (sp)
+                {
+                    if (sp != null && sp.BytesToRead > 0)
+                    {
+                        rawInput = sp.ReadExisting();
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(rawInput))
+                {
+                    long timestamp = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
+
+                    if (lastMsgUnfinished)
+                    {
+                        rawInput = lastMsg + rawInput;
+                        lastMsgUnfinished = false;
+                    }
+
+                    string[] input = rawInput.Split('\n');
+
+                    if (!rawInput.EndsWith("\n"))
+                    {
+                        lastMsgUnfinished = true;
+                        lastMsg = input[input.Length - 1];
+                    }
+                    else
+                    {
+                        lastMsg = "";
+                        lastMsgUnfinished = false;
+                    }
+
+                    for (int i = 0; i < input.Length; i++)
+                    {
+                        string myLine = input[i].TrimEnd();
+
+                        if (string.IsNullOrEmpty(myLine) && lastMsgUnfinished && i == input.Length - 1)
+                            continue;
+
+                        lock (receivedBuffer)
+                        {
+                            receivedBuffer.Add(timestamp.ToString() + "\t" + myLine);
+                        }
+
+                        lock (responseCheckLocker)
+                        {
+                            if (checkForResponseCode != null)
+                            {
+                                bool codeMatched = true;
+                                foreach (string frag in checkForResponseCode.CodeFragments)
+                                {
+                                    if (!myLine.ToLower().Contains(frag.ToLower()))
+                                    {
+                                        codeMatched = false;
+                                        break;
                                     }
-                                    if (checkForResponseCode != null)
-									{
-										lock (responseCheckLocker)
-										{
-											bool codeMatched = true;
-											foreach (string code in checkForResponseCode.CodeFragments)
-											{
-												if (!myLine.ToLower().Contains(code.ToLower()))
-												{
-													codeMatched = false;
-													break;
-												}
-											}
-											if (codeMatched)
-											{
-												checkForResponseCode = null;
-												_waitForRecvCodeDetected.Set();
-											}
-											else if (timestamp - checkForResponseCode.TimeAdded >= maxRecvCodeCheckTime * 10000)
-											{
-												Debug.Log("SerialPortThreaded RecvLoop checking for incoming code " + checkForResponseCode.CodeFragments[1] + " timed out.");
-												checkForResponseCode = null;
-												_waitForRecvCodeDetected.Set();
-											}
-										}
-									}
-								}
-								else if (checkForResponseCode != null)
-								{
-									if (timestamp - checkForResponseCode.TimeAdded >= maxRecvCodeCheckTime * 10000)
-									{
-										Debug.Log("SerialPortThreaded RecvLoop no incoming code, checking for incoming code " + checkForResponseCode.CodeFragments[1] + " timed out.");
-										checkForResponseCode = null;
-										_waitForRecvCodeDetected.Set();
-									}
-								}
-							}
-							break;
-						default:
-							Debug.LogError("Serial Port: Unknown data verbosity of " + dataVerbosity.ToString());
-							break;
-					}
-				}
-			}
-			else if (checkForResponseCode != null)
-			{
-				long timestamp = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
-				if (timestamp - checkForResponseCode.TimeAdded >= maxRecvCodeCheckTime * 10000)
-				{
-					Debug.Log("SerialPortThreaded RecvLoop no incoming code, checking for incoming code " + checkForResponseCode.CodeFragments[1] + " timed out.");
-					checkForResponseCode = null;
-					_waitForRecvCodeDetected.Set();
-				}
-			}
-			Thread.Sleep(msBetweenReceiving);
-		}
-		Thread.CurrentThread.Abort();
-	}
+                                }
 
-	public void ClosePort()
+                                if (codeMatched)
+                                {
+                                    checkForResponseCode = null;
+                                    _waitForRecvCodeDetected.Set();
+                                }
+                                else if (timestamp - checkForResponseCode.TimeAdded >= maxRecvCodeCheckTime * 10000)
+                                {
+                                    Debug.Log("RecvLoop timeout for code: " + checkForResponseCode.CodeFragments[0]);
+                                    checkForResponseCode = null;
+                                    _waitForRecvCodeDetected.Set();
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    long timestamp = TimeStamp.ConvertToUnixTimestamp(DateTime.Now);
+                    lock (responseCheckLocker)
+                    {
+                        if (checkForResponseCode != null &&
+                            timestamp - checkForResponseCode.TimeAdded >= maxRecvCodeCheckTime * 10000)
+                        {
+                            Debug.Log("RecvLoop timeout without data for code: " + checkForResponseCode.CodeFragments[0]);
+                            checkForResponseCode = null;
+                            _waitForRecvCodeDetected.Set();
+                        }
+                    }
+                }
+
+                Thread.Sleep(msBetweenReceiving);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError("RecvLoop Exception: " + ex.Message);
+            }
+        }
+
+        Debug.Log("RecvLoop exiting cleanly.");
+    }
+
+
+
+    public void ClosePort()
 	{
 		active = false;
-		sp.Close();
+        _waitForSendCode.Set();
+        _waitForRecvCodeDetected.Set();
+        sp.Close();
 	}
 
 

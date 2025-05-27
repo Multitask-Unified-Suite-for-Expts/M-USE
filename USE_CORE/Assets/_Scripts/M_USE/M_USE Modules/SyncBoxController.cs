@@ -55,7 +55,7 @@ public class SyncBoxController
 
         for (int i = 0; i < numPulses; i++)
         {
-            Debug.LogWarning("SENDING PULSE");
+            Debug.LogWarning("ADDING TO SEND | PULSE SIZE: " + pulseSize + " TIME: " + Time.time);
             serialPortController.AddToSend("RWD " + pulseSize);//values less than 250 don't consistently work so use between 250-500 (# in 0.1 ms increments)
             float waitTime = (MsBetweenRewardPulses + pulseSize / 10) / 1000;
             yield return new WaitForSeconds(waitTime);

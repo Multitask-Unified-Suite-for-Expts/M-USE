@@ -51,21 +51,45 @@ public class SyncBoxController
 
     public IEnumerator SendRewardPulses(int numPulses, int pulseSize)
     {
-        Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
+        Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses);
+
+        // Convert pulseSize (in 0.1ms units) to seconds
+        float pulseDurationSeconds = pulseSize / 10000f; // 250 = 0.025s
+
+        // Convert MsBetweenRewardPulses to seconds
+        float gapDurationSeconds = Mathf.Max(MsBetweenRewardPulses / 1000f, 0.001f); // enforce minimum wait
 
         for (int i = 0; i < numPulses; i++)
         {
-            serialPortController.AddToSend("RWD " + pulseSize);//values less than 250 don't consistently work so use between 250-500 (# in 0.1 ms increments)
-            float waitTime = (float)(MsBetweenRewardPulses + pulseSize / 10) / 1000;
-            
-            if(waitTime < .2)
-                Debug.LogWarning("WAIT TIME IS LESS THAN .2s WHICH MEANS IT MAY SKIP PULSES | WAIT TIME = " + waitTime);
+            serialPortController.AddToSend("RWD " + pulseSize);
 
-            yield return new WaitForSeconds(waitTime);
+            yield return new WaitForSeconds(pulseDurationSeconds);
+
+            if (i < numPulses - 1) // don't delay after final pulse
+                yield return new WaitForSeconds(gapDurationSeconds);
         }
 
         Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
     }
+
+
+    //public IEnumerator SendRewardPulses(int numPulses, int pulseSize)
+    //{
+    //    Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
+
+    //    for (int i = 0; i < numPulses; i++)
+    //    {
+    //        serialPortController.AddToSend("RWD " + pulseSize);//values less than 250 don't consistently work so use between 250-500 (# in 0.1 ms increments)
+    //        float waitTime = (float)(MsBetweenRewardPulses + pulseSize / 10) / 1000;
+            
+    //        if(waitTime < .2)
+    //            Debug.LogWarning("WAIT TIME IS LESS THAN .2s WHICH MEANS IT MAY SKIP PULSES | WAIT TIME = " + waitTime);
+
+    //        yield return new WaitForSeconds(waitTime);
+    //    }
+
+    //    Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
+    //}
 
     public IEnumerator SendSonication()
     {

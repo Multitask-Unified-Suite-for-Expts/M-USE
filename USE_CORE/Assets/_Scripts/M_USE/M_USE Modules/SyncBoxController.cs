@@ -32,7 +32,7 @@ public class SyncBoxController
 {
     [HideInInspector] public SerialPortThreaded serialPortController;
 
-    private readonly int MsBetweenRewardPulses = 200;
+    private readonly float SecBetweenRewardPulses = 0.2f;
 
 
     public void SendCommand(string command)
@@ -56,8 +56,8 @@ public class SyncBoxController
         // Convert pulseSize (in 0.1ms units) to seconds
         float pulseDurationSeconds = pulseSize / 10000f; // 250 = 0.025s
 
-        // Convert MsBetweenRewardPulses to seconds
-        float gapDurationSeconds = Mathf.Max(MsBetweenRewardPulses / 1000f, 0.001f); // enforce minimum wait
+        if(pulseDurationSeconds < .025)
+            Debug.LogError("PULSE SIZE MUST BE LESS THAN 250! THIS COULD CAUSE TIMING TO BE OFF AND PULSES TO BE SKIPPED");
 
         for (int i = 0; i < numPulses; i++)
         {
@@ -66,56 +66,34 @@ public class SyncBoxController
             yield return new WaitForSeconds(pulseDurationSeconds);
 
             if (i < numPulses - 1) // don't delay after final pulse
-                yield return new WaitForSeconds(gapDurationSeconds);
+                yield return new WaitForSeconds(SecBetweenRewardPulses);
         }
 
         Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
     }
 
-
-    //public IEnumerator SendRewardPulses(int numPulses, int pulseSize)
-    //{
-    //    Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses); //moved out of for loop and changed to range
-
-    //    for (int i = 0; i < numPulses; i++)
-    //    {
-    //        serialPortController.AddToSend("RWD " + pulseSize);//values less than 250 don't consistently work so use between 250-500 (# in 0.1 ms increments)
-    //        float waitTime = (float)(MsBetweenRewardPulses + pulseSize / 10) / 1000;
-            
-    //        if(waitTime < .2)
-    //            Debug.LogWarning("WAIT TIME IS LESS THAN .2s WHICH MEANS IT MAY SKIP PULSES | WAIT TIME = " + waitTime);
-
-    //        yield return new WaitForSeconds(waitTime);
-    //    }
-
-    //    Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
-    //}
-
     public IEnumerator SendSonication()
     {
         Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
 
+        // Convert pulseSize (in 0.1ms units) to seconds
+        float pulseDurationSeconds = Session.SessionDef.StimulationPulseSize / 10000f; // 250 = 0.025s
+
+        if(pulseDurationSeconds < .025)
+            Debug.LogError("SESSION CONFIG PULSE SIZE MUST BE LESS THAN 250! THIS COULD CAUSE TIMING TO BE OFF AND PULSES TO BE SKIPPED");
+
         for (int i = 0; i < Session.SessionDef.StimulationNumPulses; i++)
         {
             serialPortController.AddToSend("RWB " + Session.SessionDef.StimulationPulseSize);
-            float waitTime = (MsBetweenRewardPulses + Session.SessionDef.StimulationPulseSize / 10) / 1000;
-            yield return new WaitForSeconds(waitTime);
+
+            yield return new WaitForSeconds(pulseDurationSeconds);
+
+            if (i < Session.SessionDef.StimulationNumPulses - 1) // don't delay after final pulse
+                yield return new WaitForSeconds(SecBetweenRewardPulses);
         }
 
         Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalStimulationPulses", Session.SessionDef.StimulationNumPulses));
     }
 
-
-    public IEnumerator SendCameraSyncPulses()
-    {
-        Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
-
-        for (int i = 0; i < Session.SessionDef.Camera_NumPulses; i++)
-        {
-            serialPortController.AddToSend("RWB " + Session.SessionDef.Camera_PulseSize_Ticks);
-            float waitTime = (MsBetweenRewardPulses + Session.SessionDef.Camera_PulseSize_Ticks / 10) / 1000;
-            yield return new WaitForSeconds(waitTime);
-        }
-    }
 
 }

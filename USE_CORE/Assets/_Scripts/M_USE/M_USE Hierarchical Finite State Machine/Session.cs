@@ -62,7 +62,6 @@ public static class Session
         }
     }
 
-    public static CameraSyncController CameraSyncController;
     public static FullScreenController FullScreenController;
     public static SessionAudioController SessionAudioController;
     public static TimerController TimerController;

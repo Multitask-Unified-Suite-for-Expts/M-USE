@@ -105,7 +105,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             if(!Session.WebBuild && trialLevel.AbortCode == 0)
             {
-                CurrentBlockString += "\n" + "\n";
+                CurrentBlockString += "\n";
                 CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
                 blocksAdded++;     
             }

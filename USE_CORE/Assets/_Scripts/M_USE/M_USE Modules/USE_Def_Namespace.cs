@@ -36,25 +36,10 @@ namespace USE_Def_Namespace
 {
     public class SessionDef
     {
-        // public string Subject;
-        // public DateTime SessionStart_DateTime;
-        // public int SessionStart_Frame;
-        // public float SessionStart_UnityTime;
-
         /// <summary>
         /// Represents a dictionary of task mappings where the key is the config folder name and the value is the task name.
         /// </summary>
         public OrderedDictionary TaskMappings;
-
-        /// <summary>
-        /// A list of task names.
-        /// </summary>
-        public List<string> TaskNames;
-
-        /// <summary>
-        /// Represents a dictionary of task mappings where the key is the config folder name and the value is the name of the task icons in the TaskIconsFolderPath.
-        /// </summary>
-        public Dictionary<string, string> TaskIcons;
 
         /// <summary>
         /// Path to the external folder containing the contexts for the session.
@@ -67,11 +52,6 @@ namespace USE_Def_Namespace
         public string TaskIconsFolderPath;
 
         /// <summary>
-        /// Locations for each task icon in a 3D space.
-        /// </summary>
-        public Vector3[] TaskIconLocations;
-
-        /// <summary>
         /// Duration of timeout for task selection. Default is 0f.
         /// </summary>
         public float TaskSelectionTimeout = 0f;
@@ -79,10 +59,10 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Indicates if the build is for Mac's main display.
         /// </summary>
-        public bool MacMainDisplayBuild;
+        public bool MacMainDisplayBuild = false;
 
         /// <summary>
-        /// Indicates if the actor is human.
+        /// Indicates if the subject is human.
         /// </summary>
         public bool IsHuman;
 
@@ -90,11 +70,6 @@ namespace USE_Def_Namespace
         /// Indicates if event codes are active.
         /// </summary>
         public bool EventCodesActive;
-
-        /// <summary>
-        /// Indicates if the sync box is active.
-        /// </summary>
-        public bool SyncBoxActive;
 
         /// <summary>
         /// Indicates if the serial port is active.
@@ -112,6 +87,11 @@ namespace USE_Def_Namespace
         public int SerialPortSpeed;
 
         /// <summary>
+        /// Indicates if the sync box is active.
+        /// </summary>
+        public bool SyncBoxActive;
+
+        /// <summary>
         /// List of commands to initialize the sync box.
         /// </summary>
         public List<string> SyncBoxInitCommands;
@@ -122,19 +102,14 @@ namespace USE_Def_Namespace
         public int SplitBytes = 2;
 
         /// <summary>
-        /// Type of eye tracker being used.
-        /// </summary>
-        public string EyetrackerType;
-
-        /// <summary>
         /// Indicates if the eye tracker is active.
         /// </summary>
         public bool EyeTrackerActive;
 
         /// <summary>
-        /// Type of selection method being used. Default is "mouse".
+        /// Type of selection method being used. Default is "MouseButton0Click".
         /// </summary>
-        public string SelectionType = "mouse";
+        public string SelectionType = "MouseButton0Click";
         
         /// <summary>
         /// Details of the monitor being used.
@@ -145,11 +120,6 @@ namespace USE_Def_Namespace
         /// Details of the screen being used.
         /// </summary>
         public ScreenDetails ScreenDetails;
-
-        /// <summary>
-        /// Indicates if sonication is active.
-        /// </summary>
-        public bool SonicationActive;
 
         /// <summary>
         /// Number of pulses for the reward hotkey. Default is 1.
@@ -182,6 +152,21 @@ namespace USE_Def_Namespace
         public bool FlashPanelsActive;
 
         /// <summary>
+        /// Total number of grid spots. Default is 20, but can be adjusted if needed.
+        /// </summary>
+        public int NumGridSpots = 20;
+
+        /// <summary>
+        /// List of positions for task button grid. To be set in session config.
+        /// </summary>
+        public List<int> TaskButtonGridSpots;
+
+        /// <summary>
+        /// Maximum number of task buttons per row. Default is 5.
+        /// </summary>
+        public int TaskButtonGridMaxPerRow = 5;
+
+        /// <summary>
         /// Size of each task button. Default is 225.
         /// </summary>
         public int TaskButtonSize = 225;
@@ -192,39 +177,10 @@ namespace USE_Def_Namespace
         public int TaskButtonSpacing = 25;
 
         /// <summary>
-        /// Maximum number of task buttons per row. Default is 5.
-        /// </summary>
-        public int TaskButtonGridMaxPerRow = 5;
-
-        /// <summary>
-        /// List of positions for task button grid. To be set in session config.
-        /// </summary>
-        public List<int> TaskButtonGridSpots;
-
-        /// <summary>
-        /// Total number of grid spots. Default is 20, but can be adjusted if needed.
-        /// </summary>
-        public int NumGridSpots = 20;
-
-        /// <summary>
-        /// Whether to send Camera Sync Pulses. 
-        /// </summary>
-        public bool SendCameraPulses;
-
-        /// <summary>
-        /// Pulse size for the Camera. Default is 250. 
-        /// </summary>
-        public int Camera_PulseSize_Ticks = 250;
-
-        /// <summary>
-        /// Number of Camera's Pulses to be sent. Default is 3. 
-        /// </summary>
-        public int Camera_NumPulses = 3;
-
-        /// <summary>
         /// Private backing field used to allow MaxStimLoadingDuration to have default value of 2, but also never be less than 1
         /// </summary>
         private float maxStimLoadingDuration = 2f;
+
         /// <summary>
         /// Max amount of time for Stim to be loaded.
         /// </summary>
@@ -239,17 +195,10 @@ namespace USE_Def_Namespace
         /// </summary>
         public float SessionSummaryDuration = 180f;
 
-
         /// <summary>
-        /// Num of Stimulation Pulses
+        /// Duration for Start Button Selection
         /// </summary>
-        public int StimulationNumPulses = 1;
-
-        /// <summary>
-        /// Size of Stimulation Pulses
-        /// </summary>
-        public int StimulationPulseSize = 250;
-
+        public float StartButtonSelectionDuration = 0.3f;
 
         /// <summary>
         /// Time between sending event code and sending command for sonication unit testing
@@ -262,9 +211,14 @@ namespace USE_Def_Namespace
         public int SonicationTest_NumPerCondition = 10;
 
         /// <summary>
-        /// Duration for Start Button Selection
+        /// Num of Stimulation Pulses
         /// </summary>
-        public float StartButtonSelectionDuration = 0.3f;
+        public int StimulationNumPulses = 1;
+
+        /// <summary>
+        /// Size of Stimulation Pulses
+        /// </summary>
+        public int StimulationPulseSize = 250;
 
 
     }

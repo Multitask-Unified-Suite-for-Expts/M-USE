@@ -272,11 +272,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["MazeFinish"]);
             }
         });
-        //ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
-        //{
-        //    AbortCode = 8;
-        //    HandleAbortTrialData();
-        //});
+        ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        {
+            AbortCode = 8;
+            HandleAbortTrialData();
+        });
         ChooseTile.SpecifyTermination(() => (MazeManager.GetMazeDuration() > CurrentTrial.MaxMazeDuration) || (MazeManager.GetChoiceDuration() > CurrentTrial.MaxChoiceDuration), () => ITI, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");

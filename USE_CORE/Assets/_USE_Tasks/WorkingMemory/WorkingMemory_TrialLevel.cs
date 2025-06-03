@@ -143,8 +143,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             SetShadowType(CurrentTask.ShadowType, "WorkingMemory_DirectionalLight");
             if (CurrentTask.StimFacingCamera)
                 MakeStimFaceCamera();
-
-
                         
             if (!configUIVariablesLoaded) 
                 LoadConfigUIVariables();

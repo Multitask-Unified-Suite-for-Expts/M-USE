@@ -123,6 +123,15 @@ public class TouchFBController : MonoBehaviour
 
         ObjectsToIgnore = new List<GameObject>();
 
+        if(objects != null)
+        {
+            foreach (GameObject obj in objects)
+            {
+                if(!ObjectsToIgnore.Contains(obj))
+                    ObjectsToIgnore.Add(obj);
+            }
+        }    
+
         Handler.TouchErrorFeedback += OnTouchErrorFeedback; //Subscribe to event
     }
 

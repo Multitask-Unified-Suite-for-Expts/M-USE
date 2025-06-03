@@ -2,9 +2,9 @@
 	"varsNumber": {
 
 		"timeBeforeChoiceStarts": {
-			"value": 0.3,
+			"value": 0.05,
 			"min": 0.01,
-			"max": 3.0,
+			"max": 5.0,
 			"precision": 1,
 			"isRange": true,
 			"name": "Time Before Choice Starts",
@@ -12,9 +12,9 @@
 		},
 
 		"totalChoiceDuration": {
-			"value": 0.7,
+			"value": 0.05,
 			"min": 0.01,
-			"max": 5.0,
+			"max": 10.0,
 			"precision": 1,
 			"isRange": true,
 			"name": "Total Choice Duration",

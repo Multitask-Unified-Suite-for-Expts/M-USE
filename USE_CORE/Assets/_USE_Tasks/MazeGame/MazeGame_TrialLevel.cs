@@ -151,7 +151,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SetTaskSummaryString();
             Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
         });
-        SetupTrial.SpecifyTermination(() => true, InitTrial);
+        SetupTrial.SpecifyTermination(() => true, InitTrial, () =>
+        {
+            Session.Using2DStim = true; //NEED TO MANUALLY SET FOR MAZE SINCE IT DOESNT USE QUADDLES AND THE TILES ARE 2D!
+            TouchFBController.SetUseRootGoPos(!Session.Using2DStim); //THIS IS DONE FOR ALL TASKS IN SETUPTRIAL BUT NEED TO DO IT HERE AFTER FOR MAZE SINCE NOT USING STIM
+        });
 
 
         //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -268,11 +272,11 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["MazeFinish"]);
             }
         });
-        ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
-        {
-            AbortCode = 8;
-            HandleAbortTrialData();
-        });
+        //ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        //{
+        //    AbortCode = 8;
+        //    HandleAbortTrialData();
+        //});
         ChooseTile.SpecifyTermination(() => (MazeManager.GetMazeDuration() > CurrentTrial.MaxMazeDuration) || (MazeManager.GetChoiceDuration() > CurrentTrial.MaxChoiceDuration), () => ITI, () =>
         {
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");

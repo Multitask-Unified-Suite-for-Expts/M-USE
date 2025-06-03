@@ -98,37 +98,37 @@
         "Value": 42,
         "Description": "TokenBar is Visible"
     },
-    "FixationOnObject": {
+    "SelectionOnObject": {
         "Value": 43,
-        "Description": "Fixation On Object"
+        "Description": "Selection On Object"
     },
-    "FixationOnTargetObject": {
+    "SelectionOnTargetObject": {
         "Value": 44,
-        "Description": "Fixation On Target Object"
+        "Description": "Selection On Target Object"
     },
-    "FixationOnDistractorObject": {
+    "SelectionOnDistractorObject": {
         "Value": 45,
-        "Description": "Fixation On Distractor Object"
+        "Description": "Selection On Distractor Object"
     },
-    "FixationOnIrrelevantObject": {
+    "SelectionOnIrrelevantObject": {
         "Value": 46,
-        "Description": "Fixation On Irrelevant Object"
+        "Description": "Selection On Irrelevant Object"
     },
-    "FixationOffObject": {
+    "SelectionOffObject": {
         "Value": 47,
-        "Description": "Fixation Off Object "
+        "Description": "Selection Off Object "
     },
-    "FixationOffTargetObject": {
+    "SelectionOffTargetObject": {
         "Value": 48,
-        "Description": "Fixation Off Target Object"
+        "Description": "Selection Off Target Object"
     },
-    "FixationOffDistractorObject": {
+    "SelectionOffDistractorObject": {
         "Value": 49,
-        "Description": "Fixation Off Distractor Object"
+        "Description": "Selection Off Distractor Object"
     },
-    "FixationOffIrrelevantObject": {
+    "SelectionOffIrrelevantObject": {
         "Value": 50,
-        "Description": "Fixation Off Irrelevant Object"
+        "Description": "Selection Off Irrelevant Object"
     },
     "Button0PressedOnObject": {
         "Value": 51,
@@ -226,53 +226,46 @@
         "Value": 74,
         "Description": "Button 2 Pressed Off Irrelevant Object"
     },
-    "ObjectSelected": {
+    "ChoiceBegins": {
         "Value": 75,
-        "Description": "Object Selected"
+        "Description": "Choice (selection) Begins"
     },
-    "TargetObjectSelected": {
+    "ChoiceCompleted": {
         "Value": 76,
-        "Description": "Target Object Selected"
+        "Description": "Choice (selection) Completed"
     },
-    "DistractorObjectSelected": {
+    "ChoiceFailed": {
         "Value": 77,
-        "Description": "Distractor Object Selected"
+        "Description": "Choice (selection) Failed"
     },
-    "IrrelevantObjectSelected": {
-        "Description": "Irrelevant Object Selected",
-        "Value": 78
-    },
+
     "StartButtonSelected": {
         "Description": "Start Button Selected",
-        "Value": 79
+        "Value": 78
     },
     "ContextOn": {
-        "Value": 80,
+        "Value": 79,
         "Description": "Context On"
     },
     "ContextOff": {
-        "Value": 81,
+        "Value": 80,
         "Description": "Context Off"
     },
     "InstructionsOn": {
-        "Value": 82,
+        "Value": 81,
         "Description": "Instructions On"
     },
     "InstructionsOff": {
-        "Value": 83,
+        "Value": 82,
         "Description": "Instructions Off"
     },
     "HumanStartPanelOn": {
-        "Value": 84,
+        "Value": 83,
         "Description": "HumanStartPanel On"
     },
     "HumanStartPanelOff": {
-        "Value": 85,
+        "Value": 84,
         "Description": "HumanStartPanel Off"
-    },
-    "InitialFixationDurationPassed": {
-        "Value": 86,
-        "Description": "Initial Fixation Duration has passed"
     },
     "StimulationCondition": {
         "Range": [
@@ -309,7 +302,7 @@
             1001,
             6000
         ],
-        "Description": " [1001, 6000] Setup Trial State Starts "
+        "Description": "Setup Trial State Starts "
     },
     "FinishTrialStarts": {
         "Value": 7001,

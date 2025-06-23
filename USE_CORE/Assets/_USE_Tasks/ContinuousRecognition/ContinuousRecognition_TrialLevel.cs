@@ -173,14 +173,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state ------------------------------------------------------------------------------------------------------
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            StimulateThisTrial = false;
+            StimulateDuringTrial = false;
             if (CurrentTrial.TrialsToStimulateOn != null)
             {
                 if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
-                    StimulateThisTrial = true;
+                    StimulateDuringTrial = true;
             }
 
-            if(StimulateThisTrial)
+            if(StimulateDuringTrial)
                 Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -316,28 +316,26 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             OngoingSelection = SelectionHandler.OngoingSelection;
 
-            if (OngoingSelection != null)
+            if (OngoingSelection != null && StimulatedDuringThisTrial && !StimulatedDuringThisTrial)
             {
-                SetTrialSummaryString(); //update trial summary string so experimenter can see ongoing selection duration
-
-                if (StimulateThisTrial && !StimulatedDuringThisTrial)
+                if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
                 {
-                    if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration && !OngoingSelection.ChoiceStarted)
-                    {
-                        GameObject ongoingSelectionGO = OngoingSelection.SelectedGameObject;
-                        OngoingSelectionStim = ongoingSelectionGO.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
+                    GameObject ongoingSelectionGO = OngoingSelection.SelectedGameObject;
+                    OngoingSelectionStim = ongoingSelectionGO.GetComponent<StimDefPointer>()?.GetStimDef<ContinuousRecognition_StimDef>();
 
-                        if(OngoingSelectionStim != null)
-                        {
-                            string stimulationType = CurrentTrial.StimulationType.Trim();
-                            if (stimulationType == "FixationChoice_Target" && !OngoingSelectionStim.PreviouslyChosen)
-                                StartCoroutine(StimulationCoroutine());
-                            else if (stimulationType == "FixationChoice_Distractor" && OngoingSelectionStim.PreviouslyChosen)
-                                StartCoroutine(StimulationCoroutine());
-                        }
+                    if(OngoingSelectionStim != null)
+                    {
+                        string stimulationType = CurrentTrial.StimulationType.Trim();
+                        if (stimulationType == "FixationChoice_Target" && !OngoingSelectionStim.PreviouslyChosen)
+                            StartCoroutine(StimulationCoroutine());
+                        else if (stimulationType == "FixationChoice_Distractor" && OngoingSelectionStim.PreviouslyChosen)
+                            StartCoroutine(StimulationCoroutine());
                     }
                 }
+                
             }
+
+            SetTrialSummaryString(); //update trial summary string so experimenter can see ongoing selection duration
 
             if(SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
@@ -853,7 +851,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\nPC_Stim: " + NumPC_Trial +
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial +
-                             "\nStimulateThisTrial? " + StimulateThisTrial +
+                             "\nStimulateThisTrial? " + StimulateDuringTrial +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

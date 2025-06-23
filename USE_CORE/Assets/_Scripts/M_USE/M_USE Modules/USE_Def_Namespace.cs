@@ -52,9 +52,9 @@ namespace USE_Def_Namespace
         public string TaskIconsFolderPath;
 
         /// <summary>
-        /// Duration of timeout for task selection. Default is 0f.
+        /// Duration of timeout for task selection. Default is 20f.
         /// </summary>
-        public float TaskSelectionTimeout = 0f;
+        public float TaskSelectionTimeout = 20f;
 
         /// <summary>
         /// Indicates if the build is for Mac's main display.
@@ -193,7 +193,7 @@ namespace USE_Def_Namespace
         /// <summary>
         /// Duration of the SessionSummary screen before the session finishes.
         /// </summary>
-        public float SessionSummaryDuration = 180f;
+        public float SessionSummaryDuration = 120f;
 
         /// <summary>
         /// Duration for Start Button Selection
@@ -343,6 +343,8 @@ namespace USE_Def_Namespace
         /// </summary>
         public int ShotgunRadius_Pixels = 50;
 
+
+
     }
 
     public class BlockDef
@@ -481,7 +483,7 @@ namespace USE_Def_Namespace
         public float MaskFadeInDuration = .75f;
 
         /// <summary>
-        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
+        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor)
         /// </summary>
         public string StimulationType;
 
@@ -499,6 +501,18 @@ namespace USE_Def_Namespace
         /// Stimulation Conditions Event Code list
         /// </summary>
         public int[] StimulationConditionCodes;
+
+        /// <summary>
+        /// Trials to Stimulate on for the Block
+        /// </summary>
+        public int[] TrialsToStimulateOn;
+
+        /// <summary>
+        /// Object Stimulation Order Number
+        /// </summary>
+        public int[][] ObjectsToStimulateOn;
+
+
 
 
 
@@ -668,7 +682,7 @@ namespace USE_Def_Namespace
         public float MaskFadeInDuration = .75f;
 
         /// <summary>
-        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor, HaloOnset_Correct, HaloOnset_Incorrect)
+        /// Stimulation Type. [FixationChoice_Target, FixationChoice_Distractor)
         /// </summary>
         public string StimulationType;
 
@@ -686,6 +700,16 @@ namespace USE_Def_Namespace
         /// Stimulation Conditions Event Code list
         /// </summary>
         public int[] StimulationConditionCodes;
+
+        /// <summary>
+        /// Trials to Stimulate on for the Block
+        /// </summary>
+        public int[] TrialsToStimulateOn;
+
+        /// <summary>
+        /// Object Stimulation Order Number
+        /// </summary>
+        public int[][] ObjectsToStimulateOn;
 
 
 

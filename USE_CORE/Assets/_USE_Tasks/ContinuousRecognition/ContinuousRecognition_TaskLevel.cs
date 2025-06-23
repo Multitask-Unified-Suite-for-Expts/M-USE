@@ -89,6 +89,9 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                 BlockStimulationCode = currentBlockDef.StimulationConditionCodes[indexNum];
                 trialLevel.TrialStimulationCode = BlockStimulationCode;
             }
+            else
+                Debug.LogWarning("Allow Stimulation is set to true, but the StimulationConditionCodes are empty");
+            
         });
 
         BlockFeedback.AddSpecificInitializationMethod(() =>

@@ -74,6 +74,8 @@ public class SyncBoxController
 
     public IEnumerator SendSonication()
     {
+        Debug.LogWarning("ABOUT TO START SONICATION");
+
         Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
 
         // Convert pulseSize (in 0.1ms units) to seconds

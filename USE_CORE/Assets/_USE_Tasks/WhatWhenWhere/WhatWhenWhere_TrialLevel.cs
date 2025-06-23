@@ -34,7 +34,7 @@ using System.Linq;
 using System.IO;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
-
+using System.Collections;
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -113,9 +113,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private Vector3? MaskValues_CurrentTrial;
 
-
     private bool Masking = false;
     private int MaskingErrors_Trial;
+
+    [HideInInspector] WhatWhenWhere_StimDef OngoingSelectionStim;
+
+    private bool StimulateOnCurrentObject = false;
+
+
 
     public override void DefineControlLevel()
     {
@@ -196,15 +201,16 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             }
 
-            StimulateThisTrial = false;
+            StimulateDuringTrial = false;
             if (CurrentTrial.TrialsToStimulateOn != null)
             {
                 if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
-                    StimulateThisTrial = true;
+                    StimulateDuringTrial = true;
             }
 
-            if (StimulateThisTrial)
+            if (StimulateDuringTrial)
                 Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
+
         });
 
         SetupTrial.AddTimer(()=> startButtonPresentationDelay, InitTrial);
@@ -316,11 +322,52 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 SelectionHandler.ClearSelections();
 
 
-            //reset it so the duration is 0 on exp display even if had one last trial
+
+            StimulateOnCurrentObject = false;
+
+            if (StimulateDuringTrial && CurrentTrial.TrialsToStimulateOn != null)
+            {
+                int index = Array.IndexOf(CurrentTrial.TrialsToStimulateOn, TrialCount_InBlock + 1);
+                int[] trialObjectsToStimOn = CurrentTrial.ObjectsToStimulateOn[index];
+
+                if (trialObjectsToStimOn != null && trialObjectsToStimOn.Contains(SequenceManager.GetSeqIdx() + 1))
+                {
+                    StimulateOnCurrentObject = true;
+                }
+            }
+
+            StimulatedDuringThisTrial = false; //have to reset after every object for WWW
+
+
             OngoingSelection = null;
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
+            OngoingSelection = SelectionHandler.OngoingSelection;
+
+            if (OngoingSelection != null && StimulateOnCurrentObject && !StimulatedDuringThisTrial)
+            {
+                if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
+                {
+                    GameObject ongoingSelectionGO = OngoingSelection.SelectedGameObject;
+                    OngoingSelectionStim = ongoingSelectionGO.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
+
+                    if (OngoingSelectionStim != null)
+                    {
+                        string stimulationType = CurrentTrial.StimulationType.Trim();
+                        if (stimulationType == "FixationChoice_Target" && OngoingSelectionStim.IsCurrentTarget)
+                            StartCoroutine(StimulationCoroutine());
+                        else if (stimulationType == "FixationChoice_Distractor" && OngoingSelectionStim.IsDistractor)
+                            StartCoroutine(StimulationCoroutine());
+                    }
+
+                }
+            }
+
+
+            SetTrialSummaryString(); //Update Exp Display with OngoingSelection Duration:
+
+
             if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
                 GameObject selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.transform.root.gameObject;
@@ -338,14 +385,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         SequenceManager.SetSequenceStartTime(Time.time);
                     }
                 }
-            }
-
-            OngoingSelection = SelectionHandler.OngoingSelection;
-
-            //Update Exp Display with OngoingSelection Duration:
-            if (OngoingSelection != null)
-            {
-                SetTrialSummaryString();
             }
 
 
@@ -515,6 +554,32 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         DefineTrialData();
         DefineFrameData();
+    }
+
+
+    public IEnumerator StimulationCoroutine()
+    {
+        if (StimulatedDuringThisTrial)
+        {
+            Debug.LogWarning("ALREADY STIMULATED");
+            yield break;
+        }
+
+        StimulateOnCurrentObject = false; // Reset immedietely
+
+        StimulatedDuringThisTrial = true;
+
+        Debug.Log("STIMULATION ABOUT TO BE TRIGGERED AFTER DELAY");
+
+        yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
+
+        if (Session.SyncBoxController != null)
+        {
+            StartCoroutine(Session.SyncBoxController.SendSonication());
+            StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
+            CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
+            CurrentTaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
+        }
     }
 
     private void HandleCompletedSequence()

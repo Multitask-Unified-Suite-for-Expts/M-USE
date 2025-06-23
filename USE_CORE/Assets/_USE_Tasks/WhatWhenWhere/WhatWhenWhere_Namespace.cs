@@ -32,9 +32,6 @@ namespace WhatWhenWhere_Namespace
 {
     public class WhatWhenWhere_BlockDef : BlockDef
     {
-        //Stimulation:
-        public int[] TrialsToStimulateOn;
-
         // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
         public int ErrorThreshold;
@@ -110,7 +107,13 @@ namespace WhatWhenWhere_Namespace
                 td.MaskColor = MaskColor;
                 td.MaskValues = MaskValues;
                 td.MaskFadeInDuration = MaskFadeInDuration;
+
                 td.TrialsToStimulateOn = TrialsToStimulateOn;
+                td.ObjectsToStimulateOn = ObjectsToStimulateOn;
+                td.StimulationType = StimulationType;
+                td.InitialFixationDuration = InitialFixationDuration;
+                td.StimulationDelayDuration = StimulationDelayDuration;
+
                 TrialDefs.Add(td);
             }
         }
@@ -118,9 +121,6 @@ namespace WhatWhenWhere_Namespace
 
     public class WhatWhenWhere_TrialDef : TrialDef
     {
-        //Stimulation:
-        public int[] TrialsToStimulateOn;
-
         // Stimuli Selection Variables
         public int[] CorrectObjectTouchOrder;
         public int ErrorThreshold;

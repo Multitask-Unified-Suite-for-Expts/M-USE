@@ -253,8 +253,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (OngoingSelection != null)
             {
-                SetTrialSummaryString();
-
                 if (!StimulatedDuringThisTrial && !string.IsNullOrEmpty(StimulationType))
                 {
                     if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
@@ -276,6 +274,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
             }
+
+            SetTrialSummaryString();
 
             if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {

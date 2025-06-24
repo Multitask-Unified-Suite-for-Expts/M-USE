@@ -118,7 +118,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] WhatWhenWhere_StimDef OngoingSelectionStim;
 
-    private bool StimulateOnCurrentObject = false;
 
 
 
@@ -201,14 +200,14 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             }
 
-            StimulateDuringTrial = false;
+            CanStimulateThisTrial = false;
             if (CurrentTrial.TrialsToStimulateOn != null)
             {
                 if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
-                    StimulateDuringTrial = true;
+                    CanStimulateThisTrial = true;
             }
 
-            if (StimulateDuringTrial)
+            if (CanStimulateThisTrial)
                 Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
 
         });
@@ -322,10 +321,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 SelectionHandler.ClearSelections();
 
 
+            StimulatedThisTrial = false; //have to reset after every object for WWW
+
 
             StimulateOnCurrentObject = false;
 
-            if (StimulateDuringTrial && CurrentTrial.TrialsToStimulateOn != null)
+            if (CanStimulateThisTrial && CurrentTrial.TrialsToStimulateOn != null)
             {
                 int index = Array.IndexOf(CurrentTrial.TrialsToStimulateOn, TrialCount_InBlock + 1);
                 int[] trialObjectsToStimOn = CurrentTrial.ObjectsToStimulateOn[index];
@@ -336,8 +337,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            StimulatedDuringThisTrial = false; //have to reset after every object for WWW
-
 
             OngoingSelection = null;
         });
@@ -345,7 +344,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             OngoingSelection = SelectionHandler.OngoingSelection;
 
-            if (OngoingSelection != null && StimulateOnCurrentObject && !StimulatedDuringThisTrial)
+            if (OngoingSelection != null && StimulateOnCurrentObject && !StimulatedThisTrial)
             {
                 if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
                 {
@@ -559,7 +558,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     public IEnumerator StimulationCoroutine()
     {
-        if (StimulatedDuringThisTrial)
+        if (StimulatedThisTrial)
         {
             Debug.LogWarning("ALREADY STIMULATED");
             yield break;
@@ -567,7 +566,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         StimulateOnCurrentObject = false; // Reset immedietely
 
-        StimulatedDuringThisTrial = true;
+        StimulatedThisTrial = true;
 
         Debug.Log("STIMULATION ABOUT TO BE TRIGGERED AFTER DELAY");
 

@@ -173,14 +173,14 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         //SETUP TRIAL state ------------------------------------------------------------------------------------------------------
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            StimulateDuringTrial = false;
+            CanStimulateThisTrial = false;
             if (CurrentTrial.TrialsToStimulateOn != null)
             {
                 if (CurrentTrial.TrialsToStimulateOn.Contains(TrialCount_InBlock + 1) && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
-                    StimulateDuringTrial = true;
+                    CanStimulateThisTrial = true;
             }
 
-            if(StimulateDuringTrial)
+            if(CanStimulateThisTrial)
                 Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
         });
         SetupTrial.SpecifyTermination(() => true, InitTrial);
@@ -316,7 +316,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             OngoingSelection = SelectionHandler.OngoingSelection;
 
-            if (OngoingSelection != null && StimulatedDuringThisTrial && !StimulatedDuringThisTrial)
+            if (OngoingSelection != null && CanStimulateThisTrial && !StimulatedThisTrial)
             {
                 if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
                 {
@@ -572,10 +572,10 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
     public IEnumerator StimulationCoroutine()
     {
-        if (StimulatedDuringThisTrial)
+        if (StimulatedThisTrial)
             yield break;
 
-        StimulatedDuringThisTrial = true;
+        StimulatedThisTrial = true;
 
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
 
@@ -851,7 +851,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                              "\nPC_Stim: " + NumPC_Trial +
                              "\nNew_Stim: " + NumNew_Trial +
                              "\nPNC_Stim: " + NumPNC_Trial +
-                             "\nStimulateThisTrial? " + StimulateDuringTrial +
+                             "\nStimulateThisTrial? " + CanStimulateThisTrial +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
     }

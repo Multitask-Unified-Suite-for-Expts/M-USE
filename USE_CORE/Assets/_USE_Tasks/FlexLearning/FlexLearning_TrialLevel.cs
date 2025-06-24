@@ -253,7 +253,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (OngoingSelection != null)
             {
-                if (!StimulatedDuringThisTrial && !string.IsNullOrEmpty(StimulationType))
+                if (!StimulatedThisTrial && !string.IsNullOrEmpty(StimulationType))
                 {
                     if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
                     {
@@ -416,10 +416,10 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
     public IEnumerator StimulationCoroutine()
     {
-        if (StimulatedDuringThisTrial)
+        if (StimulatedThisTrial)
             yield break;
 
-        StimulatedDuringThisTrial = true;
+        StimulatedThisTrial = true;
 
         yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
 

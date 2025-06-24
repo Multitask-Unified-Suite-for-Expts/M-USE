@@ -498,7 +498,7 @@ namespace USE_Def_Namespace
         public float StimulationDelayDuration = 0f;
 
         /// <summary>
-        /// Stimulation Conditions Event Code list
+        /// Stimulation conditions to be randomized and sent to external python script at start of stimulation trial. 
         /// </summary>
         public int[] StimulationConditionCodes;
 

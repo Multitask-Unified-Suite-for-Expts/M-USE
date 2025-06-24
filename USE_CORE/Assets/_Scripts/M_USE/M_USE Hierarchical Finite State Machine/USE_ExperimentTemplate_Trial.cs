@@ -129,8 +129,9 @@ namespace USE_ExperimentTemplate_Trial
         //Can be used by tasks' trial levels to set the trial stimulation code
         [HideInInspector] public int TrialStimulationCode = 0;
 
-        [HideInInspector] public bool StimulateDuringTrial = false;
-        [HideInInspector] public bool StimulatedDuringThisTrial = false;
+        [HideInInspector] public bool CanStimulateThisTrial = false;
+        [HideInInspector] public bool StimulatedThisTrial = false;
+        [HideInInspector] public bool StimulateOnCurrentObject = false;
 
         [HideInInspector] public USE_Selection OngoingSelection;
 
@@ -326,9 +327,9 @@ namespace USE_ExperimentTemplate_Trial
 
 
                 //Set stimulate to false, then individual tasks trial levels can set to try if conditions warrant it
-                StimulateDuringTrial = false;
-
-                StimulatedDuringThisTrial = false;
+                CanStimulateThisTrial = false;
+                StimulatedThisTrial = false;
+                StimulateOnCurrentObject = false;
 
                 ChoiceFailed_Trial = false;
 

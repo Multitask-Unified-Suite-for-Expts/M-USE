@@ -214,7 +214,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TrialStim = null;
             }
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
 
             if(SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
@@ -475,7 +475,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 TotalTouches_Block++;
                 CurrentTaskLevel.Touches_Task++;
                 SetTrialSummaryString();
-                CurrentTaskLevel.CalculateBlockSummaryString();
+                CurrentTaskLevel.SetBlockSummaryString();
                 CurrentTaskLevel.SetTaskSummaryString();
             }
 
@@ -668,7 +668,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         DeactivateGameObjects();
 
         if (AbortCode == 0) //Normal
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         else
         {
             CurrentTaskLevel.NumAbortedTrials_InBlock++;

@@ -414,24 +414,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    public IEnumerator StimulationCoroutine()
-    {
-        if (StimulatedThisTrial)
-            yield break;
-
-        StimulatedThisTrial = true;
-
-        yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
-
-        if(Session.SyncBoxController != null)
-        {
-            StartCoroutine(Session.SyncBoxController.SendSonication());
-            StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
-            CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
-            CurrentTaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
-        }
-    }
-
     public override void OnTokenBarFull()
     {
         NumTokenBarFull_InBlock++;

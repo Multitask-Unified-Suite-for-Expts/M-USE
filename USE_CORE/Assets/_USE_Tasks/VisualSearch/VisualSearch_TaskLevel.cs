@@ -41,8 +41,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumCorrect_InTask;
     [HideInInspector] public int NumErrors_InTask;
     [HideInInspector] public List<float?> SearchDurations_InTask = new List<float?>();
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
     [HideInInspector] public int BlockStringsAdded;
 
     public List<VisualSearch_TrialDataSummary> AllTrialDataSummaries = new List<VisualSearch_TrialDataSummary>();
@@ -55,7 +53,6 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         vsTL = (VisualSearch_TrialLevel)TrialLevel;
         //vsTD = (VisualSearch_TrialDef)vsTL.GetCurrentTrialDef<VisualSearch_TrialDef>();
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -107,7 +104,7 @@ public class VisualSearch_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public void SetBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +

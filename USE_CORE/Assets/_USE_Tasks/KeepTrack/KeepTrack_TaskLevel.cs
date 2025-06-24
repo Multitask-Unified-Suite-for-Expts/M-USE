@@ -11,9 +11,6 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
     KeepTrack_BlockDef CurrentBlock => GetCurrentBlockDef<KeepTrack_BlockDef>();
     KeepTrack_TrialLevel trialLevel;
 
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public int BlockStringsAdded = 0;
-
     //DATA
     [HideInInspector] public int TrialsCompleted_Task = 0;
     [HideInInspector] public int SuccessfulTargetSelections_Task = 0;
@@ -47,10 +44,8 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);
             trialLevel.ResetBlockVariables();
-            CalculateBlockSummaryString();
+            SetBlockSummaryString();
         });
-
-        BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
     }
 
 
@@ -60,7 +55,7 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         return customSettings;
     }
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
 
@@ -133,15 +128,6 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("SliderBarCompletions", () => trialLevel.SliderBarCompletions_Block);
     }
 
-    private void HandleBlockStrings()
-    {
-        if (!Session.WebBuild)
-        {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-        }
-    }
 
     public void ClearStrings()
     {

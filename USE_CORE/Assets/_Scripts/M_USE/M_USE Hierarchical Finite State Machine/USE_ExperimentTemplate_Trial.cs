@@ -486,6 +486,31 @@ namespace USE_ExperimentTemplate_Trial
 
         }
 
+        public IEnumerator StimulationCoroutine()
+        {
+            if (StimulatedThisTrial)
+            {
+                Debug.LogWarning("ALREADY STIMULATED");
+                yield break;
+            }
+
+            StimulateOnCurrentObject = false; // Reset immedietely
+            StimulatedThisTrial = true;
+
+            yield return new WaitForSeconds(TrialDefs[CurrentTrialDefIndex].StimulationDelayDuration);
+
+            Debug.LogWarning("ABOUT TO TRIGGER SONICATION");
+
+            if (Session.SyncBoxController != null)
+            {
+                StartCoroutine(Session.SyncBoxController.SendSonication());
+                StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
+                TaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
+                TaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
+            }
+        }
+
+
 
         private IEnumerator WaitForTransitionFromGazeCalibrationToTask()
         {

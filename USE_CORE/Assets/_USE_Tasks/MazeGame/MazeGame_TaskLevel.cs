@@ -86,9 +86,6 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
     
     // Block Summary String Variables
     [HideInInspector] public string BlockAveragesString;
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
-    private int blocksAdded = 0;
     public MazeGame_BlockDef mgBD => GetCurrentBlockDef<MazeGame_BlockDef>();
     private MazeGame_TaskDef currentTaskDef => GetTaskDef<MazeGame_TaskDef>();
     private MazeGame_TrialLevel mgTL;
@@ -111,10 +108,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         
         BlockAveragesString = "";
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
 
-
-        blocksAdded = 0;
         //LoadMazeDef();
 
         RunBlock.AddSpecificInitializationMethod(() =>
@@ -133,7 +127,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
             mgTL.MazeManager.LoadTextMaze(mgBD);
             //StartCoroutine(LoadTextMaze()); // need currMaze here to set all the arrays
 
-            CalculateBlockSummaryString();
+            SetBlockSummaryString();
             ResetBlockVariables();
             blockDataSummary = new MazeGame_BlockDataSummary();
 
@@ -226,7 +220,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
         ChoiceDurations_InBlock.Clear();
         mgTL.runningPercentError.Clear();
     }
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
         float? latestPercentError = null;
@@ -252,8 +246,7 @@ public class MazeGame_TaskLevel : ControlLevel_Task_Template
                              String.Format("{0:0.00}", CalculateAverageDuration(MazeDurations_InBlock));
         
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        if (PreviousBlocksString.Length > 0)
-            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());
+
     }
     private string CreateBlockSummaryDataString(MazeGame_BlockDataSummary blockSummary)
     {

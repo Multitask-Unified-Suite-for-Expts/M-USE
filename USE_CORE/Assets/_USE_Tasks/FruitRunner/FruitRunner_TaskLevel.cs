@@ -8,9 +8,6 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
     FruitRunner_BlockDef CurrentBlock => GetCurrentBlockDef<FruitRunner_BlockDef>();
     FruitRunner_TrialLevel trialLevel;
 
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public int BlockStringsAdded = 0;
-
     [HideInInspector] public int TargetsHit_Task;
     [HideInInspector] public int TargetsMissed_Task;
     [HideInInspector] public int DistractorsHit_Task;
@@ -42,12 +39,11 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
             SetTrialFogStrength();
             trialLevel.ResetBlockVariables();
             SetSkyBox(CurrentBlock.ContextName);
-            CalculateBlockSummaryString();
+            SetBlockSummaryString();
         });
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             Camera.main.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
-            HandleBlockStrings();
         });
     }
 
@@ -85,7 +81,7 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
     }
 
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
 
@@ -107,15 +103,6 @@ public class FruitRunner_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("BlockadesAvoided", () => trialLevel.BlockadesAvoided_Block);
     }
 
-    private void HandleBlockStrings()
-    {
-        if (!Session.WebBuild)
-        {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-        }
-    }
 
     public void ClearStrings()
     {

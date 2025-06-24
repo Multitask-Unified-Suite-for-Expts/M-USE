@@ -13,9 +13,6 @@ public class AudioVisual_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int TrialsCorrect_Task;
     [HideInInspector] public int TokenBarCompletions_Task;
 
-    [HideInInspector] public string CurrentBlockString;
-    public int blocksAdded;
-
 
 
     public override void DefineControlLevel()
@@ -24,7 +21,6 @@ public class AudioVisual_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = "";
         DefineBlockData();
-        blocksAdded = 0;
 
         Session.HumanStartPanel.AddTaskDisplayName(TaskName, "Audio Visual");
         Session.HumanStartPanel.AddTaskInstructions(TaskName, "Select the correct object based on the sound frequency you hear!");
@@ -32,20 +28,9 @@ public class AudioVisual_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             SetSkyBox(CurrentBlock.ContextName.Trim());
-            CalculateBlockSummaryString();
+            SetBlockSummaryString();
             trialLevel.ResetBlockVariables();
         });
-
-        BlockFeedback.AddSpecificInitializationMethod(() =>
-        {
-            if (!Session.WebBuild && trialLevel.AbortCode == 0)
-            {
-                CurrentBlockString += "\n" + "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                blocksAdded++;
-            }
-        });
-
     }
 
 
@@ -89,7 +74,7 @@ public class AudioVisual_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("TimeToCompletion", () => trialLevel.TimeToCompletion_Block);
     }
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         CurrentBlockString = "";
         CurrentBlockSummaryString.Clear();
@@ -101,8 +86,6 @@ public class AudioVisual_TaskLevel : ControlLevel_Task_Template
                 "\nTimeToCompletion: " + trialLevel.TimeToCompletion_Block.ToString("0.00") + "s" +
                 "\nReward Pulses: " + NumRewardPulses_InBlock;
 
-        if (blocksAdded > 1)
-            CurrentBlockString += "\n";
 
         ////Add CurrentBlockString if block wasn't aborted:
         if (trialLevel.AbortCode == 0)

@@ -43,9 +43,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumErrors_InTask = 0;
     [HideInInspector] public List<float?> SearchDurations_InTask = new List<float?>();
     
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public StringBuilder PreviousBlocksString;
-    [HideInInspector] public int BlockStringsAdded = 0;
     FlexLearning_BlockDef flBD => GetCurrentBlockDef<FlexLearning_BlockDef>();
     FlexLearning_TrialLevel flTL;
 
@@ -56,7 +53,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         flTL = (FlexLearning_TrialLevel)TrialLevel;
         
         CurrentBlockString = "";
-        PreviousBlocksString = new StringBuilder();
         
         Add_ControlLevel_InitializationMethod(() =>
         {
@@ -78,16 +74,6 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
             flTL.TokenFBController.SetTotalTokensNum(flBD.TokenBarCapacity);
             flTL.TokenFBController.SetTokenBarValue(flBD.NumInitialTokens);
             SetBlockSummaryString();
-        });
-        BlockFeedback.AddSpecificInitializationMethod(() =>
-        {
-            if(!Session.WebBuild)
-            {
-                if (BlockStringsAdded > 0)
-                    CurrentBlockString += "\n";
-                BlockStringsAdded++;
-                PreviousBlocksString.Insert(0, CurrentBlockString);
-            }
         });
         AssignBlockData();
     }
@@ -145,7 +131,7 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public void SetBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("Max Trials in Block: " + MaxTrials_InBlock +
@@ -157,11 +143,9 @@ public class FlexLearning_TaskLevel : ControlLevel_Task_Template
                                       "\nTotal Tokens Collected: " + flTL.TotalTokensCollected_InBlock +
                                       "\nStimulationPulsesGiven: " + flTL.StimulationPulsesGiven_Block);
 
-
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
-        /*if (PreviousBlocksString.Length > 0)
-            CurrentBlockSummaryString.AppendLine(PreviousBlocksString.ToString());*/
     }
+
     public override void SetTaskSummaryString()
     {
         CurrentTaskSummaryString.Clear();

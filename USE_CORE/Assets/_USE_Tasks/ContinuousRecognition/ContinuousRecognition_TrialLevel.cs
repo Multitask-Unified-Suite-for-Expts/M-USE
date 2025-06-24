@@ -217,7 +217,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
 
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
@@ -570,23 +570,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
 
     //HELPER FUNCTIONS --------------------------------------------------------------------------------------------------------------------
-    public IEnumerator StimulationCoroutine()
-    {
-        if (StimulatedThisTrial)
-            yield break;
-
-        StimulatedThisTrial = true;
-
-        yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
-
-        if(Session.SyncBoxController != null)
-        {
-            StartCoroutine(Session.SyncBoxController.SendSonication());
-            StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
-            CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
-            CurrentTaskLevel.CalculateBlockSummaryString(); //update exp display after incrementing data
-        }
-    }
 
     public override void FinishTrialCleanup()
     {
@@ -618,7 +601,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TrialsCorrect_Task++;
             }
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         }
         else
         {

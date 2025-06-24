@@ -435,7 +435,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
         {
             //TrialCompletions_Block++;
             //CurrentTaskLevel.TrialsCompleted_Task++;
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         }
         else
         {

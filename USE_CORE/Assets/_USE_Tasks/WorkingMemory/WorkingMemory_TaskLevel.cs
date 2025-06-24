@@ -87,7 +87,7 @@ public class WorkingMemory_TaskLevel : ControlLevel_Task_Template
     }
 
 
-    public void SetBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         CurrentBlockSummaryString.Clear();
         float avgBlockSearchDuration = 0;

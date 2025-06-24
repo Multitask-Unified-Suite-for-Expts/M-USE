@@ -38,9 +38,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
     AntiSaccade_BlockDef CurrentBlock => GetCurrentBlockDef<AntiSaccade_BlockDef>();
     AntiSaccade_TrialLevel trialLevel;
 
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public int BlockStringsAdded = 0;
-
     //Task Values used for SummaryData file
     [HideInInspector] public int TrialsCompleted_Task = 0;
     [HideInInspector] public int TrialsCorrect_Task = 0;
@@ -75,7 +72,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockFeedback.AddSpecificInitializationMethod(() =>
         {
             AddToThresholdCategory();
-            HandleBlockStrings();
         });
 
     }
@@ -100,16 +96,6 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
             Debug.LogWarning("BlockName includes neither AS nor PS!");
     }
     
-    private void HandleBlockStrings()
-    {
-        if (!Session.WebBuild)
-        {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-        }
-    }
-
     
     public override OrderedDictionary GetTaskSummaryData()
     {
@@ -149,7 +135,7 @@ public class AntiSaccade_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("StdDevReactionTime", () => CalculateStdDevDuration(trialLevel.ReactionTimes_InBlock));
     }
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
 

@@ -553,7 +553,7 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
                 TrialsCorrect_Block++;
                 CurrentTaskLevel.TrialsCorrect_Task++;
             }
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         }
         else
         {

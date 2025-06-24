@@ -165,7 +165,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             LoadConfigUIVariables();
             SetSquareSizeAndPosition();
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
 
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
@@ -452,7 +452,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
         {
             SquareGO.SetActive(false);
             UpdateData();
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
            // CheckIfBlockShouldEnd();
             ConfigValuesChangedInPrevTrial = ConfigValuesChanged();
         });

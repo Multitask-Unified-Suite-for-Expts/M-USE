@@ -193,7 +193,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SliderGO.SetActive(true);
 
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
             SetTrialSummaryString();
         });
         ChooseTile.AddSpecificInitializationMethod(() =>
@@ -357,7 +357,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
 
             SetTrialSummaryString(); //Set the Trial Summary String to reflect the results of choice
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
             CurrentTaskLevel.SetTaskSummaryString();
             
             MazeManager.ResetSelectionClassifications();
@@ -645,7 +645,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = false;
 
         if (AbortCode == 0)
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         else
         {
             CurrentTaskLevel.NumAbortedTrials_InBlock++;

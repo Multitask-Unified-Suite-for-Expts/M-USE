@@ -140,7 +140,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
 
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
@@ -363,7 +363,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.TrialsCorrect_Task++;
             }
 
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         }
         else
         {

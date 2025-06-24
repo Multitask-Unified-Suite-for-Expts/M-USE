@@ -47,8 +47,6 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
     [HideInInspector] public int NumSameEffortChosen_Task = 0;
     [HideInInspector] public List<float?> InflationDurations_Task = new List<float?>();
 
-    [HideInInspector] public string CurrentBlockString;
-    [HideInInspector] public int BlockStringsAdded = 0;
     [HideInInspector] public EffortControl_BlockDef CurrentBlock => GetCurrentBlockDef<EffortControl_BlockDef>();
     EffortControl_TrialLevel trialLevel;
 
@@ -67,20 +65,9 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
             SetSkyBox(CurrentBlock.ContextName);
             trialLevel.ResetBlockVariables();
         });
-
-        BlockFeedback.AddSpecificInitializationMethod(() => HandleBlockStrings());
     }
 
 
-    private void HandleBlockStrings()
-    {
-        if (!Session.WebBuild)
-        {
-            if (BlockStringsAdded > 0)
-                CurrentBlockString += "\n";
-            BlockStringsAdded++;
-        }
-    }
 
     public override OrderedDictionary GetTaskSummaryData()
     {
@@ -113,7 +100,7 @@ public class EffortControl_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
         CurrentBlockString = ("\nTouches: " + trialLevel.TotalTouches_Block +

@@ -53,10 +53,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     [HideInInspector] public Dictionary<int, PerceptualInterferance_BlockData> PerceptualInterference_Task; //access its index for that Score's data
 
-    [HideInInspector] public string CurrentBlockString;
-
-    public int blocksAdded;
-
     //Data for Task Summary at end of session:
     [HideInInspector] public int LongestStreak = 0;
     [HideInInspector] public float AverageStreak = 0f;
@@ -71,7 +67,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = "";
         DefineBlockData();
-        blocksAdded = 0;
 
         RunBlock.AddSpecificInitializationMethod(() =>
         {
@@ -80,7 +75,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
             trialLevel.TokenFBController.SetTotalTokensNum(CurrentBlock.TokenBarCapacity);
             trialLevel.TokenFBController.SetTokenBarValue(CurrentBlock.NumInitialTokens);
             trialLevel.ResetBlockVariables();
-            CalculateBlockSummaryString();
+            SetBlockSummaryString();
 
             //SET STIMULATION CODE FOR THE BLOCK:
             if (currentBlockDef.StimulationConditionCodes != null && currentBlockDef.StimulationConditionCodes.Length > 0)
@@ -104,14 +99,6 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
             //Similarity Data:
             AddSimilarityScoreBlockData();
-
-
-            if(!Session.WebBuild && trialLevel.AbortCode == 0)
-            {
-                CurrentBlockString += "\n";
-                CurrentBlockString = CurrentBlockString.Replace("Current Block", $"Block {blocksAdded + 1}");
-                blocksAdded++;     
-            }
         });        
     }
 
@@ -216,7 +203,7 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
 
     }
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         CurrentBlockString = "";
         CurrentBlockSummaryString.Clear();
@@ -230,15 +217,11 @@ public class ContinuousRecognition_TaskLevel : ControlLevel_Task_Template
                 "\nNonStimTouches: " + trialLevel.NonStimTouches_Block +
                 "\nStimulationPulsesGiven: " + trialLevel.StimulationPulsesGiven_Block;
 
-
         if (BlockStimulationCode > 0)
         {
             CurrentBlockString += "\nStimulationCode: " + BlockStimulationCode.ToString();
             CurrentBlockString += "\nStimulationType: " + currentBlockDef.StimulationType.ToString();
         }
-
-        if (blocksAdded > 1)
-            CurrentBlockString += "\n";
 
         //Add CurrentBlockString if block wasn't aborted:
         if (trialLevel.AbortCode == 0)

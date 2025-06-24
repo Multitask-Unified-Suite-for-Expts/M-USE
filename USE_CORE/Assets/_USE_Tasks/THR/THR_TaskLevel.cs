@@ -60,7 +60,7 @@ public class THR_TaskLevel : ControlLevel_Task_Template
             MinTrials_InBlock = CurrentBlock.MinTrials;
             MaxTrials_InBlock = CurrentBlock.MaxTrials;
             trialLevel.ResetBlockVariables();
-            CalculateBlockSummaryString();
+            SetBlockSummaryString();
         });
     }
 
@@ -93,13 +93,13 @@ public class THR_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public void CalculateBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         CurrentBlockSummaryString.Clear();
 
-        CurrentBlockSummaryString.AppendLine("<b>\nMin Trials in Block: </b>" + MinTrials_InBlock +
-                             "<b>\nMax Trials in Block: </b>" + MaxTrials_InBlock +
-                                "<b>\n\nBlock Name: " + CurrentBlock.BlockName + "</b>" +
+        CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +
+                             "\nMax Trials in Block: " + MaxTrials_InBlock +
+                                "\nBlock Name: " + CurrentBlock.BlockName  +
                         "\nTrials Correct: " + trialLevel.TrialsCorrect_Block + 
                         "\nReleased Early: " + trialLevel.NumReleasedEarly_Block +
                         "\nReleased Late: " + trialLevel.NumReleasedLate_Block +

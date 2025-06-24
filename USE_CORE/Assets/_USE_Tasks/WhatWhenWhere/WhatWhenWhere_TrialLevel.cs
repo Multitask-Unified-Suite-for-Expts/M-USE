@@ -556,31 +556,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
 
 
-    public IEnumerator StimulationCoroutine()
-    {
-        if (StimulatedThisTrial)
-        {
-            Debug.LogWarning("ALREADY STIMULATED");
-            yield break;
-        }
-
-        StimulateOnCurrentObject = false; // Reset immedietely
-
-        StimulatedThisTrial = true;
-
-        Debug.Log("STIMULATION ABOUT TO BE TRIGGERED AFTER DELAY");
-
-        yield return new WaitForSeconds(CurrentTrial.StimulationDelayDuration);
-
-        if (Session.SyncBoxController != null)
-        {
-            StartCoroutine(Session.SyncBoxController.SendSonication());
-            StimulationPulsesGiven_Block += Session.SessionDef.StimulationNumPulses;
-            CurrentTaskLevel.StimulationPulsesGiven_Task += Session.SessionDef.StimulationNumPulses;
-            CurrentTaskLevel.SetBlockSummaryString(); //update exp display after incrementing data
-        }
-    }
-
     private void HandleCompletedSequence()
     {
         runningAcc.Add(1);

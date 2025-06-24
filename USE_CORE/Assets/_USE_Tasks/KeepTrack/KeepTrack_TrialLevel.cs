@@ -248,7 +248,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorSelection"]);
                     }
 
-                    CurrentTaskLevel.CalculateBlockSummaryString(); //update data on Exp Display
+                    CurrentTaskLevel.SetBlockSummaryString(); //update data on Exp Display
 
                     if(ChosenObject.CurrentCycle.firstIntervalStarted && !ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
                     {
@@ -305,7 +305,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     {
         TargetAnimsWithoutSelection_Block++;
         CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
-        CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
+        CurrentTaskLevel.SetBlockSummaryString(); //update data on exp display
         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetAnimWithoutSelection"]);
         Session.EventCodeManager.SendCodeThisFrame("NoChoice");
 
@@ -314,7 +314,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     {
         DistractorRejections_Block++;
         CurrentTaskLevel.DistractorRejections_Task++;
-        CurrentTaskLevel.CalculateBlockSummaryString(); //update data on exp display
+        CurrentTaskLevel.SetBlockSummaryString(); //update data on exp display
         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorRejection"]);
 
     }
@@ -351,7 +351,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         {
             TrialCompletions_Block++;
             CurrentTaskLevel.TrialsCompleted_Task++;
-            CurrentTaskLevel.CalculateBlockSummaryString();
+            CurrentTaskLevel.SetBlockSummaryString();
         }
         else
         {

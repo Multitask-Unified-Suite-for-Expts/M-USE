@@ -79,6 +79,8 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
 
     // Block Summary String Variables
     [HideInInspector] public string BlockAveragesString;
+
+
     public override void DefineControlLevel()
     {
         wwwTL = (WhatWhenWhere_TrialLevel)TrialLevel;
@@ -160,7 +162,7 @@ public class WhatWhenWhere_TaskLevel : ControlLevel_Task_Template
         return data;
     }
 
-    public void SetBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         ClearStrings();
         CurrentBlockSummaryString.AppendLine("\nMin Trials in Block: " + MinTrials_InBlock +

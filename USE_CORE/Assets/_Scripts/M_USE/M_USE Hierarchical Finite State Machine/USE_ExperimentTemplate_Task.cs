@@ -93,6 +93,9 @@ namespace USE_ExperimentTemplate_Task
         [HideInInspector]
         public StringBuilder CurrentBlockSummaryString, CurrentTaskSummaryString, PreviousBlockSummaryString;
 
+        [HideInInspector] public string CurrentBlockString;
+
+
         public GameObject TaskDirectionalLight;
 
         private int TaskStringsAdded = 0;
@@ -473,6 +476,8 @@ namespace USE_ExperimentTemplate_Task
 
             TaskLevelDefined = true;
         }
+
+
         public bool CheckForcedTaskEnd()
         {
             if (ForceTaskEnd)
@@ -481,6 +486,12 @@ namespace USE_ExperimentTemplate_Task
                 return true;
             }
             return false;
+        }
+
+
+        public virtual void SetBlockSummaryString()
+        {
+
         }
 
 

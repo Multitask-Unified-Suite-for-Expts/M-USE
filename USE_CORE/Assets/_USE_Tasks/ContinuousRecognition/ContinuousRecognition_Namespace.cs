@@ -42,14 +42,13 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_BlockDef : BlockDef
     {
         //FROM BLOCK CONFIG:
+        public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public int SliderChange;
-        public float ItiDuration;
         public int[] BlockStimIndices;
+        public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
         public int[] NumObjectsMinMax;
         public float[] X_Locations;
         public float[] Y_Locations;
-        public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
-        public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
         public float slopeOfRewardIncreaseOverTrials;
 
         //Calculated below (DONT SET IN CONFIG!!!):
@@ -152,13 +151,14 @@ namespace ContinuousRecognition_Namespace
     public class ContinuousRecognition_TrialDef : TrialDef
     {
         //FROM BLOCK CONFIG & PASSED:
+        public bool ShakeStim, FindAllStim, UseStarfield;
         public int SliderChange;
         public float ItiDuration;
         public int[] BlockStimIndices;
         public int[] NumObjectsMinMax;
+
         public float[] X_FbLocations = new float[] {-3f, -1.8f, -.6f, .6f, 1.8f, 3f};
         public float[] Y_FbLocations = new float[] {2.1f, 1.05f, 0f, -1.05f, -2.1f};
-        public bool ShakeStim, FindAllStim, UseStarfield;
         public float slopeOfRewardIncreaseOverTrials;
 
         //Not in block config BUT STILL PASSED DOWN:

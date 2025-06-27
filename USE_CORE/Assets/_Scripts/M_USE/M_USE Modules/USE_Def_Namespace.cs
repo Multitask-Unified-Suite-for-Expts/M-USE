@@ -246,21 +246,6 @@ namespace USE_Def_Namespace
         public string ExternalStimFolderPath;
 
         /// <summary>
-        /// File extension used for the external stimuli.
-        /// </summary>
-        public string ExternalStimExtension;
-
-        /// <summary>
-        /// A list of feature names associated with the task.
-        /// </summary>
-        public List<string[]> FeatureNames;
-
-        /// <summary>
-        /// Name of the neutral patterned color.
-        /// </summary>
-        public string NeutralPatternedColorName;
-
-        /// <summary>
         /// Scale applied to the external stimuli.
         /// </summary>
         public float? ExternalStimScale;
@@ -279,21 +264,6 @@ namespace USE_Def_Namespace
         /// Total number of tokens in the token bar. Default is 5.
         /// </summary>
         public int TotalTokensNum = 5;
-
-        /// <summary>
-        /// Indicates if the reward pulses are active.
-        /// </summary>
-        public bool RewardPulsesActive;
-
-        /// <summary>
-        /// Represents the type of selection method being used.
-        /// </summary>
-        public string SelectionType;
-
-        /// <summary>
-        /// Custom settings defined as key-value pairs.
-        /// </summary>
-        public Dictionary<string, string> CustomSettings;
 
         /// <summary>
         /// Position of the start button. Default is (0,0,0).
@@ -325,8 +295,6 @@ namespace USE_Def_Namespace
         /// </summary>
         public bool NeutralITI;
         
-        public string TrialDefSelectionStyle;
-
         /// <summary>
         /// The Task's Directional Light Intensity.
         /// </summary>
@@ -339,7 +307,7 @@ namespace USE_Def_Namespace
 
 
         /// <summary>
-        /// 3D Shotgun Radius in Pixels
+        /// Shotgun Radius in Pixels for the task
         /// </summary>
         public int ShotgunRadius_Pixels = 50;
 
@@ -513,6 +481,19 @@ namespace USE_Def_Namespace
         public int[][] ObjectsToStimulateOn;
 
 
+        public int PosStep;
+        public int NegStep;
+
+        public string TrialDefSelectionStyle;
+        public int MaxDiffLevel;
+        public int AvgDiffLevel;
+        public int DiffLevelJitter;
+        public int NumReversalsUntilTerm = -1;
+        public int MinTrialsBeforeTermProcedure = -1;
+        public int TerminationWindowSize = -1;
+        public float[] RandomMinTrialDuration;
+        public float? MinTrialDuration;
+
 
 
 
@@ -580,11 +561,6 @@ namespace USE_Def_Namespace
         /// Unique identifier for a trial.
         /// </summary>
         public string TrialID;
-
-        /// <summary>
-        /// Object representing the stimuli associated with the trial.
-        /// </summary>
-        public TrialStims TrialStims;
 
         /// <summary>
         /// Indicates the type of block end condition.
@@ -711,13 +687,23 @@ namespace USE_Def_Namespace
         /// </summary>
         public int[][] ObjectsToStimulateOn;
 
-
-
         public int DifficultyLevel;
-        public int posStep;
-        public int numTrialsBeforePosStep;
-        public int negStep;
-        public int numTrialsBeforeNegStep;
+
+
+        public int NumTrialsBeforePosStep;
+        public int NumTrialsBeforeNegStep;
+        public int PosStep;
+        public int NegStep;
+
+        public string TrialDefSelectionStyle;
+        public int MaxDiffLevel;
+        public int AvgDiffLevel;
+        public int DiffLevelJitter;
+        public int NumReversalsUntilTerm;
+        public int MinTrialsBeforeTermProcedure;
+        public int TerminationWindowSize;
+        public float[] RandomMinTrialDuration;
+        public float? MinTrialDuration;
     }
 
 }

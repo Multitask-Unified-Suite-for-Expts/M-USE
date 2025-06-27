@@ -46,18 +46,8 @@ namespace EffortControl_Namespace
         public int PulseSizeLeft;
         public int PulseSizeRight;
         public int ClicksPerOutline;
+
         public bool TokensInMiddleOfOutlines;
-        public int PosStep;
-        public int NegStep;
-        public string TrialDefSelectionStyle;
-        public int MaxDiffLevel;
-        public int AvgDiffLevel;
-        public int DiffLevelJitter;
-        public int NumReversalsUntilTerm = -1;
-        public int MinTrialsBeforeTermProcedure = -1;
-        public int TerminationWindowSize = -1;
-        public float[] RandomMinTrialDuration;
-        public float? MinTrialDuration;
         
 
         public override void GenerateTrialDefsFromBlockDef()
@@ -145,17 +135,8 @@ namespace EffortControl_Namespace
         public int PulseSizeRight;
         public int ClicksPerOutline;
         public bool TokensInMiddleOfOutlines;
-        public int PosStep;
-        public int NegStep;
-        public string TrialDefSelectionStyle;
-        public int MaxDiffLevel;
-        public int AvgDiffLevel;
-        public int DiffLevelJitter;
-        public int NumReversalsUntilTerm;
-        public int MinTrialsBeforeTermProcedure;
-        public int TerminationWindowSize;
-        public float[] RandomMinTrialDuration;
-        public float? MinTrialDuration;
+
+
     }
 
     public class EffortControl_StimDef : StimDef

@@ -151,8 +151,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //SET AND SEND STIMULATION CODE FOR THE TRIAL:
+            CanStimulateThisTrial = false;
             if (CurrentTrial.StimulationConditionCodes != null && CurrentTrial.StimulationConditionCodes.Length > 0)
             {
+                CanStimulateThisTrial = true;
+
                 int randomIndex = Random.Range(0, CurrentTrial.StimulationConditionCodes.Length);
                 TrialStimulationCode = CurrentTrial.StimulationConditionCodes[randomIndex];
                 Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);

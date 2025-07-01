@@ -128,6 +128,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             //SET AND SEND STIMULATION CODE FOR THE TRIAL:
+            CanStimulateThisTrial = false;
             if (CurrentTrial.StimulationConditionCodes != null && CurrentTrial.StimulationConditionCodes.Length > 0)
             {
                 CanStimulateThisTrial = true;

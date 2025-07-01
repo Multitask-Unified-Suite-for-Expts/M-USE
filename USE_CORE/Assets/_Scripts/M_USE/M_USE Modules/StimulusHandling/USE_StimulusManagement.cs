@@ -43,9 +43,13 @@ namespace USE_StimulusManagement
 {
 	public class StimDef
 	{
+		//variables set in task's StimDef files:
+		public int StimIndex;
+		public string FileName;
+
+
 		public Dictionary<string, StimGroup> StimGroups; //stimulus type field (e.g. sample/target/irrelevant/etc)
 		public string StimName;
-		public string FileName; //name of file
 		public string StimFolderPath;
 
 		public string StimFilePath
@@ -102,7 +106,6 @@ namespace USE_StimulusManagement
 
 		public string StimExtension;
 		public int StimCode; //optional, for analysis purposes
-		public int StimIndex;
 		public string StimID;
 		[System.NonSerialized] public GameObject StimGameObject; //not in config, generated at runtime
 		public GameObject CanvasGameObject;

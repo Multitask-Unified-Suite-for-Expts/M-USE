@@ -326,7 +326,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             StimulateOnCurrentObject = false;
 
-            if (CanStimulateThisTrial && CurrentTrial.TrialsToStimulateOn != null)
+            if (CanStimulateThisTrial)
             {
                 int index = Array.IndexOf(CurrentTrial.TrialsToStimulateOn, TrialCount_InBlock + 1);
                 int[] trialObjectsToStimOn = CurrentTrial.ObjectsToStimulateOn[index];

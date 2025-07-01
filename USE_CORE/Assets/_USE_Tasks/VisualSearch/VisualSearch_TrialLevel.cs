@@ -130,6 +130,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             //SET AND SEND STIMULATION CODE FOR THE TRIAL:
             if (CurrentTrial.StimulationConditionCodes != null && CurrentTrial.StimulationConditionCodes.Length > 0)
             {
+                CanStimulateThisTrial = true;
+
                 int randomIndex = Random.Range(0, CurrentTrial.StimulationConditionCodes.Length);
                 TrialStimulationCode = CurrentTrial.StimulationConditionCodes[randomIndex];
                 Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
@@ -220,7 +222,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
 
             if (OngoingSelection != null)
             {
-                if (!StimulatedThisTrial && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
+                if (CanStimulateThisTrial && !StimulatedThisTrial)
                 {
                     if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
                     {

@@ -42,6 +42,7 @@ namespace VisualSearch_Namespace
         public bool RandomizedLocations;
         public bool TokensWithStimOn;
         public float? FeatureSimilarity;
+
         public override void GenerateTrialDefsFromBlockDef()
         {
             //pick # of trials from minmax
@@ -77,6 +78,7 @@ namespace VisualSearch_Namespace
                 TrialDefs.Add(td);
             }
         }
+
         public override void AddToTrialDefsFromBlockDef()
         {
             MaxTrials = TrialDefs.Count;
@@ -102,13 +104,13 @@ namespace VisualSearch_Namespace
 
     public class VisualSearch_TrialDef : TrialDef
     {
-        public int[] TrialStimIndices;
         public Vector3[] TrialStimLocations;
+        public int[] TrialStimIndices;
         public int[] TrialStimTokenReward;
         public Reward[][] ProbabilisticTrialStimTokenReward;
         public Reward[] ProbablisticNumPulses;
-        public bool TokensWithStimOn;
         public bool RandomizedLocations;
+        public bool TokensWithStimOn;
         public float? FeatureSimilarity;
     }
 

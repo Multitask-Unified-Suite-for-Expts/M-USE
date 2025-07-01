@@ -104,9 +104,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public int PreSearch_TouchFbErrorCount;
 
 
-    private string StimulationType;
-
-
 
     public override void DefineControlLevel()
     {
@@ -153,7 +150,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
-            //SET AND SEND STIMULATION CODE FOR THE BLOCK:
+            //SET AND SEND STIMULATION CODE FOR THE TRIAL:
             if (CurrentTrial.StimulationConditionCodes != null && CurrentTrial.StimulationConditionCodes.Length > 0)
             {
                 int randomIndex = Random.Range(0, CurrentTrial.StimulationConditionCodes.Length);
@@ -232,12 +229,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
-            if (CurrentTrial.StimulationType != null)
-                StimulationType = CurrentTrial.StimulationType.Trim();
-            else
-                StimulationType = null;
-
-
             ChoiceFailed_Trial = false;
 
             if (SelectionHandler.AllChoices.Count > 0)
@@ -253,7 +244,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             if (OngoingSelection != null)
             {
-                if (!StimulatedThisTrial && !string.IsNullOrEmpty(StimulationType))
+                if (!StimulatedThisTrial && !string.IsNullOrEmpty(CurrentTrial.StimulationType))
                 {
                     if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
                     {
@@ -262,11 +253,11 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
                         if (SdSelected != null)
                         {
-                            if (StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
+                            if (CurrentTrial.StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
                             {
                                 StartCoroutine(StimulationCoroutine());
                             }
-                            else if (StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
+                            else if (CurrentTrial.StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
                             {
                                 StartCoroutine(StimulationCoroutine());
                             }

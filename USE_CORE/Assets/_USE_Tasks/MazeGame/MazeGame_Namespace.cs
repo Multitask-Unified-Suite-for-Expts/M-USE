@@ -34,20 +34,19 @@ namespace MazeGame_Namespace
     public class MazeGame_TaskDef : TaskDef
     {
         public Vector3 MazePosition;
+        public string MazeBackgroundTexture;
+        public float SpaceBetweenTiles;
         public float TileSize;
         public string TileTexture;
-        public int NumBlinks;
-
-        public float[] DefaultTileColor;
         public float[] StartColor;
         public float[] FinishColor;
         public float[] CorrectColor;
         public float[] LastCorrectColor;
         public float[] IncorrectRuleAbidingColor;
         public float[] IncorrectRuleBreakingColor;
+        public int NumBlinks;
         public bool UsingFixedRatioReward;
-        public string MazeBackgroundTexture;
-        public float SpaceBetweenTiles;
+        public float[] DefaultTileColor;
     }
 
     public class MazeGame_BlockDef : BlockDef

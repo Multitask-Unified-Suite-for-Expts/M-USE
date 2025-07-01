@@ -39,16 +39,7 @@ namespace AntiSaccade_Namespace
 
     public class AntiSaccade_BlockDef : BlockDef
     {
-        public int PosStep;
-        public int NegStep;
-        public string TrialDefSelectionStyle;
-        public int MaxDiffLevel;
-        public int AvgDiffLevel;
-        public int DiffLevelJitter;
-        public int NumReversalsUntilTerm = -1;
-        public int MinTrialsBeforeTermProcedure = -1;
         public int MaxTrialsInBlock = -1;
-        public int TerminationWindowSize = -1;
         
         public override void GenerateTrialDefsFromBlockDef()
         {
@@ -124,16 +115,8 @@ namespace AntiSaccade_Namespace
         public float ChooseStimDuration;
         public float FeedbackDuration;
         public float ItiDuration;
-        public int PosStep;
-        public int NegStep;
-        public string TrialDefSelectionStyle;
-        public int MaxDiffLevel;
-        public int AvgDiffLevel;
-        public int DiffLevelJitter;
-        public int NumReversalsUntilTerm;
-        public int MinTrialsBeforeTermProcedure;
+
         public int MaxTrialsInBlock;
-        public int TerminationWindowSize;
     }
 
     public class AntiSaccade_StimDef : StimDef

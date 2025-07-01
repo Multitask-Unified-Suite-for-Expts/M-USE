@@ -44,6 +44,7 @@ namespace ContinuousRecognition_Namespace
         //FROM BLOCK CONFIG:
         public bool ShakeStim, FindAllStim, UseStarfield, ManuallySpecifyLocation;
         public int SliderChange;
+        public float ItiDuration;
         public int[] BlockStimIndices;
         public Vector3[] BlockStimLocations; //Empty unless they specify locations in block config (and set ManuallySpecifyLocation to true)
         public int[] NumObjectsMinMax;

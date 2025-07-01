@@ -29,6 +29,7 @@ using UnityEngine;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
+using VisualSearch_Namespace;
 using WorkingMemory_Namespace;
 using static SelectionTracking.SelectionTracker;
 
@@ -139,6 +140,17 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
+            //SET AND SEND STIMULATION CODE FOR THE TRIAL:
+            if (CurrentTrial.StimulationConditionCodes != null && CurrentTrial.StimulationConditionCodes.Length > 0)
+            {
+                CanStimulateThisTrial = true;
+
+                int randomIndex = Random.Range(0, CurrentTrial.StimulationConditionCodes.Length);
+                TrialStimulationCode = CurrentTrial.StimulationConditionCodes[randomIndex];
+                Session.EventCodeManager.SendRangeCodeThisFrame("StimulationCondition", TrialStimulationCode);
+            }
+
+
             //Set the Stimuli Light/Shadow settings
             SetShadowType(CurrentTask.ShadowType, "WorkingMemory_DirectionalLight");
             if (CurrentTask.StimFacingCamera)
@@ -235,6 +247,33 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         });
         SearchDisplay.AddUpdateMethod(() =>
         {
+            OngoingSelection = SelectionHandler.OngoingSelection;
+
+            if (OngoingSelection != null)
+            {
+                if (CanStimulateThisTrial && !StimulatedThisTrial)
+                {
+                    if (OngoingSelection.Duration >= CurrentTrial.InitialFixationDuration)
+                    {
+                        GameObject GoSelected = OngoingSelection.SelectedGameObject;
+                        var SdSelected = GoSelected?.GetComponent<StimDefPointer>()?.GetStimDef<VisualSearch_StimDef>();
+
+                        if (SdSelected != null)
+                        {
+                            if (CurrentTrial.StimulationType == "FixationChoice_Target" && SdSelected.IsTarget)
+                            {
+                                StartCoroutine(StimulationCoroutine());
+                            }
+                            else if (CurrentTrial.StimulationType == "FixationChoice_Distractor" && !SdSelected.IsTarget)
+                            {
+                                StartCoroutine(StimulationCoroutine());
+                            }
+                        }
+                    }
+                }
+            }
+
+
             if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
                 ChoiceFailed_Trial = true;
@@ -249,13 +288,9 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                     choiceMade = true;
             }
 
-            OngoingSelection = SelectionHandler.OngoingSelection;
 
-            //Update Exp Display with OngoingSelection Duration:
-            if (OngoingSelection != null)
-            {
-                SetTrialSummaryString();
-            }
+            SetTrialSummaryString();
+            
         });
         SearchDisplay.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {

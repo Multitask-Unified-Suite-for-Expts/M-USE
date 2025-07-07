@@ -1,3 +1,3 @@
-BlockName	BlockCount	ContextName	RandomMinMaxTrials	TokenBarCapacity	NumInitialTokens	ProbabilisticNumPulses	PulseSize	BlockEndType	BlockEndWindow	BlockEndThreshold
- NNNew.4	1	004_015_010_001_4	[4, 4]	6	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8
- IDSame.1	2	004_015_010_001_3	[4, 4]	6	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8
+BlockName	BlockCount	ContextName	RandomMinMaxTrials	TokenBarCapacity	NumInitialTokens	ProbabilisticNumPulses	PulseSize	BlockEndType	BlockEndWindow	BlockEndThreshold	ParticleHaloActive	CircleHaloActive
+ NNNew.4	1	004_015_010_001_4	[4, 4]	6	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8	TRUE	FALSE
+ IDSame.1	2	004_015_010_001_3	[4, 4]	6	0	[{"NumReward":3,"Probability":1.0}]	250	SimpleThreshold	5	0.8	TRUE	FALSE

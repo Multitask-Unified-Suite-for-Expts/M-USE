@@ -355,12 +355,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
-            int? depth = Session.Using2DStim ? 50 : (int?)null;
+            int? depthFor2D = Session.Using2DStim ? 50 : (int?) null;
 
             if (selectedSD.StimTokenRewardMag > 0)
-                HaloFBController.ShowPositive(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: depth);
+                HaloFBController.ShowPositive(selectedGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depthFor2D);
             else
-                HaloFBController.ShowNegative(selectedGO, particleHaloActive: CurrentTrial.ParticleHaloActive, circleHaloActive: CurrentTrial.CircleHaloActive, depth: depth);
+                HaloFBController.ShowNegative(selectedGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, depthFor2D);
         });
 
         SelectionFeedback.AddTimer(() => fbDuration.value, TokenFeedback, () =>

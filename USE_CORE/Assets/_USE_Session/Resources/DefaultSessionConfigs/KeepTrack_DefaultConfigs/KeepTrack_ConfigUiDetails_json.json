@@ -11,7 +11,7 @@
         },
 
         "totalChoiceDuration": {
-            "value": 0.2,
+            "value": 0.1,
             "min": 0.01,
             "max": 5.0,
             "precision": 1,

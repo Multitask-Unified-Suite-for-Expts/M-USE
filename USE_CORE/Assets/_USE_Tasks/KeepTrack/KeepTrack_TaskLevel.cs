@@ -39,7 +39,12 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         RunBlock.AddSpecificInitializationMethod(() =>
         {
             //Grab custom settings from Object Config that are read in:
-            KT_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString == "KeepTrack_ObjectsDef").AssignCustomSetting<KT_Object_ConfigValues[]>();
+
+            foreach(var setting in customSettings)
+            {
+                Debug.LogWarning(setting.SearchString);
+            }
+            KT_Objects_ConfigValues = customSettings.FirstOrDefault(setting => setting.SearchString.Contains("_ObjectsDef")).AssignCustomSetting<KT_Object_ConfigValues[]>();
 
             CurrentBlock.ContextName = CurrentBlock.ContextName.Trim();
             SetSkyBox(CurrentBlock.ContextName);

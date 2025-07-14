@@ -54,7 +54,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     // ConfigUI Variables
-    private bool configUIVariablesLoaded;
     [HideInInspector]
     public ConfigNumber timeBeforeChoiceStarts, totalChoiceDuration, itiDuration, 
         fbDuration, selectObjectDuration, tokenRevealDuration, tokenUpdateDuration, tokenFlashingDuration, 
@@ -166,8 +165,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTask.StimFacingCamera)
                 MakeStimFaceCamera();
             
-            if (!configUIVariablesLoaded)
-                LoadConfigUIVariables();
+            LoadConfigUIVariables();
 
             UpdateExperimenterDisplaySummaryStrings();
         });
@@ -611,7 +609,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
         tokenFbDuration = (tokenFlashingDuration.value + tokenUpdateDuration.value + tokenRevealDuration.value);//ensures full flashing duration within
         ////configured token fb duration
-        configUIVariablesLoaded = true;
     }
     void SetTrialSummaryString()
     {

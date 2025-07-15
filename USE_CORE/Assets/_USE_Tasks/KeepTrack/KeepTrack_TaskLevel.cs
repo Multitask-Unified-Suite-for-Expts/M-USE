@@ -51,7 +51,7 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
 
     public override List<CustomSettings> DefineCustomSettings()
     {
-        customSettings.Add(new CustomSettings("KeepTrack_ObjectsDef", typeof(KT_Object_ConfigValues), "array", KT_Objects_ConfigValues));
+        customSettings.Add(new CustomSettings(ConfigFolderName + "_ObjectsDef", typeof(KT_Object_ConfigValues), "array", KT_Objects_ConfigValues));
         return customSettings;
     }
 
@@ -74,7 +74,7 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
     {
         CurrentTaskSummaryString.Clear();
         base.SetTaskSummaryString();
-        CurrentTaskSummaryString.Append($"\t<b># Successful Target Selections:</b> {SuccessfulTargetSelections_Task}");
+        CurrentTaskSummaryString.Append($"\t# Successful Target Selections: {SuccessfulTargetSelections_Task}");
     }
 
     public override OrderedDictionary GetTaskSummaryData()

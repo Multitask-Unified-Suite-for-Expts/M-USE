@@ -335,9 +335,8 @@ namespace SelectionTracking
             {
 
                 //added to try and fix gaze bug
-                //currentTarget = null;
-                //OngoingSelection = null;
-                //Debug.LogWarning("CLEARING SELECTIONS AND SETTING CURRENTTARGET & ONGOING SELECTION NULL");
+                currentTarget = null;
+                OngoingSelection = null;
 
 
                 SuccessfulChoices.Clear();

@@ -317,8 +317,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             SelectionHandler.HandlerActive = true;
 
-            if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+            SelectionHandler.ClearSelections();
 
 
             StimulatedThisTrial = false; //have to reset after every object for WWW
@@ -336,7 +335,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     StimulateOnCurrentObject = true;
                 }
             }
-
 
             OngoingSelection = null;
         });
@@ -371,10 +369,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             {
                 GameObject selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.transform.root.gameObject;
                 WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
+
                 SelectionHandler.ClearSelections();
+
                 if (selectedSD != null)
                 {
                     choiceMade = true;
+                    SelectionHandler.HandlerActive = false;
 
                     SequenceManager.SetSelectedGO(selectedGO);
                     SequenceManager.SetSelectedSD(selectedSD);
@@ -386,23 +387,25 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-
             if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
                 ChoiceFailed_Trial = true;
+                SelectionHandler.HandlerActive = false;
             }
         });
         ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
             HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
-        ChooseStimulus.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        ChooseStimulus.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
             AbortCode = 8;
             HandleAbortedTrialData();
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
+            SelectionHandler.HandlerActive = false;
+
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
             AbortCode = 6;
             HandleAbortedTrialData();

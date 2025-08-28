@@ -524,7 +524,7 @@ namespace USE_ExperimentTemplate_Trial
 
             if (Session.SessionDef.SerialPortActive && !Session.GazeCalibrationController.InTaskGazeCalibration)
             {
-                Debug.LogWarning("CREATING A NEW TASK INDEXED SERIAL DATA: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialSentData.fileName);
+                Debug.Log("CREATING A NEW TASK INDEXED SERIAL DATA: " + Session.SerialRecvData.folderPath + " W NAME: " + Session.SerialSentData.fileName);
                 Session.SerialRecvData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
                 Session.SerialSentData.CreateNewTrialIndexedFile(TrialCount_InTask + 1, Session.FilePrefix);
             }

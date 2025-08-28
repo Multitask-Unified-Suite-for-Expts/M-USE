@@ -319,7 +319,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             Accuracy_InBlock = NumCorrect_InBlock/(TrialCount_InBlock + 1);
             UpdateExperimenterDisplaySummaryStrings();
         });
-        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
             AbortCode = 8;
             HandleAbortedTrialData();

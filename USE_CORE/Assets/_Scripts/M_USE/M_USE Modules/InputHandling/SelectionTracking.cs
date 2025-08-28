@@ -78,6 +78,7 @@ namespace SelectionTracking
             }
         }
 
+
         public bool HandlerLevelValid(string handlerLevel)
         {
             List<string> validLevels = new List<string>() { "session", "task", "trial" };
@@ -332,14 +333,16 @@ namespace SelectionTracking
 
             public void ClearSelections()
             {
-                if (SuccessfulChoices.Count > 0)
-                    SuccessfulChoices.Clear();
 
-                if (UnsuccessfulChoices.Count > 0)
-                    UnsuccessfulChoices.Clear();
+                //added to try and fix gaze bug
+                //currentTarget = null;
+                //OngoingSelection = null;
+                //Debug.LogWarning("CLEARING SELECTIONS AND SETTING CURRENTTARGET & ONGOING SELECTION NULL");
 
-                if (AllChoices.Count > 0)
-                    AllChoices.Clear();
+
+                SuccessfulChoices.Clear();
+                UnsuccessfulChoices.Clear();
+                AllChoices.Clear();
 
                 LastChoice = new USE_Selection(null);
                 LastSuccessfulChoice = new USE_Selection(null);
@@ -403,6 +406,7 @@ namespace SelectionTracking
 
             public void UpdateSelections()
             {
+
                 if (CurrentInputLocation == null)
                 {
                     if (OngoingSelection != null)

@@ -299,7 +299,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             }
             UpdateExperimenterDisplaySummaryStrings();
         });
-        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
             AbortCode = 8;
             //Dont need negative audio because touchfeedback (for holding too short) plays it

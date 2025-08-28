@@ -322,7 +322,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             UpdateExperimenterDisplaySummaryStrings();
         });
-        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, Delay, () =>
+        SearchDisplay.SpecifyTermination(() => ChoiceFailed_Trial, Delay, () =>
         {
             AbortCode = 8;
             DelayDuration = .5f; //50ms delay for stimulation to finish

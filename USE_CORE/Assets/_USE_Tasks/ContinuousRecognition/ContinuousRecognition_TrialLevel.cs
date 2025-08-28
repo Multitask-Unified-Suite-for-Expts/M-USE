@@ -436,7 +436,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             }
         });
         ChooseStim.SpecifyTermination(() => StimIsChosen, TouchFeedback);
-        ChooseStim.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, Delay, () =>
+        ChooseStim.SpecifyTermination(() => ChoiceFailed_Trial, Delay, () =>
         {
             AbortCode = 8;
             numPulsesTrial = 0;

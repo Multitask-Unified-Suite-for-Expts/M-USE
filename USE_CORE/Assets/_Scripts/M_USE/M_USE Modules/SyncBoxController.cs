@@ -53,6 +53,8 @@ public class SyncBoxController
     {
         Session.EventCodeManager.SendRangeCodeThisFrame("SyncBoxController_RewardPulseSent", numPulses);
 
+        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
+
         // Convert pulseSize (in 0.1ms units) to seconds
         float pulseDurationSeconds = pulseSize / 10000f; // 250 = 0.025s
 
@@ -69,7 +71,6 @@ public class SyncBoxController
                 yield return new WaitForSeconds(SecBetweenRewardPulses);
         }
 
-        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalRewardPulses", numPulses));
     }
 
     public IEnumerator SendSonication()
@@ -77,6 +78,8 @@ public class SyncBoxController
         Debug.LogWarning("ABOUT TO START SONICATION");
 
         Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["SyncBoxController_SonicationPulseSent"]);
+
+        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalStimulationPulses", Session.SessionDef.StimulationNumPulses));
 
         // Convert pulseSize (in 0.1ms units) to seconds
         float pulseDurationSeconds = Session.SessionDef.StimulationPulseSize / 10000f; // 250 = 0.025s
@@ -94,7 +97,6 @@ public class SyncBoxController
                 yield return new WaitForSeconds(SecBetweenRewardPulses);
         }
 
-        Session.SessionInfoPanel.UpdateSessionSummaryValues(("totalStimulationPulses", Session.SessionDef.StimulationNumPulses));
     }
 
 

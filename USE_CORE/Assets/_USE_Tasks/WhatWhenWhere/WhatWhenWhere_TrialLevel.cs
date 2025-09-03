@@ -561,6 +561,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleCompletedSequence()
     {
+        Debug.LogWarning("HANDLING COMPLETED SEQUENCE");
+
         runningAcc.Add(1);
         completedSequences_InTrial += 1;
         CurrentTaskLevel.CompletedSequences_InBlock++;

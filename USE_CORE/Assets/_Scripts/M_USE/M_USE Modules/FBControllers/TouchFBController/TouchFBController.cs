@@ -189,7 +189,6 @@ public class TouchFBController : MonoBehaviour
     private void ShowTouchFeedback(TouchFeedback touchFb)
     {
         Debug.LogWarning("---------- TOUCH FBCONTROLLER TURNING OFF HANDLER -----------");
-        Handler.HandlerActive = false;
         FeedbackOn = true;
         audioFBController.Play("Negative");
         if (InstantiatedGO != null)
@@ -213,7 +212,6 @@ public class TouchFBController : MonoBehaviour
             Destroy(InstantiatedGO);
             Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOff"]);
             DeactivatePrefabs();
-            Handler.HandlerActive = true;
             Debug.LogWarning("---------- TOUCH FBCONTROLLER TURNING HANDLER BACK ON -----------");
             FeedbackOn = false;
         }

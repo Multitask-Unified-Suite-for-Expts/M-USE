@@ -216,26 +216,24 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //-------------------------------------------------------------------------------------------------------------------------------
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, SliderFlashingFeedback);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InitTrial);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, SliderFlashingFeedback);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, InitTrial);
 
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, WWW_CanvasGO);
         //-------------------------------------------------------------------------------------------------------------------------------
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            SelectionHandler.HandlerActive = true;
-            Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN INITTRIAL INIT METHOD (may have already been on) -----------");
-
-
-            if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
-
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
 
             SelectionHandler.MaxPixelDisplacement = 50;
+
+            SelectionHandler.ClearSelections();
+
+            SelectionHandler.HandlerActive = true;
+
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
@@ -273,6 +271,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
+            if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+                SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, ChooseStimulus, SliderFlashingFeedback);
+            else
+                SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, ChooseStimulus, SliderFlashingFeedback);
+
+
             //For testing the dialogue controller:
             //DialogueController.CreateDialogueBox("Last Trial!", 500f);
 
@@ -314,13 +318,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 }
             }
 
-            choiceMade = false;
-            ChoiceFailed_Trial = false;
-
-            SelectionHandler.HandlerActive = true;
-            Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN CHOOSE STIM INIT METHOD -----------");
-
-            SelectionHandler.ClearSelections();
 
             StimulatedThisTrial = false; //have to reset after every object for WWW
             StimulateOnCurrentObject = false;
@@ -335,6 +332,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                     StimulateOnCurrentObject = true;
                 }
             }
+
+
+            choiceMade = false;
+            ChoiceFailed_Trial = false;
+
+            SelectionHandler.HandlerActive = true;
+            Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN CHOOSE STIM INIT METHOD -----------");
+
+            SelectionHandler.ClearSelections();
 
             OngoingSelection = null;
         });
@@ -385,6 +391,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
+                Debug.LogWarning("--- WWW CHOICE FAILED DUE TO NOT SELECTING LONG ENOUGH ---");
                 ChoiceFailed_Trial = true;
             }
 
@@ -392,14 +399,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            SelectionHandler.ClearSelections();
             SelectionHandler.HandlerActive = false;
 
             HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
         ChooseStimulus.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
-            SelectionHandler.ClearSelections();
             SelectionHandler.HandlerActive = false;
 
             AbortCode = 8;
@@ -407,7 +412,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            SelectionHandler.ClearSelections();
             SelectionHandler.HandlerActive = false;
 
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
@@ -421,7 +425,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SequenceManager.ManageSelection();
             ManageDataHandlers();
 
-            SelectionHandler.HandlerActive = false;
+
             int? depth = Session.Using2DStim ? 50 : (int?)null;
             int? stimIdx = null;
 
@@ -528,8 +532,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         SliderFlashingFeedback.AddSpecificInitializationMethod(() =>
         {
-            SelectionHandler.HandlerActive = false;
-
             //Destroy all created text objects on Player View of Experimenter Display
             if(!Session.WebBuild)
                 DestroyChildren(GameObject.Find("MainCameraCopy"));
@@ -807,7 +809,12 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         {
             //Create corresponding text on player view of experimenter display
             textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent.transform);
-            textLocation.y += 75;
+
+            if (!Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+                textLocation.y += 75;
+
+            Debug.LogWarning("TEXT POSITION = " + textLocation.ToString());
+
             playerViewText = playerView.CreateTextObject(CurrentTrial.CorrectObjectTouchOrder[iStim].ToString(),
                 (CurrentTrial.CorrectObjectTouchOrder[iStim]).ToString(),
                 Color.red, textLocation, new Vector2(200, 200), playerViewParent.transform);

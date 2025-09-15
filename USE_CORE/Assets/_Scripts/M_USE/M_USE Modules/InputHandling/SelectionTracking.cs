@@ -407,7 +407,6 @@ namespace SelectionTracking
                         CheckTermination();
                     }
                     currentTarget = null;
-                    OngoingSelection = null; //reset ongoing sel too? 
                     return;
                 }
                 

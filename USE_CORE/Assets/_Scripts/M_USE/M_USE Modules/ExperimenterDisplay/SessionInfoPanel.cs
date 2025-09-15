@@ -114,7 +114,7 @@ public class SessionInfoPanel : ExperimenterDisplayPanel
                     break;
                 case nameof(totalStimulationPulses):
                     if (changeValue is int stimulationPulsesIncrement && stimulationPulsesIncrement > 0)
-                        totalRewardPulses += stimulationPulsesIncrement;
+                        totalStimulationPulses += stimulationPulsesIncrement;
                     break;
                 case nameof(sessionDuration):
                     if (changeValue is float currentSessionDuration && currentSessionDuration > 0)

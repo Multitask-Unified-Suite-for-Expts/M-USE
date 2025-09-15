@@ -333,12 +333,6 @@ namespace SelectionTracking
 
             public void ClearSelections()
             {
-
-                //added to try and fix gaze bug
-                currentTarget = null;
-                OngoingSelection = null;
-
-
                 SuccessfulChoices.Clear();
                 UnsuccessfulChoices.Clear();
                 AllChoices.Clear();
@@ -413,6 +407,7 @@ namespace SelectionTracking
                         CheckTermination();
                     }
                     currentTarget = null;
+                    OngoingSelection = null; //reset ongoing sel too? 
                     return;
                 }
                 
@@ -505,6 +500,8 @@ namespace SelectionTracking
                 {
                     if (initErrors == null)
                     {
+                        Debug.LogWarning("------ NEW ONGOING SELECTION AT FRAME: " + Time.frameCount + " -------");
+
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                     }
                 }
@@ -555,7 +552,10 @@ namespace SelectionTracking
                     return;
                 }
 
-                if(error != null)
+                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " -------");
+
+
+                if (error != null)
                     SelectionErrorHandling(error);
 
                 OngoingSelection.CompleteSelection(false);
@@ -578,6 +578,9 @@ namespace SelectionTracking
                     OngoingSelection = null;
                     return;
                 }
+
+                Debug.LogWarning("------ CHOICE COMPLETE AT FRAME: " + Time.frameCount + " -------");
+
 
                 OngoingSelection.CompleteSelection(true);
                 OngoingSelection.WasSuccessful = true;

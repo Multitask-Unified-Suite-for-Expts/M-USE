@@ -226,6 +226,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             SelectionHandler.HandlerActive = true;
+            Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN INITTRIAL INIT METHOD (may have already been on) -----------");
+
 
             if (SelectionHandler.AllChoices.Count > 0)
                 SelectionHandler.ClearSelections();
@@ -316,13 +318,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             ChoiceFailed_Trial = false;
 
             SelectionHandler.HandlerActive = true;
+            Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN CHOOSE STIM INIT METHOD -----------");
 
             SelectionHandler.ClearSelections();
 
-
             StimulatedThisTrial = false; //have to reset after every object for WWW
-
-
             StimulateOnCurrentObject = false;
 
             if (CanStimulateThisTrial)
@@ -341,6 +341,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         ChooseStimulus.AddUpdateMethod(() =>
         {
             OngoingSelection = SelectionHandler.OngoingSelection;
+
 
             if (OngoingSelection != null && StimulateOnCurrentObject && !StimulatedThisTrial)
             {
@@ -362,20 +363,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
 
-            SetTrialSummaryString(); //Update Exp Display with OngoingSelection Duration:
-
-
             if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
                 GameObject selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.transform.root.gameObject;
                 WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
 
-                SelectionHandler.ClearSelections();
-
                 if (selectedSD != null)
                 {
                     choiceMade = true;
-                    SelectionHandler.HandlerActive = false;
+                    Debug.LogWarning("--- WWW CHOICE MADE ---");
 
                     SequenceManager.SetSelectedGO(selectedGO);
                     SequenceManager.SetSelectedSD(selectedSD);
@@ -390,20 +386,28 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
             {
                 ChoiceFailed_Trial = true;
-                SelectionHandler.HandlerActive = false;
             }
+
+            SetTrialSummaryString(); //Update Exp Display with OngoingSelection Duration:
         });
         ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
+            SelectionHandler.ClearSelections();
+            SelectionHandler.HandlerActive = false;
+
             HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
         ChooseStimulus.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
+            SelectionHandler.ClearSelections();
+            SelectionHandler.HandlerActive = false;
+
             AbortCode = 8;
             HandleAbortedTrialData();
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
+            SelectionHandler.ClearSelections();
             SelectionHandler.HandlerActive = false;
 
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");

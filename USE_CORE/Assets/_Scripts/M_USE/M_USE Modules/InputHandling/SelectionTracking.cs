@@ -407,6 +407,7 @@ namespace SelectionTracking
                         CheckTermination();
                     }
                     currentTarget = null;
+                    OngoingSelection = null; //also set null if they not looking at screen
                     return;
                 }
                 

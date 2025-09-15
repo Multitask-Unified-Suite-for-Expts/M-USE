@@ -216,27 +216,27 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         //-------------------------------------------------------------------------------------------------------------------------------
         if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InitTrial);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, ITI);
         else
-            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, InitTrial);
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, ITI);
 
         TouchFBController.EnableTouchFeedback(SelectionHandler, CurrentTask.TouchFeedbackDuration, CurrentTask.TouchFeedbackSize, WWW_CanvasGO);
         //-------------------------------------------------------------------------------------------------------------------------------
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            //Set to start button durations
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
 
             SelectionHandler.MaxPixelDisplacement = 50;
 
-            SelectionHandler.ClearSelections();
-
-            SelectionHandler.HandlerActive = true;
+            SelectionHandler.ClearChoices();
 
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
+            //Set back to values for chooseStim state
             SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
             SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
@@ -271,11 +271,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
-            if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-                SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, ChooseStimulus, SliderFlashingFeedback);
-            else
-                SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, ChooseStimulus, SliderFlashingFeedback);
-
 
             //For testing the dialogue controller:
             //DialogueController.CreateDialogueBox("Last Trial!", 500f);
@@ -337,12 +332,13 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             choiceMade = false;
             ChoiceFailed_Trial = false;
 
+             
             SelectionHandler.HandlerActive = true;
             Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN CHOOSE STIM INIT METHOD -----------");
 
-            SelectionHandler.ClearSelections();
+            SelectionHandler.ClearChoices();
 
-            OngoingSelection = null;
+            OngoingSelection = null; //reset internal WWW ongoingSelection
         });
         ChooseStimulus.AddUpdateMethod(() =>
         {
@@ -369,6 +365,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             }
 
 
+
             if (SelectionHandler.SuccessfulChoices.Count > 0)
             {
                 GameObject selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.transform.root.gameObject;
@@ -387,13 +384,25 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                         SequenceManager.SetSequenceStartTime(Time.time);
                     }
                 }
+                else
+                    Debug.LogWarning("SUCCESSFULLY SELECTED SOMETHING THAT WAS NOT A STIM *********");
+
+            }
+            else if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
+            {
+                GameObject selectedGO = SelectionHandler.LastUnsuccessfulChoice.SelectedGameObject.transform.root.gameObject;
+                WhatWhenWhere_StimDef selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WhatWhenWhere_StimDef>();
+
+                if (selectedSD != null)
+                {
+                    ChoiceFailed_Trial = true;
+                    Debug.LogWarning("--- WWW CHOICE FAILED DUE TO NOT SELECTING LONG ENOUGH ---");
+                }
+                else
+                    Debug.LogWarning("SELECTED SOMETHING THAT WAS NOT A STIM ***********");
             }
 
-            if (SelectionHandler.UnsuccessfulChoices.Count > 0 && !ChoiceFailed_Trial)
-            {
-                Debug.LogWarning("--- WWW CHOICE FAILED DUE TO NOT SELECTING LONG ENOUGH ---");
-                ChoiceFailed_Trial = true;
-            }
+
 
             SetTrialSummaryString(); //Update Exp Display with OngoingSelection Duration:
         });

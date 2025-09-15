@@ -163,7 +163,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
                 CurrentTaskLevel.SetTaskSummaryString();
 
             if (ShotgunHandler.AllChoices.Count > 0)
-                ShotgunHandler.ClearSelections();
+                ShotgunHandler.ClearChoices();
             ShotgunHandler.TimeBeforeChoiceStarts = CurrentTrial.MinTouchDuration;
             ShotgunHandler.TotalChoiceDuration = CurrentTrial.MaxTouchDuration;
         });
@@ -191,7 +191,7 @@ public class THRQ_TrialLevel : ControlLevel_Trial_Template
             HeldDuration = 0;
 
             if (ShotgunHandler.AllChoices.Count > 0)
-                ShotgunHandler.ClearSelections();
+                ShotgunHandler.ClearChoices();
 
             TrialStartTime = Time.time;
 

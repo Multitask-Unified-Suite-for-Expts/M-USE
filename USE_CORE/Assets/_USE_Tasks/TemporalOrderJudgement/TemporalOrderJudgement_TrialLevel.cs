@@ -109,7 +109,7 @@ public class TemporalOrderJudgement_TrialLevel : ControlLevel_Trial_Template
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             if (Handler.AllChoices.Count > 0)
-                Handler.ClearSelections();
+                Handler.ClearChoices();
 
             Handler.TimeBeforeChoiceStarts = minObjectTouchDuration.value;
             Handler.TotalChoiceDuration = maxObjectTouchDuration.value;

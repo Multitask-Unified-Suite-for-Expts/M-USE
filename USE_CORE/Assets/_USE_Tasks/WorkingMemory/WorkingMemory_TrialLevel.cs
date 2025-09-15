@@ -191,7 +191,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -241,7 +241,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
                 CreateTextOnExperimenterDisplay();
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
@@ -284,7 +284,7 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject;
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<WorkingMemory_StimDef>();
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
                 if (selectedSD != null)
                     choiceMade = true;
             }

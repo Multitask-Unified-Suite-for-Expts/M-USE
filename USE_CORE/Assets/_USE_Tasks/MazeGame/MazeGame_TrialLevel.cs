@@ -173,7 +173,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.HandlerActive = true;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -221,7 +221,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.HandlerActive = true;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
         });
         ChooseTile.AddUpdateMethod(() =>
@@ -242,7 +242,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     
                     MazeManager.AddReactionTime();
                     MazeManager.SetSelectedTileGO(SelectionHandler.LastSuccessfulChoice.SelectedGameObject);
-                    SelectionHandler.ClearSelections();
+                    SelectionHandler.ClearChoices();
                 }
             }
 

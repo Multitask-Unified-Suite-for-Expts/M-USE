@@ -331,15 +331,15 @@ namespace SelectionTracking
                     selectionTracker.TrialHandlerNames.Remove(HandlerName);
             }
 
-            public void ClearSelections()
+            public void ClearChoices()
             {
                 SuccessfulChoices.Clear();
                 UnsuccessfulChoices.Clear();
                 AllChoices.Clear();
 
-                LastChoice = new USE_Selection(null);
-                LastSuccessfulChoice = new USE_Selection(null);
-                LastUnsuccessfulChoice = new USE_Selection(null);
+                //LastChoice = new USE_Selection(null);
+                //LastSuccessfulChoice = new USE_Selection(null);
+                //LastUnsuccessfulChoice = new USE_Selection(null);
             }
 
             public bool LastSelectionMatches(GameObject go)
@@ -400,6 +400,7 @@ namespace SelectionTracking
             public void UpdateSelections()
             {
 
+                // NO INPUT ---------------------------------------------
                 if (CurrentInputLocation == null)
                 {
                     if (OngoingSelection != null)
@@ -410,8 +411,9 @@ namespace SelectionTracking
                     OngoingSelection = null; //also set null if they not looking at screen
                     return;
                 }
-                
-                //WE HAVE INPUT ----------------------------------------
+
+
+                // GET TARGET ------------------------------------------
 
                 if (HandlerName.ToLower().Contains("shotgun"))
                     currentTarget = InputTracker.ShotgunRaycastTarget;
@@ -419,22 +421,7 @@ namespace SelectionTracking
                     currentTarget = InputTracker.SimpleRaycastTarget;
 
 
-                //Set the booleans to know when selection actually starts and finishes
-                if(OngoingSelection != null)
-                {
-                    if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
-                    {
-                        OngoingSelection.ChoiceStarted = true;
-                        Session.EventCodeManager.SendCodeThisFrame("ChoiceBegins");
-                    }
-
-                    if(OngoingSelection.Duration >= TotalChoiceDuration && !OngoingSelection.ChoiceCompleted)
-                    {
-                        OngoingSelection.ChoiceCompleted = true;
-                    }
-                }
-
-                //IF NO INPUT OVER A GAMEOBJECT, RETURN!
+                // HANDLE NO TARGET --------------------------------------
                 if (currentTarget == null)
                 {
                     if (SelectionOnEventCodeSent && OngoingSelection == null)
@@ -444,10 +431,11 @@ namespace SelectionTracking
                         SelectionOnEventCodeSent = false; //reset fixation
                     }
 
-                    if (OngoingSelection != null) // the previous frame was a selection
+                    // HANDLE PREVIOUS FRAME HAVING A SELECTION
+                    if (OngoingSelection != null)
                     {
                         //For EventCodes:
-                        if(SelectionOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
+                        if (SelectionOnEventCodeSent && OngoingSelection.SelectedGameObject != null)
                         {
                             Session.EventCodeManager.CheckForAndSendEventCode(OngoingSelection.SelectedGameObject, "SelectionOff");
                             SelectionOnEventCodeSent = false; //reset fixation
@@ -456,24 +444,44 @@ namespace SelectionTracking
                         CheckTermination();
                     }
 
-                    return;
+                    return; //RETURN SINCE NO TARGET
                 }
 
-                //For EventCodes:
+
+                //WE HAVE A TARGET --------------------------------------------------------------
+
+
+                //Send EventCode if there's a New Target
                 if (currentTarget != null && !SelectionOnEventCodeSent && LastChoice.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
                 {
                     Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "SelectionOn");
                     SelectionOnEventCodeSent = true;
                 }
 
-
-                //WE HAVE A TARGET --------------------------------------
+                //We have a target so see if should start a onging selection
                 if (OngoingSelection == null) //no previous selection
                 {
                     CheckInit();
                     return;
                 }
 
+
+                //Set the booleans to know when selection actually starts and finishes
+                if (OngoingSelection != null)
+                {
+                    if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
+                    {
+                        Debug.LogWarning("CHOICE STARTED ON FRAME: " + Time.frameCount);
+                        OngoingSelection.ChoiceStarted = true;
+                        Session.EventCodeManager.SendCodeThisFrame("ChoiceBegins");
+                    }
+
+                    if(OngoingSelection.Duration >= TotalChoiceDuration && !OngoingSelection.ChoiceCompleted)
+                    {
+                        Debug.LogWarning("CHOICE COMPLETED ON FRAME: " + Time.frameCount);
+                        OngoingSelection.ChoiceCompleted = true;
+                    }
+                }
 
 
                 //if we have reached this point we know there is a target, there was a previous selection AND this is not first frame of new selection
@@ -484,10 +492,8 @@ namespace SelectionTracking
                     return;
                 }
 
-                //if we have reached this point we know we have an ongoing selection
                 CheckUpdate();
                 CheckTermination();
-
             }
 
 

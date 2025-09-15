@@ -236,7 +236,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SetShadowType(CurrentTask.ShadowType, "ContinuousRecognition_DirectionalLight");
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -307,7 +307,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 TimeToCompletion_StartTime = Time.time;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;

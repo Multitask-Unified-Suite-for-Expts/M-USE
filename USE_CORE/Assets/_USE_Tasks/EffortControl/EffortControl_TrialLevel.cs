@@ -217,7 +217,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SetBlockSummaryString();
 
             if(SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -263,7 +263,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             SideChoice = null;
 
             if(SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
         });
         ChooseBalloon.AddUpdateMethod(() =>
         {
@@ -384,7 +384,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 SelectionHandler.HandlerActive = true;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
@@ -466,7 +466,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     }
                 }
 
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
             }
 
             if (InputBroker.GetMouseButtonUp(0))
@@ -501,7 +501,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                         Debug.LogWarning("CHOICE FAILED ON ANOTHER OBJECT: " + SelectionHandler.UnsuccessfulChoices[0].SelectedGameObject.name);
                 }
 
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
             }
 
         });

@@ -136,7 +136,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -180,7 +180,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             GiveRewardIfSliderFull = false;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
 
             ObjManager.ActivateInitialObjectsMovement();

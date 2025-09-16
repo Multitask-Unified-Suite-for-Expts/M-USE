@@ -101,19 +101,22 @@ namespace SelectionTracking
 
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("RaycastHitsAGameObject"));
             mouseClick.InitConditions.Add(mouseClick.DefaultConditions("MouseButton0Down"));
+            mouseClick.InitConditions.Add(mouseClick.DefaultConditions("HandlerActive"));
 
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("MouseButton0"));
             mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            mouseClick.UpdateConditions.Add(mouseClick.DefaultConditions("HandlerActive"));
 
             mouseClick.UpdateErrorTriggers.Add("MovedTooFar", mouseClick.DefaultConditions("MovedTooFar"));
             mouseClick.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseClick.DefaultConditions("NotSelectablePeriod"));
-
-            mouseClick.TerminationErrorTriggers.Add("DurationTooShort", mouseClick.DefaultConditions("DurationTooShort"));
 
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("NoTarget"));
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("NewTarget"));
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("MouseButton0Up"));
             mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("ReachedRequiredDuration"));
+            mouseClick.TerminationConditions.Add(mouseClick.DefaultConditions("HandlerNotActive"));
+
+            mouseClick.TerminationErrorTriggers.Add("DurationTooShort", mouseClick.DefaultConditions("DurationTooShort"));
 
             mouseClick.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseButton0Click", mouseClick);
@@ -122,16 +125,22 @@ namespace SelectionTracking
             SelectionHandler mouseHover = new SelectionHandler();
             
             mouseHover.InitConditions.Add(mouseHover.DefaultConditions("RaycastHitsAGameObject"));
+            mouseHover.InitConditions.Add(mouseHover.DefaultConditions("HandlerActive"));
+
 
             mouseHover.UpdateConditions.Add(mouseHover.DefaultConditions("RaycastHitsSameObjectAsPreviousFrame"));
+            mouseHover.UpdateConditions.Add(mouseHover.DefaultConditions("HandlerActive"));
 
             mouseHover.UpdateErrorTriggers.Add("NotSelectablePeriod", mouseHover.DefaultConditions("NotSelectablePeriod"));
 
-            mouseHover.TerminationErrorTriggers.Add("DurationTooShort", mouseHover.DefaultConditions("DurationTooShort"));
 
             mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("NoTarget"));
             mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("NewTarget"));
             mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("ReachedRequiredDuration"));
+            mouseHover.TerminationConditions.Add(mouseHover.DefaultConditions("HandlerNotActive"));
+
+            mouseHover.TerminationErrorTriggers.Add("DurationTooShort", mouseHover.DefaultConditions("DurationTooShort"));
+
 
             mouseHover.CurrentInputLocation = () => InputBroker.mousePosition;
             DefaultSelectionHandlers.Add("MouseHover", mouseHover);
@@ -141,19 +150,24 @@ namespace SelectionTracking
 
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsAGameObject"));
             touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("MouseButton0Down"));
+            touchShotgun.InitConditions.Add(touchShotgun.DefaultConditions("HandlerActive"));
+
 
             touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
             touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("MouseButton0"));
+            touchShotgun.UpdateConditions.Add(touchShotgun.DefaultConditions("HandlerActive"));
 
             touchShotgun.UpdateErrorTriggers.Add("MovedTooFar", touchShotgun.DefaultConditions("MovedTooFar"));
             touchShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", touchShotgun.DefaultConditions("NotSelectablePeriod"));
 
-            touchShotgun.TerminationErrorTriggers.Add("DurationTooShort", touchShotgun.DefaultConditions("DurationTooShort"));
 
             touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("MouseButton0Up"));
             touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("NoTarget"));
             touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("NewTarget"));
             touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("ReachedRequiredDuration"));
+            touchShotgun.TerminationConditions.Add(touchShotgun.DefaultConditions("HandlerNotActive"));
+
+            touchShotgun.TerminationErrorTriggers.Add("DurationTooShort", touchShotgun.DefaultConditions("DurationTooShort"));
 
 
             touchShotgun.CurrentInputLocation = () => InputBroker.mousePosition;
@@ -163,16 +177,20 @@ namespace SelectionTracking
             SelectionHandler gazeShotgun = new SelectionHandler();
 
             gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsAGameObject"));
+            gazeShotgun.InitConditions.Add(gazeShotgun.DefaultConditions("HandlerActive"));
 
             gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("ShotgunRaycastHitsPreviouslyHitGO"));
+            gazeShotgun.UpdateConditions.Add(gazeShotgun.DefaultConditions("HandlerActive"));
 
             gazeShotgun.UpdateErrorTriggers.Add("NotSelectablePeriod", gazeShotgun.DefaultConditions("NotSelectablePeriod"));
 
-            gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
             gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("NoTarget"));
             gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("NewTarget"));
             gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("ReachedRequiredDuration"));
+            gazeShotgun.TerminationConditions.Add(gazeShotgun.DefaultConditions("HandlerNotActive"));
+
+            gazeShotgun.TerminationErrorTriggers.Add("DurationTooShort", gazeShotgun.DefaultConditions("DurationTooShort"));
 
 
             gazeShotgun.CurrentInputLocation = () => InputBroker.gazePosition;
@@ -585,9 +603,6 @@ namespace SelectionTracking
                     return;
                 }
 
-                Debug.LogWarning("------ CHOICE COMPLETE AT FRAME: " + Time.frameCount + " -------");
-
-
                 OngoingSelection.CompleteSelection(true);
                 OngoingSelection.WasSuccessful = true;
                 LastSuccessfulChoice = OngoingSelection;
@@ -682,6 +697,9 @@ namespace SelectionTracking
                 DefaultConditions.Add("ShotgunRaycastHitsAGameObject", () => InputTracker.ShotgunRaycastTarget != null);
                 DefaultConditions.Add("RaycastHitsAGameObject", () => InputTracker.SimpleRaycastTarget != null);
 
+                DefaultConditions.Add("HandlerActive", () => HandlerActive); //using for both Init and Update
+
+
                 //UPDATE CONDITIONS:
                 DefaultConditions.Add("ShotgunRaycastHitsPreviouslyHitGO", () => DefaultConditions["ShotgunRaycastHitsAGameObject"]() &&
                                                                             OngoingSelection != null &&
@@ -697,8 +715,9 @@ namespace SelectionTracking
 
                 DefaultConditions.Add("ReachedRequiredDuration", () => OngoingSelection != null && OngoingSelection.ChoiceStarted && OngoingSelection.ChoiceCompleted);
 
-
                 DefaultConditions.Add("NewTarget", () => currentTarget != null && OngoingSelection != null && currentTarget != OngoingSelection.SelectedGameObject);
+
+                DefaultConditions.Add("HandlerNotActive", () => OngoingSelection != null && !HandlerActive);
 
 
                 //TERM ERRORS:
@@ -716,6 +735,8 @@ namespace SelectionTracking
                 });
 
                 DefaultConditions.Add("NotSelectablePeriod", () => OngoingSelection != null && !SelectablePeriod);
+
+
 
                 DefaultConditions.Add("MouseButton0", () => InputBroker.GetMouseButton(0));
                 DefaultConditions.Add("MouseButton0Down", () => InputBroker.GetMouseButtonDown(0));

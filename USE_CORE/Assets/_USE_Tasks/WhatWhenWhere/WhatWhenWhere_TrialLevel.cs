@@ -130,6 +130,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         State SelectionFeedback = new State("SelectionFeedback");
         State SliderFlashingFeedback = new State("SliderFlashingFeedback");
         State ITI = new State("ITI");
+
         AddActiveStates(new List<State>
         {
             InitTrial, ChooseStimulus, SelectionFeedback, SliderFlashingFeedback, ITI, FlashNextCorrectStim
@@ -225,6 +226,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            SelectionHandler.HandlerActive = true; //Turn back on manually in case turned off after last selection
+
             //Set to start button durations
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -236,6 +239,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         InitTrial.SpecifyTermination(() => SelectionHandler.LastSuccessfulSelectionMatchesStartButton(), Delay, ()=>
         {
+            SelectionHandler.HandlerActive = false; //Turn OFF manually so cant make selections before choose stim state.
+
             //Set back to values for chooseStim state
             SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
             SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
@@ -332,9 +337,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             choiceMade = false;
             ChoiceFailed_Trial = false;
 
-             
-            SelectionHandler.HandlerActive = true;
-            Debug.LogWarning("---------- MANUALLY ACTIVATING HANDLER IN CHOOSE STIM INIT METHOD -----------");
+
+            SelectionHandler.HandlerActive = true; //Turn back on manually in case turned off after last selection
 
             SelectionHandler.ClearChoices();
 
@@ -396,7 +400,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (selectedSD != null)
                 {
                     ChoiceFailed_Trial = true;
-                    Debug.LogWarning("--- WWW CHOICE FAILED DUE TO NOT SELECTING LONG ENOUGH ---");
+                    Debug.LogWarning("--- WWW CHOICE FAILED (trial aborted) DUE TO NOT SELECTING LONG ENOUGH ---");
                 }
                 else
                     Debug.LogWarning("SELECTED SOMETHING THAT WAS NOT A STIM ***********");
@@ -408,20 +412,21 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         });
         ChooseStimulus.SpecifyTermination(() => choiceMade, SelectionFeedback, () =>
         {
-            SelectionHandler.HandlerActive = false;
+            SelectionHandler.HandlerActive = false; //Turn OFF manually so cant make additional selections
+
 
             HandleSearchDurationData(Time.time - searchDurationStartTime);
         });
         ChooseStimulus.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
-            SelectionHandler.HandlerActive = false;
+            SelectionHandler.HandlerActive = false; //Turn OFF manually so cant make additional selections
 
             AbortCode = 8;
             HandleAbortedTrialData();
         });
         ChooseStimulus.AddTimer(() => selectObjectDuration.value, ITI, () =>
         {
-            SelectionHandler.HandlerActive = false;
+            SelectionHandler.HandlerActive = false; //Turn OFF manually so cant make additional selections
 
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
             AbortCode = 6;

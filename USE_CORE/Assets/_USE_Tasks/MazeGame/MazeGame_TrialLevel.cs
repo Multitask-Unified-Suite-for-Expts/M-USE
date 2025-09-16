@@ -272,7 +272,7 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
                     Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["MazeFinish"]);
             }
         });
-        ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        ChooseTile.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
             AbortCode = 8;
             HandleAbortTrialData();

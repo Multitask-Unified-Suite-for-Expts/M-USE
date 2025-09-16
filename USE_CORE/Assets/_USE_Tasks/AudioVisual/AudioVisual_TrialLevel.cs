@@ -273,7 +273,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
         });
         PlayerChoice.SpecifyTermination(() => SelectionMade, Feedback);
-        PlayerChoice.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        PlayerChoice.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
             AbortCode = 8;
             //Dont need negative audio because touchfeedback (for holding too short) plays it

@@ -202,7 +202,7 @@ namespace SelectionTracking
 
         public class USE_Selection
         {
-            public float? Duration, StartTime, EndTime;
+            public float? Duration;
             public int StartFrame, EndFrame;
             public GameObject SelectedGameObject;
             public StimDefPointer SelectedStimDefPointer;
@@ -224,7 +224,6 @@ namespace SelectionTracking
 
                 Duration = 0;
                 StartFrame = Time.frameCount;
-                StartTime = Time.time;
                 InputLocations = new List<Vector3>();
 
                 if(go != null)
@@ -249,13 +248,11 @@ namespace SelectionTracking
             public void UpdateSelection(Vector3 inputLocation)
             {
                 InputLocations.Add(inputLocation);
-                Duration = Time.time - StartTime;
+                Duration += Time.deltaTime;
             }
 
             public void CompleteSelection(bool success = true)
             {
-                EndTime = Time.time;
-                Duration = EndTime - StartTime;
                 WasSuccessful = success;
             }
         }
@@ -354,10 +351,6 @@ namespace SelectionTracking
                 SuccessfulChoices.Clear();
                 UnsuccessfulChoices.Clear();
                 AllChoices.Clear();
-
-                //LastChoice = new USE_Selection(null);
-                //LastSuccessfulChoice = new USE_Selection(null);
-                //LastUnsuccessfulChoice = new USE_Selection(null);
             }
 
             public bool LastSelectionMatches(GameObject go)
@@ -496,7 +489,6 @@ namespace SelectionTracking
 
                     if(OngoingSelection.Duration >= TotalChoiceDuration && !OngoingSelection.ChoiceCompleted)
                     {
-                        Debug.LogWarning("CHOICE COMPLETED ON FRAME: " + Time.frameCount);
                         OngoingSelection.ChoiceCompleted = true;
                     }
                 }
@@ -536,7 +528,7 @@ namespace SelectionTracking
                 bool? update = CheckForAllConditions(UpdateConditions);
                 string? updateErrors = CheckAllErrorTriggers("update");
 
-                if (update != null && update.Value)
+                if (update != null && update.Value) //SHOULD UPDATE
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
@@ -547,6 +539,8 @@ namespace SelectionTracking
                         ChoiceFailed(updateErrors);
                     }
                 }
+                else
+                    Debug.LogWarning("Not going to Update");
             }
 
             private void CheckTermination()
@@ -556,6 +550,8 @@ namespace SelectionTracking
 
                 if (term != null && term.Value)
                 {
+                    Debug.LogWarning("TERM? " + term.Value);
+
                     if (termErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
                         ChoiceComplete();
@@ -576,7 +572,7 @@ namespace SelectionTracking
                     return;
                 }
 
-                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " -------");
+                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration + " -------");
 
 
                 if (error != null)
@@ -602,6 +598,7 @@ namespace SelectionTracking
                     OngoingSelection = null;
                     return;
                 }
+                Debug.LogWarning("------ CHOICE COMPLETE ON FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration + " -------");
 
                 OngoingSelection.CompleteSelection(true);
                 OngoingSelection.WasSuccessful = true;

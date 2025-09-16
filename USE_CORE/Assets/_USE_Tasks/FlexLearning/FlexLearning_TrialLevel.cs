@@ -195,7 +195,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -223,7 +223,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             PreSearch_TouchFbErrorCount = TouchFBController.ErrorCount;
 
@@ -233,7 +233,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             ChoiceFailed_Trial = false;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;

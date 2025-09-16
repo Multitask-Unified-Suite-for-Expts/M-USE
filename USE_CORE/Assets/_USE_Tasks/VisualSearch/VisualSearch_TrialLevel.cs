@@ -177,7 +177,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.SetFlashingTime(tokenFlashingDuration.value);
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -210,7 +210,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 CreateTextOnExperimenterDisplay();
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             ChoiceFailed_Trial = false;
 
@@ -264,7 +264,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                     TrialDataSummary.SelectionPrecision = SelectionHandler.LastSuccessfulChoice.SelectionPrecision;
                     choiceMade = true;
                 }
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
             }
 
 

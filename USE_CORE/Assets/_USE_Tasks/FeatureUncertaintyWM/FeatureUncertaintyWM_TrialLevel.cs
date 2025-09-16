@@ -226,7 +226,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             }
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
             SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
@@ -271,7 +271,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             choiceMade = false;
             // Handler.HandlerActive = true;
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
             
             foreach(StimDef sd in multiCompStims.stimDefs)
                 sd.StimGameObject.transform.localRotation = Quaternion.Euler(Vector3.zero);
@@ -284,7 +284,7 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
                 selectedGO = SelectionHandler.LastSuccessfulChoice.SelectedGameObject.GetComponent<StimDefPointer>().StimDef.StimGameObject;
                 Debug.Log("selected stim" + selectedGO);
                 selectedSD = selectedGO?.GetComponent<StimDefPointer>()?.GetStimDef<FeatureUncertaintyWM_MultiCompStimDef>();
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
                 if (selectedSD != null)
                     choiceMade = true;
             }

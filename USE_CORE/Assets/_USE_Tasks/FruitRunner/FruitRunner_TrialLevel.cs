@@ -118,7 +118,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             SetTrialSummaryString();
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -214,7 +214,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
             finishedPlaying = false;
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
         });
         Play.AddUpdateMethod(() =>
         {
@@ -243,7 +243,7 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
                 {
                     PlayerManager.MovementCirclesController.HandleCircleClicked(lastSuccessful);
                 }
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
             }
 
         });

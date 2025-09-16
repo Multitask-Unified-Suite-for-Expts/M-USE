@@ -493,7 +493,7 @@ namespace USE_ExperimentTemplate_Session
                 HumanVersionToggleButton.SetActive(Session.SessionDef.IsHuman);
 
                 if (SelectionHandler.AllChoices.Count > 0)
-                    SelectionHandler.ClearSelections();
+                    SelectionHandler.ClearChoices();
 
                 Session.EventCodeManager.SendCodeThisFrame("SelectTaskStarts");
 

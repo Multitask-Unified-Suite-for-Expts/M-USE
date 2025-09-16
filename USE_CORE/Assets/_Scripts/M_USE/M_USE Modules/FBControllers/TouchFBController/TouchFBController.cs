@@ -59,6 +59,7 @@ public class TouchFBController : MonoBehaviour
     public static Texture2D MovedTooFar_Texture;
     public static Texture2D NotSelectablePeriod_Texture;
 
+
     private Dictionary<string, int> Error_Dict;
 
     public int ErrorCount
@@ -141,6 +142,7 @@ public class TouchFBController : MonoBehaviour
         Handler.TouchErrorFeedback -= OnTouchErrorFeedback;
     }
 
+
     private void OnTouchErrorFeedback(object sender, TouchFeedbackArgs e)
     {
         if (e.Selection.SelectedGameObject == null || e.Selection.ParentName == "ExperimenterDisplay")
@@ -154,8 +156,6 @@ public class TouchFBController : MonoBehaviour
             }
 
             TouchErrorFeedbackEvent?.Invoke(this, e);
-
-            //Debug.LogWarning("DUR AT TOUCHFB: " + e.Selection.Duration);
 
             switch (e.Selection.ErrorType)
             {
@@ -188,7 +188,6 @@ public class TouchFBController : MonoBehaviour
 
     private void ShowTouchFeedback(TouchFeedback touchFb)
     {
-        Handler.HandlerActive = false;
         FeedbackOn = true;
         audioFBController.Play("Negative");
         if (InstantiatedGO != null)
@@ -212,7 +211,6 @@ public class TouchFBController : MonoBehaviour
             Destroy(InstantiatedGO);
             Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["TouchFBController_FeedbackOff"]);
             DeactivatePrefabs();
-            Handler.HandlerActive = true;
             FeedbackOn = false;
         }
     }

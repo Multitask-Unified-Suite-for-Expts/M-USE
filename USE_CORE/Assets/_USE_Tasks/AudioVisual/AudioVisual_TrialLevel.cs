@@ -151,7 +151,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             SetShadowType(CurrentTask.ShadowType, "AudioVisual_DirectionalLight");
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             SelectionHandler.TimeBeforeChoiceStarts = Session.SessionDef.StartButtonSelectionDuration;
             SelectionHandler.TotalChoiceDuration = Session.SessionDef.StartButtonSelectionDuration;
@@ -221,7 +221,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
             WaitCueGO.SetActive(false);
 
             if (SelectionHandler.AllChoices.Count > 0)
-                SelectionHandler.ClearSelections();
+                SelectionHandler.ClearChoices();
 
             //reset it so the duration is 0 on exp display even if had one last trial
             OngoingSelection = null;
@@ -273,7 +273,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
 
         });
         PlayerChoice.SpecifyTermination(() => SelectionMade, Feedback);
-        PlayerChoice.SpecifyTermination(() => ChoiceFailed_Trial && !TouchFBController.FeedbackOn, ITI, () =>
+        PlayerChoice.SpecifyTermination(() => ChoiceFailed_Trial, ITI, () =>
         {
             AbortCode = 8;
             //Dont need negative audio because touchfeedback (for holding too short) plays it

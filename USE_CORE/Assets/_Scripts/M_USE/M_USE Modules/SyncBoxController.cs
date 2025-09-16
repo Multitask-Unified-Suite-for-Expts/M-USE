@@ -71,6 +71,7 @@ public class SyncBoxController
                 yield return new WaitForSeconds(SecBetweenRewardPulses);
         }
 
+
     }
 
     public IEnumerator SendSonication()

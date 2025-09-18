@@ -202,7 +202,7 @@ namespace SelectionTracking
 
         public class USE_Selection
         {
-            public float? Duration, StartTime, EndTime;
+            public float? Duration;
             public int StartFrame, EndFrame;
             public GameObject SelectedGameObject;
             public StimDefPointer SelectedStimDefPointer;
@@ -224,7 +224,6 @@ namespace SelectionTracking
 
                 Duration = 0;
                 StartFrame = Time.frameCount;
-                StartTime = Time.time;
                 InputLocations = new List<Vector3>();
 
                 if(go != null)
@@ -249,13 +248,11 @@ namespace SelectionTracking
             public void UpdateSelection(Vector3 inputLocation)
             {
                 InputLocations.Add(inputLocation);
-                Duration = Time.time - StartTime;
+                Duration += Time.deltaTime;
             }
 
             public void CompleteSelection(bool success = true)
             {
-                EndTime = Time.time;
-                Duration = EndTime - StartTime;
                 WasSuccessful = success;
             }
         }
@@ -354,10 +351,6 @@ namespace SelectionTracking
                 SuccessfulChoices.Clear();
                 UnsuccessfulChoices.Clear();
                 AllChoices.Clear();
-
-                //LastChoice = new USE_Selection(null);
-                //LastSuccessfulChoice = new USE_Selection(null);
-                //LastUnsuccessfulChoice = new USE_Selection(null);
             }
 
             public bool LastSelectionMatches(GameObject go)
@@ -496,7 +489,6 @@ namespace SelectionTracking
 
                     if(OngoingSelection.Duration >= TotalChoiceDuration && !OngoingSelection.ChoiceCompleted)
                     {
-                        Debug.LogWarning("CHOICE COMPLETED ON FRAME: " + Time.frameCount);
                         OngoingSelection.ChoiceCompleted = true;
                     }
                 }
@@ -536,7 +528,7 @@ namespace SelectionTracking
                 bool? update = CheckForAllConditions(UpdateConditions);
                 string? updateErrors = CheckAllErrorTriggers("update");
 
-                if (update != null && update.Value)
+                if (update != null && update.Value) //SHOULD UPDATE
                 {
                     if (updateErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
@@ -547,6 +539,8 @@ namespace SelectionTracking
                         ChoiceFailed(updateErrors);
                     }
                 }
+                else
+                    Debug.LogWarning("--- Not going to Update ---");
             }
 
             private void CheckTermination()
@@ -562,6 +556,7 @@ namespace SelectionTracking
                     }
                     else
                     {
+                        Debug.LogWarning("TERM ERROR = " + termErrors.ToString());
                         ChoiceFailed(termErrors);
                     }
                 }
@@ -576,14 +571,12 @@ namespace SelectionTracking
                     return;
                 }
 
-                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " -------");
 
 
                 if (error != null)
                     SelectionErrorHandling(error);
 
                 OngoingSelection.CompleteSelection(false);
-                OngoingSelection.WasSuccessful = false;
                 LastUnsuccessfulChoice = OngoingSelection;
                 LastChoice = OngoingSelection;
                 AllChoices.Add(OngoingSelection);
@@ -591,6 +584,8 @@ namespace SelectionTracking
 
                 Session.EventCodeManager.SendCodeThisFrame("ChoiceFailed");
                 SelectionOnEventCodeSent = false; //reset fixation for event codes
+
+                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
 
                 OngoingSelection = null;
             }
@@ -604,7 +599,6 @@ namespace SelectionTracking
                 }
 
                 OngoingSelection.CompleteSelection(true);
-                OngoingSelection.WasSuccessful = true;
                 LastSuccessfulChoice = OngoingSelection;
                 LastChoice = OngoingSelection;
                 AllChoices.Add(OngoingSelection);
@@ -616,7 +610,12 @@ namespace SelectionTracking
                 Session.EventCodeManager.SendCodeThisFrame("ChoiceCompleted");
                 SelectionOnEventCodeSent = false; //reset fixation for event codes
 
+
+
+                Debug.LogWarning("------ CHOICE COMPLETE ON FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
+                OngoingSelection.Duration = 0; //attempting to reset the duration before setting null incase same selection/object immedietely used again.
                 OngoingSelection = null;
+
             }
 
 
@@ -681,7 +680,9 @@ namespace SelectionTracking
                     foreach (BoolDelegate bd in boolList)
                     {
                         if (bd())
+                        {
                             return true;
+                        }
                     }
                     return false;
                 }

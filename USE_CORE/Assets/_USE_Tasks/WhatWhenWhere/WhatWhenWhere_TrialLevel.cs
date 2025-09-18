@@ -581,8 +581,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void HandleCompletedSequence()
     {
-        Debug.LogWarning("HANDLING COMPLETED SEQUENCE");
-
         runningAcc.Add(1);
         completedSequences_InTrial += 1;
         CurrentTaskLevel.CompletedSequences_InBlock++;
@@ -795,7 +793,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     }
     private void DefineFrameData() //All ".AddDatum" commands for Frame Data
     {
-        FrameData.AddDatum("ContextName", () => ContextName);
+        FrameData.AddDatum("OngoingSelectionDuration", () => OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeSelf ? "Active" : "NotActive");
         FrameData.AddDatum("SearchStimuliShown", () => searchStims?.IsActive);
         FrameData.AddDatum("DistractorStimuliShown", () => distractorStims?.IsActive);

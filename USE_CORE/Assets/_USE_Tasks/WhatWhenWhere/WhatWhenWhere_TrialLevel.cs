@@ -825,7 +825,7 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             if (!Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
                 textLocation.y += 75;
 
-            if(iStim == 0)
+            if(iStim == 1)
                 Debug.LogWarning("TEXT POSITION = " + textLocation.ToString());
 
             playerViewText = playerView.CreateTextObject(CurrentTrial.CorrectObjectTouchOrder[iStim].ToString(),

@@ -75,6 +75,14 @@ namespace SelectionTracking
                 {
                     ActiveSelectionHandlers[key].UpdateSelections();
                 }
+                else
+                {
+                    if (ActiveSelectionHandlers[key].OngoingSelection != null)
+                    {
+                        Debug.LogWarning("SEL HANDLER IS INACTIVE BUT HAD AN ONGOING SELECTION SO IVE SET IT TO NULL");
+                        ActiveSelectionHandlers[key].OngoingSelection = null;
+                    }
+                }
             }
         }
 
@@ -540,7 +548,7 @@ namespace SelectionTracking
                     }
                 }
                 else
-                    Debug.LogWarning("--- Not going to Update ---");
+                    Debug.LogWarning("--- NOT GOING TO UPDATE AGAIN, CONDITIONS FAILED ---");
             }
 
             private void CheckTermination()

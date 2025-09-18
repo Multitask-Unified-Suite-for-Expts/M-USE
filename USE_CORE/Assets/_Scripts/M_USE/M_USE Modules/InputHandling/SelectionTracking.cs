@@ -540,7 +540,7 @@ namespace SelectionTracking
                     }
                 }
                 else
-                    Debug.LogWarning("Not going to Update");
+                    Debug.LogWarning("--- Not going to Update ---");
             }
 
             private void CheckTermination()
@@ -550,14 +550,13 @@ namespace SelectionTracking
 
                 if (term != null && term.Value)
                 {
-                    Debug.LogWarning("TERM? " + term.Value);
-
                     if (termErrors == null) // update condition is true (e.g. mouse button is being held down)
                     {
                         ChoiceComplete();
                     }
                     else
                     {
+                        Debug.LogWarning("TERM ERROR = " + termErrors.ToString());
                         ChoiceFailed(termErrors);
                     }
                 }
@@ -572,14 +571,12 @@ namespace SelectionTracking
                     return;
                 }
 
-                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration + " -------");
 
 
                 if (error != null)
                     SelectionErrorHandling(error);
 
                 OngoingSelection.CompleteSelection(false);
-                OngoingSelection.WasSuccessful = false;
                 LastUnsuccessfulChoice = OngoingSelection;
                 LastChoice = OngoingSelection;
                 AllChoices.Add(OngoingSelection);
@@ -587,6 +584,8 @@ namespace SelectionTracking
 
                 Session.EventCodeManager.SendCodeThisFrame("ChoiceFailed");
                 SelectionOnEventCodeSent = false; //reset fixation for event codes
+
+                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
 
                 OngoingSelection = null;
             }
@@ -598,10 +597,8 @@ namespace SelectionTracking
                     OngoingSelection = null;
                     return;
                 }
-                Debug.LogWarning("------ CHOICE COMPLETE ON FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration + " -------");
 
                 OngoingSelection.CompleteSelection(true);
-                OngoingSelection.WasSuccessful = true;
                 LastSuccessfulChoice = OngoingSelection;
                 LastChoice = OngoingSelection;
                 AllChoices.Add(OngoingSelection);
@@ -613,7 +610,12 @@ namespace SelectionTracking
                 Session.EventCodeManager.SendCodeThisFrame("ChoiceCompleted");
                 SelectionOnEventCodeSent = false; //reset fixation for event codes
 
+
+
+                Debug.LogWarning("------ CHOICE COMPLETE ON FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
+                OngoingSelection.Duration = 0; //attempting to reset the duration before setting null incase same selection/object immedietely used again.
                 OngoingSelection = null;
+
             }
 
 
@@ -678,7 +680,9 @@ namespace SelectionTracking
                     foreach (BoolDelegate bd in boolList)
                     {
                         if (bd())
+                        {
                             return true;
+                        }
                     }
                     return false;
                 }

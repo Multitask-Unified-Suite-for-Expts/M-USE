@@ -360,9 +360,9 @@ namespace SelectionTracking
                 UnsuccessfulChoices.Clear();
                 AllChoices.Clear();
 
-                LastSuccessfulChoice = null;
-                LastUnsuccessfulChoice = null;
-                LastChoice = null;
+                LastSuccessfulChoice = new USE_Selection(null);
+                LastUnsuccessfulChoice = new USE_Selection(null);
+                LastChoice = new USE_Selection(null);
             }
 
             public bool LastSelectionMatches(GameObject go)

@@ -393,7 +393,7 @@ namespace SelectionTracking
             //Main method used by tasks to check if selection matches start button:
             public bool LastSuccessfulSelectionMatchesStartButton()
             {
-                if(LastSuccessfulChoice.SelectedGameObject != null)
+                if(LastSuccessfulChoice != null && LastSuccessfulChoice.SelectedGameObject != null)
                 {
                     if (LastSuccessfulChoice.SelectedGameObject.name == "StartButton_TransparentFront")
                         return true;
@@ -475,10 +475,13 @@ namespace SelectionTracking
 
 
                 //Send EventCode if there's a New Target
-                if (currentTarget != null && !SelectionOnEventCodeSent && LastChoice.SelectedGameObject != currentTarget) //The last AND is so that it wont send if selection is made. 
+                if (currentTarget != null && !SelectionOnEventCodeSent) //The last AND is so that it wont send if selection is made. 
                 {
-                    Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "SelectionOn");
-                    SelectionOnEventCodeSent = true;
+                    if(LastChoice != null && LastChoice.SelectedGameObject != null && LastChoice.SelectedGameObject != currentTarget)
+                    {
+                        Session.EventCodeManager.CheckForAndSendEventCode(currentTarget, "SelectionOn");
+                        SelectionOnEventCodeSent = true;
+                    }
                 }
 
                 //We have a target so see if should start a onging selection

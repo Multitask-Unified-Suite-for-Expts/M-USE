@@ -359,6 +359,10 @@ namespace SelectionTracking
                 SuccessfulChoices.Clear();
                 UnsuccessfulChoices.Clear();
                 AllChoices.Clear();
+
+                LastSuccessfulChoice = null;
+                LastUnsuccessfulChoice = null;
+                LastChoice = null;
             }
 
             public bool LastSelectionMatches(GameObject go)

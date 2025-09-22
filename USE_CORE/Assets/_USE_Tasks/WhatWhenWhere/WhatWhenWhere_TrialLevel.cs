@@ -289,8 +289,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (!Session.WebBuild)
             {
-                if (GameObject.Find("MainCameraCopy").transform.childCount == 0)
-                    CreateTextOnExperimenterDisplay();
+                if(playerViewParent != null)
+                {
+                    if(playerViewParent.transform.childCount == 0)
+                        CreateTextOnExperimenterDisplay();
+                    else
+                        Debug.LogWarning("MAINCAMERACOPY HAS " + playerViewParent.transform.childCount.ToString() + " CHILDREN ");
+                }
+                else
+                    Debug.LogWarning("COULD NOT FIND MainCameraCopy GAME OBJECT");
             }
 
 
@@ -817,6 +824,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateTextOnExperimenterDisplay()
     {
+        Debug.LogWarning("CREATING TEXT ON EXPERIMENTER DISPLAY");
+
         for (int iStim = 0; iStim < CurrentTrial.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display

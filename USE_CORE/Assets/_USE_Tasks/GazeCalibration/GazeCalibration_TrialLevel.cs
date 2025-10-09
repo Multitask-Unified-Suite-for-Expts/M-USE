@@ -75,7 +75,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     // Game Objects
     private USE_Circle CalibCircle;
-    private GameObject PlayerViewPanelGO;
+    private GameObject PlayerViewGO;
     private PlayerViewPanel PlayerViewPanel;
     private GameObject ResultContainer;
 
@@ -116,15 +116,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            // Create necessary variables to display text onto the Experimenter Display
-            if (!Session.WebBuild)
-            {
-                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
-                PlayerViewPanelGO = GameObject.Find("MainCameraCopy");
-            }
-
             GC_CanvasGO = GameObject.Find("GazeCalibration_Canvas");
-
+            if (GC_CanvasGO == null)
+                Debug.LogError("CANT FIND GAZE CANVAS");
 
             if (Session.GazeCalibrationController.InTaskGazeCalibration)
                 TrialCount_InTask = Session.GazeCalibrationController.InTaskGazeCalibration_TrialCount_InTask;
@@ -358,7 +352,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
         ITI.AddSpecificInitializationMethod(() =>
         {
             CalibCircle.CircleGO.SetActive(false);
-            DestroyChildren(ResultContainer);
+            DestroyChildren(PlayerViewGO);
         });
         ITI.SpecifyTermination(() => true, FinishTrial);
 
@@ -525,7 +519,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
     private void CreateResultContainer()
     {
         ResultContainer = new GameObject("ResultContainer", typeof(Canvas), typeof(CanvasRenderer));
-        ResultContainer.transform.parent = PlayerViewPanelGO.transform;
+        ResultContainer.transform.parent = PlayerViewGO.transform;
         ResultContainer.GetComponent<RectTransform>().sizeDelta = ResultContainer.transform.parent.GetComponent<RectTransform>().sizeDelta;
         ResultContainer.GetComponent<RectTransform>().anchorMin = Vector3.zero;
         ResultContainer.GetComponent<RectTransform>().anchorMax = Vector3.zero;

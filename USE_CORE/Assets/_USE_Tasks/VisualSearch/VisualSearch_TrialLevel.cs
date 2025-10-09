@@ -60,8 +60,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     VisualSearch_StimDef selectedSD;
     
     //Player View Variables
-    private PlayerViewPanel playerView;
-    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     private GameObject playerViewText;
     private Vector2 textLocation;
 
@@ -99,8 +97,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (!Session.WebBuild)
             {
-                playerView = gameObject.AddComponent<PlayerViewPanel>();
-                playerViewParent = GameObject.Find("MainCameraCopy");
+                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                PlayerViewGO = GameObject.Find("MainCameraCopy");
             }
 
             if (Session.SessionDef.IsHuman)
@@ -434,8 +432,8 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         if(!Session.WebBuild)
         {
-            if (playerViewParent.transform.childCount != 0)
-                DestroyChildren(playerViewParent);
+            if (PlayerViewGO.transform.childCount != 0)
+                DestroyChildren(PlayerViewGO);
         }
 
         searchStim.ToggleVisibility(false);
@@ -455,7 +453,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     }
     private void DestroyTextOnExperimenterDisplay()
     {
-        DestroyChildren(playerViewParent);
+        DestroyChildren(PlayerViewGO);
     }
 
     public void ResetBlockVariables()
@@ -554,11 +552,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.IsTarget)
             {
-                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), PlayerViewGO.transform);
                 textLocation.y += 50;
                 Vector3 textSize = new Vector3(2,2,1);
-                playerViewText = playerView.CreateTextObject("TargetText","TARGET",
-                    Color.red, textLocation, textSize, playerViewParent.transform);
+                playerViewText = PlayerViewPanel.CreateTextObject("TargetText","TARGET",
+                    Color.red, textLocation, textSize, PlayerViewGO.transform);
                 playerViewText.SetActive(true);
             }
         }

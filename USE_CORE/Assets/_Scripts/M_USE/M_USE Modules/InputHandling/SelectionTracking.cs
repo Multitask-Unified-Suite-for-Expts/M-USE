@@ -531,8 +531,6 @@ namespace SelectionTracking
                 {
                     if (initErrors == null)
                     {
-                        Debug.LogWarning("------ NEW ONGOING SELECTION AT FRAME: " + Time.frameCount + " -------");
-
                         OngoingSelection = new USE_Selection(currentTarget); // start a new ongoing selection
                     }
                 }
@@ -554,8 +552,6 @@ namespace SelectionTracking
                         ChoiceFailed(updateErrors);
                     }
                 }
-                else
-                    Debug.LogWarning("--- NOT GOING TO UPDATE AGAIN, CONDITIONS FAILED ---");
             }
 
             private void CheckTermination()

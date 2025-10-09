@@ -24,20 +24,19 @@ SOFTWARE.
 
 
 
-using UnityEngine;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using ConfigDynamicUI;
+using ContinuousRecognition_Namespace;
+using TMPro;
+using UnityEngine;
+using USE_ExperimentTemplate_Trial;
 using USE_States;
 using USE_StimulusManagement;
-using ContinuousRecognition_Namespace;
-using System;
-using Random = UnityEngine.Random;
-using ConfigDynamicUI;
-using USE_ExperimentTemplate_Trial;
-using System.Linq;
-using TMPro;
-using System.Collections;
-using UnityEngine.UI;
 using static SelectionTracking.SelectionTracker;
+using Random = UnityEngine.Random;
 
 
 public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
@@ -102,8 +101,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     private int NumPC_Trial, NumNew_Trial, NumPNC_Trial;
 
-    private PlayerViewPanel playerView;
-    private GameObject playerViewParent, playerViewText;
+    private GameObject playerViewText;
     [HideInInspector] public List<GameObject> playerViewTextList;
     
     //Config Variables
@@ -136,8 +134,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (!Session.WebBuild)
             {
-                playerView = gameObject.AddComponent<PlayerViewPanel>();
-                playerViewParent = GameObject.Find("MainCameraCopy");
+                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                PlayerViewGO = GameObject.Find("MainCameraCopy");
                 playerViewTextList = new List<GameObject>();
             }
 
@@ -706,7 +704,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         for(int i=0; i < CurrentTrial.NumTrialStims; ++i)
         {
             Debug.Log("**CURRENT TRIAL NUM TRIAL STIMS: " + CurrentTrial.NumTrialStims + " || STIM DEFS: " + trialStims.stimDefs.Count);
-            Vector2 textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), playerViewParent.transform);
+            Vector2 textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(trialStims.stimDefs[i].StimLocation), PlayerViewGO.transform);
             textLocation.y += 50;
             Vector2 textSize = new Vector2(200, 200);
             string stimString = "Target";
@@ -714,7 +712,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (currentStim.PreviouslyChosen)
                 stimString = "PC";
 
-            playerViewText = playerView.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, playerViewParent.transform);
+            playerViewText = PlayerViewPanel.CreateTextObject(stimString, stimString, stimString == "PC" ? Color.red : Color.green, textLocation, textSize, PlayerViewGO.transform);
             playerViewText.GetComponent<RectTransform>().localScale = new Vector3(1.1f, 1.1f, 0);
             playerViewTextList.Add(playerViewText);
             playerViewText.SetActive(true);

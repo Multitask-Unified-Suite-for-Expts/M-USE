@@ -70,8 +70,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public ConfigNumber itiDuration;
     
     //Player View Variables
-    private PlayerViewPanel playerView;
-    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     public List<GameObject> playerViewTextList = new List<GameObject>();
     public GameObject playerViewText;
     private Vector2 textLocation;
@@ -111,8 +109,8 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         {
             if (!Session.WebBuild) //player view variables
             {
-                playerView = gameObject.AddComponent<PlayerViewPanel>();
-                playerViewParent = GameObject.Find("MainCameraCopy");
+                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                PlayerViewGO = GameObject.Find("MainCameraCopy");
             }
 
             if (Session.SessionDef.IsHuman)
@@ -588,11 +586,11 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             {
                 if (stim.IsTarget)
                 {
-                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                    textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), PlayerViewGO.transform);
                     textLocation.y += 50;
                     Vector2 textSize = new Vector2(200, 200);
-                    playerViewText = playerView.CreateTextObject("TargetText","TARGET",
-                        Color.red, textLocation, textSize, playerViewParent.transform);
+                    playerViewText = PlayerViewPanel.CreateTextObject("TargetText","TARGET",
+                        Color.red, textLocation, textSize, PlayerViewGO.transform);
                     playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
                     playerViewTextList.Add(playerViewText);
                     playerViewLoaded = true;

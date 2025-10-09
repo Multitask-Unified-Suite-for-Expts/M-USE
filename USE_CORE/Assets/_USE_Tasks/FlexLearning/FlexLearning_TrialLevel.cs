@@ -75,11 +75,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
     
     
     //Player View Variables
-    private PlayerViewPanel playerView;
-    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
     private GameObject playerViewText;
     private Vector2 textLocation;
-    private bool playerViewLoaded;
    
     // Block Data Variables
     [HideInInspector] public string ContextName = "";
@@ -119,8 +116,8 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if(!Session.WebBuild)
             {
-                playerView = gameObject.AddComponent<PlayerViewPanel>();
-                playerViewParent = GameObject.Find("MainCameraCopy");     
+                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                PlayerViewGO = GameObject.Find("MainCameraCopy");     
             }
 
             if (Session.SessionDef.IsHuman)
@@ -218,7 +215,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             TokenFBController.enabled = true;
 
             if (!Session.WebBuild)
-                ActivateChildren(playerViewParent);
+                ActivateChildren(PlayerViewGO);
 
             Session.EventCodeManager.SendCodeThisFrame("TokenBarVisible");
             
@@ -578,21 +575,19 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
         {
             if (stim.IsTarget)
             {
-                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), playerViewParent.transform);
+                textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(stim.StimLocation), PlayerViewGO.transform);
                 textLocation.y += 50;
                 Vector3 textSize = new Vector3(2, 2,1);
-                playerViewText = playerView.CreateTextObject("TargetText","TARGET",
-                    Color.red, textLocation, textSize, playerViewParent.transform);                
+                playerViewText = PlayerViewPanel.CreateTextObject("TargetText","TARGET",
+                    Color.red, textLocation, textSize, PlayerViewGO.transform);                
                 playerViewText.SetActive(true);
             }
         }
-        playerViewLoaded = true;
     }
     private void DestroyTextOnExperimenterDisplay()
     {
-        DestroyChildren(playerViewParent);
+        DestroyChildren(PlayerViewGO);
         playerViewText = null;
-        playerViewLoaded = false;
     }
     void LoadConfigUIVariables()
     {

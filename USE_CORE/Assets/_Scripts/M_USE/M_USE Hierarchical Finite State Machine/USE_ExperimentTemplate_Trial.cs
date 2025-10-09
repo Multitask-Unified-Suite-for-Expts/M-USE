@@ -142,6 +142,13 @@ namespace USE_ExperimentTemplate_Trial
 
 
 
+        //Player View Variables
+        [HideInInspector] public PlayerViewPanel PlayerViewPanel;
+        [HideInInspector] public GameObject PlayerViewGO;
+
+
+
+
         public virtual void DefineCustomTrialDefSelection()
         {
         }
@@ -252,6 +259,16 @@ namespace USE_ExperimentTemplate_Trial
                 
                 TrialStims = new List<StimGroup>();
                 AudioFBController?.UpdateAudioSource();
+
+
+                if (!Session.WebBuild) //player view variables
+                {
+                    PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                    PlayerViewGO = GameObject.Find("MainCameraCopy");
+                    if (PlayerViewGO == null)
+                        Debug.LogWarning("PLAYER VIEW PARENT IS NULL (could not find gameobject named MainCameraCopy");
+                }
+
             });
 
             LoadTrialTextures.AddUniversalInitializationMethod(() =>

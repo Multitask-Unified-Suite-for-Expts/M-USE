@@ -33,8 +33,8 @@ using ConfigDynamicUI;
 using System.Linq;
 using System.IO;
 using USE_ExperimentTemplate_Trial;
-using USE_ExperimentTemplate_Task;
 using System.Collections;
+
 
 public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 {
@@ -94,18 +94,9 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
     private float searchDurationStartTime;
     
     // misc variables
-    private bool variablesLoaded;
     private bool choiceMade = false;
     private int sliderGainSteps, sliderLossSteps;
     
-
-    //Player View Variables
-    private PlayerViewPanel playerView;
-    private GameObject playerViewParent; // Helps set things onto the player view in the experimenter display
-    public List<GameObject> playerViewTextList;
-    public GameObject playerViewText;
-    private Vector2 textLocation;
-    private bool playerViewLoaded;
 
     // Stimuli Variables
     private GameObject StartButton;
@@ -155,30 +146,20 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             if (StartButton == null)
                 InitializeStartButton(InitTrial, InitTrial);
-
-            if (!Session.WebBuild) //player view variables
-            {
-                playerView = gameObject.AddComponent<PlayerViewPanel>();
-                playerViewParent = GameObject.Find("MainCameraCopy");
-            }
-
         });
 
         SetupTrial.AddSpecificInitializationMethod(() =>
         {
             SequenceManager.ResetNumCorrectChoices();
 
-            if (!variablesLoaded)
-            {
-                variablesLoaded = true;
-                LoadConfigUiVariables();
-            }
-
+            LoadConfigUiVariables();
+            
             if (CurrentTrial.LeaveFeedbackOn)
                 HaloFBController.SetLeaveFeedbackOn(true);
 
             //Set the Stimuli Light/Shadow settings
             SetShadowType(CurrentTask.ShadowType, "WhatWhenWhere_DirectionalLight");
+
             if (CurrentTask.StimFacingCamera)
                 MakeStimFaceCamera();
 
@@ -262,6 +243,15 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             //reset at start of each trial:
             foreach (WhatWhenWhere_StimDef stim in searchStims.stimDefs)
                 stim.WasCorrectlyChosen = false;
+
+
+
+            if (!Session.WebBuild)
+            {
+                if (PlayerViewGO.transform.childCount != 0)
+                    DestroyChildren(PlayerViewGO); //Destroy leftover children in case gaze or something else left them. 
+            }
+
         });
         
         FlashNextCorrectStim.AddSpecificInitializationMethod(() =>
@@ -276,7 +266,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
         // Define ChooseStimulus state - Stimulus are shown and the user must select the correct object in the correct sequence
         ChooseStimulus.AddSpecificInitializationMethod(() =>
         {
-
             //For testing the dialogue controller:
             //DialogueController.CreateDialogueBox("Last Trial!", 500f);
 
@@ -287,18 +276,18 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
             searchDurationStartTime = Time.time;
 
+
             if (!Session.WebBuild)
             {
-                if(playerViewParent != null)
+                if(PlayerViewGO != null)
                 {
-                    if(playerViewParent.transform.childCount == 0)
+                    if(PlayerViewGO.transform.childCount == 0)
                         CreateTextOnExperimenterDisplay();
                     else
-                        Debug.LogWarning("MAINCAMERACOPY HAS " + playerViewParent.transform.childCount.ToString() + " CHILDREN ");
+                        Debug.LogWarning("MAINCAMERACOPY HAS " + PlayerViewGO.transform.childCount.ToString() + " CHILDREN ");
                 }
-                else
-                    Debug.LogWarning("COULD NOT FIND MainCameraCopy GAME OBJECT");
             }
+
 
 
             //Create the masks if neccessary:
@@ -385,7 +374,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (selectedSD != null)
                 {
                     choiceMade = true;
-                    Debug.LogWarning("--- WWW CHOICE MADE ---");
 
                     SequenceManager.SetSelectedGO(selectedGO);
                     SequenceManager.SetSelectedSD(selectedSD);
@@ -407,7 +395,6 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                 if (selectedSD != null)
                 {
                     ChoiceFailed_Trial = true;
-                    Debug.LogWarning("--- WWW CHOICE FAILED (trial aborted) DUE TO NOT SELECTING LONG ENOUGH ---");
                 }
                 else
                     Debug.LogWarning("SELECTED SOMETHING THAT WAS NOT A STIM ***********");
@@ -666,8 +653,8 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         if(!Session.WebBuild)
         {
-            if (playerViewParent.transform.childCount != 0)
-                DestroyChildren(GameObject.Find("MainCameraCopy"));
+            if (PlayerViewGO != null && PlayerViewGO.transform.childCount != 0)
+                DestroyChildren(PlayerViewGO);
         }
 
         searchStims.ToggleVisibility(false);
@@ -824,24 +811,25 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateTextOnExperimenterDisplay()
     {
-        Debug.LogWarning("CREATING TEXT ON EXPERIMENTER DISPLAY");
+
+        Vector2 textLocation = new Vector2();
+        GameObject playerViewTextGO = new GameObject();
 
         for (int iStim = 0; iStim < CurrentTrial.CorrectObjectTouchOrder.Length; ++iStim)
         {
             //Create corresponding text on player view of experimenter display
-            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), playerViewParent.transform);
+            textLocation = ScreenToPlayerViewPosition(Camera.main.WorldToScreenPoint(searchStims.stimDefs[iStim].StimLocation), PlayerViewGO.transform);
 
-            if (!Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
-                textLocation.y += 75;
+            textLocation.y += 75;
 
             if(iStim == 1)
                 Debug.LogWarning("TEXT POSITION = " + textLocation.ToString());
 
-            playerViewText = playerView.CreateTextObject(CurrentTrial.CorrectObjectTouchOrder[iStim].ToString(),
+            playerViewTextGO = PlayerViewPanel.CreateTextObject(CurrentTrial.CorrectObjectTouchOrder[iStim].ToString(),
                 (CurrentTrial.CorrectObjectTouchOrder[iStim]).ToString(),
-                Color.red, textLocation, new Vector2(200, 200), playerViewParent.transform);
-            playerViewText.SetActive(true);
-            playerViewText.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
+                Color.red, textLocation, new Vector2(200, 200), PlayerViewGO.transform);
+            playerViewTextGO.SetActive(true);
+            playerViewTextGO.GetComponent<RectTransform>().localScale = new Vector3(2, 2, 0);
         }
     }
     void LoadConfigUiVariables()

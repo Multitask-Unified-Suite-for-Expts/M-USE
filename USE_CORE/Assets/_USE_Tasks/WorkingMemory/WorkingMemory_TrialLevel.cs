@@ -107,12 +107,6 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if (!Session.WebBuild) //player view variables
-            {
-                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
-                PlayerViewGO = GameObject.Find("MainCameraCopy");
-            }
-
             if (Session.SessionDef.IsHuman)
             {
                 Session.TimerController.CreateTimer(WM_CanvasGO.transform);

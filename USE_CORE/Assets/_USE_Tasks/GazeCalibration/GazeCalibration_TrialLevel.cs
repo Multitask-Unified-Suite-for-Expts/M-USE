@@ -75,8 +75,6 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     // Game Objects
     private USE_Circle CalibCircle;
-    private GameObject PlayerViewGO;
-    private PlayerViewPanel PlayerViewPanel;
     private GameObject ResultContainer;
 
     // Tobii SDK Variables 
@@ -518,6 +516,9 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateResultContainer()
     {
+        if (PlayerViewGO == null)
+            Debug.LogWarning("PLAYER VIEW GO IS NULL WHEN TRYING TO SETUP RESULTS CONTAINER FOR GAZE");
+
         ResultContainer = new GameObject("ResultContainer", typeof(Canvas), typeof(CanvasRenderer));
         ResultContainer.transform.parent = PlayerViewGO.transform;
         ResultContainer.GetComponent<RectTransform>().sizeDelta = ResultContainer.transform.parent.GetComponent<RectTransform>().sizeDelta;

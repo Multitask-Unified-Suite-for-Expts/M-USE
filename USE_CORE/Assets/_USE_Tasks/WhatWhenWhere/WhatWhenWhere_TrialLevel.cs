@@ -806,6 +806,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
                              "\nAvg Search Duration: " + CurrentTaskLevel.CalculateAverageDuration(searchDurations_InTrial) +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
 
+        if (TrialStimulationCode > 0)
+        {
+            TrialSummaryString += "\nStimulationCode: " + TrialStimulationCode.ToString();
+        }
+
     }
 
 

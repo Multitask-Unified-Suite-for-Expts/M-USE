@@ -210,9 +210,12 @@ public static class ServerManager //Used with the PHP scripts
         {
             string result = request.downloadHandler.text;
             Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
-
+            
             if (result == "File not found")
+            {
+                Debug.LogWarning("FOLDER PATH: " + folderPath + " | SEARCH STRING = " + searchString);
                 callback?.Invoke(null);
+            }
             else
                 callback?.Invoke(result);
         }

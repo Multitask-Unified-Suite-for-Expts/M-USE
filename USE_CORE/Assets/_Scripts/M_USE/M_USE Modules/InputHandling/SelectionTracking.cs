@@ -583,7 +583,6 @@ namespace SelectionTracking
                 }
 
 
-
                 if (error != null)
                     SelectionErrorHandling(error);
 

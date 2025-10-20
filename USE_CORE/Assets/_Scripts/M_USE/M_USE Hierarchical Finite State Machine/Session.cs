@@ -40,7 +40,19 @@ using USE_UI;
 
 public static class Session
 {
+    public static string Prolific_ConfigFolderName = "";
+    public static string Prolific_PlayerID = "";
+
+
     public static bool WebBuild;
+    public static bool Prolific_WebBuild
+    {
+        get
+        {
+            return WebBuild && !string.IsNullOrEmpty(Prolific_PlayerID);
+        }
+    }
+
     public static bool Using2DStim;
 
     public static readonly string DefaultStimFolderPath = "DefaultResources/Stimuli";

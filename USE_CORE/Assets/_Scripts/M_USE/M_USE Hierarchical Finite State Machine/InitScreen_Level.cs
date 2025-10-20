@@ -97,7 +97,17 @@ public class InitScreen_Level : ControlLevel
 
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
-        Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
+        Setup.AddSpecificInitializationMethod(() =>
+        {
+            SetupInitScreen();
+
+            if(Session.Prolific_WebBuild)
+            {
+                SetProlificInfo();
+
+                StartCoroutine(TestServerConnection());
+            }
+        });
         Setup.SpecifyTermination(() => true, WaitForStartPressed, () =>
         {
             MuseTextParentGO.SetActive(true);
@@ -116,6 +126,12 @@ public class InitScreen_Level : ControlLevel
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
         CollectInfoScreen.AddSpecificInitializationMethod(() =>
         {
+            if(Session.Prolific_WebBuild)
+            {
+                ConfirmButtonPressed = true;
+                return;
+            }
+
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen  
             MainPanel_GO.SetActive(true);
@@ -136,10 +152,12 @@ public class InitScreen_Level : ControlLevel
         CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
-            Session.SubjectID = GetSubjectID();
-            Session.SubjectAge = GetSubjectAge();
-            SetConfigInfo();
-            SetDataInfo();
+
+            if(!Session.Prolific_WebBuild)
+            {
+                SetConfigInfo();
+                SetDataInfo();
+            }
 
             InitScreen_GO.SetActive(false);
 
@@ -147,6 +165,25 @@ public class InitScreen_Level : ControlLevel
 
         });
 
+    }
+
+    private void SetProlificInfo()
+    {
+        ServerManager.ServerURL = "https://m-use.psy.vanderbilt.edu/UnityFolder";
+
+        //Set Data info:
+        Session.StoringDataOnServer = true;
+        ServerManager.RootDataFolder = "DATA"; //Maybe change if folder on server changes
+        Session.SubjectID = Session.Prolific_PlayerID;
+        Session.SubjectAge = ""; //setting empty since dont know prolific subject age
+
+
+        //Set Config Info:
+        Session.UsingServerConfigs = true;
+        ServerManager.SetSessionConfigFolderName(Session.Prolific_ConfigFolderName); //SET AS PROLIFIC NAME
+        Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
+
+        Debug.LogWarning("CONFIG FLDER PATH = " + Session.ConfigFolderPath);
     }
 
     private IEnumerator FadeScreenInCoroutine()
@@ -265,6 +302,9 @@ public class InitScreen_Level : ControlLevel
 
     private void SetDataInfo()
     {
+        Session.SubjectID = GetSubjectID();
+        Session.SubjectAge = GetSubjectAge();
+
         if (LocalData_Toggle.isOn)
         {
             Session.StoringDataLocally = true;
@@ -505,8 +545,14 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
+                Debug.LogWarning("SUCCESSFULLY CONNECTED TO SERVER");
+
                 Session.SessionAudioController.PlayAudioClip("Connected");
                 ConnectedToServer = true;
+
+                if(Session.Prolific_WebBuild)
+                    return;
+                
                 if(ServerConfig_Toggle.isOn)
                     GreyOutPanels_Array[2].SetActive(false);
                 if(ServerData_Toggle.isOn)
@@ -523,8 +569,12 @@ public class InitScreen_Level : ControlLevel
             {
                 Debug.LogWarning("UNABLE TO CONNECT TO SERVER!");
                 Session.SessionAudioController.PlayAudioClip("Error");
+
+                if (Session.Prolific_WebBuild)
+                    return;
+
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
-                RedX_GO.SetActive(true);
+                RedX_GO.SetActive(true);                
             }
         });
     }

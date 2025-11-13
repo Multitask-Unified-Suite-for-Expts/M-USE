@@ -641,6 +641,7 @@ public class GazeCalibration_TrialLevel : ControlLevel_Trial_Template
 
     private void OnApplicationQuit()
     {
+        Debug.LogWarning("GAZE ON APP QUIT");
         TurnOffCalibration();
     }
 

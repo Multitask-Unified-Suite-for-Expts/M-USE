@@ -198,7 +198,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUIVariables();
 
             //Set timer duration for the trial:
-            if (Session.SessionDef.IsHuman)
+            if (CurrentTrial.UseTimer)
             {
                 Session.TimerController.CreateTimer(CR_CanvasGO.transform);
                 Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
@@ -487,17 +487,25 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
                     }
                     else
+                    {
                         TokenFBController.AddTokens(ChosenGO, CurrentTrial.TokenGain);
+                    }
                 }
                 else
+                {
                     SliderFBController.UpdateSliderValue((float)(CurrentTrial.SliderChange / 100f));
+                }
             }
             else //Got wrong
             {
                 if(Session.SessionDef.IsHuman)
+                {
                     TokenFBController.RemoveTokens(ChosenGO,CurrentTrial.TokenLoss);
+                }
                 else
+                {
                     SliderFBController.UpdateSliderValue(-(float)(CurrentTrial.SliderChange / 100f));
+                }
                 numPulsesTrial = 0;
                 EndBlock = true;
             }

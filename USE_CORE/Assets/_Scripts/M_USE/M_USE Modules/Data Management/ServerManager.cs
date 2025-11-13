@@ -34,7 +34,7 @@ using UnityEngine.Networking;
 
 public static class ServerManager //Used with the PHP scripts
 {
-    public static string ServerURL = ""; //input into initscreen. can eventually remove the value. 
+    public static string ServerURL = "https://m-use.psy.vanderbilt.edu/UnityFolder/";
 
     public static readonly string ServerStimFolderPath = "Resources/Stimuli"; //path to stim folder. currently just having them set it up this way. 
     public static readonly string ServerContextFolderPath = "Resources/Contexts"; //path to contexts folder. currently just having them set it up this way. 
@@ -67,25 +67,29 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator TestServerConnection(Action<bool> callback)
     {
-        if (TestURL())
+        if (!TestURL())
         {
-            string url = $"{ServerURL}/testConnection.php";
-            using UnityWebRequest request = UnityWebRequest.Get(url);
-            yield return request.SendWebRequest();
+            callback?.Invoke(false);
+            yield break;
+        }
 
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                Debug.Log("Server connection test successful!");
-                callback?.Invoke(true);
-            }
-            else
-            {
-                Debug.LogWarning($"URL = {url} | SERVER CONNECTION TEST FAILED! ERROR: {request.error}");
-                callback?.Invoke(false);
-            }
+        string url = $"{ServerURL}/testConnection.php";
+
+        using UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment"); // required for WebGL
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Server connection test successful!");
+            callback?.Invoke(true);
         }
         else
+        {
+            Debug.LogWarning($"URL = {url} | SERVER CONNECTION TEST FAILED! ERROR: {request.error}");
             callback?.Invoke(false);
+        }
     }
 
     public static bool TestURL()
@@ -101,6 +105,7 @@ public static class ServerManager //Used with the PHP scripts
             return false;
         }
     }
+
 
     public static IEnumerator LoadAudioFromServer(string filePath, Action<AudioClip> callback)
     {
@@ -123,39 +128,52 @@ public static class ServerManager //Used with the PHP scripts
 
     public static IEnumerator CreateFolder(string folderPath)
     {
-        string url = $"{ServerURL}/createFolder.php?path={folderPath}";
+        string url = $"{ServerURL}/createFolder.php";
         WWWForm formData = new WWWForm();
         formData.AddField("path", folderPath);
+
         using (UnityWebRequest request = UnityWebRequest.Post(url, formData))
         {
+            request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment");
             yield return request.SendWebRequest();
-            Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFolder Request: {request.downloadHandler.text} | FolderPath: {folderPath}" : $"ERROR CREATING FOLDER | Error: {request.error}");
+
+            Debug.Log(request.result == UnityWebRequest.Result.Success ?
+                $"Folder created successfully: {folderPath}" :
+                $"ERROR CREATING FOLDER | Error: {request.error}");
         }
+
         foldersCreatedList.Add(folderPath);
     }
+
 
     public static IEnumerator GetSessionConfigFolders(Action<List<string>> callback)
     {
         string url = $"{ServerURL}/getFolderNames.php?directoryPath={RootConfigFolder}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment"); // required for WebGL
         var operation = request.SendWebRequest();
         yield return operation;
 
         if (request.result == UnityWebRequest.Result.Success)
         {
-            Debug.Log("Successfully got the folder names from the server!");
+            Debug.LogWarning("Successfully got the folder names from the server!");
             string plainTextResponse = request.downloadHandler.text;
-            string[] folderNameArray = plainTextResponse.Split(',');
+
+            // Split by comma using char array to avoid Unity string.Split issues
+            string[] folderNameArray = plainTextResponse.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
             List<string> folderNames = new List<string>(folderNameArray);
             callback?.Invoke(folderNames);
         }
         else
         {
-            Debug.Log($"An error occurred while getting folder names. Error: {request.error}");
+            Debug.LogWarning($"An error occurred while getting folder names. Error: {request.error}");
             callback?.Invoke(null);
         }
     }
+
+
 
     public static IEnumerator CreateFileAsync(string filePath, string content)
     {
@@ -163,9 +181,15 @@ public static class ServerManager //Used with the PHP scripts
         using UnityWebRequest request = UnityWebRequest.Put(url, content);
         request.method = UnityWebRequest.kHttpVerbPUT;
         request.SetRequestHeader("Content-Type", "text/plain");
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment");
+
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Successful CreateFile Request: {request.downloadHandler.text} | FilePath: {filePath}" : $"ERROR CREATING FILE AT PATH: {filePath} | Error: {request.error}");
+
+        Debug.Log(request.result == UnityWebRequest.Result.Success ?
+            $"Successful CreateFile request: {filePath}" :
+            $"ERROR CREATING FILE AT PATH: {filePath} | Error: {request.error}");
     }
+
 
     public static IEnumerator AppendToFileAsync(string filePath, string rowData)
     {
@@ -179,21 +203,30 @@ public static class ServerManager //Used with the PHP scripts
                 WWWForm formData = new WWWForm();
                 formData.AddField("data", updatedFileContents);
 
+                // Start the coroutine to write the updated contents
                 IEnumerator appendCoroutine = WriteFileCoroutine(url, formData);
                 CoroutineHelper.StartCoroutine(appendCoroutine);
             }
             else
+            {
                 Debug.Log("ORIGINAL CONTENTS IS NULL FOR FILE AT PATH: " + filePath);
+            }
         });
     }
+
 
     private static IEnumerator WriteFileCoroutine(string url, WWWForm formData)
     {
         using UnityWebRequest request = UnityWebRequest.Post(url, formData);
         request.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment"); // required for WebGL
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Success writing file to server!" : $"FAILED writing file! | Error: {request.error}");
+
+        Debug.Log(request.result == UnityWebRequest.Result.Success
+            ? $"Success writing file to server!"
+            : $"FAILED writing file! | Error: {request.error}");
     }
+
 
 
     public static IEnumerator GetFilePath(string folderPath, string searchString, Action<string> callback)
@@ -201,6 +234,8 @@ public static class ServerManager //Used with the PHP scripts
         string url = $"{ServerURL}/getFilePath.php?folderPath={folderPath}&searchString={searchString}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment"); // required for WebGL
+
         var operation = request.SendWebRequest();
 
         while (!operation.isDone)
@@ -209,12 +244,11 @@ public static class ServerManager //Used with the PHP scripts
         if (request.result == UnityWebRequest.Result.Success)
         {
             string result = request.downloadHandler.text;
-            Debug.Log(result == "File not found" ? ("File NOT Found on Server: " + searchString) : ("Found File On Server: " + searchString));
+            Debug.Log(result == "File not found"
+                ? ("File NOT Found on Server: " + searchString)
+                : ("Found File On Server: " + searchString));
 
-            if (result == "File not found")
-                callback?.Invoke(null);
-            else
-                callback?.Invoke(result);
+            callback?.Invoke(result == "File not found" ? null : result);
         }
         else
         {
@@ -224,11 +258,14 @@ public static class ServerManager //Used with the PHP scripts
     }
 
 
+
     public static IEnumerator GetFileStringAsync(string path, Action<string[]> callback)
     {
         string url = $"{ServerURL}/getFile.php?path={path}";
 
         using UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment"); // required for WebGL
+
         var operation = request.SendWebRequest();
 
         while (!operation.isDone)
@@ -239,29 +276,35 @@ public static class ServerManager //Used with the PHP scripts
         {
             string result = request.downloadHandler.text;
 
-            Debug.Log(result == "File not found" ? ("File NOT Found on Server at path: " + path) : ("Found File On Server at path: " + path));
+            Debug.Log(result == "File not found"
+                ? ("File NOT Found on Server at path: " + path)
+                : ("Found File On Server at path: " + path));
+
             if (result == "File not found")
                 resultArray = null;
             else
-            {
                 resultArray = result.Split(new[] { "\n##########\n" }, StringSplitOptions.None);
-            }
         }
         else
         {
             resultArray = null;
             Debug.Log($"ERROR FINDING FILE AT PATH: {path} | ERROR: {request.error}");
         }
+
         callback?.Invoke(resultArray);
     }
+
 
     public static IEnumerator CopyFolder(string sourcePath, string destinationPath)
     {
         string url = $"{ServerURL}/copyFolder.php?sourcePath={sourcePath}&destinationPath={destinationPath}";
-
         using UnityWebRequest request = UnityWebRequest.Get(url);
+        request.SetRequestHeader("X-Unity-Client", "MUSE-Experiment");
         yield return request.SendWebRequest();
-        Debug.Log(request.result == UnityWebRequest.Result.Success ? $"Folder copied successfully!" : $"FAILED TO COPY FOLDER! ERROR: {request.error}");
+
+        Debug.Log(request.result == UnityWebRequest.Result.Success ?
+            "Folder copied successfully!" :
+            $"FAILED TO COPY FOLDER! ERROR: {request.error}");
     }
 
     public static IEnumerator LoadTextureFromServer(string filePath, Action<Texture2D> callback)
@@ -282,6 +325,7 @@ public static class ServerManager //Used with the PHP scripts
     }
 
 
+
     public static void SetSessionDataFolder(string sessionDataFolder)
     {
         SessionDataFolder = sessionDataFolder;
@@ -299,7 +343,6 @@ public static class ServerManager //Used with the PHP scripts
 
 
 }
-
 
 
 

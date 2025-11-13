@@ -341,7 +341,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_FontData.m_Font
       value: 
-      objectReference: {fileID: 12800000, guid: ed01368cda63e425ab7f00570f996ed4,
+      objectReference: {fileID: 12800000, guid: 53224191b5f4a46f39e903a60c127c11,
         type: 3}
     - target: {fileID: 7410627626172539339, guid: 5cac0106dc4a64a068e5d4a7d8de1d71,
         type: 3}
@@ -352,6 +352,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_FontData.m_FontSize
       value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 7410627626172539339, guid: 5cac0106dc4a64a068e5d4a7d8de1d71,
+        type: 3}
+      propertyPath: m_FontData.m_LineSpacing
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 7410627627245931908, guid: 5cac0106dc4a64a068e5d4a7d8de1d71,
         type: 3}

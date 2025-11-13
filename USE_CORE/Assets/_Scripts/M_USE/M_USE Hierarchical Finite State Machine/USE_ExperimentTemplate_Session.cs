@@ -139,10 +139,11 @@ namespace USE_ExperimentTemplate_Session
             State runTask = new State("RunTask");
             State finishSession = new State("FinishSession");
             State saveData = new State("SaveData");
+            State quitApplication = new State("QuitApplication");
             State loadGazeCalibration = new State("LoadGazeCalibration");
             State setupGazeCalibration = new State("SetupGazeCalibration");
             State gazeCalibration = new State("GazeCalibration");
-            AddActiveStates(new List<State> { initScreen, setupSession, sessionBuilder, selectTask, loadTask, setupTask, runTask, finishSession, saveData, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
+            AddActiveStates(new List<State> { initScreen, setupSession, sessionBuilder, selectTask, loadTask, setupTask, runTask, finishSession, saveData, quitApplication, loadGazeCalibration, setupGazeCalibration, gazeCalibration });
 
             initScreen_Level = gameObject.GetComponent<InitScreen_Level>();
             SetupSession_Level setupSessionLevel = GameObject.Find("ControlLevels").GetComponent<SetupSession_Level>();
@@ -234,8 +235,8 @@ namespace USE_ExperimentTemplate_Session
                 SetHumanPanelAndStartButton();
                 SummaryData.Init();
 
-                if (Session.StoreData)
-                    CreateSessionSettingsFolder();
+
+                CreateSessionSettingsFolder();
 
                 if (Session.SessionDef.SerialPortActive)
                 {
@@ -438,6 +439,7 @@ namespace USE_ExperimentTemplate_Session
 
             });
             sessionBuilder.SpecifyTermination(() => SessionBuilder.RunButtonClicked, selectTask);
+            sessionBuilder.SpecifyTermination(() => Session.Prolific_WebBuild, selectTask); //SEE IF IT WORKS
 
             sessionBuilder.AddDefaultTerminationMethod(() =>
             {
@@ -490,7 +492,21 @@ namespace USE_ExperimentTemplate_Session
                     RedAudioCross.SetActive(true);
                 }
 
-                HumanVersionToggleButton.SetActive(Session.SessionDef.IsHuman);
+
+
+                if(!Session.SessionDef.IsHuman || Session.Prolific_WebBuild)
+                {
+                    HumanVersionToggleButton.SetActive(false);
+                    ToggleAudioButton.SetActive(false);
+                }
+                else if(Session.SessionDef.IsHuman && !Session.Prolific_WebBuild)
+                {
+                    HumanVersionToggleButton.SetActive(true);
+                    ToggleAudioButton.SetActive(true);
+                }
+
+
+
 
                 if (SelectionHandler.AllChoices.Count > 0)
                     SelectionHandler.ClearChoices();
@@ -667,13 +683,7 @@ namespace USE_ExperimentTemplate_Session
 
                 TaskButtonsContainer.SetActive(true);
 
-                if (Session.SessionDef.IsHuman)
-                {
-                    HumanVersionToggleButton.SetActive(true);
-                    ToggleAudioButton.SetActive(true);
-                    if (!Session.SessionDef.PlayBackgroundMusic)
-                        RedAudioCross.SetActive(true);
-                }
+
 
                 startedSonicationTesting = false;
 
@@ -876,7 +886,9 @@ namespace USE_ExperimentTemplate_Session
             {
                 OrderedDictionary taskResultsData = CurrentTask.GetTaskResultsData();
                 SessionBuilder.SetTaskData(CurrentTask.TaskName, CurrentTask.TrialLevel.TrialCount_InTask, CurrentTask.Duration, taskResultsData);
-                SessionBuilder.SetExpDisplayIconAsInactive(taskCount);
+
+                if(!Session.WebBuild)
+                    SessionBuilder.SetExpDisplayIconAsInactive(taskCount);
 
                 if (PreviousTaskSummaryString != null && CurrentTask.CurrentTaskSummaryString != null)
                     PreviousTaskSummaryString.Insert(0, CurrentTask.CurrentTaskSummaryString);
@@ -940,19 +952,33 @@ namespace USE_ExperimentTemplate_Session
                 
             });
             finishSession.AddLateUpdateMethod(() => { Session.EventCodeManager.CheckFrameEventCodeBuffer(); });
+
             finishSession.SpecifyTermination(() => skipSessionSummary, () => saveData);
             finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => saveData);
-            //finishSession.SpecifyTermination(() => SessionSummaryController != null && SessionSummaryController.EndSessionButtonClicked, () => null);
             finishSession.AddTimer(() => Session.SessionDef.SessionSummaryDuration, () => saveData);
-            finishSession.AddDefaultTerminationMethod(() =>
-            {
-                SaveDataAtEndOfSession();
-            });
+
 
             //SaveData State---------------------------------------------------------------------------------------------------------------
             saveData.AddSpecificInitializationMethod(() =>
             {
                 SaveDataAtEndOfSession();
+
+                //FOR PROLIFIC WEB BUILD, NEED TO FIRST CHECK THAT THEY PLAYED ALL TASKS, OTHERWISE DONT WANT TO REDIRECT THEM
+                //
+                //
+
+
+                Transform saveDataTransform = SavePanel.transform.Find("SavingData_Text");
+                if(saveDataTransform != null && Session.Prolific_WebBuild)
+                {
+                    TextMeshProUGUI saveText = saveDataTransform.gameObject.GetComponent<TextMeshProUGUI>();
+                    if (saveText != null)
+                        saveText.text = "Session Complete";
+                    TextMeshProUGUI saveSubText = saveDataTransform.Find("Window_Text").gameObject.GetComponent<TextMeshProUGUI>();
+                    if (saveSubText != null)
+                        saveSubText.text = "Redirecting to Prolific momentarily";
+
+                }
 
                 SavePanel.SetActive(true);
 
@@ -973,8 +999,14 @@ namespace USE_ExperimentTemplate_Session
                     Session.SerialPortController.ClosePort();
 
             });
-            saveData.AddTimer(() => 2.5f, () => null);
-            saveData.AddDefaultTerminationMethod(() =>
+            saveData.AddTimer(() => 3f, () => quitApplication, () =>
+            {
+                Session.Prolific_Controller_Session.TriggerRedirectoToCompletionURL();
+            });
+
+
+            //--------------------------------------------------------------------------------------------------
+            quitApplication.AddTimer(() => 1f, () => null, () =>
             {
                 //Run the Quit method to the closing of: handle web build, normal build, or editor
                 Session.ApplicationQuit.HandleClosingApplication();
@@ -1106,8 +1138,11 @@ namespace USE_ExperimentTemplate_Session
             }
 
         }
+
         public void SaveDataAtEndOfSession()
         {
+            Debug.LogWarning("SAVING DATA AT END OF SESSION");
+
             if (Session.SessionDef == null)
                 return;
 
@@ -1254,6 +1289,11 @@ namespace USE_ExperimentTemplate_Session
         
         private void CreateSessionSettingsFolder()
         {
+            if (!Session.StoreData || Session.WebBuild) //Dont copy session config folder if not storing data, OR its a web build
+            {
+                return;
+            }
+
             string folderName = "SessionConfigs";
 
             if (Session.UsingServerConfigs)

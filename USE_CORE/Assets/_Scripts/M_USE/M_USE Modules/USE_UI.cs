@@ -146,6 +146,9 @@ namespace USE_UI
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
+            if (Session.Prolific_WebBuild)
+                EndTaskButtonGO.SetActive(false);
+
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;
             Button button = InstructionsButtonGO.AddComponent<Button>();
             button.onClick.AddListener(ToggleInstructions);
@@ -220,7 +223,7 @@ namespace USE_UI
                 else if (trialCountInBlock == 0 && trialCountInTask != 0) //"New Game" - show text, playbutton, instructions
                 {
                     StartButtonGO.transform.localPosition = InitialStartButtonPosition;
-                    TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Play Again?";
+                    TitleTextGO.GetComponent<TextMeshProUGUI>().text = "Next Block";
                     TitleTextGO.SetActive(true);
                 }
             }

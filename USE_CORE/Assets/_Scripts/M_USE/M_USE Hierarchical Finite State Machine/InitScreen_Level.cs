@@ -97,7 +97,15 @@ public class InitScreen_Level : ControlLevel
 
 
         //Setup State-----------------------------------------------------------------------------------------------------------------------------------
-        Setup.AddSpecificInitializationMethod(() => SetupInitScreen());
+        Setup.AddSpecificInitializationMethod(() =>
+        {
+            SetupInitScreen();
+
+            if(Session.Prolific_WebBuild)
+            {
+                StartCoroutine(TestServerConnection());
+            }
+        });
         Setup.SpecifyTermination(() => true, WaitForStartPressed, () =>
         {
             MuseTextParentGO.SetActive(true);
@@ -116,6 +124,12 @@ public class InitScreen_Level : ControlLevel
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
         CollectInfoScreen.AddSpecificInitializationMethod(() =>
         {
+            if(Session.Prolific_WebBuild)
+            {
+                ConfirmButtonPressed = true;
+                return;
+            }
+
             StartCoroutine(ActivateObjectsAfterPlayerPrefsLoaded());
             MainPanel_GO.transform.localPosition = new Vector3(0, -800, 0); //start it off the screen  
             MainPanel_GO.SetActive(true);
@@ -136,18 +150,20 @@ public class InitScreen_Level : ControlLevel
         CollectInfoScreen.SpecifyTermination(() => ConfirmButtonPressed, () => null, () =>
         {
             ConfirmButtonPressed = false;
-            Session.SubjectID = GetSubjectID();
-            Session.SubjectAge = GetSubjectAge();
-            SetConfigInfo();
-            SetDataInfo();
+
+            if (!Session.Prolific_WebBuild)
+            {
+                SetConfigInfo();
+                SetDataInfo();
+            }
 
             InitScreen_GO.SetActive(false);
 
             Session.MainExperimenterCanvas_LoadingText_GO.SetActive(true);
-
         });
 
     }
+
 
     private IEnumerator FadeScreenInCoroutine()
     {
@@ -265,6 +281,9 @@ public class InitScreen_Level : ControlLevel
 
     private void SetDataInfo()
     {
+        Session.SubjectID = GetSubjectID();
+        Session.SubjectAge = GetSubjectAge();
+
         if (LocalData_Toggle.isOn)
         {
             Session.StoringDataLocally = true;
@@ -505,8 +524,15 @@ public class InitScreen_Level : ControlLevel
         {
             if (isConnected)
             {
-                Session.SessionAudioController.PlayAudioClip("Connected");
+                Debug.LogWarning("SUCCESSFULLY CONNECTED TO SERVER");
+
                 ConnectedToServer = true;
+
+                if(Session.Prolific_WebBuild)
+                    return;
+
+                Session.SessionAudioController.PlayAudioClip("Connected");
+                
                 if(ServerConfig_Toggle.isOn)
                     GreyOutPanels_Array[2].SetActive(false);
                 if(ServerData_Toggle.isOn)
@@ -523,8 +549,12 @@ public class InitScreen_Level : ControlLevel
             {
                 Debug.LogWarning("UNABLE TO CONNECT TO SERVER!");
                 Session.SessionAudioController.PlayAudioClip("Error");
+
+                if (Session.Prolific_WebBuild)
+                    return;
+
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;
-                RedX_GO.SetActive(true);
+                RedX_GO.SetActive(true);                
             }
         });
     }

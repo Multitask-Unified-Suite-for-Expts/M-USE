@@ -40,13 +40,13 @@ public class ApplicationQuit : MonoBehaviour
     //Called by end of session level to close the app
     public void HandleClosingApplication()
     {
-        #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-        #elif UNITY_WEBGL && !UNITY_EDITOR
-                Application.OpenURL("https://m-use.psy.vanderbilt.edu");
-        #else
-                Application.Quit();
-        #endif
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_WEBGL
+    Debug.LogWarning("🟢 WebGL build — Application.Quit() skipped (browser handles closing).");
+#else
+    Application.Quit();
+#endif
     }
 
     private void Update()

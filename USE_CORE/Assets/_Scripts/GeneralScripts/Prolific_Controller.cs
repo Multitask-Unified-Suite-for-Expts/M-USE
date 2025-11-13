@@ -1,66 +1,99 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
+using System;
+using System.Runtime.InteropServices;
+
 
 
 public class Prolific_Controller : MonoBehaviour
 {
+    #if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport("__Internal")]
+        private static extern void NotifyParentTasksComplete();
+    #endif
 
 
     private void Start()
     {
-        SetProlificVariables();
+        Session.Prolific_Controller_Session = this;
+
+#if UNITY_EDITOR && UNITY_WEBGL
+        SetEditorValuesManually();
+#endif
     }
 
-    private void SetProlificVariables()
+
+    public void ReceiveURLParams(string json)
     {
-        string configName = GetQueryParam("config");
-        //Session.Prolific_ConfigFolderName = configName;  //UNCOMMENT LATER
-        Session.Prolific_ConfigFolderName = "CONFIGS_2-24-25";  //DELETE LATER
-        Debug.LogWarning("PROLIFIC CONFIG NAME = " + Session.Prolific_ConfigFolderName);
-
-        string prolificID = GetQueryParam("pid");
-        //Session.Prolific_PlayerID = prolificID; //UN COMMENT LATER
-        Session.Prolific_PlayerID = "21"; //TEMPORARY - DELETE LATER!!!!
-        Debug.LogWarning("PROLIFIC PLAYER ID = " + Session.Prolific_PlayerID);
-    }
-
-    private string GetQueryParam(string key)
-    {
-        string url = Application.absoluteURL;
-
-        if (string.IsNullOrEmpty(url))
+        Debug.LogWarning("📩 Received params from page: " + json);
+        try
         {
-            Debug.LogWarning("URL IS NULL OR EMPTY");
-            return null;
-        }
-
-        Debug.LogWarning("URL = " + url);
-
-        int q = url.IndexOf('?');
-
-        if (q < 0)
-        {
-            Debug.LogWarning("INDEX OF '?' LESS THAN 0");
-            return null;
-        }
-
-        string query = url.Substring(q + 1); // everything after ?
-        var parts = query.Split('&');
-        foreach (var p in parts)
-        {
-            var kv = p.Split('=');
-            if (kv.Length >= 2)
+            var data = JsonUtility.FromJson<ParamData>(json);
+            if (data != null)
             {
-                string k = UnityWebRequest.UnEscapeURL(kv[0]);
-                string v = UnityWebRequest.UnEscapeURL(kv[1]);
-                if (k == key)
-                    return v;
+                Session.Prolific_SessionID = data.sessionid;
+                Session.Prolific_StudyID = data.studyid;
+                Session.Prolific_PlayerID = data.playerid;
+                Session.Prolific_ConfigFolderName = data.config;
+
+                Debug.LogWarning($"✅ Received SessionID: {data.sessionid}, StudyID: {data.studyid}, PID: {data.playerid}, CONFIG: {data.config}");
+
+                Session.StoringDataOnServer = true;
+                Session.SubjectID = Session.Prolific_PlayerID;
+                Session.SubjectAge = ""; //setting empty since dont know prolific subject age
+
+                Session.UsingServerConfigs = true;
+                ServerManager.SetSessionConfigFolderName(Session.Prolific_ConfigFolderName); //SET AS PROLIFIC NAME
+                Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ Failed to parse JSON data from page.");
             }
         }
-        return null;
+        catch (Exception ex)
+        {
+            Debug.LogError("❌ Error parsing params: " + ex.Message);
+        }
     }
 
+    public void TriggerRedirectoToCompletionURL()
+    {
+        Debug.LogWarning("✅ Tasks complete — notifying parent page...");
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        NotifyParentTasksComplete();
+#endif
+
+    }
+
+
+    private void SetEditorValuesManually()
+    {
+        Debug.LogWarning("Manually setting values for prolific testing");
+        Session.Prolific_PlayerID = "123";
+        Session.Prolific_ConfigFolderName = "Config_TestA";
+        Session.Prolific_SessionID = "EditorSession";
+        Session.Prolific_StudyID = "TestStudy";
+
+        Session.StoringDataOnServer = true;
+        Session.SubjectID = Session.Prolific_PlayerID;
+        Session.SubjectAge = ""; //setting empty since dont know prolific subject age
+
+        Session.UsingServerConfigs = true;
+        ServerManager.SetSessionConfigFolderName(Session.Prolific_ConfigFolderName); //SET AS PROLIFIC NAME
+        Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
+    }
+
+
+}
+
+
+
+[Serializable]
+public class ParamData
+{
+    public string sessionid;
+    public string studyid;
+    public string playerid;
+    public string config;
 }

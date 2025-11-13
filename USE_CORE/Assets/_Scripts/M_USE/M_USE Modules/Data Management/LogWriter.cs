@@ -80,7 +80,9 @@ public class LogWriter : MonoBehaviour
                 return null;
             }
             else
-                return $"{ServerManager.SessionDataFolderPath}/LogFile/Player.log";
+            {
+                return $"{ServerManager.SessionDataFolderPath}/LogFile/Player.txt";
+            }
         }
     }
 

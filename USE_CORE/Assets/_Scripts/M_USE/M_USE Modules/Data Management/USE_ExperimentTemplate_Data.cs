@@ -117,9 +117,21 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "SessionData";
-            AddDatum("SubjectID", () => Session.SubjectID);
-            AddDatum("SubjectAge", () => Session.SubjectAge);
+            //AddDatum("SubjectAge", () => Session.SubjectAge);
+
             AddDatum("SessionTime", () => Session.FilePrefix);
+
+            AddDatum("SubjectID", () => Session.SubjectID); //will match prolific player ID if prolific web build
+
+            AddDatum("Prolific_WebBuild ", () => Session.Prolific_WebBuild);
+
+            if(Session.Prolific_WebBuild)
+            {
+                AddDatum("Prolific_SessionID ", () => Session.Prolific_SessionID);
+                AddDatum("Prolific_StudyID ", () => Session.Prolific_StudyID);
+
+            }
+
             AddStateTimingData(Session.SessionLevel);
            // DataControllerHoldsFrames = true;
         }
@@ -188,9 +200,6 @@ namespace USE_ExperimentTemplate_Data
         public override void DefineUSETemplateDataController()
         {
             DataControllerName = "FrameData";
-            AddDatum("SubjectID", () => Session.SubjectID);
-            AddDatum("SubjectAge", () => Session.SubjectAge);
-            AddDatum("SessionTime", () => Session.FilePrefix);
             AddDatum("TaskName", () => Session.TaskLevel != null ? Session.TaskLevel.TaskName : "NoTaskActive");
             AddDatum("BlockCount", () => Session.TaskLevel != null ? (Session.TaskLevel.BlockCount + 1).ToString() : "NoTaskActive");
             AddDatum("TrialCount_InTask", () => Session.TrialLevel != null ? (Session.TrialLevel.TrialCount_InTask + 1).ToString() : "NoTaskActive");

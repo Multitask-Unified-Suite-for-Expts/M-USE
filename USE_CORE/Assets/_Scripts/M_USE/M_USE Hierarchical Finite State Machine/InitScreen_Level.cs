@@ -103,8 +103,6 @@ public class InitScreen_Level : ControlLevel
 
             if(Session.Prolific_WebBuild)
             {
-                SetProlificInfo();
-
                 StartCoroutine(TestServerConnection());
             }
         });
@@ -153,7 +151,7 @@ public class InitScreen_Level : ControlLevel
         {
             ConfirmButtonPressed = false;
 
-            if(!Session.Prolific_WebBuild)
+            if (!Session.Prolific_WebBuild)
             {
                 SetConfigInfo();
                 SetDataInfo();
@@ -162,29 +160,10 @@ public class InitScreen_Level : ControlLevel
             InitScreen_GO.SetActive(false);
 
             Session.MainExperimenterCanvas_LoadingText_GO.SetActive(true);
-
         });
 
     }
 
-    private void SetProlificInfo()
-    {
-        ServerManager.ServerURL = "https://m-use.psy.vanderbilt.edu/UnityFolder";
-
-        //Set Data info:
-        Session.StoringDataOnServer = true;
-        ServerManager.RootDataFolder = "DATA"; //Maybe change if folder on server changes
-        Session.SubjectID = Session.Prolific_PlayerID;
-        Session.SubjectAge = ""; //setting empty since dont know prolific subject age
-
-
-        //Set Config Info:
-        Session.UsingServerConfigs = true;
-        ServerManager.SetSessionConfigFolderName(Session.Prolific_ConfigFolderName); //SET AS PROLIFIC NAME
-        Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
-
-        Debug.LogWarning("CONFIG FLDER PATH = " + Session.ConfigFolderPath);
-    }
 
     private IEnumerator FadeScreenInCoroutine()
     {
@@ -547,11 +526,12 @@ public class InitScreen_Level : ControlLevel
             {
                 Debug.LogWarning("SUCCESSFULLY CONNECTED TO SERVER");
 
-                Session.SessionAudioController.PlayAudioClip("Connected");
                 ConnectedToServer = true;
 
                 if(Session.Prolific_WebBuild)
                     return;
+
+                Session.SessionAudioController.PlayAudioClip("Connected");
                 
                 if(ServerConfig_Toggle.isOn)
                     GreyOutPanels_Array[2].SetActive(false);

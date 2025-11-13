@@ -497,7 +497,7 @@ namespace SelectionTracking
                 {
                     if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
                     {
-                        Debug.LogWarning("CHOICE STARTED ON FRAME: " + Time.frameCount);
+                        Debug.Log("CHOICE STARTED ON FRAME: " + Time.frameCount);
                         OngoingSelection.ChoiceStarted = true;
                         Session.EventCodeManager.SendCodeThisFrame("ChoiceBegins");
                     }
@@ -620,9 +620,7 @@ namespace SelectionTracking
                 Session.EventCodeManager.SendCodeThisFrame("ChoiceCompleted");
                 SelectionOnEventCodeSent = false; //reset fixation for event codes
 
-
-
-                Debug.LogWarning("------ CHOICE COMPLETE ON FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
+                Debug.Log("------ CHOICE COMPLETE ON FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
                 OngoingSelection.Duration = 0; //attempting to reset the duration before setting null incase same selection/object immedietely used again.
                 OngoingSelection = null;
 

@@ -111,7 +111,7 @@ public class KT_ObjectManager : MonoBehaviour
                 Debug.Log($"<color=cyan>{configValues.ObjectName}: RGB = ({configValues.ObjectColor[0]}, {configValues.ObjectColor[1]}, {configValues.ObjectColor[2]}) → Unity Color = {go.GetComponent<Image>().color}</color>");
                 Debug.Log("..MSG to check if corrected codes is working...");
 
-                go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
+                go.GetComponent<CircleCollider2D>().radius = configValues.Size * .52f; //Set Collider radius
 
                 KT_Object obj = go.AddComponent<KT_Object>();
                 obj.SetupObject(this, configValues);

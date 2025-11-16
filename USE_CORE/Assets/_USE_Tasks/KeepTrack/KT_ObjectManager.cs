@@ -437,18 +437,7 @@ List<float> GenerateRandomIntervals(int numIntervals, float duration)
         return randomFloats;
     }
 
-    private void NextCycle()
-    {
-        Cycles.RemoveAt(0);
 
-        if (Cycles.Count >= 1)
-        {
-            CurrentCycle = Cycles[0];
-            CurrentCycle.StartCycle();
-        }
-        else
-            DestroyObj();
-    }
 
     private void Update()
     {
@@ -666,29 +655,64 @@ List<float> GenerateRandomIntervals(int numIntervals, float duration)
     }
 
 
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        //if(collision.contactCount > 0)
-        //{
-        //    foreach(ContactPoint2D contact in collision.contacts)
-        //    {
-        //        Vector2 collisionPoint = contact.point;
-
-        //        if(collisionPoint != ObjManager.MostRecentCollisionPoint)
-        //        {
-        //            Debug.LogWarning("COLLISION AT POINT: " + collisionPoint);
-        //            //send the event code here!
-        //        }
-        //        ObjManager.MostRecentCollisionPoint = collisionPoint;
-        //    }
-        //}
-
-        if(!IsTarget)
+        if (collision.contactCount > 0)
+        {
+            // Get the collision normal (perpendicular to the surface)
+            Vector2 collisionNormal = collision.contacts[0].normal;
+            Vector2 collisionPoint = collision.contacts[0].point;
+            
+            // Check if we hit another KT_Object (pacman-to-pacman collision)
+            KT_Object otherPacman = collision.gameObject.GetComponent<KT_Object>();
+            
+            string collisionType = "";
+            if (otherPacman != null)
+            {
+                // For pacman collisions: normal is the line between centers
+                Vector3 centerToCenter = (transform.localPosition - otherPacman.transform.localPosition).normalized;
+                collisionNormal = new Vector2(centerToCenter.x, centerToCenter.y);
+                collisionType = $"<color=cyan>PACMAN</color> ({otherPacman.ObjectName})";
+            }
+            else
+            {
+                collisionType = "<color=yellow>WALL</color>";
+            }
+            
+            // Store old direction
+            Vector2 oldDirection = new Vector2(Direction.x, Direction.y);
+            
+            // Calculate angles BEFORE reflection
+            float oldAngle = Mathf.Atan2(oldDirection.y, oldDirection.x) * Mathf.Rad2Deg;
+            float normalAngle = Mathf.Atan2(collisionNormal.y, collisionNormal.x) * Mathf.Rad2Deg;
+            
+            // Apply realistic reflection physics
+            Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal);
+            Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0);
+            
+            // Calculate angles AFTER reflection
+            float newAngle = Mathf.Atan2(reflectedDirection.y, reflectedDirection.x) * Mathf.Rad2Deg;
+            float angleChange = Mathf.DeltaAngle(oldAngle, newAngle);
+            
+            // DEBUG LOG
+            Debug.Log($"<color=lime>━━━ {ObjectName} COLLISION ━━━</color>\n" +
+                    $"Type: {collisionType}\n" +
+                    $"Point: {collisionPoint}\n" +
+                    $"<color=orange>Before:</color> Direction angle = {oldAngle:F1}°\n" +
+                    $"<color=cyan>Normal:</color> Surface angle = {normalAngle:F1}°\n" +
+                    $"<color=lime>After:</color> Direction angle = {newAngle:F1}°\n" +
+                    $"<color=magenta>Change:</color> {Mathf.Abs(angleChange):F1}° {(angleChange > 0 ? "counter-clockwise" : "clockwise")}");
+            
+            SetNewDestination();
+        }
+        else if (!IsTarget)
         {
             Direction = -Direction;
             SetNewDestination();
         }
     }
+
 
     private void OnCollisionStay2D(Collision2D collision)
     {

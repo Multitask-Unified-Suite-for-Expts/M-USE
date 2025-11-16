@@ -354,21 +354,86 @@ public class KT_Object : MonoBehaviour
             Debug.LogError("NUMBER OF REWARD SECONDS DOES NOT MATCH THE SUM OF ALL THE Y VALUES IN THE RatesAndDurations variable!");
     }
 
-    List<float> GenerateRandomIntervals(int numIntervals, float duration)
+
+List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        List<float> randomFloats = new List<float>() { duration };  //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
+        List<float> randomFloats = new List<float>() { duration };
+
+        // FALLBACK: Check if it's even possible to fit the intervals
+        float minPossibleDuration = numIntervals * MinAnimGap;
+
+        if (minPossibleDuration > duration)
+        {
+            Debug.LogWarning($"<color=yellow>━━━ {ObjectName} INTERVAL GENERATION ISSUE ━━━</color>\n" +
+                            $"Requested: {numIntervals} animations in {duration}s\n" +
+                            $"Minimum needed: {minPossibleDuration:F2}s (with MinAnimGap={MinAnimGap}s)\n" +
+                            $"<color=orange>FALLBACK: Generating evenly-spaced intervals instead</color>");
+
+            // Fallback: Generate evenly spaced intervals
+            float interval = duration / (numIntervals + 1);
+
+            for (int i = 1; i <= numIntervals; i++)
+            {
+                randomFloats.Add(i * interval);
+            }
+
+            randomFloats.Sort();
+
+            Debug.Log($"<color=cyan>Generated {randomFloats.Count - 1} evenly-spaced intervals at {interval:F2}s apart</color>");
+            return randomFloats;
+        }
+
+        // NORMAL: Try to generate random intervals
+        int maxAttempts = 1000;
 
         for (int i = 0; i < numIntervals; i++)
         {
             float randomValue;
+            int attempts = 0;
+            bool foundValid = false;
+
             do
             {
                 randomValue = Random.Range(0f, duration);
-            } while (randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap));
+                attempts++;
+
+                // Check if this value is far enough from all existing values
+                bool tooClose = randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap);
+
+                if (!tooClose)
+                {
+                    foundValid = true;
+                    break;
+                }
+
+                if (attempts >= maxAttempts)
+                {
+                    Debug.LogWarning($"<color=yellow>━━━ {ObjectName} INTERVAL GENERATION TIMEOUT ━━━</color>\n" +
+                                    $"Could not find valid position for interval {i + 1}/{numIntervals} after {maxAttempts} attempts\n" +
+                                    $"<color=orange>FALLBACK: Using evenly-spaced intervals for remaining</color>");
+
+                    // Fallback: Fill remaining with evenly spaced intervals
+                    randomFloats.Sort();
+                    float lastValue = randomFloats[randomFloats.Count - 1];
+                    int remaining = numIntervals - i;
+                    float remainingDuration = duration - lastValue;
+                    float spacing = remainingDuration / (remaining + 1);
+
+                    for (int j = 1; j <= remaining; j++)
+                    {
+                        randomFloats.Add(lastValue + j * spacing);
+                    }
+
+                    randomFloats.Sort();
+                    return randomFloats;
+                }
+
+            } while (!foundValid);
+
             randomFloats.Add(randomValue);
         }
-        randomFloats.Sort();
 
+        randomFloats.Sort();
         return randomFloats;
     }
 

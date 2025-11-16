@@ -751,15 +751,16 @@ List<float> GenerateRandomIntervals(int numIntervals, float duration)
         return false;
     }
 
-    public void DestroyObj()
+ 
+     public void DestroyObj()
     {
-        ObjManager.RemoveFromObjectList(this);
+        if (ObjManager != null)
+            ObjManager.RemoveFromObjectList(this);
 
-        if(gameObject != null)
+        if (gameObject != null)
             Destroy(gameObject);
-        if(Marker != null)
+        if (Marker != null)
             Destroy(Marker);
-
     }
 
     private void SetupMarker()

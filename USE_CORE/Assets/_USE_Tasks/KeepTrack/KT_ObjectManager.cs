@@ -718,10 +718,27 @@ List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
         if (Time.time - NewDestStartTime >= MaxCollisionTime)
         {
-            Direction = -Direction;
+            Debug.Log($"<color=red> {ObjectName} STUCK in collision - forcing reflection</color>");
+            
+            if (collision.contactCount > 0)
+            {
+                Vector2 collisionNormal = collision.contacts[0].normal;
+                Vector2 oldDirection = new Vector2(Direction.x, Direction.y);
+                Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal);
+                Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0);
+                
+                float oldAngle = Mathf.Atan2(oldDirection.y, oldDirection.x) * Mathf.Rad2Deg;
+                float newAngle = Mathf.Atan2(reflectedDirection.y, reflectedDirection.x) * Mathf.Rad2Deg;
+                Debug.Log($"Unstuck: {oldAngle:F1}° → {newAngle:F1}°");
+            }
+            else
+            {
+                Direction = -Direction;
+            }
             SetNewDestination();
         }
     }
+  
 
     public bool AtDestination()
     {

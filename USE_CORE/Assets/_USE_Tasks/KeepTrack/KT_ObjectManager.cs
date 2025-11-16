@@ -29,6 +29,10 @@ public class KT_ObjectManager : MonoBehaviour
 
     public Vector2 MostRecentCollisionPoint;
 
+    public float MinRespawnDistance = 250f; //Next point of appearance should be at least this distance farther
+
+    public float MaxRespawnDistance = 400f;
+
 
     public void NoSelectionDuringInterval(KT_Object obj)
     {
@@ -81,6 +85,7 @@ public class KT_ObjectManager : MonoBehaviour
     public List<KT_Object> CreateObjects(List<KT_Object_ConfigValues> objects)
     {
         List<KT_Object> trialObjects = new List<KT_Object>();
+        Debug.LogWarning(objects.Count()); //Added a log warning to see if objects indexes are right
 
         foreach(KT_Object_ConfigValues configValues in objects)
         {
@@ -103,6 +108,8 @@ public class KT_ObjectManager : MonoBehaviour
                                                             configValues.ObjectColor[2] / 255f,
                                                             1f // Ensure alpha is fully opaque
                                                         );
+                Debug.Log($"<color=cyan>{configValues.ObjectName}: RGB = ({configValues.ObjectColor[0]}, {configValues.ObjectColor[1]}, {configValues.ObjectColor[2]}) → Unity Color = {go.GetComponent<Image>().color}</color>");
+                Debug.Log("..MSG to check if corrected codes is working...");
 
                 go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
 

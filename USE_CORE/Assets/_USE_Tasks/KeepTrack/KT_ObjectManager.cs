@@ -16,8 +16,8 @@ public class KT_ObjectManager : MonoBehaviour
 
     private Transform ObjectParent;
 
-    public readonly Vector2 xRange = new Vector2(-800f, 800f);
-    public readonly Vector2 yRange = new Vector2(-400f, 325f);
+    public readonly Vector2 xRange = new Vector2(-850f, 850f); //from -800 to -850 to increase the screen size so that pacmans go near border
+    public readonly Vector2 yRange = new Vector2(-450f, 325f); //from -400 to -450
 
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;

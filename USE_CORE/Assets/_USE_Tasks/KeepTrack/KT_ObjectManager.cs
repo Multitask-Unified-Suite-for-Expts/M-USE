@@ -220,7 +220,128 @@ public class KT_ObjectManager : MonoBehaviour
             target.gameObject.SetActive(false);
     }
 
+
+
+public IEnumerator DisappearAndRespawnObject(KT_Object obj)
+{
+    if (obj == null || obj.gameObject == null)
+    {
+        Debug.LogError("Object is null!");
+        yield break;
+    }
+    
+    Debug.Log($"<color=orange>━━━ {obj.ObjectName} DISAPPEARING ━━━</color>\n" +
+              $"Position: {obj.transform.localPosition}\n" +
+              $"Time: {Time.time:F2}s");
+    
+    // Stop movement
+    obj.MoveAroundScreen = false;
+    
+    // Get Image component
+    Image objImage = obj.gameObject.GetComponent<Image>();
+    if (objImage == null)
+    {
+        Debug.LogError($"{obj.ObjectName} has no Image component!");
+        yield break;
+    }
+    
+    Color originalColor = objImage.color;
+    obj.LastDisappearPosition = obj.transform.localPosition;
+    
+    // FADE OUT (10 frames)
+    for (int i = 60; i >= 0; i--)
+    {
+        if (obj == null || objImage == null) yield break;
+        
+        float alpha = i / 60f;
+        Color c = originalColor;
+        c.a = alpha;
+        objImage.color = c;
+        
+        yield return null;  // Wait one frame
+    }
+    
+    // Wait a moment
+    yield return new WaitForSeconds(0.005f);
+    
+    // Calculate and move to new position
+    Vector3 newPosition = GetRespawnPosition(obj);
+    obj.transform.localPosition = newPosition;
+    
+    float distance = Vector3.Distance(obj.LastDisappearPosition, newPosition);
+    
+    Debug.Log($"<color=lime>━━━ {obj.ObjectName} REAPPEARING ━━━</color>\n" +
+              $"New Position: {newPosition}\n" +
+              $"Distance: {distance:F1} units\n" +
+              $"Time: {Time.time:F2}s");
+    
+    // FADE IN (10 frames)
+    for (int i = 0; i <= 60; i++)
+    {
+        if (obj == null || objImage == null) yield break;
+        
+        float alpha = i / 60f;
+        Color c = originalColor;
+        c.a = alpha;
+        objImage.color = c;
+        
+        yield return null;  // Wait one frame
+    }
+    
+    // Ensure fully opaque
+    if (objImage != null)
+    {
+        objImage.color = originalColor;
+    }
+    
+    // Start next cycle
+    if (obj.Cycles != null && obj.Cycles.Count > 0)
+    {
+        obj.CurrentCycle = obj.Cycles[0];
+        obj.CurrentCycle.StartCycle();
+    }
+    
+    // Resume movement and clear flags
+    obj.MoveAroundScreen = true;
+    obj.IsTransitioning = false;  //shouldn't attempt to delete the object when the obj is transitioning
+    
+    Debug.Log($"<color=cyan>✓ {obj.ObjectName} resumed at {Time.time:F2}s</color>");
 }
+
+    private Vector3 GetRespawnPosition(KT_Object obj)
+    {
+        Vector3 newPosition;
+        int maxAttempts = 50;
+        int attempts = 0;
+
+        do
+        {
+            // Generate random position within bounds
+            newPosition = new Vector3(
+                Random.Range(xRange.x + 100f, xRange.y - 100f),
+                Random.Range(yRange.x + 100f, yRange.y - 100f),
+                0
+            );
+
+            attempts++;
+
+            // Check distance from last disappear position
+            float distanceFromLast = Vector3.Distance(newPosition, obj.LastDisappearPosition);
+
+            if ((distanceFromLast >= MinRespawnDistance) && (distanceFromLast <= MaxRespawnDistance))
+            {
+                Debug.Log($"<color=cyan>✓ Valid position found for {obj.ObjectName} (attempt {attempts})</color>");
+                return newPosition;
+            }
+
+        } while (attempts < maxAttempts);
+
+        Debug.LogWarning($"<color=yellow> Using non-ideal position for {obj.ObjectName} after {maxAttempts} attempts</color>");
+        return newPosition;
+    }
+
+}
+
 
 
 
@@ -281,6 +402,10 @@ public class KT_Object : MonoBehaviour
 
     public int CurrentRewardValue;
 
+    //Added so that the next appearing position is not so close to where it disappeared
+    public Vector3 LastDisappearPosition;
+    public bool IsRespawning = false; 
+    public bool IsTransitioning = false;
 
     public KT_Object()
     {
@@ -438,37 +563,59 @@ List<float> GenerateRandomIntervals(int numIntervals, float duration)
     }
 
 
-
-    private void Update()
+    private void NextCycle()
+{
+    if (IsTransitioning)  // Already transitioning, don't call again!
     {
-        if (MoveAroundScreen)
+        return;
+    }
+    
+    IsTransitioning = true;  // Set flag IMMEDIATELY
+    
+    Cycles.RemoveAt(0);
+
+    if (Cycles.Count >= 1)
+    {
+        ObjManager.StartCoroutine(ObjManager.DisappearAndRespawnObject(this));
+    }
+    else
+    {
+        DestroyObj();
+    }
+}
+
+
+
+   private void Update()
+{
+    if (MoveAroundScreen && !IsTransitioning)  // ← ADD CHECK HERE
+    {
+        if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
         {
-            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
-            {
-                StartCoroutine(AnimationCoroutine());
-                CurrentCycle.NextInterval();
-            }
+            StartCoroutine(AnimationCoroutine());
+            CurrentCycle.NextInterval();
+        }
 
-            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
-            {
-                NextCycle();
-            }
+        if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+        {
+            NextCycle();  // This will set IsTransitioning = true
+        }
 
-            WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
+        WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
 
-            HandlePausingWhileBeingSelected();
-            HandleInput();
+        HandlePausingWhileBeingSelected();
+        HandleInput();
 
-            //Call it every second instead of every frame:
-            RewardTimer += Time.deltaTime;
-            if (RewardTimer >= RewardInterval)
-            {
-                SetCurrentRewardValue();
-                RewardTimer = 0;
-            }
-
+        //Call it every second instead of every frame:
+        RewardTimer += Time.deltaTime;
+        if (RewardTimer >= RewardInterval)
+        {
+            SetCurrentRewardValue();
+            RewardTimer = 0;
         }
     }
+}
+
 
     private void SetCurrentRewardValue()
     {

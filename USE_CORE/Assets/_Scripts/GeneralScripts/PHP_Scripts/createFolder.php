@@ -1,15 +1,27 @@
 <?php
-$path = $_POST['path'];
+require_once 'security.php';
 
-if (!empty($path)) {
-    // Create the folder
-    if (!file_exists($path)) {
-        mkdir($path, 0777, true);
-        echo "Folder created successfully.";
-    } else {
-        echo "Folder already exists.";
+$folderPath = $_REQUEST['path'] ?? '';
+
+if (empty($folderPath)) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Missing folder path']);
+    exit;
+}
+
+// Sanitize path
+$folderPath = safe_path($folderPath);
+
+// Create folder
+if (!file_exists($folderPath)) {
+    try {
+        mkdir($folderPath, 0755, true);
+        echo json_encode(['ok' => true, 'message' => 'Folder created successfully']);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => 'Failed to create folder']);
     }
 } else {
-    echo "Invalid path specified.";
+    echo json_encode(['ok' => true, 'message' => 'Folder already exists']);
 }
 ?>

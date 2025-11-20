@@ -313,17 +313,6 @@ namespace USE_ExperimentTemplate_Task
 
                 Session.EventCodeManager.SendRangeCodeThisFrame("RunBlockStarts", BlockCount);
             });
-
-            //Hotkeys for WebGL build so we can end task and go to next block
-            if (Session.WebBuild)
-            {
-                RunBlock.AddUpdateMethod(() =>
-                {
-                    if (TrialLevel != null)
-                        HandleWebBuildHotKeys();
-                });
-            }
-
             RunBlock.AddLateUpdateMethod(() =>
             {
                 // Check the case that the FrameData is deactivated when InTask_GazeCalibration is running
@@ -515,47 +504,7 @@ namespace USE_ExperimentTemplate_Task
             StartCoroutine(HandleSkybox(contextFilePath));
         }
 
-        private void HandleWebBuildHotKeys()
-        {
-            if (InputBroker.GetKeyUp(KeyCode.P)) //Pause Game HotKey:
-            {
-                Time.timeScale = Time.timeScale == 1 ? 0 : 1;
-            }
 
-            if (InputBroker.GetKeyUp(KeyCode.E)) //End Task HotKey
-            {
-                Time.timeScale = 1; //if paused, unpause before ending task
-
-                TrialLevel.AbortCode = 5;
-                Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", TrialLevel.AbortCodeDict["EndTask"]);
-                TrialLevel.ForceBlockEnd = true;
-                TrialLevel.FinishTrialCleanup();
-                TrialLevel.ClearActiveTrialHandlers();
-                SpecifyCurrentState(FinishTask);
-            }
-
-            if (InputBroker.GetKeyUp(KeyCode.N)) //Next Block HotKey
-            {
-
-                Time.timeScale = 1; //if paused, unpause before ending block
-
-                if (TrialLevel.TokenFBController != null)
-                {
-                    TrialLevel.TokenFBController.animationPhase = TokenFBController.AnimationPhase.None;
-                    TrialLevel.TokenFBController.enabled = false;
-                }
-
-                if (Session.HumanStartPanel.HumanStartPanelGO != null)
-                    Session.HumanStartPanel.HumanStartPanelGO.SetActive(false);
-
-                if (TrialLevel.AudioFBController.IsPlaying())
-                    TrialLevel.AudioFBController.audioSource.Stop();
-                TrialLevel.AbortCode = 3;
-                Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", TrialLevel.AbortCodeDict["EndBlock"]);
-                TrialLevel.ForceBlockEnd = true;
-                TrialLevel.SpecifyCurrentState(TrialLevel.GetStateFromName("FinishTrial"));
-            }
-        }
 
         public float CalculateAverageDuration(List<float?> durations)
         {

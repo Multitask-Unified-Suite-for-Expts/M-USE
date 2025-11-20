@@ -35,6 +35,7 @@ using USE_ExperimenterDisplay;
 using USE_ExperimentTemplate_Trial;
 using USE_ExperimentTemplate_Task;
 
+
 public class HotKeyPanel : ExperimenterDisplayPanel
 {
     public HotKeyList HKList;
@@ -43,8 +44,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
     public delegate bool BoolDelegate();
     public delegate void VoidDelegate();
 
-
     public GameObject hotKeyPanel;
+
 
     public override void CustomPanelInitialization()
     {
@@ -62,11 +63,13 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
         hotKeyText.GetComponent<Text>().text = HKList.GenerateHotKeyDescriptions();
     }
+
     public override void CustomPanelUpdate()
     {
         HKList.CheckAllHotKeyConditions();
         ConfigUIList.CheckAllHotKeyConditions();
     }
+
 
     public class HotKey
     {
@@ -74,6 +77,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         public string actionName;
         public VoidDelegate hotKeyAction;
         public BoolDelegate hotKeyCondition;
+
+        public bool SkipForProlificWebBuild = false;
+
 
         public string GenerateTextDescription()
         {
@@ -85,7 +91,6 @@ public class HotKeyPanel : ExperimenterDisplayPanel
     public class HotKeyList
     {
         List<HotKey> HotKeys = new List<HotKey>();
-        List<Selectable> m_orderedSelectables = new List<Selectable>();
         List<HotKey> ConfigUIHotKeys = new List<HotKey>();
         private HotKeyPanel HkPanel;
 
@@ -94,6 +99,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             string completeString = "";
             foreach (HotKey hk in HotKeys)
             {
+                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                    continue; //skip this key
+
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
             Debug.Log("HotKeyDescriptions: " + completeString);
@@ -105,6 +113,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             string completeString = "";
             foreach (HotKey hk in ConfigUIHotKeys)
             {
+                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                    continue; //skip this key
+
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
             }
 
@@ -113,9 +124,13 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
         public void CheckAllHotKeyConditions()
         {
-
             foreach (HotKey hk in HotKeys)
             {
+                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                {
+                    continue; //skip this key
+                }
+
                 if (hk.hotKeyCondition())
                 {
                     hk.hotKeyAction();
@@ -124,6 +139,9 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
             foreach (HotKey hk in ConfigUIHotKeys)
             {
+                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                    continue; //skip this key
+
                 if (hk.hotKeyCondition())
                 {
                     hk.hotKeyAction();
@@ -167,52 +185,13 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             ControlLevel_Task_Template OriginalTaskLevel = null;
             ControlLevel_Trial_Template OriginalTrialLevel = null;
 
-            // Toggle Displays HotKey
-            //HotKey toggleDisplays = new HotKey
-            //{
-            //    keyDescription = "W",
-            //    actionName = "Toggle Displays",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
-            //    hotKeyAction = () =>
-            //    {                    
-            //        Debug.LogWarning("CLICKED TOGGLE DISPLAY HOTKEY!");
-
-            //        if (Session.WebBuild)
-            //            return;
-                                        
-            //        var allCameras = GameObject.FindObjectsOfType<Camera>();
-            //        foreach (Camera c in allCameras)
-            //        {
-            //            Debug.Log($"--- CAMERA {c.name} BEFORE: {c.targetDisplay} ---");
-            //            c.targetDisplay = 1 - c.targetDisplay;
-            //            Debug.Log($"--- CAMERA {c.name} AFTER: {c.targetDisplay} ---");
-            //        }
-
-            //        //Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
-            //        var allCanvases = GameObject.FindObjectsOfType<Canvas>();
-            //        foreach (Canvas c in allCanvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
-            //        {
-            //            if(c.renderMode == RenderMode.ScreenSpaceOverlay)
-            //            {
-            //                Debug.Log($"--- CANVAS {c.name} BEFORE: {c.targetDisplay} ---");
-            //                c.targetDisplay = 1 - c.targetDisplay;
-            //                Debug.Log($"--- CANVAS {c.name} AFTER: {c.targetDisplay} ---");
-            //            }
-                        
-                     
-            //        }
-
-            //        // Change display of the loading canvas which could be inactive
-            //        Session.LoadingController_Session.gameObject.GetComponent<Canvas>().targetDisplay = 1 - Session.LoadingController_Session.gameObject.GetComponent<Canvas>().targetDisplay;
-            //    }
-            //};
-            //HotKeyList.Add(toggleDisplays);
 
             // Remove Cursor Hot Key
             HotKey toggleCursor = new HotKey
             {
                 keyDescription = "C",
                 actionName = "Cursor Visibility",
+                SkipForProlificWebBuild = false,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.C),
                 hotKeyAction = () =>
                 {
@@ -228,6 +207,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "P",
                 actionName = "Pause Game",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
@@ -244,6 +224,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "R",
                 actionName = "Restart Block",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
@@ -268,6 +249,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "B",
                 actionName = "Previous Block",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
                 hotKeyAction = () =>
                 {
@@ -300,6 +282,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "N",
                 actionName = "End Block",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
@@ -334,6 +317,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "E",
                 actionName = "End Task",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
@@ -357,38 +341,13 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             };
             HotKeyList.Add(endTask);
 
-            // Quit Game Hot Key
-            //ALREADY HANDLED BY ApplicationQuit class!
-            //HotKey quitGame = new HotKey
-            //{
-            //    keyDescription = "Esc",
-            //    actionName = "Quit",
-            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
-            //    hotKeyAction = () =>
-            //    {
-            //        Debug.Log("---PRESSED QUIT GAME HOT KEY---");
-            //        if(Session.TrialLevel != null)
-            //            Session.TrialLevel.ForceBlockEnd = true;
-
-            //        if (Session.TaskLevel != null)
-            //            Session.TaskLevel.Terminated = true;
-
-            //        if(Session.SessionLevel != null)
-            //        {
-            //            Session.SessionLevel.TasksFinished = true;
-            //            Session.SessionLevel.SpecifyCurrentState(Session.SessionLevel.GetStateFromName("FinishSession"));
-            //        }
-            //        Debug.LogWarning("HOT KEY QUIT");
-            //        Application.Quit();
-            //    }
-            //};
-            //HotKeyList.Add(quitGame);
 
             //Reward HotKey:
             HotKey reward = new HotKey
             {
                 keyDescription = "G",
                 actionName = "GiveReward",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.G),
                 hotKeyAction = () =>
                 {
@@ -412,6 +371,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Tab",
                 actionName = "Calibration",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
@@ -496,6 +456,8 @@ public class HotKeyPanel : ExperimenterDisplayPanel
                 }
             };
             HotKeyList.Add(calibration);
+
+
             //InstructionsButton visibility HotKey:
             //HotKey instructionsButton = new HotKey
             //{
@@ -508,6 +470,76 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             //    }
             //};
             //HotKeyList.Add(instructionsButton);
+
+
+            // Toggle Displays HotKey
+            //HotKey toggleDisplays = new HotKey
+            //{
+            //    keyDescription = "W",
+            //    actionName = "Toggle Displays",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.W),
+            //    hotKeyAction = () =>
+            //    {                    
+            //        Debug.LogWarning("CLICKED TOGGLE DISPLAY HOTKEY!");
+
+            //        if (Session.WebBuild)
+            //            return;
+
+            //        var allCameras = GameObject.FindObjectsOfType<Camera>();
+            //        foreach (Camera c in allCameras)
+            //        {
+            //            Debug.Log($"--- CAMERA {c.name} BEFORE: {c.targetDisplay} ---");
+            //            c.targetDisplay = 1 - c.targetDisplay;
+            //            Debug.Log($"--- CAMERA {c.name} AFTER: {c.targetDisplay} ---");
+            //        }
+
+            //        //Canvas[] allCanvases = Resources.FindObjectsOfTypeAll<Canvas>();
+            //        var allCanvases = GameObject.FindObjectsOfType<Canvas>();
+            //        foreach (Canvas c in allCanvases) //ExperimenterCanvas: 1, TaskSelectionCanvas:0 (DC), InitScreenCanvas:1, CR_Canvas:0 (DC)
+            //        {
+            //            if(c.renderMode == RenderMode.ScreenSpaceOverlay)
+            //            {
+            //                Debug.Log($"--- CANVAS {c.name} BEFORE: {c.targetDisplay} ---");
+            //                c.targetDisplay = 1 - c.targetDisplay;
+            //                Debug.Log($"--- CANVAS {c.name} AFTER: {c.targetDisplay} ---");
+            //            }
+
+
+            //        }
+
+            //        // Change display of the loading canvas which could be inactive
+            //        Session.LoadingController_Session.gameObject.GetComponent<Canvas>().targetDisplay = 1 - Session.LoadingController_Session.gameObject.GetComponent<Canvas>().targetDisplay;
+            //    }
+            //};
+            //HotKeyList.Add(toggleDisplays);
+
+
+            // Quit Game Hot Key
+            //ALREADY HANDLED BY ApplicationQuit class!
+            //HotKey quitGame = new HotKey
+            //{
+            //    keyDescription = "Esc",
+            //    actionName = "Quit",
+            //    hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Escape),
+            //    hotKeyAction = () =>
+            //    {
+            //        Debug.Log("---PRESSED QUIT GAME HOT KEY---");
+            //        if(Session.TrialLevel != null)
+            //            Session.TrialLevel.ForceBlockEnd = true;
+
+            //        if (Session.TaskLevel != null)
+            //            Session.TaskLevel.Terminated = true;
+
+            //        if(Session.SessionLevel != null)
+            //        {
+            //            Session.SessionLevel.TasksFinished = true;
+            //            Session.SessionLevel.SpecifyCurrentState(Session.SessionLevel.GetStateFromName("FinishSession"));
+            //        }
+            //        Debug.LogWarning("HOT KEY QUIT");
+            //        Application.Quit();
+            //    }
+            //};
+            //HotKeyList.Add(quitGame);
 
             return (HotKeyList);
         }
@@ -523,6 +555,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Tab",
                 actionName = "Scroll",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => Input.GetKeyDown(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
@@ -536,6 +569,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Enter",
                 actionName = "Select",
+                SkipForProlificWebBuild = true,
                 hotKeyCondition = () => (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)),
                 hotKeyAction = () =>
                 {

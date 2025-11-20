@@ -16,8 +16,8 @@ public class KT_ObjectManager : MonoBehaviour
 
     private Transform ObjectParent;
 
-    public readonly Vector2 xRange = new Vector2(-800f, 800f);
-    public readonly Vector2 yRange = new Vector2(-400f, 325f);
+    public readonly Vector2 xRange = new Vector2(-850f, 850f); //from -800 to -850 to increase the screen size so that pacmans go near border
+    public readonly Vector2 yRange = new Vector2(-450f, 325f); //from -400 to -450
 
     public delegate void CycleEventHandler();
     public event CycleEventHandler OnTargetIntervalMissed;
@@ -28,6 +28,10 @@ public class KT_ObjectManager : MonoBehaviour
     public float MaxTouchDuration;
 
     public Vector2 MostRecentCollisionPoint;
+
+    public float MinRespawnDistance = 250f; //Next point of appearance should be at least this distance farther
+
+    public float MaxRespawnDistance = 400f;
 
 
     public void NoSelectionDuringInterval(KT_Object obj)
@@ -81,6 +85,7 @@ public class KT_ObjectManager : MonoBehaviour
     public List<KT_Object> CreateObjects(List<KT_Object_ConfigValues> objects)
     {
         List<KT_Object> trialObjects = new List<KT_Object>();
+        Debug.LogWarning(objects.Count()); //Added a log warning to see if objects indexes are right
 
         foreach(KT_Object_ConfigValues configValues in objects)
         {
@@ -103,8 +108,10 @@ public class KT_ObjectManager : MonoBehaviour
                                                             configValues.ObjectColor[2] / 255f,
                                                             1f // Ensure alpha is fully opaque
                                                         );
+                Debug.Log($"<color=cyan>{configValues.ObjectName}: RGB = ({configValues.ObjectColor[0]}, {configValues.ObjectColor[1]}, {configValues.ObjectColor[2]}) → Unity Color = {go.GetComponent<Image>().color}</color>");
+                Debug.Log("..MSG to check if corrected codes is working...");
 
-                go.GetComponent<CircleCollider2D>().radius = configValues.Size * .567f; //Set Collider radius
+                go.GetComponent<CircleCollider2D>().radius = configValues.Size * .52f; //Set Collider radius
 
                 KT_Object obj = go.AddComponent<KT_Object>();
                 obj.SetupObject(this, configValues);
@@ -213,7 +220,128 @@ public class KT_ObjectManager : MonoBehaviour
             target.gameObject.SetActive(false);
     }
 
+
+
+public IEnumerator DisappearAndRespawnObject(KT_Object obj)
+{
+    if (obj == null || obj.gameObject == null)
+    {
+        Debug.LogError("Object is null!");
+        yield break;
+    }
+    
+    Debug.Log($"<color=orange>━━━ {obj.ObjectName} DISAPPEARING ━━━</color>\n" +
+              $"Position: {obj.transform.localPosition}\n" +
+              $"Time: {Time.time:F2}s");
+    
+    // Stop movement
+    obj.MoveAroundScreen = false;
+    
+    // Get Image component
+    Image objImage = obj.gameObject.GetComponent<Image>();
+    if (objImage == null)
+    {
+        Debug.LogError($"{obj.ObjectName} has no Image component!");
+        yield break;
+    }
+    
+    Color originalColor = objImage.color;
+    obj.LastDisappearPosition = obj.transform.localPosition;
+    
+    // FADE OUT (10 frames)
+    for (int i = 60; i >= 0; i--)
+    {
+        if (obj == null || objImage == null) yield break;
+        
+        float alpha = i / 60f;
+        Color c = originalColor;
+        c.a = alpha;
+        objImage.color = c;
+        
+        yield return null;  // Wait one frame
+    }
+    
+    // Wait a moment
+    yield return new WaitForSeconds(0.005f);
+    
+    // Calculate and move to new position
+    Vector3 newPosition = GetRespawnPosition(obj);
+    obj.transform.localPosition = newPosition;
+    
+    float distance = Vector3.Distance(obj.LastDisappearPosition, newPosition);
+    
+    Debug.Log($"<color=lime>━━━ {obj.ObjectName} REAPPEARING ━━━</color>\n" +
+              $"New Position: {newPosition}\n" +
+              $"Distance: {distance:F1} units\n" +
+              $"Time: {Time.time:F2}s");
+    
+    // FADE IN (10 frames)
+    for (int i = 0; i <= 60; i++)
+    {
+        if (obj == null || objImage == null) yield break;
+        
+        float alpha = i / 60f;
+        Color c = originalColor;
+        c.a = alpha;
+        objImage.color = c;
+        
+        yield return null;  // Wait one frame
+    }
+    
+    // Ensure fully opaque
+    if (objImage != null)
+    {
+        objImage.color = originalColor;
+    }
+    
+    // Start next cycle
+    if (obj.Cycles != null && obj.Cycles.Count > 0)
+    {
+        obj.CurrentCycle = obj.Cycles[0];
+        obj.CurrentCycle.StartCycle();
+    }
+    
+    // Resume movement and clear flags
+    obj.MoveAroundScreen = true;
+    obj.IsTransitioning = false;  //shouldn't attempt to delete the object when the obj is transitioning
+    
+    Debug.Log($"<color=cyan>✓ {obj.ObjectName} resumed at {Time.time:F2}s</color>");
 }
+
+    private Vector3 GetRespawnPosition(KT_Object obj)
+    {
+        Vector3 newPosition;
+        int maxAttempts = 50;
+        int attempts = 0;
+
+        do
+        {
+            // Generate random position within bounds
+            newPosition = new Vector3(
+                Random.Range(xRange.x + 100f, xRange.y - 100f),
+                Random.Range(yRange.x + 100f, yRange.y - 100f),
+                0
+            );
+
+            attempts++;
+
+            // Check distance from last disappear position
+            float distanceFromLast = Vector3.Distance(newPosition, obj.LastDisappearPosition);
+
+            if ((distanceFromLast >= MinRespawnDistance) && (distanceFromLast <= MaxRespawnDistance))
+            {
+                Debug.Log($"<color=cyan>✓ Valid position found for {obj.ObjectName} (attempt {attempts})</color>");
+                return newPosition;
+            }
+
+        } while (attempts < maxAttempts);
+
+        Debug.LogWarning($"<color=yellow> Using non-ideal position for {obj.ObjectName} after {maxAttempts} attempts</color>");
+        return newPosition;
+    }
+
+}
+
 
 
 
@@ -274,6 +402,10 @@ public class KT_Object : MonoBehaviour
 
     public int CurrentRewardValue;
 
+    //Added so that the next appearing position is not so close to where it disappeared
+    public Vector3 LastDisappearPosition;
+    public bool IsRespawning = false; 
+    public bool IsTransitioning = false;
 
     public KT_Object()
     {
@@ -347,67 +479,143 @@ public class KT_Object : MonoBehaviour
             Debug.LogError("NUMBER OF REWARD SECONDS DOES NOT MATCH THE SUM OF ALL THE Y VALUES IN THE RatesAndDurations variable!");
     }
 
-    List<float> GenerateRandomIntervals(int numIntervals, float duration)
+
+List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
-        List<float> randomFloats = new List<float>() { duration };  //add the ending number as a interval. 1) so last interval will end here, and 2) so that no randomly gen numbers below will be too close to the final value and thus subject may not have time to select before cycle ends. 
+        List<float> randomFloats = new List<float>() { duration };
+
+        // FALLBACK: Check if it's even possible to fit the intervals
+        float minPossibleDuration = numIntervals * MinAnimGap;
+
+        if (minPossibleDuration > duration)
+        {
+            Debug.LogWarning($"<color=yellow>━━━ {ObjectName} INTERVAL GENERATION ISSUE ━━━</color>\n" +
+                            $"Requested: {numIntervals} animations in {duration}s\n" +
+                            $"Minimum needed: {minPossibleDuration:F2}s (with MinAnimGap={MinAnimGap}s)\n" +
+                            $"<color=orange>FALLBACK: Generating evenly-spaced intervals instead</color>");
+
+            // Fallback: Generate evenly spaced intervals
+            float interval = duration / (numIntervals + 1);
+
+            for (int i = 1; i <= numIntervals; i++)
+            {
+                randomFloats.Add(i * interval);
+            }
+
+            randomFloats.Sort();
+
+            Debug.Log($"<color=cyan>Generated {randomFloats.Count - 1} evenly-spaced intervals at {interval:F2}s apart</color>");
+            return randomFloats;
+        }
+
+        // NORMAL: Try to generate random intervals
+        int maxAttempts = 1000;
 
         for (int i = 0; i < numIntervals; i++)
         {
             float randomValue;
+            int attempts = 0;
+            bool foundValid = false;
+
             do
             {
                 randomValue = Random.Range(0f, duration);
-            } while (randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap));
+                attempts++;
+
+                // Check if this value is far enough from all existing values
+                bool tooClose = randomFloats.Any(value => Mathf.Abs(value - randomValue) < MinAnimGap);
+
+                if (!tooClose)
+                {
+                    foundValid = true;
+                    break;
+                }
+
+                if (attempts >= maxAttempts)
+                {
+                    Debug.LogWarning($"<color=yellow>━━━ {ObjectName} INTERVAL GENERATION TIMEOUT ━━━</color>\n" +
+                                    $"Could not find valid position for interval {i + 1}/{numIntervals} after {maxAttempts} attempts\n" +
+                                    $"<color=orange>FALLBACK: Using evenly-spaced intervals for remaining</color>");
+
+                    // Fallback: Fill remaining with evenly spaced intervals
+                    randomFloats.Sort();
+                    float lastValue = randomFloats[randomFloats.Count - 1];
+                    int remaining = numIntervals - i;
+                    float remainingDuration = duration - lastValue;
+                    float spacing = remainingDuration / (remaining + 1);
+
+                    for (int j = 1; j <= remaining; j++)
+                    {
+                        randomFloats.Add(lastValue + j * spacing);
+                    }
+
+                    randomFloats.Sort();
+                    return randomFloats;
+                }
+
+            } while (!foundValid);
+
             randomFloats.Add(randomValue);
         }
-        randomFloats.Sort();
 
+        randomFloats.Sort();
         return randomFloats;
     }
 
+
     private void NextCycle()
+{
+    if (IsTransitioning)  // Already transitioning, don't call again!
     {
-        Cycles.RemoveAt(0);
-
-        if (Cycles.Count >= 1)
-        {
-            CurrentCycle = Cycles[0];
-            CurrentCycle.StartCycle();
-        }
-        else
-            DestroyObj();
+        return;
     }
+    
+    IsTransitioning = true;  // Set flag IMMEDIATELY
+    
+    Cycles.RemoveAt(0);
 
-    private void Update()
+    if (Cycles.Count >= 1)
     {
-        if (MoveAroundScreen)
+        ObjManager.StartCoroutine(ObjManager.DisappearAndRespawnObject(this));
+    }
+    else
+    {
+        DestroyObj();
+    }
+}
+
+
+
+   private void Update()
+{
+    if (MoveAroundScreen && !IsTransitioning)  // ← ADD CHECK HERE
+    {
+        if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
         {
-            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
-            {
-                StartCoroutine(AnimationCoroutine());
-                CurrentCycle.NextInterval();
-            }
+            StartCoroutine(AnimationCoroutine());
+            CurrentCycle.NextInterval();
+        }
 
-            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
-            {
-                NextCycle();
-            }
+        if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+        {
+            NextCycle();  // This will set IsTransitioning = true
+        }
 
-            WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
+        WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
 
-            HandlePausingWhileBeingSelected();
-            HandleInput();
+        HandlePausingWhileBeingSelected();
+        HandleInput();
 
-            //Call it every second instead of every frame:
-            RewardTimer += Time.deltaTime;
-            if (RewardTimer >= RewardInterval)
-            {
-                SetCurrentRewardValue();
-                RewardTimer = 0;
-            }
-
+        //Call it every second instead of every frame:
+        RewardTimer += Time.deltaTime;
+        if (RewardTimer >= RewardInterval)
+        {
+            SetCurrentRewardValue();
+            RewardTimer = 0;
         }
     }
+}
+
 
     private void SetCurrentRewardValue()
     {
@@ -594,38 +802,90 @@ public class KT_Object : MonoBehaviour
     }
 
 
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        //if(collision.contactCount > 0)
-        //{
-        //    foreach(ContactPoint2D contact in collision.contacts)
-        //    {
-        //        Vector2 collisionPoint = contact.point;
-
-        //        if(collisionPoint != ObjManager.MostRecentCollisionPoint)
-        //        {
-        //            Debug.LogWarning("COLLISION AT POINT: " + collisionPoint);
-        //            //send the event code here!
-        //        }
-        //        ObjManager.MostRecentCollisionPoint = collisionPoint;
-        //    }
-        //}
-
-        if(!IsTarget)
+        if (collision.contactCount > 0)
+        {
+            // Get the collision normal (perpendicular to the surface)
+            Vector2 collisionNormal = collision.contacts[0].normal;
+            Vector2 collisionPoint = collision.contacts[0].point;
+            
+            // Check if we hit another KT_Object (pacman-to-pacman collision)
+            KT_Object otherPacman = collision.gameObject.GetComponent<KT_Object>();
+            
+            string collisionType = "";
+            if (otherPacman != null)
+            {
+                // For pacman collisions: normal is the line between centers
+                Vector3 centerToCenter = (transform.localPosition - otherPacman.transform.localPosition).normalized;
+                collisionNormal = new Vector2(centerToCenter.x, centerToCenter.y);
+                collisionType = $"<color=cyan>PACMAN</color> ({otherPacman.ObjectName})";
+            }
+            else
+            {
+                collisionType = "<color=yellow>WALL</color>";
+            }
+            
+            // Store old direction
+            Vector2 oldDirection = new Vector2(Direction.x, Direction.y);
+            
+            // Calculate angles BEFORE reflection
+            float oldAngle = Mathf.Atan2(oldDirection.y, oldDirection.x) * Mathf.Rad2Deg;
+            float normalAngle = Mathf.Atan2(collisionNormal.y, collisionNormal.x) * Mathf.Rad2Deg;
+            
+            // Apply realistic reflection physics
+            Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal);
+            Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0);
+            
+            // Calculate angles AFTER reflection
+            float newAngle = Mathf.Atan2(reflectedDirection.y, reflectedDirection.x) * Mathf.Rad2Deg;
+            float angleChange = Mathf.DeltaAngle(oldAngle, newAngle);
+            
+            // DEBUG LOG
+            Debug.Log($"<color=lime>━━━ {ObjectName} COLLISION ━━━</color>\n" +
+                    $"Type: {collisionType}\n" +
+                    $"Point: {collisionPoint}\n" +
+                    $"<color=orange>Before:</color> Direction angle = {oldAngle:F1}°\n" +
+                    $"<color=cyan>Normal:</color> Surface angle = {normalAngle:F1}°\n" +
+                    $"<color=lime>After:</color> Direction angle = {newAngle:F1}°\n" +
+                    $"<color=magenta>Change:</color> {Mathf.Abs(angleChange):F1}° {(angleChange > 0 ? "counter-clockwise" : "clockwise")}");
+            
+            SetNewDestination();
+        }
+        else if (!IsTarget)
         {
             Direction = -Direction;
             SetNewDestination();
         }
     }
+
 
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (Time.time - NewDestStartTime >= MaxCollisionTime)
         {
-            Direction = -Direction;
+            Debug.Log($"<color=red> {ObjectName} STUCK in collision - forcing reflection</color>");
+            
+            if (collision.contactCount > 0)
+            {
+                Vector2 collisionNormal = collision.contacts[0].normal;
+                Vector2 oldDirection = new Vector2(Direction.x, Direction.y);
+                Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal);
+                Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0);
+                
+                float oldAngle = Mathf.Atan2(oldDirection.y, oldDirection.x) * Mathf.Rad2Deg;
+                float newAngle = Mathf.Atan2(reflectedDirection.y, reflectedDirection.x) * Mathf.Rad2Deg;
+                Debug.Log($"Unstuck: {oldAngle:F1}° → {newAngle:F1}°");
+            }
+            else
+            {
+                Direction = -Direction;
+            }
             SetNewDestination();
         }
     }
+  
 
     public bool AtDestination()
     {
@@ -638,15 +898,16 @@ public class KT_Object : MonoBehaviour
         return false;
     }
 
-    public void DestroyObj()
+ 
+     public void DestroyObj()
     {
-        ObjManager.RemoveFromObjectList(this);
+        if (ObjManager != null)
+            ObjManager.RemoveFromObjectList(this);
 
-        if(gameObject != null)
+        if (gameObject != null)
             Destroy(gameObject);
-        if(Marker != null)
+        if (Marker != null)
             Destroy(Marker);
-
     }
 
     private void SetupMarker()

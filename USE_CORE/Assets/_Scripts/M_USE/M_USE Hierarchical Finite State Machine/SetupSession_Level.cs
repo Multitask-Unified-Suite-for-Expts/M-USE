@@ -67,8 +67,9 @@ public class SetupSession_Level : ControlLevel
         ImportSessionSettings.AddDefaultInitializationMethod(() =>
         {
             SetDataPaths();
-            if (Session.UsingDefaultConfigs)
-                WriteSessionConfigsToPersistantDataPath();
+
+            //if (Session.UsingDefaultConfigs)
+            //    WriteSessionConfigsToPersistantDataPath();
 
             importSettings_Level.SettingsDetails = new List<SettingsDetails>()
             {

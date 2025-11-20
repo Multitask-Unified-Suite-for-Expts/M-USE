@@ -1,37 +1,35 @@
 <?php
+require_once 'security.php';
 
-$directoryPath = $_GET['directoryPath'];
+$directoryPath = $_GET['directoryPath'] ?? '';
 
-// Ensure the directory path is valid and exists
+if (empty($directoryPath)) {
+    http_response_code(400);
+    echo "";
+    exit;
+}
+
+// Sanitize the directory path
+$directoryPath = safe_path($directoryPath);
+
+// Ensure the directory exists
 if (is_dir($directoryPath)) {
-    // Open the directory
+    $folderNames = '';
     if ($dirHandle = opendir($directoryPath)) {
-        $folderNames = '';
-
-        // Read each entry in the directory
         while (($entry = readdir($dirHandle)) !== false) {
-            // Exclude current directory and parent directory
-            if ($entry != "." && $entry != "..") {
-                // Check if the entry is a directory
+            if ($entry !== "." && $entry !== "..") {
                 if (is_dir($directoryPath . '/' . $entry)) {
-                    // Concatenate the folder name to the string
                     $folderNames .= $entry . ',';
                 }
             }
         }
-
-        // Close the directory handle
         closedir($dirHandle);
-
-        // Output the folder names as plain text
+        // Output folder names as a comma-separated string
         echo rtrim($folderNames, ',');
     } else {
-        // Failed to open the directory
         echo "Failed to open the directory.";
     }
 } else {
-    // Invalid or non-existent directory path
     echo "Invalid or non-existent directory path.";
 }
-
 ?>

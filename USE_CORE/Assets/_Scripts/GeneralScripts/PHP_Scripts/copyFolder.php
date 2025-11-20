@@ -1,49 +1,58 @@
 <?php
+require_once 'security.php';
 
-function copyFolder($source, $destination) {
-    if (!is_dir($source)) {
-        return false;
-    }
+// Helper: recursively copy a folder within the safe base directory
+function copyFolder($src, $dst) {
+    if (!is_dir($src)) return false;
 
-    if (!is_dir($destination)) {
-        mkdir($destination, 0777, true);
-    }
+    if (!file_exists($dst)) mkdir($dst, 0755, true);
 
-    $dirHandle = opendir($source);
+    $dir = opendir($src);
+    if (!$dir) return false;
 
-    while (($file = readdir($dirHandle)) !== false) {
-        if ($file != "." && $file != "..") {
-            $sourceFile = $source . '/' . $file;
-            $destinationFile = $destination . '/' . $file;
+    while (($file = readdir($dir)) !== false) {
+        if ($file === '.' || $file === '..') continue;
 
-            if (is_dir($sourceFile)) {
-                copyFolder($sourceFile, $destinationFile);
-            } else {
-                copy($sourceFile, $destinationFile);
+        $srcFile = $src . '/' . $file;
+        $dstFile = $dst . '/' . $file;
+
+        if (is_dir($srcFile)) {
+            if (!copyFolder($srcFile, $dstFile)) {
+                closedir($dir);
+                return false;
+            }
+        } else {
+            if (!copy($srcFile, $dstFile)) {
+                closedir($dir);
+                return false;
             }
         }
     }
 
-    closedir($dirHandle);
+    closedir($dir);
     return true;
 }
 
-$sourcePath = $_GET['sourcePath'];
-$destinationPath = $_GET['destinationPath'];
+// Accept either GET or POST
+$sourcePath = $_REQUEST['sourcePath'] ?? '';
+$destinationPath = $_REQUEST['destinationPath'] ?? '';
 
-// Validate the paths
+// Validate input
 if (empty($sourcePath) || empty($destinationPath)) {
-    echo "Invalid paths";
-    return;
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Missing source or destination path']);
+    exit;
 }
 
-// Copy the folder and its contents
-$result = copyFolder($sourcePath, $destinationPath);
+// Sanitize paths
+$src = safe_path($sourcePath);
+$dst = safe_path($destinationPath);
 
-if ($result) {
-    echo "Folder copied successfully";
+// Perform copy
+if (copyFolder($src, $dst)) {
+    echo json_encode(['ok' => true, 'message' => 'Folder copied successfully']);
 } else {
-    echo "Failed to copy folder";
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Failed to copy folder']);
 }
-
 ?>

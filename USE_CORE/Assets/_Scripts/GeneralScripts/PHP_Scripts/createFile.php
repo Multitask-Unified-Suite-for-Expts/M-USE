@@ -1,23 +1,31 @@
 <?php
-$path = $_GET['path'];
+require_once 'security.php';
 
-if (!empty($path)) {
-    $headers = file_get_contents('php://input');
-    
-    if ($headers !== false) {
-        if (!file_exists($path)) {
-            // Create a new file
-            file_put_contents($path, $headers);
-            echo "File created successfully.";
-        } else {
-            // Replace the existing file
-            file_put_contents($path, $headers);
-            echo "File replaced successfully.";
-        }
-    } else {
-        echo "Error reading file headers.";
-    }
-} else {
-    echo "Invalid path specified.";
+$path = $_REQUEST['path'] ?? '';
+
+if (empty($path)) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Missing path']);
+    exit;
+}
+
+// Sanitize path
+$path = safe_path($path);
+
+// Read file content from request body
+$content = file_get_contents('php://input');
+if ($content === false) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Error reading request body']);
+    exit;
+}
+
+// Write file
+try {
+    file_put_contents($path, $content);
+    echo json_encode(['ok' => true, 'message' => 'File created/replaced successfully']);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Failed to write file']);
 }
 ?>

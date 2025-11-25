@@ -497,7 +497,7 @@ namespace SelectionTracking
                 {
                     if(OngoingSelection.Duration >= TimeBeforeChoiceStarts && !OngoingSelection.ChoiceStarted)
                     {
-                        Debug.Log("CHOICE STARTED ON FRAME: " + Time.frameCount);
+                        //Debug.LogWarning("CHOICE STARTED ON FRAME: " + Time.frameCount);
                         OngoingSelection.ChoiceStarted = true;
                         Session.EventCodeManager.SendCodeThisFrame("ChoiceBegins");
                     }
@@ -595,7 +595,7 @@ namespace SelectionTracking
                 Session.EventCodeManager.SendCodeThisFrame("ChoiceFailed");
                 SelectionOnEventCodeSent = false; //reset fixation for event codes
 
-                Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
+                //Debug.LogWarning("------ CHOICE FAILED AT FRAME: " + Time.frameCount + " | DURATION = " + OngoingSelection.Duration);
 
                 OngoingSelection = null;
             }

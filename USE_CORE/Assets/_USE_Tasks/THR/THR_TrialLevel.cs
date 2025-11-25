@@ -151,9 +151,14 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 StartButton = null;
         });
 
-        //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
-        var ShotgunHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "MouseButton0Click", Session.MouseTracker, InitTrial, InitTrial);
+        //--------------------------------------------------------------------------------------------------------------------------------------------
+        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", "GazeShotgun", Session.GazeTracker, InitTrial, InitTrial);
+        else
+            SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("trial", Session.SessionDef.SelectionType, Session.MouseTracker, InitTrial, InitTrial);
 
+
+        //INIT TRIAL state --------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
             ResetGlobalTrialVariables();
@@ -170,10 +175,10 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
             if (TrialCount_InTask != 0)
                 CurrentTaskLevel.SetTaskSummaryString();
 
-            if (ShotgunHandler.AllChoices.Count > 0)
-                ShotgunHandler.ClearChoices();
+            if (SelectionHandler.AllChoices.Count > 0)
+                SelectionHandler.ClearChoices();
         });
-        InitTrial.SpecifyTermination(() => true && ((Session.SessionDef.IsHuman && ShotgunHandler.LastSuccessfulSelectionMatchesStartButton()) || StartButton == null), CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
+        InitTrial.SpecifyTermination(() => true && ((Session.SessionDef.IsHuman && SelectionHandler.LastSuccessfulSelectionMatchesStartButton()) || StartButton == null), CurrentTask.StartWithSelectObjectState ? SelectObject : AvoidObject);
         InitTrial.AddDefaultTerminationMethod(() => TrialStartTime = Time.time);
 
         //AVOID OBJECT state ------------------------------------------------------------------------------------------------------------------------
@@ -232,7 +237,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 BackdropTouchTime = 0;
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)
@@ -367,7 +372,7 @@ public class THR_TrialLevel : ControlLevel_Trial_Template
                 BackdropTouchTime = 0;
             }
 
-            OngoingSelection = ShotgunHandler.OngoingSelection;
+            OngoingSelection = SelectionHandler.OngoingSelection;
 
             //Update Exp Display with OngoingSelection Duration:
             if (OngoingSelection != null)

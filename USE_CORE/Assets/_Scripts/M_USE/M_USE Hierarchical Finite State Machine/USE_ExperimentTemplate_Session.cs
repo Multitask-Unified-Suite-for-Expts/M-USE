@@ -506,8 +506,6 @@ namespace USE_ExperimentTemplate_Session
                 }
 
 
-
-
                 if (SelectionHandler.AllChoices.Count > 0)
                     SelectionHandler.ClearChoices();
 
@@ -527,6 +525,7 @@ namespace USE_ExperimentTemplate_Session
                 if (taskCount >= SessionBuilder.GetQueueLength())
                 {
                     TasksFinished = true;
+                    Debug.LogWarning("DONE WITH ALL TASKS");
                     return;
                 }
 
@@ -691,14 +690,13 @@ namespace USE_ExperimentTemplate_Session
 
             selectTask.AddUpdateMethod(() =>
             {
-                if(!startedSonicationTesting)
+                if (!startedSonicationTesting)
                 {
                     if(InputBroker.GetKeyDown(KeyCode.Space))
                     {
                         startedSonicationTesting = true;
                         StartCoroutine(SonicationUnitTest());
                     }
-
                 }
             });
 
@@ -962,10 +960,6 @@ namespace USE_ExperimentTemplate_Session
             saveData.AddSpecificInitializationMethod(() =>
             {
                 SaveDataAtEndOfSession();
-
-                //FOR PROLIFIC WEB BUILD, NEED TO FIRST CHECK THAT THEY PLAYED ALL TASKS, OTHERWISE DONT WANT TO REDIRECT THEM
-                //
-                //
 
 
                 Transform saveDataTransform = SavePanel.transform.Find("SavingData_Text");

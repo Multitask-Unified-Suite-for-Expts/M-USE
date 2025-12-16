@@ -433,6 +433,11 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
             SequenceManager.ManageSelection();
             ManageDataHandlers();
 
+            //TEMPORARY:
+            if (!Session.UsingDefaultConfigs)
+            {
+                HaloFBController.SetCircleHaloPositions(new Vector3(0f, 0f, -1f));
+            }
 
             int? depth = Session.Using2DStim ? 50 : (int?)null;
             int? stimIdx = null;
@@ -587,9 +592,10 @@ public class WhatWhenWhere_TrialLevel : ControlLevel_Trial_Template
 
         if (Session.SyncBoxController != null)
         {
-            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
         }
     }
     private void HandleSearchDurationData(float? searchDuration)

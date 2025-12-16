@@ -392,13 +392,14 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
     void GiveReward()
     {
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
         if (ChosenObject != null)
         {
             if(Session.SyncBoxController != null)
             {
+                CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+                CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
                 StartCoroutine(Session.SyncBoxController.SendRewardPulses(ChosenObject.RewardPulsesBySec != null ? ChosenObject.CurrentRewardValue : CurrentTrial.NumPulses, CurrentTrial.PulseSize));
             }
         }

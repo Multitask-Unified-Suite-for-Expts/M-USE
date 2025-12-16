@@ -123,12 +123,12 @@ namespace USE_ExperimentTemplate_Data
 
             AddDatum("SubjectID", () => Session.SubjectID); //will match prolific player ID if prolific web build
 
-            AddDatum("Prolific_WebBuild ", () => Session.Prolific_WebBuild);
+            AddDatum("Prolific_WebBuild ", () => Session.WebBuild_ParametersProvided);
 
-            if(Session.Prolific_WebBuild)
+            if(Session.WebBuild_ParametersProvided)
             {
-                AddDatum("Prolific_SessionID ", () => Session.Prolific_SessionID);
-                AddDatum("Prolific_StudyID ", () => Session.Prolific_StudyID);
+                AddDatum("Prolific_SessionID ", () => Session.SessionID_Param);
+                AddDatum("Prolific_StudyID ", () => Session.StudyID_Param);
 
             }
 

@@ -52,8 +52,6 @@ namespace ContinuousRecognition_Namespace
         public float[] Y_Locations;
         public float slopeOfRewardIncreaseOverTrials;
 
-        public bool UseTimer = false;
-
         //Calculated below (DONT SET IN CONFIG!!!):
         public int MaxNumTrials;
 
@@ -143,8 +141,6 @@ namespace ContinuousRecognition_Namespace
                 trial.InitialFixationDuration = InitialFixationDuration;
                 trial.StimulationDelayDuration = StimulationDelayDuration;
 
-                trial.UseTimer = UseTimer;
-
 
                 TrialDefs.Add(trial);
                 numTrialStims++;
@@ -171,7 +167,6 @@ namespace ContinuousRecognition_Namespace
         public int NumTrialStims;
         public int MaxNumTrials;
 
-        public bool UseTimer;
     }
 
     public class ContinuousRecognition_StimDef : StimDef

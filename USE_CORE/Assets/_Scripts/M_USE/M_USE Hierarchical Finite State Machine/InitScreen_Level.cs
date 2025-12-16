@@ -101,7 +101,7 @@ public class InitScreen_Level : ControlLevel
         {
             SetupInitScreen();
 
-            if(Session.Prolific_WebBuild)
+            if(Session.WebBuild_ParametersProvided)
             {
                 StartCoroutine(TestServerConnection());
             }
@@ -124,7 +124,7 @@ public class InitScreen_Level : ControlLevel
         //CollectInfo State-----------------------------------------------------------------------------------------------------------------------------------
         CollectInfoScreen.AddSpecificInitializationMethod(() =>
         {
-            if(Session.Prolific_WebBuild)
+            if(Session.WebBuild_ParametersProvided)
             {
                 ConfirmButtonPressed = true;
                 return;
@@ -151,7 +151,7 @@ public class InitScreen_Level : ControlLevel
         {
             ConfirmButtonPressed = false;
 
-            if (!Session.Prolific_WebBuild)
+            if (!Session.WebBuild_ParametersProvided)
             {
                 SetConfigInfo();
                 SetDataInfo();
@@ -528,7 +528,7 @@ public class InitScreen_Level : ControlLevel
 
                 ConnectedToServer = true;
 
-                if(Session.Prolific_WebBuild)
+                if(Session.WebBuild_ParametersProvided)
                     return;
 
                 Session.SessionAudioController.PlayAudioClip("Connected");
@@ -550,7 +550,7 @@ public class InitScreen_Level : ControlLevel
                 Debug.LogWarning("UNABLE TO CONNECT TO SERVER!");
                 Session.SessionAudioController.PlayAudioClip("Error");
 
-                if (Session.Prolific_WebBuild)
+                if (Session.WebBuild_ParametersProvided)
                     return;
 
                 ConnectToServerButton_GO.GetComponentInChildren<Image>().color = Color.red;

@@ -311,7 +311,15 @@ namespace USE_Def_Namespace
         /// </summary>
         public int ShotgunRadius_Pixels = 50;
 
+        /// <summary>
+        /// Whether or not to use the UI Timer (for tasks that implement it)
+        /// </summary>
+        public bool UseTimer = false;
 
+        /// <summary>
+        /// Whether or not to show the UI Score (if implemented for that task)
+        /// </summary>
+        public bool ShowScoreUI = false;
 
     }
 
@@ -479,6 +487,10 @@ namespace USE_Def_Namespace
         /// Object Stimulation Order Number
         /// </summary>
         public int[][] ObjectsToStimulateOn;
+
+
+
+
 
 
         public int PosStep;
@@ -686,6 +698,11 @@ namespace USE_Def_Namespace
         /// Object Stimulation Order Number
         /// </summary>
         public int[][] ObjectsToStimulateOn;
+
+
+
+
+
 
         public int DifficultyLevel;
 

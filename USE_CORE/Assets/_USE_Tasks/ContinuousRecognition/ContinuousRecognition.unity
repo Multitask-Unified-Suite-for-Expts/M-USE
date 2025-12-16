@@ -1051,6 +1051,7 @@ MonoBehaviour:
   NumAbortedTrials_InBlock: 0
   NumRewardPulses_InBlock: 0
   NumRewardPulses_InTask: 0
+  StimulationPulsesGiven_Task: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
   ForceTaskEnd: 0
@@ -1060,6 +1061,7 @@ MonoBehaviour:
   TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
+  CurrentBlockString: 
   TaskDirectionalLight: {fileID: 374264268}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
@@ -1088,6 +1090,7 @@ MonoBehaviour:
   TaskResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
+  BlockStimulationCode: 0
   TrialsCompleted_Task: 0
   TrialsCorrect_Task: 0
   TokenBarCompletions_Task: 0
@@ -1096,8 +1099,6 @@ MonoBehaviour:
   NumNew_Picked_Task: 0
   NumPNC_Picked_Task: 0
   RecencyInterference_Task: 
-  CurrentBlockString: 
-  blocksAdded: 0
   LongestStreak: 0
   AverageStreak: 0
 --- !u!114 &1101764165
@@ -1125,6 +1126,7 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  StimulationPulsesGiven_Block: 0
   runningPerformance: 
   difficultyLevel: 0
   posStep: 0
@@ -1135,6 +1137,7 @@ MonoBehaviour:
   diffLevelJitter: 0
   NumReversalsUntilTerm: 0
   MinTrialsBeforeTermProcedure: 0
+  MaxTrialsInBlock: 0
   TerminationWindowSize: 0
   reversalsCount: 0
   DiffLevelsAtReversals: 
@@ -1167,8 +1170,11 @@ MonoBehaviour:
   HaloFBController: {fileID: 0}
   TokenFBController: {fileID: 0}
   SliderFBController: {fileID: 0}
+  MaskFBController: {fileID: 0}
+  DialogueController: {fileID: 0}
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  PathReassignmentComplete: 0
   SkyboxMaterial: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
@@ -1179,8 +1185,17 @@ MonoBehaviour:
   NotSelectablePeriodTexture: {fileID: 0}
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
-  CR_CanvasGO: {fileID: 321374836}
+  TrialStimulationCode: 0
+  CanStimulateThisTrial: 0
+  StimulatedThisTrial: 0
+  StimulateOnCurrentObject: 0
+  ChoiceFailed_Trial: 0
+  PlayerViewPanel: {fileID: 0}
+  PlayerViewGO: {fileID: 0}
+  Score: 0
   ScoreTextGO: {fileID: 208675865}
+  ScoreText: {fileID: 208675867}
+  CR_CanvasGO: {fileID: 321374836}
   NumTrialsTextGO: {fileID: 1932148019}
   GreenBorderPrefab: {fileID: 692447127116707221, guid: 56d1b38cf705cfa458909624e6058ac2,
     type: 3}
@@ -1197,6 +1212,12 @@ MonoBehaviour:
   New_Stim: 
   Unseen_Stim: 
   TrialStimIndices: 
+  ChosenStimCategory: 
+  ChosenObjectLocation: 
+  ChosenObjectIndex: 
+  NonChosenStimIndices: 
+  NonChosenStimLocations: 
+  numPulsesTrial: 0
   BlockFeedbackLocations: []
   CompletedAllTrials: 0
   EndBlock: 0
@@ -1219,7 +1240,7 @@ MonoBehaviour:
   TimeToChoice_Block: []
   RecencyInterference_Block: 0
   playerViewTextList: []
-  minObjectTouchDuration:
+  timeBeforeChoiceStarts:
     name: 
     hidden: 0
     value: 0
@@ -1227,7 +1248,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  maxObjectTouchDuration:
+  totalChoiceDuration:
     name: 
     hidden: 0
     value: 0

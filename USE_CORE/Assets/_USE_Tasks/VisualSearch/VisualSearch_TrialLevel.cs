@@ -101,12 +101,6 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
                 PlayerViewGO = GameObject.Find("MainCameraCopy");
             }
 
-            if (Session.SessionDef.IsHuman)
-            {
-                Session.TimerController.CreateTimer(VS_CanvasGO.transform);
-                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
-            }
-
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -166,9 +160,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
-            //Set timer duration for the trial:
-            if (Session.SessionDef.IsHuman)
+            if (CurrentTask.UseTimer)
+            {
+                Session.TimerController.CreateTimer(VS_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
                 Session.TimerController.SetDuration(selectObjectDuration.value);
+            }
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
@@ -329,6 +326,12 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
         {   
             UpdateExperimenterDisplaySummaryStrings();
 
+            //TEMPORARY:
+            if (!Session.UsingDefaultConfigs)
+            {
+                HaloFBController.SetCircleHaloPositions(new Vector3(0f, 0f, -1f));
+            }
+
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
@@ -389,6 +392,7 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
     {
         NumTokenBarFull_InBlock++;
         CurrentTaskLevel.NumTokenBarFull_InTask++;
+
         if (Session.SyncBoxController != null)
         {
             int NumPulses;
@@ -397,12 +401,11 @@ public class VisualSearch_TrialLevel : ControlLevel_Trial_Template
             else
                 NumPulses = CurrentTrial.NumPulses;
 
-            Debug.LogWarning("VS SENDING PULSES: " + NumPulses);
+            CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
 
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(NumPulses, CurrentTrial.PulseSize));
 
-            CurrentTaskLevel.NumRewardPulses_InBlock += NumPulses;
-            CurrentTaskLevel.NumRewardPulses_InTask += NumPulses;
             RewardGiven = true;
         }
     }

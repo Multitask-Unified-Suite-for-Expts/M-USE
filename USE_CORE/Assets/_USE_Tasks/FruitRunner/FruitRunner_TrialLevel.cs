@@ -324,12 +324,13 @@ public class FruitRunner_TrialLevel : ControlLevel_Trial_Template
 
     public override void OnTokenBarFull()
     {
-        //GIVE REWARD:
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-
         if(Session.SyncBoxController != null)
+        {
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        }
     }
 
     private void SubscribeToFrEvents()

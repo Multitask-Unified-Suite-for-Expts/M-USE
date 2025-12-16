@@ -439,7 +439,7 @@ namespace USE_ExperimentTemplate_Session
 
             });
             sessionBuilder.SpecifyTermination(() => SessionBuilder.RunButtonClicked, selectTask);
-            sessionBuilder.SpecifyTermination(() => Session.Prolific_WebBuild, selectTask); //SEE IF IT WORKS
+            sessionBuilder.SpecifyTermination(() => Session.WebBuild_ParametersProvided, selectTask); //SEE IF IT WORKS
 
             sessionBuilder.AddDefaultTerminationMethod(() =>
             {
@@ -494,12 +494,12 @@ namespace USE_ExperimentTemplate_Session
 
 
 
-                if(!Session.SessionDef.IsHuman || Session.Prolific_WebBuild)
+                if(!Session.SessionDef.IsHuman || Session.WebBuild_ParametersProvided)
                 {
                     HumanVersionToggleButton.SetActive(false);
                     ToggleAudioButton.SetActive(false);
                 }
-                else if(Session.SessionDef.IsHuman && !Session.Prolific_WebBuild)
+                else if(Session.SessionDef.IsHuman && !Session.WebBuild_ParametersProvided)
                 {
                     HumanVersionToggleButton.SetActive(true);
                     ToggleAudioButton.SetActive(true);
@@ -963,7 +963,7 @@ namespace USE_ExperimentTemplate_Session
 
 
                 Transform saveDataTransform = SavePanel.transform.Find("SavingData_Text");
-                if(saveDataTransform != null && Session.Prolific_WebBuild)
+                if(saveDataTransform != null && Session.WebBuild_ParametersProvided)
                 {
                     TextMeshProUGUI saveText = saveDataTransform.gameObject.GetComponent<TextMeshProUGUI>();
                     if (saveText != null)
@@ -995,7 +995,8 @@ namespace USE_ExperimentTemplate_Session
             });
             saveData.AddTimer(() => 3f, () => quitApplication, () =>
             {
-                Session.Prolific_Controller_Session.TriggerRedirectoToCompletionURL();
+                if(Session.SendToProlificUponCompletion)
+                    Session.Prolific_Controller_Session.TriggerRedirectoToCompletionURL();
             });
 
 
@@ -1157,6 +1158,7 @@ namespace USE_ExperimentTemplate_Session
             }
 
             StartCoroutine(FrameData.AppendDataToFile());
+
             if (CurrentTask == null)
                 Debug.Log("Current Task is Null before trying to write summary data! (could be that no task was started yet)");
             else

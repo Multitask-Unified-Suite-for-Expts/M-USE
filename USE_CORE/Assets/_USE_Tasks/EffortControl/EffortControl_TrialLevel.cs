@@ -32,9 +32,9 @@ using USE_ExperimentTemplate_Trial;
 using ConfigDynamicUI;
 using UnityEngine.UI;
 using TMPro;
-using USE_ExperimentTemplate_Task;
-using USE_UI;
 using static SelectionTracking.SelectionTracker;
+using System.Collections;
+
 
 public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 {
@@ -51,7 +51,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public Vector3 OriginalStartButtonPosition;
 
+    //SET IN INSPECTOR:
     public GameObject EC_CanvasGO;
+
 
     private GameObject StartButton, StimLeft, StimRight, TrialStim, OutlineContainerLeft, OutlineContainerRight,
                         BalloonOutline, RewardContainerLeft, RewardContainerRight, Reward, MiddleBarrier;
@@ -172,6 +174,7 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (!ObjectsCreated)
                 CreateObjects();
+  
         });
 
         //SETUP TRIAL state ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -230,6 +233,14 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             DelayDuration = sbToBalloonDelay.value;
             StateAfterDelay = ChooseBalloon;
             trialStartTime = Time.time;
+
+
+            if (CurrentTask.ShowScoreUI)
+            {
+                EC_CanvasGO.SetActive(true);
+                ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
+                ScoreTextGO.SetActive(true);
+            }
         });
 
         //Choose Balloon state -------------------------------------------------------------------------------------------------------------------------------------------
@@ -411,6 +422,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     }
                     else //Reached the scale 
                     {
+                        StartCoroutine(ScoreCoroutine(NumInflations * 10));
+
                         Inflate = false;
                         SelectionHandler.HandlerActive = true;
                         if (NumInflations >= InflationsNeeded) //Done enough inflations
@@ -427,7 +440,10 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
             {
                 GameObject hitGO = InputBroker.ShotgunRaycast(InputBroker.mousePosition);
                 if (hitGO == null)
+                {
                     AudioFBController.Play("Negative");
+                    StartCoroutine(ScoreCoroutine(-(NumInflations * 10)));
+                }
             }
 
 
@@ -496,6 +512,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     {
                         Debug.LogWarning("CHOICE FAILED ON A SELECTABLE OBJECT");
                         ChoiceFailed_Trial = true;
+
+                        StartCoroutine(ScoreCoroutine(-(NumInflations * 10)));
                     }
                     else
                         Debug.LogWarning("CHOICE FAILED ON ANOTHER OBJECT: " + SelectionHandler.UnsuccessfulChoices[0].SelectedGameObject.name);
@@ -579,6 +597,11 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         {
             TokenFBController.enabled = false;
             AddTokenInflateAudioPlayed = false;
+
+            if (CurrentTask.ShowScoreUI)
+            {
+                ScoreTextGO.SetActive(false);
+            }
         });
         ConfirmMinTrialDuration.AddDefaultInitializationMethod(() =>
         {
@@ -616,13 +639,21 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public override void OnTokenBarFull()
     {
-        CurrentTaskLevel.NumRewardPulses_InBlock += SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight;
-        CurrentTaskLevel.NumRewardPulses_InTask += SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight;
 
         if(Session.SyncBoxController != null)
         {
+            CurrentTaskLevel.NumRewardPulses_InBlock += SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight;
+            CurrentTaskLevel.NumRewardPulses_InTask += SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight;
+
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(SideChoice == "Left" ? CurrentTrial.NumPulsesLeft : CurrentTrial.NumPulsesRight, SideChoice == "Left" ? CurrentTrial.PulseSizeLeft : CurrentTrial.PulseSizeRight));
         }
+    }
+
+
+    void DeactivateTextObjects()
+    {
+        if (ScoreTextGO.activeInHierarchy)
+            ScoreTextGO.SetActive(false);
     }
 
     public override void ResetTrialVariables()
@@ -665,6 +696,8 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
     public override void FinishTrialCleanup() //called automatically at start of FinishTrial state
     {
+        DeactivateTextObjects();
+
         DeactivateGameObjects();
 
         if (AbortCode == 0) //Normal
@@ -723,6 +756,9 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
         DiffLevelsAtReversals.Clear();
         InflationDurations_Block.Clear();
         runningPerformance.Clear();
+
+        Score = 0;
+
     }
 
     private void ScaleToNextInterval()

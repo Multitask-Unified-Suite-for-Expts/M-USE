@@ -120,12 +120,6 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
                 PlayerViewGO = GameObject.Find("MainCameraCopy");     
             }
 
-            if (Session.SessionDef.IsHuman)
-            {
-                Session.TimerController.CreateTimer(FL_CanvasGO.transform);
-                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
-            }
-
             if (StartButton == null)
             {
                 if (Session.SessionDef.IsHuman)
@@ -183,9 +177,14 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
             if (Session.SessionDef.MacMainDisplayBuild & !Application.isEditor) //adj text positions if running build with mac as main display
                 TokenFBController.AdjustTokenBarSizing(200);
 
-            //Set timer duration for the trial:
-            if (Session.SessionDef.IsHuman)
+
+            if (CurrentTask.UseTimer)
+            {
+                Session.TimerController.CreateTimer(FL_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
                 Session.TimerController.SetDuration(selectObjectDuration.value);
+            }
+
 
             TokenFBController.SetRevealTime(tokenRevealDuration.value);
             TokenFBController.SetUpdateTime(tokenUpdateDuration.value);
@@ -350,6 +349,12 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             SetTrialSummaryString();
 
+            //TEMPORARY:
+            if (!Session.UsingDefaultConfigs)
+            {
+                HaloFBController.SetCircleHaloPositions(new Vector3(0f, 0f, -1f));
+            }
+
             int? depthFor2D = Session.Using2DStim ? 50 : (int?) null;
 
             if (selectedSD.StimTokenRewardMag > 0)
@@ -420,6 +425,7 @@ public class FlexLearning_TrialLevel : ControlLevel_Trial_Template
 
             CurrentTaskLevel.NumRewardPulses_InBlock += numPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += numPulses;
+
             RewardGiven = true;
         }
     }

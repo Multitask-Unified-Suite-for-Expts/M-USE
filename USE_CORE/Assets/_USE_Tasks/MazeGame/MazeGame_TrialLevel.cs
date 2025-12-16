@@ -147,13 +147,14 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
             }
 
             CurrentTaskLevel.SetTaskSummaryString();
-            Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
-        });
-        SetupTrial.SpecifyTermination(() => true, InitTrial, () =>
-        {
+
             Session.Using2DStim = true; //NEED TO MANUALLY SET FOR MAZE SINCE IT DOESNT USE QUADDLES AND THE TILES ARE 2D!
             TouchFBController.SetUseRootGoPos(!Session.Using2DStim); //THIS IS DONE FOR ALL TASKS IN SETUPTRIAL BUT NEED TO DO IT HERE AFTER FOR MAZE SINCE NOT USING STIM
+
+            Input.ResetInputAxes(); //reset input in case they still touching their selection from last trial!
+
         });
+        SetupTrial.SpecifyTermination(() => true, InitTrial);
 
 
         //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -512,10 +513,10 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
 
         if (Session.SyncBoxController != null)
         {
-            Debug.LogWarning("MG SENDING PULSES: " + CurrentTrial.NumPulses);
-            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
             CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
             CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
         }
         
         DisableSceneElements();

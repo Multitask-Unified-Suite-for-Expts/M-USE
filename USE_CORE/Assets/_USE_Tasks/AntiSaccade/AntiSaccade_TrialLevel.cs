@@ -322,6 +322,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
             if (ChosenStim == null)
                 return;
 
+
+            //TEMPORARY:
+            if (!Session.UsingDefaultConfigs)
+            {
+                HaloFBController.SetCircleHaloPositions(new Vector3(0f, 0f, -1f));
+            }
+
             int? haloDepth = Session.Using2DStim ? 25 : (int?)null;
 
             float? tokenYAdjustment = Session.Using2DStim ? -5f : (float?)null; //used to adjust where the tokens appear in relation to GameObject
@@ -391,11 +398,9 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         
         int randomIndex = random.Next(CurrentTrial.SpatialCueDelayDuration.Length);
         ChosenSpatialCueDelayDuration = CurrentTrial.SpatialCueDelayDuration[randomIndex];
-        Debug.Log(("CHOSEN SPATIALCUEDELAYDURATION: " + ChosenSpatialCueDelayDuration));
         
         int randomIndex2 = random.Next(CurrentTrial.DisplayTargetDuration.Length);
         ChosenDisplayTargetDuration = CurrentTrial.DisplayTargetDuration[randomIndex2];
-        Debug.Log(("CHOSEN DISPLAYTARGETDURATION: " + ChosenDisplayTargetDuration));
     }
 
     public override void OnTokenBarFull()
@@ -404,10 +409,13 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.TokenBarsCompleted_Task++;
 
         if(Session.SyncBoxController != null)
-            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        {
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        }
+
 
         StartCoroutine(ResetTbAfterFilled());
 

@@ -48,7 +48,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     private GameObject StartButton;
 
     public GameObject CR_CanvasGO;
-    public GameObject ScoreTextGO;
     public GameObject NumTrialsTextGO;
     public GameObject GreenBorderPrefab;
     public GameObject RedBorderPrefab;
@@ -82,14 +81,6 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
     [HideInInspector] public int RecencyInterference_Block;
 
-    private int score;
-    [HideInInspector] public int Score
-    {
-        get
-        {
-            return score;
-        }
-    }
 
 
     private StimGroup trialStims, RightGroup, WrongGroup;
@@ -198,7 +189,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
                 LoadConfigUIVariables();
 
             //Set timer duration for the trial:
-            if (CurrentTrial.UseTimer)
+            if (CurrentTask.UseTimer)
             {
                 Session.TimerController.CreateTimer(CR_CanvasGO.transform);
                 Session.TimerController.SetVisibilityOnOffStates(ChooseStim, ChooseStim);
@@ -247,7 +238,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
             SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
-            if (Session.SessionDef.IsHuman)
+            if (CurrentTask.ShowScoreUI)
             {
                 CR_CanvasGO.SetActive(true);
                 SetScoreAndTrialsText();
@@ -457,6 +448,12 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (!StimIsChosen)
                 return;
 
+            //TEMPORARY:
+            if (!Session.UsingDefaultConfigs)
+            {
+                HaloFBController.SetCircleHaloPositions(new Vector3(0f, 0f, -1f));
+            }
+
             int? depth = Session.Using2DStim ? 10 : (int?)null;
 
             if (GotTrialCorrect)
@@ -520,7 +517,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             if (CurrentTrial.ShakeStim)
                 RemoveShakeStimScript(trialStims);
 
-            if (Session.SessionDef.IsHuman)
+            if (CurrentTask.ShowScoreUI)
             {
                 ScoreTextGO.SetActive(false);
                 NumTrialsTextGO.SetActive(false);
@@ -585,7 +582,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
             SliderFBController.SliderHaloGO.SetActive(false);
 
         if (GotTrialCorrect)
-            score += (TrialCount_InBlock + 1) * 100;
+            Score += (TrialCount_InBlock + 1) * 100;
 
         if (DisplayResultsPanelGO.activeInHierarchy)
             DisplayResultsPanelGO.SetActive(false);
@@ -766,7 +763,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         AvgTimeToChoice_Block = 0;
         TimeToCompletion_Block = 0;
         RecencyInterference_Block = 0;
-        score = 0;
+        Score = 0;
 
         SliderBarCompletions_Block = 0;
 
@@ -830,7 +827,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
     void SetScoreAndTrialsText()
     {
         //Set the Score and NumTrials texts at the beginning of the trial. 
-        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {score}";
+        ScoreTextGO.GetComponent<TextMeshProUGUI>().text = $"SCORE: {Score}";
         NumTrialsTextGO.GetComponent<TextMeshProUGUI>().text = $"TRIAL: {TrialCount_InBlock + 1}";
     }
 
@@ -1074,7 +1071,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         if (TrialCount_InBlock == 0)
         {
             trialStims = null;
-            score = 0;
+            Score = 0;
 
             //clear stim lists in case it's NOT the first block!
             ClearCurrentTrialStimLists();

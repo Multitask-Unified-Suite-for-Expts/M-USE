@@ -406,11 +406,13 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
         NumTbCompletions_Block++;
         CurrentTaskLevel.TokenBarCompletions_Task++;
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
-
         if(Session.SyncBoxController != null)
+        {
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+
             StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        }
     }
 
 

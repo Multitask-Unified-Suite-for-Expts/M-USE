@@ -43,7 +43,7 @@ using System.Collections;
 using USE_Def_Namespace;
 using Random = UnityEngine.Random;
 using static SelectionTracking.SelectionTracker;
-
+using TMPro;
 
 namespace USE_ExperimentTemplate_Trial
 {
@@ -145,6 +145,12 @@ namespace USE_ExperimentTemplate_Trial
         //Player View Variables
         [HideInInspector] public PlayerViewPanel PlayerViewPanel;
         [HideInInspector] public GameObject PlayerViewGO;
+
+
+        [HideInInspector] public int Score;
+
+        public GameObject ScoreTextGO;
+        public TextMeshProUGUI ScoreText;
 
 
 
@@ -252,7 +258,6 @@ namespace USE_ExperimentTemplate_Trial
 
             Add_ControlLevel_InitializationMethod(() =>
             {
-
                 TrialCount_InBlock = -1;
 
                 DefineCustomTrialDefSelection();
@@ -269,6 +274,8 @@ namespace USE_ExperimentTemplate_Trial
                         Debug.LogWarning("PLAYER VIEW PARENT IS NULL (could not find gameobject named MainCameraCopy");
                 }
 
+                if (ScoreTextGO != null)
+                    ScoreText = ScoreTextGO.GetComponent<TextMeshProUGUI>();
             });
 
             LoadTrialTextures.AddUniversalInitializationMethod(() =>
@@ -354,9 +361,10 @@ namespace USE_ExperimentTemplate_Trial
 
             });
 
-            SetupTrial.AddDefaultTerminationMethod(() =>
+            SetupTrial.AddUniversalTerminationMethod(() =>
             {
                 Input.ResetInputAxes();
+
                 if (Session.SessionDef.IsHuman)
                     Session.HumanStartPanel.AdjustPanelBasedOnTrialNum(TrialCount_InTask, TrialCount_InBlock);
 
@@ -364,11 +372,7 @@ namespace USE_ExperimentTemplate_Trial
 
                 Session.ParticipantCanvas_GO.SetActive(false);
 
-            });
-
-            SetupTrial.AddUniversalTerminationMethod(() =>
-            {
-                 Scene targetScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
+                Scene targetScene = SceneManager.GetSceneByName(TaskLevel.TaskName);
                 if (targetScene.IsValid())
                 {
                     GameObject[] allObjects = targetScene.GetRootGameObjects();
@@ -381,6 +385,7 @@ namespace USE_ExperimentTemplate_Trial
                         }
                     }
                 }
+
             });
 
             FinishTrial.AddSpecificInitializationMethod(() =>
@@ -501,6 +506,20 @@ namespace USE_ExperimentTemplate_Trial
             TrialData.AddStateTimingData(this);
             StartCoroutine(TrialData.CreateFile());
 
+        }
+
+
+
+        public IEnumerator ScoreCoroutine(int scoreChange)
+        {
+            Score += scoreChange;
+
+            ScoreText.text = $"SCORE: {Score}";
+
+            Color startingColor = ScoreText.color;
+            ScoreText.color = scoreChange > 0 ? Color.green : Color.red;
+            yield return new WaitForSeconds(.2f);
+            ScoreText.color = startingColor;
         }
 
         public IEnumerator StimulationCoroutine()

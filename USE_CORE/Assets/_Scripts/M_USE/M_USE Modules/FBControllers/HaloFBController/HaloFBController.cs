@@ -78,6 +78,7 @@ public class HaloFBController : MonoBehaviour
                 StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, false, particleHalo?.GetParticleEffectDuration(), destroyTime, null));
             else
                 StartCoroutine(circleHalo.CreateCircleHalo("positive", gameObj, true, particleHalo?.GetParticleEffectDuration(), destroyTime, depth.Value));
+            
 
         }
         if (Session.SessionDef.EventCodesActive)
@@ -181,6 +182,13 @@ public class HaloFBController : MonoBehaviour
         }
 
         return null; // Returns null if CircleHalo not found in any child
+    }
+
+
+    public void SetCircleHaloPositions(Vector3 pos)
+    {
+        PositiveCircleHaloPrefab.transform.localPosition = pos;
+        NegativeCircleHaloPrefab.transform.localPosition = pos;
     }
 
 
@@ -297,4 +305,6 @@ public class HaloFBController : MonoBehaviour
     {
         return IsFlashing;
     }
+
+
 }

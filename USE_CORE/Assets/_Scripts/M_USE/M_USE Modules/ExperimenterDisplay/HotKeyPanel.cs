@@ -78,7 +78,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         public VoidDelegate hotKeyAction;
         public BoolDelegate hotKeyCondition;
 
-        public bool SkipForProlificWebBuild = false;
+        public bool SkipForParametersWebBuild = false;
 
 
         public string GenerateTextDescription()
@@ -99,7 +99,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             string completeString = "";
             foreach (HotKey hk in HotKeys)
             {
-                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                if (Session.WebBuild_ParametersProvided && hk.SkipForParametersWebBuild)
                     continue; //skip this key
 
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
@@ -113,7 +113,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             string completeString = "";
             foreach (HotKey hk in ConfigUIHotKeys)
             {
-                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                if (Session.WebBuild_ParametersProvided && hk.SkipForParametersWebBuild)
                     continue; //skip this key
 
                 completeString = completeString + hk.GenerateTextDescription() + "\n";
@@ -126,7 +126,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
         {
             foreach (HotKey hk in HotKeys)
             {
-                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                if (Session.WebBuild_ParametersProvided && hk.SkipForParametersWebBuild)
                 {
                     continue; //skip this key
                 }
@@ -139,7 +139,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
 
             foreach (HotKey hk in ConfigUIHotKeys)
             {
-                if (Session.Prolific_WebBuild && hk.SkipForProlificWebBuild)
+                if (Session.WebBuild_ParametersProvided && hk.SkipForParametersWebBuild)
                     continue; //skip this key
 
                 if (hk.hotKeyCondition())
@@ -191,7 +191,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "C",
                 actionName = "Cursor Visibility",
-                SkipForProlificWebBuild = false,
+                SkipForParametersWebBuild = false,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.C),
                 hotKeyAction = () =>
                 {
@@ -207,7 +207,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "P",
                 actionName = "Pause Game",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.P),
                 hotKeyAction = () =>
                 {
@@ -224,7 +224,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "R",
                 actionName = "Restart Block",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.R),
                 hotKeyAction = () =>
                 {
@@ -249,7 +249,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "B",
                 actionName = "Previous Block",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.B),
                 hotKeyAction = () =>
                 {
@@ -282,7 +282,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "N",
                 actionName = "End Block",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.N),
                 hotKeyAction = () =>
                 {
@@ -317,7 +317,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "E",
                 actionName = "End Task",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.E),
                 hotKeyAction = () =>
                 {
@@ -347,7 +347,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "G",
                 actionName = "GiveReward",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.G),
                 hotKeyAction = () =>
                 {
@@ -371,7 +371,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Tab",
                 actionName = "Calibration",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => InputBroker.GetKeyUp(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
@@ -555,7 +555,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Tab",
                 actionName = "Scroll",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => Input.GetKeyDown(KeyCode.Tab),
                 hotKeyAction = () =>
                 {
@@ -569,7 +569,7 @@ public class HotKeyPanel : ExperimenterDisplayPanel
             {
                 keyDescription = "Enter",
                 actionName = "Select",
-                SkipForProlificWebBuild = true,
+                SkipForParametersWebBuild = true,
                 hotKeyCondition = () => (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter)),
                 hotKeyAction = () =>
                 {

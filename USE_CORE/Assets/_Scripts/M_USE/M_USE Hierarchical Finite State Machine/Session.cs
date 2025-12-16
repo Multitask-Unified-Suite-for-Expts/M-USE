@@ -43,31 +43,34 @@ public static class Session
 
     public static Prolific_Controller Prolific_Controller_Session;
 
-    public static string Prolific_StudyID = "";
-    public static string Prolific_SessionID = "";
-    public static string Prolific_PlayerID = "";
-    public static string Prolific_ConfigFolderName = "";
+    public static string StudyID_Param = ""; //Set to "nonprolific" for it to NOT send to prolific upon completion
+    public static string SessionID_Param = "";
+    public static string PlayerID_Param = "";
+    public static string ConfigFolderName_Param = "";
 
-    public static bool WebBuild;
-    public static bool Prolific_WebBuild
+
+    public static bool WebBuild; //opposite is local build
+
+    public static bool WebBuild_ParametersProvided //   1) Prolific and 2) NonProlific Parameters provided for human testing     (whether or not to send to prolific depends on boolean down below)
     {
         get
         {
-            return WebBuild && !string.IsNullOrEmpty(Prolific_PlayerID);
+            return WebBuild && !string.IsNullOrEmpty(PlayerID_Param);
         }
     }
 
-    public static bool Using2DStim;
+    public static bool SendToProlificUponCompletion
+    {
+        get
+        {
+            return WebBuild_ParametersProvided && !string.IsNullOrEmpty(StudyID_Param) && StudyID_Param != "nonprolific";
+        }
+    }
 
-    public static readonly string DefaultStimFolderPath = "DefaultResources/Stimuli";
-    public static readonly string DefaultContextFolderPath = "DefaultResources/Contexts";
-
-    //Info Collected from Init Screen Panels:
-    public static string SubjectID;
-    public static string SubjectAge;
     public static bool UsingDefaultConfigs;
     public static bool UsingLocalConfigs;
     public static bool UsingServerConfigs;
+
     public static bool StoringDataLocally;
     public static bool StoringDataOnServer;
     public static bool StoreData
@@ -77,6 +80,16 @@ public static class Session
             return StoringDataLocally || StoringDataOnServer;
         }
     }
+
+    public static bool Using2DStim;
+
+    public static readonly string DefaultStimFolderPath = "DefaultResources/Stimuli";
+    public static readonly string DefaultContextFolderPath = "DefaultResources/Contexts";
+
+    public static string SubjectID;
+    public static string SubjectAge;
+
+
 
     public static FullScreenController FullScreenController;
     public static SessionAudioController SessionAudioController;

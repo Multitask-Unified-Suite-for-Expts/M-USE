@@ -107,10 +107,10 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         Add_ControlLevel_InitializationMethod(() =>
         {
-            if (Session.SessionDef.IsHuman)
+            if (!Session.WebBuild) //player view variables
             {
-                Session.TimerController.CreateTimer(WM_CanvasGO.transform);
-                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
+                PlayerViewPanel = gameObject.AddComponent<PlayerViewPanel>();
+                PlayerViewGO = GameObject.Find("MainCameraCopy");
             }
 
             if (StartButton == null)
@@ -167,9 +167,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
 
         InitTrial.AddSpecificInitializationMethod(() =>
         {
-            //Set timer duration for the trial:
-            if (Session.SessionDef.IsHuman)
+
+            if (CurrentTask.UseTimer)
+            {
+                Session.TimerController.CreateTimer(WM_CanvasGO.transform);
+                Session.TimerController.SetVisibilityOnOffStates(SearchDisplay, SearchDisplay);
                 Session.TimerController.SetDuration(selectObjectDuration.value);
+            }
 
 
             if (Session.WebBuild)
@@ -331,6 +335,13 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
             CurrentTaskLevel.SearchDurations_InTask.Add(SearchDuration);
             UpdateExperimenterDisplaySummaryStrings();
 
+
+            //TEMPORARY:
+            if (!Session.UsingDefaultConfigs)
+            {
+                HaloFBController.SetCircleHaloPositions(new Vector3(0f, 0f, 1f));
+            }
+
             int? depth = Session.Using2DStim ? 50 : (int?)null;
 
             if (CorrectSelection) 
@@ -400,10 +411,12 @@ public class WorkingMemory_TrialLevel : ControlLevel_Trial_Template
         CurrentTaskLevel.NumTokenBarFull_InTask++;
 
         if(Session.SyncBoxController != null)
-            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        {
+            CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
+            CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
 
-        CurrentTaskLevel.NumRewardPulses_InBlock += CurrentTrial.NumPulses;
-        CurrentTaskLevel.NumRewardPulses_InTask += CurrentTrial.NumPulses;
+            StartCoroutine(Session.SyncBoxController.SendRewardPulses(CurrentTrial.NumPulses, CurrentTrial.PulseSize));
+        }
         
     }
 

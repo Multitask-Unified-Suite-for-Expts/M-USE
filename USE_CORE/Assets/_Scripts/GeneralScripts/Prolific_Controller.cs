@@ -30,19 +30,19 @@ public class Prolific_Controller : MonoBehaviour
             var data = JsonUtility.FromJson<ParamData>(json);
             if (data != null)
             {
-                Session.Prolific_SessionID = data.sessionid;
-                Session.Prolific_StudyID = data.studyid;
-                Session.Prolific_PlayerID = data.playerid;
-                Session.Prolific_ConfigFolderName = data.config;
+                Session.SessionID_Param = data.sessionid;
+                Session.StudyID_Param = data.studyid;
+                Session.PlayerID_Param = data.playerid;
+                Session.ConfigFolderName_Param = data.config;
 
                 Debug.LogWarning($"✅ Received SessionID: {data.sessionid}, StudyID: {data.studyid}, PID: {data.playerid}, CONFIG: {data.config}");
 
                 Session.StoringDataOnServer = true;
-                Session.SubjectID = Session.Prolific_PlayerID;
+                Session.SubjectID = Session.PlayerID_Param;
                 Session.SubjectAge = ""; //setting empty since dont know prolific subject age
 
                 Session.UsingServerConfigs = true;
-                ServerManager.SetSessionConfigFolderName(Session.Prolific_ConfigFolderName); //SET AS PROLIFIC NAME
+                ServerManager.SetSessionConfigFolderName(Session.ConfigFolderName_Param); //SET AS PROLIFIC NAME
                 Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
             }
             else
@@ -58,7 +58,7 @@ public class Prolific_Controller : MonoBehaviour
 
     public void TriggerRedirectoToCompletionURL()
     {
-        Debug.LogWarning("✅ Tasks complete — notifying parent page...");
+        Debug.LogWarning("✅ TASKS COMPLETE - NOTIFYING WORDPRESS PAGE");
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         NotifyParentTasksComplete();
@@ -70,17 +70,17 @@ public class Prolific_Controller : MonoBehaviour
     private void SetEditorValuesManually()
     {
         Debug.LogWarning("Manually setting values for prolific testing");
-        Session.Prolific_PlayerID = "123";
-        Session.Prolific_ConfigFolderName = "Config_TestA";
-        Session.Prolific_SessionID = "EditorSession";
-        Session.Prolific_StudyID = "TestStudy";
+        Session.PlayerID_Param = "123";
+        Session.ConfigFolderName_Param = "SessionConfig_112_WEBGL_Test1";
+        Session.SessionID_Param = "EditorSession";
+        Session.StudyID_Param = "TestStudy";
 
         Session.StoringDataOnServer = true;
-        Session.SubjectID = Session.Prolific_PlayerID;
+        Session.SubjectID = Session.PlayerID_Param;
         Session.SubjectAge = ""; //setting empty since dont know prolific subject age
 
         Session.UsingServerConfigs = true;
-        ServerManager.SetSessionConfigFolderName(Session.Prolific_ConfigFolderName); //SET AS PROLIFIC NAME
+        ServerManager.SetSessionConfigFolderName(Session.ConfigFolderName_Param); //SET AS PROLIFIC NAME
         Session.ConfigFolderPath = ServerManager.SessionConfigFolderPath;
     }
 

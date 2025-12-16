@@ -146,7 +146,7 @@ namespace USE_UI
             Button endTaskButton = EndTaskButtonGO.AddComponent<Button>();
             endTaskButton.onClick.AddListener(HandleEndTask);
 
-            if (Session.Prolific_WebBuild)
+            if (Session.WebBuild_ParametersProvided)
                 EndTaskButtonGO.SetActive(false);
 
             InstructionsButtonGO = HumanStartPanelGO.transform.Find("InstructionsButton").gameObject;

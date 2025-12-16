@@ -35,7 +35,7 @@ public class ParticleHalo : MonoBehaviour
             InstantiatedParticleHaloGO.transform.localScale = rootObj.transform.localScale;
         }
 
-        float distanceBehind = 1.5f; ; // Set the distance behind the gameObj
+        float distanceBehind = -0.25f; ; // Set the distance behind the gameObj
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         InstantiatedParticleHaloGO.transform.position = behindPos;
 

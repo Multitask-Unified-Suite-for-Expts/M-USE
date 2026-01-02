@@ -39,6 +39,9 @@ public class ParticleHalo : MonoBehaviour
         Vector3 behindPos = rootObj.transform.position - rootObj.transform.forward * distanceBehind;
         InstantiatedParticleHaloGO.transform.position = behindPos;
 
+        //Make it face camera so the rotation is correct
+        InstantiatedParticleHaloGO.AddComponent<FaceCamera>();
+
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         

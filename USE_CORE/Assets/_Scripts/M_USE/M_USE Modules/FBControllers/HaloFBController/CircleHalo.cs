@@ -57,12 +57,16 @@ public class CircleHalo : MonoBehaviour
             Light haloLight = InstantiatedCircleHaloGO.GetComponent<Light>();
             if (haloLight != null)
             {
-                haloLight.range = 2.5f;
+                haloLight.range = 1.85f;
             }
             else
                 Debug.LogWarning("HALO LIGHT COMPONENT IS NULL");
 
         }
+
+        //Make it face the camera
+        if (InstantiatedCircleHaloGO.GetComponent<FaceCamera>() == null)
+            InstantiatedCircleHaloGO.AddComponent<FaceCamera>();
 
         InstantiatedCircleHaloGO.SetActive(true);
 

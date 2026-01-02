@@ -422,8 +422,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                     }
                     else //Reached the scale 
                     {
-                        StartCoroutine(ScoreCoroutine(NumInflations * 10));
-
                         Inflate = false;
                         SelectionHandler.HandlerActive = true;
                         if (NumInflations >= InflationsNeeded) //Done enough inflations
@@ -442,7 +440,6 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
                 if (hitGO == null)
                 {
                     AudioFBController.Play("Negative");
-                    StartCoroutine(ScoreCoroutine(-(NumInflations * 10)));
                 }
             }
 
@@ -580,9 +577,13 @@ public class EffortControl_TrialLevel : ControlLevel_Trial_Template
 
             if (Response == 1)
             {
+                int numCoins = SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight;
+
+                StartCoroutine(ScoreCoroutine(numCoins * 10));
+
                 GameObject CenteredGO = new GameObject();
                 CenteredGO.transform.position = new Vector3(0, .5f, 0);
-                TokenFBController.AddTokens(CenteredGO, SideChoice == "Left" ? CurrentTrial.NumCoinsLeft : CurrentTrial.NumCoinsRight);
+                TokenFBController.AddTokens(CenteredGO, numCoins);
                 Destroy(CenteredGO);
 
                 Completions_Block++;

@@ -283,7 +283,7 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
 
         //CHOOSE STIM state -------------------------------------------------------------------------------------------------------
         ChooseStim.AddSpecificInitializationMethod(() =>
-        {
+        {            
             if (!Session.WebBuild)
                 CreateTextOnExperimenterDisplay();
 
@@ -531,6 +531,8 @@ public class ContinuousRecognition_TrialLevel : ControlLevel_Trial_Template
         {
             if (!Session.SessionDef.IsHuman || displayResultsDuration.value == 0 || ChosenStimIndices.Count < 1) 
                 return;
+
+            HaloFBController.DestroyAllHalos();
 
             if (EndBlock || CompletedAllTrials)
             {

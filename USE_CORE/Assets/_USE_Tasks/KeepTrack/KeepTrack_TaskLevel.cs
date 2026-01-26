@@ -13,10 +13,12 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
 
     //DATA
     [HideInInspector] public int TrialsCompleted_Task = 0;
+    [HideInInspector] public int TargetAnimations_Task = 0;
+    [HideInInspector] public int DistractorAnimations_Task = 0;
     [HideInInspector] public int SuccessfulTargetSelections_Task = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Task = 0;
     [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Task = 0;
-    [HideInInspector] public int TargetAnimsWithoutSelection_Task = 0;
+    [HideInInspector] public int TargetIntervalsMissed_Task = 0;
     [HideInInspector] public int AdditionalTargetSelections_Task = 0;
     [HideInInspector] public int DistractorSelections_Task = 0;
     [HideInInspector] public int DistractorRejections_Task = 0;
@@ -64,7 +66,7 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
                              "\nDistractor Sel: " + trialLevel.DistractorSelections_Block +
                              "\nDistractor Rej: " + trialLevel.DistractorRejections_Block +
                              "\nAdditional Target Sel: " + trialLevel.AdditionalTargetSelections_Block +
-                             "\nIntervals w/o Sel: " + trialLevel.TargetAnimsWithoutSelection_Block +
+                             "\nIntervals w/o Sel: " + trialLevel.TargetIntervalsMissed_Block +
                              "\nReward Pulses: " + NumRewardPulses_InBlock;
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
@@ -82,13 +84,15 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskSummaryData();
 
         data["Trials Completed"] = TrialsCompleted_Task;
+        data["Target Animations"] = TargetAnimations_Task;
+        data["Distractor Animations"] = DistractorAnimations_Task;
         data["Successful Target Selections"] = SuccessfulTargetSelections_Task;
         data["Unsuccessful Target Selections"] = UnsuccessfulTargetSelections_Task;
         data["Distractor Selections"] = DistractorSelections_Task;
         data["Distractor Rejections"] = DistractorRejections_Task;
         data["Additional Target Selections"] = AdditionalTargetSelections_Task;
         data["Target Selections Before First Anim"] = TargetSelectionsBeforeFirstAnim_Task;
-        data["Intervals Without Selections"] = TargetAnimsWithoutSelection_Task;
+        data["Intervals Without Selections"] = TargetIntervalsMissed_Task;
         data["SliderBar Completions"] = SliderBarCompletions_Task;
         return data;
     }
@@ -112,9 +116,12 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
 
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
 
+        BlockData.AddDatum("Target Animations", () => trialLevel.TargetAnimations_Block);
+        BlockData.AddDatum("Distractor Animations", () => trialLevel.DistractorAnimations_Block);
+
         BlockData.AddDatum("SuccessfulTargetSelections", () => trialLevel.SuccessfulTargetSelections_Block);
         BlockData.AddDatum("UnsuccessfulTargetSelections", () => trialLevel.UnsuccessfulTargetSelections_Block);
-        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetAnimsWithoutSelection_Block);
+        BlockData.AddDatum("TargetIntervalsWithoutASelection", () => trialLevel.TargetIntervalsMissed_Block);
 
         BlockData.AddDatum("AdditionalTargetSelections", () => trialLevel.AdditionalTargetSelections_Block);
         BlockData.AddDatum("TargetSelectionsBeforeFirstAnim", () => trialLevel.TargetSelectionsBeforeFirstAnim_Block);

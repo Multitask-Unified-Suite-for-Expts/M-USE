@@ -80,6 +80,7 @@ public class InputBroker
     }
 
 	//Shotgun Raycast Variables:
+
     private static int ShotgunRays
 	{
 		get
@@ -88,7 +89,6 @@ public class InputBroker
         }
 	}
     private static int ShotgunRadius = 25; // CONFIGURABLE VARIABLE IN TASK DEF's
-
 
 
     public static void SetShotgunRadius(int shotgunRadius)

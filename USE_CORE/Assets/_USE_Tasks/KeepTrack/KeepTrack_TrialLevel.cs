@@ -11,18 +11,33 @@ using SelectionTracking;
 using TMPro.SpriteAssetUtilities;
 using static SelectionTracking.SelectionTracker;
 
+
 public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 {
     public KeepTrack_TrialDef CurrentTrial => GetCurrentTrialDef<KeepTrack_TrialDef>();
     public KeepTrack_TaskLevel CurrentTaskLevel => GetTaskLevel<KeepTrack_TaskLevel>();
     public KeepTrack_TaskDef CurrentTask => GetTaskDef<KeepTrack_TaskDef>();
 
-    //DATA:
+    //TRIAL DATA:
+    [HideInInspector] public int TargetAnimations_Trial = 0;
+    [HideInInspector] public int DistractorAnimations_Trial = 0;
+    [HideInInspector] public int SuccessfulTargetSelections_Trial = 0;
+    [HideInInspector] public int UnsuccessfulTargetSelections_Trial = 0;
+    [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Trial = 0;
+    [HideInInspector] public int TargetIntervalsMissed_Trial = 0;
+    [HideInInspector] public int AdditionalTargetSelections_Trial = 0;
+    [HideInInspector] public int DistractorSelections_Trial = 0;
+    [HideInInspector] public int DistractorRejections_Trial = 0;
+    [HideInInspector] public int SliderBarCompletions_Trial = 0;
+
+    //BLOCK DATA:
+    [HideInInspector] public int DistractorAnimations_Block = 0;
+    [HideInInspector] public int TargetAnimations_Block = 0;
     [HideInInspector] public int TrialCompletions_Block;
     [HideInInspector] public int SuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int UnsuccessfulTargetSelections_Block = 0;
     [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Block = 0;
-    [HideInInspector] public int TargetAnimsWithoutSelection_Block = 0;
+    [HideInInspector] public int TargetIntervalsMissed_Block = 0;
     [HideInInspector] public int AdditionalTargetSelections_Block = 0;
     [HideInInspector] public int DistractorSelections_Block = 0;
     [HideInInspector] public int DistractorRejections_Block = 0;
@@ -49,6 +64,15 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     private float HaloDuration = .15f;
 
     List<KT_Object> TrialObjects;
+
+
+
+    private bool TargetAnimStartedThisFrame = false;
+    private bool DistractorAnimStartedThisFrame = false;
+
+    private bool TargetAnimMissedThisFrame = false;
+    private bool DistractorAvoidedThisFrame = false;
+
 
 
 
@@ -93,10 +117,9 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
             ObjManager = gameObject.AddComponent<KT_ObjectManager>();
             ObjManager.MaxTouchDuration = totalChoiceDuration.value;
-            ObjManager.TaskEventCodes = TaskEventCodes;
             ObjManager.SetObjectParent(KeepTrack_CanvasGO.transform);
-            ObjManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
-            ObjManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
+
+            SubscribeToObjectEvents();
 
             List<KT_Object_ConfigValues> trialObjectsConfigValues = new List<KT_Object_ConfigValues>();
 
@@ -197,13 +220,15 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             {
                 if(ChosenGO.TryGetComponent<KT_Object>(out ChosenObject))
                 {
-                    if (ChosenObject.IsTarget)
+                    if (ChosenObject.IsTarget) //Selected a target
                     {
                         if(ChosenObject.WithinDuration && !ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
                         {
                             GiveRewardIfSliderFull = true;
                             HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, HaloDuration, HaloDepth);
                             SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps));
+                            Debug.LogWarning("SUCCESSFUL TARGET SELECTION");
+                            SuccessfulTargetSelections_Trial++;
                             SuccessfulTargetSelections_Block++;
                             CurrentTaskLevel.SuccessfulTargetSelections_Task++;
                             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["SuccessfulTargetSelection"]);
@@ -216,6 +241,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
                             if(ChosenObject.CurrentCycle.selectedDuringCurrentInterval)
                             {
+                                Debug.LogWarning("ADDITIONAL SELECTION");
+                                AdditionalTargetSelections_Trial++;
                                 AdditionalTargetSelections_Block++;
                                 CurrentTaskLevel.AdditionalTargetSelections_Task++;
                                 Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["AdditionalTargetSelection"]);
@@ -224,6 +251,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                             {
                                 if (ChosenObject.CurrentCycle.firstIntervalStarted)
                                 {
+                                    Debug.LogWarning("UNSUCCESSFUL SELECTION");
+                                    UnsuccessfulTargetSelections_Trial++;
                                     UnsuccessfulTargetSelections_Block++;
                                     CurrentTaskLevel.UnsuccessfulTargetSelections_Task++;
                                     Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["UnsuccessfulTargetSelection"]);
@@ -232,6 +261,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                                 }
                                 else
                                 {
+                                    Debug.LogWarning("TOO EARLY TO SELECT");
+                                    TargetSelectionsBeforeFirstAnim_Trial++;
                                     TargetSelectionsBeforeFirstAnim_Block++;
                                     CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
                                     Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
@@ -243,6 +274,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                     {
                         HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, HaloDuration, HaloDepth);
                         SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
+                        DistractorSelections_Trial++;
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;
                         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorSelection"]);
@@ -292,19 +324,68 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         DefineFrameData();
     }
 
-    //Helper Method:
+
+
+    private void SubscribeToObjectEvents()
+    {
+        if(ObjManager != null)
+        {
+            ObjManager.OnTargetIntervalMissed += TargetIntervalMissed; //subscribe to MissedInterval Event for data logging purposes
+            ObjManager.OnDistractorAvoided += DistractorAvoided; //subscribe to DistractorAvoided Event for data logging purposes
+
+            ObjManager.OnTargetAnimationStarted += HandleTargetAnimation;
+            ObjManager.OnDistractorAnimationStarted += DistractorAnimationBegins;
+        }
+    }
+
     private void OnDestroy()
     {
         if(ObjManager != null)
         {
-            ObjManager.OnTargetIntervalMissed -= TargetIntervalMissed; //UNsubscribe to MissedInterval Event
-            ObjManager.OnDistractorAvoided -= DistractorAvoided; //UNsubscribe to DistractorAvoided Event
+            ObjManager.OnTargetIntervalMissed -= TargetIntervalMissed;
+            ObjManager.OnDistractorAvoided -= DistractorAvoided; 
+            ObjManager.OnTargetAnimationStarted -= HandleTargetAnimation;
+            ObjManager.OnDistractorAnimationStarted -= DistractorAnimationBegins;
         }
     }
+
+    private void HandleTargetAnimation()
+    {
+        if (TargetAnimStartedThisFrame)
+            Debug.LogWarning("MULTIPLE TARGET ANIMATIONS STARTED THIS FRAME: " + Time.frameCount);
+
+        TargetAnimStartedThisFrame = true;
+
+        Debug.LogWarning("TARGET ANIMATION ON FRAME: " + Time.frameCount);
+
+        Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetAnimationBegins"]);
+
+        TargetAnimations_Trial++;
+        TargetAnimations_Block++;
+        CurrentTaskLevel.TargetAnimations_Task++;
+        CurrentTaskLevel.SetBlockSummaryString(); //update data on exp display
+    }
+
+    private void DistractorAnimationBegins()
+    {
+        if (DistractorAnimStartedThisFrame)
+            Debug.LogWarning("MULTIPLE DISTRACTOR ANIMATIONS STARTED THIS FRAME: " + Time.frameCount);
+
+        DistractorAnimStartedThisFrame = true;
+
+        Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorAnimationBegins"]);
+
+        DistractorAnimations_Trial++;
+        DistractorAnimations_Block++;
+        CurrentTaskLevel.DistractorAnimations_Task++;
+        CurrentTaskLevel.SetBlockSummaryString();
+    }
+
     private void TargetIntervalMissed()
     {
-        TargetAnimsWithoutSelection_Block++;
-        CurrentTaskLevel.TargetAnimsWithoutSelection_Task++;
+        TargetIntervalsMissed_Trial++;
+        TargetIntervalsMissed_Block++;
+        CurrentTaskLevel.TargetIntervalsMissed_Task++;
         CurrentTaskLevel.SetBlockSummaryString(); //update data on exp display
         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetAnimWithoutSelection"]);
         Session.EventCodeManager.SendCodeThisFrame("NoChoice");
@@ -312,11 +393,39 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     }
     private void DistractorAvoided()
     {
+        DistractorRejections_Trial++;
         DistractorRejections_Block++;
         CurrentTaskLevel.DistractorRejections_Task++;
         CurrentTaskLevel.SetBlockSummaryString(); //update data on exp display
         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorRejection"]);
 
+    }
+
+    private bool CheckIfTargetAnimThisFrame()
+    {
+        bool targetAnimated = TargetAnimStartedThisFrame;
+        TargetAnimStartedThisFrame = false;
+        return targetAnimated;
+    }
+    private bool CheckIfDistractorAnimThisFrame()
+    {
+        bool distractorAnimated = DistractorAnimStartedThisFrame;
+        DistractorAnimStartedThisFrame = false;
+        return distractorAnimated;
+    }
+    private bool CheckIfTargetAnimMissedThisFrame()
+    {
+        bool targetMissed = TargetAnimMissedThisFrame;
+        TargetAnimMissedThisFrame = false; //RESET FOR NEXT FRAME
+        return targetMissed;
+
+    }
+
+    private bool CheckIfDistractorAvoidedThisFrame()
+    {
+        bool distractorAvoided = DistractorAvoidedThisFrame;
+        DistractorAvoidedThisFrame = false;
+        return distractorAvoided;
     }
 
     private void HandleSlider()
@@ -330,6 +439,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                 SliderFBController.ResetSliderBarFull();
                 SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
                 GiveRewardIfSliderFull = false;
+                SliderBarCompletions_Trial++;
                 SliderBarCompletions_Block++;
                 CurrentTaskLevel.SliderBarCompletions_Task++;
             }
@@ -364,18 +474,31 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     {
         SliderGainSteps = 0;
         SliderFBController.ResetSliderBarFull();
+
+        TargetAnimations_Trial = 0;
+        DistractorAnimations_Trial = 0;
+        SuccessfulTargetSelections_Trial = 0;
+        UnsuccessfulTargetSelections_Trial = 0;
+        TargetSelectionsBeforeFirstAnim_Trial = 0;
+        TargetIntervalsMissed_Trial = 0;
+        AdditionalTargetSelections_Trial = 0;
+        DistractorSelections_Trial = 0;
+        DistractorRejections_Trial = 0;
+        SliderBarCompletions_Trial = 0;
     }
 
     public void ResetBlockVariables()
     {
         TrialCompletions_Block = 0;
 
+        TargetAnimations_Block = 0;
+        DistractorAnimations_Block = 0;
         SuccessfulTargetSelections_Block = 0;
         UnsuccessfulTargetSelections_Block = 0;
         TargetSelectionsBeforeFirstAnim_Block = 0;
         DistractorSelections_Block = 0;
         DistractorRejections_Block = 0;
-        TargetAnimsWithoutSelection_Block = 0;
+        TargetIntervalsMissed_Block = 0;
         AdditionalTargetSelections_Block = 0;
         SliderBarCompletions_Block = 0;
     }
@@ -411,8 +534,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     private void SetTrialSummaryString()
     {
         TrialSummaryString = "Trial #" + (TrialCount_InBlock + 1) + " In Block" +
-                             "\nNum Targets: " + TrialObjects.Where(obj => obj.IsTarget).Count() +
-                             "\nNum Distractors: " + TrialObjects.Where(obj => !obj.IsTarget).Count() +
+                             "\nNum Targets: " + TrialObjects.Where(obj => obj != null && obj.IsTarget && obj.gameObject.activeInHierarchy).Count() +
+                             "\nNum Distractors: " + TrialObjects.Where(obj => obj != null && !obj.IsTarget && obj.gameObject.activeInHierarchy).Count() +
                              "\nOngoingSelection: " + (OngoingSelection == null ? "" : OngoingSelection.Duration.Value.ToString("F2") + " s");
     }
 
@@ -424,18 +547,75 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("DisplayDistractorsDuration", () => CurrentTrial.DisplayDistractorsDuration);
         TrialData.AddDatum("SliderInitialValue", () => CurrentTrial.SliderInitialValue);
         TrialData.AddDatum("SliderGain", () => String.Join(", ", CurrentTrial.SliderGain));
+        TrialData.AddDatum("SliderBarCompletions", () => SliderBarCompletions_Trial);
+
+        TrialData.AddDatum("SuccessfulTargetSelections", () => SuccessfulTargetSelections_Trial);
+        TrialData.AddDatum("UnsuccessfulTargetSelections", () => UnsuccessfulTargetSelections_Trial);
+        TrialData.AddDatum("TargetSelectionsBeforeFirstAnim", () => TargetSelectionsBeforeFirstAnim_Trial);
+        TrialData.AddDatum("TargetIntervalsMissed", () => TargetIntervalsMissed_Trial);
+        TrialData.AddDatum("AdditionalTargetSelections", () => AdditionalTargetSelections_Trial);
+        TrialData.AddDatum("DistractorSelections", () => DistractorSelections_Trial);
+        TrialData.AddDatum("DistractorRejections", () => DistractorRejections_Trial);
     }
 
     private void DefineFrameData()
     {
         FrameData.AddDatum("StartButton", () => StartButton != null && StartButton.activeInHierarchy ? "Active" : "NotActive");
 
+        FrameData.AddDatum("Targets_Active", () => GetNumActiveTargets());
+        FrameData.AddDatum("Distractors_Active", () => GetNumActiveDistractors());
+
+        FrameData.AddDatum("TargetAnimationThisFrame", () => CheckIfTargetAnimThisFrame());
+        FrameData.AddDatum("DistractorAnimationThisFrame", () => CheckIfDistractorAnimThisFrame());
+
+        FrameData.AddDatum("TargetAnimationMissed", () => CheckIfTargetAnimMissedThisFrame());
+        FrameData.AddDatum("DistractorAvoided", () => CheckIfDistractorAvoidedThisFrame());
+
         FrameData.AddDatum("ObjectNames", () => GetObjNamesString());
         FrameData.AddDatum("ObjectPositions", () => GetObjPositionsString());
         FrameData.AddDatum("ObjectAnimStatus", () => GetObjAnimStatus());
         FrameData.AddDatum("ObjectMouthAngles", () => GetMouthAnglesString());
         FrameData.AddDatum("ObjectSelections", () => GetObjSelectionString());
-        FrameData.AddDatum("SelectionCorrectness", () => GetSelectionCorrectnessString());
+        //FrameData.AddDatum("SelectionCorrectness", () => GetSelectionCorrectnessString());
+    }
+
+
+
+    private string GetNumActiveTargets()
+    {
+        if (TrialObjects == null)
+            return "0";
+
+        int targetCount = 0;
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj == null || !obj.IsTarget || !obj.gameObject.activeInHierarchy)
+                continue;
+
+            targetCount++;
+        }
+
+        return targetCount.ToString();
+    }
+
+    private string GetNumActiveDistractors()
+    {
+        if (TrialObjects == null)
+            return "0";
+
+        int distractorCount = 0;
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj != null)
+            {
+                if (!obj.IsTarget && obj.gameObject.activeInHierarchy)
+                    distractorCount++;
+            }
+        }
+
+        return distractorCount.ToString();
     }
 
     private string GetObjSelectionString()
@@ -547,6 +727,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         }
         return names.Count < 1 ? "[]" : $"[{string.Join(", ", names)}]";
     }
+
     private string GetObjPositionsString()
     {
         if (TrialObjects == null)

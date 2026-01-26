@@ -23,4 +23,5 @@ namespace KeepTrack_Namespace
     public class KeepTrack_StimDef : StimDef
     {
     }
+
 }

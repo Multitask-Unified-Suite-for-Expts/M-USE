@@ -42,7 +42,9 @@ public class KT_ObjectManager : MonoBehaviour
     public void NoSelectionDuringInterval(KT_Object obj)
     {
         if (obj.IsTarget)
+        {
             OnTargetIntervalMissed?.Invoke();
+        }
         else
             OnDistractorAvoided?.Invoke();
     }
@@ -458,16 +460,16 @@ public class KT_Object : MonoBehaviour
     {
         if (MoveAroundScreen)
         {
-            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
+            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
+            {
+                NextCycle();
+            }
+            else if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
             {
                 StartCoroutine(AnimationCoroutine());
                 CurrentCycle.NextInterval();
             }
 
-            if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
-            {
-                NextCycle();
-            }
         }
 
         WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
@@ -484,6 +486,23 @@ public class KT_Object : MonoBehaviour
         
     }
 
+    private void FixedUpdate()
+    {
+        if (MoveAroundScreen && !ObjectPaused)
+        {
+            if (AtDestination())
+                SetNewDestination();
+
+            MoveTowardsDestination();
+
+            if (RotateTowardsDest)
+                RotateTowardsDirection();
+
+            if (Marker != null)
+                Marker.transform.localPosition = CurrentDestination;
+        }
+    }
+
 
     private void SetCurrentRewardValue()
     {
@@ -494,23 +513,6 @@ public class KT_Object : MonoBehaviour
             CurrentRewardValue = RewardPulsesBySec[timeSinceActivation_Rounded - 1];
         }
 
-    }
-
-    private void FixedUpdate()
-    {
-        if(MoveAroundScreen && !ObjectPaused)
-        {
-            if (AtDestination())
-                SetNewDestination();            
-
-            MoveTowardsDestination();
-
-            if(RotateTowardsDest)
-                RotateTowardsDirection();
-
-            if(Marker != null)
-                Marker.transform.localPosition = CurrentDestination;
-        }
     }
 
     private void SetCurrentOpenAngle()
@@ -749,8 +751,12 @@ public class KT_Object : MonoBehaviour
 
         if (gameObject != null)
             Destroy(gameObject);
+
         if (Marker != null)
             Destroy(Marker);
+
+        Destroy(this);
+
     }
 
     private void SetupMarker()

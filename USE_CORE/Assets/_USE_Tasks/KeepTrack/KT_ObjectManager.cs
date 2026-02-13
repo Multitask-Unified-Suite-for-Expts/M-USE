@@ -11,6 +11,7 @@ using Random = UnityEngine.Random;
 
 public class KT_ObjectManager : MonoBehaviour
 {
+    public List<KT_Object> TrialObjects;
     public List<KT_Object> TargetList;
     public List<KT_Object> DistractorList;
 
@@ -22,13 +23,54 @@ public class KT_ObjectManager : MonoBehaviour
     public delegate void ObjectEventHandler();
     public event ObjectEventHandler OnTargetAnimationStarted;
     public event ObjectEventHandler OnDistractorAnimationStarted;
-    public event ObjectEventHandler OnTargetIntervalMissed;
+    public event ObjectEventHandler OnTargetMissed;
     public event ObjectEventHandler OnDistractorAvoided;
 
     public float MaxTouchDuration;
 
-    public Vector2 MostRecentCollisionPoint;
+    public List<Vector2> StartingPositions = new List<Vector2>();
 
+    public Queue<Vector2> StartingPositions_Queue = new Queue<Vector2>();
+
+
+    public Vector2 GetRandomStartingPosition() //Already randomized at this point
+    {
+        Vector2 startPos = StartingPositions_Queue.Dequeue(); //grab latest start pos
+        StartingPositions_Queue.Enqueue(startPos); //Put it back at the end of the queue
+        return startPos;
+    }
+
+    public void SetRandomStartingPositions()
+    {
+        for(float x = -750; x <= 750f; x+= 250f)
+        {
+            for(float y = -350f; y <= 350f; y+= 175f)
+            {
+                StartingPositions.Add(new Vector2(x, y));
+            }
+        }
+
+        Shuffle(StartingPositions);
+
+        //Add to queue:
+        foreach (Vector2 startPos in StartingPositions)
+            StartingPositions_Queue.Enqueue(startPos);
+    }
+
+    private void Shuffle<T>(List<T> list)
+    {
+        if(list == null || list.Count < 1)
+        {
+            Debug.LogError("LIST IS NULL");
+            return;
+        }
+
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1); // inclusive upper bound
+            (list[i], list[j]) = (list[j], list[i]);
+        }
+    }
 
     public void AnimationStarted(KT_Object obj)
     {
@@ -39,11 +81,11 @@ public class KT_ObjectManager : MonoBehaviour
 
     }
 
-    public void NoSelectionDuringInterval(KT_Object obj)
+    public void NoSelectionDuringResponseWindow(KT_Object obj)
     {
         if (obj.IsTarget)
         {
-            OnTargetIntervalMissed?.Invoke();
+            OnTargetMissed?.Invoke();
         }
         else
             OnDistractorAvoided?.Invoke();
@@ -53,6 +95,8 @@ public class KT_ObjectManager : MonoBehaviour
     {
         TargetList = new List<KT_Object>();
         DistractorList = new List<KT_Object>();
+
+        SetRandomStartingPositions();
     }
 
     public void SetObjectParent(Transform parentTransform)
@@ -94,7 +138,7 @@ public class KT_ObjectManager : MonoBehaviour
         if (objects == null)
             Debug.LogError("OBJECTS ARE NULL");
 
-        List<KT_Object> trialObjects = new List<KT_Object>();
+        TrialObjects = new List<KT_Object>();
 
         foreach(KT_Object_ConfigValues configValues in objects)
         {
@@ -128,15 +172,16 @@ public class KT_ObjectManager : MonoBehaviour
                 else
                     DistractorList.Add(obj);
 
-                trialObjects.Add(obj);
+                TrialObjects.Add(obj);
             }
             catch(Exception ex)
             {
                 Debug.LogWarning("ERROR CREATING OBJECT WITH INDEX NUMBER " + configValues.Index + " | Error Message: " + ex.Message);
             }
+
         }
 
-        return trialObjects;
+        return TrialObjects;
     }
     
 
@@ -260,7 +305,7 @@ public class KT_Object : MonoBehaviour
     public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
-    public float ActivateDelay;
+    public int ActivateDelay;
     public Vector2[] MouthAngles;
 
     public Vector3 CurrentDestination;
@@ -272,8 +317,8 @@ public class KT_Object : MonoBehaviour
     public Vector3 Direction;
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
-    public float AnimStartTime;
-    public bool WithinDuration;
+    public float IntervalStartTime;
+    public bool WithinResponseWindow;
     private readonly List<float> PreviousAngleOffsets = new List<float>();
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
@@ -290,6 +335,12 @@ public class KT_Object : MonoBehaviour
 
     public int CurrentRewardValue;
 
+    public bool CurrentIntervalSuccessful = false;
+    public bool SelectedDuringCurrentInterval = false;
+
+
+    public bool MissedCurrentIntervalResponseWindow = false;
+
 
     public KT_Object()
     {
@@ -305,7 +356,6 @@ public class KT_Object : MonoBehaviour
         OpenAngle = configValue.OpenAngle;
         ClosedLineThickness = configValue.ClosedLineThickness;
         IsTarget = configValue.IsTarget;
-        StartingPosition = configValue.StartingPosition;
         AngleProbs = configValue.AngleProbs;
         RotateTowardsDest = configValue.RotateTowardsDest;
         MinAnimGap = configValue.MinAnimGap;
@@ -329,6 +379,9 @@ public class KT_Object : MonoBehaviour
 
         ActivateDelay = configValue.ActivateDelay;
 
+        StartingPosition = ObjManager.GetRandomStartingPosition();
+        transform.localPosition = new Vector3(StartingPosition.x, StartingPosition.y, 0);
+
         CheckRewardsMatchDurations();
 
         foreach (var rateAndDur in RatesAndDurations)
@@ -341,8 +394,6 @@ public class KT_Object : MonoBehaviour
             };
             Cycles.Add(cycle);
         }
-
-        transform.localPosition = new Vector3(StartingPosition.x, StartingPosition.y, 0);
 
         SetNewDestination();
 
@@ -458,6 +509,21 @@ public class KT_Object : MonoBehaviour
 
     private void Update()
     {
+
+        WithinResponseWindow = IntervalStartTime > 0 && Time.time - IntervalStartTime > ResponseWindow.x && Time.time - IntervalStartTime <= ResponseWindow.y;
+
+        //See if missed the window
+        if (IntervalStartTime > 0 && !MissedCurrentIntervalResponseWindow)
+        {
+            if (Time.time - IntervalStartTime >= ResponseWindow.y)
+            {
+                MissedCurrentIntervalResponseWindow = true;
+
+                if(!CurrentIntervalSuccessful) //wont ever be true for distractors (fine, controlled by trial level)
+                    ObjManager.NoSelectionDuringResponseWindow(this); //Trigger event so data can be incremented
+            }
+        }
+
         if (MoveAroundScreen)
         {
             if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
@@ -471,8 +537,6 @@ public class KT_Object : MonoBehaviour
             }
 
         }
-
-        WithinDuration = AnimStartTime > 0 && Time.time - AnimStartTime > ResponseWindow.x && Time.time - AnimStartTime <= ResponseWindow.y;
 
         HandlePausingWhileBeingSelected();
         HandleInput();
@@ -537,8 +601,6 @@ public class KT_Object : MonoBehaviour
 
     private IEnumerator AnimationCoroutine()
     {
-        AnimStartTime = Time.time;
-
         ObjManager.AnimationStarted(this);
 
         gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
@@ -597,11 +659,8 @@ public class KT_Object : MonoBehaviour
     public void ActivateMovement()
     {
         MoveAroundScreen = true;
-
         ActivationStartTime = Time.time;
-
-        AnimStartTime = 0; //used to be Time.time 
-
+        IntervalStartTime = 0; //used to be Time.time 
         CurrentCycle = Cycles[0];
         CurrentCycle.StartCycle();
     }
@@ -792,7 +851,6 @@ public class KT_Object_ConfigValues
     public bool RotateTowardsDest;
     public float Speed;
     public float Size;
-    public Vector2 StartingPosition;
     public float NextDestDist;
     public Vector2 ResponseWindow;
     public float CloseDuration;
@@ -803,7 +861,7 @@ public class KT_Object_ConfigValues
     public int NumDestWithoutBigTurn;
     public float[] ObjectColor;
     public int SliderChange;
-    public float ActivateDelay;
+    public int ActivateDelay;
     public Vector2[] MouthAngles;
 
 
@@ -818,30 +876,33 @@ public class Cycle
     public float currentInterval;
     public float cycleStartTime;
 
-    public bool selectedDuringCurrentInterval;
-    public bool firstIntervalStarted;
+    public bool AfterFirstAnimation;
 
 
     public void StartCycle()
     {
         currentInterval = intervals[0];
         cycleStartTime = Time.time;
-        firstIntervalStarted = false;
+        AfterFirstAnimation = false;
     }
 
     public void NextInterval()
     {
-        if(firstIntervalStarted && !selectedDuringCurrentInterval) //Skip first interval cuz hasn't animated yet.
-            sa_Object.ObjManager.NoSelectionDuringInterval(sa_Object); //Trigger event so data can be incremented
-        
+        sa_Object.IntervalStartTime = Time.time;
+
+        sa_Object.SelectedDuringCurrentInterval = false;
+        sa_Object.MissedCurrentIntervalResponseWindow = false; //reset since start of next interval
+        sa_Object.CurrentIntervalSuccessful = false;
+
         intervals.RemoveAt(0);
         if (intervals.Count > 0)
             currentInterval = intervals[0];
 
-        selectedDuringCurrentInterval = false;
 
-        if (!firstIntervalStarted)
-            firstIntervalStarted = true;
+        if (!AfterFirstAnimation)
+        {
+            AfterFirstAnimation = true;
+        }
     }
 
 }

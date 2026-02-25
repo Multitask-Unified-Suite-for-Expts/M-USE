@@ -13,6 +13,7 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
 
     //DATA
     [HideInInspector] public int TrialsCompleted_Task = 0;
+    [HideInInspector] public int SectionChanges_Task = 0;
     [HideInInspector] public int TargetAnimations_Task = 0;
     [HideInInspector] public int DistractorAnimations_Task = 0;
     [HideInInspector] public int SuccessfulTargetSelections_Task = 0;
@@ -63,10 +64,10 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
 
         CurrentBlockString = "\nSuccessful Target Sel: " + trialLevel.SuccessfulTargetSelections_Block +
                              "\nUnsuccessful Target Sel: " + trialLevel.SelectedAfterResponseWindow_Block +
+                             "\nIntervals w/o Sel: " + trialLevel.TargetIntervalsMissed_Block +
                              "\nDistractor Sel: " + trialLevel.DistractorSelections_Block +
                              "\nDistractor Rej: " + trialLevel.DistractorRejections_Block +
                              "\nAdditional Target Sel: " + trialLevel.AdditionalTargetSelections_Block +
-                             "\nIntervals w/o Sel: " + trialLevel.TargetIntervalsMissed_Block +
                              "\nReward Pulses: " + NumRewardPulses_InBlock;
 
         CurrentBlockSummaryString.AppendLine(CurrentBlockString).ToString();
@@ -84,6 +85,7 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         OrderedDictionary data = base.GetTaskSummaryData();
 
         data["Trials Completed"] = TrialsCompleted_Task;
+        data["Section Changes"] = SectionChanges_Task;
         data["Target Animations"] = TargetAnimations_Task;
         data["Distractor Animations"] = DistractorAnimations_Task;
         data["Successful Target Selections"] = SuccessfulTargetSelections_Task;
@@ -115,6 +117,8 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         BlockData.AddDatum("ContextName", () => CurrentBlock.ContextName);
 
         BlockData.AddDatum("TrialsCompleted", () => trialLevel.TrialCompletions_Block);
+
+        BlockData.AddDatum("Section Changes", () => trialLevel.SectionChanges_Block);
 
         BlockData.AddDatum("Target Animations", () => trialLevel.TargetAnimations_Block);
         BlockData.AddDatum("Distractor Animations", () => trialLevel.DistractorAnimations_Block);

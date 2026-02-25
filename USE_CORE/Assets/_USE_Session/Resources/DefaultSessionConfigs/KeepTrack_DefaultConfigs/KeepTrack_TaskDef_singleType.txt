@@ -1,3 +1,6 @@
+float	ColorChangeDuration	.3
+Vector3	CorrectSelectionColor	[0, 225, 0]
+Vector3	IncorrectSelectionColor	[130, 130, 130]
 float	ExternalStimScale	5.25
 Vector3	StartButtonPosition	[0, 0, 0]
 float	StartButtonScale	1

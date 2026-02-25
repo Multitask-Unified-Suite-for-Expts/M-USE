@@ -16,10 +16,14 @@ public class ParticleHalo : MonoBehaviour
     {
         PositiveParticleHaloPrefab = posParticleHaloPrefab;
         NegativeParticleHaloPrefab = negParticleHaloPrefab;
+
+        PositiveParticleHaloPrefab.gameObject.AddComponent<FaceCamera>();
+        NegativeParticleHaloPrefab.gameObject.AddComponent<FaceCamera>();
+
         ParticleEffectDuration = PositiveParticleHaloPrefab.GetComponent<ParticleSystem>().main.duration;
     }
 
-    public void ShowParticleHalo(string feedbackType, GameObject go)
+    public void ShowParticleHalo(string feedbackType, GameObject go, float? destroyDuration = null)
     {
         GameObject particlePrefab = (feedbackType.ToLower() == "positive") ? PositiveParticleHaloPrefab : NegativeParticleHaloPrefab;
 
@@ -45,10 +49,10 @@ public class ParticleHalo : MonoBehaviour
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
         
-        Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration);
+        Destroy(InstantiatedParticleHaloGO, destroyDuration == null ? ParticleEffectDuration : destroyDuration.Value);
     }
 
-    public void ShowParticleHalo2D(string feedbackType, GameObject go, float depth = 10)
+    public void ShowParticleHalo2D(string feedbackType, GameObject go, float depth = 10, float? destroyDuration = null)
     {
         GameObject particlePrefab = (feedbackType.ToLower() == "positive") ? PositiveParticleHaloPrefab : NegativeParticleHaloPrefab;
 
@@ -62,7 +66,7 @@ public class ParticleHalo : MonoBehaviour
         if (Session.SessionDef.EventCodesActive)
             Session.EventCodeManager.SendCodeThisFrame(Session.EventCodeManager.SessionEventCodes["HaloFbController_SelectionVisualFbOn"]);
        
-        Destroy(InstantiatedParticleHaloGO, ParticleEffectDuration * 2);
+        Destroy(InstantiatedParticleHaloGO, destroyDuration == null ? ParticleEffectDuration : destroyDuration.Value);
 
     }
     public float GetParticleEffectDuration() { return ParticleEffectDuration; }

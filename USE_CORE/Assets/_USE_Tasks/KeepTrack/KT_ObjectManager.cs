@@ -270,9 +270,6 @@ public class KT_ObjectManager : MonoBehaviour
         List<KT_Object> targetListCopy = new List<KT_Object>(TargetList);
         List<KT_Object> distractorListCopy = new List<KT_Object>(DistractorList);
 
-        Debug.LogWarning("TARGET COUNT AT END: " + targetListCopy.Count);
-        Debug.LogWarning("DISTRACTOR COUNT AT END: " + distractorListCopy.Count);
-
         foreach(KT_Object obj in targetListCopy)
         {
             if (obj != null)
@@ -427,7 +424,7 @@ public class KT_Object : MonoBehaviour
     public bool MissedCurrentIntervalResponseWindow = false;
 
 
-    public float FadeDuration = .5f;
+    public float FadeDuration = .15f;
 
     public Image ImageComponent;
 

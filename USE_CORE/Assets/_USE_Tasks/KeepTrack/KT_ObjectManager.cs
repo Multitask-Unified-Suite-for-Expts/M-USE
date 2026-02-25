@@ -25,12 +25,68 @@ public class KT_ObjectManager : MonoBehaviour
     public event ObjectEventHandler OnDistractorAnimationStarted;
     public event ObjectEventHandler OnTargetMissed;
     public event ObjectEventHandler OnDistractorAvoided;
+    public event ObjectEventHandler OnSectionChanged;
+
+    private string Section = "";
+    private float SectionChange_StartTime = 0f;
 
     public float MaxTouchDuration;
 
     public List<Vector2> StartingPositions = new List<Vector2>();
 
     public Queue<Vector2> StartingPositions_Queue = new Queue<Vector2>();
+
+
+    private void Update()
+    {
+        CheckIfSectionChanged();
+    }
+
+    public float GetTimeSinceLastSectionChange()
+    {
+        return Time.time - SectionChange_StartTime;
+    }
+
+    private void CheckIfSectionChanged()
+    {
+        string sectionThisFrame = DetermineCurrentSection();
+
+        if(Section != sectionThisFrame)
+        {
+            OnSectionChanged?.Invoke();
+            SectionChange_StartTime = Time.time;
+        }
+        Section = sectionThisFrame;
+    }
+
+    private string DetermineCurrentSection()
+    {
+        if (TrialObjects == null)
+            return "0T0D";
+
+        int targetCount = 0;
+        int distractorCount = 0;
+
+        foreach (var obj in TrialObjects)
+        {
+            if (obj == null || !obj.gameObject.activeInHierarchy)
+                continue;
+            else
+            {
+                if (obj.IsTarget)
+                    targetCount++;
+                else
+                    distractorCount++;
+            }
+        }
+
+        return targetCount + "T" + distractorCount + "D";
+    }
+
+    public string GetSection()
+    {
+        return Section;
+    }    
 
 
     public Vector2 GetRandomStartingPosition() //Already randomized at this point
@@ -112,26 +168,7 @@ public class KT_ObjectManager : MonoBehaviour
             DistractorList.Remove(obj);
     }
 
-    public void ActivateInitialObjectsMovement()
-    {
-        if (TargetList.Count > 0)
-        {
-            foreach (KT_Object target in TargetList)
-            {
-                if(target.ActivateDelay == 0)
-                    target.ActivateMovement();
-            }
-        }
 
-        if (DistractorList.Count > 0)
-        {
-            foreach (KT_Object distractor in DistractorList)
-            {
-                if(distractor.ActivateDelay == 0)
-                    distractor.ActivateMovement();
-            }
-        }
-    }
 
     public List<KT_Object> CreateObjects(List<KT_Object_ConfigValues> objects)
     {
@@ -155,11 +192,12 @@ public class KT_ObjectManager : MonoBehaviour
                 go.transform.localScale = Vector3.one;
                 go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
 
+
                 go.GetComponent<Image>().color = new Color(
                                                             configValues.ObjectColor[0] / 255f,
                                                             configValues.ObjectColor[1] / 255f,
                                                             configValues.ObjectColor[2] / 255f,
-                                                            1f // Ensure alpha is fully opaque
+                                                            1
                                                         );
 
                 go.GetComponent<CircleCollider2D>().radius = configValues.Size * .52f; //Set Collider radius
@@ -183,7 +221,41 @@ public class KT_ObjectManager : MonoBehaviour
 
         return TrialObjects;
     }
-    
+
+
+    public IEnumerator ChangeObjColorCoroutine(KT_Object obj, Vector3 changeToColor, float duration)
+    {
+        if (obj == null)
+            Debug.LogError("OBJ IS NULL");
+
+        if (obj.TryGetComponent<Image>(out var objImage))
+        {
+            objImage.color = new Color(
+                                            changeToColor[0] / 255f,
+                                            changeToColor[1] / 255f,
+                                            changeToColor[2] / 255f,
+                                            1
+                                        );
+        }
+        else
+        {
+            Debug.LogError("IMAGE COMPONENT IS NULL");
+        }
+
+        yield return new WaitForSeconds(duration);
+
+        if (objImage != null)
+        {
+            objImage.color = new Color(
+                                            obj.ObjectColor[0] / 255f,
+                                            obj.ObjectColor[1] / 255f,
+                                            obj.ObjectColor[2] / 255f,
+                                            1
+                                        );
+        }
+
+    }
+
 
     public void AddToList(KT_Object obj)
     {
@@ -197,6 +269,9 @@ public class KT_ObjectManager : MonoBehaviour
     {
         List<KT_Object> targetListCopy = new List<KT_Object>(TargetList);
         List<KT_Object> distractorListCopy = new List<KT_Object>(DistractorList);
+
+        Debug.LogWarning("TARGET COUNT AT END: " + targetListCopy.Count);
+        Debug.LogWarning("DISTRACTOR COUNT AT END: " + distractorListCopy.Count);
 
         foreach(KT_Object obj in targetListCopy)
         {
@@ -216,19 +291,44 @@ public class KT_ObjectManager : MonoBehaviour
 
     public void ActivateInitialTargets()
     {
-        foreach (var target in TargetList)
+        foreach (var obj in TargetList)
         {
-            if(target.ActivateDelay == 0)
-                target.gameObject.SetActive(true);
+            if(obj.ActivateDelay == 0)
+            {
+                obj.gameObject.SetActive(true);
+            }
         }
     }
 
     public void ActivateInitialDistractors()
     {
-        foreach (var distractor in DistractorList)
+        foreach (var obj in DistractorList)
         {
-            if (distractor.ActivateDelay == 0)
-                distractor.gameObject.SetActive(true);
+            if (obj.ActivateDelay == 0)
+            {
+                obj.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    public void ActivateInitialObjectsMovement()
+    {
+        if (TargetList.Count > 0)
+        {
+            foreach (KT_Object target in TargetList)
+            {
+                if (target.ActivateDelay == 0)
+                    target.ActivateMovement();
+            }
+        }
+
+        if (DistractorList.Count > 0)
+        {
+            foreach (KT_Object distractor in DistractorList)
+            {
+                if (distractor.ActivateDelay == 0)
+                    distractor.ActivateMovement();
+            }
         }
     }
 
@@ -254,22 +354,7 @@ public class KT_ObjectManager : MonoBehaviour
     public IEnumerator ActivateObjectCoroutine(KT_Object obj)
     {
         yield return new WaitForSeconds(obj.ActivateDelay);
-        obj.gameObject.SetActive(true);
-        obj.ActivateMovement();
-    }
-
-    //Not Used:
-    public void DeactivateTargets()
-    {
-        foreach (var target in TargetList)
-            target.gameObject.SetActive(false);
-    }
-
-    //Not Used:
-    public void DeactivateDistractors()
-    {
-        foreach (var target in DistractorList)
-            target.gameObject.SetActive(false);
+        StartCoroutine(obj.FadeIn());
     }
 
 
@@ -303,7 +388,7 @@ public class KT_Object : MonoBehaviour
     public Vector3 AngleProbs;
     public Vector2[] AngleRanges;
     public int NumDestWithoutBigTurn;
-    public float[] ObjectColor;
+    public Vector3 ObjectColor;
     public int SliderChange;
     public int ActivateDelay;
     public Vector2[] MouthAngles;
@@ -340,6 +425,14 @@ public class KT_Object : MonoBehaviour
 
 
     public bool MissedCurrentIntervalResponseWindow = false;
+
+
+    public float FadeDuration = .5f;
+
+    public Image ImageComponent;
+
+    private bool Fading = false;
+   
 
 
     public KT_Object()
@@ -402,7 +495,79 @@ public class KT_Object : MonoBehaviour
         PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
         PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
         PacmanDrawer.DrawMouth(OpenAngle);
+
+        if (!TryGetComponent<Image>(out ImageComponent))
+            Debug.LogError("IMAGE COMPONENT IS NULL");
     }
+
+
+    public IEnumerator FadeIn()
+    {
+        Fading = true;
+
+        Color color = ImageComponent.color;
+
+        float startAlpha = 0f;
+        float timeElapsed = 0f;
+
+        color.a = 0f;
+        ImageComponent.color = color;
+
+        gameObject.SetActive(true); //MAKE SURE GAMEOBJECT TURNED ON:
+
+        while(timeElapsed < FadeDuration)
+        {
+            timeElapsed += Time.deltaTime;
+            float newAlpha = Mathf.Lerp(startAlpha, 1f, timeElapsed / FadeDuration);
+
+            color.a = newAlpha;
+            ImageComponent.color = color;
+
+            yield return null;
+        }
+
+        color.a = 1f;
+        ImageComponent.color = color;
+
+        Fading = false;
+
+        ActivateMovement();
+    }
+
+    public IEnumerator FadeOut()
+    {
+        Fading = true;
+
+        Color color = ImageComponent.color;
+
+        float startAlpha = 1f;
+        float timeElapsed = 0f;
+
+        color.a = startAlpha;
+        ImageComponent.color = color;
+
+        while (timeElapsed < FadeDuration)
+        {
+            timeElapsed += Time.deltaTime;
+            float newAlpha = Mathf.Lerp(startAlpha, 0f, timeElapsed / FadeDuration);
+
+            color.a = newAlpha;
+            ImageComponent.color = color;
+
+            yield return null;
+        }
+
+        color.a = 0f;
+        ImageComponent.color = color;
+
+        Fading = false;
+
+        gameObject.SetActive(false); //MAKE SURE GAMEOBJECT TURNED OFF:
+
+        DestroyObj(); //trying here
+
+    }
+
 
     private void CheckRewardsMatchDurations()
     {
@@ -491,7 +656,7 @@ public class KT_Object : MonoBehaviour
 
 
     private void NextCycle()
-    {    
+    {
         Cycles.RemoveAt(0);
 
         if (Cycles.Count >= 1)
@@ -501,7 +666,7 @@ public class KT_Object : MonoBehaviour
         }
         else
         {
-            DestroyObj();
+            StartCoroutine(FadeOut());
         }
     }
 
@@ -524,10 +689,11 @@ public class KT_Object : MonoBehaviour
             }
         }
 
-        if (MoveAroundScreen)
+        if (MoveAroundScreen && !CurrentCycle.CycleComplete)
         {
             if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.duration)
             {
+                CurrentCycle.CycleComplete = true;
                 NextCycle();
             }
             else if (Time.time - CurrentCycle.cycleStartTime >= CurrentCycle.currentInterval && CurrentCycle.intervals.Count > 0)
@@ -535,6 +701,7 @@ public class KT_Object : MonoBehaviour
                 StartCoroutine(AnimationCoroutine());
                 CurrentCycle.NextInterval();
             }
+            
 
         }
 
@@ -610,6 +777,8 @@ public class KT_Object : MonoBehaviour
         gameObject.GetComponent<PacmanDrawer>().DrawMouth(CurrentMouthAngle);
         CurrentAnimationStatus = AnimationStatus.Open;
     }
+
+
 
     private void HandlePausingWhileBeingSelected()
     {
@@ -859,7 +1028,7 @@ public class KT_Object_ConfigValues
     public Vector3 AngleProbs;
     public Vector2[] AngleRanges;
     public int NumDestWithoutBigTurn;
-    public float[] ObjectColor;
+    public Vector3 ObjectColor;
     public int SliderChange;
     public int ActivateDelay;
     public Vector2[] MouthAngles;
@@ -876,7 +1045,9 @@ public class Cycle
     public float currentInterval;
     public float cycleStartTime;
 
-    public bool AfterFirstAnimation;
+    public bool CycleComplete = false;
+
+    public bool AfterFirstAnimation = false;
 
 
     public void StartCycle()
@@ -884,6 +1055,7 @@ public class Cycle
         currentInterval = intervals[0];
         cycleStartTime = Time.time;
         AfterFirstAnimation = false;
+        CycleComplete = false;
     }
 
     public void NextInterval()

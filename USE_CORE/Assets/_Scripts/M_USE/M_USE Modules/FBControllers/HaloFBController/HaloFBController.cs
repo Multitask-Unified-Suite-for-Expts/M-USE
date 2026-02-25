@@ -62,10 +62,30 @@ public class HaloFBController : MonoBehaviour
         if (particleHaloActive)
         {
             particleHalo = GetOrCreateParticleHalo(gameObj);
+
             if (depth == null)
-                particleHalo.ShowParticleHalo("positive", gameObj);
+            {
+                if(destroyTime.HasValue)
+                {
+                    particleHalo.ShowParticleHalo("positive", gameObj, destroyTime.Value);
+                }
+                else
+                {
+                    particleHalo.ShowParticleHalo("positive", gameObj);
+                }
+            }
             else
-                particleHalo.ShowParticleHalo2D("positive", gameObj, depth.Value);
+            {
+                if(destroyTime.HasValue)
+                {
+                    particleHalo.ShowParticleHalo2D("positive", gameObj, depth.Value, destroyTime.Value);
+                }
+                else
+                {
+                    particleHalo.ShowParticleHalo2D("positive", gameObj, depth.Value);
+                }
+
+            }
         }
 
 
@@ -97,9 +117,27 @@ public class HaloFBController : MonoBehaviour
             particleHalo = GetOrCreateParticleHalo(gameObj);
 
             if (depth == null)
-                particleHalo.ShowParticleHalo("negative", gameObj);
+            {
+                if(destroyTime.HasValue)
+                {
+                    particleHalo.ShowParticleHalo("negative", gameObj, destroyTime.Value);
+                }
+                else
+                {
+                    particleHalo.ShowParticleHalo("negative", gameObj);
+                }
+            }
             else
-                particleHalo.ShowParticleHalo2D("negative", gameObj, depth.Value);
+            {
+                if(destroyTime.HasValue)
+                {
+                    particleHalo.ShowParticleHalo2D("negative", gameObj, depth.Value, destroyTime.Value);
+                }
+                else
+                {
+                    particleHalo.ShowParticleHalo2D("negative", gameObj, depth.Value);
+                }
+            }
 
         }
 

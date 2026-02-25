@@ -7,6 +7,9 @@ namespace KeepTrack_Namespace
 {
     public class KeepTrack_TaskDef : TaskDef
     {
+        public float ColorChangeDuration;
+        public Vector3 CorrectSelectionColor;
+        public Vector3 IncorrectSelectionColor;
     }
 
     public class KeepTrack_BlockDef : BlockDef

@@ -34,5 +34,10 @@
     "DistractorAnimationBegins": {
         "Value": 15084,
         "Description": "Distractor animation begins"
+    },
+    "SectionChanged": {
+        "Value": 15085,
+        "Description": "Section Changed"
     }
+
 }

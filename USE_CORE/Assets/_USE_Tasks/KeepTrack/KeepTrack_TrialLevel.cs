@@ -6,7 +6,6 @@ using KeepTrack_Namespace;
 using UnityEngine;
 using USE_ExperimentTemplate_Trial;
 using USE_States;
-using static System.Collections.Specialized.BitVector32;
 using static SelectionTracking.SelectionTracker;
 
 
@@ -18,31 +17,33 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
 
     //TRIAL DATA:
     [HideInInspector] public int SectionChanges_Trial = 0;
+    [HideInInspector] public int TargetSel_BeforeFirstAnim_Trial = 0;
+    [HideInInspector] public int TargetSel_BeforeResponseWindow_Trial = 0;
+    [HideInInspector] public int TargetSel_WithinResponseWindow_Trial = 0;
+    [HideInInspector] public int TargetSel_AfterResponseWindow_Trial = 0;
+    [HideInInspector] public int AdditionalTargetSel_Trial = 0;
+
     [HideInInspector] public int TargetAnimations_Trial = 0;
     [HideInInspector] public int DistractorAnimations_Trial = 0;
-    [HideInInspector] public int SuccessfulTargetSelections_Trial = 0;
-    [HideInInspector] public int SelectedAfterResponseWindow_Trial = 0;
-    [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Trial = 0;
     [HideInInspector] public int TargetIntervalsMissed_Trial = 0;
-    [HideInInspector] public int AdditionalTargetSelections_Trial = 0;
     [HideInInspector] public int DistractorSelections_Trial = 0;
     [HideInInspector] public int DistractorRejections_Trial = 0;
     [HideInInspector] public int SliderBarCompletions_Trial = 0;
 
     //BLOCK DATA:
-    [HideInInspector] public int DistractorAnimations_Block = 0;
     [HideInInspector] public int SectionChanges_Block = 0;
-
+    [HideInInspector] public int TargetSel_BeforeFirstAnim_Block = 0;
+    [HideInInspector] public int TargetSel_BeforeResponseWindow_Block = 0;
+    [HideInInspector] public int TargetSel_WithinResponseWindow_Block = 0;
+    [HideInInspector] public int TargetSel_AfterResponseWindow_Block = 0;
+    [HideInInspector] public int AdditionalTargetSel_Block = 0;
     [HideInInspector] public int TargetAnimations_Block = 0;
-    [HideInInspector] public int TrialCompletions_Block;
-    [HideInInspector] public int SuccessfulTargetSelections_Block = 0;
-    [HideInInspector] public int SelectedAfterResponseWindow_Block = 0;
-    [HideInInspector] public int TargetSelectionsBeforeFirstAnim_Block = 0;
+    [HideInInspector] public int DistractorAnimations_Block = 0;
     [HideInInspector] public int TargetIntervalsMissed_Block = 0;
-    [HideInInspector] public int AdditionalTargetSelections_Block = 0;
     [HideInInspector] public int DistractorSelections_Block = 0;
     [HideInInspector] public int DistractorRejections_Block = 0;
     [HideInInspector] public int SliderBarCompletions_Block = 0;
+    [HideInInspector] public int TrialCompletions_Block;
 
     //Set in Inspector:
     public GameObject KeepTrack_CanvasGO;
@@ -59,10 +60,6 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     private bool GiveRewardIfSliderFull = false;
 
     [HideInInspector] public ConfigNumber itiDuration, timeBeforeChoiceStarts, totalChoiceDuration, sliderFlashingDuration, sliderUpdateDuration, sliderSize;
-
-
-    //private float HaloDepth = 15f;
-    //private float HaloDuration = 0.3f;
 
     List<KT_Object> TrialObjects;
 
@@ -87,8 +84,6 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         {
             if (SliderFBController != null && SliderFBController.SliderGO == null)
                 SliderFBController.InitializeSlider();
-
-            //HaloFBController.SetCircleHaloIntensity(2f);
 
             if (StartButton == null)
             {
@@ -221,70 +216,70 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                 {
                     if (ChosenObject.IsTarget) //Selected a target
                     {
-                        if(ChosenObject.WithinResponseWindow && ChosenObject.CurrentCycle.AfterFirstAnimation && !ChosenObject.SelectedDuringCurrentInterval)
+                        if(ChosenObject.WithinResponseWindow && ChosenObject.CurrentCycle.AfterFirstAnimation && !ChosenObject.SelectedDuringCurrentInterval) //Correct Selection
                         {
                             GiveRewardIfSliderFull = true;
                             StartCoroutine(ObjManager.ChangeObjColorCoroutine(ChosenObject, CurrentTask.CorrectSelectionColor, CurrentTask.ColorChangeDuration));
-                            //HaloFBController.ShowPositive(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, HaloDuration, HaloDepth);
                             SliderFBController.UpdateSliderValue(ChosenObject.SliderChange * (1f / SliderGainSteps));
-                            //Debug.LogWarning("SUCCESSFUL TARGET SELECTION");
-                            SuccessfulTargetSelections_Trial++;
-                            SuccessfulTargetSelections_Block++;
-                            CurrentTaskLevel.SuccessfulTargetSelections_Task++;
-                            Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["SuccessfulTargetSelection"]);
-                            //Session.EventCodeManager.SendCodeThisFrame("CorrectResponse");
+                            TargetSel_WithinResponseWindow_Trial++;
+                            TargetSel_WithinResponseWindow_Block++;
+                            CurrentTaskLevel.TargetSel_WithinResponseWindow_Task++;
+                            Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionWithinResponseWindow"]);
 
-                            ChosenObject.CurrentIntervalSuccessful = true; //SET TO TRUE FOR SUCCESSFUL SELECTION
+                            ChosenObject.CurrentIntervalSuccessful = true;
                         }
-                        else
+                        else //Incorrect Selection
                         {
                             StartCoroutine(ObjManager.ChangeObjColorCoroutine(ChosenObject, CurrentTask.IncorrectSelectionColor, CurrentTask.ColorChangeDuration));
-                            //HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, HaloDuration, HaloDepth);
                             SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
 
-                            if(ChosenObject.SelectedDuringCurrentInterval)
+                            if(!ChosenObject.CurrentCycle.AfterFirstAnimation)
                             {
-                                //Debug.LogWarning("ADDITIONAL SELECTION");
-                                AdditionalTargetSelections_Trial++;
-                                AdditionalTargetSelections_Block++;
-                                CurrentTaskLevel.AdditionalTargetSelections_Task++;
-                                Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["AdditionalTargetSelection"]);
+                                TargetSel_BeforeFirstAnim_Trial++;
+                                TargetSel_BeforeFirstAnim_Block++;
+                                CurrentTaskLevel.TargetSel_BeforeFirstAnim_Task++;
+                                Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
+                            }
+                            else if(ChosenObject.SelectedDuringCurrentInterval)
+                            {
+                                AdditionalTargetSel_Trial++;
+                                AdditionalTargetSel_Block++;
+                                CurrentTaskLevel.AdditionalTargetSel_Task++;
+                            }
+                            else if (ChosenObject.BeforeResponseWindow)
+                            {
+                                TargetSel_BeforeResponseWindow_Trial++;
+                                TargetSel_BeforeResponseWindow_Block++;
+                                CurrentTaskLevel.TargetSel_BeforeResponseWindow_Task++;
+                                Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionBeforeResponseWindow"]);
+
+                            }
+                            else if(ChosenObject.AfterResponseWindow)
+                            {
+                                TargetSel_AfterResponseWindow_Trial++;
+                                TargetSel_AfterResponseWindow_Block++;
+                                CurrentTaskLevel.TargetSel_AfterResponseWindow_Task++;
+                                Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionAfterResponseWindow"]);
                             }
                             else
                             {
-                                if (ChosenObject.CurrentCycle.AfterFirstAnimation)
-                                {
-                                    //Debug.LogWarning("UNSUCCESSFUL SELECTION");
-                                    SelectedAfterResponseWindow_Trial++;
-                                    SelectedAfterResponseWindow_Block++;
-                                    CurrentTaskLevel.SelectedAfterResponseWindow_Task++;
-                                    Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["UnsuccessfulTargetSelection"]);
-                                    //Session.EventCodeManager.SendCodeThisFrame("IncorrectResponse");
-
-                                }
-                                else
-                                {
-                                    //Debug.LogWarning("TOO EARLY TO SELECT");
-                                    TargetSelectionsBeforeFirstAnim_Trial++;
-                                    TargetSelectionsBeforeFirstAnim_Block++;
-                                    CurrentTaskLevel.TargetSelectionsBeforeFirstAnim_Task++;
-                                    Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["TargetSelectionBeforeFirstAnim"]);
-                                }
+                                Debug.LogWarning("ELSE STATEMENT");
                             }
+
                         }
                     }
                     else //Selected a Distractor
                     {
                         StartCoroutine(ObjManager.ChangeObjColorCoroutine(ChosenObject, CurrentTask.IncorrectSelectionColor, CurrentTask.ColorChangeDuration));
-                        //HaloFBController.ShowNegative(ChosenGO, CurrentTrial.ParticleHaloActive, CurrentTrial.CircleHaloActive, HaloDuration, HaloDepth);
                         SliderFBController.UpdateSliderValue(-ChosenObject.SliderChange * (1f / SliderGainSteps));
+
                         DistractorSelections_Trial++;
                         DistractorSelections_Block++;
                         CurrentTaskLevel.DistractorSelections_Task++;
                         Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["DistractorSelection"]);
                     }
 
-                    CurrentTaskLevel.SetBlockSummaryString(); //update data on Exp Display
+
 
                     if(ChosenObject.CurrentCycle.AfterFirstAnimation && !ChosenObject.SelectedDuringCurrentInterval)
                     {
@@ -292,6 +287,8 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
                     }
 
                     Input.ResetInputAxes(); //Reset input?
+
+                    CurrentTaskLevel.SetBlockSummaryString(); //update data on Exp Display
 
                     SelectionHandler.LastSuccessfulChoice = null;
                 }
@@ -331,7 +328,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     private void SectionChanged()
     {
         if (SectionChanged_Frames == null)
-            Debug.LogWarning("SECTION CHANGED FRAMES DICT IS NULL");
+            Debug.LogError("SECTION CHANGED FRAMES DICT IS NULL");
 
         int currentFrame = Time.frameCount;
 
@@ -552,14 +549,15 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         TargetAnimationsMissed_Frames = new Dictionary<int, int>();
         TargetAnimations_Frames = new Dictionary<int, int>();
 
+        AdditionalTargetSel_Trial = 0;
+        TargetSel_BeforeResponseWindow_Trial = 0;
         SectionChanges_Trial = 0;
         TargetAnimations_Trial = 0;
         DistractorAnimations_Trial = 0;
-        SuccessfulTargetSelections_Trial = 0;
-        SelectedAfterResponseWindow_Trial = 0;
-        TargetSelectionsBeforeFirstAnim_Trial = 0;
+        TargetSel_WithinResponseWindow_Trial = 0;
+        TargetSel_AfterResponseWindow_Trial = 0;
+        TargetSel_BeforeFirstAnim_Trial = 0;
         TargetIntervalsMissed_Trial = 0;
-        AdditionalTargetSelections_Trial = 0;
         DistractorSelections_Trial = 0;
         DistractorRejections_Trial = 0;
         SliderBarCompletions_Trial = 0;
@@ -569,16 +567,17 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
     {
         TrialCompletions_Block = 0;
 
+        AdditionalTargetSel_Block = 0;
+        TargetSel_BeforeResponseWindow_Block = 0;
         SectionChanges_Block = 0;
         TargetAnimations_Block = 0;
         DistractorAnimations_Block = 0;
-        SuccessfulTargetSelections_Block = 0;
-        SelectedAfterResponseWindow_Block = 0;
-        TargetSelectionsBeforeFirstAnim_Block = 0;
+        TargetSel_WithinResponseWindow_Block = 0;
+        TargetSel_AfterResponseWindow_Block = 0;
+        TargetSel_BeforeFirstAnim_Block = 0;
         DistractorSelections_Block = 0;
         DistractorRejections_Block = 0;
         TargetIntervalsMissed_Block = 0;
-        AdditionalTargetSelections_Block = 0;
         SliderBarCompletions_Block = 0;
     }
 
@@ -628,12 +627,13 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         TrialData.AddDatum("SliderGain", () => String.Join(", ", CurrentTrial.SliderGain));
         TrialData.AddDatum("SliderBarCompletions", () => SliderBarCompletions_Trial);
 
-        TrialData.AddDatum("Section Changes", () => SectionChanges_Trial);
-        TrialData.AddDatum("SuccessfulTargetSelections", () => SuccessfulTargetSelections_Trial);
-        TrialData.AddDatum("UnsuccessfulTargetSelections", () => SelectedAfterResponseWindow_Trial);
-        TrialData.AddDatum("TargetSelectionsBeforeFirstAnim", () => TargetSelectionsBeforeFirstAnim_Trial);
+        TrialData.AddDatum("SectionChanges", () => SectionChanges_Trial);
+        TrialData.AddDatum("TargetSel_BeforeFirstAnim", () => TargetSel_BeforeFirstAnim_Trial);
+        TrialData.AddDatum("TargetSel_BeforeResponseWindow", () => TargetSel_BeforeResponseWindow_Trial);
+        TrialData.AddDatum("TargetSel_WithinResponseWindow", () => TargetSel_WithinResponseWindow_Trial);
+        TrialData.AddDatum("TargetSel_AfterResponseWindow", () => TargetSel_AfterResponseWindow_Trial);
+        TrialData.AddDatum("AdditionalTargetSel_WithinResponseWindow", () => TargetSel_AfterResponseWindow_Trial);
         TrialData.AddDatum("TargetIntervalsMissed", () => TargetIntervalsMissed_Trial);
-        TrialData.AddDatum("AdditionalTargetSelections", () => AdditionalTargetSelections_Trial);
         TrialData.AddDatum("DistractorSelections", () => DistractorSelections_Trial);
         TrialData.AddDatum("DistractorRejections", () => DistractorRejections_Trial);
     }

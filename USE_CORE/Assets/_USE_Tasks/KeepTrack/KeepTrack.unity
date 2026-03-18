@@ -215,7 +215,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 1051536199}
-  - {fileID: 960084242}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -224,151 +223,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1001 &960084241
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 542748423}
-    m_Modifications:
-    - target: {fileID: 672353693860155555, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155555, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 0.9569329
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155555, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 0.9716981
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_Pivot.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_Pivot.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 250
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 250
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155582, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_Name
-      value: PacmanCircle
-      objectReference: {fileID: 0}
-    - target: {fileID: 672353693860155582, guid: d881786e9a0e8471899a69cab3a62c98,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d881786e9a0e8471899a69cab3a62c98, type: 3}
---- !u!224 &960084242 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 672353693860155581, guid: d881786e9a0e8471899a69cab3a62c98,
-    type: 3}
-  m_PrefabInstance: {fileID: 960084241}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1051536198
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -564,6 +418,7 @@ MonoBehaviour:
   NumAbortedTrials_InBlock: 0
   NumRewardPulses_InBlock: 0
   NumRewardPulses_InTask: 0
+  StimulationPulsesGiven_Task: 0
   MinTrials_InBlock: 0
   MaxTrials_InBlock: 0
   ForceTaskEnd: 0
@@ -573,6 +428,7 @@ MonoBehaviour:
   TrialData: {fileID: 0}
   TaskConfigPath: 
   TaskDataPath: 
+  CurrentBlockString: 
   TaskDirectionalLight: {fileID: 2032822622}
   TaskCam: {fileID: 0}
   TaskCanvasses: []
@@ -601,14 +457,17 @@ MonoBehaviour:
   TaskResultsGO: {fileID: 0}
   importSettings_Level: {fileID: 0}
   verifyTask_Level: {fileID: 0}
-  CurrentBlockString: 
-  BlockStringsAdded: 0
+  BlockStimulationCode: 0
   TrialsCompleted_Task: 0
-  SuccessfulTargetSelections_Task: 0
-  UnsuccessfulTargetSelections_Task: 0
-  TargetSelectionsBeforeFirstAnim_Task: 0
-  TargetAnimsWithoutSelection_Task: 0
-  AdditionalTargetSelections_Task: 0
+  SectionChanges_Task: 0
+  TargetAnimations_Task: 0
+  DistractorAnimations_Task: 0
+  TargetSel_BeforeFirstAnim_Task: 0
+  TargetSel_BeforeResponseWindow_Task: 0
+  TargetSel_WithinResponseWindow_Task: 0
+  TargetSel_AfterResponseWindow_Task: 0
+  AdditionalTargetSel_Task: 0
+  TargetIntervalsMissed_Task: 0
   DistractorSelections_Task: 0
   DistractorRejections_Task: 0
   SliderBarCompletions_Task: 0
@@ -637,6 +496,7 @@ MonoBehaviour:
   TrialCount_InTask: 0
   TrialCount_InBlock: 0
   AbortCode: 0
+  StimulationPulsesGiven_Block: 0
   runningPerformance: 
   difficultyLevel: 0
   posStep: 0
@@ -647,6 +507,7 @@ MonoBehaviour:
   diffLevelJitter: 0
   NumReversalsUntilTerm: 0
   MinTrialsBeforeTermProcedure: 0
+  MaxTrialsInBlock: 0
   TerminationWindowSize: 0
   reversalsCount: 0
   DiffLevelsAtReversals: 
@@ -683,6 +544,7 @@ MonoBehaviour:
   DialogueController: {fileID: 0}
   PauseIconGO: {fileID: 0}
   TrialStimsLoaded: 0
+  PathReassignmentComplete: 0
   SkyboxMaterial: {fileID: 0}
   HeldTooLongTexture: {fileID: 0}
   HeldTooShortTexture: {fileID: 0}
@@ -693,16 +555,41 @@ MonoBehaviour:
   NotSelectablePeriodTexture: {fileID: 0}
   TrialFilesLoaded: 0
   CurrentTrialDefIndex: 0
-  MaskValues_Block: []
-  TrialCompletions_Block: 0
-  SuccessfulTargetSelections_Block: 0
-  UnsuccessfulTargetSelections_Block: 0
-  TargetSelectionsBeforeFirstAnim_Block: 0
-  TargetAnimsWithoutSelection_Block: 0
-  AdditionalTargetSelections_Block: 0
+  TrialStimulationCode: 0
+  CanStimulateThisTrial: 0
+  StimulatedThisTrial: 0
+  StimulateOnCurrentObject: 0
+  ChoiceFailed_Trial: 0
+  PlayerViewPanel: {fileID: 0}
+  PlayerViewGO: {fileID: 0}
+  Score: 0
+  ScoreTextGO: {fileID: 0}
+  ScoreText: {fileID: 0}
+  SectionChanges_Trial: 0
+  TargetSel_BeforeFirstAnim_Trial: 0
+  TargetSel_BeforeResponseWindow_Trial: 0
+  TargetSel_WithinResponseWindow_Trial: 0
+  TargetSel_AfterResponseWindow_Trial: 0
+  AdditionalTargetSel_Trial: 0
+  TargetAnimations_Trial: 0
+  DistractorAnimations_Trial: 0
+  TargetIntervalsMissed_Trial: 0
+  DistractorSelections_Trial: 0
+  DistractorRejections_Trial: 0
+  SliderBarCompletions_Trial: 0
+  SectionChanges_Block: 0
+  TargetSel_BeforeFirstAnim_Block: 0
+  TargetSel_BeforeResponseWindow_Block: 0
+  TargetSel_WithinResponseWindow_Block: 0
+  TargetSel_AfterResponseWindow_Block: 0
+  AdditionalTargetSel_Block: 0
+  TargetAnimations_Block: 0
+  DistractorAnimations_Block: 0
+  TargetIntervalsMissed_Block: 0
   DistractorSelections_Block: 0
   DistractorRejections_Block: 0
   SliderBarCompletions_Block: 0
+  TrialCompletions_Block: 0
   KeepTrack_CanvasGO: {fileID: 542748419}
   BordersGO: {fileID: 1051536200}
   itiDuration:
@@ -713,7 +600,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  minObjectTouchDuration:
+  timeBeforeChoiceStarts:
     name: 
     hidden: 0
     value: 0
@@ -721,7 +608,7 @@ MonoBehaviour:
     max: 0
     min: 0
     precision: 0
-  maxObjectTouchDuration:
+  totalChoiceDuration:
     name: 
     hidden: 0
     value: 0

@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2989978243321567105}
   - component: {fileID: 2081178431304017056}
   m_Layer: 5
-  m_Name: PacmanCircle
+  m_Name: MonkeyClosed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +31,6 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -69,7 +68,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b0f6295723fcd9545a3cd7ad2864853b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7eb4a4881051d4cfea21c24f1e708af1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -128,3 +127,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df7582b3f58944f68839a96df4c5467d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ClosedLineThickness: 4

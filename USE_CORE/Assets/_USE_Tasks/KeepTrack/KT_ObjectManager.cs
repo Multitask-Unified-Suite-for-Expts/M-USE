@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.ProBuilder.MeshOperations;
 using UnityEngine.UI;
-using USE_ExperimentTemplate_Classes;
 using Random = UnityEngine.Random;
 
 
@@ -36,6 +34,18 @@ public class KT_ObjectManager : MonoBehaviour
 
     public Queue<Vector2> StartingPositions_Queue = new Queue<Vector2>();
 
+    public Dictionary<string, Sprite> SpriteDict;
+
+
+    private void Awake()
+    {
+        TargetList = new List<KT_Object>();
+        DistractorList = new List<KT_Object>();
+
+        SpriteDict = new Dictionary<string, Sprite>();
+        
+        SetRandomStartingPositions();
+    }
 
     private void Update()
     {
@@ -147,14 +157,6 @@ public class KT_ObjectManager : MonoBehaviour
             OnDistractorAvoided?.Invoke();
     }
 
-    private void Awake()
-    {
-        TargetList = new List<KT_Object>();
-        DistractorList = new List<KT_Object>();
-
-        SetRandomStartingPositions();
-    }
-
     public void SetObjectParent(Transform parentTransform)
     {
         ObjectParent = parentTransform;
@@ -181,25 +183,17 @@ public class KT_ObjectManager : MonoBehaviour
         {
             try
             {
-                GameObject go = Instantiate(Resources.Load<GameObject>("PacmanCircle"));
+                GameObject go = Instantiate(Resources.Load<GameObject>("Pacman")); //start with default prefab
 
                 go.GetComponent<PacmanDrawer>().ManualStart();
 
                 go.name = configValues.IsTarget ? $"Target_" + configValues.Index : $"Distractor_" + configValues.Index;
                 go.SetActive(false);
+
                 go.transform.SetParent(ObjectParent);
                 go.transform.localPosition = Vector3.zero;
                 go.transform.localScale = Vector3.one;
                 go.GetComponent<RectTransform>().sizeDelta = new Vector2(configValues.Size, configValues.Size);
-
-
-                go.GetComponent<Image>().color = new Color(
-                                                            configValues.ObjectColor[0] / 255f,
-                                                            configValues.ObjectColor[1] / 255f,
-                                                            configValues.ObjectColor[2] / 255f,
-                                                            1
-                                                        );
-
                 go.GetComponent<CircleCollider2D>().radius = configValues.Size * .52f; //Set Collider radius
 
                 KT_Object obj = go.AddComponent<KT_Object>();
@@ -216,6 +210,7 @@ public class KT_ObjectManager : MonoBehaviour
             {
                 Debug.LogWarning("ERROR CREATING OBJECT WITH INDEX NUMBER " + configValues.Index + " | Error Message: " + ex.Message);
             }
+  
 
         }
 
@@ -230,12 +225,7 @@ public class KT_ObjectManager : MonoBehaviour
 
         if (obj.TryGetComponent<Image>(out var objImage))
         {
-            objImage.color = new Color(
-                                            changeToColor[0] / 255f,
-                                            changeToColor[1] / 255f,
-                                            changeToColor[2] / 255f,
-                                            1
-                                        );
+            objImage.color = new Color(changeToColor[0] / 255f, changeToColor[1] / 255f, changeToColor[2] / 255f, obj.Opacity);
         }
         else
         {
@@ -246,12 +236,14 @@ public class KT_ObjectManager : MonoBehaviour
 
         if (objImage != null)
         {
-            objImage.color = new Color(
-                                            obj.ObjectColor[0] / 255f,
-                                            obj.ObjectColor[1] / 255f,
-                                            obj.ObjectColor[2] / 255f,
-                                            1
-                                        );
+            if (obj.usePacman)
+            {
+                objImage.color = new Color(obj.ObjectColor[0] / 255f, obj.ObjectColor[1] / 255f, obj.ObjectColor[2] / 255f, obj.Opacity);
+            }
+            else
+            {
+                objImage.color = new Color(255f, 255f, 255f, obj.Opacity); //not using pacman
+            }
         }
 
     }
@@ -351,7 +343,7 @@ public class KT_ObjectManager : MonoBehaviour
     public IEnumerator ActivateObjectCoroutine(KT_Object obj)
     {
         yield return new WaitForSeconds(obj.ActivateDelay);
-        StartCoroutine(obj.FadeIn());
+        StartCoroutine(obj.Fade(0f, 1f, obj.ActivateMovement));
     }
 
 
@@ -366,9 +358,20 @@ public class KT_Object : MonoBehaviour
 
     public PacmanDrawer PacmanDrawer;
 
+    public bool usePacman
+    {
+        get
+        {
+            return string.IsNullOrEmpty(OpenSpriteName) || string.IsNullOrEmpty(ClosedSpriteName);
+        }
+    }
+
+
     //From Object Config:
     public int Index;
     public string ObjectName;
+    public string ClosedSpriteName;
+    public string OpenSpriteName;
     public float OpenAngle;
     public int ClosedLineThickness;
     public float MinAnimGap;
@@ -386,6 +389,7 @@ public class KT_Object : MonoBehaviour
     public Vector2[] AngleRanges;
     public int NumDestWithoutBigTurn;
     public Vector3 ObjectColor;
+    public float Opacity;
     public int SliderChange;
     public int ActivateDelay;
     public Vector2[] MouthAngles;
@@ -400,7 +404,6 @@ public class KT_Object : MonoBehaviour
     private float NewDestStartTime;
     private readonly float MaxCollisionTime = .25f;
     public float IntervalStartTime;
-    public bool WithinResponseWindow;
     private readonly List<float> PreviousAngleOffsets = new List<float>();
     public List<Cycle> Cycles;
     public Cycle CurrentCycle;
@@ -428,8 +431,14 @@ public class KT_Object : MonoBehaviour
 
     public Image ImageComponent;
 
-    private bool Fading = false;
-   
+    public bool Fading = false;
+
+    public bool BeforeResponseWindow;
+    public bool WithinResponseWindow;
+    public bool AfterResponseWindow;
+
+    public Sprite ClosedSprite;
+    public Sprite OpenSprite;
 
 
     public KT_Object()
@@ -443,6 +452,8 @@ public class KT_Object : MonoBehaviour
         ObjManager = objManager;
         Index = configValue.Index;
         ObjectName = configValue.ObjectName;
+        ClosedSpriteName = configValue.ClosedSpriteName;
+        OpenSpriteName = configValue.OpenSpriteName;
         OpenAngle = configValue.OpenAngle;
         ClosedLineThickness = configValue.ClosedLineThickness;
         IsTarget = configValue.IsTarget;
@@ -462,12 +473,37 @@ public class KT_Object : MonoBehaviour
 
         RatesAndDurations = configValue.RatesAndDurations;
         ObjectColor = configValue.ObjectColor;
+        Opacity = configValue.Opacity;
         SliderChange = configValue.SliderChange;
         AngleRanges = configValue.AngleRanges;
         NumDestWithoutBigTurn = configValue.NumDestWithoutBigTurn;
         MouthAngles = configValue.MouthAngles;
-
         ActivateDelay = configValue.ActivateDelay;
+
+        if (!TryGetComponent<Image>(out ImageComponent))
+            Debug.LogError("IMAGE COMPONENT IS NULL");
+
+        if (OpenSpriteName != null)
+        {
+            OpenSprite = GetSprite(OpenSpriteName);
+            if(OpenSprite != null) //It starts as pacman, so if its null here then dont have to do anything
+                ImageComponent.sprite = OpenSprite; //Start Object with Closed sprite (
+        }
+        if(ClosedSpriteName != null)
+        {
+            ClosedSprite = GetSprite(ClosedSpriteName);
+        }
+        
+        if (usePacman)
+        {
+            GetComponent<Image>().color = new Color(ObjectColor[0] / 255f, ObjectColor[1] / 255f, ObjectColor[2] / 255f, Opacity);
+        }
+        else
+        {
+            Color color = GetComponent<Image>().color;
+            color.a = Opacity;
+            GetComponent<Image>().color = color;
+        }
 
         StartingPosition = ObjManager.GetRandomStartingPosition();
         transform.localPosition = new Vector3(StartingPosition.x, StartingPosition.y, 0);
@@ -491,78 +527,68 @@ public class KT_Object : MonoBehaviour
 
         PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
         PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
-        PacmanDrawer.DrawMouth(OpenAngle);
 
-        if (!TryGetComponent<Image>(out ImageComponent))
-            Debug.LogError("IMAGE COMPONENT IS NULL");
+        if(usePacman)
+        {
+            PacmanDrawer.DrawMouth(OpenAngle);
+        }
     }
 
-
-    public IEnumerator FadeIn()
+    public Sprite GetSprite(string spriteName)
     {
-        Fading = true;
+        if (string.IsNullOrEmpty(spriteName))
+            return null;
 
-        Color color = ImageComponent.color;
-
-        float startAlpha = 0f;
-        float timeElapsed = 0f;
-
-        color.a = 0f;
-        ImageComponent.color = color;
-
-        gameObject.SetActive(true); //MAKE SURE GAMEOBJECT TURNED ON:
-
-        while(timeElapsed < FadeDuration)
+        if (ObjManager == null || ObjManager.SpriteDict == null)
         {
-            timeElapsed += Time.deltaTime;
-            float newAlpha = Mathf.Lerp(startAlpha, 1f, timeElapsed / FadeDuration);
-
-            color.a = newAlpha;
-            ImageComponent.color = color;
-
-            yield return null;
+            Debug.LogError("ObjManager or SpriteDict is null.");
+            return null;
         }
 
-        color.a = 1f;
-        ImageComponent.color = color;
+        if (ObjManager.SpriteDict.TryGetValue(spriteName, out Sprite sprite) && sprite != null)
+        {
+            return sprite;
+        }
 
-        Fading = false;
+        Sprite loaded = Resources.Load<Sprite>("Object_Sprites/" + spriteName);
+        if (loaded == null)
+        {
+            Debug.LogError($"FAILED TO LOAD SPRITE '{spriteName}' FROM RESOURCES/ Object_Sprites/");
+            return null;
+        }
 
-        ActivateMovement();
+        ObjManager.SpriteDict[spriteName] = loaded;
+        return loaded;
     }
 
-    public IEnumerator FadeOut()
+    public IEnumerator Fade(float startAlpha, float endAlpha, Action onComplete)
     {
         Fading = true;
 
         Color color = ImageComponent.color;
-
-        float startAlpha = 1f;
-        float timeElapsed = 0f;
-
-        color.a = startAlpha;
+        color.a = Mathf.Clamp01(startAlpha);
         ImageComponent.color = color;
+
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
+        float timeElapsed = 0f;
 
         while (timeElapsed < FadeDuration)
         {
             timeElapsed += Time.deltaTime;
-            float newAlpha = Mathf.Lerp(startAlpha, 0f, timeElapsed / FadeDuration);
-
-            color.a = newAlpha;
+            float t = Mathf.Clamp01(timeElapsed / FadeDuration);
+            color.a = Mathf.Lerp(startAlpha, endAlpha, t);
             ImageComponent.color = color;
-
             yield return null;
         }
 
-        color.a = 0f;
+        color.a = Mathf.Clamp01(endAlpha);
         ImageComponent.color = color;
 
         Fading = false;
 
-        gameObject.SetActive(false); //MAKE SURE GAMEOBJECT TURNED OFF:
-
-        DestroyObj(); //trying here
-
+        onComplete?.Invoke();
     }
 
 
@@ -663,7 +689,7 @@ public class KT_Object : MonoBehaviour
         }
         else
         {
-            StartCoroutine(FadeOut());
+            StartCoroutine(Fade(1f, 0f, DestroyObj));
         }
     }
 
@@ -671,8 +697,9 @@ public class KT_Object : MonoBehaviour
 
     private void Update()
     {
-
+        BeforeResponseWindow = IntervalStartTime > 0 && Time.time - IntervalStartTime < ResponseWindow.x;
         WithinResponseWindow = IntervalStartTime > 0 && Time.time - IntervalStartTime > ResponseWindow.x && Time.time - IntervalStartTime <= ResponseWindow.y;
+        AfterResponseWindow = IntervalStartTime > 0 && Time.time - IntervalStartTime >= ResponseWindow.y;
 
         //See if missed the window
         if (IntervalStartTime > 0 && !MissedCurrentIntervalResponseWindow)
@@ -767,11 +794,23 @@ public class KT_Object : MonoBehaviour
     {
         ObjManager.AnimationStarted(this);
 
-        gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
+        if(usePacman)
+            gameObject.GetComponent<PacmanDrawer>().DrawClosedMouth();
+        else
+            ImageComponent.sprite = ClosedSprite;
+        
         CurrentAnimationStatus = AnimationStatus.Closed;
         yield return new WaitForSeconds(CloseDuration);
-        SetCurrentOpenAngle();
-        gameObject.GetComponent<PacmanDrawer>().DrawMouth(CurrentMouthAngle);
+
+        if(usePacman)
+        {
+            SetCurrentOpenAngle();
+            gameObject.GetComponent<PacmanDrawer>().DrawMouth(CurrentMouthAngle);
+        }
+        else
+        {
+            ImageComponent.sprite = OpenSprite;
+        }
         CurrentAnimationStatus = AnimationStatus.Open;
     }
 
@@ -789,7 +828,7 @@ public class KT_Object : MonoBehaviour
                 TimeOfPause = Time.time;
             }
         }
-        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration + .1f)) //add .1 so the touch fb dissapears before object starts moving again
+        else if(ObjectPaused && (InputBroker.GetMouseButtonUp(0) || Time.time - TimeOfPause >= ObjManager.MaxTouchDuration)) //removed.... (add .1 so the touch fb dissapears before object starts moving again)
             ObjectPaused = false;
 
         //if(ObjectPaused && InputBroker.GetMouseButton(0))
@@ -1010,6 +1049,8 @@ public class KT_Object_ConfigValues
     //From Object Config:
     public int Index;
     public string ObjectName;
+    public string ClosedSpriteName;
+    public string OpenSpriteName;
     public float OpenAngle;
     public int ClosedLineThickness;
     public float MinAnimGap;
@@ -1026,6 +1067,7 @@ public class KT_Object_ConfigValues
     public Vector2[] AngleRanges;
     public int NumDestWithoutBigTurn;
     public Vector3 ObjectColor;
+    public float Opacity;
     public int SliderChange;
     public int ActivateDelay;
     public Vector2[] MouthAngles;

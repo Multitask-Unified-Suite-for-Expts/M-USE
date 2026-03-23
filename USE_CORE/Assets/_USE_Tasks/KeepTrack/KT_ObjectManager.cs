@@ -210,10 +210,7 @@ public class KT_ObjectManager : MonoBehaviour
             {
                 Debug.LogWarning("ERROR CREATING OBJECT WITH INDEX NUMBER " + configValues.Index + " | Error Message: " + ex.Message);
             }
-  
-
         }
-
         return TrialObjects;
     }
 
@@ -224,28 +221,19 @@ public class KT_ObjectManager : MonoBehaviour
             Debug.LogError("OBJ IS NULL");
 
         if (obj.TryGetComponent<Image>(out var objImage))
-        {
             objImage.color = new Color(changeToColor[0] / 255f, changeToColor[1] / 255f, changeToColor[2] / 255f, obj.Opacity);
-        }
         else
-        {
             Debug.LogError("IMAGE COMPONENT IS NULL");
-        }
-
+        
         yield return new WaitForSeconds(duration);
 
         if (objImage != null)
         {
             if (obj.usePacman)
-            {
                 objImage.color = new Color(obj.ObjectColor[0] / 255f, obj.ObjectColor[1] / 255f, obj.ObjectColor[2] / 255f, obj.Opacity);
-            }
             else
-            {
                 objImage.color = new Color(255f, 255f, 255f, obj.Opacity); //not using pacman
-            }
         }
-
     }
 
 
@@ -362,7 +350,7 @@ public class KT_Object : MonoBehaviour
     {
         get
         {
-            return string.IsNullOrEmpty(OpenSpriteName) || string.IsNullOrEmpty(ClosedSpriteName);
+            return OpenSpriteName == "Pacman" || ClosedSpriteName == "Pacman";
         }
     }
 
@@ -553,7 +541,10 @@ public class KT_Object : MonoBehaviour
         Sprite loaded = Resources.Load<Sprite>("Object_Sprites/" + spriteName);
         if (loaded == null)
         {
-            Debug.LogError($"FAILED TO LOAD SPRITE '{spriteName}' FROM RESOURCES/ Object_Sprites/");
+            if(!usePacman)
+            {
+                Debug.LogError($"NOT USING PACMAN & FAILED TO LOAD SPRITE '{spriteName}' FROM RESOURCES/ Object_Sprites/");
+            }
             return null;
         }
 

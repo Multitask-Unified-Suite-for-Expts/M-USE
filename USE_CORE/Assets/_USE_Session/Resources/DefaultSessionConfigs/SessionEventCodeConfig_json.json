@@ -238,7 +238,6 @@
         "Value": 77,
         "Description": "Choice (selection) Failed"
     },
-
     "StartButtonSelected": {
         "Description": "Start Button Selected",
         "Value": 78
@@ -281,7 +280,6 @@
         ],
         "Description": "Setup Task State Starts"
     },
-
     "RunBlockStarts": {
         "Range": [
             201,

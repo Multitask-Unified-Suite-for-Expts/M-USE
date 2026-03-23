@@ -23,7 +23,6 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     public GameObject AV_CanvasGO;
 
     //Set In Inspector:
-    public GameObject ScoreTextGO;
     public GameObject NumCorrectTextGO;
 
     [HideInInspector] public GameObject WaitCueGO;
@@ -53,14 +52,7 @@ public class AudioVisual_TrialLevel : ControlLevel_Trial_Template
     [HideInInspector] public List<float> TimeToChoice_Block;
 
     private int score;
-    [HideInInspector]
-    public int Score
-    {
-        get
-        {
-            return score;
-        }
-    }
+
 
     //internal data:
     private int Correct_Block;

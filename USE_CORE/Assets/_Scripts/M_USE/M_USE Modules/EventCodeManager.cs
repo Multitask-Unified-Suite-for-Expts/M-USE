@@ -178,9 +178,15 @@ public class EventCodeManager : MonoBehaviour
 
     public void SendCodeThisFrame(string codeString)
     {
-        EventCode code = SessionEventCodes[codeString];
-        if (code != null)
+        if(SessionEventCodes.TryGetValue(codeString, out var code))
+        {
             SendCodeThisFrame(code);
+        }
+        else
+        {
+            Debug.LogWarning("******* COULD NOT FIND CODESTRING: " + codeString);
+        }
+
     }
 
     public void SendCodeThisFrame(EventCode ec)
@@ -196,8 +202,7 @@ public class EventCodeManager : MonoBehaviour
 
     public void SendRangeCodeThisFrame(string codeString, int valueToAdd)
     {
-        EventCode code = SessionEventCodes[codeString];
-        if (code != null)
+        if(SessionEventCodes.TryGetValue(codeString, out var code))
         {
             int computedCode = code.Range[0] + valueToAdd;
             if (computedCode > code.Range[1])
@@ -206,6 +211,10 @@ public class EventCodeManager : MonoBehaviour
             {
                 SendCodeThisFrame(computedCode);
             }
+        }
+        else
+        {
+            Debug.LogWarning("COULD NOT FIND RANGE CODE: " + codeString);
         }
     }
 

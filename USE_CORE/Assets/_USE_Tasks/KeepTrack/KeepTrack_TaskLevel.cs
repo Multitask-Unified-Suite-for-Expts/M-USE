@@ -92,15 +92,15 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
         data["Section Changes"] = SectionChanges_Task;
         data["Target Animations"] = TargetAnimations_Task;
         data["Distractor Animations"] = DistractorAnimations_Task;
-        data["Target Sel Before Response Window"] = TargetSel_BeforeResponseWindow_Task;
-        data["Target Sel Within Response Window"] = TargetSel_WithinResponseWindow_Task;
-        data["Target Sel After Response Window"] = TargetSel_AfterResponseWindow_Task;
+        data["TargetSel_BeforeWindow"] = TargetSel_BeforeResponseWindow_Task;
+        data["TargetSel_WithinWindow"] = TargetSel_WithinResponseWindow_Task;
+        data["TargetSel_AfterWindow"] = TargetSel_AfterResponseWindow_Task;
         data["Additional Target Sel"] = AdditionalTargetSel_Task;
 
         data["Distractor Selections"] = DistractorSelections_Task;
         data["Distractor Rejections"] = DistractorRejections_Task;
-        data["Target Selections Before First Anim"] = TargetSel_BeforeFirstAnim_Task;
-        data["Intervals Without Selections"] = TargetIntervalsMissed_Task;
+        data["TargetSel_BeforeFirstAnim"] = TargetSel_BeforeFirstAnim_Task;
+        data["Intervals Without Selection"] = TargetIntervalsMissed_Task;
         data["SliderBar Completions"] = SliderBarCompletions_Task;
 
         return data;
@@ -109,9 +109,16 @@ public class KeepTrack_TaskLevel : ControlLevel_Task_Template
     public override OrderedDictionary GetTaskResultsData()
     {
         OrderedDictionary data = base.GetTaskResultsData();
-        //data["Longest Streak"] = LongestStreak;
-        //data["Average Streak"] = GetAvgStreak();
 
+        data["Trials Completed"] = TrialsCompleted_Task;
+        data["TargetSel_BeforeWindow"] = TargetSel_BeforeResponseWindow_Task;
+        data["TargetSel_WithinWindow"] = TargetSel_WithinResponseWindow_Task;
+        data["TargetSel_AfterWindow"] = TargetSel_AfterResponseWindow_Task;
+        data["Additional Target Sel"] = AdditionalTargetSel_Task;
+        data["Distractor Selections"] = DistractorSelections_Task;
+        data["Distractor Rejections"] = DistractorRejections_Task;
+        data["TargetSel_BeforeFirstAnim"] = TargetSel_BeforeFirstAnim_Task;
+        data["Intervals Without Selection"] = TargetIntervalsMissed_Task;
 
         return data;
     }

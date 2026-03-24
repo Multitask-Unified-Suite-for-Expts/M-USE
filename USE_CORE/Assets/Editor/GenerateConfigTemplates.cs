@@ -167,7 +167,6 @@ public class ReflectionMethods
         List<FieldInfo> fieldInfos = typeof(T).GetFields(bindingFlags).Select(field => field).ToList();
         // List<string> listNames = typeof(T).GetFields(bindingFlags).Select(field => field.Name).ToList();
         // List<Type> fieldTypes = typeof(T).GetFields(bindingFlags).Select(field => field.FieldType).ToList();
-        FieldInfo fi;
         string test = "";
         Debug.Log(fieldInfos.Count);
         for (int iT = 0; iT < fieldInfos.Count; iT++)
@@ -231,10 +230,8 @@ public class ReflectionMethods
             }
             else if (fieldInfos[iT].FieldType == typeof(string[]))
             {
-                Debug.Log("hallllllloooooo: " + fieldInfos[iT].GetValue(dummyInstance));
                 fieldInfos[iT].SetValue(dummyInstance, new[]{"SomeString1", "SomeString2", "SomeString3"});
                 string[] tester = (string[]) fieldInfos[iT].GetValue(dummyInstance);
-                Debug.Log("goooodbyyyyeeee: " + tester[0]);
             }
             else if (fieldInfos[iT].FieldType == typeof(int[]))
             {

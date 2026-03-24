@@ -56,13 +56,13 @@ public class FeatureUncertaintyWM_TaskLevel : ControlLevel_Task_Template
             fuWMTL.ContextName = fuWMBD.ContextName;
             StartCoroutine(HandleSkybox(fuWMTL.GetContextNestedFilePath(Session.SessionDef.ContextExternalFilePath, fuWMTL.ContextName)));
             fuWMTL.ResetBlockVariables();
-            fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.NumTokenBar);
+            fuWMTL.TokenFBController.SetTotalTokensNum(fuWMBD.TokenBarCapacity);
             fuWMTL.TokenFBController.SetTokenBarValue(fuWMBD.NumInitialTokens);
             SetBlockSummaryString();
         });
     }
 
-    public void SetBlockSummaryString()
+    public override void SetBlockSummaryString()
     {
         CurrentBlockSummaryString.Clear();
         float avgBlockSearchDuration = 0;

@@ -429,7 +429,7 @@ public class KT_Object : MonoBehaviour
     public Sprite OpenSprite;
 
     private float LastCollisionResponseTime = -999f;
-    private readonly float CollisionResponseCooldown = 0.05f;
+    private readonly float CollisionResponseCooldown = 0.075f;
 
 
 
@@ -960,59 +960,51 @@ public class KT_Object : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.contactCount > 0)
-        {
-            // Get the collision normal (perpendicular to the surface)
-            Vector2 collisionNormal = collision.contacts[0].normal;
-            
-            // Check if we hit another KT_Object (pacman-to-pacman collision)
-            KT_Object otherPacman = collision.gameObject.GetComponent<KT_Object>();
-            
-            if (otherPacman != null)
-            {
-                // For pacman collisions: normal is the line between centers
-                Vector3 centerToCenter = (transform.localPosition - otherPacman.transform.localPosition).normalized;
-                collisionNormal = new Vector2(centerToCenter.x, centerToCenter.y);
-            }
-
-            // Store old direction
-            Vector2 oldDirection = new Vector2(Direction.x, Direction.y);
-            
-            // Apply realistic reflection physics
-            Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal);
-            Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0);
-            
-            
-            SetNewDestination();
-        }
-        else if(!IsTarget)
-        {
-            Direction = -Direction;
-            SetNewDestination();
-        }
-
+        HandleCollisionBounce(collision);
     }
-
 
     private void OnCollisionStay2D(Collision2D collision)
     {
-        if (Time.time - NewDestStartTime >= MaxCollisionTime)
-        {            
-            if (collision.contactCount > 0)
-            {
-                Vector2 collisionNormal = collision.contacts[0].normal;
-                Vector2 oldDirection = new Vector2(Direction.x, Direction.y);
-                Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal);
-                Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0);
-            }
-            else
-            {
-                Direction = -Direction;
-            }
-            SetNewDestination();
-        }
+        if (Time.time - NewDestStartTime < MaxCollisionTime)
+            return;
+
+        HandleCollisionBounce(collision);
     }
-  
+
+    private void HandleCollisionBounce(Collision2D collision)
+    {
+        if (Time.time - LastCollisionResponseTime < CollisionResponseCooldown)
+            return;
+
+        if (collision.contactCount <= 0)
+            return;
+
+        Vector2 collisionNormal = collision.contacts[0].normal;
+
+        KT_Object otherPacman = collision.gameObject.GetComponent<KT_Object>();
+        if (otherPacman != null)
+        {
+            Vector2 centerToCenter = (transform.localPosition - otherPacman.transform.localPosition);
+            if (centerToCenter.sqrMagnitude > 0.0001f)
+                collisionNormal = centerToCenter.normalized;
+        }
+
+        BounceFromNormal(collisionNormal);
+        LastCollisionResponseTime = Time.time;
+    }
+
+    private void BounceFromNormal(Vector2 collisionNormal)
+    {
+        Vector2 oldDirection = Direction.sqrMagnitude > 0.0001f
+            ? ((Vector2)Direction).normalized
+            : Vector2.right;
+
+        Vector2 reflectedDirection = Vector2.Reflect(oldDirection, collisionNormal.normalized).normalized;
+
+        Direction = new Vector3(reflectedDirection.x, reflectedDirection.y, 0f);
+        SetNewDestination();
+    }
+
 
     public bool AtDestination()
     {

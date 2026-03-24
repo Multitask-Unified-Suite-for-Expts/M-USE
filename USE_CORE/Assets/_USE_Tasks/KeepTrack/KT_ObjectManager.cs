@@ -428,6 +428,10 @@ public class KT_Object : MonoBehaviour
     public Sprite ClosedSprite;
     public Sprite OpenSprite;
 
+    private float LastCollisionResponseTime = -999f;
+    private readonly float CollisionResponseCooldown = 0.05f;
+
+
 
     public KT_Object()
     {
@@ -511,7 +515,7 @@ public class KT_Object : MonoBehaviour
 
         SetNewDestination();
 
-        //SetupMarker(); //Uncomment when want to use the Marker for debugging purposes
+        SetupMarker(); //Uncomment when want to use the Marker for debugging purposes
 
         PacmanDrawer = gameObject.GetComponent<PacmanDrawer>();
         PacmanDrawer.ClosedLineThickness = ClosedLineThickness;
@@ -554,34 +558,36 @@ public class KT_Object : MonoBehaviour
 
     public IEnumerator Fade(float startAlpha, float endAlpha, Action onComplete)
     {
-        Fading = true;
-
-        Color color = ImageComponent.color;
-        color.a = Mathf.Clamp01(startAlpha);
-        ImageComponent.color = color;
-
-        if (!gameObject.activeSelf)
-            gameObject.SetActive(true);
-
-        float timeElapsed = 0f;
-
-        while (timeElapsed < FadeDuration)
+        if(ImageComponent != null)
         {
-            timeElapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(timeElapsed / FadeDuration);
-            color.a = Mathf.Lerp(startAlpha, endAlpha, t);
+            Fading = true;
+
+            Color color = ImageComponent.color;
+            color.a = Mathf.Clamp01(startAlpha);
             ImageComponent.color = color;
-            yield return null;
+
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);
+
+            float timeElapsed = 0f;
+
+            while (timeElapsed < FadeDuration)
+            {
+                timeElapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(timeElapsed / FadeDuration);
+                color.a = Mathf.Lerp(startAlpha, endAlpha, t);
+                ImageComponent.color = color;
+                yield return null;
+            }
+
+            color.a = Mathf.Clamp01(endAlpha);
+            ImageComponent.color = color;
+
+            Fading = false;
+
+            onComplete?.Invoke();
         }
-
-        color.a = Mathf.Clamp01(endAlpha);
-        ImageComponent.color = color;
-
-        Fading = false;
-
-        onComplete?.Invoke();
     }
-
 
     private void CheckRewardsMatchDurations()
     {
@@ -592,7 +598,6 @@ public class KT_Object : MonoBehaviour
         if (RewardPulsesBySec.Count() != durationSum)
             Debug.Log("NUMBER OF REWARD SECONDS DOES NOT MATCH THE SUM OF ALL THE Y VALUES IN THE RatesAndDurations variable!");
     }
-
 
     List<float> GenerateRandomIntervals(int numIntervals, float duration)
     {
@@ -668,7 +673,6 @@ public class KT_Object : MonoBehaviour
         return randomFloats;
     }
 
-
     private void NextCycle()
     {
         Cycles.RemoveAt(0);
@@ -683,7 +687,6 @@ public class KT_Object : MonoBehaviour
             StartCoroutine(Fade(1f, 0f, DestroyObj));
         }
     }
-
 
 
     private void Update()
@@ -863,35 +866,62 @@ public class KT_Object : MonoBehaviour
 
     private void MoveTowardsDestination()
     {
-        if (CurrentDestination != null)
-        {
-            Direction = (CurrentDestination - transform.localPosition).normalized;
-            Vector3 nextPos = transform.localPosition + Speed * Time.deltaTime * Direction;
-            transform.localPosition = nextPos;
-        }
+        Vector3 currentPos = transform.localPosition;
+        Vector3 targetPos = CurrentDestination;
+
+        Vector3 toTarget = targetPos - currentPos;
+        if (toTarget.sqrMagnitude < 0.0001f)
+            return;
+
+        Direction = toTarget.normalized;
+
+        Vector3 nextPos = Vector3.MoveTowards(
+            currentPos,
+            targetPos,
+            Speed * Time.fixedDeltaTime
+        );
+
+        nextPos.x = Mathf.Round(nextPos.x);
+        nextPos.y = Mathf.Round(nextPos.y);
+
+        transform.localPosition = nextPos;
+
     }
 
     private void RotateTowardsDirection()
     {
+        if (Direction.sqrMagnitude < 0.0001f)
+            return;
+
         float angle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+
+        //My old way:
+        //float angle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg;
+        //transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
     }
 
     public void SetNewDestination()
     {
-        float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg; //Extract angle from current Direction
+        float currentAngle = Mathf.Atan2(Direction.y, Direction.x) * Mathf.Rad2Deg;
 
-        float randomChance = Random.value; //Get randomNum between 0 and .99
+        float randomChance = Random.value;
         float angleOffset;
 
-        if (randomChance < AngleProbs.x) //AngleProbs.x is the "Chance of a small angle"
-            angleOffset = Random.Range(AngleRanges[0].x, AngleRanges[0].y); //Small Angle Range
-        else if (randomChance < AngleProbs.x + AngleProbs.y) //AngleProbs.y is the "Chance of a medium angle"
-            angleOffset = Random.Range(AngleRanges[1].x, AngleRanges[1].y); //Medium Angle Range
-        else
-            angleOffset = Random.Range(AngleRanges[2].x, AngleRanges[2].y); //Large Angle Range
+        Vector2 smallRange = AngleRanges[0];
+        Vector2 mediumRange = AngleRanges[1];
+        Vector2 largeRange = AngleRanges[2];
 
-       
+        float smallChance = AngleProbs.x;
+        float mediumChance = AngleProbs.x + AngleProbs.y;
+
+        if (randomChance < smallChance)
+            angleOffset = Random.Range(smallRange.x, smallRange.y);
+        else if (randomChance < mediumChance)
+            angleOffset = Random.Range(mediumRange.x, mediumRange.y);
+        else
+            angleOffset = Random.Range(largeRange.x, largeRange.y);
+
         if (PreviousAngleOffsets.Count > NumDestWithoutBigTurn)
             PreviousAngleOffsets.RemoveAt(0);
 
@@ -901,32 +931,29 @@ public class KT_Object : MonoBehaviour
             {
                 if (Mathf.Abs(offset) > 90f)
                 {
-                    angleOffset = Random.Range(0, 46);
+                    angleOffset = Random.Range(0f, 46f);
                     break;
                 }
             }
         }
 
-        float randomNum = Random.value; //Randomize whether to make it negative
-        if (randomNum < .5f) //50% chance to be negative
+        if (Random.value < 0.5f)
             angleOffset = -angleOffset;
 
         PreviousAngleOffsets.Add(angleOffset);
-        
+
         currentAngle += angleOffset;
 
-        float radianAngle = Mathf.Deg2Rad * currentAngle;
-        float newX = Mathf.Cos(radianAngle);
-        float newY = Mathf.Sin(radianAngle);
-        Vector3 change = new Vector3(newX, newY, 0);
+        float radianAngle = currentAngle * Mathf.Deg2Rad;
+        Vector3 change = new Vector3(Mathf.Cos(radianAngle), Mathf.Sin(radianAngle), 0f);
+
         Vector3 destination = transform.localPosition + change * NextDestDist;
-        float xDiff = Mathf.Clamp(destination.x, ObjManager.xRange.x, ObjManager.xRange.y) - destination.x;
-        float yDiff = Mathf.Clamp(destination.y, ObjManager.yRange.x, ObjManager.yRange.y) - destination.y;
-        destination += new Vector3(xDiff, yDiff, 0);
+
+        destination.x = Mathf.Clamp(destination.x, ObjManager.xRange.x, ObjManager.xRange.y);
+        destination.y = Mathf.Clamp(destination.y, ObjManager.yRange.x, ObjManager.yRange.y);
 
         CurrentDestination = destination;
         NewDestStartTime = Time.time;
-
     }
 
 
@@ -992,10 +1019,7 @@ public class KT_Object : MonoBehaviour
         float distanceThreshold = 5f;
         float distanceToDestination = Vector3.Distance(transform.localPosition, CurrentDestination);
 
-        if(distanceToDestination <= distanceThreshold)
-            return true;
-        
-        return false;
+        return distanceToDestination <= distanceThreshold;
     }
 
  

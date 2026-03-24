@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 public class PacmanDrawer : MonoBehaviour
 {
@@ -13,19 +10,46 @@ public class PacmanDrawer : MonoBehaviour
     private int OriginalTextureWidth;
     private int OriginalTextureHeight;
 
-    public int ClosedLineThickness = 4; //default is 4, but they specify in the object config. 
+    private Color[] BasePixels;
 
+    public int ClosedLineThickness = 4; // default is 4, but they specify in the object config.
 
     public void ManualStart()
     {
         image = GetComponent<Image>();
+
+        if (image == null)
+        {
+            Debug.LogError("PacmanDrawer: Image component not found.");
+            return;
+        }
+
+        if (image.sprite == null)
+        {
+            Debug.LogError("PacmanDrawer: Image sprite is missing.");
+            return;
+        }
+
         CircleTexture = image.sprite.texture;
+
+        if (CircleTexture == null)
+        {
+            Debug.LogError("PacmanDrawer: Sprite texture is missing.");
+            return;
+        }
+
         OriginalTextureWidth = CircleTexture.width;
         OriginalTextureHeight = CircleTexture.height;
+
+        // Cache the original pixels once so we do not keep reading them from the texture.
+        BasePixels = CircleTexture.GetPixels();
     }
 
     public void DrawMouth(float mouthAngle)
     {
+        if (!IsReady())
+            return;
+
         MouthAngle = mouthAngle;
 
         Texture2D texture = new Texture2D(OriginalTextureWidth, OriginalTextureHeight);
@@ -38,7 +62,7 @@ public class PacmanDrawer : MonoBehaviour
             {
                 if (IsInsideWedge(x, y) && IsInsideCircle(x, y))
                 {
-                    pixels[x + y * OriginalTextureWidth] = Color.clear; // Make the pixels in the wedge transparent
+                    pixels[x + y * OriginalTextureWidth] = Color.clear;
                 }
             }
         }
@@ -46,12 +70,20 @@ public class PacmanDrawer : MonoBehaviour
         texture.SetPixels(pixels);
         texture.Apply();
 
-        Sprite newSprite = Sprite.Create(texture, new Rect(0, 0, OriginalTextureWidth, OriginalTextureHeight), new Vector2(0.5f, 0.5f));
+        Sprite newSprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, OriginalTextureWidth, OriginalTextureHeight),
+            new Vector2(0.5f, 0.5f)
+        );
+
         image.sprite = newSprite;
     }
 
     public void DrawClosedMouth()
     {
+        if (!IsReady())
+            return;
+
         Texture2D texture = new Texture2D(OriginalTextureWidth, OriginalTextureHeight);
         ResetToFullCircle(texture);
 
@@ -77,20 +109,34 @@ public class PacmanDrawer : MonoBehaviour
         texture.SetPixels(pixels);
         texture.Apply();
 
-        Sprite newSprite = Sprite.Create(texture, new Rect(0, 0, OriginalTextureWidth, OriginalTextureHeight), new Vector2(0.5f, 0.5f));
+        Sprite newSprite = Sprite.Create(
+            texture,
+            new Rect(0, 0, OriginalTextureWidth, OriginalTextureHeight),
+            new Vector2(0.5f, 0.5f)
+        );
+
         image.sprite = newSprite;
     }
 
     private void ResetToFullCircle(Texture2D texture)
     {
-        texture.SetPixels(CircleTexture.GetPixels());
+        texture.SetPixels(BasePixels);
         texture.Apply();
+    }
+
+    private bool IsReady()
+    {
+        return image != null
+            && CircleTexture != null
+            && BasePixels != null
+            && OriginalTextureWidth > 0
+            && OriginalTextureHeight > 0;
     }
 
     bool IsInsideWedge(int x, int y)
     {
         Vector2 pixelPos = new Vector2(x, y);
-        Vector2 pacmanCenter = new Vector2(OriginalTextureWidth / 2, OriginalTextureHeight / 2);
+        Vector2 pacmanCenter = new Vector2(OriginalTextureWidth / 2f, OriginalTextureHeight / 2f);
         Vector2 dirToPixel = pixelPos - pacmanCenter;
 
         float angleToPixel = Vector2.Angle(Vector2.right, dirToPixel);
@@ -99,9 +145,9 @@ public class PacmanDrawer : MonoBehaviour
 
     bool IsInsideCircle(int x, int y)
     {
-        Vector2 pacmanCenter = new Vector2(OriginalTextureWidth / 2, OriginalTextureHeight / 2);
+        Vector2 pacmanCenter = new Vector2(OriginalTextureWidth / 2f, OriginalTextureHeight / 2f);
         Vector2 pixelPos = new Vector2(x, y);
 
-        return Vector2.Distance(pixelPos, pacmanCenter) <= OriginalTextureWidth / 2;
+        return Vector2.Distance(pixelPos, pacmanCenter) <= OriginalTextureWidth / 2f;
     }
 }

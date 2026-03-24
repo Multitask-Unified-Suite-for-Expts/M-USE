@@ -166,8 +166,7 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             SelectionHandler.TimeBeforeChoiceStarts = timeBeforeChoiceStarts.value;
             SelectionHandler.TotalChoiceDuration = totalChoiceDuration.value;
 
-
-            BordersGO.SetActive(true); //TURNING OFF BORDERS WITH NEW BACKGROUND
+            BordersGO.SetActive(true);
 
             CalculateSliderSteps();
             SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps), new Vector3(0f, -43f, 0f));

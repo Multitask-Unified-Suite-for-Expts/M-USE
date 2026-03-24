@@ -53,16 +53,7 @@ namespace FeatureUncertaintyWM_Namespace
         public int[] nRepetitionsMinMax, blockMcCompStimIndices; // blockMcCompStimIndices = all indices to all component stims this block
         //blockMcCompStimIndices= {10, 23, 48, 57}
         public int numMcStim, maxComp;
-        public string BlockName;
-        public int NumInitialTokens;
-        public int NumTokenBar;
-        public int NumPulses;
-        public int PulseSize;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
         public bool StimFacingCamera;
-        public string ContextName;
 
         //public override void GenerateTrialDefsFromBlockDef()
         //{
@@ -88,7 +79,7 @@ namespace FeatureUncertaintyWM_Namespace
                 td.BlockName = BlockName;
                 td.NumInitialTokens = NumInitialTokens;
                 td.NumPulses = NumPulses;
-                td.NumTokenBar = NumTokenBar;
+                td.TokenBarCapacity = TokenBarCapacity;
                 td.PulseSize = PulseSize;
                 td.BlockEndType = BlockEndType;
                 td.BlockEndThreshold = BlockEndThreshold;
@@ -112,15 +103,6 @@ namespace FeatureUncertaintyWM_Namespace
         public int[][]  mcCompObjNumber, mcCompObjIndices, mcAngleOffset;
         //mcCompObjIndices= {{57, 10, 23}, {48}}
         public float[][] mcRadius;
-        public string ContextName;
-        public string BlockName;
-        public int NumInitialTokens;
-        public int NumTokenBar;
-        public int NumPulses;
-        public int PulseSize;
-        public string BlockEndType;
-        public float BlockEndThreshold;
-        public int BlockEndWindow;
         public bool StimFacingCamera;
     }
 

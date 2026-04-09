@@ -567,7 +567,7 @@ namespace SelectionTracking
                     }
                     else
                     {
-                        Debug.LogWarning("TERM ERROR = " + termErrors.ToString());
+                        //Debug.LogWarning("TERM ERROR = " + termErrors.ToString());
                         ChoiceFailed(termErrors);
                     }
                 }

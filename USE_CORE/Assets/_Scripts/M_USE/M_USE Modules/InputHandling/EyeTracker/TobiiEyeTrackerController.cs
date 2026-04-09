@@ -22,7 +22,7 @@ public class TobiiEyeTrackerController : EyeTrackerController_Base
     public TobiiGazeSample mostRecentGazeSample;
     public TobiiGazeDataSubscription GazeDataSubscription;
 
-    private void Awake()
+    private new void Awake()
     {
         base.Awake();
         mostRecentGazeSample = new TobiiGazeSample();

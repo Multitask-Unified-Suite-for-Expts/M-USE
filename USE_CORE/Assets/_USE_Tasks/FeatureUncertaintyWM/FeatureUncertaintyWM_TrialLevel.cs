@@ -105,7 +105,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
     // Trial Data Variables
     private int? SelectedStimIndex = null;
-    private string selectedStimName = null;
     private Vector3? SelectedStimLocation = null;
     private float SearchDuration = 0;
     private bool RewardGiven = false;

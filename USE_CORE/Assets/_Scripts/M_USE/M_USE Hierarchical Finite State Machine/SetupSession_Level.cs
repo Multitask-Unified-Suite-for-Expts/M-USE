@@ -110,6 +110,7 @@ public class SetupSession_Level : ControlLevel
         CreateDataFolder.AddDefaultInitializationMethod(() =>
         {
             dataFolderCreated = false;
+
             if (Session.StoreData)
                 StartCoroutine(CreateSessionDataFolder(result =>
                 {
@@ -129,8 +130,10 @@ public class SetupSession_Level : ControlLevel
         {
             taskSceneLoaded = false;
             taskName = (string)Session.SessionDef.TaskMappings[iTask];
+
             loadScene = SceneManager.LoadSceneAsync(taskName, LoadSceneMode.Additive);
             string configFolderName = Session.SessionDef.TaskMappings.Cast<DictionaryEntry>().ElementAt(iTask).Key.ToString();
+
             loadScene.completed += (_) =>
             {
                 taskSceneLoaded = true;
@@ -205,56 +208,64 @@ public class SetupSession_Level : ControlLevel
 
     private void SetupInputManagement(State inputActive, State inputInactive)
     {
-        Session.EventCodeManager.splitBytes = Session.SessionDef.SplitBytes;
-
-        Session.InputManager = new GameObject("InputManager");
-        Session.InputManager.SetActive(true);
-
-        Session.InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"),
-            Session.InputManager.transform);
-
-        Session.MouseTracker = Session.InputTrackers.GetComponent<MouseTracker>();
-        Session.GazeTracker = Session.InputTrackers.GetComponent<GazeTracker>();
-
-        Session.SelectionTracker = new SelectionTracker();
-
-        if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+        try
         {
-            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
-            Session.GazeTracker.enabled = true;
-            Session.GazeTracker.UsingShotgunHandler = true;
-            InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
-        }
-        else if(Session.SessionDef.SelectionType.ToLower().Equals("mousehover"))
-        {
-            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseHover", Session.MouseTracker, inputActive, inputInactive);
-            Session.MouseTracker.enabled = true;
-        }
-        else if (Session.SessionDef.SelectionType.ToLower().Equals("touchshotgun"))
-        {
-            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "TouchShotgun", Session.MouseTracker, inputActive, inputInactive);
-            Session.MouseTracker.enabled = true;
-            InputBroker.SetShotgunRadius(50); //set shotgun radius for task selection
-        }
-        else
-        {
-            Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", Session.MouseTracker, inputActive, inputInactive);
-            Session.MouseTracker.enabled = true;
-        }
-        
+            Session.EventCodeManager.splitBytes = Session.SessionDef.SplitBytes;
 
-        if (Session.SessionDef.MonitorDetails != null && Session.SessionDef.ScreenDetails != null)
-        {
-            USE_CoordinateConverter.ScreenDetails = new ScreenDetails(
-                Session.SessionDef.ScreenDetails.LowerLeft_Cm,
-                Session.SessionDef.ScreenDetails.UpperRight_Cm,
-                Session.SessionDef.ScreenDetails.PixelResolution);
-            USE_CoordinateConverter.MonitorDetails = new MonitorDetails(
-                Session.SessionDef.MonitorDetails.PixelResolution,
-                Session.SessionDef.MonitorDetails.CmSize);
-            USE_CoordinateConverter.SetMonitorDetails(USE_CoordinateConverter.MonitorDetails);
-            USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
+            Session.InputManager = new GameObject("InputManager");
+            Session.InputManager.SetActive(true);
+
+            Session.InputTrackers = Instantiate(Resources.Load<GameObject>("InputTrackers"),Session.InputManager.transform);
+
+            Session.MouseTracker = Session.InputTrackers.GetComponent<MouseTracker>();
+            Session.GazeTracker = Session.InputTrackers.GetComponent<GazeTracker>();
+
+            Session.SelectionTracker = new SelectionTracker();
+
+            if (Session.SessionDef.SelectionType.ToLower().Contains("gaze"))
+            {
+                Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "GazeShotgun", Session.GazeTracker, inputActive, inputInactive);
+                Session.GazeTracker.enabled = true;
+                Session.GazeTracker.UsingShotgunHandler = true;
+                InputBroker.SetShotgunRadius(25); //set shotgun radius for task selection
+            }
+            else if(Session.SessionDef.SelectionType.ToLower().Equals("mousehover"))
+            {
+                Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseHover", Session.MouseTracker, inputActive, inputInactive);
+                Session.MouseTracker.enabled = true;
+            }
+            else if (Session.SessionDef.SelectionType.ToLower().Equals("touchshotgun"))
+            {                
+                Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "TouchShotgun", Session.MouseTracker, inputActive, inputInactive);
+                Session.MouseTracker.enabled = true;
+                InputBroker.SetShotgunRadius(50); //set shotgun radius for task selection
+            }
+            else
+            {
+                Session.SessionLevel.SelectionHandler = Session.SelectionTracker.SetupSelectionHandler("session", "MouseButton0Click", Session.MouseTracker, inputActive, inputInactive);
+                Session.MouseTracker.enabled = true;
+            }
+
+
+            if (Session.SessionDef.MonitorDetails != null && Session.SessionDef.ScreenDetails != null)
+            {
+                USE_CoordinateConverter.ScreenDetails = new ScreenDetails(
+                    Session.SessionDef.ScreenDetails.LowerLeft_Cm,
+                    Session.SessionDef.ScreenDetails.UpperRight_Cm,
+                    Session.SessionDef.ScreenDetails.PixelResolution);
+                USE_CoordinateConverter.MonitorDetails = new MonitorDetails(
+                    Session.SessionDef.MonitorDetails.PixelResolution,
+                    Session.SessionDef.MonitorDetails.CmSize);
+                USE_CoordinateConverter.SetMonitorDetails(USE_CoordinateConverter.MonitorDetails);
+                USE_CoordinateConverter.SetScreenDetails(USE_CoordinateConverter.ScreenDetails);
+            }
+
         }
+        catch(Exception ex)
+        {
+            Debug.LogWarning("EXCEPTION: " + ex.Message);
+        }
+        ;
     }
 
 

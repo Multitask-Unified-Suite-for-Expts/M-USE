@@ -561,7 +561,6 @@ public class ReflectionMethods
         }
 
         File.WriteAllText("C:\\Users\\Owner\\Desktop\\test\\test.txt", test);
-        PropertyInfo propertyInfo;
         return dummyInstance;
     }
     

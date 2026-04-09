@@ -37,7 +37,8 @@ public class UIHotkeySelect : MonoBehaviour
     {
         m_orderedSelectables = new List<Selectable>();
     }
- 
+
+    [System.Obsolete]
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Tab))
@@ -50,7 +51,8 @@ public class UIHotkeySelect : MonoBehaviour
             HandleHotkeySelect(false, false, true);
         }
     }
- 
+
+    [System.Obsolete]
     private void HandleHotkeySelect(bool _isNavigateBackward, bool _isWrapAround, bool _isEnterSelect)
     {
         SortSelectables();
@@ -160,7 +162,8 @@ public class UIHotkeySelect : MonoBehaviour
  
         return (nextSelection);
     }
- 
+
+    [System.Obsolete]
     private void SortSelectables()
     {
         List<Selectable> originalSelectables = Selectable.allSelectables;

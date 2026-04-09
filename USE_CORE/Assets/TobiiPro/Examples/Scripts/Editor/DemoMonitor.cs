@@ -40,6 +40,7 @@ namespace Tobii.Research.Unity
                 ok: "OK");
         }
 
+        [System.Obsolete]
         private static bool VRSupported
         {
             get
@@ -117,6 +118,7 @@ namespace Tobii.Research.Unity
 
 #endif
 
+        [System.Obsolete]
         private static void SceneOpened(UnityEngine.SceneManagement.Scene scene, UnityEditor.SceneManagement.OpenSceneMode mode)
         {
             if (!(scene.path.Contains("TobiiPro") && scene.path.Contains("Examples")))

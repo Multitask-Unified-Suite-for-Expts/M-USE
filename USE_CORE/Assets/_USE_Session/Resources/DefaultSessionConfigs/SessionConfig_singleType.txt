@@ -6,4 +6,5 @@ float	TaskSelectionTimeout	3000
 bool	IsHuman	true
 bool	PlayBackgroundMusic	true
 float	TaskResultsDuration	20
+int	SplitBytes	2
 string	SelectionType	"TouchShotgun"

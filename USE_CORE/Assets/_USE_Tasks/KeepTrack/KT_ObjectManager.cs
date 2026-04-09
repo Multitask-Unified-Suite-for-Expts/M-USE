@@ -36,6 +36,8 @@ public class KT_ObjectManager : MonoBehaviour
 
     public Dictionary<string, Sprite> SpriteDict;
 
+    public float FadeDuration = .2f;
+
 
     private void Awake()
     {
@@ -411,11 +413,7 @@ public class KT_Object : MonoBehaviour
     public bool CurrentIntervalSuccessful = false;
     public bool SelectedDuringCurrentInterval = false;
 
-
     public bool MissedCurrentIntervalResponseWindow = false;
-
-
-    public float FadeDuration = .15f;
 
     public Image ImageComponent;
 
@@ -571,10 +569,10 @@ public class KT_Object : MonoBehaviour
 
             float timeElapsed = 0f;
 
-            while (timeElapsed < FadeDuration)
+            while (timeElapsed < ObjManager.FadeDuration)
             {
                 timeElapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(timeElapsed / FadeDuration);
+                float t = Mathf.Clamp01(timeElapsed / ObjManager.FadeDuration);
                 color.a = Mathf.Lerp(startAlpha, endAlpha, t);
                 ImageComponent.color = color;
                 yield return null;

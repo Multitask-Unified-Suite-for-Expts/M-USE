@@ -16,9 +16,10 @@ public class Prolific_Controller : MonoBehaviour
     {
         Session.Prolific_Controller_Session = this;
 
-#if UNITY_EDITOR && UNITY_WEBGL
-        SetEditorValuesManually();
-#endif
+        //UNCOMMENT THIS WHEN YOU WANT TO TEST PROLIFIC
+//#if UNITY_EDITOR && UNITY_WEBGL
+//        SetEditorValuesManually();
+//#endif
     }
 
 

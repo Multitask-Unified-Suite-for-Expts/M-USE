@@ -51,7 +51,6 @@ public class TokenFBController : MonoBehaviour
     // Token Counts
     private int totalTokensNum = 5;
     private int numCollected = 0;
-    private int numTokenBarFull = 0;
 
 
     // Rendering

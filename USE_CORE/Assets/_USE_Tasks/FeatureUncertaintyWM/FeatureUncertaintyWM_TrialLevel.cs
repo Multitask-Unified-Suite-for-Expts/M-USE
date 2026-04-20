@@ -109,8 +109,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
     private float SearchDuration = 0;
     private bool RewardGiven = false;
     private bool TouchDurationError = false;
-    private bool aborted = false;
-    private float? selectionDuration = null;
     private bool choiceMade = false;
 
     [HideInInspector] public bool AdjustedPositionsForMac;
@@ -323,8 +321,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
             Session.EventCodeManager.SendCodeThisFrame("NoChoice");
             Session.EventCodeManager.SendRangeCodeThisFrame("CustomAbortTrial", AbortCodeDict["NoSelectionMade"]);
             AbortCode = 6;
-
-            aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
         });
@@ -462,7 +458,6 @@ public class FeatureUncertaintyWM_TrialLevel : ControlLevel_Trial_Template
 
         if (AbortCode == AbortCodeDict["RestartBlock"] || AbortCode == AbortCodeDict["PreviousBlock"])
         {
-            aborted = true;
             NumAborted_InBlock++;
             CurrentTaskLevel.NumAborted_InTask++;
             CurrentTaskLevel.CurrentBlockSummaryString.Clear();
@@ -818,7 +813,6 @@ private GameObject GenerateMultiCompStim(FeatureUncertaintyWM_MultiCompStimDef s
         CorrectSelection = false;
         RewardGiven = false;
         TouchDurationError = false;
-        aborted = false;
         choiceMade = false;
 
         selectedGO = null;

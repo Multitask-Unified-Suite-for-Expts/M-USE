@@ -574,7 +574,10 @@ public class KT_Object : MonoBehaviour
                 timeElapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(timeElapsed / ObjManager.FadeDuration);
                 color.a = Mathf.Lerp(startAlpha, endAlpha, t);
-                ImageComponent.color = color;
+
+                if(ImageComponent != null )
+                    ImageComponent.color = color;
+
                 yield return null;
             }
 
@@ -589,8 +592,11 @@ public class KT_Object : MonoBehaviour
 
     private void CheckRewardsMatchDurations()
     {
-        if (RewardPulsesBySec == null)
+        if (RewardPulsesBySec == null || RewardPulsesBySec.Length < 1)
+        {
+            Debug.Log("RewardPulsesBySec either null or empty");
             return;
+        }
 
         float durationSum = RatesAndDurations.Sum(value => value.y);
         if (RewardPulsesBySec.Count() != durationSum)
@@ -755,11 +761,19 @@ public class KT_Object : MonoBehaviour
     {
         int timeSinceActivation_Rounded = Mathf.CeilToInt(Time.time - ActivationStartTime);
 
-        if (RewardPulsesBySec != null && RewardPulsesBySec.Count() >= timeSinceActivation_Rounded)
+        if(RewardPulsesBySec == null || RewardPulsesBySec.Length < 1)
         {
-            CurrentRewardValue = RewardPulsesBySec[timeSinceActivation_Rounded - 1];
+            CurrentRewardValue = 1;
+            Debug.LogWarning("setting to 1");
         }
-
+        else
+        {
+            if (RewardPulsesBySec.Count() >= timeSinceActivation_Rounded)
+            {
+                CurrentRewardValue = RewardPulsesBySec[timeSinceActivation_Rounded - 1];
+                Debug.LogWarning("REWARD = " + CurrentRewardValue);
+            }
+        }
     }
 
     private void SetCurrentOpenAngle()

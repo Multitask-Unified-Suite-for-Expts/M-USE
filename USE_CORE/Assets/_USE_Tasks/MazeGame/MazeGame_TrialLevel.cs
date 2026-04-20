@@ -73,7 +73,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     private bool choiceMade;
 
     // Config UI Variables
-    private bool configVariablesLoaded;
     [HideInInspector]
     public ConfigNumber mazeOnsetDelay;
     public ConfigNumber correctFbDuration;
@@ -546,7 +545,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
         totalChoiceDuration = ConfigUiVariables.get<ConfigNumber>("totalChoiceDuration");
 
         finishedFbDuration = flashingFbDuration.value + correctFbDuration.value;
-        configVariablesLoaded = true;
     }
 
     
@@ -658,7 +656,6 @@ public class MazeGame_TrialLevel : ControlLevel_Trial_Template
     {
         SliderFBController.ResetSliderBarFull();
         choiceMade = false;
-        configVariablesLoaded = false;
         playerViewTextLoaded = false;
         MazeManager.ResetMazeVariables();
         correctTouches_InTrial = 0;

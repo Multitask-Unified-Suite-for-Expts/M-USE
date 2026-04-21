@@ -764,14 +764,12 @@ public class KT_Object : MonoBehaviour
         if(RewardPulsesBySec == null || RewardPulsesBySec.Length < 1)
         {
             CurrentRewardValue = 1;
-            Debug.LogWarning("setting to 1");
         }
         else
         {
             if (RewardPulsesBySec.Count() >= timeSinceActivation_Rounded)
             {
                 CurrentRewardValue = RewardPulsesBySec[timeSinceActivation_Rounded - 1];
-                Debug.LogWarning("REWARD = " + CurrentRewardValue);
             }
         }
     }

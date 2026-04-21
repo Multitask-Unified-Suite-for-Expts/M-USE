@@ -151,6 +151,9 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
         //InitTrial state ----------------------------------------------------------------------------------------------------------------------------------------------
         InitTrial.AddSpecificInitializationMethod(() =>
         {
+            Session.Using2DStim = true; //NEED TO MANUALLY SET SINCE IT DOESNT USE QUADDLES AND THE cue's ARE 2D!
+            TouchFBController.SetUseRootGoPos(!Session.Using2DStim); //THIS IS DONE FOR ALL TASKS IN SETUPTRIAL BUT NEED TO DO IT HERE AFTER FOR MAZE SINCE NOT USING STIM
+
             SetTrialSummaryString();
 
             if (SelectionHandler.AllChoices.Count > 0)

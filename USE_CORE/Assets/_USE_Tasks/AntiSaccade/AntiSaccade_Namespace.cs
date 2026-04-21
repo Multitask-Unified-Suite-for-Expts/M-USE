@@ -88,6 +88,10 @@ namespace AntiSaccade_Namespace
     public class AntiSaccade_TrialDef : TrialDef
     {
         public int PreCue_Size;
+
+        public Vector3 PreCue_Color;
+        public int SpatialCue_Size;
+
         public string SpatialCue_Icon;
         public string Mask_Icon;
         public bool SpatialCueActiveThroughDisplayTarget;

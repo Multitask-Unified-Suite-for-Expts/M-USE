@@ -171,8 +171,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //PreCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         PreCue.AddSpecificInitializationMethod(() =>
         {
-            if (CurrentTrial.PreCue_Size > 0)
-                PreCue_GO.GetComponent<RectTransform>().sizeDelta = new Vector2(CurrentTrial.PreCue_Size, CurrentTrial.PreCue_Size);
             PreCue_GO.SetActive(true);
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["PreCueOn"]);
 
@@ -193,11 +191,8 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //SpatialCue state ----------------------------------------------------------------------------------------------------------------------------------------------
         SpatialCue.AddSpecificInitializationMethod(() =>
         {
-            SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos;
             SpatialCue_GO.SetActive(true);
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["SpatialCueOn"]);
-
-            CurrentTrial.SpatialCueDuration = 3f; //DELETE LATER
         });
         SpatialCue.AddTimer(() => CurrentTrial.SpatialCueDuration, SpatialCueDelay, () =>
         {
@@ -233,10 +228,6 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
         //Mask state ----------------------------------------------------------------------------------------------------------------------------------------------
         Mask.AddSpecificInitializationMethod(() =>
         {
-            //if (CurrentTrial.RandomMaskColor)
-                //Mask_GO.GetComponent<Image>().color = GetRandomColor();
-
-            Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos;
             Mask_GO.SetActive(true);
             Session.EventCodeManager.SendCodeThisFrame(TaskEventCodes["MaskOn"]);
         });
@@ -439,46 +430,54 @@ public class AntiSaccade_TrialLevel : ControlLevel_Trial_Template
 
     private void CreateIcons()
     {
-        if (PreCue_GO == null)
+        if(PreCue_GO != null)
         {
-            PreCue_GO = new GameObject("PreCue");
-            PreCue_GO.SetActive(false);
-            PreCue_GO.transform.parent = AntiSaccade_CanvasGO.transform;
-            PreCue_GO.transform.localPosition = Vector3.zero;
-            PreCue_GO.transform.localScale = Vector3.one;
-            RectTransform preCueRect = PreCue_GO.AddComponent<RectTransform>();
-            preCueRect.sizeDelta = new Vector2(75, 75);
-            Image preCueImage = PreCue_GO.AddComponent<Image>();
-            preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
-            preCueImage.color = new Color32(255, 255, 185, 255);
+            Destroy(PreCue_GO);
+            PreCue_GO = null;
         }
+        PreCue_GO = new GameObject("PreCue");
+        PreCue_GO.SetActive(false);
+        PreCue_GO.transform.parent = AntiSaccade_CanvasGO.transform;
+        PreCue_GO.transform.localPosition = Vector3.zero;
+        PreCue_GO.transform.localScale = Vector3.one;
+        RectTransform preCueRect = PreCue_GO.AddComponent<RectTransform>();
+        preCueRect.sizeDelta = new Vector2(CurrentTrial.PreCue_Size, CurrentTrial.PreCue_Size); //set size
+        Image preCueImage = PreCue_GO.AddComponent<Image>();
+        preCueImage.sprite = Resources.Load<Sprite>("PlusSign");
+        preCueImage.color = new Color32((byte)CurrentTrial.PreCue_Color.x, (byte)CurrentTrial.PreCue_Color.y, (byte)CurrentTrial.PreCue_Color.z, 255); //set color
 
-        if(SpatialCue_GO == null)
-        {
-            SpatialCue_GO = new GameObject("SpatialCue");
-            SpatialCue_GO.SetActive(false);
-            SpatialCue_GO.transform.parent = AntiSaccade_CanvasGO.transform;
-            SpatialCue_GO.transform.localPosition = Vector3.zero;
-            SpatialCue_GO.transform.localScale = Vector3.one;
-            RectTransform spatialCueRect = SpatialCue_GO.AddComponent<RectTransform>();
-            spatialCueRect.sizeDelta = new Vector2(100, 100);
-            Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
-            spatialCueImage.sprite = Resources.Load<Sprite>("Asterisk");
-        }
 
-        if(Mask_GO == null)
+        if(SpatialCue_GO != null)
         {
-            Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black_old"));
-            Mask_GO.name = "Mask";
-            Mask_GO.SetActive(false);
-            Mask_GO.transform.localPosition = Vector3.zero;
-            SpatialCue_GO.AddComponent<FaceCamera>();
-            Mask_GO.transform.localScale *= 0.75f; // adjusting to match scale to 0.6 externalstimscale
-            if (CurrentTrial.SpatialCue_Pos[0] < 0)
-                Mask_GO.transform.localRotation = Quaternion.Euler(0f, 85f, 0f);
-            else
-                Mask_GO.transform.localRotation = Quaternion.Euler(0f, 95f, 0f);
+            Destroy(SpatialCue_GO);
+            SpatialCue_GO = null;
         }
+        SpatialCue_GO = new GameObject("SpatialCue");
+        SpatialCue_GO.SetActive(false);
+        SpatialCue_GO.transform.parent = AntiSaccade_CanvasGO.transform;
+        SpatialCue_GO.transform.localPosition = CurrentTrial.SpatialCue_Pos; //set Pos
+        SpatialCue_GO.transform.localScale = Vector3.one;
+        RectTransform spatialCueRect = SpatialCue_GO.AddComponent<RectTransform>();
+        spatialCueRect.sizeDelta = new Vector2(CurrentTrial.SpatialCue_Size, CurrentTrial.SpatialCue_Size); //set size
+        Image spatialCueImage = SpatialCue_GO.AddComponent<Image>();
+        spatialCueImage.sprite = Resources.Load<Sprite>("Asterisk");
+        
+
+        if(Mask_GO != null)
+        {
+            Destroy(Mask_GO);
+            Mask_GO = null;
+        }
+        Mask_GO = Instantiate(Resources.Load<GameObject>("hashtag_black_old"));
+        Mask_GO.name = "Mask";
+        Mask_GO.SetActive(false);
+        Mask_GO.transform.localPosition = CurrentTrial.Mask_Pos; //set Pos
+        Mask_GO.transform.localScale *= 0.75f; // adjusting to match scale to 0.6 externalstimscale
+        if (CurrentTrial.SpatialCue_Pos[0] < 0)
+            Mask_GO.transform.localRotation = Quaternion.Euler(0f, 85f, 0f);
+        else
+            Mask_GO.transform.localRotation = Quaternion.Euler(0f, 95f, 0f);
+        
     }
 
     private void DeactivateGameObjects()

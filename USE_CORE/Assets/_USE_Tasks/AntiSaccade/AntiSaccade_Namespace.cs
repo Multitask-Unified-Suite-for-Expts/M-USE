@@ -93,7 +93,6 @@ namespace AntiSaccade_Namespace
         public bool SpatialCueActiveThroughDisplayTarget;
         public bool UseSpinAnimation;
         public bool DeactivateNonSelectedStimOnSel;
-        public bool RandomSpatialCueColor;
         public bool RandomMaskColor;
         public int TargetStimIndex;
         public int[] DistractorStimIndices;

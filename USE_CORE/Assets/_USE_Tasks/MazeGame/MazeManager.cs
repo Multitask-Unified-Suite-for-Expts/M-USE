@@ -53,7 +53,6 @@ public class MazeManager:MonoBehaviour
     [HideInInspector] private bool startedMaze;
     [HideInInspector] private bool finishedMaze;
     [HideInInspector] private bool backTrackError;
-    [HideInInspector] private bool tileConnectorsLoaded;
     [HideInInspector] private bool mazeManagerInitialized;
     [HideInInspector] private Maze currentMaze;
 
@@ -323,8 +322,6 @@ public class MazeManager:MonoBehaviour
                 CreateTileConnectors(adjTile, tileGO, adjTile.transform.localPosition,
                     tileGO.transform.localPosition);
         }
-
-        tileConnectorsLoaded = true;
     }
     private void AssignInitialTileColor(Tile tile, Maze maze)
     {

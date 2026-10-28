@@ -508,12 +508,17 @@ public class KeepTrack_TrialLevel : ControlLevel_Trial_Template
             {
                 GiveReward();
 
+                Debug.LogWarning("----- AFTER GIVE REWARD CALL -----");
+
                 SliderFBController.ResetSliderBarFull();
                 SliderFBController.ConfigureSlider(sliderSize.value, CurrentTrial.SliderInitialValue * (1f / SliderGainSteps));
                 GiveRewardIfSliderFull = false;
                 SliderBarCompletions_Trial++;
                 SliderBarCompletions_Block++;
                 CurrentTaskLevel.SliderBarCompletions_Task++;
+
+                Debug.LogWarning("----- AEND OF HANDLE SLIDER METHOD AFTER GIVE REWARD CALL -----");
+
             }
         }
     }

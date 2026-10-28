@@ -142,21 +142,30 @@ public class KT_ObjectManager : MonoBehaviour
 
     public void AnimationStarted(KT_Object obj)
     {
-        if (obj.IsTarget)
-            OnTargetAnimationStarted?.Invoke();
+        if (obj == null || obj.gameObject == null)
+            Debug.Log("-----OBJ IS NULL WHEN TRYING TO ANIMATE -----");
         else
-            OnDistractorAnimationStarted?.Invoke();
-
+        {
+            if (obj.IsTarget)
+                OnTargetAnimationStarted?.Invoke();
+            else
+                OnDistractorAnimationStarted?.Invoke();
+        }
     }
 
     public void NoSelectionDuringResponseWindow(KT_Object obj)
     {
-        if (obj.IsTarget)
-        {
-            OnTargetMissed?.Invoke();
-        }
+        if (obj == null || obj.gameObject == null)
+            Debug.Log("-----OBJ IS NULL WHEN TRYING TO ANIMATE -----");
         else
-            OnDistractorAvoided?.Invoke();
+        {
+            if (obj.IsTarget)
+            {
+                OnTargetMissed?.Invoke();
+            }
+            else
+                OnDistractorAvoided?.Invoke();
+        }
     }
 
     public void SetObjectParent(Transform parentTransform)
@@ -166,10 +175,17 @@ public class KT_ObjectManager : MonoBehaviour
 
     public void RemoveFromObjectList(KT_Object obj)
     {
-        if (obj.IsTarget)
-            TargetList.Remove(obj);
+        if(obj == null || obj.gameObject == null)
+        {
+            Debug.LogWarning("----- OBJECT IS NULL WHEN TRYING TO REMOVE FROM OBJECT LIST");
+        }
         else
-            DistractorList.Remove(obj);
+        {
+            if (obj.IsTarget)
+                TargetList.Remove(obj);
+            else
+                DistractorList.Remove(obj);
+        }
     }
 
 
@@ -241,10 +257,17 @@ public class KT_ObjectManager : MonoBehaviour
 
     public void AddToList(KT_Object obj)
     {
-        if (obj.IsTarget)
-            TargetList.Add(obj);
+        if(obj == null || obj.gameObject == null)
+        {
+            Debug.LogWarning("----- OBJ IS NULL WHEN TRYING TO ADD TO LIST -----");
+        }
         else
-            DistractorList.Add(obj);
+        {
+            if (obj.IsTarget)
+                TargetList.Add(obj);
+            else
+                DistractorList.Add(obj);
+        }
     }
 
     public void DestroyExistingObjects()
@@ -252,47 +275,83 @@ public class KT_ObjectManager : MonoBehaviour
         List<KT_Object> targetListCopy = new List<KT_Object>(TargetList);
         List<KT_Object> distractorListCopy = new List<KT_Object>(DistractorList);
 
-        foreach(KT_Object obj in targetListCopy)
+        if(targetListCopy != null)
         {
-            if (obj != null)
-                obj.DestroyObj();
+            foreach(KT_Object obj in targetListCopy)
+            {
+                if (obj != null)
+                {
+                    Debug.LogWarning("----- Destroying Target object -----");
+                    obj.DestroyObj();
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("-----TARGET LIST COPY IS NULL WHEN TRYING TO DESTROY OBJECT");
         }
 
-        foreach (KT_Object obj in distractorListCopy)
+        if(distractorListCopy != null)
         {
-            if (obj != null)
-                obj.DestroyObj();
+            foreach (KT_Object obj in distractorListCopy)
+            {
+                if (obj != null)
+                {
+                    Debug.LogWarning("----- Destroying Distractor object -----");
+                    obj.DestroyObj();
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("-----DISTRACTOR LIST COPY IS NULL WHEN TRYING TO DESTROY OBJECT");
         }
 
         TargetList.Clear();
         DistractorList.Clear();
+
+        Debug.LogWarning("----- Cleared both lists of objects -----");
     }
 
     public void ActivateInitialTargets()
     {
-        foreach (var obj in TargetList)
+        if(TargetList.Count < 1 || TargetList == null)
         {
-            if(obj.ActivateDelay == 0)
+            Debug.LogWarning("----- TARGET LIST IS NULL WHEN TRYING TO ACTIVATE -----");
+        }
+        else
+        {
+            foreach (var obj in TargetList)
             {
-                obj.gameObject.SetActive(true);
+                if(obj.ActivateDelay == 0)
+                {
+                    obj.gameObject.SetActive(true);
+                }
             }
         }
     }
 
     public void ActivateInitialDistractors()
     {
-        foreach (var obj in DistractorList)
+        if(DistractorList.Count < 1 || DistractorList == null)
         {
-            if (obj.ActivateDelay == 0)
+            Debug.LogWarning("----- DISTRACTOR LIST IS NULL WHEN TRYING TO ACTIVATE -----");
+        }
+        else
+        {
+            foreach (var obj in DistractorList)
             {
-                obj.gameObject.SetActive(true);
+                if (obj.ActivateDelay == 0)
+                {
+                    obj.gameObject.SetActive(true);
+                }
             }
         }
     }
 
     public void ActivateInitialObjectsMovement()
     {
-        if (TargetList.Count > 0)
+        if (TargetList != null && TargetList.Count > 0)
         {
             foreach (KT_Object target in TargetList)
             {
@@ -300,8 +359,12 @@ public class KT_ObjectManager : MonoBehaviour
                     target.ActivateMovement();
             }
         }
+        else
+        {
+            Debug.LogWarning("TARGET LIST IS NULL WHEN TRYING TO ACTIVATE INITIAL OBJECTS MOVEMENT");
+        }
 
-        if (DistractorList.Count > 0)
+        if (DistractorList != null && DistractorList.Count > 0)
         {
             foreach (KT_Object distractor in DistractorList)
             {
@@ -309,31 +372,61 @@ public class KT_ObjectManager : MonoBehaviour
                     distractor.ActivateMovement();
             }
         }
+        else
+        {
+            Debug.LogWarning("DISTRACTOR LIST IS NULL WHEN TRYING TO ACTIVATE INITIAL OBJECTS MOVEMENT");
+        }
     }
 
     public void ActivateRemainingObjects()
     {
         foreach(var target in TargetList)
         {
-            if (target.ActivateDelay == 0)
-                continue;
+            if(target != null && target.gameObject != null)
+            {
+                if (target.ActivateDelay == 0)
+                    continue;
 
-            StartCoroutine(ActivateObjectCoroutine(target));
+                StartCoroutine(ActivateObjectCoroutine(target));
+            }
+            else
+            {
+                Debug.LogWarning("TARGET IS NULL WHEN TRYING TO ACTIVATE REMAINING OBJECTS");
+            }
         }
 
         foreach (var distractor in DistractorList)
         {
-            if (distractor.ActivateDelay == 0)
-                continue;
+            if(distractor != null && distractor.gameObject != null)
+            {
+                if (distractor.ActivateDelay == 0)
+                    continue;
 
-            StartCoroutine(ActivateObjectCoroutine(distractor));
+                StartCoroutine(ActivateObjectCoroutine(distractor));
+            }
+            else
+            {
+                Debug.LogWarning("DISTRACTOR IS NULL WHEN TRYING TO ACTIVATE REMAINING OBJECTS");
+            }
         }
     }
 
     public IEnumerator ActivateObjectCoroutine(KT_Object obj)
     {
-        yield return new WaitForSeconds(obj.ActivateDelay);
-        StartCoroutine(obj.Fade(0f, 1f, obj.ActivateMovement));
+        if(obj == null || obj.gameObject == null)
+        {
+            Debug.LogWarning("OBJ IS NULL WHEN TRYING TO ACTIVATE OBJECT COROUTINE");
+        }
+        else
+        {
+            yield return new WaitForSeconds(obj.ActivateDelay);
+
+            obj.ActivateMovement();
+
+            obj.TurnOnWithoutFade();
+
+            //StartCoroutine(obj.Fade(0f, 1f, obj.ActivateMovement));
+        }
     }
 
 
@@ -554,9 +647,32 @@ public class KT_Object : MonoBehaviour
         return loaded;
     }
 
+    public void TurnOnWithoutFade()
+    {
+        if(gameObject == null)
+        {
+            Debug.LogWarning("GO IS NULL WHEN TRYING TO TURN IT ON");
+        }
+        else
+        {
+            gameObject.SetActive(true); //adding these 2 pieces (from fade method) since we are stopping the all to Fade method.
+
+            if (ImageComponent != null)
+            {
+                Color color = ImageComponent.color;
+                color.a = Mathf.Clamp01(1);
+                ImageComponent.color = color;
+            }
+
+        }
+
+    }
+
+
+
     public IEnumerator Fade(float startAlpha, float endAlpha, Action onComplete)
     {
-        if(ImageComponent != null)
+        if (ImageComponent != null)
         {
             Fading = true;
 
@@ -575,7 +691,7 @@ public class KT_Object : MonoBehaviour
                 float t = Mathf.Clamp01(timeElapsed / ObjManager.FadeDuration);
                 color.a = Mathf.Lerp(startAlpha, endAlpha, t);
 
-                if(ImageComponent != null )
+                if (ImageComponent != null)
                     ImageComponent.color = color;
 
                 yield return null;
@@ -688,7 +804,9 @@ public class KT_Object : MonoBehaviour
         }
         else
         {
-            StartCoroutine(Fade(1f, 0f, DestroyObj));
+            DestroyObj();
+
+            //StartCoroutine(Fade(1f, 0f, DestroyObj)); //trying to fix the issue by removing fade method
         }
     }
 
@@ -872,6 +990,8 @@ public class KT_Object : MonoBehaviour
         IntervalStartTime = 0; //used to be Time.time 
         CurrentCycle = Cycles[0];
         CurrentCycle.StartCycle();
+
+        Debug.LogWarning("----MOVEMENT ACTIVATED FOR OBJ: " + gameObject.name + " -----");
     }
 
     private void MoveTowardsDestination()
@@ -1031,13 +1151,17 @@ public class KT_Object : MonoBehaviour
             ObjManager.RemoveFromObjectList(this);
 
         if (gameObject != null)
+        {
             Destroy(gameObject);
+            Debug.Log("-----GameObject successfully destroyed-----");
+        }
 
         if (Marker != null)
             Destroy(Marker);
 
+        Debug.LogWarning("----- About to destroy KT OBJECT -----");
         Destroy(this);
-
+        Debug.LogWarning("----- After KT Object should have been destroyed -----");
     }
 
     private void SetupMarker()
